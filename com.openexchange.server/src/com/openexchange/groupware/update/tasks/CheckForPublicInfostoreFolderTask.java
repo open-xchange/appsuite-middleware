@@ -49,15 +49,15 @@
 
 package com.openexchange.groupware.update.tasks;
 
-import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
-import gnu.trove.list.TIntList;
-import gnu.trove.list.array.TIntArrayList;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import com.openexchange.database.Databases;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.update.SimpleUpdateTask;
+import gnu.trove.list.TIntList;
+import gnu.trove.list.array.TIntArrayList;
 
 /**
  * {@link CheckForPublicInfostoreFolderTask} - Checks for missing folder 'public_infostore' (15) in any available context.
@@ -77,6 +77,7 @@ public final class CheckForPublicInfostoreFolderTask extends SimpleUpdateTask {
             PreparedStatement stmt = null;
             ResultSet rs = null;
             try {
+                // GROUP BY CLAUSE: ensure ONLY_FULL_GROUP_BY compatibility
                 stmt = con.prepareStatement("SELECT t1.cid FROM oxfolder_tree AS t1 WHERE "+FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID+" NOT IN (SELECT fuid FROM oxfolder_tree AS t2 WHERE t2.cid = t1.cid) GROUP BY cid");
                 rs = stmt.executeQuery();
                 if (!rs.next()) {
@@ -87,7 +88,7 @@ public final class CheckForPublicInfostoreFolderTask extends SimpleUpdateTask {
                     contextIds.add(rs.getInt(1));
                 } while (rs.next());
             } finally {
-                closeSQLStuff(rs, stmt);
+                Databases.closeSQLStuff(rs, stmt);
             }
         }
         if (contextIds.isEmpty()) {
@@ -101,20 +102,20 @@ public final class CheckForPublicInfostoreFolderTask extends SimpleUpdateTask {
                 		"VALUES (15,?,9,'public_infostore',8,5,1220981203760,2,1220981203760,2,2,1,0)");
                 stmt.setInt(1, contextId);
                 stmt.executeUpdate();
-                closeSQLStuff(stmt);
+                Databases.closeSQLStuff(stmt);
 
                 stmt = con.prepareStatement("INSERT INTO oxfolder_permissions (cid,fuid,permission_id,fp,orp,owp,odp,admin_flag,group_flag,system) " +
                 		"VALUES (?,15,0,8,0,0,0,0,1,0)");
                 stmt.setInt(1, contextId);
                 stmt.executeUpdate();
-                closeSQLStuff(stmt);
+                Databases.closeSQLStuff(stmt);
 
                 stmt = con.prepareStatement("INSERT INTO oxfolder_permissions (cid,fuid,permission_id,fp,orp,owp,odp,admin_flag,group_flag,system) " +
                     "VALUES (?,15,2,8,0,0,0,1,0,0)");
                 stmt.setInt(1, contextId);
                 stmt.executeUpdate();
             } finally {
-                closeSQLStuff(stmt);
+                Databases.closeSQLStuff(stmt);
             }
         }
     }

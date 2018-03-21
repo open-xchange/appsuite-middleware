@@ -96,6 +96,7 @@ public enum BuiltInProvider {
     /**
      * The legacy OX Updater provider
      */
+    @Deprecated
     UPDATER("oxupdater"),
     /**
      * The Sync App for Android provider

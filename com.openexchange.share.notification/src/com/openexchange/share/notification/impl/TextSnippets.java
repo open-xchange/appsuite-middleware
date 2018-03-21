@@ -54,7 +54,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 import com.openexchange.i18n.Translator;
-import com.openexchange.share.groupware.DriveTargetProxyType;
+import com.openexchange.share.groupware.KnownTargetProxyType;
 import com.openexchange.share.groupware.TargetProxy;
 import com.openexchange.share.groupware.TargetProxyType;
 import com.openexchange.share.notification.NotificationStrings;
@@ -94,19 +94,25 @@ public class TextSnippets {
             TargetProxy targetProxy = targetProxies.iterator().next();
             TargetProxyType targetProxyType = targetProxy.getProxyType();
             String itemName = targetProxy.getTitle();
-            if (DriveTargetProxyType.IMAGE.equals(targetProxyType)) {
+            if (KnownTargetProxyType.IMAGE.equals(targetProxyType)) {
                 if (count == 1) {
                     return String.format(translator.translate(NotificationStrings.SUBJECT_SHARED_IMAGE), somebody, itemName);
                 } else {
                     return String.format(translator.translate(NotificationStrings.SUBJECT_SHARED_IMAGES), somebody, count);
                 }
-            } else if (DriveTargetProxyType.FILE.equals(targetProxyType)) {
+            } else if (KnownTargetProxyType.FILE.equals(targetProxyType)) {
                 if (count == 1) {
                     return String.format(translator.translate(NotificationStrings.SUBJECT_SHARED_FILE), somebody, itemName);
                 } else {
                     return String.format(translator.translate(NotificationStrings.SUBJECT_SHARED_FILES), somebody, count);
                 }
-            } else if (DriveTargetProxyType.FOLDER.equals(targetProxyType)) {
+            } else if (KnownTargetProxyType.CALENDAR.equals(targetProxyType)) {
+                if (count == 1) {
+                    return String.format(translator.translate(NotificationStrings.SUBJECT_SHARED_CALENDAR), somebody, itemName);
+                } else {
+                    return String.format(translator.translate(NotificationStrings.SUBJECT_SHARED_CALENDARS), somebody, count);
+                }
+            } else if (KnownTargetProxyType.FOLDER.equals(targetProxyType)) {
                 if (count == 1) {
                     return String.format(translator.translate(NotificationStrings.SUBJECT_SHARED_FOLDER), somebody, itemName);
                 } else {
@@ -144,19 +150,25 @@ public class TextSnippets {
             TargetProxy targetProxy = targetProxies.iterator().next();
             TargetProxyType targetProxyType = targetProxy.getProxyType();
             String itemName = targetProxy.getTitle();
-            if (DriveTargetProxyType.IMAGE.equals(targetProxyType)) {
+            if (KnownTargetProxyType.IMAGE.equals(targetProxyType)) {
                 if (count == 1) {
                     return String.format(translator.translate(NotificationStrings.SUBJECT_SHARED_IMAGE_GROUP), somebody, itemName, group);
                 } else {
                     return String.format(translator.translate(NotificationStrings.SUBJECT_SHARED_IMAGES_GROUP), somebody, count, group);
                 }
-            } else if (DriveTargetProxyType.FILE.equals(targetProxyType)) {
+            } else if (KnownTargetProxyType.FILE.equals(targetProxyType)) {
                 if (count == 1) {
                     return String.format(translator.translate(NotificationStrings.SUBJECT_SHARED_FILE_GROUP), somebody, itemName, group);
                 } else {
                     return String.format(translator.translate(NotificationStrings.SUBJECT_SHARED_FILES_GROUP), somebody, count, group);
                 }
-            } else if (DriveTargetProxyType.FOLDER.equals(targetProxyType)) {
+            } else if (KnownTargetProxyType.CALENDAR.equals(targetProxyType)) {
+                if (count == 1) {
+                    return String.format(translator.translate(NotificationStrings.SUBJECT_SHARED_CALENDAR_GROUP), somebody, itemName, group);
+                } else {
+                    return String.format(translator.translate(NotificationStrings.SUBJECT_SHARED_CALENDARS_GROUP), somebody, count, group);
+                }
+            } else if (KnownTargetProxyType.FOLDER.equals(targetProxyType)) {
                 if (count == 1) {
                     return String.format(translator.translate(NotificationStrings.SUBJECT_SHARED_FOLDER_GROUP), somebody, itemName, group);
                 } else {
@@ -198,20 +210,26 @@ public class TextSnippets {
                 }
             } else {//multiple shares of single type
                 TargetProxyType targetProxyType = targetProxyTypes.iterator().next();
-                if (DriveTargetProxyType.IMAGE.equals(targetProxyType)) {
+                if (KnownTargetProxyType.IMAGE.equals(targetProxyType)) {
                     if (hasMessage) {
                         return String.format(translator.translate(NotificationStrings.HAS_SHARED_IMAGES_AND_MESSAGE), fullName, email, count);
                     } else {
                         return String.format(translator.translate(NotificationStrings.HAS_SHARED_IMAGES_NO_IMAGES), fullName, email, count);
                     }
 
-                } else if (DriveTargetProxyType.FILE.equals(targetProxyType)) {
+                } else if (KnownTargetProxyType.FILE.equals(targetProxyType)) {
                     if (hasMessage) {
                         return String.format(translator.translate(NotificationStrings.HAS_SHARED_FILES_AND_MESSAGE), fullName, email, count);
                     } else {
                         return String.format(translator.translate(NotificationStrings.HAS_SHARED_FILES_NO_MESSAGE), fullName, email, count);
                     }
-                } else if (DriveTargetProxyType.FOLDER.equals(targetProxyType)) {
+                } else if (KnownTargetProxyType.CALENDAR.equals(targetProxyType)) {
+                    if (hasMessage) {
+                        return String.format(translator.translate(NotificationStrings.HAS_SHARED_CALENDARS_AND_MESSAGE), fullName, email, count);
+                    } else {
+                        return String.format(translator.translate(NotificationStrings.HAS_SHARED_CALENDARS_NO_MESSAGE), fullName, email, count);
+                    }
+                } else if (KnownTargetProxyType.FOLDER.equals(targetProxyType)) {
                     if (hasMessage) {
                         return String.format(translator.translate(NotificationStrings.HAS_SHARED_FOLDERS_AND_MESSAGE), fullName, email, count);
                     } else {
@@ -230,19 +248,25 @@ public class TextSnippets {
             TargetProxy targetProxy = targetProxies.iterator().next();
             TargetProxyType targetProxyType = targetProxyTypes.iterator().next();
             String filename = targetProxy.getTitle();
-            if (DriveTargetProxyType.IMAGE.equals(targetProxyType)) {
+            if (KnownTargetProxyType.IMAGE.equals(targetProxyType)) {
                 if (hasMessage) {
                     return String.format(translator.translate(NotificationStrings.HAS_SHARED_PHOTO_AND_MESSAGE), fullName, email, filename);
                 } else {
                     return String.format(translator.translate(NotificationStrings.HAS_SHARED_IMAGE_NO_MESSAGE), fullName, email, filename);
                 }
-            } else if (DriveTargetProxyType.FILE.equals(targetProxyType)) {
+            } else if (KnownTargetProxyType.FILE.equals(targetProxyType)) {
                 if (hasMessage) {
                     return String.format(translator.translate(NotificationStrings.HAS_SHARED_FILE_AND_MESSAGE), fullName, email, filename);
                 } else {
                     return String.format(translator.translate(NotificationStrings.HAS_SHARED_FILE_NO_MESSAGE), fullName, email, filename);
                 }
-            } else if (DriveTargetProxyType.FOLDER.equals(targetProxyType)) {
+            } else if (KnownTargetProxyType.CALENDAR.equals(targetProxyType)) {
+                if (hasMessage) {
+                    return String.format(translator.translate(NotificationStrings.HAS_SHARED_CALENDAR_AND_MESSAGE), fullName, email, filename);
+                } else {
+                    return String.format(translator.translate(NotificationStrings.HAS_SHARED_CALENDAR_NO_MESSAGE), fullName, email, filename);
+                }
+            } else if (KnownTargetProxyType.FOLDER.equals(targetProxyType)) {
                 if (hasMessage) {
                     return String.format(translator.translate(NotificationStrings.HAS_SHARED_FOLDER_AND_MESSAGE), fullName, email, filename);
                 } else {
@@ -285,20 +309,26 @@ public class TextSnippets {
                 }
             } else {//multiple shares of single type
                 TargetProxyType targetProxyType = targetProxyTypes.iterator().next();
-                if (DriveTargetProxyType.IMAGE.equals(targetProxyType)) {
+                if (KnownTargetProxyType.IMAGE.equals(targetProxyType)) {
                     if (hasMessage) {
                         return String.format(translator.translate(NotificationStrings.HAS_SHARED_IMAGES_AND_MESSAGE_GROUP), fullName, email, count, group);
                     } else {
                         return String.format(translator.translate(NotificationStrings.HAS_SHARED_IMAGES_NO_IMAGES_GROUP), fullName, email, count, group);
                     }
 
-                } else if (DriveTargetProxyType.FILE.equals(targetProxyType)) {
+                } else if (KnownTargetProxyType.FILE.equals(targetProxyType)) {
                     if (hasMessage) {
                         return String.format(translator.translate(NotificationStrings.HAS_SHARED_FILES_AND_MESSAGE_GROUP), fullName, email, count, group);
                     } else {
                         return String.format(translator.translate(NotificationStrings.HAS_SHARED_FILES_NO_MESSAGE_GROUP), fullName, email, count, group);
                     }
-                } else if (DriveTargetProxyType.FOLDER.equals(targetProxyType)) {
+                } else if (KnownTargetProxyType.CALENDAR.equals(targetProxyType)) {
+                    if (hasMessage) {
+                        return String.format(translator.translate(NotificationStrings.HAS_SHARED_CALENDARS_AND_MESSAGE_GROUP), fullName, email, count, group);
+                    } else {
+                        return String.format(translator.translate(NotificationStrings.HAS_SHARED_CALENDARS_NO_MESSAGE_GROUP), fullName, email, count, group);
+                    }
+                } else if (KnownTargetProxyType.FOLDER.equals(targetProxyType)) {
                     if (hasMessage) {
                         return String.format(translator.translate(NotificationStrings.HAS_SHARED_FOLDERS_AND_MESSAGE_GROUP), fullName, email, count, group);
                     } else {
@@ -317,19 +347,25 @@ public class TextSnippets {
             TargetProxy targetProxy = targetProxies.iterator().next();
             TargetProxyType targetProxyType = targetProxyTypes.iterator().next();
             String filename = targetProxy.getTitle();
-            if (DriveTargetProxyType.IMAGE.equals(targetProxyType)) {
+            if (KnownTargetProxyType.IMAGE.equals(targetProxyType)) {
                 if (hasMessage) {
                     return String.format(translator.translate(NotificationStrings.HAS_SHARED_PHOTO_AND_MESSAGE_GROUP), fullName, email, filename, group);
                 } else {
                     return String.format(translator.translate(NotificationStrings.HAS_SHARED_IMAGE_NO_MESSAGE_GROUP), fullName, email, filename, group);
                 }
-            } else if (DriveTargetProxyType.FILE.equals(targetProxyType)) {
+            } else if (KnownTargetProxyType.FILE.equals(targetProxyType)) {
                 if (hasMessage) {
                     return String.format(translator.translate(NotificationStrings.HAS_SHARED_FILE_AND_MESSAGE_GROUP), fullName, email, filename, group);
                 } else {
                     return String.format(translator.translate(NotificationStrings.HAS_SHARED_FILE_NO_MESSAGE_GROUP), fullName, email, filename, group);
                 }
-            } else if (DriveTargetProxyType.FOLDER.equals(targetProxyType)) {
+            } else if (KnownTargetProxyType.CALENDAR.equals(targetProxyType)) {
+                if (hasMessage) {
+                    return String.format(translator.translate(NotificationStrings.HAS_SHARED_CALENDAR_AND_MESSAGE_GROUP), fullName, email, filename, group);
+                } else {
+                    return String.format(translator.translate(NotificationStrings.HAS_SHARED_CALENDAR_NO_MESSAGE_GROUP), fullName, email, filename, group);
+                }
+            } else if (KnownTargetProxyType.FOLDER.equals(targetProxyType)) {
                 if (hasMessage) {
                     return String.format(translator.translate(NotificationStrings.HAS_SHARED_FOLDER_AND_MESSAGE_GROUP), fullName, email, filename, group);
                 } else {
@@ -364,19 +400,25 @@ public class TextSnippets {
             targetProxyType = targetProxyTypes.iterator().next();
         }
 
-        if (DriveTargetProxyType.IMAGE.equals(targetProxyType)) {
+        if (KnownTargetProxyType.IMAGE.equals(targetProxyType)) {
             if (multipleShares) {
                 return translator.translate(NotificationStrings.VIEW_IMAGES);
             } else {
                 return translator.translate(NotificationStrings.VIEW_IMAGE);
             }
-        } else if (DriveTargetProxyType.FILE.equals(targetProxyType)) {
+        } else if (KnownTargetProxyType.FILE.equals(targetProxyType)) {
             if (multipleShares) {
                 return translator.translate(NotificationStrings.VIEW_FILES);
             } else {
                 return translator.translate(NotificationStrings.VIEW_FILE);
             }
-        } else if (DriveTargetProxyType.FOLDER.equals(targetProxyType)) {
+        } else if (KnownTargetProxyType.CALENDAR.equals(targetProxyType)) {
+            if (multipleShares) {
+                return translator.translate(NotificationStrings.VIEW_CALENDARS);
+            } else {
+                return translator.translate(NotificationStrings.VIEW_CALENDAR);
+            }
+        } else if (KnownTargetProxyType.FOLDER.equals(targetProxyType)) {
             if (multipleShares) {
                 return translator.translate(NotificationStrings.VIEW_FOLDERS);
             } else {

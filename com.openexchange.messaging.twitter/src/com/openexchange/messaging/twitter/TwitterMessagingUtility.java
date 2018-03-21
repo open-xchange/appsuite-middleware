@@ -50,6 +50,7 @@
 package com.openexchange.messaging.twitter;
 
 import com.openexchange.exception.OXException;
+import com.openexchange.java.util.Tools;
 import com.openexchange.messaging.MessagingContent;
 import com.openexchange.messaging.MessagingExceptionCodes;
 import com.openexchange.messaging.MessagingMessage;
@@ -83,10 +84,6 @@ public final class TwitterMessagingUtility {
         return clazz.cast(content);
     }
 
-    private static final long DEFAULT = -1L;
-
-    private static final int RADIX = 10;
-
     /**
      * Parses as an unsigned <code>long</code>.
      *
@@ -94,76 +91,7 @@ public final class TwitterMessagingUtility {
      * @return An unsigned <code>long</code> or <code>-1</code>.
      */
     public static long parseUnsignedLong(final String s) {
-        if (s == null) {
-            return DEFAULT;
-        }
-        final int max = s.length();
-        if (max <= 0) {
-            return -1;
-        }
-        if (s.charAt(0) == '-') {
-            return -1;
-        }
-
-        long result = 0;
-        int i = 0;
-
-        final long limit = -Long.MAX_VALUE;
-        final long multmin = limit / RADIX;
-        int digit;
-
-        if (i < max) {
-            digit = digit(s.charAt(i++));
-            if (digit < 0) {
-                return DEFAULT;
-            }
-            result = -digit;
-        }
-        while (i < max) {
-            /*
-             * Accumulating negatively avoids surprises near MAX_VALUE
-             */
-            digit = digit(s.charAt(i++));
-            if (digit < 0) {
-                return DEFAULT;
-            }
-            if (result < multmin) {
-                return DEFAULT;
-            }
-            result *= RADIX;
-            if (result < limit + digit) {
-                return DEFAULT;
-            }
-            result -= digit;
-        }
-        return -result;
-    }
-
-    private static int digit(final char c) {
-        switch (c) {
-        case '0':
-            return 0;
-        case '1':
-            return 1;
-        case '2':
-            return 2;
-        case '3':
-            return 3;
-        case '4':
-            return 4;
-        case '5':
-            return 5;
-        case '6':
-            return 6;
-        case '7':
-            return 7;
-        case '8':
-            return 8;
-        case '9':
-            return 9;
-        default:
-            return -1;
-        }
+        return Tools.getUnsignedLong(s);
     }
 
 }

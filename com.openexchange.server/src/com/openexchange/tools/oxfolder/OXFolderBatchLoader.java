@@ -51,9 +51,6 @@ package com.openexchange.tools.oxfolder;
 
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.tools.sql.DBUtils.getIN;
-import gnu.trove.map.TIntObjectMap;
-import gnu.trove.map.hash.TIntObjectHashMap;
-import gnu.trove.procedure.TObjectProcedure;
 import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -69,10 +66,14 @@ import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.FolderPermissionType;
 import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.groupware.container.FolderPathObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.java.Streams;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.impl.OCLPermission;
+import gnu.trove.map.TIntObjectMap;
+import gnu.trove.map.hash.TIntObjectHashMap;
+import gnu.trove.procedure.TObjectProcedure;
 
 /**
  * {@link OXFolderBatchLoader}
@@ -207,7 +208,7 @@ public final class OXFolderBatchLoader {
                     // Compose statement
                     final int[] currentIds = com.openexchange.tools.arrays.Arrays.extract(folderIds, i, IN_LIMIT);
                     final String sql = getIN(
-                        "SELECT parent,fname,module,type,creating_date,created_from,changing_date,changed_from,permission_flag,subfolder_flag,default_flag,fuid,meta FROM #TABLE# WHERE cid=? AND fuid IN (",
+                        "SELECT parent,fname,module,type,creating_date,created_from,changing_date,changed_from,permission_flag,subfolder_flag,default_flag,fuid,meta,origin FROM #TABLE# WHERE cid=? AND fuid IN (",
                         currentIds.length);
                     stmt = readCon.prepareStatement(PAT_RPL_TABLE.matcher(sql).replaceFirst(table));
                     int pos = 1;
@@ -227,6 +228,12 @@ public final class OXFolderBatchLoader {
                         folderObj.setLastModified(new Date(rs.getLong(7)));
                         folderObj.setModifiedBy(parseStringValue(rs.getString(8), ctx));
                         folderObj.setPermissionFlag(rs.getInt(9));
+                        String sFolderPath = rs.getString(14);
+                        if (rs.wasNull()) {
+                            folderObj.setOriginPath(null);
+                        } else {
+                            folderObj.setOriginPath(FolderPathObject.parseFrom(sFolderPath));
+                        }
                         final int defaultFolder = rs.getInt(11);
                         if (rs.wasNull()) {
                             folderObj.setDefaultFolder(false);

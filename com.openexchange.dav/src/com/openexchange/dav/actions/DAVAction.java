@@ -49,6 +49,7 @@
 
 package com.openexchange.dav.actions;
 
+import static com.openexchange.webdav.protocol.Protocol.DAV_NS;
 import java.io.IOException;
 import javax.servlet.http.HttpServletResponse;
 import org.jdom2.Document;
@@ -322,6 +323,30 @@ public abstract class DAVAction extends AbstractAction {
                 org.slf4j.LoggerFactory.getLogger(DAVAction.class).warn("Error sending WebDAV response", e);
             }
         }
+    }
+
+    /**
+     * Prepares an XML element ready to be used as root element for a multistatus response, containing any additionally defined
+     * namespace declarations of the underlying protocol.
+     *
+     * @return A new multistatus element
+     */
+    protected Element prepareMultistatusElement() {
+        Element multistatusElement = new Element("multistatus", DAV_NS);
+        for (Namespace namespace : protocol.getAdditionalNamespaces()) {
+            multistatusElement.addNamespaceDeclaration(namespace);
+        }
+        return multistatusElement;
+    }
+
+    /**
+     * Sends a multistatus response.
+     *
+     * @param response The WebDAV response to write to
+     * @param multistatusElement The root element for the multistatus response
+     */
+    protected void sendMultistatusResponse(WebdavResponse response, Element multistatusElement) {
+        sendXMLResponse(response, new Document(multistatusElement), Protocol.SC_MULTISTATUS);
     }
 
     protected HostData getHostData(WebdavRequest request) throws WebdavProtocolException {

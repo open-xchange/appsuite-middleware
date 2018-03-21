@@ -2906,6 +2906,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
             try {
                 con = cache.getReadConnectionForConfigDB();
 
+                // GROUP BY CLAUSE: ensure ONLY_FULL_GROUP_BY compatibility
                 stmt = con.prepareStatement("SELECT MIN(cid) FROM context_server2db_pool GROUP BY db_schema");
                 rs = stmt.executeQuery();
                 if (false == rs.next()) {
@@ -2940,10 +2941,6 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
             changeAccessCombination(cid, filter, addAccess, removeAccess);
         }
     }
-
-    private static final String SYMBOLIC_NAME_CACHE = "com.openexchange.caching";
-
-    private static final String NAME_OXCACHE = "oxcache";
 
     private void changeAccessCombination(int cid, int filter, int addAccess, int removeAccess) throws StorageException {
         Connection con = null;

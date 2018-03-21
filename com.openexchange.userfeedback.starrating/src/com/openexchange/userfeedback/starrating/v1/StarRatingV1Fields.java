@@ -49,10 +49,10 @@
 
 package com.openexchange.userfeedback.starrating.v1;
 
-import com.google.common.collect.ImmutableSet;
 import java.util.HashSet;
 import java.util.Set;
 import org.json.JSONObject;
+import com.google.common.collect.ImmutableSet;
 
 /**
  * {@link StarRatingV1Fields}

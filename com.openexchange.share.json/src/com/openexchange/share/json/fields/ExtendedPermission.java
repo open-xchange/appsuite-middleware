@@ -50,6 +50,7 @@
 package com.openexchange.share.json.fields;
 
 import java.util.Date;
+import java.util.Set;
 import java.util.TimeZone;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -63,6 +64,7 @@ import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.share.ShareInfo;
 import com.openexchange.share.core.tools.PermissionResolver;
+import com.openexchange.tools.TimeZoneUtils;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -114,12 +116,21 @@ public abstract class ExtendedPermission {
             /*
              * serialize anonymized or full contact as needed
              */
+            Contact toAdd = userContact;
             ServerSession session = requestData.getSession();
-            if (Anonymizers.isGuest(session) && session.getUserId() != userContact.getInternalUserId()) {
-                addContactInfo(jsonObject, Anonymizers.optAnonymize(userContact, Module.CONTACT, session));
+            if (Anonymizers.isGuest(session)) {
+                if (session.getUserId() != toAdd.getInternalUserId()) {
+                    Set<Integer> sharingUsers = Anonymizers.getSharingUsersFor(session.getContextId(), session.getUserId());
+                    if (false == sharingUsers.contains(Integer.valueOf(toAdd.getInternalUserId()))) {
+                        toAdd = Anonymizers.optAnonymize(toAdd, Module.CONTACT, session);
+                    }
+                }
             } else {
-                addContactInfo(jsonObject, userContact);
+                if (session.getUserId() != toAdd.getInternalUserId() && Anonymizers.isNonVisibleGuest(toAdd.getInternalUserId(), session)) {
+                    toAdd = Anonymizers.optAnonymize(toAdd, Module.CONTACT, session);
+                }
             }
+            addContactInfo(jsonObject, toAdd);
         }
     }
 
@@ -128,12 +139,21 @@ public abstract class ExtendedPermission {
             /*
              * serialize anonymized or full user as needed
              */
+            User toAdd = user;
             ServerSession session = requestData.getSession();
-            if (Anonymizers.isGuest(session) && session.getUserId() != user.getId()) {
-                addContactInfo(jsonObject, Anonymizers.optAnonymize(user, Module.USER, session));
+            if (Anonymizers.isGuest(session)) {
+                if (session.getUserId() != toAdd.getId()) {
+                    Set<Integer> sharingUsers = Anonymizers.getSharingUsersFor(session.getContextId(), session.getUserId());
+                    if (false == sharingUsers.contains(Integer.valueOf(toAdd.getId()))) {
+                        toAdd = Anonymizers.optAnonymize(toAdd, Module.CONTACT, session);
+                    }
+                }
             } else {
-                addContactInfo(jsonObject, user);
+                if (session.getUserId() != toAdd.getId() && Anonymizers.isNonVisibleGuest(toAdd.getId(), session)) {
+                    toAdd = Anonymizers.optAnonymize(toAdd, Module.CONTACT, session);
+                }
             }
+            addContactInfo(jsonObject, toAdd);
         }
     }
 
@@ -185,7 +205,7 @@ public abstract class ExtendedPermission {
         if (null == timeZoneID) {
             timeZoneID = requestData.getSession().getUser().getTimeZone();
         }
-        return TimeZone.getTimeZone(timeZoneID);
+        return TimeZoneUtils.getTimeZone(timeZoneID);
     }
 
 }

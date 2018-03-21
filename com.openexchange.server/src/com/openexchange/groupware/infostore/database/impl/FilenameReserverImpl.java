@@ -74,7 +74,6 @@ import com.openexchange.groupware.infostore.InfostoreExceptionCodes;
 import com.openexchange.groupware.infostore.database.FilenameReservation;
 import com.openexchange.groupware.infostore.database.FilenameReserver;
 import com.openexchange.java.util.UUIDs;
-import com.openexchange.tools.sql.DBUtils;
 
 /**
  * {@link FilenameReserverImpl}
@@ -200,7 +199,7 @@ public class FilenameReserverImpl implements FilenameReserver {
         } catch (IncorrectStringSQLException e) {
             throw AbstractInfostoreAction.handleIncorrectStringError(e, null);
         } catch (SQLException e) {
-            throw InfostoreExceptionCodes.SQL_PROBLEM.create(e.getMessage(), e);
+            throw InfostoreExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } finally {
             if (startedTransaction) {
                 if (false == committed) {
@@ -381,7 +380,7 @@ public class FilenameReserverImpl implements FilenameReserver {
                 conflictingFilenames.put(name, document);
             }
         } finally {
-            DBUtils.closeSQLStuff(result, stmt);
+            Databases.closeSQLStuff(result, stmt);
         }
         return conflictingFilenames;
     }
@@ -394,7 +393,7 @@ public class FilenameReserverImpl implements FilenameReserver {
             stmt.setLong(2, targetFolderID);
             return stmt.execute();
         } finally {
-            DBUtils.closeSQLStuff(stmt);
+            Databases.closeSQLStuff(stmt);
         }
     }
 

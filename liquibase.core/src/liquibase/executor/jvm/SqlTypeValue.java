@@ -1,8 +1,7 @@
 package liquibase.executor.jvm;
 
-import liquibase.util.JdbcUtils;
-
 import java.sql.PreparedStatement;
+import liquibase.util.JdbcUtils;
 
 /**
  * Interface to be implemented for setting values for more complex database specific

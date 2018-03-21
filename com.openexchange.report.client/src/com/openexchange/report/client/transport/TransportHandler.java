@@ -64,13 +64,14 @@ import java.net.URL;
 import java.net.URLEncoder;
 import java.util.List;
 import java.util.Map;
-import java.util.Scanner;
 import java.util.Map.Entry;
+import java.util.Scanner;
 import javax.management.openmbean.CompositeData;
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLException;
 import org.json.JSONException;
 import org.json.JSONObject;
+import com.openexchange.java.Streams;
 import com.openexchange.report.client.configuration.ReportConfiguration;
 import com.openexchange.report.client.container.ClientLoginCount;
 import com.openexchange.report.client.container.ContextDetail;
@@ -134,7 +135,7 @@ public class TransportHandler {
      * Try to send the report to the saved REPORT_SERVER_URL over https, if the given parameter is set. If
      * https fails, try it with http. If that fails, save the report to hard-drive and save location
      * to logfile.
-     * 
+     *
      * @param isHttps
      * @param reportConfiguration
      * @param report
@@ -166,6 +167,7 @@ public class TransportHandler {
         httpURLConnection.setReadTimeout(2500);
         httpURLConnection.setUseCaches(false);
         httpURLConnection.setDoOutput(true);
+        httpURLConnection.setFixedLengthStreamingMode(report.length()); // This enforces 'sun.net.www.protocol.http.HttpURLConnection' to use a "streaming" output stream; otherwise outgoing data is stored into a ByteArrayOutputStream (likely causing an OOME; see Bug 57260)
         httpURLConnection.setDoInput(true);
         httpURLConnection.setRequestMethod("POST");
         httpURLConnection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
@@ -193,16 +195,18 @@ public class TransportHandler {
                 System.out.println("Trying to send without ssl.");
                 sendReport(false, reportConfiguration, metadata);
                 return;
-            } else
+            } else {
                 saveReportToHardDrive(metadata);
+            }
         }
 
         if (httpURLConnection.getResponseCode() != HttpURLConnection.HTTP_OK) {
             System.err.println("Report sending failure, unable to send via http...");
-            if (isHttps)
+            if (isHttps) {
                 sendReport(false, reportConfiguration, metadata);
-            else
+            } else {
                 saveReportToHardDrive(metadata);
+            }
             throw new MalformedURLException("Problem contacting report server: " + httpURLConnection.getResponseCode());
         }
         final BufferedReader in = new BufferedReader(new InputStreamReader(httpURLConnection.getInputStream()));
@@ -254,7 +258,7 @@ public class TransportHandler {
 
     /**
      * Save the given report to hard-drive and print the location into the logfile.
-     * 
+     *
      * @param report
      * @throws IOException
      * @throws JSONException
@@ -265,11 +269,14 @@ public class TransportHandler {
         System.out.println("Saving report to " + tmpfile.getAbsolutePath());
         // Compose report from stored data, depending on the report-type
         DataOutputStream tfo = new DataOutputStream(new FileOutputStream(tmpfile));
-        tfo.writeBytes(reportString);
-        if (metadata.getBoolean("needsComposition")) {
-            appendStoredContentToOutputstream(metadata, tfo, false);
+        try {
+            tfo.writeBytes(reportString);
+            if (metadata.getBoolean("needsComposition")) {
+                appendStoredContentToOutputstream(metadata, tfo, false);
+            }
+        } finally {
+            Streams.close(tfo);
         }
-        tfo.close();
     }
 
     private JSONObject buildJSONObject(final List<Total> totals, final List<MacDetail> macDetails, final List<ContextDetail> contextDetails, Map<String, String> serverConfiguration, final String[] versions, final ClientLoginCount clc, final ClientLoginCount clcYear) throws JSONException {

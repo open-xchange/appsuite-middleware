@@ -182,7 +182,7 @@ public class FolderBuffer {
     private static List<String> resolveToRoot(String folderID, Session session) {
         List<String> folderIDs = new ArrayList<String>();
         try {
-            IDBasedFolderAccess folderAccess = DriveEventServiceLookup.getService(IDBasedFolderAccessFactory.class).createAccess(session);
+            IDBasedFolderAccess folderAccess = DriveEventServiceLookup.getService(IDBasedFolderAccessFactory.class, true).createAccess(session);
             FileStorageFolder[] path2DefaultFolder = folderAccess.getPath2DefaultFolder(folderID);
             for (FileStorageFolder folder : path2DefaultFolder) {
                 folderIDs.add(folder.getId());

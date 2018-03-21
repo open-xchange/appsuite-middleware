@@ -51,13 +51,11 @@ package com.openexchange.ajax.appointment.bugtests;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.groupware.calendar.TimeTools;
 import com.openexchange.groupware.container.Appointment;
-import com.openexchange.test.CalendarTestManager;
 
 /**
  * {@link Bug38079Test}

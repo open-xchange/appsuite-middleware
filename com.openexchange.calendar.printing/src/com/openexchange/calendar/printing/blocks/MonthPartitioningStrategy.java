@@ -52,8 +52,8 @@ package com.openexchange.calendar.printing.blocks;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
-import com.openexchange.calendar.printing.CPAppointment;
 import com.openexchange.calendar.printing.CPCalendar;
+import com.openexchange.calendar.printing.CPEvent;
 import com.openexchange.calendar.printing.CPTool;
 import com.openexchange.calendar.printing.CPType;
 
@@ -68,13 +68,13 @@ public class MonthPartitioningStrategy extends WeekPartitioningStrategy {
     }
 
     @Override
-    public CPPartition partition(List<CPAppointment> appointments) {
+    public CPPartition partition(List<CPEvent> appointments) {
         CPTool tools = new CPTool();
         tools.sort(appointments);
 
         CPPartition blocks = new CPPartition();
         for (int i = 0, length = appointments.size(); i < length; i++) {
-            CPAppointment appointment = appointments.get(i);
+            CPEvent appointment = appointments.get(i);
             if (i > 0) {
                 lastStoredAppointment = appointments.get(i - 1);
             }
@@ -138,7 +138,7 @@ public class MonthPartitioningStrategy extends WeekPartitioningStrategy {
     }
 
     @Override
-    protected boolean isMissingDaysInbetween(CPAppointment first, CPAppointment second) {
+    protected boolean isMissingDaysInbetween(CPEvent first, CPEvent second) {
         Date firstDate = null;
         if (first == null) {
             Calendar cal = getCalendar();
@@ -153,7 +153,7 @@ public class MonthPartitioningStrategy extends WeekPartitioningStrategy {
     }
 
     @Override
-    protected List<Date> getMissingDaysInbetween(CPAppointment first, CPAppointment second) {
+    protected List<Date> getMissingDaysInbetween(CPEvent first, CPEvent second) {
         Date firstDate = null, secondDate = null;
         if (first == null) {
             Calendar cal = getCalendar();

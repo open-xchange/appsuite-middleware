@@ -411,13 +411,15 @@ public enum S3ExceptionCode implements DisplayableOXExceptionCode {
     /**
      * The bucket POST must contain the specified field name. If it is specified, please check the order of the fields.
      */
-    UserKeyMustBeSpecified("The bucket POST must contain the specified field name. If it is specified, please check the order of the"
-        + " fields.", CATEGORY_ERROR, 79),
-
+    UserKeyMustBeSpecified("The bucket POST must contain the specified field name. If it is specified, please check the order of the fields.", CATEGORY_ERROR, 79),
     /**
-     * The S3 storage responds with \"Bad Request\". Please check whether com.openexchange.filestore.s3.[filestoreID].signerOverride is properly configured for this filestore.
+     * The S3 storage responds with "Bad Request". Please check whether com.openexchange.filestore.s3.[filestoreID].signerOverride is properly configured for this filestore.
      */
     BadRequest(S3ExceptionMessages.BadRequest_MSG, CATEGORY_ERROR, 80),
+    /**
+     * Failed to create a bucket for name "%1$s" using region "%2$s"
+     */
+    BUCKET_CREATION_FAILED(S3ExceptionMessages.BUCKET_CREATION_FAILED, CATEGORY_CONFIGURATION, 81);
 
     ;
 

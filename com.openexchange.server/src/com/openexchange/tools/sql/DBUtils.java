@@ -354,7 +354,7 @@ public final class DBUtils {
             }
             return retval;
         } finally {
-            DBUtils.closeSQLStuff(result);
+            Databases.closeSQLStuff(result);
         }
     }
 
@@ -477,8 +477,11 @@ public final class DBUtils {
 
     private static void setMysqlForeignKeyChecks(final Connection connection, final int value) throws SQLException {
         final Statement statement = connection.createStatement();
-        statement.execute("SET @@foreign_key_checks = " + value);
-        statement.close();
+        try {
+            statement.execute("SET @@foreign_key_checks = " + value);
+        } finally {
+            statement.close();
+        }
     }
 
     /**

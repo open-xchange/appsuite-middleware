@@ -50,13 +50,10 @@
 package com.openexchange.webdav.action;
 
 import java.io.IOException;
-
 import javax.servlet.http.HttpServletResponse;
-
 import org.jdom2.Document;
 import org.jdom2.Element;
 import org.jdom2.JDOMException;
-
 import com.openexchange.webdav.protocol.Protocol;
 import com.openexchange.webdav.protocol.WebdavProtocolException;
 

@@ -49,6 +49,8 @@
 
 package com.openexchange.dav.mixins;
 
+import java.util.ArrayList;
+import java.util.List;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.java.Strings;
 import com.openexchange.webdav.protocol.helpers.SingleXMLPropertyMixin;
@@ -76,10 +78,25 @@ public class EmailAddressSet extends SingleXMLPropertyMixin {
 
     @Override
     protected String getValue() {
+        List<String> addresses = new ArrayList<String>();
         if (Strings.isNotEmpty(user.getMail())) {
-            return "<D:email-address>" + user.getMail() +"</D:email-address>";
+            addresses.add(user.getMail());
         }
-        return null;
+        if (null != user.getAliases()) {
+            for (String alias : user.getAliases()) {
+                if (Strings.isNotEmpty(alias) && false == addresses.contains(alias)) {
+                    addresses.add(alias);
+                }
+            }
+        }
+        if (addresses.isEmpty()) {
+            return null;
+        }
+        StringBuilder stringBuilder = new StringBuilder();
+        for (String address : addresses) {
+            stringBuilder.append("<D:email-address>").append(address).append("</D:email-address>");
+        }
+        return stringBuilder.toString();
     }
 
 }

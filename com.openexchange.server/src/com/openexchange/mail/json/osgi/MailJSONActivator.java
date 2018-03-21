@@ -263,7 +263,9 @@ public final class MailJSONActivator extends AJAXModuleActivator {
             }
         });
 
-        registerService(PreferencesItemService.class, new MailCategoriesPreferenceItem(this));
+        MailCategoriesPreferenceItem item = new MailCategoriesPreferenceItem(this);
+        registerService(PreferencesItemService.class, item);
+        registerService(ConfigTreeEquivalent.class, item);
 
         final ContactField[] fields = new ContactField[] { ContactField.OBJECT_ID, ContactField.INTERNAL_USERID, ContactField.FOLDER_ID, ContactField.NUMBER_OF_IMAGES };
         registerService(AJAXResultDecorator.class, new DecoratorImpl(converter, fields, this));

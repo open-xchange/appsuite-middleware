@@ -51,9 +51,6 @@ package com.openexchange.html.internal;
 
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Strings.isEmpty;
-import gnu.inet.encoding.IDNAException;
-import gnu.trove.map.TIntObjectMap;
-import gnu.trove.map.hash.TIntObjectHashMap;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -77,16 +74,6 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import net.htmlparser.jericho.Attribute;
-import net.htmlparser.jericho.Attributes;
-import net.htmlparser.jericho.Element;
-import net.htmlparser.jericho.EndTag;
-import net.htmlparser.jericho.HTMLElementName;
-import net.htmlparser.jericho.OutputDocument;
-import net.htmlparser.jericho.Renderer;
-import net.htmlparser.jericho.Segment;
-import net.htmlparser.jericho.Source;
-import net.htmlparser.jericho.StartTag;
 import org.apache.commons.httpclient.DefaultHttpMethodRetryHandler;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpException;
@@ -106,7 +93,9 @@ import org.htmlcleaner.TagNode;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Comment;
 import org.jsoup.nodes.Document;
+import org.jsoup.nodes.DocumentType;
 import org.jsoup.nodes.Node;
+import org.jsoup.select.Elements;
 import org.jsoup.select.NodeVisitor;
 import org.owasp.esapi.codecs.HTMLEntityCodec;
 import com.openexchange.config.ConfigurationService;
@@ -143,6 +132,19 @@ import com.openexchange.proxy.ProxyRegistry;
 import de.l3s.boilerpipe.BoilerpipeExtractor;
 import de.l3s.boilerpipe.BoilerpipeProcessingException;
 import de.l3s.boilerpipe.extractors.CommonExtractors;
+import gnu.inet.encoding.IDNAException;
+import gnu.trove.map.TIntObjectMap;
+import gnu.trove.map.hash.TIntObjectHashMap;
+import net.htmlparser.jericho.Attribute;
+import net.htmlparser.jericho.Attributes;
+import net.htmlparser.jericho.Element;
+import net.htmlparser.jericho.EndTag;
+import net.htmlparser.jericho.HTMLElementName;
+import net.htmlparser.jericho.OutputDocument;
+import net.htmlparser.jericho.Renderer;
+import net.htmlparser.jericho.Segment;
+import net.htmlparser.jericho.Source;
+import net.htmlparser.jericho.StartTag;
 
 /**
  * {@link HtmlServiceImpl}
@@ -576,7 +578,7 @@ public final class HtmlServiceImpl implements HtmlService {
                     }
                 }
 
-                html = removeComments(html, hasBody);
+                html = removeComments(html, hasBody, options);
 
                 // Perform one-shot sanitizing
                 html = replacePercentTags(html);
@@ -622,11 +624,7 @@ public final class HtmlServiceImpl implements HtmlService {
                 htmlSanitizeResult.setTruncated(handler.isMaxContentSizeExceeded());
             } else {
                 // First, check size
-                int maxLength = HtmlServices.htmlThreshold();
-                if (maxLength > 0 && html.length() > maxLength) {
-                    LOG.info("HTML content is too big: max. '{}', but is '{}'.", I(maxLength), I(html.length()));
-                    throw HtmlExceptionCodes.TOO_BIG.create(I(maxLength), I(html.length()));
-                }
+                checkSize(html);
 
                 if (options.isSanitize()) {
                     boolean[] sanitized = new boolean[] { true };
@@ -653,10 +651,14 @@ public final class HtmlServiceImpl implements HtmlService {
                     // Get HTML content
                     if (options.isReplaceBodyWithDiv()) {
                         html = handler.getHtml();
+                        if (false == startsWith("<!doctype html>", html, true)) {
+                            html = "<!doctype html>\n" + html;
+                        }
                         htmlSanitizeResult.setTruncated(handler.isMaxContentSizeExceeded());
                         htmlSanitizeResult.setBodyReplacedWithDiv(true);
                     } else {
                         Document document = handler.getDocument();
+                        handlePrettyPrint(options, document);
                         html = hasBody ? document.outerHtml() : document.body().html();
                         htmlSanitizeResult.setTruncated(handler.isMaxContentSizeExceeded());
                     }
@@ -678,10 +680,14 @@ public final class HtmlServiceImpl implements HtmlService {
                     // Get HTML content
                     if (options.isReplaceBodyWithDiv()) {
                         html = handler.getHtml();
+                        if (false == startsWith("<!doctype html>", html, true)) {
+                            html = "<!doctype html>\n" + html;
+                        }
                         htmlSanitizeResult.setTruncated(handler.isMaxContentSizeExceeded());
                         htmlSanitizeResult.setBodyReplacedWithDiv(true);
                     } else {
                         Document document = handler.getDocument();
+                        handlePrettyPrint(options, document);
                         html = hasBody ? document.outerHtml() : document.body().html();
                         htmlSanitizeResult.setTruncated(handler.isMaxContentSizeExceeded());
                     }
@@ -707,7 +713,21 @@ public final class HtmlServiceImpl implements HtmlService {
         }
     }
 
-    private static String removeComments(String html, boolean hasBody) {
+    private void checkSize(String html) throws OXException {
+        int maxLength = HtmlServices.htmlThreshold();
+        if (maxLength > 0 && html.length() > maxLength) {
+            LOG.info("HTML content is too big: max. '{}', but is '{}'.", I(maxLength), I(html.length()));
+            throw HtmlExceptionCodes.TOO_BIG.create(I(maxLength), I(html.length()));
+        }
+    }
+
+    private static void handlePrettyPrint(HtmlSanitizeOptions options, Document document) {
+        if (false == options.isPrettyPrint()) {
+            document.outputSettings(new Document.OutputSettings().prettyPrint(false));
+        }
+    }
+
+    private static String removeComments(String html, boolean hasBody, HtmlSanitizeOptions options) {
         Document document = Jsoup.parse(html);
         final Set<Node> removedNodes = new HashSet<>(16, 0.9F);
         document.traverse(new NodeVisitor() {
@@ -727,6 +747,7 @@ public final class HtmlServiceImpl implements HtmlService {
         for (Node node : removedNodes) {
             node.remove();
         }
+        handlePrettyPrint(options, document);
         return hasBody ? document.outerHtml() : document.body().html();
     }
 
@@ -1757,6 +1778,59 @@ public final class HtmlServiceImpl implements HtmlService {
     }
 
     @Override
+    public String getWellFormedHTMLDocument(String htmlContent) throws OXException {
+        if (null == htmlContent || 0 == htmlContent.length()) {
+            return htmlContent;
+        }
+
+        Document document = Jsoup.parse(htmlContent);
+
+        {
+            DocumentType docType = null;
+            List<Node> nodes = document.childNodes();
+            for (Iterator<Node> it = nodes.iterator(); null == docType && it.hasNext();) {
+                Node node = it.next();
+                if (node instanceof DocumentType) {
+                    docType = (DocumentType) node;
+                }
+            }
+            if (null == docType) {
+                docType = new DocumentType("html", "", "");
+                document.insertChildren(0, docType);
+            }
+        }
+
+        {
+            Elements heads = document.getElementsByTag("head");
+            if (false == heads.isEmpty()) {
+                org.jsoup.nodes.Element head = heads.get(0);
+                org.jsoup.nodes.Element meta = null;
+                List<Node> nodes = head.childNodes();
+                for (Iterator<Node> it = nodes.iterator(); null == meta && it.hasNext();) {
+                    Node node = it.next();
+                    if (node instanceof org.jsoup.nodes.Element) {
+                        org.jsoup.nodes.Element e = (org.jsoup.nodes.Element) node;
+                        if ("meta".equals(e.tagName())) {
+                            org.jsoup.nodes.Attributes attributes = e.attributes();
+                            if ("Content-Type".equalsIgnoreCase(attributes.get("http-equiv"))) {
+                                meta = e;
+                            }
+                        }
+                    }
+                }
+                if (null == meta) {
+                    meta = new org.jsoup.nodes.Element("meta");
+                    meta.attr("http-equiv", "Content-Type");
+                    meta.attr("content", "text/html; charset=UTF-8");
+                    head.insertChildren(0, meta);
+                }
+            }
+        }
+
+        return document.outerHtml();
+    }
+
+    @Override
     public String getConformHTML(final String htmlContent, final String charset) throws OXException {
         return getConformHTML(htmlContent, charset, true);
     }
@@ -2396,6 +2470,30 @@ public final class HtmlServiceImpl implements HtmlService {
         } finally {
             Streams.close(fos);
         }
+    }
+
+    private static boolean startsWith(String prefix, String toCheck, boolean ignoreHeadingWhitespaces) {
+        if (null == toCheck) {
+            return false;
+        }
+
+        int len = toCheck.length();
+        if (len <= 0) {
+            return false;
+        }
+
+        if (!ignoreHeadingWhitespaces) {
+            return toCheck.startsWith(prefix);
+        }
+
+        int i = 0;
+        while (i < len && Strings.isWhitespace(toCheck.charAt(i))) {
+            i++;
+        }
+        if (i >= len) {
+            return false;
+        }
+        return toCheck.startsWith(prefix, i);
     }
 
 }

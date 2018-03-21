@@ -59,8 +59,8 @@ public interface SubfolderAwareShareInfo extends ShareInfo {
     /**
      * Defines whether this share includes sub-folders or not.
      *
-     * @return true if it contains sub-folders, false otherwise
+     * @return <code>true</code> if it contains sub-folders, <code>false</code> otherwise
      */
-    Boolean isIncludeSubfolders();
+    boolean isIncludeSubfolders();
 
 }

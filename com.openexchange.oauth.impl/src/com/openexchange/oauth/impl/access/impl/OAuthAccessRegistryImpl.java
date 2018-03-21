@@ -55,9 +55,9 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
-import com.openexchange.oauth.access.OAuthAccessRegistry;
 import com.openexchange.oauth.OAuthExceptionCodes;
 import com.openexchange.oauth.access.OAuthAccess;
+import com.openexchange.oauth.access.OAuthAccessRegistry;
 
 /**
  * {@link OAuthAccessRegistryImpl}

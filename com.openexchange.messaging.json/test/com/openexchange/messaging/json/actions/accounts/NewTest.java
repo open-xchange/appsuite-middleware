@@ -49,6 +49,9 @@
 
 package com.openexchange.messaging.json.actions.accounts;
 
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.fail;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.Test;
@@ -63,10 +66,6 @@ import com.openexchange.messaging.SimAccountManager;
 import com.openexchange.messaging.SimMessagingService;
 import com.openexchange.messaging.registry.SimMessagingServiceRegistry;
 import com.openexchange.tools.session.SimServerSession;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import static org.junit.Assert.*;
 
 
 /**

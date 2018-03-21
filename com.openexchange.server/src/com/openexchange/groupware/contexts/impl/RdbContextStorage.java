@@ -92,11 +92,6 @@ public class RdbContextStorage extends ContextStorage {
     private static final String SELECT_CONTEXT = "SELECT name,enabled,filestore_id,filestore_name,filestore_login,filestore_passwd,quota_max,server_id FROM context JOIN context_server2db_pool ON context.cid=context_server2db_pool.cid WHERE context.cid=?";
 
     /**
-     * SQL select statement for retrieving the server identifier for the specified context
-     */
-    private static final String FIND_SERVER_OF_CONTEXT = "SELECT server_id FROM context_server2db_pool WHERE cid = ?";
-
-    /**
      * SQL select statement for resolving the login info to the context
      * identifier.
      */
@@ -369,6 +364,7 @@ public class RdbContextStorage extends ContextStorage {
         PreparedStatement stmt = null;
         ResultSet result = null;
         try {
+            // GROUP BY CLAUSE: ensure ONLY_FULL_GROUP_BY compatibility
             stmt = con.prepareStatement("SELECT MIN(cid) FROM context_server2db_pool GROUP BY db_schema");
             result = stmt.executeQuery();
             if (false == result.next()) {
@@ -611,54 +607,4 @@ public class RdbContextStorage extends ContextStorage {
             Databases.autocommit(con);
         }
     }
-
-    private static final class SchemaAndWritePool {
-
-        final String schema;
-        final int writePool;
-        private final int hash;
-
-        SchemaAndWritePool(int writePool, String schema) {
-            super();
-            this.writePool = writePool;
-            this.schema = schema;
-            int prime = 31;
-            int result = 1;
-            result = prime * result + ((schema == null) ? 0 : schema.hashCode());
-            result = prime * result + writePool;
-            hash = result;
-        }
-
-        @Override
-        public int hashCode() {
-            return hash;
-        }
-
-        @Override
-        public boolean equals(Object obj) {
-            if (this == obj) {
-                return true;
-            }
-            if (obj == null) {
-                return false;
-            }
-            if (getClass() != obj.getClass()) {
-                return false;
-            }
-            SchemaAndWritePool other = (SchemaAndWritePool) obj;
-            if (writePool != other.writePool) {
-                return false;
-            }
-            if (schema == null) {
-                if (other.schema != null) {
-                    return false;
-                }
-            } else if (!schema.equals(other.schema)) {
-                return false;
-            }
-            return true;
-        }
-
-    }
-
 }

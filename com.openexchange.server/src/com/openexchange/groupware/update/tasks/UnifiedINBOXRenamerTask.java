@@ -49,18 +49,18 @@
 
 package com.openexchange.groupware.update.tasks;
 
+import static com.openexchange.database.Databases.closeSQLStuff;
 import static com.openexchange.groupware.update.UpdateConcurrency.BACKGROUND;
-import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.Attributes;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.TaskAttributes;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
-import com.openexchange.tools.sql.DBUtils;
 
 /**
  * {@link UnifiedINBOXRenamerTask} - Renames "Unified Mail" to "Unified Mail".
@@ -105,9 +105,9 @@ public final class UnifiedINBOXRenamerTask extends UpdateTaskAdapter {
         } finally {
             closeSQLStuff(stmt);
             if (rollback) {
-                DBUtils.rollback(con);
+                Databases.rollback(con);
             }
-            DBUtils.autocommit(con);
+            Databases.autocommit(con);
         }
     }
 }

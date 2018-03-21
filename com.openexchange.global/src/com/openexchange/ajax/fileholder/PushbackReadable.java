@@ -50,7 +50,6 @@
 package com.openexchange.ajax.fileholder;
 
 import java.io.IOException;
-import com.openexchange.ajax.fileholder.Readable;
 
 /**
  * {@link PushbackReadable} - Adds the functionality to another {@link Readable}, namely the ability to "push back" or "unread" bytes.

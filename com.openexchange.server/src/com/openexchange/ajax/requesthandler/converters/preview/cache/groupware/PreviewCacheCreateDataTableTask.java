@@ -49,16 +49,16 @@
 
 package com.openexchange.ajax.requesthandler.converters.preview.cache.groupware;
 
-import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
+import static com.openexchange.database.Databases.closeSQLStuff;
 import static com.openexchange.tools.sql.DBUtils.tableExists;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
-import com.openexchange.tools.sql.DBUtils;
 
 /**
  * {@link PreviewCacheCreateDataTableTask}
@@ -105,10 +105,10 @@ public class PreviewCacheCreateDataTableTask extends UpdateTaskAdapter {
         } finally {
             closeSQLStuff(stmt);
             if (rollback) {
-                DBUtils.rollback(writeCon);
+                Databases.rollback(writeCon);
             }
             if (restoreAutoCommit) {
-                DBUtils.autocommit(writeCon);
+                Databases.autocommit(writeCon);
             }
         }
     }

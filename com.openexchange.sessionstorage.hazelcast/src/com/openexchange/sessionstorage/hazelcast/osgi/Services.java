@@ -109,11 +109,8 @@ public final class Services {
      * @return The service or <code>null</code> if absent
      */
     public static <S extends Object> S optService(final Class<? extends S> clazz) {
-        try {
-            return getService(clazz);
-        } catch (final IllegalStateException e) {
-            return null;
-        }
+        ServiceLookup serviceLookup = REF.get();
+        return null == serviceLookup ? null : serviceLookup.getOptionalService(clazz);
     }
 
 }

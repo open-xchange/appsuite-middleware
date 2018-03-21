@@ -61,22 +61,85 @@ import com.openexchange.tools.iterator.SearchIterator;
  */
 public interface SubscribeService {
 
+    /**
+     * Retrieves the {@link SubscriptionSource}
+     *
+     * @return
+     */
     public SubscriptionSource getSubscriptionSource();
 
+    /**
+     * Checks whether this service handles subscriptions for the given module
+     *
+     * @param folderModule The module
+     * @return true if it handles subscriptions for the given module, false otherwise
+     */
     public boolean handles(int folderModule);
 
+    /**
+     * Add a new subscription
+     *
+     * @param subscription The subscription
+     * @throws OXException
+     */
     public void subscribe(Subscription subscription) throws OXException;
 
+    /**
+     * Gets all subscriptions within the given folder
+     *
+     * @param context The context
+     * @param folderId The folder id
+     * @param secret The secret
+     * @return A collection of {@link Subscription}s
+     * @throws OXException
+     */
     public Collection<Subscription> loadSubscriptions(Context context, String folderId, String secret) throws OXException;
 
+    /**
+     * Gets all subscriptions for a given user
+     *
+     * @param context The context
+     * @param userId The user id
+     * @param secret The secret
+     * @return A collection of {@link Subscription}s
+     * @throws OXException
+     */
     public Collection<Subscription> loadSubscriptions(Context context, int userId, String secret) throws OXException;
 
+    /**
+     * Gets a specific {@link Subscription}
+     *
+     * @param context The context
+     * @param subscriptionId The id of the {@link Subscription}
+     * @param secret The secret
+     * @return The {@link Subscription}
+     * @throws OXException
+     */
     public Subscription loadSubscription(Context context, int subscriptionId, String secret) throws OXException;
 
+    /**
+     * Removes a {@link Subscription}
+     *
+     * @param subscription The {@link Subscription} to remove
+     * @throws OXException
+     */
     public void unsubscribe(Subscription subscription) throws OXException;
 
+    /**
+     * Updates a {@link Subscription}
+     *
+     * @param subscription The {@link Subscription} to update
+     * @throws OXException
+     */
     public void update(Subscription subscription) throws OXException;
 
+    /**
+     * Gets the content of the {@link Subscription}
+     *
+     * @param subscription The {@link Subscription}
+     * @return A content collections. The type of the content depends on the {@link Subscription}
+     * @throws OXException
+     */
     public Collection<?> getContent(Subscription subscription) throws OXException;
 
     /**
@@ -88,12 +151,43 @@ public interface SubscribeService {
      */
     SearchIterator<?> loadContent(Subscription subscription) throws OXException;
 
+    /**
+     * Checks if a given subscription id is known to the service
+     *
+     * @param context The context
+     * @param subscriptionId The id of the {@link Subscription}
+     * @return true if it is known, false otherwise
+     * @throws OXException
+     */
     public boolean knows(Context context, int subscriptionId) throws OXException;
 
+    /**
+     * Migrates a new secret
+     *
+     * @param session The user session
+     * @param oldSecret The old secret
+     * @param newSecret The new secret
+     * @throws OXException
+     */
     public void migrateSecret(Session session, String oldSecret, String newSecret) throws OXException;
 
+    /**
+     * Checks if a given user has accounts
+     *
+     * @param context The context
+     * @param user The user
+     * @return true if the given user has an account for this service
+     * @throws OXException
+     */
     public boolean hasAccounts(Context context, User user) throws OXException;
 
+    /**
+     * Touches a subscription.
+     *
+     * @param context The context
+     * @param subscriptionId The id of the subscription
+     * @throws OXException
+     */
     public void touch(Context context, int subscriptionId) throws OXException;
 
     /**
@@ -105,11 +199,18 @@ public interface SubscribeService {
      */
     public void cleanUp(String secret, Session session) throws OXException;
 
+    /**
+     * Removes unrecoverable items
+     *
+     * @param secret The secret
+     * @param session The user session
+     * @throws OXException
+     */
     public void removeUnrecoverableItems(String secret, Session session) throws OXException;
-    
+
     /**
      * Gets a value indicating whether creating new or modifying existing subscriptions is enabled or not.
-     * 
+     *
      * @return <code>true</code> if enabled, <code>false</code>, otherwise
      */
     boolean isCreateModifyEnabled();

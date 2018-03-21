@@ -16,6 +16,8 @@
  */
 package org.apache.tika.parser.image;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import java.io.InputStream;
 import java.util.Arrays;
 import java.util.List;
@@ -25,10 +27,6 @@ import org.apache.tika.parser.ParseContext;
 import org.apache.tika.parser.Parser;
 import org.junit.Test;
 import org.xml.sax.helpers.DefaultHandler;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import static org.junit.Assert.*;
 
 public class TiffParserTest {    private final Parser parser = new TiffParser();
 

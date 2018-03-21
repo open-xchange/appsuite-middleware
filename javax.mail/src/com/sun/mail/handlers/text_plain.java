@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 1997-2017 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997-2018 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -40,8 +40,14 @@
 
 package com.sun.mail.handlers;
 
-import java.io.*;
-import javax.activation.*;
+import java.io.FilterOutputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.io.UnsupportedEncodingException;
+import javax.activation.ActivationDataFlavor;
+import javax.activation.DataSource;
 import javax.mail.internet.ContentType;
 import javax.mail.internet.MimeUtility;
 
@@ -137,6 +143,9 @@ public class text_plain extends handler_base {
 
 	try {
 	    enc = getCharset(type);
+	    if (null == enc) {
+            enc = "UTF8";
+        }
 	    osw = new OutputStreamWriter(new NoCloseOutputStream(os), enc);
 	} catch (IllegalArgumentException iex) {
 	    /*
@@ -167,8 +176,8 @@ public class text_plain extends handler_base {
 	    ContentType ct = new ContentType(type);
 	    String charset = ct.getParameter("charset");
 	    if (charset == null)
-		// If the charset parameter is absent, use US-ASCII.
-		charset = "us-ascii";
+		// If the charset parameter is absent, use UTF-8.
+		charset = "UTF8";
 	    return MimeUtility.javaCharset(charset);
 	} catch (Exception ex) {
 	    return null;

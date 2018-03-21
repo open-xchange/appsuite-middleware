@@ -73,7 +73,6 @@ import javax.activation.FileDataSource;
 import javax.mail.BodyPart;
 import javax.mail.Flags;
 import javax.mail.Message.RecipientType;
-import javax.mail.MessageRemovedException;
 import javax.mail.MessagingException;
 import javax.mail.Multipart;
 import javax.mail.Part;
@@ -1458,31 +1457,36 @@ public class MimeMessageFiller {
     }
 
     protected void addNestedMessage(final MailPart mailPart, final Boolean inline, final Multipart primaryMultipart, final StringBuilder sb) throws OXException, MessagingException {
-        final ThresholdFileHolder sink = new ThresholdFileHolder(65536, 65536);
-        sink.write(mailPart.getInputStream());
-        final String fn;
-        if (null == mailPart.getFileName()) {
-            String subject = MimeMessageUtility.checkNonAscii(new InternetHeaders(sink.getStream()).getHeader(MessageHeaders.HDR_SUBJECT, null));
-            if (null == subject || subject.length() == 0) {
-                fn = sb.append(PREFIX_PART).append(EXT_EML).toString();
+        ThresholdFileHolder sink = new ThresholdFileHolder(65536, 65536);
+        try {
+            sink.write(mailPart.getInputStream());
+
+            final String fn;
+            if (null == mailPart.getFileName()) {
+                String subject = MimeMessageUtility.checkNonAscii(new InternetHeaders(sink.getStream()).getHeader(MessageHeaders.HDR_SUBJECT, null));
+                if (null == subject || subject.length() == 0) {
+                    fn = sb.append(PREFIX_PART).append(EXT_EML).toString();
+                } else {
+                    subject = MimeMessageUtility.decodeMultiEncodedHeader(MimeMessageUtility.unfold(subject));
+                    fn = sb.append(subject.replaceAll("\\p{Blank}+", "_")).append(EXT_EML).toString();
+                    sb.setLength(0);
+                }
             } else {
-                subject = MimeMessageUtility.decodeMultiEncodedHeader(MimeMessageUtility.unfold(subject));
-                fn = sb.append(subject.replaceAll("\\p{Blank}+", "_")).append(EXT_EML).toString();
-                sb.setLength(0);
+                fn = mailPart.getFileName();
             }
-        } else {
-            fn = mailPart.getFileName();
-        }
-        final boolean bInline = null != inline ? inline.booleanValue() : (Part.INLINE.equalsIgnoreCase(mailPart.getContentDisposition().getDisposition()));
-        if (sink.isInMemory()) {
+
+            final boolean bInline = null != inline ? inline.booleanValue() : (Part.INLINE.equalsIgnoreCase(mailPart.getContentDisposition().getDisposition()));
             ByteArrayOutputStream buffer = sink.getBuffer();
-            if (null == buffer) {
-                addNestedMessage(primaryMultipart, new DataHandler(new FileHolderDataSource(sink, MIME_MESSAGE_RFC822)), fn, bInline);
-            } else {
+            if (null != buffer) {
                 addNestedMessage(primaryMultipart, new DataHandler(new ByteArrayDataSource(buffer.toByteArray(), MIME_MESSAGE_RFC822)), fn, bInline);
+            } else {
+                addNestedMessage(primaryMultipart, new DataHandler(new FileHolderDataSource(sink, MIME_MESSAGE_RFC822)), fn, bInline);
             }
-        } else {
-            addNestedMessage(primaryMultipart, new DataHandler(new FileHolderDataSource(sink, MIME_MESSAGE_RFC822)), fn, bInline);
+
+            // Everything went fine... avoid premature closing
+            sink = null;
+        } finally {
+            Streams.close(sink);
         }
     }
 
@@ -2069,32 +2073,43 @@ public class MimeMessageFiller {
 
     static class ImageDataImageProvider implements ImageProvider {
 
-        private final Data<InputStream> data;
-
-        private final String contentType;
-
-        private final String fileName;
+        private final ThresholdFileHolder fileHolder;
 
         public ImageDataImageProvider(ImageDataSource imageData, ImageLocation imageLocation, Session session) throws OXException {
             super();
-            this.data = imageData.getData(InputStream.class, imageData.generateDataArgumentsFrom(imageLocation), session);
-            final DataProperties dataProperties = data.getDataProperties();
-            fileName = dataProperties.get(DataProperties.PROPERTY_NAME);
-            String contentType = dataProperties.get(DataProperties.PROPERTY_CONTENT_TYPE);
-            if (null != contentType) {
-                final String lcct = toLowerCase(contentType).trim();
-                final String defaultContentType = "application/octet-stream";
-                if (!lcct.startsWith("image/") && !lcct.startsWith(defaultContentType)) {
-                    throw MailExceptionCode.ATTACHMENT_NOT_FOUND.create(imageLocation.getImageId(), imageLocation.getId(), imageLocation.getFolder());
-                }
-                if (lcct.startsWith(defaultContentType) && !Strings.isEmpty(fileName)) {
-                    final String contentTypeByFileName = MimeType2ExtMap.getContentType(fileName);
-                    if (!defaultContentType.equals(contentTypeByFileName)) {
-                        contentType = contentTypeByFileName + (lcct.length() > defaultContentType.length() ? lcct.substring(defaultContentType.length()) : "");
+            ThresholdFileHolder fileHolder = null;
+            InputStream in = null;
+            try {
+                Data<InputStream> data = imageData.getData(InputStream.class, imageData.generateDataArgumentsFrom(imageLocation), session);
+                in = data.getData();
+
+                fileHolder = new ThresholdFileHolder();
+                fileHolder.write(in);
+                in = null; // Already closed if written to ThresholdFileHolder
+
+                DataProperties dataProperties = data.getDataProperties();
+                String fileName = dataProperties.get(DataProperties.PROPERTY_NAME);
+                fileHolder.setName(fileName);
+                String contentType = dataProperties.get(DataProperties.PROPERTY_CONTENT_TYPE);
+                if (null != contentType) {
+                    final String lcct = toLowerCase(contentType).trim();
+                    final String defaultContentType = "application/octet-stream";
+                    if (!lcct.startsWith("image/") && !lcct.startsWith(defaultContentType)) {
+                        throw MailExceptionCode.ATTACHMENT_NOT_FOUND.create(imageLocation.getImageId(), imageLocation.getId(), imageLocation.getFolder());
+                    }
+                    if (lcct.startsWith(defaultContentType) && Strings.isNotEmpty(fileName)) {
+                        final String contentTypeByFileName = MimeType2ExtMap.getContentType(fileName);
+                        if (!defaultContentType.equals(contentTypeByFileName)) {
+                            contentType = contentTypeByFileName + (lcct.length() > defaultContentType.length() ? lcct.substring(defaultContentType.length()) : "");
+                        }
                     }
                 }
+                fileHolder.setContentType(contentType);
+                this.fileHolder = fileHolder;
+                fileHolder = null; // Avoid premature closing
+            } finally {
+                Streams.close(in, fileHolder);
             }
-            this.contentType = contentType;
         }
 
         @Override
@@ -2104,24 +2119,17 @@ public class MimeMessageFiller {
 
         @Override
         public String getContentType() {
-            return contentType;
+            return fileHolder.getContentType();
         }
 
         @Override
         public DataSource getDataSource() throws OXException {
-            try {
-                return new MessageDataSource(data.getData(), contentType);
-            } catch (final IOException e) {
-                if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName()) || (e.getCause() instanceof MessageRemovedException)) {
-                    throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);
-                }
-                throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
-            }
+            return new FileHolderDataSource(fileHolder, fileHolder.getContentType());
         }
 
         @Override
         public String getFileName() {
-            return fileName;
+            return fileHolder.getName();
         }
     } // End of ImageDataImageProvider
 

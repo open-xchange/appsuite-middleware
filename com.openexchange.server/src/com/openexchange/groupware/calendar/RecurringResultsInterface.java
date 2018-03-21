@@ -49,7 +49,15 @@
 
 package com.openexchange.groupware.calendar;
 
+import com.openexchange.chronos.service.RecurrenceService;
 
+/**
+ * 
+ * {@link RecurringResultsInterface}
+ *
+ * @deprecated Use {@link RecurrenceService}
+ */
+@Deprecated
 public interface RecurringResultsInterface {
 
     /**

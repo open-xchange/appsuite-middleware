@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 1997-2017 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997-2018 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -40,12 +40,19 @@
 
 package com.sun.mail.mbox;
 
-import javax.mail.*;
-import javax.mail.internet.*;
-import javax.activation.*;
-import java.util.*;
-import java.io.*;
+import java.io.BufferedInputStream;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
+import javax.activation.DataSource;
+import javax.mail.BodyPart;
+import javax.mail.MessagingException;
+import javax.mail.MethodNotSupportedException;
+import javax.mail.internet.InternetHeaders;
+import javax.mail.internet.MimeMultipart;
 import com.sun.mail.util.LineInputStream;
 
 /**
@@ -217,6 +224,9 @@ public class SunV3Multipart extends MimeMultipart {
 	} catch (IOException e) {
 	    throw new MessagingException("IO Error");	// XXX
 	} finally {
+	    if (null != in) {
+            try { in.close(); } catch (Exception e) {/*ignore*/}
+        }
 	    parsing = false;
 	}
 

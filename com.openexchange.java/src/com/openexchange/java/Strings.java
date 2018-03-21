@@ -63,11 +63,13 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
+import com.openexchange.java.util.Tools;
 
 /**
  * {@link Strings} - A library for performing operations that create Strings
@@ -542,7 +544,15 @@ public class Strings {
         return splitBy(s, '.', true);
     }
 
-    private static String[] splitBy(String s, char delim, boolean trimMatches) {
+    /**
+     * Splits given string by specified character.
+     *
+     * @param s The string to split
+     * @param delim The delimiter to split by
+     * @param trimMatches <code>true</code> to trim tokens; otherwise <code>false</code>
+     * @return The split string
+     */
+    public static String[] splitBy(String s, char delim, boolean trimMatches) {
         if (null == s) {
             return null;
         }
@@ -806,15 +816,23 @@ public class Strings {
         if (coll == null) {
             return null;
         }
-        final int size = coll.size();
+
+        int size = coll.size();
         if (size == 0) {
             return "";
         }
-        final StringBuilder builder = new StringBuilder(size << 4);
-        for (final Object obj : coll) {
-            builder.append(obj == null ? "null" : obj.toString()).append(connector);
+
+        StringBuilder builder = new StringBuilder(size << 4);
+        Iterator<? extends Object> it = coll.iterator();
+        {
+            Object obj = it.next();
+            builder.append(obj == null ? "null" : obj.toString());
         }
-        return builder.substring(0, builder.length() - connector.length());
+        while (it.hasNext()) {
+            Object obj = it.next();
+            builder.append(connector).append(obj == null ? "null" : obj.toString());
+        }
+        return builder.toString();
     }
 
     /**
@@ -829,14 +847,21 @@ public class Strings {
         if (coll == null) {
             return;
         }
-        final int size = coll.size();
+
+        int size = coll.size();
         if (size == 0) {
             return;
         }
-        for (final Object obj : coll) {
-            builder.append(obj == null ? "null" : obj.toString()).append(connector);
+
+        Iterator<? extends Object> it = coll.iterator();
+        {
+            Object obj = it.next();
+            builder.append(obj == null ? "null" : obj.toString());
         }
-        builder.setLength(builder.length() - connector.length());
+        while (it.hasNext()) {
+            Object obj = it.next();
+            builder.append(connector).append(obj == null ? "null" : obj.toString());
+        }
     }
 
     /**
@@ -1556,6 +1581,46 @@ public class Strings {
             sb.deleteCharAt(sb.length() - 1);
         }
         return sb.toString();
+    }
+
+    /**
+     * Parses a positive <code>int</code> value from passed {@link String} instance.
+     *
+     * @param s The string to parse
+     * @return The parsed positive <code>int</code> value or <code>-1</code> if parsing failed
+     */
+    public static final int parseUnsignedInt(String s) {
+        return Tools.getUnsignedInteger(s);
+    }
+
+    /**
+     * Parses a positive <code>int</code> value from passed {@link String} instance.
+     *
+     * @param s The string to parse
+     * @return The parsed positive <code>int</code> value or <code>-1</code> if parsing failed
+     */
+    public static final int getUnsignedInt(String s) {
+        return Tools.getUnsignedInteger(s);
+    }
+
+    /**
+     * Parses a positive <code>long</code> value from passed {@link String} instance.
+     *
+     * @param s The string to parse
+     * @return The parsed positive <code>long</code> value or <code>-1</code> if parsing failed
+     */
+    public static final long parseUnsignedLong(String s) {
+        return Tools.getUnsignedLong(s);
+    }
+
+    /**
+     * Parses a positive <code>long</code> value from passed {@link String} instance.
+     *
+     * @param s The string to parse
+     * @return The parsed positive <code>long</code> value or <code>-1</code> if parsing failed
+     */
+    public static final long getUnsignedLong(String s) {
+        return Tools.getUnsignedLong(s);
     }
 
 }

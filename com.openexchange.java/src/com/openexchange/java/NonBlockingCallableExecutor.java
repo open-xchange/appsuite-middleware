@@ -104,18 +104,21 @@ public class NonBlockingCallableExecutor<V> {
      * @throws Exception If unable to compute a result
      */
     public V writeCall(Callable<V> task) throws Exception {
-        V value;
-
         lock.lock();
         try {
-            writeCounter.incrementAndGet();
-            value = task.call();
+            return doWriteCall(task);
         } finally {
-            writeCounter.incrementAndGet();
             lock.unlock();
         }
+    }
 
-        return value;
+    private V doWriteCall(Callable<V> task) throws Exception {
+        writeCounter.incrementAndGet();
+        try {
+            return task.call();
+        } finally {
+            writeCounter.incrementAndGet();
+        }
     }
 
 }

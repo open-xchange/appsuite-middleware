@@ -50,13 +50,12 @@
 package com.openexchange.groupware.userconfiguration;
 
 import static com.openexchange.tools.sql.DBUtils.closeResources;
-import gnu.trove.map.TIntIntMap;
-import gnu.trove.map.hash.TIntIntHashMap;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import com.openexchange.context.ContextService;
+import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextImpl;
@@ -67,6 +66,8 @@ import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.sql.DBUtils;
+import gnu.trove.map.TIntIntMap;
+import gnu.trove.map.hash.TIntIntHashMap;
 
 
 /**
@@ -208,7 +209,7 @@ public class RdbUserPermissionBitsStorage extends UserPermissionBitsStorage {
                 rs = stmt.executeQuery();
                 insert = !rs.next();
             } finally {
-                DBUtils.closeSQLStuff(rs, stmt);
+                Databases.closeSQLStuff(rs, stmt);
                 if (closeCon) {
                     DBPool.closeReaderSilent(ctx, readCon);
                 }

@@ -413,6 +413,7 @@ public class TracingSocketMonitor implements SocketMonitor {
     public TracingSocketMonitor(TracingSocketMonitorConfig config, TimerService timerService) {
         super();
         this.config = config;
+
         final ConcurrentMap<Socket, SocketTrace> socketTraces = new ConcurrentHashMap<>(256, 0.9F, 1);
         this.socketTraces = socketTraces;
 
@@ -429,8 +430,7 @@ public class TracingSocketMonitor implements SocketMonitor {
                 try {
                     long tombstone = System.currentTimeMillis() - thrsh;
                     for (Iterator<SocketTrace> iter = socketTraces.values().iterator(); iter.hasNext();) {
-                        SocketTrace trace = iter.next();
-                        if (trace.lastAccessed() < tombstone) {
+                        if (iter.next().lastAccessed() < tombstone) {
                             iter.remove();
                         }
                     }
@@ -571,9 +571,16 @@ public class TracingSocketMonitor implements SocketMonitor {
 
     @Override
     public void connectError(Socket socket, ConnectFailure failure) throws IOException {
-        org.slf4j.Logger fileLogger = this.fileLogger;
-        if (null != fileLogger && isAllowed(socket)) {
-            fileLogger.error("Failed to connect to socket {}", socket, failure.getE());
+        if (isAllowed(socket)) {
+            SocketTrace trace = optSocketTraceFor(socket);
+            if (null != trace && false == trace.isRecordingSamples()) {
+                socketTraces.remove(socket);
+            }
+
+            org.slf4j.Logger fileLogger = this.fileLogger;
+            if (null != fileLogger) {
+                fileLogger.error("Failed to connect to socket {}", socket, failure.getE());
+            }
         }
     }
 
@@ -587,9 +594,17 @@ public class TracingSocketMonitor implements SocketMonitor {
 
     @Override
     public void closed(Socket socket) throws IOException {
-        org.slf4j.Logger fileLogger = this.fileLogger;
-        if (null != fileLogger && isAllowed(socket)) {
-            fileLogger.info("Closed connection to socket {}", socket);
+        if (isAllowed(socket)) {
+            SocketTrace trace = optSocketTraceFor(socket);
+            if (null != trace && false == trace.isRecordingSamples()) {
+                // No samples are recorded, hence drop associated SocketTrace instance
+                socketTraces.remove(socket);
+            }
+
+            org.slf4j.Logger fileLogger = this.fileLogger;
+            if (null != fileLogger) {
+                fileLogger.info("Closed connection to socket {}", socket);
+            }
         }
     }
 
@@ -717,6 +732,10 @@ public class TracingSocketMonitor implements SocketMonitor {
             buffer = withRequestData ? new ByteArrayOutputStream(2048) : null;
             lastAccessed = new AtomicLong(System.currentTimeMillis());
             this.fileLogger = fileLogger;
+        }
+
+        boolean isRecordingSamples() {
+            return null != samples;
         }
 
         long lastAccessed() {

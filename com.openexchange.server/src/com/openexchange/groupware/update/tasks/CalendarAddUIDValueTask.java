@@ -49,19 +49,14 @@
 
 package com.openexchange.groupware.update.tasks;
 
-import static com.openexchange.tools.sql.DBUtils.autocommit;
-import gnu.trove.list.TIntList;
-import gnu.trove.list.linked.TIntLinkedList;
-import gnu.trove.map.TIntObjectMap;
-import gnu.trove.map.hash.TIntObjectHashMap;
-import gnu.trove.procedure.TIntObjectProcedure;
-import gnu.trove.procedure.TIntProcedure;
+import static com.openexchange.database.Databases.autocommit;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicReference;
+import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.Attributes;
 import com.openexchange.groupware.update.PerformParameters;
@@ -69,7 +64,12 @@ import com.openexchange.groupware.update.TaskAttributes;
 import com.openexchange.groupware.update.UpdateConcurrency;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
-import com.openexchange.tools.sql.DBUtils;
+import gnu.trove.list.TIntList;
+import gnu.trove.list.linked.TIntLinkedList;
+import gnu.trove.map.TIntObjectMap;
+import gnu.trove.map.hash.TIntObjectHashMap;
+import gnu.trove.procedure.TIntObjectProcedure;
+import gnu.trove.procedure.TIntProcedure;
 
 /**
  * {@link CalendarAddUIDValueTask} - Add UIDs to appointments if missing.
@@ -110,7 +110,7 @@ public final class CalendarAddUIDValueTask extends UpdateTaskAdapter {
             throw UpdateExceptionCodes.OTHER_PROBLEM.create(e, e.getMessage());
         } finally {
             if (rollback) {
-                DBUtils.rollback(con);
+                Databases.rollback(con);
             }
             autocommit(con);
         }
@@ -132,7 +132,7 @@ public final class CalendarAddUIDValueTask extends UpdateTaskAdapter {
                 }
                 ids.add(resultSet.getInt(1));
             }
-            DBUtils.closeSQLStuff(resultSet, stmt);
+            Databases.closeSQLStuff(resultSet, stmt);
 
             final AtomicReference<SQLException> exceptionReference = new AtomicReference<SQLException>();
             map.forEachEntry(new TIntObjectProcedure<TIntList>() {
@@ -169,7 +169,7 @@ public final class CalendarAddUIDValueTask extends UpdateTaskAdapter {
                         exceptionReference.set(e);
                         return false;
                     } finally {
-                        DBUtils.closeSQLStuff(innerStmt);
+                        Databases.closeSQLStuff(innerStmt);
                     }
                 }
             }); // end of for-each procedure
@@ -178,7 +178,7 @@ public final class CalendarAddUIDValueTask extends UpdateTaskAdapter {
                 throw sqlException;
             }
         } finally {
-            DBUtils.closeSQLStuff(resultSet, stmt);
+            Databases.closeSQLStuff(resultSet, stmt);
         }
     }
 
@@ -198,7 +198,7 @@ public final class CalendarAddUIDValueTask extends UpdateTaskAdapter {
                 }
                 ids.add(resultSet.getInt(1));
             }
-            DBUtils.closeSQLStuff(resultSet, stmt);
+            Databases.closeSQLStuff(resultSet, stmt);
 
             final AtomicReference<SQLException> exceptionReference = new AtomicReference<SQLException>();
             map.forEachEntry(new TIntObjectProcedure<TIntList>() {
@@ -244,8 +244,8 @@ public final class CalendarAddUIDValueTask extends UpdateTaskAdapter {
                         exceptionReference.set(e);
                         return false;
                     } finally {
-                        DBUtils.closeSQLStuff(innerStmtMaster);
-                        DBUtils.closeSQLStuff(innerStmtExceptions);
+                        Databases.closeSQLStuff(innerStmtMaster);
+                        Databases.closeSQLStuff(innerStmtExceptions);
                     }
                 }
             }); // end of for-each procedure
@@ -254,7 +254,7 @@ public final class CalendarAddUIDValueTask extends UpdateTaskAdapter {
                 throw sqlException;
             }
         } finally {
-            DBUtils.closeSQLStuff(resultSet, stmt);
+            Databases.closeSQLStuff(resultSet, stmt);
         }
     }
 

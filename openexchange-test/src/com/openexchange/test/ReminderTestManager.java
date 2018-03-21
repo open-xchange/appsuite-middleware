@@ -71,7 +71,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.reminder.ReminderObject;
 
 /**
- * 
+ *
  * {@link ReminderTestManager}
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
@@ -217,14 +217,20 @@ public class ReminderTestManager implements TestManager {
         UpdatesRequest request = new UpdatesRequest(timestamp);
         UpdatesResponse updatesResponse = execute(request);
         setLastResponse(updatesResponse);
-        
+
         final JSONArray jsonArray = (JSONArray)updatesResponse.getData();
         List<ReminderObject> reminder = new ArrayList<>(jsonArray.length());
         for (int a = 0; a < jsonArray.length(); a++) {
             ReminderObject object = new ReminderObject();
             final JSONObject jsonReminder = jsonArray.getJSONObject(a);
 
-            object.setObjectId(DataParser.parseInt(jsonReminder, ReminderFields.ID));
+            long longId = DataParser.parseLong(jsonReminder, ReminderFields.ID);
+            if (longId > Integer.MAX_VALUE) {
+                int alarmId = (int) (longId >> 32);
+                object.setObjectId(alarmId);
+            } else {
+                object.setObjectId((int) longId);
+            }
             object.setTargetId(DataParser.parseInt(jsonReminder, ReminderFields.TARGET_ID));
             object.setFolder(DataParser.parseInt(jsonReminder, ReminderFields.FOLDER));
             object.setDate(DataParser.parseTime(jsonReminder, ReminderFields.ALARM, getClient().getValues().getTimeZone()));

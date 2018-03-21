@@ -56,6 +56,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.StringWriter;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import javax.xml.parsers.DocumentBuilder;
@@ -83,6 +87,7 @@ import org.apache.commons.cli.PosixParser;
 import org.w3c.dom.Comment;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
@@ -117,6 +122,7 @@ public class XMLModifierCLT {
         options.addOption(createOption("x", "xpath", true, "XPath to the elements that should be modified.", false));
         options.addOption(createOption("a", "add", true, "XML file that should add the elements denoted by the XPath. - can be used to read from STDIN.", false));
         options.addOption(createOption("r", "replace", true, "XML file that should replace the elements denoted by the XPath. - can be used to read from STDIN.", false));
+        options.addOption(createOption("m", "remove", true, "XML file that should remove the elements denoted by the XPath. - can be used to read from STDIN.", false));
         options.addOption(createOption("d", "id", true, "Defines the identifying attribute as XPath (relative to \"-x\") to determine if an element should be replaced (-r). If omitted all matches will be replaced.", false));
         options.addOption(createOption("z", "zap", false, "Defines if duplicate matching elements should be removed(zapped) instead of only being replaced (-r).", false));
         options.addOption(createOption("s", "scr", true, "Specifies which scr should be executed on the xml document selected via -i", false));
@@ -146,6 +152,10 @@ public class XMLModifierCLT {
         if (null == document) {
             return 1;
         }
+        Document copy = copyDocument(document);
+        if (null == copy) {
+            return 1;
+        }
         try {
             if (cmd.hasOption('s')) {
                 String scr = cmd.getOptionValue('s');
@@ -169,18 +179,28 @@ public class XMLModifierCLT {
                 XPathExpression expression = path.compile(xPath);
                 Document replace = parseInput("-".equals(cmd.getOptionValue('r')), cmd.getOptionValue('r'));
                 doReplace(cmd.getOptionValue('d'), cmd.hasOption('z'), document, expression, replace);
+            } else if (cmd.hasOption('m')) {
+                XPath path = xf.newXPath();
+                String xPath = cmd.getOptionValue('x');
+                XPathExpression expression = path.compile(xPath);
+                Document remove = parseInput("-".equals(cmd.getOptionValue('m')), cmd.getOptionValue('m'));
+                doRemove(cmd.getOptionValue('d'), document, expression, remove);
             } else {
                 System.err.println("Unknown operation mode.");
             }
+            List<String> diffs = new LinkedList<String>();
+            boolean differences = diff(document, copy, diffs);
             transformer.setOutputProperty(OutputKeys.INDENT, "yes");
-            final OutputStream os = determineOutput(!cmd.hasOption('o'), cmd.getOptionValue('o'));
-            if (null == os) {
-                return 1;
-            }
-            try {
-                transformer.transform(new DOMSource(document), new StreamResult(os));
-            } finally {
-                os.close();
+            if (differences) {
+                final OutputStream os = determineOutput(!cmd.hasOption('o'), cmd.getOptionValue('o'));
+                if (null == os) {
+                    return 1;
+                }
+                try {
+                    transformer.transform(new DOMSource(document), new StreamResult(os));
+                } finally {
+                    os.close();
+                }
             }
         } catch (XPathExpressionException e) {
             System.err.println("Can not parse XPath expression: " + e.getMessage());
@@ -196,6 +216,10 @@ public class XMLModifierCLT {
             return 1;
         } catch (SCRException e) {
             System.err.println("Error whily trying to apply Software Change Request: " + e.getMessage());
+            e.printStackTrace();
+            return 1;
+        } catch (Exception e) {
+            System.err.println("Error: " + e.getMessage());
             e.printStackTrace();
             return 1;
         }
@@ -247,7 +271,7 @@ public class XMLModifierCLT {
         }
     }
 
-    private static void doReplace(String identifier, boolean removeDuplicates, Document document, XPathExpression expression, Document replace) throws XPathExpressionException {
+    private static void doReplace(String identifier, boolean removeDuplicates, Document document, XPathExpression expression, Document replace) throws Exception {
         NodeList toReplaceList = (NodeList) expression.evaluate(replace, XPathConstants.NODESET);
         for (int i = 0; i < toReplaceList.getLength(); i++) {
             Node toReplace = toReplaceList.item(i);
@@ -265,7 +289,7 @@ public class XMLModifierCLT {
                         parent.replaceChild(imported, original);
                         found = true;
                     } else {
-                        //already seen it, should we remove duplicates? 
+                        //already seen it, should we remove duplicates?
                         if (removeDuplicates) {
                             //indentation is a text node which has to be removed
                             Node prev = original.getPreviousSibling();
@@ -288,20 +312,45 @@ public class XMLModifierCLT {
                 } else {
                     parentNode = findParentNode(document, expression, replace);
                 }
+                if(parentNode == null) {
+                    throw new Exception("Unable to find parent node!");
+                }
                 parentNode.appendChild(imported);
+            }
+        }
+    }
+
+    private static void doRemove(String identifier, Document document, XPathExpression expression, Document remove) throws XPathExpressionException {
+        NodeList toRemoveList = (NodeList) expression.evaluate(remove, XPathConstants.NODESET);
+        for (int i = 0; i < toRemoveList.getLength(); i++) {
+            Node toRemove = toRemoveList.item(i);
+            final String toRemoveIdentifier = getIdentifier(identifier, toRemove);
+            NodeList origList = (NodeList) expression.evaluate(document, XPathConstants.NODESET);
+            for (int j = 0; j < origList.getLength(); j++) {
+                Node original = origList.item(j);
+                final String origIdentifier = getIdentifier(identifier, original);
+                if (toRemoveIdentifier.equals(origIdentifier)) {
+                    Node parent = original.getParentNode();
+                    // remove previous text to remove empty lines
+                    Node prev = original.getPreviousSibling();
+                    if (prev != null && prev.getNodeType() == Node.TEXT_NODE && prev.getNodeValue().trim().isEmpty()) {
+                        parent.removeChild(prev);
+                    }
+                    parent.removeChild(original);
+                }
             }
         }
     }
 
     /**
      * Transform a node into plain text
-     * 
+     *
      * @param tf {@link TransformerFactory} to use for transformer creation
      * @param node The {@link Node} to transform to plain text
      * @return The transformed node
      * @throws TransformerException If an unrecoverable error occurs during the course of the transformation.
      */
-    private static String transformToString(TransformerFactory tf, Node node) throws TransformerException {
+    private static String transformToString(Node node) throws TransformerException {
         StringWriter sWriter = new StringWriter();
         Transformer transformer = tf.newTransformer();
         transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
@@ -321,7 +370,7 @@ public class XMLModifierCLT {
 
     /**
      * Creates a commandline option
-     * 
+     *
      * @param shortOpt The short version of the argumente e.g.: -h
      * @param longOpt The long version of the argument e.g.: --help
      * @param hasArg true If the option needs an argument or not e.g. --input /tmp/somefile
@@ -371,6 +420,36 @@ public class XMLModifierCLT {
         return document;
     }
 
+    /**
+     * @return <code>null</code> if the document builder can not be configured.
+     */
+    private static DocumentBuilder createDocumentBuilder() {
+        DocumentBuilder db;
+        try {
+            db = dbf.newDocumentBuilder();
+        } catch (ParserConfigurationException e) {
+            System.err.println("Can not configure XML parser: " + e.getMessage());
+            e.printStackTrace();
+            return null;
+        }
+        db.setEntityResolver(new ClassloaderEntityResolver());
+        return db;
+    }
+
+    /**
+     * @param document Document to copy
+     * @return <code>null</code> if document builder can not be configured.
+     */
+    private static Document copyDocument(Document document) {
+        DocumentBuilder db = createDocumentBuilder();
+        if (null == db) {
+            return null;
+        }
+        Document retval = db.newDocument();
+        retval.appendChild(retval.importNode(document.getDocumentElement(), true));
+        return retval;
+    }
+
     static InputStream determineInput(boolean stdin, String filename) {
         final InputStream is;
         if (!stdin) {
@@ -392,12 +471,161 @@ public class XMLModifierCLT {
         return is;
     }
 
+    private static boolean diff(Node node1, Node node2, List<String> diffs) {
+        if (diffNodeExists(node1, node2, diffs)) {
+            return true;
+        }
+        diffNodeType(node1, node2, diffs);
+        diffNodeValue(node1, node2, diffs);
+        diffAttributes(node1, node2, diffs);
+        diffNodes( node1, node2, diffs);
+        return diffs.size() > 0;
+    }
+
+    private static boolean diffNodes(Node node1, Node node2, List<String> diffs) {
+        // sort by name
+        Map<String, List<Node>> children1 = new LinkedHashMap<String, List<Node>>();
+        NodeList list = node1.getChildNodes();
+        for (int i = 0; i < list.getLength(); i++) {
+            Node node = list.item(i);
+            List<Node> same = children1.get(node.getNodeName());
+            if (null == same) {
+                same = new LinkedList<Node>();
+                children1.put(node.getNodeName(), same);
+            }
+            same.add(node);
+        }
+        Map<String, List<Node>> children2 = new LinkedHashMap<String, List<Node>>();
+        list = node2.getChildNodes();
+        for (int i = 0; i < list.getLength(); i++) {
+            Node node = list.item(i);
+            List<Node> same = children2.get(node.getNodeName());
+            if (null == same) {
+                same = new LinkedList<Node>();
+                children2.put(node.getNodeName(), same);
+            }
+            same.add(node);
+        }
+        // diff all the children1
+        for (List<Node> nodes1 : children1.values()) {
+            Iterator<Node> iter = nodes1.iterator();
+            while (iter.hasNext()) {
+                Node nodeOne = iter.next();
+                List<Node> nodes2 = children2.get(nodeOne.getNodeName());
+                Node nodeTwo = findOnAttributes(nodes2, nodeOne);
+                if (null != nodeTwo) {
+                    // remove matches from our list, too
+                    iter.remove();
+                    nodes2.remove(nodeTwo);
+                }
+                diff(nodeOne, nodeTwo, diffs);
+            }
+        }
+        // diff all the children2 left over
+        for (List<Node> nodes2 : children2.values()) {
+            Iterator<Node> iter = nodes2.iterator();
+            while (iter.hasNext()) {
+                Node nodeTwo = iter.next();
+                List<Node> nodes1 = children1.get(nodeTwo.getNodeName());
+                Node nodeOne = findOnAttributes(nodes1, nodeTwo);
+                if (null != nodeOne) {
+                    iter.remove();
+                    nodes1.remove(nodeOne);
+                }
+                diff(nodeOne, nodeTwo, diffs);
+            }
+        }
+        return diffs.size() > 0;
+    }
+
+    private static Node findOnAttributes(List<Node> nodes, Node node) {
+        for (Node other : nodes) {
+            if (!diffAttributes(node, other, new LinkedList<String>())) {
+                return other;
+            }
+        }
+        return null;
+    }
+
+    private static boolean diffAttributes(Node node1, Node node2, List<String> diffs) {
+        // sort by Name
+        NamedNodeMap map = node1.getAttributes();
+        Map<String, Node> attributes1 = new LinkedHashMap<String, Node>();
+        for (int i = 0; null != map && i < map.getLength(); i++) {
+            Node attribute = map.item(i);
+            attributes1.put(attribute.getNodeName(), attribute);
+        }
+        map = node2.getAttributes();
+        Map<String, Node> attributes2 = new LinkedHashMap<String, Node>();
+        for (int i = 0; null != map && i < map.getLength(); i++) {
+            Node attribute = map.item(i);
+            attributes2.put(attribute.getNodeName(), attribute);
+        }
+        // diff all the attributes
+        for (Node attribute1 : attributes1.values()) {
+            diff(attribute1, attributes2.remove(attribute1.getNodeName()), diffs);
+        }
+        for (Node attribute2 : attributes2.values()) {
+            diff(attributes1.get(attribute2.getNodeName()), attribute2, diffs);
+        }
+        return diffs.size() > 0;
+    }
+
+    private static boolean diffNodeExists(Node node1, Node node2, List<String> diffs) {
+        if (null == node1 && null != node2) {
+            diffs.add(getPath(node2) + ":node " + node1 + "!=" + node2.getNodeName());
+            return true;
+        }
+        if (null != node1 && null == node2) {
+            diffs.add(getPath(node1) + ":node " + node1.getNodeName() + "!=" + node2);
+            return true;
+        }
+        return false;
+    }
+
+    private static boolean diffNodeType(Node node1, Node node2, List<String> diffs) {
+        if (node1.getNodeType() != node2.getNodeType()) {
+            diffs.add(getPath(node1) + ":type " + node1.getNodeType() + "!=" + node2.getNodeType());
+            return true;
+        }
+        return false;
+    }
+
+    private static boolean diffNodeValue(Node node1, Node node2, List<String> diffs) {
+        if (null == node1.getNodeValue() && null == node2.getNodeValue()) {
+            return false;
+        }
+        if (null == node1.getNodeValue() && null != node2.getNodeValue()) {
+            diffs.add(getPath(node1) + ":value " + node1 + "!=" + node2.getNodeValue());
+            return true;
+        }
+        if (null != node1.getNodeValue() && null == node2.getNodeValue()) {
+            diffs.add(getPath(node1) + ":value " + node1.getNodeValue() + "!=" + node2);
+            return true;
+        }
+        if (!node1.getNodeValue().equals(node2.getNodeValue())) {
+            diffs.add(getPath(node1) + ":value " + node1.getNodeValue() + "!=" + node2.getNodeValue());
+            return true;
+        }
+        return false;
+    }
+
+    private static String getPath(Node node) {
+        Node tmp = node;
+        StringBuilder path = new StringBuilder();
+        do {
+            path.insert(0, tmp.getNodeName());
+            path.insert(0, "/");
+        } while((tmp = tmp.getParentNode()) != null);
+        return path.toString();
+    }
+
     /**
      * Apply SCR 4249: Dropped alternative file logger specification in logback
      * configuration file as only one of FILE and FILE_COMPAT can be configured
      * as they both would use the same log file which causes error logging to
      * open-xchange-console.log
-     * 
+     *
      * @param doc The document to which the SCR should be applied
      * @throws SCRException if applying the Software Change Request fails
      */
@@ -436,13 +664,13 @@ public class XMLModifierCLT {
                     } else if (!activeAppenders.containsKey(FILEC)) {
                         Element fileCompactAppender = allAppenders.get(FILEC);
                         Node parentNode = fileCompactAppender.getParentNode();
-                        Comment commentedCompactAppender = doc.createComment(transformToString(tf, fileCompactAppender));
+                        Comment commentedCompactAppender = doc.createComment(transformToString(fileCompactAppender));
                         parentNode.replaceChild(commentedCompactAppender, fileCompactAppender);
                         System.out.println("Commented the FILE_COMPAT appender based on Software Change Request 4249");
                     } else if (!activeAppenders.containsKey(FILE)) {
                         Element fileAppender = allAppenders.get(FILE);
                         Node parentNode = fileAppender.getParentNode();
-                        Comment commentedAppender = doc.createComment(transformToString(tf, fileAppender));
+                        Comment commentedAppender = doc.createComment(transformToString(fileAppender));
                         parentNode.replaceChild(commentedAppender, fileAppender);
                         System.out.println("Commented the FILE appender based on Software Change Request 4249");
                     }

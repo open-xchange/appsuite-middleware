@@ -49,6 +49,8 @@
 
 package com.openexchange.subscribe.crawler;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
@@ -59,10 +61,6 @@ import java.util.Map;
 import org.junit.Test;
 import com.openexchange.subscribe.crawler.internal.PagePart;
 import com.openexchange.subscribe.crawler.internal.PagePartSequence;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import static org.junit.Assert.*;
 
 /**
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>

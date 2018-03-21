@@ -49,7 +49,7 @@
 
 package com.openexchange.oauth.impl.osgi;
 
-import static com.openexchange.tools.sql.DBUtils.autocommit;
+import static com.openexchange.database.Databases.autocommit;
 import java.sql.Connection;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.database.provider.DBProvider;

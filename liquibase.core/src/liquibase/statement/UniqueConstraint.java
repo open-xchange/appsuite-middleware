@@ -1,10 +1,9 @@
 package liquibase.statement;
 
-import liquibase.structure.core.Index;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import liquibase.structure.core.Index;
 
 public class UniqueConstraint implements ColumnConstraint {
     private String constraintName;

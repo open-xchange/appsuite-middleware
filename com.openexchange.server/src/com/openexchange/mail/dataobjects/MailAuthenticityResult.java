@@ -63,19 +63,28 @@ import com.openexchange.mail.authenticity.MailAuthenticityStatus;
 public final class MailAuthenticityResult {
 
     /** The 'none' result */
-    public static final MailAuthenticityResult NONE_RESULT = new MailAuthenticityResult(MailAuthenticityStatus.NONE);
+    public static final MailAuthenticityResult NONE_RESULT = new MailAuthenticityResult(MailAuthenticityStatus.NONE, Collections.emptyMap());
 
     /** The default neutral result */
-    public static final MailAuthenticityResult NEUTRAL_RESULT = new MailAuthenticityResult(MailAuthenticityStatus.NEUTRAL);
+    public static final MailAuthenticityResult NEUTRAL_RESULT = new MailAuthenticityResult(MailAuthenticityStatus.NEUTRAL, Collections.emptyMap());
 
-    /** The 'not_analyzed' result (used for case where an error occurred during the analysis */
-    public static final MailAuthenticityResult NOT_ANALYZED_RESULT = new MailAuthenticityResult(MailAuthenticityStatus.NOT_ANALYZED);
+    /** The 'not_analyzed' result (used for case where an error occurred during the analysis or for e-mails before the cuf-off-date) */
+    public static final MailAuthenticityResult NOT_ANALYZED_RESULT = new MailAuthenticityResult(MailAuthenticityStatus.NOT_ANALYZED, Collections.emptyMap());
 
     /** Map holding information about the result that does not accept <code>null</code> values */
     private final Map<MailAuthenticityResultKey, Object> attributes;
 
     /** The overall status of the result */
     private MailAuthenticityStatus status;
+
+    /**
+     * Initialises a new {@link MailAuthenticityResult}.
+     */
+    private MailAuthenticityResult(MailAuthenticityStatus status, Map<MailAuthenticityResultKey, Object> attributes) {
+        super();
+        this.status = status;
+        this.attributes = attributes;
+    }
 
     /**
      * Initialises a new {@link MailAuthenticityResult}.
@@ -88,7 +97,7 @@ public final class MailAuthenticityResult {
 
     /**
      * Adds the specified key with the specified value
-     * 
+     *
      * @param key The {@link MailAuthenticityResultKey}
      * @param value The value to add
      * @throws IllegalArgumentException if the value is <code>null</code>
@@ -103,7 +112,7 @@ public final class MailAuthenticityResult {
     /**
      * Returns the value of the attribute that is stored under the
      * specified {@link MailAuthenticityResultKey}
-     * 
+     *
      * @param key The {@link MailAuthenticityResultKey}
      * @return The value of the attribute
      */
@@ -114,7 +123,7 @@ public final class MailAuthenticityResult {
     /**
      * Returns the value of the attribute that is stored under the
      * specified {@link MailAuthenticityResultKey}, casted to the specified type
-     * 
+     *
      * @param key The {@link MailAuthenticityResultKey}
      * @param type The type to cast the value of the attribute to
      * @return The casted value of the attribute or <code>null</code> if no such attribute exists or
@@ -137,7 +146,7 @@ public final class MailAuthenticityResult {
 
     /**
      * Returns an unmodifiable {@link Map} with the attributes of the result
-     * 
+     *
      * @return an unmodifiable {@link Map} with the attributes of the result
      */
     public Map<MailAuthenticityResultKey, Object> getAttributes() {

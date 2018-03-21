@@ -51,9 +51,6 @@ package com.openexchange.folderstorage.mail;
 
 import static com.openexchange.mail.utils.MailFolderUtility.prepareFullname;
 import static com.openexchange.mail.utils.MailFolderUtility.prepareMailFolderParam;
-import gnu.trove.map.TIntObjectMap;
-import gnu.trove.map.hash.TIntObjectHashMap;
-import gnu.trove.procedure.TObjectProcedure;
 import java.text.Collator;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -150,6 +147,9 @@ import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
+import gnu.trove.map.TIntObjectMap;
+import gnu.trove.map.hash.TIntObjectHashMap;
+import gnu.trove.procedure.TObjectProcedure;
 
 /**
  * {@link MailFolderStorage} - The mail folder storage.

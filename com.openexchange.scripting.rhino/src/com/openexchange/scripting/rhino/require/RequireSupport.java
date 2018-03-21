@@ -54,10 +54,8 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-
 import org.mozilla.javascript.Context;
 import org.mozilla.javascript.Scriptable;
-
 import com.openexchange.scripting.rhino.SharedScope;
 
 /**
@@ -81,48 +79,43 @@ public class RequireSupport {
 
 	public static final List<ResolveEnhancement> resolveEnhancements = new ArrayList<ResolveEnhancement>();
 
-	public static void addResolveEnhancement(ResolveEnhancement enhancement) {
-		try {
-			Context.enter();
-			resolveEnhancements.add(enhancement);
-			Collection<DependencyResolver> values = bundleResolvers.values();
-			for (DependencyResolver dependencyResolver : values) {
-				enhancement.enhance(dependencyResolver, converter);
-			}
-			for (DependencyResolver dependencyResolver : values) {
-				DeferredResolution.resolve(dependencyResolver.getBundle(),
-						dependencyResolver);
-			}
-		} finally {
-			Context.exit();
-		}
+    public static void addResolveEnhancement(ResolveEnhancement enhancement) {
+        try {
+            Context.enter();
+            resolveEnhancements.add(enhancement);
+            Collection<DependencyResolver> values = bundleResolvers.values();
+            for (DependencyResolver dependencyResolver : values) {
+                enhancement.enhance(dependencyResolver, converter);
+            }
+            for (DependencyResolver dependencyResolver : values) {
+                DeferredResolution.resolve(dependencyResolver);
+            }
+        } finally {
+            Context.exit();
+        }
 
-	}
+    }
 
-	public static void initialize(final Scriptable serviceScope, Context cx,
-			JSBundle bundle, Map<String, Object> additionalModules) {
+    public static void initialize(final Scriptable serviceScope, JSBundle bundle, Map<String, Object> additionalModules) {
 
-		DependencyResolver resolver = new DependencyResolver(bundle);
-		bundleResolvers.put(bundle.getSymbolicName(), resolver);
+        DependencyResolver resolver = new DependencyResolver(bundle);
+        bundleResolvers.put(bundle.getSymbolicName(), resolver);
 
-		serviceScope.put("define", serviceScope,
-				new OXDefine(bundle.getSymbolicName() + "/main", resolver));
+        serviceScope.put("define", serviceScope, new OXDefine(bundle.getSymbolicName() + "/main", resolver));
 
-		OXRequire oxRequire = new OXRequire(resolver);
-		serviceScope.put("require", serviceScope, oxRequire);
-		resolver.remember("require", oxRequire);
+        OXRequire oxRequire = new OXRequire(resolver);
+        serviceScope.put("require", serviceScope, oxRequire);
+        resolver.remember("require", oxRequire);
 
-		for (ResolveEnhancement enhancement : resolveEnhancements) {
-			enhancement.enhance(resolver, converter);
-		}
+        for (ResolveEnhancement enhancement : resolveEnhancements) {
+            enhancement.enhance(resolver, converter);
+        }
 
-		for (Map.Entry<String, Object> additional : additionalModules
-				.entrySet()) {
-			resolver.remember(additional.getKey(),
-					Context.javaToJS(additional.getValue(), serviceScope));
-		}
+        for (Map.Entry<String, Object> additional : additionalModules.entrySet()) {
+            resolver.remember(additional.getKey(), Context.javaToJS(additional.getValue(), serviceScope));
+        }
 
-		DeferredResolution.resolve(bundle, resolver);
-	}
+        DeferredResolution.resolve(resolver);
+    }
 
 }

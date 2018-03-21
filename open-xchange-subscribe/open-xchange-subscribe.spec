@@ -2,7 +2,6 @@
 
 Name:          open-xchange-subscribe
 BuildArch:     noarch
-#!BuildIgnore: post-build-checks
 %if 0%{?rhel_version} && 0%{?rhel_version} >= 700
 BuildRequires: ant
 %else
@@ -15,7 +14,7 @@ BuildRequires: java-1_8_0-openjdk-devel
 BuildRequires: java-1.8.0-openjdk-devel
 %endif
 Version:       @OXVERSION@
-%define        ox_release 0
+%define        ox_release 3
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -67,6 +66,7 @@ if [ ${1:-0} -eq 2 ]; then
     ox_add_property com.openexchange.subscribe.microformats.createModifyEnabled false /opt/open-xchange/etc/microformatSubscription.properties
 
     # SoftwareChange_Request-2670
+    pfile=/opt/open-xchange/etc/crawler.properties
     rm -f /opt/open-xchange/etc/crawlers/t-online.yml
     ox_remove_property com.openexchange.subscribe.crawler.t-online.de $pfile
     ox_remove_property com.openexchange.subscribe.crawler.t-online.de.autorunInterval $pfile
@@ -83,8 +83,6 @@ if [ ${1:-0} -eq 2 ]; then
     ox_remove_property com.openexchange.subscribe.crawler.webde.autorunInterval /opt/open-xchange/etc/crawler.properties
 
     # SoftwareChange_Request-2942
-    ox_add_property com.openexchange.subscribe.google.calendar.autorunInterval 1d /opt/open-xchange/etc/googlesubscribe.properties
-    ox_add_property com.openexchange.subscribe.google.contact.autorunInterval 1d /opt/open-xchange/etc/googlesubscribe.properties
     ox_add_property com.openexchange.subscribe.socialplugin.xing.autorunInterval 1d /opt/open-xchange/etc/xingsubscribe.properties
 fi
 
@@ -101,7 +99,6 @@ fi
 %dir %attr(755,open-xchange,root) /opt/open-xchange/etc/crawlers/
 %attr(644,open-xchange,root) /opt/open-xchange/etc/crawlers/*
 %config(noreplace) /opt/open-xchange/etc/crawler.properties
-%config(noreplace) %attr(644,open-xchange,root) /opt/open-xchange/etc/googlesubscribe.properties
 %config(noreplace) /opt/open-xchange/etc/microformatSubscription.properties
 %config(noreplace) /opt/open-xchange/etc/xingsubscribe.properties
 %config(noreplace) /opt/open-xchange/etc/yahoosubscribe.properties
@@ -109,6 +106,12 @@ fi
 %doc docs/
 
 %changelog
+* Tue Feb 20 2018 Marcus Klein <marcus.klein@open-xchange.com>
+Third preview of 7.10.0 release
+* Fri Feb 02 2018 Marcus Klein <marcus.klein@open-xchange.com>
+Second preview for 7.10.0 release
+* Fri Dec 01 2017 Marcus Klein <marcus.klein@open-xchange.com>
+First preview for 7.10.0 release
 * Thu Oct 12 2017 Marcus Klein <marcus.klein@open-xchange.com>
 prepare for 7.10.0 release
 * Fri May 19 2017 Marcus Klein <marcus.klein@open-xchange.com>

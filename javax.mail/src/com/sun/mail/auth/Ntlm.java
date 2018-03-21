@@ -44,9 +44,7 @@
 
 package com.sun.mail.auth;
 
-import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.io.PrintStream;
 import java.security.GeneralSecurityException;
 import java.security.NoSuchAlgorithmException;
 import java.util.Locale;
@@ -56,7 +54,6 @@ import javax.crypto.NoSuchPaddingException;
 import javax.crypto.SecretKey;
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.DESKeySpec;
-
 import com.sun.mail.util.BASE64DecoderStream;
 import com.sun.mail.util.BASE64EncoderStream;
 import com.sun.mail.util.MailLogger;

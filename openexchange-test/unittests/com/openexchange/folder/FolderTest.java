@@ -14,13 +14,11 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.slf4j.Logger;
-import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.api2.FolderSQLInterface;
 import com.openexchange.api2.RdbFolderSQLInterface;
 import com.openexchange.cache.impl.FolderCacheManager;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Init;
-import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.calendar.Constants;
 import com.openexchange.groupware.configuration.AbstractConfigWrapper;
@@ -38,7 +36,6 @@ import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.server.impl.OCLPermission;
-import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.sessiond.impl.SessionObject;
 import com.openexchange.sessiond.impl.SessionObjectWrapper;
 import com.openexchange.test.AjaxInit;
@@ -97,10 +94,6 @@ public class FolderTest {
             init = false;
             Init.stopServer();
         }
-    }
-
-    public AppointmentSQLInterface getAppointmentHandler() {
-        return ServerServiceRegistry.getInstance().getService(AppointmentSqlFactoryService.class).createAppointmentSql(session);
     }
 
     @Test
@@ -1042,11 +1035,6 @@ public class FolderTest {
                 cdao.setParticipants(participants.getList());
 
                 fillDatesInDao(cdao);
-
-                AppointmentSQLInterface csql = getAppointmentHandler();
-                csql.insertAppointmentObject(cdao);
-                final int object_id = cdao.getObjectID();
-                csql.getObjectById(object_id, fuid);
 
                 /*
                  * Clean folder

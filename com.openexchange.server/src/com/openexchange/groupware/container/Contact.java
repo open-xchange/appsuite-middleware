@@ -49,7 +49,8 @@
 
 package com.openexchange.groupware.container;
 
-import static com.openexchange.java.Autoboxing.*;
+import static com.openexchange.java.Autoboxing.B;
+import static com.openexchange.java.Autoboxing.I;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;

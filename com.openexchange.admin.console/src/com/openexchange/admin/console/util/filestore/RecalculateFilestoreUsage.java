@@ -120,7 +120,7 @@ public class RecalculateFilestoreUsage extends AbstractRmiCLI<Void> {
 
             boolean hasScopeOption = cmd.hasOption(OPT_SCOPE_LONG);
             if (hasScopeOption) {
-                String scope = hasScopeOption ? cmd.getOptionValue(OPT_SCOPE_LONG) : null;
+                String scope = cmd.getOptionValue(OPT_SCOPE_LONG);
                 recalculateUsingScope(scope, oxutil, null);
             } else {
                 recalculateDedicated(options, cmd, oxutil);

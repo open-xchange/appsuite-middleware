@@ -49,9 +49,14 @@
 
 package com.openexchange.oauth.impl.osgi;
 
+import java.util.Dictionary;
+import java.util.Hashtable;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
+import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
+import org.osgi.service.event.EventConstants;
+import org.osgi.service.event.EventHandler;
 import org.osgi.util.tracker.ServiceTracker;
 import com.hazelcast.core.HazelcastInstance;
 import com.openexchange.config.cascade.ConfigViewFactory;
@@ -97,6 +102,7 @@ import com.openexchange.secret.SecretEncryptionFactoryService;
 import com.openexchange.secret.recovery.EncryptedItemCleanUpService;
 import com.openexchange.secret.recovery.EncryptedItemDetectorService;
 import com.openexchange.secret.recovery.SecretMigrator;
+import com.openexchange.sessiond.SessiondEventConstants;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.timer.ScheduledTimerTask;
@@ -147,7 +153,8 @@ public final class OAuthActivator extends HousekeepingActivator {
             final BundleContext context = this.context;
             registry.start(context);
 
-            OAuthAccessRegistryService accessRegistryService = new OAuthAccessRegistryServiceImpl();
+            final OAuthAccessRegistryServiceImpl accessRegistryService = new OAuthAccessRegistryServiceImpl();
+            this.accessRegistryService = accessRegistryService;
             registerService(OAuthAccessRegistryService.class, accessRegistryService);
             trackService(OAuthAccessRegistryService.class);
 
@@ -217,6 +224,29 @@ public final class OAuthActivator extends HousekeepingActivator {
 
             final ScribeHTTPClientFactoryImpl oauthFactory = new ScribeHTTPClientFactoryImpl();
             registerService(OAuthHTTPClientFactory.class, oauthFactory);
+
+            {
+                EventHandler eventHandler = new EventHandler() {
+
+                    @Override
+                    public void handleEvent(Event event) {
+                        String topic = event.getTopic();
+                        if (SessiondEventConstants.TOPIC_LAST_SESSION.equals(topic)) {
+                            Integer contextId = (Integer) event.getProperty(SessiondEventConstants.PROP_CONTEXT_ID);
+                            if (null != contextId) {
+                                Integer userId = (Integer) event.getProperty(SessiondEventConstants.PROP_USER_ID);
+                                if (null != userId) {
+                                    accessRegistryService.userInactive(userId.intValue(), contextId.intValue());
+
+                                }
+                            }
+                        }
+                    }
+                };
+                Dictionary<String, Object> dict = new Hashtable<String, Object>(1);
+                dict.put(EventConstants.EVENT_TOPIC, SessiondEventConstants.TOPIC_LAST_SESSION);
+                registerService(EventHandler.class, eventHandler, dict);
+            }
 
             SimpleRegistryListener<HTTPResponseProcessor> listener = new SimpleRegistryListener<HTTPResponseProcessor>() {
 

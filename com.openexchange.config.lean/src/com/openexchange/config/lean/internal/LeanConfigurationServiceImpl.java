@@ -274,8 +274,7 @@ public class LeanConfigurationServiceImpl implements LeanConfigurationService {
 
             PropertyValueParser<?> propertyValueParser = valueParsers.get(coerceTo);
 
-            Object parse = propertyValueParser.parse(value);
-            return coerceTo.cast(parse);
+            return (T) propertyValueParser.parse(value);
         } catch (Exception e) {
             defaultValue = property.getDefaultValue(coerceTo);
             LOGGER.warn("The value '{}' of property '{}' cannot be cast as '{}'. Returning default value '{}' instead.", value, property.getFQPropertyName(optionals), coerceTo.getSimpleName(), defaultValue, e);

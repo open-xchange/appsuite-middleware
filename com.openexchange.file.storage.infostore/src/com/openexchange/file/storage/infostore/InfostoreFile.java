@@ -8,9 +8,12 @@ import java.util.Set;
 import com.openexchange.file.storage.AbstractFile;
 import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.FileStorageObjectPermission;
+import com.openexchange.file.storage.FolderPath;
 import com.openexchange.file.storage.UserizedFile;
+import com.openexchange.file.storage.infostore.internal.Utils;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.InfostoreFacade;
+import com.openexchange.groupware.infostore.InfostoreFolderPath;
 
 /*
  *
@@ -256,7 +259,7 @@ public class InfostoreFile extends AbstractFile implements UserizedFile {
         if (id == FileStorageFileAccess.NEW) {
             document.setId(InfostoreFacade.NEW);
         } else {
-            document.setId(Integer.parseInt(id));
+            document.setId(Utils.parseUnsignedInt(id));
         }
     }
 
@@ -297,7 +300,7 @@ public class InfostoreFile extends AbstractFile implements UserizedFile {
 
     @Override
     public void setVersion(final String version) {
-        document.setVersion(Integer.parseInt(version));
+        document.setVersion(Utils.parseUnsignedInt(version));
     }
 
     @Override
@@ -342,7 +345,7 @@ public class InfostoreFile extends AbstractFile implements UserizedFile {
 
     @Override
     public void setOriginalId(String id) {
-        document.setOriginalId(Integer.parseInt(id));
+        document.setOriginalId(Utils.parseUnsignedInt(id));
     }
 
     @Override
@@ -353,6 +356,21 @@ public class InfostoreFile extends AbstractFile implements UserizedFile {
     @Override
     public void setOriginalFolderId(String id) {
         document.setOriginalFolderId(Long.parseLong(id));
+    }
+
+    @Override
+    public void setSequenceNumber(long sequenceNumber) {
+        document.setSequenceNumber(sequenceNumber);
+    }
+
+    public FolderPath getOrigin() {
+        InfostoreFolderPath folderPath = document.getOriginFolderPath();
+        return null == folderPath ? null : FolderPath.copyOf(folderPath);
+    }
+
+    @Override
+    public void setOrigin(FolderPath origin) {
+        document.setOriginFolderPath(null == origin ? null : InfostoreFolderPath.copyOf(origin));
     }
 
 }

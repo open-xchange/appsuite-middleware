@@ -62,6 +62,7 @@ import com.openexchange.share.GuestInfo;
 import com.openexchange.share.ShareExceptionCodes;
 import com.openexchange.share.core.tools.PermissionResolver;
 import com.openexchange.share.recipient.RecipientType;
+import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link ExtendedFolderPermission}
@@ -95,8 +96,7 @@ public class ExtendedFolderPermission extends ExtendedPermission {
     public JSONObject toJSON(AJAXRequestData requestData) throws JSONException, OXException {
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("entity", permission.getEntity());
-        jsonObject.put("bits", Permissions.createPermissionBits(permission.getFolderPermission(), permission.getReadPermission(),
-            permission.getWritePermission(), permission.getDeletePermission(), permission.isFolderAdmin()));
+        jsonObject.put("bits", createPermissionBits(permission));
         if (permission.isGroupPermission()) {
             jsonObject.put("type", "group");
             addGroupInfo(requestData, jsonObject, resolver.getGroup(permission.getEntity()));
@@ -108,7 +108,8 @@ public class ExtendedFolderPermission extends ExtendedPermission {
             } else if (user.isGuest()) {
                 GuestInfo guest = resolver.getGuest(user.getId());
                 if (guest == null) {
-                    int contextId = requestData.getSession() == null ? -1 : requestData.getSession().getContextId();
+                    ServerSession session = requestData.getSession();
+                    int contextId = session == null ? -1 : session.getContextId();
                     throw ShareExceptionCodes.UNEXPECTED_ERROR.create("Could not resolve guest info for ID " + user.getId() + " in context " + contextId + ". " +
                         "It might have been deleted in the mean time or is in an inconsistent state.");
                 }
@@ -129,6 +130,10 @@ public class ExtendedFolderPermission extends ExtendedPermission {
             jsonObject.put("isInheritedFrom", permission.getPermissionLegator());
         }
         return jsonObject;
+    }
+
+    private static int createPermissionBits(OCLPermission permission) {
+        return Permissions.createPermissionBits(permission.getFolderPermission(), permission.getReadPermission(), permission.getWritePermission(), permission.getDeletePermission(), permission.isFolderAdmin());
     }
 
 }

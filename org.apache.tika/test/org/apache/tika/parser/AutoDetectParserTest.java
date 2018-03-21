@@ -16,6 +16,10 @@
  */
 package org.apache.tika.parser;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -30,10 +34,6 @@ import org.apache.tika.mime.MediaType;
 import org.apache.tika.sax.BodyContentHandler;
 import org.junit.Test;
 import org.xml.sax.ContentHandler;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import static org.junit.Assert.*;
 
 public class AutoDetectParserTest {    private TikaConfig tika = TikaConfig.getDefaultConfig();
 

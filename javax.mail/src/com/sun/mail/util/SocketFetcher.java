@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 1997-2017 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997-2018 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -40,18 +40,39 @@
 
 package com.sun.mail.util;
 
-import java.security.*;
-import java.net.*;
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.Closeable;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.PrintStream;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.net.ConnectException;
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
+import java.net.Socket;
+import java.net.SocketTimeoutException;
 import java.nio.channels.SocketChannel;
 import java.nio.charset.StandardCharsets;
-import java.lang.reflect.*;
-import java.util.*;
-import java.util.regex.*;
+import java.security.AccessController;
+import java.security.GeneralSecurityException;
+import java.security.PrivilegedAction;
+import java.security.cert.CertificateParsingException;
+import java.security.cert.X509Certificate;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Properties;
+import java.util.StringTokenizer;
 import java.util.logging.Level;
-import java.security.cert.*;
-import javax.net.*;
-import javax.net.ssl.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import javax.net.SocketFactory;
+import javax.net.ssl.SSLPeerUnverifiedException;
+import javax.net.ssl.SSLSocket;
+import javax.net.ssl.SSLSocketFactory;
 
 /**
  * This class is used to get Sockets. Depending on the arguments passed
@@ -183,6 +204,7 @@ public class SocketFetcher {
 	int cto = PropUtil.getIntProperty(props,
 					prefix + ".connectiontimeout", -1);
 	Socket socket = null;
+	try {
 	String localaddrstr = props.getProperty(prefix + ".localaddress", null);
 	InetAddress localaddr = null;
 	if (localaddrstr != null) {
@@ -278,7 +300,14 @@ public class SocketFetcher {
 	    }
 	}
 
-	return socket;
+	Socket returnMe = socket;
+	socket = null;
+    return returnMe;
+	} finally {
+	    if (null != socket) {
+            socket.close();
+        }
+	}
     }
 
     public static Socket getSocket(String host, int port, Properties props,
@@ -314,8 +343,6 @@ public class SocketFetcher {
 				Properties props, String prefix,
 				SocketFactory sf, boolean useSSL)
 				throws IOException {
-	Socket socket = null;
-
 	if (logger.isLoggable(Level.FINEST)) {
         logger.finest("create socket: prefix " + prefix +
 		", localaddr " + localaddr + ", localport " + localport +
@@ -324,6 +351,9 @@ public class SocketFetcher {
 		", socket factory " + sf + ", useSSL " + useSSL);
     }
 
+	Socket socket = null;
+    Socket overriddenSocket = null;
+	try {
     String proxyHost = props.getProperty(prefix + ".proxy.host", null);
 	int proxyPort = 80;
 	String socksHost = null;
@@ -416,9 +446,6 @@ public class SocketFetcher {
 	 * If we want an SSL connection and we didn't get an SSLSocket,
 	 * wrap our plain Socket with an SSLSocket.
 	 */
-	boolean error = true;
-	Socket closeMeOnError = socket;
-	try {
 	if ((useSSL || sf instanceof SSLSocketFactory) &&
 		!(socket instanceof SSLSocket)) {
 	    String trusted;
@@ -443,7 +470,8 @@ public class SocketFetcher {
         } else {
             ssf = (SSLSocketFactory)SSLSocketFactory.getDefault();
         }
-	    socket = ssf.createSocket(socket, host, port, true);
+	    overriddenSocket = socket;
+	    socket = ssf.createSocket(overriddenSocket, host, port, true);
 	    sf = ssf;
 	}
 
@@ -456,13 +484,12 @@ public class SocketFetcher {
 	/*
 	 * Apparently, everything went fine
 	 */
-	error = false;
-	return socket;
+	Socket returnMe = socket;
+	socket = null;
+	overriddenSocket = null;
+    return returnMe;
 	} finally {
-	    if (error) {
-	        closeMeOnError.close();
-            socket.close();
-        }
+	    close(overriddenSocket, socket);
 	}
     }
 
@@ -987,5 +1014,24 @@ public class SocketFetcher {
 		return cl;
 	    }
 	});
+    }
+
+    /**
+     * Safely closes specified {@link Closeable} instances.
+     *
+     * @param closeables The {@link Closeable} instances
+     */
+    private static void close(Closeable... closeables) {
+        if (null != closeables) {
+            for (Closeable toClose : closeables) {
+                if (null != toClose) {
+                    try {
+                        toClose.close();
+                    } catch (Exception e) {
+                        // Ignore
+                    }
+                }
+            }
+        }
     }
 }

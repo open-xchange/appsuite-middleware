@@ -1,7 +1,6 @@
 package liquibase.statement.core;
 
 import java.math.BigInteger;
-
 import liquibase.statement.AbstractSqlStatement;
 
 public class AddAutoIncrementStatement extends AbstractSqlStatement {

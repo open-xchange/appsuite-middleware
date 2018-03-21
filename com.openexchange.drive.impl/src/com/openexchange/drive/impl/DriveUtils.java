@@ -49,7 +49,8 @@
 
 package com.openexchange.drive.impl;
 
-import static com.openexchange.drive.impl.DriveConstants.*;
+import static com.openexchange.drive.impl.DriveConstants.PATH_SEPARATOR;
+import static com.openexchange.drive.impl.DriveConstants.ROOT_PATH;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;

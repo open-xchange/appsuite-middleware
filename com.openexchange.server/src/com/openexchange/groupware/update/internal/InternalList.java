@@ -51,7 +51,6 @@ package com.openexchange.groupware.update.internal;
 
 import java.util.ArrayList;
 import java.util.List;
-
 import com.openexchange.groupware.update.UpdateTaskAdapter;
 import com.openexchange.groupware.update.UpdateTaskV2;
 import com.openexchange.groupware.update.tasks.AddOAuthColumnToMailAccountTableTask;
@@ -655,7 +654,11 @@ public final class InternalList {
         list.add(new AddSharedParentFolderToFolderPermissionTableUpdateTask());
 
         // Drops rather needless foreign key from "object_use_count" table
+
         list.add(new com.openexchange.groupware.update.tasks.DropForeignKeyFromObjectUseCountTable());
+
+        // Add origin column to "del_infostore" table to be able to restore deleted files to origin 
+        list.add(new com.openexchange.groupware.update.tasks.AddOriginColumnToInfostoreDocumentTables());
 
         return list.toArray(new UpdateTaskV2[list.size()]);
     }

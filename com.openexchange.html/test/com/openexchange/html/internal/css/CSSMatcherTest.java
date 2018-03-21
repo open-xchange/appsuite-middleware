@@ -139,15 +139,15 @@ public class CSSMatcherTest {
 
         final String line0 = lines[0];
         String expectedLine0 = "/* +++++++++++++++++++++ RESET +++++++++++++++++++++ */ @namespace \"http://www.w3.org/1999/xhtml\";   @namespace svg \"http://www.w3.org/2000/svg\";   body * { font-size: 1px; line-height: 1px;";
-        assertTrue("Unexpected CSS in line0! Expected to start with: " + expectedLine0 + ", but was " + line0, line0.trim().startsWith(expectedLine0.trim()));
+        assertTrue("Unexpected CSS in line0! Expected to start with: " + expectedLine0 + ", but was " + line0, line0.trim().replaceAll(" +", " ").startsWith(expectedLine0.trim().replaceAll(" +", " ")));
 
         final String line1 = lines[1];
         String expectedLine1 = "abbr, address, article, aside, audio, b, blockquote,";
-        assertTrue("Unexpected CSS in line1! Expected to start with: " + expectedLine1 + ", but was " + line1.trim(), line1.trim().startsWith(expectedLine1.trim()));
+        assertTrue("Unexpected CSS in line1! Expected to start with: " + expectedLine1 + ", but was " + line1.trim(), line1.trim().replaceAll(" +", " ").startsWith(expectedLine1.trim().replaceAll(" +", " ")));
 
         final String line10 = lines[10];
         String expectedLine10 = "/* +++++++++++++++++++++ BASICS +++++++++++++++++++++ */ html {";
-        assertTrue("Unexpected CSS in line10! Expected to start with: " + expectedLine10 + ", but was " + line10, line10.trim().startsWith(expectedLine10.trim()));
+        assertTrue("Unexpected CSS in line10! Expected to start with: " + expectedLine10 + ", but was " + line10, line10.trim().replaceAll(" +", " ").startsWith(expectedLine10.trim().replaceAll(" +", " ")));
     }
 
      @Test
@@ -373,6 +373,23 @@ public class CSSMatcherTest {
         CSSMatcher.checkCSSElements(cssBld, FilterMaps.getStaticStyleMap(), true);
         String content = "font-size: 12px;";
         String convertedCss = cssBld.toString().trim();
+        Assert.assertEquals("Processed CSS does not match.", content, convertedCss);
+    }
+
+    @Test
+    public void testDoCheckCss_bug57095() {
+        FilterMaps.loadWhitelist();
+
+        Stringer cssBld = new StringBufferStringer(new StringBuffer("font:\"'/{/onerror=alert(document.cookie)"));
+        CSSMatcher.checkCSSElements(cssBld, FilterMaps.getStaticStyleMap(), true);
+        String content = "";
+        String convertedCss = cssBld.toString().trim();
+        Assert.assertEquals("Processed CSS does not match.", content, convertedCss);
+
+        cssBld = new StringBufferStringer(new StringBuffer("font:\"'href=javascript:alert(document.cookie)"));
+        CSSMatcher.checkCSSElements(cssBld, FilterMaps.getStaticStyleMap(), true);
+        content = "";
+        convertedCss = cssBld.toString().trim();
         Assert.assertEquals("Processed CSS does not match.", content, convertedCss);
     }
 

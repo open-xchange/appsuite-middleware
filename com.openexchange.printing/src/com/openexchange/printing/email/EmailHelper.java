@@ -52,7 +52,6 @@ package com.openexchange.printing.email;
 import java.util.Locale;
 import java.util.Map;
 import java.util.TimeZone;
-
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.printing.DateFormatter;

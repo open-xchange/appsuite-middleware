@@ -53,7 +53,6 @@ import java.io.OutputStream;
 import javax.mail.MessagingException;
 import javax.mail.Session;
 import javax.mail.URLName;
-import com.sun.mail.smtp.SMTPTransport;
 
 /**
  * {@link JavaSMTPTransport}

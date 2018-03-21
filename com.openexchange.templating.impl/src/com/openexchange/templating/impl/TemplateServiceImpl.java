@@ -81,11 +81,11 @@ import com.openexchange.java.util.Pair;
 import com.openexchange.mail.mime.MimeType2ExtMap;
 import com.openexchange.session.Session;
 import com.openexchange.templating.OXTemplate;
+import com.openexchange.templating.OXTemplate.TemplateLevel;
 import com.openexchange.templating.OXTemplateExceptionHandler;
 import com.openexchange.templating.TemplateErrorMessage;
 import com.openexchange.templating.TemplateService;
 import com.openexchange.templating.TemplatingHelper;
-import com.openexchange.templating.OXTemplate.TemplateLevel;
 import com.openexchange.tools.encoding.Base64;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
@@ -445,7 +445,8 @@ public class TemplateServiceImpl implements TemplateService {
         }
     }
 
-    private File getTemplateFile(final String defaultTemplateName) {
+    private File getTemplateFile(String defaultTemplateName) {
+        defaultTemplateName = new File(defaultTemplateName).getName();
         return new File(defaultTemplatePath, defaultTemplateName);
     }
 

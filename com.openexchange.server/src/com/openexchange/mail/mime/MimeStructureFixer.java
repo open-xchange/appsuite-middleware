@@ -50,8 +50,6 @@
 package com.openexchange.mail.mime;
 
 import static com.openexchange.mail.mime.converters.MimeMessageConverter.multipartFor;
-import gnu.trove.list.TIntList;
-import gnu.trove.list.array.TIntArrayList;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -76,6 +74,8 @@ import com.openexchange.mail.mime.converters.MimeMessageConverter;
 import com.openexchange.mail.mime.utils.MimeMessageUtility;
 import com.openexchange.mail.utils.MessageUtility;
 import com.sun.mail.util.MessageRemovedIOException;
+import gnu.trove.list.TIntList;
+import gnu.trove.list.array.TIntArrayList;
 
 /**
  * {@link MimeStructureFixer} - Detects badly structured multipart as composed by Apple mailer and fixes it.

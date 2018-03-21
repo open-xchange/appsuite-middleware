@@ -1,0 +1,16 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Proxy Authenticator
+Bundle-SymbolicName: com.openexchange.proxy.authenticator
+Bundle-Version: 7.10.0
+Bundle-Vendor: OX Software GmbH
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Bundle-Activator: com.openexchange.proxy.authenticator.osgi.ProxyAuthenticatorActivator
+Import-Package: com.google.common.annotations,
+ com.google.common.base,
+ com.google.common.collect,
+ com.openexchange.java,
+ com.openexchange.java.util,
+ org.osgi.framework,
+ org.slf4j
+

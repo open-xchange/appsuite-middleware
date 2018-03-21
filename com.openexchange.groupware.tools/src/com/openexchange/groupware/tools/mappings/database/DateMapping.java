@@ -71,7 +71,8 @@ public abstract class DateMapping<O> extends DefaultDbMapping<Date, O> {
 	@Override
 	public Date get(final ResultSet resultSet, String columnLabel) throws SQLException {
 	    try {
-	        return resultSet.getTimestamp(columnLabel);
+	        Timestamp timestamp = resultSet.getTimestamp(columnLabel);
+	        return null != timestamp ? new Date(timestamp.getTime()) : null;
 	    } catch (SQLException e) {
 	        if ("S1009".equals(e.getSQLState())) {
 	            /*
@@ -85,7 +86,7 @@ public abstract class DateMapping<O> extends DefaultDbMapping<Date, O> {
 	}
 
 	@Override
-	public void set(final PreparedStatement statement, final int parameterIndex, final O object) throws SQLException {
+    public int set(final PreparedStatement statement, final int parameterIndex, final O object) throws SQLException {
 		if (this.isSet(object)) {
 			final Date value = this.get(object);
 			if (null != value) {
@@ -96,6 +97,7 @@ public abstract class DateMapping<O> extends DefaultDbMapping<Date, O> {
 		} else {
 			statement.setNull(parameterIndex, this.getSqlType());
 		}
+        return 1;
 	}
 
 }

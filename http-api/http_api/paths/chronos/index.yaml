@@ -1,0 +1,15 @@
+requests:
+  - AllRequest.yaml
+  - ListRequest.yaml
+  - UpdatesRequest.yaml
+  - GetRequest.yaml
+  - GetAttachmentRequest.yaml
+  - UpdateRequest.yaml
+  - NewRequest.yaml
+  - DeleteRequest.yaml
+  - UpdateAttendeeRequest.yaml
+  - MoveRequest.yaml
+  - FreeBusyRequest.yaml
+  - NeedsActionRequest.yaml
+  - ResolveRequest.yaml
+  

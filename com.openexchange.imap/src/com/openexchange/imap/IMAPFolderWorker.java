@@ -202,6 +202,7 @@ public abstract class IMAPFolderWorker extends MailMessageStorageLong {
     protected final Set<IMAPFolder> otherFolders;
     protected int holdsMessages = -1;
     protected final boolean ignoreSubscriptions;
+    protected final boolean examineHasAttachmentUserFlags;
 
     /**
      * Initializes a new {@link IMAPFolderWorker}.
@@ -224,6 +225,7 @@ public abstract class IMAPFolderWorker extends MailMessageStorageLong {
         aclExtension = imapConfig.getACLExtension();
         otherFolders = new HashSet<IMAPFolder>(4);
         ignoreSubscriptions = imapConfig.getIMAPProperties().isIgnoreSubscription();
+        examineHasAttachmentUserFlags = imapConfig.getCapabilities().hasAttachmentMarker();
     }
 
     /**

@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 1997-2017 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997-2018 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -40,15 +40,21 @@
 
 package com.sun.mail.gimap;
 
-import java.io.*;
-
-import javax.mail.*;
-import javax.mail.internet.*;
-
-import com.sun.mail.iap.*;
-import com.sun.mail.imap.*;
-import com.sun.mail.imap.protocol.*;
-import com.sun.mail.gimap.protocol.*;
+import javax.mail.FetchProfile;
+import javax.mail.FolderClosedException;
+import javax.mail.Message;
+import javax.mail.MessageRemovedException;
+import javax.mail.MessagingException;
+import com.sun.mail.gimap.protocol.GmailProtocol;
+import com.sun.mail.iap.ConnectionException;
+import com.sun.mail.iap.ProtocolException;
+import com.sun.mail.imap.IMAPFolder;
+import com.sun.mail.imap.IMAPMessage;
+import com.sun.mail.imap.IMAPStore;
+import com.sun.mail.imap.Utility;
+import com.sun.mail.imap.protocol.IMAPProtocol;
+import com.sun.mail.imap.protocol.ListInfo;
+import com.sun.mail.imap.protocol.MessageSet;
 
 /**
  * A Gmail folder.  Defines new FetchProfile items and

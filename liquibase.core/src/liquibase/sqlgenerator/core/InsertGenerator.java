@@ -1,5 +1,6 @@
 package liquibase.sqlgenerator.core;
 
+import java.util.Date;
 import liquibase.database.Database;
 import liquibase.datatype.DataTypeFactory;
 import liquibase.exception.ValidationErrors;
@@ -10,8 +11,6 @@ import liquibase.statement.DatabaseFunction;
 import liquibase.statement.core.InsertStatement;
 import liquibase.structure.core.Relation;
 import liquibase.structure.core.Table;
-
-import java.util.Date;
 
 public class InsertGenerator extends AbstractSqlGenerator<InsertStatement> {
 

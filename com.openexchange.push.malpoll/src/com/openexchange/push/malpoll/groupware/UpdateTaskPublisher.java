@@ -52,8 +52,8 @@ package com.openexchange.push.malpoll.groupware;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import com.openexchange.groupware.update.UpdateTaskV2;
 import com.openexchange.groupware.update.UpdateTaskProviderService;
+import com.openexchange.groupware.update.UpdateTaskV2;
 
 /**
  * {@link UpdateTaskPublisher} - The {@link UpdateTaskProviderService} for MAL Poll bundle.

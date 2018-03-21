@@ -1,0 +1,23 @@
+@startuml
+rectangle "Main Load Balancer"
+
+node "Node A: 7.10.0"
+node "Node B: 7.10.0"
+node "Node C: 7.10.0"
+node "Node D: 7.10.0"
+node "Node E: x.y.z"
+
+database "OX DB"
+
+[Main Load Balancer] --> [Node A: 7.10.0]
+[Main Load Balancer] --> [Node B: 7.10.0]
+[Main Load Balancer] --> [Node C: 7.10.0]
+[Main Load Balancer] --> [Node D: 7.10.0]
+
+[Node A: 7.10.0] --> [OX DB]
+[Node B: 7.10.0] --> [OX DB]
+[Node C: 7.10.0] --> [OX DB]
+[Node D: 7.10.0] --> [OX DB]
+[Node E: x.y.z] --> [OX DB]
+
+@enduml

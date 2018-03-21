@@ -95,6 +95,7 @@ public class HtmlSanitizeOptions {
         private boolean suppressLinks;
         private boolean replaceBodyWithDiv;
         private boolean sanitize;
+        private boolean prettyPrint;
         private Session session;
         private ParserPreference parserPreference;
 
@@ -109,7 +110,24 @@ public class HtmlSanitizeOptions {
             replaceBodyWithDiv = false;
             session = null;
             sanitize = true;
+            prettyPrint = true;
             parserPreference = ParserPreference.NONE;
+        }
+
+        /** Sets this builder arguments according to specified <code>HtmlSanitizeOptions</code> instance */
+        public Builder copyFrom(HtmlSanitizeOptions options) {
+            this.session = options.optSession();
+            this.sanitize = options.isSanitize();
+            this.optConfigName = options.getOptConfigName();
+            this.dropExternalImages = options.isDropExternalImages();
+            this.modified = options.getModified();
+            this.cssPrefix = options.getCssPrefix();
+            this.maxContentSize = options.getMaxContentSize();
+            this.suppressLinks = options.isSuppressLinks();
+            this.replaceBodyWithDiv = options.isReplaceBodyWithDiv();
+            this.parserPreference = options.getParserPreference();
+            this.prettyPrint = options.isPrettyPrint();
+            return this;
         }
 
         /** Sets the parser preference */
@@ -171,9 +189,15 @@ public class HtmlSanitizeOptions {
             return this;
         }
 
+        /** Set whether to 'pretty-print' the html or not */
+        public Builder setPrettyPrint(boolean prettyPrint) {
+            this.prettyPrint = prettyPrint;
+            return this;
+        }
+
         /** Builds the instance from this builder's arguments */
         public HtmlSanitizeOptions build() {
-            return new HtmlSanitizeOptions(session, sanitize, optConfigName, dropExternalImages, modified, cssPrefix, maxContentSize, suppressLinks, replaceBodyWithDiv, parserPreference);
+            return new HtmlSanitizeOptions(session, sanitize, optConfigName, dropExternalImages, modified, cssPrefix, maxContentSize, suppressLinks, replaceBodyWithDiv, parserPreference, prettyPrint);
         }
     }
 
@@ -187,10 +211,12 @@ public class HtmlSanitizeOptions {
     private final int maxContentSize;
     private final boolean suppressLinks;
     private final boolean replaceBodyWithDiv;
+    private final boolean prettyPrint;
     private final Session session;
     private final ParserPreference parserPreference;
 
-    HtmlSanitizeOptions(Session session, boolean sanitize, String optConfigName, boolean dropExternalImages, boolean[] modified, String cssPrefix, int maxContentSize, boolean suppressLinks, boolean replaceBodyWithDiv, ParserPreference parserPreference) {
+    HtmlSanitizeOptions(Session session, boolean sanitize, String optConfigName, boolean dropExternalImages, boolean[] modified, String cssPrefix, int maxContentSize, boolean suppressLinks, boolean replaceBodyWithDiv,
+        ParserPreference parserPreference, boolean prettyPrint) {
         super();
         this.session = session;
         this.sanitize = sanitize;
@@ -201,6 +227,7 @@ public class HtmlSanitizeOptions {
         this.maxContentSize = maxContentSize;
         this.suppressLinks = suppressLinks;
         this.replaceBodyWithDiv = replaceBodyWithDiv;
+        this.prettyPrint = prettyPrint;
         this.parserPreference = null == parserPreference ? ParserPreference.NONE : parserPreference;
     }
 
@@ -292,6 +319,15 @@ public class HtmlSanitizeOptions {
      */
     public boolean isReplaceBodyWithDiv() {
         return replaceBodyWithDiv;
+    }
+
+    /**
+     * Checks whether to 'pretty-print' the html or not
+     * 
+     * @return <code>true</code> to pretty-print, otherwise <code>false</code>
+     */
+    public boolean isPrettyPrint() {
+        return prettyPrint;
     }
 
 }

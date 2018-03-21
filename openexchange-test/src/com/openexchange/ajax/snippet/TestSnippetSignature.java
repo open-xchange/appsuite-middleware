@@ -159,7 +159,7 @@ public class TestSnippetSignature extends AbstractAJAXSession {
         try {
             byte[] buffer = new byte[4096];
             ous = new ByteArrayOutputStream();
-            ios = new FileInputStream(new File(AJAXConfig.getProperty(AJAXConfig.Property.TEST_MAIL_DIR) + filename));
+            ios = new FileInputStream(new File(AJAXConfig.getProperty(AJAXConfig.Property.TEST_DIR) + filename));
             int read = 0;
             while ((read = ios.read(buffer)) != -1) {
                 ous.write(buffer, 0, read);

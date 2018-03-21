@@ -77,6 +77,7 @@ public class DefaultFile extends AbstractFile {
     private long fileSize;
     private String folderId;
     private String id;
+    private Long sequenceNumber;
     private Date lastModified;
     private Date lockedUntil;
     private int modifiedBy;
@@ -90,6 +91,7 @@ public class DefaultFile extends AbstractFile {
     private Map<String, Object> dynamicProperties;
     private List<FileStorageObjectPermission> objectPermissions;
     private boolean shareable;
+    private FolderPath origin;
 
     /**
      * Initializes a new {@link DefaultFile}.
@@ -231,10 +233,13 @@ public class DefaultFile extends AbstractFile {
 
     @Override
     public long getSequenceNumber() {
-        if (lastModified == null) {
-            return 0;
+        Long sequenceNumber = this.sequenceNumber;
+        if (null != sequenceNumber) {
+            return sequenceNumber.longValue();
         }
-        return lastModified.getTime();
+
+        Date lastModified = this.lastModified;
+        return lastModified == null ? 0 : lastModified.getTime();
     }
 
     @Override
@@ -261,10 +266,20 @@ public class DefaultFile extends AbstractFile {
     public boolean isCurrentVersion() {
         return isCurrentVersion;
     }
-    
+
     @Override
     public boolean isShareable() {
         return shareable;
+    }
+
+    @Override
+    public FolderPath getOrigin() {
+        return origin;
+    }
+
+    @Override
+    public void setOrigin(FolderPath origin) {
+        this.origin = origin;
     }
 
     @Override
@@ -386,10 +401,15 @@ public class DefaultFile extends AbstractFile {
     public List<FileStorageObjectPermission> getObjectPermissions() {
         return objectPermissions;
     }
-    
+
     @Override
     public void setShareable(boolean shareable) {
         this.shareable = shareable;
+    }
+
+    @Override
+    public void setSequenceNumber(long sequenceNumber) {
+        this.sequenceNumber = Long.valueOf(sequenceNumber);
     }
 
 }

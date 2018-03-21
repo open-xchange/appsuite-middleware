@@ -49,8 +49,8 @@
 
 package com.openexchange.groupware.reminder.internal;
 
-import static com.openexchange.tools.sql.DBUtils.autocommit;
-import static com.openexchange.tools.sql.DBUtils.rollback;
+import static com.openexchange.database.Databases.autocommit;
+import static com.openexchange.database.Databases.rollback;
 import java.sql.Connection;
 import java.sql.SQLException;
 import com.openexchange.databaseold.Database;

@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 1997-2017 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997-2018 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -40,13 +40,38 @@
 
 package javax.mail.internet;
 
-import javax.mail.MessagingException;
-import javax.mail.EncodingAware;
-import javax.activation.*;
-import java.util.*;
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.EOFException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.StringReader;
+import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
-import com.sun.mail.util.*;
+import java.util.HashMap;
+import java.util.Locale;
+import java.util.Map;
+import java.util.NoSuchElementException;
+import java.util.StringTokenizer;
+import javax.activation.DataHandler;
+import javax.activation.DataSource;
+import javax.mail.EncodingAware;
+import javax.mail.MessagingException;
+import com.sun.mail.util.ASCIIUtility;
+import com.sun.mail.util.BASE64DecoderStream;
+import com.sun.mail.util.BASE64EncoderStream;
+import com.sun.mail.util.BEncoderStream;
+import com.sun.mail.util.LineInputStream;
+import com.sun.mail.util.PropUtil;
+import com.sun.mail.util.QDecoderStream;
+import com.sun.mail.util.QEncoderStream;
+import com.sun.mail.util.QPDecoderStream;
+import com.sun.mail.util.QPEncoderStream;
+import com.sun.mail.util.UUDecoderStream;
+import com.sun.mail.util.UUEncoderStream;
 
 /**
  * This is a utility class that provides various MIME related

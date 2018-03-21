@@ -39,12 +39,10 @@ import java.io.StreamTokenizer;
 import java.net.URISyntaxException;
 import java.text.MessageFormat;
 import java.text.ParseException;
-
-import net.fortuna.ical4j.model.Calendar;
-import net.fortuna.ical4j.model.Component;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import net.fortuna.ical4j.model.Calendar;
+import net.fortuna.ical4j.model.Component;
 
 /**
  * <pre>

@@ -57,7 +57,7 @@ public class WebdavOptionsAction extends AbstractAction {
     static final String DAV_OPTIONS =
         "1, 2, 3, access-control, calendar-access, addressbook, extended-mkcol, calendar-auto-schedule, calendar-schedule, " +
         "calendarserver-sharing, calendarserver-principal-search, calendarserver-principal-property-search, " +
-        "resource-sharing, calendar-managed-attachments"
+        "resource-sharing, calendar-managed-attachments, calendarserver-private-events, calendarserver-recurrence-split"
     ;
 
 	@Override

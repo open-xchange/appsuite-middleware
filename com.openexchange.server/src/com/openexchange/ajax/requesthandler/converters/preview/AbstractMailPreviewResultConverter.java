@@ -111,7 +111,7 @@ abstract class AbstractMailPreviewResultConverter implements ResultConverter {
             LOG.debug("", e);
             fileHolder.close();
             fileHolder = new ThresholdFileHolder();
-            fileHolder.write(new byte[0]);
+            fileHolder.writeZeroBytes();
         }
         mail.prepareForCaching();
         /*

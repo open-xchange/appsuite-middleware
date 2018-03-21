@@ -55,13 +55,13 @@ import static net.fortuna.ical4j.model.property.Priority.MEDIUM;
 import static net.fortuna.ical4j.model.property.Priority.UNDEFINED;
 import java.util.List;
 import java.util.TimeZone;
-import net.fortuna.ical4j.model.component.VToDo;
 import com.openexchange.data.conversion.ical.ConversionWarning;
 import com.openexchange.data.conversion.ical.ConversionWarning.Code;
 import com.openexchange.data.conversion.ical.Mode;
 import com.openexchange.data.conversion.ical.ical4j.internal.AbstractVerifyingAttributeConverter;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.tasks.Task;
+import net.fortuna.ical4j.model.component.VToDo;
 
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
@@ -80,7 +80,7 @@ public class Priority extends AbstractVerifyingAttributeConverter<VToDo, Task> {
     @Override
     public void emit(final Mode mode, final int index, final Task task, final VToDo vToDo, final List<ConversionWarning> warnings, final Context ctx, final Object... args) {
         final net.fortuna.ical4j.model.property.Priority prio;
-        switch (task.getPriority()) {
+        switch (task.getPriority().intValue()) {
         case Task.HIGH:
             prio = HIGH;
             break;
@@ -91,7 +91,7 @@ public class Priority extends AbstractVerifyingAttributeConverter<VToDo, Task> {
             prio = LOW;
             break;
         default:
-            warnings.add(new ConversionWarning(index, Code.INVALID_PRIORITY, Integer.valueOf(task.getPriority())));
+                warnings.add(new ConversionWarning(index, Code.INVALID_PRIORITY, task.getPriority()));
             prio = UNDEFINED;
         }
         vToDo.getProperties().add(prio);
@@ -108,13 +108,13 @@ public class Priority extends AbstractVerifyingAttributeConverter<VToDo, Task> {
         final float medHigh = (MEDIUM.getLevel() + HIGH.getLevel()) >> 1;
         final int priority = todo.getPriority().getLevel();
         if (priority >= lowMed) {
-            task.setPriority(Task.LOW);
+            task.setPriority(Integer.valueOf(Task.LOW));
         } else if (priority >= medHigh) {
-            task.setPriority(Task.NORMAL);
+            task.setPriority(Integer.valueOf(Task.NORMAL));
         } else if (priority >= HIGH.getLevel()) {
-            task.setPriority(Task.HIGH);
+            task.setPriority(Integer.valueOf(Task.HIGH));
         } else if (priority == UNDEFINED.getLevel()) {
-            task.setPriority(Task.NORMAL); // Default to normal Bug #10401
+            task.setPriority(Integer.valueOf(Task.NORMAL)); // Default to normal Bug #10401
         } else {
             warnings.add(new ConversionWarning(index, Code.INVALID_PRIORITY, Integer.valueOf(priority)));
         }

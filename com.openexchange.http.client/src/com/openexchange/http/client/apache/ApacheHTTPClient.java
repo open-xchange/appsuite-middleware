@@ -76,7 +76,7 @@ public class ApacheHTTPClient extends AbstractHTTPClient implements HTTPClient {
 		try {
 			return method.getResponseBodyAsString();
 		} catch (IOException e) {
-			throw OxHttpClientExceptionCodes.APACHE_CLIENT_ERROR.create(e.getMessage(), e);
+            throw OxHttpClientExceptionCodes.APACHE_CLIENT_ERROR.create(e, e.getMessage());
 		}
 	}
 
@@ -84,7 +84,7 @@ public class ApacheHTTPClient extends AbstractHTTPClient implements HTTPClient {
 		try {
 			return method.getResponseBodyAsStream();
 		} catch (IOException e) {
-			throw OxHttpClientExceptionCodes.APACHE_CLIENT_ERROR.create(e.getMessage(), e);
+            throw OxHttpClientExceptionCodes.APACHE_CLIENT_ERROR.create(e, e.getMessage());
 		}
 	}
 
@@ -92,7 +92,7 @@ public class ApacheHTTPClient extends AbstractHTTPClient implements HTTPClient {
 		try {
 			return new InputStreamReader(method.getResponseBodyAsStream(), method.getResponseCharSet());
 		} catch (IOException e) {
-			throw OxHttpClientExceptionCodes.APACHE_CLIENT_ERROR.create(e.getMessage(), e);
+            throw OxHttpClientExceptionCodes.APACHE_CLIENT_ERROR.create(e, e.getMessage());
 		}
 	}
 

@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 1997-2017 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997-2018 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -40,13 +40,17 @@
 
 package com.sun.mail.gimap.protocol;
 
-import java.io.*;
-import java.util.*;
-
-import com.sun.mail.iap.*;
-import com.sun.mail.imap.protocol.*;
+import java.io.IOException;
+import java.util.Properties;
 import com.sun.mail.gimap.GmailFolder.FetchProfileItem;
-
+import com.sun.mail.iap.Argument;
+import com.sun.mail.iap.ProtocolException;
+import com.sun.mail.iap.Response;
+import com.sun.mail.imap.protocol.FetchItem;
+import com.sun.mail.imap.protocol.FetchResponse;
+import com.sun.mail.imap.protocol.IMAPProtocol;
+import com.sun.mail.imap.protocol.MessageSet;
+import com.sun.mail.imap.protocol.SearchSequence;
 import com.sun.mail.util.MailLogger;
 
 /**

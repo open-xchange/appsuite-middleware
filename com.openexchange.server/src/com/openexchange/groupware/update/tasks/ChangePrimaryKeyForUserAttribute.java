@@ -49,8 +49,6 @@
 
 package com.openexchange.groupware.update.tasks;
 
-import static com.openexchange.tools.sql.DBUtils.autocommit;
-import static com.openexchange.tools.sql.DBUtils.rollback;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -72,7 +70,6 @@ import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
 import com.openexchange.java.Strings;
 import com.openexchange.java.util.UUIDs;
-import com.openexchange.tools.sql.DBUtils;
 import com.openexchange.tools.update.Tools;
 import gnu.trove.list.TIntList;
 import gnu.trove.list.array.TIntArrayList;
@@ -110,7 +107,7 @@ public final class ChangePrimaryKeyForUserAttribute extends UpdateTaskAdapter {
                 return;
             }
 
-            DBUtils.startTransaction(con);
+            Databases.startTransaction(con);
             restoreAutocommit = true;
             rollback = true;
 
@@ -124,10 +121,10 @@ public final class ChangePrimaryKeyForUserAttribute extends UpdateTaskAdapter {
             throw UpdateExceptionCodes.OTHER_PROBLEM.create(e, e.getMessage());
         } finally {
             if (rollback) {
-                rollback(con);
+                Databases.rollback(con);
             }
             if (restoreAutocommit) {
-                autocommit(con);
+                Databases.autocommit(con);
             }
         }
     }
@@ -185,7 +182,7 @@ public final class ChangePrimaryKeyForUserAttribute extends UpdateTaskAdapter {
                 mapping = new HashMap<>(length);
                 for (int off = 0; off < length; off += limit) {
                     int clen = off + limit > length ? length - off : limit;
-                    stmt = con.prepareStatement(DBUtils.getIN("SELECT cid, id, name, value, uuid FROM user_attribute WHERE cid IN (", clen));
+                    stmt = con.prepareStatement(Databases.getIN("SELECT cid, id, name, value, uuid FROM user_attribute WHERE cid IN (", clen));
                     int pos = 1;
                     for (int j = 0; j < clen; j++) {
                         stmt.setInt(pos++, contextIds.get(off+j));
@@ -225,6 +222,7 @@ public final class ChangePrimaryKeyForUserAttribute extends UpdateTaskAdapter {
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
+            // GROUP BY CLAUSE: ensure ONLY_FULL_GROUP_BY compatibility
             stmt = con.prepareStatement("SELECT cid, id, name, value, uuid FROM user_attribute WHERE (cid, id, name) IN (SELECT cid, id, name FROM user_attribute GROUP BY cid, id, name HAVING COUNT(*) > 1) ORDER BY cid,id,name");
             rs = stmt.executeQuery();
             if (false == rs.next()) {
@@ -287,7 +285,7 @@ public final class ChangePrimaryKeyForUserAttribute extends UpdateTaskAdapter {
     private void delete(Duplicate duplicate, List<Value> values, Connection con) throws SQLException {
         PreparedStatement stmt = null;
         try {
-            stmt = con.prepareStatement(DBUtils.getIN("DELETE FROM user_attribute WHERE cid=? AND id=? AND name=? AND uuid IN (", values.size()));
+            stmt = con.prepareStatement(Databases.getIN("DELETE FROM user_attribute WHERE cid=? AND id=? AND name=? AND uuid IN (", values.size()));
             int pos = 1;
             stmt.setInt(pos++, duplicate.contextId);
             stmt.setInt(pos++, duplicate.userId);

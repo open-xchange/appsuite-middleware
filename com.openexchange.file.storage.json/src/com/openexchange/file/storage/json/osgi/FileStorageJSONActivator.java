@@ -96,7 +96,7 @@ public class FileStorageJSONActivator extends AJAXModuleActivator {
         try {
             Services.setServiceLookup(this);
             rememberTracker(new ServiceTracker<I18nService, I18nService>(context, I18nService.class.getName(), new I18nServiceCustomizer(context)));
-            FileFieldCollector fieldCollector = new FileFieldCollector(context);
+            OSGiFileFieldCollector fieldCollector = new OSGiFileFieldCollector(context);
             Services.setFieldCollector(fieldCollector);
             rememberTracker(new ServiceTracker<AdditionalFileField, AdditionalFileField>(context, AdditionalFileField.class.getName(), fieldCollector));
 

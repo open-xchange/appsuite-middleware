@@ -32,10 +32,8 @@
 package net.fortuna.ical4j.model;
 
 import java.util.Calendar;
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
-
 import net.fortuna.ical4j.model.component.Daylight;
 import net.fortuna.ical4j.model.component.Observance;
 import net.fortuna.ical4j.model.component.VTimeZone;

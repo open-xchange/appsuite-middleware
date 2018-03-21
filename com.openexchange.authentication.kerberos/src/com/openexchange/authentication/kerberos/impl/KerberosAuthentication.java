@@ -49,8 +49,8 @@
 
 package com.openexchange.authentication.kerberos.impl;
 
-import static com.openexchange.authentication.LoginExceptionCodes.INVALID_CREDENTIALS_MISSING_USER_MAPPING;
 import static com.openexchange.authentication.LoginExceptionCodes.INVALID_CREDENTIALS_MISSING_CONTEXT_MAPPING;
+import static com.openexchange.authentication.LoginExceptionCodes.INVALID_CREDENTIALS_MISSING_USER_MAPPING;
 import static com.openexchange.authentication.kerberos.impl.ConfigurationProperty.PROXY_DELIMITER;
 import static com.openexchange.authentication.kerberos.impl.ConfigurationProperty.PROXY_USER;
 import java.util.List;
@@ -170,15 +170,10 @@ public class KerberosAuthentication implements AuthenticationService {
         String retval = null;
         Object tmp = loginInfo.getProperties().get("headers");
         if (tmp instanceof Map<?, ?>) {
-            @SuppressWarnings("unchecked")
-            Map<String, List<String>> headers = (Map<String, List<String>>) tmp;
-            tmp = headers.get(Header.AUTH_HEADER);
-            if (tmp instanceof List<?>) {
-                @SuppressWarnings("unchecked")
-                List<String> values = (List<String>) tmp;
-                if (values.size() > 0) {
-                    retval = values.get(0);
-                }
+            @SuppressWarnings("unchecked") Map<String, List<String>> headers = (Map<String, List<String>>) tmp;
+            List<String> values = headers.get(Header.AUTH_HEADER);
+            if (values != null && values.size() > 0) {
+                retval = values.get(0);
             }
         }
         return retval;

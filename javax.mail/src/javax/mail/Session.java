@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 1997-2017 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997-2018 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -40,18 +40,26 @@
 
 package javax.mail;
 
-import java.lang.reflect.*;
-import java.io.*;
-import java.net.*;
-import java.security.*;
-import java.util.Enumeration;
+import java.io.BufferedInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.PrintStream;
+import java.lang.reflect.Constructor;
+import java.net.InetAddress;
+import java.net.URL;
+import java.security.AccessController;
+import java.security.PrivilegedAction;
+import java.security.PrivilegedActionException;
+import java.security.PrivilegedExceptionAction;
 import java.util.Hashtable;
 import java.util.Properties;
 import java.util.StringTokenizer;
 import java.util.Vector;
-import java.util.logging.Level;
 import java.util.concurrent.Executor;
-import javax.activation.*;
+import java.util.logging.Level;
 import javax.mail.osgi.BundleResourceLoader;
 import com.sun.mail.util.LineInputStream;
 import com.sun.mail.util.MailLogger;

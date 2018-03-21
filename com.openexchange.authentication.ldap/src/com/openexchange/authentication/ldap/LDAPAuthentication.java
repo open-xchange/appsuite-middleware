@@ -226,7 +226,7 @@ public class LDAPAuthentication implements AuthenticationService, Reloadable {
                     if( res.hasMoreElements() ) {
                         dn = res.nextElement().getNameInNamespace();
                         if( res.hasMoreElements() ) {
-                            final String errortext = "Found more then one user with " + uidAttribute + "=" + uid;
+                            final String errortext = "Found more than one user with " + uidAttribute + "=" + uid;
                             LOG.error(errortext);
                             throw LoginExceptionCodes.INVALID_CREDENTIALS.create();
                         }
@@ -316,12 +316,12 @@ public class LDAPAuthentication implements AuthenticationService, Reloadable {
             LOG.error("", e);
             throw LoginExceptionCodes.COMMUNICATION.create(e);
         } finally {
-            try {
-                if( context != null ) {
+            if (context != null) {
+                try {
                     context.close();
+                } catch (NamingException e) {
+                    LOG.error("", e);
                 }
-            } catch (NamingException e) {
-                LOG.error("", e);
             }
         }
     }

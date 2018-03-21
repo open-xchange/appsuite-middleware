@@ -1,7 +1,18 @@
 
 package liquibase.integration.commandline;
 
-import java.io.*;
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.Console;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStreamWriter;
+import java.io.PrintStream;
+import java.io.UnsupportedEncodingException;
+import java.io.Writer;
 import java.lang.reflect.Field;
 import java.net.URL;
 import java.net.URLClassLoader;

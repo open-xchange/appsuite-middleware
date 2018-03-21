@@ -51,7 +51,6 @@ package com.openexchange.mobile.configuration.json.osgi;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-
 import com.openexchange.mobile.configuration.json.action.ActionService;
 import com.openexchange.mobile.configuration.json.action.ActionTypes;
 import com.openexchange.osgi.ServiceRegistry;

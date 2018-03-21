@@ -57,11 +57,14 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import org.json.JSONException;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
@@ -70,9 +73,12 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.FolderEventConstants;
+import com.openexchange.folderstorage.FolderPath;
 import com.openexchange.folderstorage.FolderPermissionType;
+import com.openexchange.folderstorage.StorageParameters;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.groupware.container.FolderPathObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.impl.IDGenerator;
 import com.openexchange.java.Streams;
@@ -318,6 +324,7 @@ public final class OXFolderSQL {
         }
     }
 
+    // GROUP BY CLAUSE: ensure ONLY_FULL_GROUP_BY compatibility
     private static final String SQL_SELECT_ALL_SHARED_FLDS = "SELECT ot.fuid FROM oxfolder_tree AS ot WHERE ot.cid = ? AND ot.type = ? AND ot.created_from = ? AND " + "(SELECT COUNT(op.permission_id) FROM oxfolder_permissions AS op WHERE op.cid = ot.cid AND op.fuid = ot.fuid) > 1 GROUP BY ot.fuid";
 
     /**
@@ -1331,6 +1338,78 @@ public final class OXFolderSQL {
     }
 
     /**
+     * Gets the names of all parent folders in the tree down to the root folder.
+     *
+     * @param folderId The ID of the folder to get the path for
+     * @param defaultFolderId The identifier of user's default Infostore folder
+     * @param readConnection A connection with read capability, or <code>null</code> to fetch from pool dynamically
+     * @param context The context
+     * @return The IDs of all parent folders on the path in (hierarchical) descending order; the supplied folder ID itself is not included
+     */
+    public static FolderPathObject generateFolderPathFor(int folderId, int defaultFolderId, Connection readConnection, Context context) throws OXException, SQLException {
+        boolean closeReadConnection = false;
+        try {
+            /*
+             * acquire local read connection if not supplied
+             */
+            if (null == readConnection) {
+                readConnection = DBPool.pickup(context);
+                closeReadConnection = true;
+            }
+            /*
+             * get parent folders recursively
+             */
+            List<String> names = null;
+            int currentID = folderId;
+            String name = null;
+            boolean first = true;
+            while (FolderObject.SYSTEM_INFOSTORE_FOLDER_ID != currentID) {
+                PreparedStatement stmt = null;
+                ResultSet rs = null;
+                try {
+                    stmt = readConnection.prepareStatement("SELECT parent, fname FROM oxfolder_tree WHERE cid=? AND fuid=?");
+                    stmt.setInt(1, context.getContextId());
+                    stmt.setInt(2, currentID);
+                    rs = executeQuery(stmt);
+                    if (rs.next()) {
+                        if (currentID == FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID || currentID == FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID || currentID == defaultFolderId) {
+                            name = String.valueOf(currentID);
+                            currentID = FolderObject.SYSTEM_INFOSTORE_FOLDER_ID; // force termination of while loop
+                        } else {
+                            name = rs.getString(2);
+                            currentID = rs.getInt(1);
+                        }
+                    }
+                } finally {
+                    Databases.closeSQLStuff(rs, stmt);
+                }
+                if (first) {
+                    first = false;
+                } else {
+                    if (Strings.isNotEmpty(name)) {
+                        if (null == names) {
+                            names = new ArrayList<>(6);
+                        }
+                        names.add(name);
+                    }
+                }
+            }
+
+            if (null == names) {
+                return null;
+            }
+
+            if (names.size() > 1) {
+                Collections.reverse(names);
+            }
+            return FolderPathObject.copyOf(names);
+        } finally {
+            closeResources(null, null, closeReadConnection ? readConnection : null, true, context);
+        }
+    }
+
+
+    /**
      * Gets the parent identifier for specified folder.
      *
      * @param folder The folder identifier
@@ -1374,7 +1453,6 @@ public final class OXFolderSQL {
             Databases.closeSQLStuff(rs, stmt);
         }
     }
-
     /**
      * Gets a folder's path down to the root folder, ready to be used in events.
      *
@@ -1706,11 +1784,12 @@ public final class OXFolderSQL {
 
                 // Do the update
                 int pos = 1;
-                final boolean containsMeta = folder.containsMeta();
-                final boolean containsCreatedBy = folder.containsCreatedBy();
+                boolean containsMeta = folder.containsMeta();
+                boolean containsCreatedBy = folder.containsCreatedBy();
+                FolderPathObject originPath = folder.getOriginPath();
                 if (folder.containsFolderName()) {
                     stmt = writeCon.prepareStatement("UPDATE oxfolder_tree SET fname=?" + (containsMeta ? ",meta=?" : "") +
-                        ",changing_date=?,changed_from=?,permission_flag=?,module=?" + (containsCreatedBy ? ",created_from=?" : "") +
+                        ",changing_date=?,changed_from=?,permission_flag=?,module=?" + (containsCreatedBy ? ",created_from=?" : "") + (null != originPath ? ",origin=?" : "") +
                         " WHERE cid=? AND fuid=? AND NOT EXISTS (SELECT 1 FROM (" +
                         "SELECT fname,fuid FROM oxfolder_tree WHERE cid=? AND parent=? AND parent>?) AS ft WHERE ft.fname=? AND ft.fuid<>?);");
                     stmt.setString(pos++, folder.getFolderName());
@@ -1729,6 +1808,13 @@ public final class OXFolderSQL {
                     if (containsCreatedBy) {
                         stmt.setInt(pos++, folder.getCreatedBy());
                     }
+                    if (null != originPath) {
+                        if (originPath.isEmpty()) {
+                            stmt.setNull(pos++, java.sql.Types.VARCHAR);
+                        } else {
+                            stmt.setString(pos++,  originPath.toString());
+                        }
+                    }
                     stmt.setInt(pos++, ctx.getContextId());
                     stmt.setInt(pos++, folder.getObjectID());
                     stmt.setInt(pos++, ctx.getContextId());
@@ -1745,7 +1831,7 @@ public final class OXFolderSQL {
                 } else {
                     stmt = writeCon.prepareStatement("UPDATE oxfolder_tree SET " + (containsMeta ? "meta = ?, " : "") +
                         "changing_date = ?, changed_from = ?, " + "permission_flag = ?, module = ? " +
-                        (containsCreatedBy ? ", created_from = ? " : "") + "WHERE cid = ? AND fuid = ?");
+                        (containsCreatedBy ? ", created_from = ?" : "") + (null != originPath ? ", origin=?" : "") + " WHERE cid = ? AND fuid = ?");
                     if (containsMeta) {
                         metaStream = OXFolderUtility.serializeMeta(folder.getMeta());
                         if (null == metaStream) {
@@ -1760,6 +1846,13 @@ public final class OXFolderSQL {
                     stmt.setInt(pos++, folder.getModule());
                     if (containsCreatedBy) {
                         stmt.setInt(pos++, folder.getCreatedBy());
+                    }
+                    if (null != originPath) {
+                        if (originPath.isEmpty()) {
+                            stmt.setNull(pos++, java.sql.Types.VARCHAR);
+                        } else {
+                            stmt.setString(pos++,  originPath.toString());
+                        }
                     }
                     stmt.setInt(pos++, ctx.getContextId());
                     stmt.setInt(pos++, folder.getObjectID());
@@ -2404,6 +2497,7 @@ public final class OXFolderSQL {
         }
     }
 
+    // GROUP BY CLAUSE: ensure ONLY_FULL_GROUP_BY compatibility
     private static final String SQL_SEL_PERMS = "SELECT ot.fuid, ot.type, ot.module, ot.default_flag FROM " + TMPL_PERM_TABLE + " AS op JOIN " + TMPL_FOLDER_TABLE + " AS ot ON op.fuid = ot.fuid AND op.cid = ? AND ot.cid = ? WHERE op.permission_id IN " + TMPL_IDS + " GROUP BY ot.fuid";
 
     /**
@@ -3223,6 +3317,73 @@ public final class OXFolderSQL {
             this.fuid = fuid;
             this.name = name;
         }
+    }
+
+    private static final String GET_ORIGIN_PATH_SQL = "SELECT fuid, origin FROM oxfolder_tree WHERE cid = ? AND module = ? AND created_from = ? AND fuid IN (";
+    public static Map<Integer, FolderPath> getOriginPaths(List<Integer> folderIds, StorageParameters storageParameters) throws OXException, SQLException {
+        Context ctx = storageParameters.getContext();
+        int userId = storageParameters.getUserId();
+        Connection readCon = DBPool.pickup(ctx);
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            stmt = readCon.prepareStatement(Databases.getIN(GET_ORIGIN_PATH_SQL, folderIds.size()));
+            int pos = 1;
+            stmt.setInt(pos++, ctx.getContextId());
+            stmt.setInt(pos++, FolderObject.INFOSTORE);
+            stmt.setInt(pos++, userId);
+            for (Integer folderId : folderIds) {
+                stmt.setInt(pos++, folderId.intValue());
+            }
+            rs = stmt.executeQuery();
+            if (false == rs.next()) {
+                return Collections.emptyMap();
+            }
+
+            Map<Integer, FolderPath> paths = new LinkedHashMap<>(folderIds.size());
+            do {
+                paths.put(Integer.valueOf(rs.getInt(1)), FolderPath.parseFrom(rs.getString(2)));
+            } while (rs.next());
+            return paths;
+        } finally {
+            Databases.closeSQLStuff(rs, stmt);
+            DBPool.push(ctx, readCon);
+        }
+    }
+
+    private static final String GET_UNUSED_FOLDERNAME_SQL = "SELECT fuid FROM oxfolder_tree WHERE cid = ? AND module = 8 AND parent = ? AND fname = ?";
+    public static String getUnusedFolderName(String name, int parentId, StorageParameters storageParameters) throws OXException, SQLException {
+        Context ctx = storageParameters.getContext();
+        Connection readCon = DBPool.pickup(ctx);
+        String newName = name;
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        int i = 0;
+        try {
+            stmt = readCon.prepareStatement(GET_UNUSED_FOLDERNAME_SQL);
+            stmt.setInt(1, ctx.getContextId());
+            stmt.setInt(2, parentId);
+            stmt.setString(3, name);
+            rs = stmt.executeQuery();
+            while (rs.next()) {
+                Databases.closeSQLStuff(rs, stmt);
+                newName = appendIndex(name, ++i);
+                stmt = readCon.prepareStatement(GET_UNUSED_FOLDERNAME_SQL);
+                stmt.setInt(1, ctx.getContextId());
+                stmt.setInt(2, parentId);
+                stmt.setString(3, newName);
+                rs = stmt.executeQuery();
+            }
+            return newName;
+        } finally {
+            Databases.closeSQLStuff(rs, stmt);
+            DBPool.push(ctx, readCon);
+        }
+    }
+
+    private static String appendIndex(String name, int index) {
+        StringBuilder sb = new StringBuilder(name).append(" (").append(index).append(")");
+        return sb.toString();
     }
 
 }

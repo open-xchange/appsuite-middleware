@@ -49,10 +49,11 @@
 
 package com.openexchange.folder.json.writer;
 
-import java.io.Closeable;
+import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -64,6 +65,7 @@ import java.util.concurrent.ConcurrentMap;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.customizer.folder.AdditionalFolderField;
 import com.openexchange.ajax.customizer.folder.AdditionalFolderFieldList;
 import com.openexchange.ajax.customizer.folder.BulkFolderField;
@@ -75,20 +77,26 @@ import com.openexchange.folder.json.FolderFieldRegistry;
 import com.openexchange.folder.json.services.ServiceRegistry;
 import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
+import com.openexchange.folderstorage.FolderPath;
 import com.openexchange.folderstorage.FolderPermissionType;
 import com.openexchange.folderstorage.FolderProperty;
+import com.openexchange.folderstorage.FolderResponse;
+import com.openexchange.folderstorage.FolderService;
+import com.openexchange.folderstorage.FolderServiceDecorator;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.Permissions;
 import com.openexchange.folderstorage.Type;
 import com.openexchange.folderstorage.UserizedFolder;
+import com.openexchange.folderstorage.database.contentType.InfostoreContentType;
 import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.java.Streams;
+import com.openexchange.java.Strings;
 import com.openexchange.java.util.Tools;
 import com.openexchange.publish.PublicationTarget;
 import com.openexchange.publish.PublicationTargetDiscoveryService;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.subscribe.SubscriptionSource;
 import com.openexchange.subscribe.SubscriptionSourceDiscoveryService;
+import com.openexchange.tools.session.ServerSession;
 import gnu.trove.ConcurrentTIntObjectHashMap;
 import gnu.trove.list.TIntList;
 import gnu.trove.list.array.TIntArrayList;
@@ -116,6 +124,133 @@ public final class FolderWriter {
         super();
     }
 
+    private static final class OriginPathFolderFieldWriter implements FolderFieldWriter {
+
+        private static final String USER_INFOSTORE_FOLDER_ID   = Integer.toString(FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID);
+        private static final String PUBLIC_INFOSTORE_FOLDER_ID = Integer.toString(FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID);
+        private static final String TREE_ID = "1";
+
+        /**
+         * Initializes a new {@link OriginPathFolderFieldWriter}.
+         */
+        OriginPathFolderFieldWriter() {
+            super();
+        }
+
+        @Override
+        public void writeField(JSONValuePutter jsonPutter, UserizedFolder theFolder, Map<String, Object> state, ServerSession session) throws JSONException {
+            FolderPath originPath = theFolder.getOriginPath();
+            if (null == originPath) {
+                jsonPutter.put(jsonPutter.withKey() ? FolderField.ORIGIN.getName() : null, JSONObject.NULL);
+                return;
+            }
+
+            try {
+                String folderId;
+                switch (originPath.getType()) {
+                    case PRIVATE:
+                        folderId = getInfoStoreDefaultFolder(state, session).getID();
+                        break;
+                    case PUBLIC:
+                        folderId = PUBLIC_INFOSTORE_FOLDER_ID;
+                        break;
+                    case SHARED:
+                        folderId = USER_INFOSTORE_FOLDER_ID;
+                        break;
+                    case UNDEFINED: /* fall-through */
+                    default:
+                        folderId = getInfoStoreDefaultFolder(state, session).getID();
+                        originPath = FolderPath.EMPTY_PATH;
+                }
+
+                UserizedFolder folder = getFolderFor(folderId, state, session);
+                Locale locale = session.getUser().getLocale();
+                StringBuilder sb = new StringBuilder();
+                sb.append(folder.getLocalizedName(locale));
+
+                if (!originPath.isEmpty()) {
+                    boolean searchInSubfolders = true;
+                    for (String folderName : originPath.getPathForRestore()) {
+                        boolean found = false;
+                        if (searchInSubfolders) {
+                            UserizedFolder[] subfolders = getSuboldersFor(folderId, state, session);
+                            for (int i = 0; !found && i < subfolders.length; i++) {
+                                UserizedFolder subfolder = subfolders[i];
+                                if (folderName.equals(subfolder.getName())) {
+                                    found = true;
+                                    sb.append("/").append(subfolder.getLocalizedName(locale));
+                                    folder = subfolder;
+                                }
+                            }
+                        }
+
+                        if (false == found) {
+                            sb.append("/").append(folderName);
+                            searchInSubfolders = false;
+                        }
+                    }
+                }
+
+                jsonPutter.put(jsonPutter.withKey() ? FolderField.ORIGIN.getName() : null, sb.toString());
+            } catch (OXException e) {
+                LOG.debug("Failed to determine original path", e);
+                jsonPutter.put(jsonPutter.withKey() ? FolderField.ORIGIN.getName() : null, JSONObject.NULL);
+            }
+        }
+
+        private UserizedFolder getInfoStoreDefaultFolder(Map<String, Object> state, ServerSession session) throws OXException {
+            UserizedFolder defaultFolder = (UserizedFolder) state.get("__personal__");
+            if (null == defaultFolder) {
+                FolderServiceDecorator decorator = initDecorator(session);
+                FolderService folderService = ServiceRegistry.getInstance().getService(FolderService.class, true);
+                defaultFolder = folderService.getDefaultFolder(session.getUser(), TREE_ID, InfostoreContentType.getInstance(), session, decorator);
+                state.put(defaultFolder.getID(), defaultFolder);
+                state.put("__personal__", defaultFolder);
+            }
+            return defaultFolder;
+        }
+
+        private UserizedFolder getFolderFor(String folderId, Map<String, Object> state, ServerSession session) throws OXException {
+            UserizedFolder folder = (UserizedFolder) state.get(folderId);
+            if (null == folder) {
+                FolderServiceDecorator decorator = initDecorator(session);
+                FolderService folderService = ServiceRegistry.getInstance().getService(FolderService.class, true);
+                folder = folderService.getFolder(TREE_ID, folderId, session, decorator);
+                state.put(folderId, folder);
+            }
+            return folder;
+        }
+
+        private UserizedFolder[] getSuboldersFor(String folderId, Map<String, Object> state, ServerSession session) throws OXException {
+            String key = "sub_" + folderId;
+            UserizedFolder[] subfolders = (UserizedFolder[]) state.get(key);
+            if (null == subfolders) {
+                FolderServiceDecorator decorator = initDecorator(session);
+                FolderService folderService = ServiceRegistry.getInstance().getService(FolderService.class, true);
+                FolderResponse<UserizedFolder[]> subfolderResponse = folderService.getSubfolders(TREE_ID, folderId, true, session, decorator);
+                subfolders = subfolderResponse.getResponse();
+                state.put(key, subfolders);
+            }
+            return subfolders;
+        }
+
+        /**
+         * Creates and initializes a folder service decorator ready to use with calls to the underlying folder service.
+         *
+         * @return A new folder service decorator
+         */
+        private FolderServiceDecorator initDecorator(ServerSession session) {
+            FolderServiceDecorator decorator = new FolderServiceDecorator();
+            Object connection = session.getParameter(Connection.class.getName());
+            if (null != connection) {
+                decorator.put(Connection.class.getName(), connection);
+            }
+            decorator.put("altNames", Boolean.TRUE.toString());
+            decorator.setLocale(session.getUser().getLocale());
+            return decorator;
+        }
+    }
+
     /**
      * {@link AdditionalFolderFieldWriter}
      *
@@ -139,7 +274,7 @@ public final class FolderWriter {
         }
 
         @Override
-        public void writeField(final JSONValuePutter jsonPutter, final UserizedFolder folder) throws JSONException {
+        public void writeField(final JSONValuePutter jsonPutter, final UserizedFolder folder, Map<String, Object> state, ServerSession session) throws JSONException {
             FolderObject fo = turnIntoFolderObject(folder);
             Object value = aff.getValue(fo, requestData.getSession());
             jsonPutter.put(jsonPutter.withKey() ? aff.getColumnName() : null, aff.renderJSON(requestData, value));
@@ -303,17 +438,21 @@ public final class FolderWriter {
          *
          * @param jsonValue The JSON value
          * @param folder The folder
+         * @param state A state useful for caching
+         * @param session The associated session
          * @throws JSONException If a JSON error occurs
          * @throws NecessaryValueMissingException If a necessary value is missing; such as identifier
          */
-        void writeField(JSONValuePutter jsonValue, UserizedFolder folder) throws JSONException;
+        void writeField(JSONValuePutter jsonValue, UserizedFolder folder, Map<String, Object> state, ServerSession session) throws JSONException;
     }
 
     protected static final FolderFieldWriter UNKNOWN_FIELD_FFW = new FolderFieldWriter() {
 
+        private final String name = "unknown_field";
+
         @Override
-        public void writeField(final JSONValuePutter jsonValue, final UserizedFolder folder) throws JSONException {
-            jsonValue.put("unknown_field", JSONObject.NULL);
+        public void writeField(final JSONValuePutter jsonValue, final UserizedFolder folder, Map<String, Object> state, ServerSession session) throws JSONException {
+            jsonValue.put(jsonValue.withKey() ? name : null, JSONObject.NULL);
         }
     };
 
@@ -326,7 +465,7 @@ public final class FolderWriter {
         m.put(FolderField.ID.getColumn(), new FolderFieldWriter() {
 
             @Override
-            public void writeField(final JSONValuePutter jsonPutter, final UserizedFolder folder) throws JSONException {
+            public void writeField(final JSONValuePutter jsonPutter, final UserizedFolder folder, Map<String, Object> state, ServerSession session) throws JSONException {
                 final String id = folder.getID();
                 if (null == id) {
                     throw new NecessaryValueMissingException("Missing folder identifier.");
@@ -337,7 +476,7 @@ public final class FolderWriter {
         m.put(FolderField.CREATED_BY.getColumn(), new FolderFieldWriter() {
 
             @Override
-            public void writeField(final JSONValuePutter jsonPutter, final UserizedFolder folder) throws JSONException {
+            public void writeField(final JSONValuePutter jsonPutter, final UserizedFolder folder, Map<String, Object> state, ServerSession session) throws JSONException {
                 final int createdBy = folder.getCreatedBy();
                 jsonPutter.put(jsonPutter.withKey() ? FolderField.CREATED_BY.getName() : null, -1 == createdBy ? JSONObject.NULL : Integer.valueOf(createdBy));
             }
@@ -345,7 +484,7 @@ public final class FolderWriter {
         m.put(FolderField.MODIFIED_BY.getColumn(), new FolderFieldWriter() {
 
             @Override
-            public void writeField(final JSONValuePutter jsonPutter, final UserizedFolder folder) throws JSONException {
+            public void writeField(final JSONValuePutter jsonPutter, final UserizedFolder folder, Map<String, Object> state, ServerSession session) throws JSONException {
                 final int modifiedBy = folder.getModifiedBy();
                 jsonPutter.put(jsonPutter.withKey() ? FolderField.MODIFIED_BY.getName() : null, -1 == modifiedBy ? JSONObject.NULL : Integer.valueOf(modifiedBy));
             }
@@ -353,7 +492,7 @@ public final class FolderWriter {
         m.put(FolderField.CREATION_DATE.getColumn(), new FolderFieldWriter() {
 
             @Override
-            public void writeField(final JSONValuePutter jsonPutter, final UserizedFolder folder) throws JSONException {
+            public void writeField(final JSONValuePutter jsonPutter, final UserizedFolder folder, Map<String, Object> state, ServerSession session) throws JSONException {
                 final Date d = folder.getCreationDate();
                 jsonPutter.put(jsonPutter.withKey() ? FolderField.CREATION_DATE.getName() : null, null == d ? JSONObject.NULL : Long.valueOf(d.getTime()));
             }
@@ -361,7 +500,7 @@ public final class FolderWriter {
         m.put(FolderField.LAST_MODIFIED.getColumn(), new FolderFieldWriter() {
 
             @Override
-            public void writeField(final JSONValuePutter jsonPutter, final UserizedFolder folder) throws JSONException {
+            public void writeField(final JSONValuePutter jsonPutter, final UserizedFolder folder, Map<String, Object> state, ServerSession session) throws JSONException {
                 final Date d = folder.getLastModified();
                 jsonPutter.put(jsonPutter.withKey() ? FolderField.LAST_MODIFIED.getName() : null, null == d ? JSONObject.NULL : Long.valueOf(d.getTime()));
             }
@@ -369,7 +508,7 @@ public final class FolderWriter {
         m.put(FolderField.LAST_MODIFIED_UTC.getColumn(), new FolderFieldWriter() {
 
             @Override
-            public void writeField(final JSONValuePutter jsonPutter, final UserizedFolder folder) throws JSONException {
+            public void writeField(final JSONValuePutter jsonPutter, final UserizedFolder folder, Map<String, Object> state, ServerSession session) throws JSONException {
                 final Date d = folder.getLastModifiedUTC();
                 jsonPutter.put(jsonPutter.withKey() ? FolderField.LAST_MODIFIED_UTC.getName() : null, null == d ? JSONObject.NULL : Long.valueOf(d.getTime()));
             }
@@ -377,7 +516,7 @@ public final class FolderWriter {
         m.put(FolderField.FOLDER_ID.getColumn(), new FolderFieldWriter() {
 
             @Override
-            public void writeField(final JSONValuePutter jsonPutter, final UserizedFolder folder) throws JSONException {
+            public void writeField(final JSONValuePutter jsonPutter, final UserizedFolder folder, Map<String, Object> state, ServerSession session) throws JSONException {
                 final String pid = folder.getParentID();
                 jsonPutter.put(jsonPutter.withKey() ? FolderField.FOLDER_ID.getName() : null, pid);
             }
@@ -385,7 +524,7 @@ public final class FolderWriter {
         m.put(FolderField.ACCOUNT_ID.getColumn(), new FolderFieldWriter() {
 
             @Override
-            public void writeField(final JSONValuePutter jsonPutter, final UserizedFolder folder) throws JSONException {
+            public void writeField(final JSONValuePutter jsonPutter, final UserizedFolder folder, Map<String, Object> state, ServerSession session) throws JSONException {
                 final String accountId = folder.getAccountID();
                 jsonPutter.put(jsonPutter.withKey() ? FolderField.ACCOUNT_ID.getName() : null, accountId == null ? JSONObject.NULL : accountId);
             }
@@ -393,7 +532,7 @@ public final class FolderWriter {
         m.put(FolderField.FOLDER_NAME.getColumn(), new FolderFieldWriter() {
 
             @Override
-            public void writeField(final JSONValuePutter jsonPutter, final UserizedFolder folder) throws JSONException {
+            public void writeField(final JSONValuePutter jsonPutter, final UserizedFolder folder, Map<String, Object> state, ServerSession session) throws JSONException {
                 final Locale locale = folder.getLocale();
                 if (folder.supportsAltName()) {
                     jsonPutter.put(jsonPutter.withKey() ? FolderField.FOLDER_NAME.getName() : null, folder.getLocalizedName(locale == null ? DEFAULT_LOCALE : locale, folder.isAltNames()));
@@ -405,22 +544,36 @@ public final class FolderWriter {
         m.put(FolderField.FOLDER_NAME_RAW.getColumn(), new FolderFieldWriter() {
 
             @Override
-            public void writeField(final JSONValuePutter jsonPutter, final UserizedFolder folder) throws JSONException {
+            public void writeField(final JSONValuePutter jsonPutter, final UserizedFolder folder, Map<String, Object> state, ServerSession session) throws JSONException {
                 jsonPutter.put(jsonPutter.withKey() ? FolderField.FOLDER_NAME_RAW.getName() : null, folder.getName());
             }
         });
+        m.put(FolderField.ORIGIN.getColumn(), new OriginPathFolderFieldWriter());
         m.put(FolderField.MODULE.getColumn(), new FolderFieldWriter() {
 
             @Override
-            public void writeField(final JSONValuePutter jsonPutter, final UserizedFolder folder) throws JSONException {
+            public void writeField(final JSONValuePutter jsonPutter, final UserizedFolder folder, Map<String, Object> state, ServerSession session) throws JSONException {
                 final ContentType obj = folder.getContentType();
-                jsonPutter.put(jsonPutter.withKey() ? FolderField.MODULE.getName() : null, null == obj ? JSONObject.NULL : obj.toString());
+                Object value;
+                if (null == obj) {
+                    value = JSONObject.NULL;
+                } else {
+                    int optFolderId;
+                    try {
+                        optFolderId = Integer.parseInt(folder.getID());
+                    } catch (NumberFormatException | NullPointerException e) {
+                        optFolderId = 0;
+                    }
+                    String module = AJAXServlet.getModuleString(obj.getModule(), optFolderId);
+                    value = Strings.isEmpty(module) ? obj.toString() : module;
+                }
+                jsonPutter.put(jsonPutter.withKey() ? FolderField.MODULE.getName() : null, value);
             }
         });
         m.put(FolderField.TYPE.getColumn(), new FolderFieldWriter() {
 
             @Override
-            public void writeField(final JSONValuePutter jsonPutter, final UserizedFolder folder) throws JSONException {
+            public void writeField(final JSONValuePutter jsonPutter, final UserizedFolder folder, Map<String, Object> state, ServerSession session) throws JSONException {
                 final Type obj = folder.getType();
                 jsonPutter.put(jsonPutter.withKey() ? FolderField.TYPE.getName() : null, null == obj ? JSONObject.NULL : Integer.valueOf(obj.getType()));
             }
@@ -428,7 +581,7 @@ public final class FolderWriter {
         m.put(FolderField.SUBFOLDERS.getColumn(), new FolderFieldWriter() {
 
             @Override
-            public void writeField(final JSONValuePutter jsonPutter, final UserizedFolder folder) throws JSONException {
+            public void writeField(final JSONValuePutter jsonPutter, final UserizedFolder folder, Map<String, Object> state, ServerSession session) throws JSONException {
                 final String[] obj = folder.getSubfolderIDs();
                 if (null == obj) {
                     LOG.warn("Got null as subfolders for folder {}. Marking this folder to hold subfolders...", folder.getID());
@@ -441,7 +594,7 @@ public final class FolderWriter {
         m.put(FolderField.OWN_RIGHTS.getColumn(), new FolderFieldWriter() {
 
             @Override
-            public void writeField(final JSONValuePutter jsonPutter, final UserizedFolder folder) throws JSONException {
+            public void writeField(final JSONValuePutter jsonPutter, final UserizedFolder folder, Map<String, Object> state, ServerSession session) throws JSONException {
                 final int bits = folder.getBits();
                 if (bits < 0) {
                     final Permission obj = folder.getOwnPermission();
@@ -460,7 +613,7 @@ public final class FolderWriter {
         m.put(FolderField.PERMISSIONS_BITS.getColumn(), new FolderFieldWriter() {
 
             @Override
-            public void writeField(final JSONValuePutter jsonPutter, final UserizedFolder folder) throws JSONException {
+            public void writeField(final JSONValuePutter jsonPutter, final UserizedFolder folder, Map<String, Object> state, ServerSession session) throws JSONException {
                 final JSONArray ja;
                 {
                     final Permission[] obj = folder.getPermissions();
@@ -486,7 +639,7 @@ public final class FolderWriter {
         m.put(FolderField.SUMMARY.getColumn(), new FolderFieldWriter() {
 
             @Override
-            public void writeField(final JSONValuePutter jsonPutter, final UserizedFolder folder) throws JSONException {
+            public void writeField(final JSONValuePutter jsonPutter, final UserizedFolder folder, Map<String, Object> state, ServerSession session) throws JSONException {
                 final String obj = folder.getSummary();
                 jsonPutter.put(jsonPutter.withKey() ? FolderField.SUMMARY.getName() : null, null == obj ? JSONObject.NULL : obj);
             }
@@ -494,21 +647,21 @@ public final class FolderWriter {
         m.put(FolderField.STANDARD_FOLDER.getColumn(), new FolderFieldWriter() {
 
             @Override
-            public void writeField(final JSONValuePutter jsonPutter, final UserizedFolder folder) throws JSONException {
+            public void writeField(final JSONValuePutter jsonPutter, final UserizedFolder folder, Map<String, Object> state, ServerSession session) throws JSONException {
                 jsonPutter.put(jsonPutter.withKey() ? FolderField.STANDARD_FOLDER.getName() : null, Boolean.valueOf(folder.isDefault()));
             }
         });
         m.put(FolderField.STANDARD_FOLDER_TYPE.getColumn(), new FolderFieldWriter() {
 
             @Override
-            public void writeField(final JSONValuePutter jsonPutter, final UserizedFolder folder) throws JSONException {
+            public void writeField(final JSONValuePutter jsonPutter, final UserizedFolder folder, Map<String, Object> state, ServerSession session) throws JSONException {
                 jsonPutter.put(jsonPutter.withKey() ? FolderField.STANDARD_FOLDER_TYPE.getName() : null, Integer.valueOf(folder.getDefaultType()));
             }
         });
         m.put(FolderField.TOTAL.getColumn(), new FolderFieldWriter() {
 
             @Override
-            public void writeField(final JSONValuePutter jsonPutter, final UserizedFolder folder) throws JSONException {
+            public void writeField(final JSONValuePutter jsonPutter, final UserizedFolder folder, Map<String, Object> state, ServerSession session) throws JSONException {
                 final int obj = folder.getTotal();
                 jsonPutter.put(jsonPutter.withKey() ? FolderField.TOTAL.getName() : null, -1 == obj ? JSONObject.NULL : Integer.valueOf(obj));
             }
@@ -516,7 +669,7 @@ public final class FolderWriter {
         m.put(FolderField.NEW.getColumn(), new FolderFieldWriter() {
 
             @Override
-            public void writeField(final JSONValuePutter jsonPutter, final UserizedFolder folder) throws JSONException {
+            public void writeField(final JSONValuePutter jsonPutter, final UserizedFolder folder, Map<String, Object> state, ServerSession session) throws JSONException {
                 final int obj = folder.getNew();
                 jsonPutter.put(jsonPutter.withKey() ? FolderField.NEW.getName() : null, -1 == obj ? JSONObject.NULL : Integer.valueOf(obj));
             }
@@ -524,7 +677,7 @@ public final class FolderWriter {
         m.put(FolderField.UNREAD.getColumn(), new FolderFieldWriter() {
 
             @Override
-            public void writeField(final JSONValuePutter jsonPutter, final UserizedFolder folder) throws JSONException {
+            public void writeField(final JSONValuePutter jsonPutter, final UserizedFolder folder, Map<String, Object> state, ServerSession session) throws JSONException {
                 final int obj = folder.getUnread();
                 jsonPutter.put(jsonPutter.withKey() ? FolderField.UNREAD.getName() : null, -1 == obj ? JSONObject.NULL : Integer.valueOf(obj));
             }
@@ -532,7 +685,7 @@ public final class FolderWriter {
         m.put(FolderField.DELETED.getColumn(), new FolderFieldWriter() {
 
             @Override
-            public void writeField(final JSONValuePutter jsonPutter, final UserizedFolder folder) throws JSONException {
+            public void writeField(final JSONValuePutter jsonPutter, final UserizedFolder folder, Map<String, Object> state, ServerSession session) throws JSONException {
                 final int obj = folder.getDeleted();
                 jsonPutter.put(jsonPutter.withKey() ? FolderField.DELETED.getName() : null, -1 == obj ? JSONObject.NULL : Integer.valueOf(obj));
             }
@@ -540,14 +693,14 @@ public final class FolderWriter {
         m.put(FolderField.SUBSCRIBED.getColumn(), new FolderFieldWriter() {
 
             @Override
-            public void writeField(final JSONValuePutter jsonPutter, final UserizedFolder folder) throws JSONException {
+            public void writeField(final JSONValuePutter jsonPutter, final UserizedFolder folder, Map<String, Object> state, ServerSession session) throws JSONException {
                 jsonPutter.put(jsonPutter.withKey() ? FolderField.SUBSCRIBED.getName() : null, Boolean.valueOf(folder.isSubscribed()));
             }
         });
         m.put(FolderField.SUBSCR_SUBFLDS.getColumn(), new FolderFieldWriter() {
 
             @Override
-            public void writeField(final JSONValuePutter jsonPutter, final UserizedFolder folder) throws JSONException {
+            public void writeField(final JSONValuePutter jsonPutter, final UserizedFolder folder, Map<String, Object> state, ServerSession session) throws JSONException {
                 /*-
                  *
                 final String[] obj = folder.getSubfolderIDs();
@@ -560,7 +713,7 @@ public final class FolderWriter {
         m.put(FolderField.CAPABILITIES.getColumn(), new FolderFieldWriter() {
 
             @Override
-            public void writeField(final JSONValuePutter jsonPutter, final UserizedFolder folder) throws JSONException {
+            public void writeField(final JSONValuePutter jsonPutter, final UserizedFolder folder, Map<String, Object> state, ServerSession session) throws JSONException {
                 final int caps = folder.getCapabilities();
                 jsonPutter.put(jsonPutter.withKey() ? FolderField.CAPABILITIES.getName() : null, -1 == caps ? JSONObject.NULL : Integer.valueOf(caps));
             }
@@ -568,7 +721,7 @@ public final class FolderWriter {
         // Meta
         m.put(FolderField.META.getColumn(), new FolderFieldWriter() {
             @Override
-            public void writeField(final JSONValuePutter jsonPutter, final UserizedFolder folder) throws JSONException {
+            public void writeField(final JSONValuePutter jsonPutter, final UserizedFolder folder, Map<String, Object> state, ServerSession session) throws JSONException {
                 // Get meta map
                 Map<String, Object> map = folder.getMeta();
                 jsonPutter.put(jsonPutter.withKey() ? FolderField.META.getName() : null, null == map || map.isEmpty() ? JSONObject.NULL : JSONCoercion.coerceToJSON(map));
@@ -579,7 +732,7 @@ public final class FolderWriter {
         m.put(FolderField.SUPPORTED_CAPABILITIES.getColumn(), new FolderFieldWriter() {
 
             @Override
-            public void writeField(final JSONValuePutter jsonPutter, final UserizedFolder folder) throws JSONException {
+            public void writeField(final JSONValuePutter jsonPutter, final UserizedFolder folder, Map<String, Object> state, ServerSession session) throws JSONException {
                 final Set<String> caps = getSupportedCapabilities(folder);
                 jsonPutter.put(jsonPutter.withKey() ? FolderField.SUPPORTED_CAPABILITIES.getName() : null, null == caps ? JSONObject.NULL : new JSONArray(caps));
             }
@@ -679,18 +832,18 @@ public final class FolderWriter {
             }
             ffws[i] = ffw;
         }
-        ConcurrentMap<String, Object> params = null;
+
+        ServerSession session = requestData.getSession();
+        Map<String, Object> state = new HashMap<String, Object>();
         try {
             final JSONArray jsonArray = new JSONArray(folders.length);
             final JSONArrayPutter jsonPutter = new JSONArrayPutter(null);
-            // params = jsonPutter.parameters();
             for (final UserizedFolder folder : folders) {
-                // folder.setParameters(params);
                 try {
                     final JSONArray folderArray = new JSONArray(ffws.length);
                     jsonPutter.setJSONArray(folderArray);
                     for (final FolderFieldWriter ffw : ffws) {
-                        ffw.writeField(jsonPutter, folder);
+                        ffw.writeField(jsonPutter, folder, state, session);
                     }
                     jsonArray.put(folderArray);
                 } catch (final NecessaryValueMissingException e) {
@@ -700,14 +853,6 @@ public final class FolderWriter {
             return jsonArray;
         } catch (final JSONException e) {
             throw FolderExceptionErrorMessage.JSON_ERROR.create(e, e.getMessage());
-        } finally {
-            if (params != null) {
-                for (final Object param : params.values()) {
-                    if (param instanceof Closeable) {
-                        Streams.close((Closeable) param);
-                    }
-                }
-            }
         }
     }
 
@@ -738,28 +883,20 @@ public final class FolderWriter {
             }
             ffws[i] = ffw;
         }
-        ConcurrentMap<String, Object> params = null;
+
+        ServerSession session = requestData.getSession();
+        Map<String, Object> state = new HashMap<String, Object>();
         try {
             final JSONObject jsonObject = new JSONObject(ffws.length);
             final JSONValuePutter jsonPutter = new JSONObjectPutter(jsonObject, null);
-            // params = jsonPutter.parameters();
             for (final FolderFieldWriter ffw : ffws) {
-                // folder.setParameters(params);
-                ffw.writeField(jsonPutter, folder);
+                ffw.writeField(jsonPutter, folder, state, session);
             }
             return jsonObject;
         } catch (final JSONException e) {
             throw FolderExceptionErrorMessage.JSON_ERROR.create(e, e.getMessage());
         } catch (final NecessaryValueMissingException e) {
             throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
-        } finally {
-            if (params != null) {
-                for (final Object param : params.values()) {
-                    if (param instanceof Closeable) {
-                        Streams.close((Closeable) param);
-                    }
-                }
-            }
         }
     }
 
@@ -767,6 +904,7 @@ public final class FolderWriter {
         final TIntList list = new TIntArrayList();
         list.add(ALL_FIELDS);
         list.add(additionalFolderFieldList.getKnownFields());
+        list.addAll(FolderFieldRegistry.getInstance().getFields().keys());
         return list.toArray();
     }
 
@@ -788,9 +926,9 @@ public final class FolderWriter {
         }
 
         @Override
-        public void writeField(final JSONValuePutter jsonPutter, final UserizedFolder folder) throws JSONException {
+        public void writeField(final JSONValuePutter jsonPutter, final UserizedFolder folder, Map<String, Object> state, ServerSession session) throws JSONException {
             final FolderProperty property = folder.getProperties().get(field);
-            jsonPutter.put(jsonPutter.withKey() ? name : null, null == property ? field.getDefaultValue() : property.getValue());
+            jsonPutter.put(jsonPutter.withKey() ? name : null, field.write(property));
         }
 
     }
@@ -800,7 +938,7 @@ public final class FolderWriter {
     private static FolderFieldWriter getPropertyByField(final int field, final TIntObjectMap<com.openexchange.folderstorage.FolderField> fields) {
         final com.openexchange.folderstorage.FolderField fieldNamePair = fields.get(field);
         if (null == fieldNamePair) {
-            LOG.warn("Unknown field: {}", field, new Throwable());
+            LOG.warn("Client requested an unknown field: {}", Integer.valueOf(field));
             return UNKNOWN_FIELD_FFW;
         }
         PropertyFieldWriter pw = PROPERTY_WRITERS.get(field);

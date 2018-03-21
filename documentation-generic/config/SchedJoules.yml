@@ -1,0 +1,35 @@
+feature_name: SchedJoules
+properties:
+    - key: com.openexchange.calendar.schedjoules.apiKey
+      description: |
+        Specifies the SchedJoules API key
+      defaultValue: <none>
+      version: 7.10.0
+      reloadable: true
+      configcascadeAware: true
+      related: 
+      file: schedjoules.properties
+      packageName: open-xchange-subscribe
+      tags: ["Calendar", "SchedJoules"]
+    - key: com.openexchange.calendar.schedjoules.itemBlacklist
+      description: |
+        Defines a comma separated blacklist for itemIds of SchedJoules calendars and pages that should be hidden from the end user.
+      defaultValue: <none>
+      version: 7.10.0
+      reloadable: true
+      configcascadeAware: false
+      related: 
+      file: schedjoules.properties
+      packageName: open-xchange-subscribe
+      tags: ["Calendar", "SchedJoules"]
+    - key: com.openexchange.calendar.schedjoules.refreshInterval
+      description: |
+        The refresh interval of subscriptions in milliseconds.
+      defaultValue: 604800000
+      version: 7.10.0
+      reloadable: true
+      configcascadeAware: true
+      related: 
+      file: schedjoules.properties
+      packageName: open-xchange-subscribe
+      tags: ["Calendar", "SchedJoules"]

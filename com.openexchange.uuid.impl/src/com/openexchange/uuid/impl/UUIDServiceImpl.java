@@ -49,7 +49,6 @@
 package com.openexchange.uuid.impl;
 
 import java.util.UUID;
-
 import com.openexchange.eav.UUIDService;
 
 /**

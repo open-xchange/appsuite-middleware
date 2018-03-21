@@ -50,8 +50,6 @@
 package com.openexchange.unifiedinbox;
 
 import static com.openexchange.mail.dataobjects.MailFolder.DEFAULT_FOLDER_ID;
-import gnu.trove.iterator.TIntObjectIterator;
-import gnu.trove.map.TIntObjectMap;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -101,6 +99,7 @@ import com.openexchange.mail.search.SearchTerm;
 import com.openexchange.mail.threader.Conversation;
 import com.openexchange.mail.threader.Conversations;
 import com.openexchange.mail.utils.MailMessageComparator;
+import com.openexchange.mail.utils.MailMessageComparatorFactory;
 import com.openexchange.mail.utils.MessageUtility;
 import com.openexchange.mail.utils.StorageUtility;
 import com.openexchange.mailaccount.MailAccount;
@@ -119,6 +118,8 @@ import com.openexchange.unifiedinbox.utility.LoggingCallable;
 import com.openexchange.unifiedinbox.utility.UnifiedInboxCompletionService;
 import com.openexchange.unifiedinbox.utility.UnifiedInboxUtility;
 import com.openexchange.user.UserService;
+import gnu.trove.iterator.TIntObjectIterator;
+import gnu.trove.map.TIntObjectMap;
 
 /**
  * {@link UnifiedInboxMessageStorage} - The Unified Mail message storage implementation.
@@ -715,7 +716,6 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
         if (UnifiedInboxAccess.KNOWN_FOLDERS.contains(fullName)) {
             List<MailAccount> accounts = getAccounts();
             final int undelegatedAccountId = access.getAccountId();
-            boolean descending = OrderDirection.DESC.equals(order);
             MailSortField effectiveSortField = null == sortField ? MailSortField.RECEIVED_DATE :  sortField;
             MailFields mfs = new MailFields(mailFieldz);
             mfs.add(MailField.getField(effectiveSortField.getField()));
@@ -825,8 +825,6 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
                              */
                             MailMessage[] msgArr;
                             try {
-                                int allSort = MailSortField.RECEIVED_DATE.getField();
-                                int allOrder = OrderDirection.DESC.getOrder();
                                 msgArr = messageStorage.getThreadSortedMessages(fn, applicableRange, sortField, order, null, checkedFields);
                             } catch (OXException e) {
                                 msgArr = messageStorage.getAllMessages(fn, applicableRange, sortField, order, checkedFields);
@@ -861,12 +859,8 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
                             /*
                              * Sort root elements
                              */
-                            boolean descending = OrderDirection.DESC.equals(order);
                             MailSortField effectiveSortField = null == sortField ? MailSortField.RECEIVED_DATE :  sortField;
-                            if (null == effectiveSortField) {
-                                effectiveSortField = MailSortField.RECEIVED_DATE;
-                            }
-                            final MailMessageComparator comparator = new MailMessageComparator(effectiveSortField, descending, null, mailAccess.getMailConfig().getMailProperties().isUserFlagsEnabled());
+                            final MailMessageComparator comparator = MailMessageComparatorFactory.createComparator(effectiveSortField, order, getLocale(), getSession(), mailAccess.getMailConfig().getMailProperties().isUserFlagsEnabled());
                             Comparator<List<MailMessage>> listComparator = new Comparator<List<MailMessage>>() {
 
                                 @Override
@@ -928,7 +922,7 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
                 LOG.debug("getThreadSortedMessages from folder \"{}\" took {}msec.", fullName, completionService.getDuration());
 
                 // Sort them
-                final MailMessageComparator comparator = new MailMessageComparator(effectiveSortField, descending, null, true);
+                final MailMessageComparator comparator = MailMessageComparatorFactory.createComparator(effectiveSortField, order, locale, session, true);
                 Comparator<List<MailMessage>> listComparator = new Comparator<List<MailMessage>>() {
 
                     @Override
@@ -1117,7 +1111,6 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
         if (UnifiedInboxAccess.KNOWN_FOLDERS.contains(fullName)) {
             List<MailAccount> accounts = getAccounts();
             final int undelegatedAccountId = access.getAccountId();
-            boolean descending = OrderDirection.DESC.equals(order);
             MailSortField effectiveSortField = null == sortField ? MailSortField.RECEIVED_DATE :  sortField;
             MailFields mfs = new MailFields(mailFieldz);
             mfs.add(MailField.getField(effectiveSortField.getField()));
@@ -1193,8 +1186,6 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
                              */
                             MailMessage[] msgArr;
                             try {
-                                int allSort = MailSortField.RECEIVED_DATE.getField();
-                                int allOrder = OrderDirection.DESC.getOrder();
                                 msgArr = messageStorage.getThreadSortedMessages(fn, applicableRange, sortField, order, null, checkedFields);
                             } catch (OXException e) {
                                 msgArr = messageStorage.getAllMessages(fn, applicableRange, sortField, order, checkedFields);
@@ -1229,12 +1220,8 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
                             /*
                              * Sort root elements
                              */
-                            boolean descending = OrderDirection.DESC.equals(order);
                             MailSortField effectiveSortField = null == sortField ? MailSortField.RECEIVED_DATE :  sortField;
-                            if (null == effectiveSortField) {
-                                effectiveSortField = MailSortField.RECEIVED_DATE;
-                            }
-                            final MailMessageComparator comparator = new MailMessageComparator(effectiveSortField, descending, null, mailAccess.getMailConfig().getMailProperties().isUserFlagsEnabled());
+                            final MailMessageComparator comparator = MailMessageComparatorFactory.createComparator(effectiveSortField, order, getLocale(), getSession(), mailAccess.getMailConfig().getMailProperties().isUserFlagsEnabled());
                             Comparator<List<MailMessage>> listComparator = new Comparator<List<MailMessage>>() {
 
                                 @Override
@@ -1289,7 +1276,7 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
                 LOG.debug("getThreadSortedMessages from folder \"{}\" took {}msec.", fullName, completionService.getDuration());
 
                 // Sort them
-                final MailMessageComparator comparator = new MailMessageComparator(effectiveSortField, descending, null, true);
+                final MailMessageComparator comparator = MailMessageComparatorFactory.createComparator(effectiveSortField, order, locale, session, true);
                 Comparator<List<MailMessage>> listComparator = new Comparator<List<MailMessage>>() {
 
                     @Override
@@ -1486,7 +1473,7 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
     }
 
     private Comparator<List<MailMessage>> getListComparator(final MailSortField sortField, final OrderDirection order, Locale locale, boolean userFlagsEnabled) {
-        final MailMessageComparator comparator = new MailMessageComparator(sortField, OrderDirection.DESC.equals(order), locale, userFlagsEnabled);
+        final MailMessageComparator comparator = MailMessageComparatorFactory.createComparator(sortField, order, locale, this.session, userFlagsEnabled);
         Comparator<List<MailMessage>> listComparator = new Comparator<List<MailMessage>>() {
 
             @Override
@@ -1511,27 +1498,6 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
         return listComparator;
     }
 
-    /**
-     * Sets account ID and name in given instances of {@link MailMessage}.
-     *
-     * @param mailMessages The {@link MailMessage} instances
-     * @return The given instances of {@link MailMessage} each with account ID and name set
-     * @throws OXException If mail account cannot be obtained
-     */
-    private <C extends Collection<MailMessage>, W extends Collection<C>> W setAccountInfo2(W col, MailAccount account) throws OXException {
-        String name = account.getName();
-        int id = account.getId();
-        for (C mailMessages : col) {
-            for (MailMessage mailMessage : mailMessages) {
-                if (null != mailMessage) {
-                    mailMessage.setAccountId(id);
-                    mailMessage.setAccountName(name);
-                }
-            }
-        }
-        return col;
-    }
-
     @Override
     public MailMessage[] getThreadSortedMessages(final String fullName, IndexRange indexRange, MailSortField sortField, OrderDirection order, final SearchTerm<?> searchTerm, MailField[] fieldz) throws OXException {
         if (DEFAULT_FOLDER_ID.equals(fullName)) {
@@ -1548,7 +1514,6 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
             // Create completion service for simultaneous access
             int length = accounts.size();
             final int undelegatedAccountId = access.getAccountId();
-            Executor executor = ThreadPools.getThreadPool().getExecutor();
             UnifiedInboxCompletionService<List<MailMessage>> completionService = new UnifiedInboxCompletionService<>(ThreadPools.getThreadPool());
             for (final MailAccount mailAccount : accounts) {
                 Session session = this.session;
@@ -1614,7 +1579,7 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
                 LOG.debug("Searching messages from folder \"{}\" took {}msec.", fullName, completionService.getDuration());
 
                 // Sort them
-                MailMessageComparator c = new MailMessageComparator(sortField, OrderDirection.DESC.equals(order), getLocale(), true);
+                MailMessageComparator c = MailMessageComparatorFactory.createComparator(sortField, order, getLocale(), this.session, true);
                 Collections.sort(messages, c);
                 // Return as array
                 if (null == indexRange) {
@@ -1828,14 +1793,15 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
             ContinuationRegistryService continuationRegistry = Services.optService(ContinuationRegistryService.class);
             if (null != continuationRegistry && mfs.contains(MailField.SUPPORTS_CONTINUATION) && !mfs.contains(MailField.FULL) && !mfs.contains(MailField.BODY)) {
                 ExecutorContinuation<MailMessage> executorContinuation;
+                MailMessageComparator comparator = MailMessageComparatorFactory.createComparator(effectiveSortField, order, locale, session, true);
                 {
                     ContinuationResponseGenerator<MailMessage> responseGenerator = new ContinuationResponseGenerator<MailMessage>() {
 
                         @Override
                         public ContinuationResponse<Collection<MailMessage>> responseFor(List<MailMessage> messages, boolean completed) throws OXException {
                             // Sort them
-                            MailMessageComparator c = new MailMessageComparator(effectiveSortField, OrderDirection.DESC.equals(order), locale, true);
-                            Collections.sort(messages, c);
+
+                            Collections.sort(messages, comparator);
                             // Return as array
                             if (null == indexRange) {
                                 return new ContinuationResponse<Collection<MailMessage>>(messages, null, "mail", completed);
@@ -2092,7 +2058,8 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
                 }
                 LOG.debug("Searching messages from folder \"{}\" took {}msec.", fullName, completionService.getDuration());
                 // Sort them
-                MailMessageComparator c = new MailMessageComparator(effectiveSortField, OrderDirection.DESC.equals(order), locale, true);
+                MailMessageComparator c = MailMessageComparatorFactory.createComparator(effectiveSortField, order, locale, session, true);
+
                 Collections.sort(messages, c);
                 // Return as array
                 if (null == indexRange) {
@@ -2291,7 +2258,8 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
                 LOG.debug("Retrieving unread messages from folder \"{}\" took {}msec.", fullName, completionService.getDuration());
 
                 // Sort them
-                Collections.sort(messages, new MailMessageComparator(sortField, OrderDirection.DESC.equals(order), getLocale(), true));
+                Collections.sort(messages, MailMessageComparatorFactory.createComparator(sortField, order, getLocale(), session, true));
+
                 // Return as array
                 return messages.toArray(new MailMessage[messages.size()]);
             } catch (InterruptedException e) {

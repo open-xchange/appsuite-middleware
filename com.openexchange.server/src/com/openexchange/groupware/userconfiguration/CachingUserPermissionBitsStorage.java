@@ -49,10 +49,6 @@
 
 package com.openexchange.groupware.userconfiguration;
 
-import gnu.trove.list.TIntList;
-import gnu.trove.list.array.TIntArrayList;
-import gnu.trove.map.TIntObjectMap;
-import gnu.trove.map.hash.TIntObjectHashMap;
 import java.sql.Connection;
 import java.util.concurrent.locks.Lock;
 import com.openexchange.cache.registry.CacheAvailabilityListener;
@@ -67,6 +63,10 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.lock.LockService;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.services.ServerServiceRegistry;
+import gnu.trove.list.TIntList;
+import gnu.trove.list.array.TIntArrayList;
+import gnu.trove.map.TIntObjectMap;
+import gnu.trove.map.hash.TIntObjectHashMap;
 
 
 /**

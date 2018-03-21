@@ -53,6 +53,7 @@ import java.util.Set;
 import com.openexchange.capabilities.Capability;
 import com.openexchange.configuration.CookieHashSource;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.util.Tools;
 import com.openexchange.log.LogProperties;
 import com.openexchange.login.ConfigurationProperty;
 import com.openexchange.server.services.ServerServiceRegistry;
@@ -139,7 +140,7 @@ public final class LoginConfiguration {
                 return sessiondAutoLogin;
             }
 
-            ServerConfig config = configService.getServerConfig(hostName, -1, -1);
+            ServerConfig config = configService.getServerConfig(hostName, getUserId(), getContextId());
             Set<Capability> capabilities = config.getCapabilities();
             if (null != capabilities) {
                 return capabilities.contains(CAPABILITY_AUTOLOGIN);
@@ -203,6 +204,36 @@ public final class LoginConfiguration {
 
     public boolean isCheckPunyCodeLoginString() {
         return checkPunyCodeLoginString;
+    }
+
+    // ----------------------------------------------------------------------------------------------------------------------------------------------------------
+
+    /**
+     * Retrieves the context identifier from the {@link LogProperties}
+     *
+     * @return the context identifier from the LogProperties
+     */
+    private int getContextId() {
+        return getLogPropertyValue(LogProperties.Name.SESSION_CONTEXT_ID);
+    }
+
+    /**
+     * Retrieves the user identifier from the {@link LogProperties}
+     *
+     * @return the user identifier from the {@link LogProperties}
+     */
+    private int getUserId() {
+        return getLogPropertyValue(LogProperties.Name.SESSION_USER_ID);
+    }
+
+    /**
+     * Retrieves value of the specified property from the {@link LogProperties}
+     *
+     * @param name The log property's name
+     * @return the property's value
+     */
+    private int getLogPropertyValue(LogProperties.Name name) {
+        return Tools.getUnsignedInteger(LogProperties.get(name));
     }
 
 }

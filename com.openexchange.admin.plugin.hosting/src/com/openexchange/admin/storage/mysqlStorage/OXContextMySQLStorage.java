@@ -1565,7 +1565,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                 Database givenDatabase = ctx.getWriteDatabase();
                 if (null == givenDatabase) {
                     // No database specified
-                    db = utils.getNextDBHandleByWeight(configCon);
+                    db = utils.getNextDBHandleByWeight(configCon, true);
                     // Resolved with respect to schema?
                     String preferredSchema = db.getScheme();
                     if (null != preferredSchema) {
@@ -1648,10 +1648,12 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
             throw new StorageException(e.getMessage(), e);
         } finally {
             if (decrementDatabaseSchemaCount) {
-                try {
-                    contextCommon.updateContextsPerDBSchemaCount(false, db.getScheme(), db, configCon);
-                } catch (Exception e) {
-                    LOG.error("Failed to decrement contexts-per-dbschema count", e);
+                if (null != db) {
+                    try {
+                        contextCommon.updateContextsPerDBSchemaCount(false, db.getScheme(), db, configCon);
+                    } catch (Exception e) {
+                        LOG.error("Failed to decrement contexts-per-dbschema count", e);
+                    }
                 }
             }
             if (decrementDatabaseCount) {
@@ -2705,7 +2707,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
             if (null != cacheService) {
                 try {
                     final Cache jcs = cacheService.getCache("CapabilitiesContext");
-                    final Serializable key = Integer.valueOf(ctx.getId().intValue());
+                    final Serializable key = ctx.getId();
                     jcs.remove(key);
                 } catch (final Exception e) {
                     LOG.error("", e);
@@ -3100,16 +3102,6 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
         }
     }
 
-    private void closeRecordset(final ResultSet rs) {
-        if (null != rs) {
-            try {
-                rs.close();
-            } catch (final SQLException e) {
-                LOG.error("Error closing recordset", e);
-            }
-        }
-    }
-
     private void closePreparedStatement(final PreparedStatement stmt) {
         try {
             if (stmt != null) {
@@ -3328,6 +3320,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
             }
 
             // Check count entries for existing ones
+            // GROUP BY CLAUSE: ensure ONLY_FULL_GROUP_BY compatibility
             stmt = configCon.prepareStatement("SELECT filestore.id, COUNT(context.cid) AS num FROM filestore LEFT JOIN context ON filestore.id=context.filestore_id GROUP BY filestore.id ORDER BY num ASC");
             rs = stmt.executeQuery();
             if (false == rs.next()) {
@@ -3413,6 +3406,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
             }
 
             // Check count entries for existing ones
+            // GROUP BY CLAUSE: ensure ONLY_FULL_GROUP_BY compatibility
             stmt = configCon.prepareStatement("SELECT db_cluster.write_db_pool_id, COUNT(context_server2db_pool.cid) AS num FROM db_cluster LEFT JOIN context_server2db_pool ON db_cluster.write_db_pool_id = context_server2db_pool.write_db_pool_id GROUP BY db_cluster.write_db_pool_id ORDER BY num ASC");
             rs = stmt.executeQuery();
             if (false == rs.next()) {
@@ -3719,6 +3713,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
 
             Map<Integer, List<SchemaCount>> counts = new LinkedHashMap<Integer, List<SchemaCount>>(32, 0.9F);
             for (Integer poolId : poolIds) {
+                // GROUP BY CLAUSE: ensure ONLY_FULL_GROUP_BY compatibility
                 stmt = configCon.prepareStatement("SELECT db_schema,COUNT(db_schema) AS count FROM context_server2db_pool WHERE write_db_pool_id=? GROUP BY db_schema ORDER BY count ASC");
                 stmt.setInt(1, poolId.intValue());
                 rs = stmt.executeQuery();

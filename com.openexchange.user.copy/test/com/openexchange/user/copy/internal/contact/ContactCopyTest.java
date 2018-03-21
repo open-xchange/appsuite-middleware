@@ -122,7 +122,7 @@ public class ContactCopyTest extends AbstractUserCopyTest {
         try {
             mapping = copyTask.copyUser(getObjectMappingWithFolders());
         } catch (final OXException e) {
-            DBUtils.rollback(dstCon);
+            Databases.rollback(dstCon);
             e.printStackTrace();
             fail("A UserCopyException occurred.");
         }        
@@ -211,7 +211,7 @@ public class ContactCopyTest extends AbstractUserCopyTest {
     @After
     public void tearDown()
  throws Exception {
-        DBUtils.autocommit(dstCon);
+        Databases.autocommit(dstCon);
         deleteAllFromTablesForCid(dstCtxId, "cid", dstCon, "prg_contacts", "prg_contacts_image", "prg_dlist");
         super.tearDown();
     }

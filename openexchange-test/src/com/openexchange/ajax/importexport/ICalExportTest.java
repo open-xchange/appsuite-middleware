@@ -51,41 +51,10 @@ package com.openexchange.ajax.importexport;
 
 import static org.junit.Assert.assertTrue;
 import org.junit.Test;
-import com.openexchange.ajax.appointment.AppointmentTools;
 import com.openexchange.ajax.task.TaskTools;
-import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.tasks.Task;
 
 public class ICalExportTest extends AbstractICalTest {
-
-    @Test
-    public void testExportICalAppointment() throws Exception {
-        final String title = "testExportICalAppointment" + System.currentTimeMillis();
-
-        final Appointment appointmentObj = new Appointment();
-        appointmentObj.setTitle(title);
-        appointmentObj.setStartDate(startTime);
-        appointmentObj.setEndDate(endTime);
-        appointmentObj.setShownAs(Appointment.RESERVED);
-        appointmentObj.setParentFolderID(appointmentFolderId);
-        appointmentObj.setIgnoreConflicts(true);
-
-        final int objectId = catm.insert(appointmentObj).getObjectID();
-
-        final Appointment[] appointmentArray = exportAppointment(appointmentFolderId, null);
-
-        boolean found = false;
-        for (int a = 0; a < appointmentArray.length; a++) {
-            if ((null != appointmentArray[a].getTitle()) && (appointmentArray[a].getTitle().equals(title))) {
-                found = true;
-                appointmentObj.setUntil(appointmentArray[a].getUntil());
-                appointmentArray[a].setParentFolderID(appointmentFolderId);
-                AppointmentTools.compareObject(appointmentObj, appointmentArray[a]);
-            }
-        }
-
-        assertTrue("appointment with title: " + title + " not found", found);
-    }
 
     @Test
     public void testExportICalTask() throws Exception {

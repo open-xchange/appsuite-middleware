@@ -49,8 +49,6 @@
 
 package com.openexchange.groupware.infostore.webdav;
 
-import gnu.trove.map.TIntObjectMap;
-import gnu.trove.map.hash.TIntObjectHashMap;
 import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -91,6 +89,8 @@ import com.openexchange.webdav.protocol.WebdavProtocolException;
 import com.openexchange.webdav.protocol.WebdavResource;
 import com.openexchange.webdav.protocol.helpers.AbstractResource;
 import com.openexchange.webdav.protocol.helpers.AbstractWebdavFactory;
+import gnu.trove.map.TIntObjectMap;
+import gnu.trove.map.hash.TIntObjectHashMap;
 
 public class InfostoreWebdavFactory extends AbstractWebdavFactory implements BulkLoader {
 

@@ -52,8 +52,8 @@ package com.openexchange.calendar.printing.blocks;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
-import com.openexchange.calendar.printing.CPAppointment;
 import com.openexchange.calendar.printing.CPCalendar;
+import com.openexchange.calendar.printing.CPEvent;
 
 /**
  * This abstract class is the super class for all partitioning strategies that use weeks. Weeks are special, because a view on a month might
@@ -77,7 +77,7 @@ public abstract class AbstractWeekPartitioningStrategy extends WeekAndDayCalcula
 
     public static final int FILLDAY = 11; // a day that is only used to fill up the beginning or end of weeks or months
 
-    protected CPAppointment lastStoredAppointment = null;
+    protected CPEvent lastStoredAppointment = null;
 
     protected abstract void cleanup(CPPartition partition);
 
@@ -127,7 +127,7 @@ public abstract class AbstractWeekPartitioningStrategy extends WeekAndDayCalcula
         lastYear = getYear(date).intValue();
     }
 
-    protected boolean isSignalForNewDay(CPAppointment appointment) {
+    protected boolean isSignalForNewDay(CPEvent appointment) {
         if (lastStoredAppointment == null) {
             return true;
         }
@@ -137,7 +137,7 @@ public abstract class AbstractWeekPartitioningStrategy extends WeekAndDayCalcula
             appointment.getEndDate());
     }
 
-    protected boolean isSignalForNewWeek(CPAppointment appointment) {
+    protected boolean isSignalForNewWeek(CPEvent appointment) {
         if (lastStoredAppointment == null) {
             return true;
         }
@@ -147,7 +147,7 @@ public abstract class AbstractWeekPartitioningStrategy extends WeekAndDayCalcula
             appointment.getEndDate());
     }
 
-    protected boolean isSignalForNewMonth(CPAppointment appointment) {
+    protected boolean isSignalForNewMonth(CPEvent appointment) {
         if (lastStoredAppointment == null) {
             return true;
         }

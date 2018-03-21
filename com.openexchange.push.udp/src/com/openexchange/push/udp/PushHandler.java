@@ -64,7 +64,6 @@ import com.openexchange.event.CommonEvent;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.container.DataObject;
-import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.push.udp.registry.PushServiceRegistry;
@@ -111,36 +110,35 @@ public class PushHandler implements EventHandler {
 
         final int module = event.getModule();
 
-        Object tmp = event.getSourceFolder();
-        final FolderObject parentFolder;
-        if (tmp instanceof FolderObject) {
-            parentFolder = (FolderObject) event.getSourceFolder();
-        } else {
-            parentFolder = null;
-        }
-        if (parentFolder == null && module != Types.EMAIL) {
-            LOG.warn("folder object in event is null");
+        Map<Integer, Set<Integer>> affectedUsersWithFolder = event.getAffectedUsersWithFolder();
+        if (null == affectedUsersWithFolder && module != Types.EMAIL) {
+            LOG.info("No folder information available in event {}, skipping.", event);
             return;
         }
+
         switch (module) {
         case Types.APPOINTMENT:
+                for (final Entry<Integer, Set<Integer>> entry : transform(affectedUsersWithFolder).entrySet()) {
+                event(i(entry.getKey()), I2i(entry.getValue()), module, ctx, getTimestamp(castTo(event.getActionObj(), com.openexchange.chronos.Event.class)));
+            }
+            break;
         case Types.TASK:
         case Types.CONTACT:
         case Types.FOLDER:
-            for (final Entry<Integer, Set<Integer>> entry : transform(event.getAffectedUsersWithFolder()).entrySet()) {
-                event(i(entry.getKey()), I2i(entry.getValue()), module, ctx, getTimestamp((DataObject) event.getActionObj()));
+                for (final Entry<Integer, Set<Integer>> entry : transform(affectedUsersWithFolder).entrySet()) {
+                event(i(entry.getKey()), I2i(entry.getValue()), module, ctx, getTimestamp(castTo(event.getActionObj(), DataObject.class)));
             }
             break;
         case Types.EMAIL:
             event(1, new int[] { event.getUserId() }, module, ctx, 0);
             break;
         case Types.INFOSTORE:
-            for (final Entry<Integer, Set<Integer>> entry : transform(event.getAffectedUsersWithFolder()).entrySet()) {
-                event(i(entry.getKey()), I2i(entry.getValue()), module, ctx, getTimestamp(((DocumentMetadata) event.getActionObj()).getLastModified()));
+                for (final Entry<Integer, Set<Integer>> entry : transform(affectedUsersWithFolder).entrySet()) {
+                event(i(entry.getKey()), I2i(entry.getValue()), module, ctx, getTimestamp((castTo(event.getActionObj(), DocumentMetadata.class))));
             }
             break;
         default:
-            LOG.warn("Got event with unimplemented module: {}", module);
+            LOG.warn("Got event with unimplemented module: {}", Integer.valueOf(module));
         }
     }
 
@@ -165,6 +163,14 @@ public class PushHandler implements EventHandler {
         return null == object ? 0 : getTimestamp(object.getLastModified());
     }
 
+    private static long getTimestamp(final com.openexchange.chronos.Event event) {
+        return null == event ? 0 : getTimestamp(event.getLastModified());
+    }
+
+    private static long getTimestamp(final DocumentMetadata meta) {
+        return null == meta ? 0 : getTimestamp(meta.getLastModified());
+    }
+
     private static final Map<Integer, Set<Integer>> transform(final Map<Integer, Set<Integer>> map) {
         final Map<Integer, Set<Integer>> retval = new HashMap<Integer, Set<Integer>>();
         for (final Entry<Integer, Set<Integer>> entry : map.entrySet()) {
@@ -178,5 +184,13 @@ public class PushHandler implements EventHandler {
             }
         }
         return retval;
+    }
+
+    private static <T> T castTo(Object actionObject, Class<T> clazz) {
+        if (null != actionObject && clazz.isAssignableFrom(actionObject.getClass())) {
+            return clazz.cast(actionObject);
+        }
+        LOG.debug("Couldn't cast object {} to desired class {}.", actionObject == null ? "null" : actionObject.getClass().getName(), clazz.getName());
+        return null;
     }
 }

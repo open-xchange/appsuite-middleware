@@ -56,9 +56,9 @@ import org.jdom2.Namespace;
 import com.google.common.io.BaseEncoding;
 import com.openexchange.dav.mixins.AddressbookHomeSet;
 import com.openexchange.dav.mixins.CalendarHomeSet;
-import com.openexchange.dav.resources.CommonFolderCollection;
 import com.openexchange.dav.resources.DAVCollection;
 import com.openexchange.dav.resources.DAVRootCollection;
+import com.openexchange.dav.resources.FolderCollection;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.UserizedFolder;
@@ -150,7 +150,7 @@ public class DAVPushUtility {
                 }
             }
         } catch (IllegalArgumentException e) {
-            throw PushExceptionCodes.INVALID_TOPIC.create(pushKey, e);
+            throw PushExceptionCodes.INVALID_TOPIC.create(e, pushKey);
         }
         throw PushExceptionCodes.INVALID_TOPIC.create(pushKey);
     }
@@ -196,8 +196,8 @@ public class DAVPushUtility {
             if (DAVRootCollection.class.isInstance(resource)) {
                 return getClientId((DAVRootCollection) resource);
             }
-            if (CommonFolderCollection.class.isInstance(resource)) {
-                return getClientId((CommonFolderCollection<?>) resource);
+            if (FolderCollection.class.isInstance(resource)) {
+                return getClientId((FolderCollection<?>) resource);
             }
         }
         return null;
@@ -322,7 +322,7 @@ public class DAVPushUtility {
         return null;
     }
 
-    private static String getClientId(CommonFolderCollection<?> folderCollection) {
+    private static String getClientId(FolderCollection<?> folderCollection) {
         UserizedFolder folder = folderCollection.getFolder();
         if (null != folder) {
             ContentType contentType = folder.getContentType();

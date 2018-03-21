@@ -1,5 +1,11 @@
 package liquibase.executor.jvm;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.PreparedStatementFactory;
 import liquibase.database.core.OracleDatabase;
@@ -10,16 +16,11 @@ import liquibase.executor.Executor;
 import liquibase.logging.LogFactory;
 import liquibase.logging.Logger;
 import liquibase.sql.visitor.SqlVisitor;
-import liquibase.statement.*;
+import liquibase.statement.CallableSqlStatement;
+import liquibase.statement.ExecutablePreparedStatement;
+import liquibase.statement.SqlStatement;
 import liquibase.util.JdbcUtils;
 import liquibase.util.StringUtils;
-
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
 
 /**
  * Class to simplify execution of SqlStatements.  Based heavily on <a href="http://static.springframework.org/spring/docs/2.0.x/reference/jdbc.html">Spring's JdbcTemplate</a>.

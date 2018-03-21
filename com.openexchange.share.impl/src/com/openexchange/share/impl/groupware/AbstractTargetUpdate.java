@@ -56,7 +56,6 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.share.ShareTarget;
@@ -143,7 +142,7 @@ public abstract class AbstractTargetUpdate implements TargetUpdate {
             touchFolders(foldersToTouch);
         }
 
-        for (Entry<Integer, List<ShareTarget>> moduleEntry : objectsByModule.entrySet()) {
+        for (Map.Entry<Integer, List<ShareTarget>> moduleEntry : objectsByModule.entrySet()) {
             List<ShareTarget> targets = moduleEntry.getValue();
             List<TargetProxy> modified = new ArrayList<TargetProxy>(targets.size());
             List<TargetProxy> touched = new ArrayList<TargetProxy>(targets.size());

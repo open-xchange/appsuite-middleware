@@ -801,7 +801,7 @@ properties:
       timezones are retrieved through tzurl.org upon first usage. 
     defaultValue: true
     version: 
-    reloadable: false
+    reloadable: true
     configcascadeAware: false
     related: 
     file: Server.properties

@@ -237,7 +237,7 @@ public class FindRequest {
             if (json.has(PARAM_START)) {
                 off = json.getInt(PARAM_START);
             }
-            if (json.has(PARAM_SIZE)) {
+            if (json.hasAndNotNull(PARAM_SIZE)) {
                 len = json.getInt(PARAM_SIZE);
             }
         } catch (JSONException e) {
@@ -347,7 +347,7 @@ public class FindRequest {
             try {
                 options.put(key, jOptions.getString(key));
             } catch (JSONException e) {
-                throw AjaxExceptionCodes.JSON_ERROR.create(e.getMessage(), e);
+                throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
             }
         }
 
@@ -409,11 +409,26 @@ public class FindRequest {
      * @return An array of columns or <code>null</code>.
      */
     public String[] getColumns() throws OXException {
-        String valueStr = request.getParameter(AJAXServlet.PARAMETER_COLUMNS);
-        if (null == valueStr) {
-            return null;
-        }
+        String valueStr = null;
+        switch(requireModule()) {
+            case CALENDAR:
+                valueStr = request.getParameter(AJAXServlet.PARAMETER_CHRONOS_FIELDS);
+                if (null == valueStr) {
+                    return null;
+                }
+                break;
+            case CONTACTS:
+            case DRIVE:
+            case MAIL:
+            case TASKS:
+            default:
+                valueStr = request.getParameter(AJAXServlet.PARAMETER_COLUMNS);
+                if (null == valueStr) {
+                    return null;
+                }
+                break;
 
+        }
         return SPLIT.split(valueStr);
     }
 

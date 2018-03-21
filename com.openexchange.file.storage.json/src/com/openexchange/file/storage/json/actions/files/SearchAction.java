@@ -59,6 +59,7 @@ import com.openexchange.file.storage.FileStorageFileAccess.SortDirection;
 import com.openexchange.file.storage.composition.IDBasedFileAccess;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorAdapter;
+import com.openexchange.tools.iterator.SearchIterators;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -91,38 +92,31 @@ public class SearchAction extends AbstractListingAction {
         Field sortingField = request.getSortingField();
         SortDirection sortingOrder = request.getSortingOrder();
         IDBasedFileAccess fileAccess = request.getFileAccess();
-        SearchIterator<File> results = fileAccess.search(
-            request.getSearchQuery(),
-            columns,
-            request.getSearchFolderId(),
-            includeSubfolders,
-            sortingField,
-            sortingOrder,
-            request.getStart(),
-            request.getEnd());
 
-        if (Field.CREATED_BY.equals(sortingField)) {
-            ServerSession serverSession = request.getSession();
-            CreatedByComparator comparator = new CreatedByComparator(
-                serverSession.getUser().getLocale(),
-                serverSession.getContext()).setDescending(SortDirection.DESC.equals(sortingOrder));
-            results = CreatedByComparator.resort(results, comparator);
-        }
-
-        //limit results if a limit is defined
-        int limit = 0;
-        if (request.getStart() == 0 && request.getEnd() != 0) {
-            limit = request.getEnd() - request.getStart() + 1;
-        }
-
-        if (limit != 0 && results.size() > limit) {
-            ArrayList<File> resultList = new ArrayList<File>(limit);
-            for (int x = 0; x < limit && results.hasNext(); x++) {
-                resultList.add(results.next());
+        SearchIterator<File> results = fileAccess.search(request.getSearchQuery(), columns, request.getSearchFolderId(), includeSubfolders, sortingField, sortingOrder, request.getStart(), request.getEnd());
+        try {
+            if (Field.CREATED_BY.equals(sortingField)) {
+                ServerSession serverSession = request.getSession();
+                CreatedByComparator comparator = new CreatedByComparator(serverSession.getUser().getLocale(), serverSession.getContext()).setDescending(SortDirection.DESC.equals(sortingOrder));
+                results = CreatedByComparator.resort(results, comparator);
             }
-            results = new SearchIteratorAdapter<File>(resultList.iterator());
+            // limit results if a limit is defined
+            int limit = 0;
+            if (request.getStart() == 0 && request.getEnd() != 0) {
+                limit = request.getEnd() - request.getStart() + 1;
+            }
+            if (limit != 0 && results.size() > limit) {
+                ArrayList<File> resultList = new ArrayList<File>(limit);
+                for (int x = 0; x < limit && results.hasNext(); x++) {
+                    resultList.add(results.next());
+                }
+                results = new SearchIteratorAdapter<File>(resultList.iterator());
+            }
+            AJAXRequestResult requestResult = results(results, 0L, request);
+            results = null; // Avoid premature closing
+            return requestResult;
+        } finally {
+            SearchIterators.close(results);
         }
-
-        return results(results, 0L, request);
     }
 }

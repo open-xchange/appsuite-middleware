@@ -49,11 +49,14 @@
 
 package com.openexchange.session.management.impl;
 
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -126,30 +129,31 @@ public class SessionManagementServiceImpl implements SessionManagementService {
             throw ServiceExceptionCode.absentService(SessiondService.class);
         }
 
-        Set<String> blackListedClients = getBlacklistedClients();
-
         Collection<Session> localSessions = sessiondService.getSessions(session.getUserId(), session.getContextId());
         Collection<PortableSession> remoteSessions = getRemoteSessionsForUser(session);
 
+        Set<String> blackListedClients = getBlacklistedClients();
         String location = getDefaultLocation(session);
 
         GeoLocationService geoLocationService = services.getOptionalService(GeoLocationService.class);
-        Map<String, String> ip2locationCache = new HashMap<>(localSessions.size() + remoteSessions.size());
-        List<ManagedSession> result = new ArrayList<>(localSessions.size() + remoteSessions.size());
+        int totalSize = localSessions.size() + remoteSessions.size();
+        Map<String, String> ip2locationCache = new HashMap<>(totalSize);
+        List<ManagedSession> result = new ArrayList<>(totalSize);
+        Set<String> filter = new HashSet<String>(totalSize, 0.9F);
         for (Session s : localSessions) {
-            if (false == blackListedClients.contains(s.getClient())) {
+            if (filter.add(s.getSessionID()) && false == blackListedClients.contains(s.getClient())) {
                 ManagedSession managedSession = DefaultManagedSession.builder(s).setLocation(optLocationFor(s, location, ip2locationCache, geoLocationService)).build();
                 result.add(managedSession);
             }
         }
 
         for (Session s : remoteSessions) {
-            if (false == blackListedClients.contains(s.getClient())) {
+            if (filter.add(s.getSessionID()) && false == blackListedClients.contains(s.getClient())) {
                 ManagedSession managedSession = DefaultManagedSession.builder(s).setLocation(optLocationFor(s, location, ip2locationCache, geoLocationService)).build();
                 result.add(managedSession);
             }
         }
-        return Collections.unmodifiableCollection(result);
+        return result;
     }
 
     @Override
@@ -191,7 +195,7 @@ public class SessionManagementServiceImpl implements SessionManagementService {
         }
 
         try {
-            Map<Member, PortableSessionCollection> collectionsByMember = Hazelcasts.executeByMembers(new PortableMultipleSessionRemoteLookUp(session.getUserId(), session.getContextId()), otherMembers, hzInstance);
+            Map<Member, PortableSessionCollection> collectionsByMember = Hazelcasts.executeByMembers(new PortableMultipleSessionRemoteLookUp(session.getUserId(), session.getContextId(), true), otherMembers, hzInstance);
             List<PortableSession> remoteSessions = new ArrayList<>(16);
             for (PortableSessionCollection portableSessionCollection : collectionsByMember.values()) {
                 PortableSession[] portableSessions = portableSessionCollection.getSessions();
@@ -254,6 +258,23 @@ public class SessionManagementServiceImpl implements SessionManagementService {
 
     private String optLocationFor(Session s, String def, Map<String, String> ip2locationCache, GeoLocationService geoLocationService) {
         String ipAddress = s.getLocalIp();
+
+        try {
+            InetAddress address = InetAddress.getByName(ipAddress);
+            if (address.isLoopbackAddress() || address.isLinkLocalAddress() || address.isSiteLocalAddress()) {
+                UserService userService = services.getService(UserService.class);
+                if (null != userService) {
+                    try {
+                        return StringHelper.valueOf(userService.getUser(s.getUserId(), s.getContextId()).getLocale()).getString(SessionManagementStrings.INTRANET_LOCATION);
+                    } catch (OXException e) {
+                        LOG.warn("", e);
+                    }
+                }
+                return SessionManagementStrings.INTRANET_LOCATION;
+            }
+        } catch (UnknownHostException e) {
+            // ignore and try geolocation service
+        }
 
         // Check "cache" first
         String location = ip2locationCache.get(ipAddress);

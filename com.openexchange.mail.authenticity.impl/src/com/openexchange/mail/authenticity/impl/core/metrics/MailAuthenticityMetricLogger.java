@@ -63,8 +63,9 @@ public interface MailAuthenticityMetricLogger {
      * Logs the raw <code>Authentication-Results</code> headers and the overall result with the
      * parsed mail authentication mechanisms (known and unknown)
      * 
+     * @param mailId the unique mail identifier
      * @param rawHeaders a {@link List} with the raw headers as they appear in the mail message
      * @param overallResult The {@link MailAuthenticityResult} and the parsed mechanisms
      */
-    void log(List<String> rawHeaders, MailAuthenticityResult overallResult);
+    void log(String mailId, List<String> rawHeaders, MailAuthenticityResult overallResult);
 }

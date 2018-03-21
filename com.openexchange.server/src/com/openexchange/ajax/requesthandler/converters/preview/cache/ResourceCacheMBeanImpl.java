@@ -49,9 +49,6 @@
 
 package com.openexchange.ajax.requesthandler.converters.preview.cache;
 
-import gnu.trove.procedure.TIntProcedure;
-import gnu.trove.set.TIntSet;
-import gnu.trove.set.hash.TIntHashSet;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -76,6 +73,9 @@ import com.openexchange.mail.mime.MimeType2ExtMap;
 import com.openexchange.mail.mime.MimeTypes;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.services.ServerServiceRegistry;
+import gnu.trove.procedure.TIntProcedure;
+import gnu.trove.set.TIntSet;
+import gnu.trove.set.hash.TIntHashSet;
 
 
 /**

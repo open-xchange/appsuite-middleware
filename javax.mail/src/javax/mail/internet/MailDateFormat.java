@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 1997-2017 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997-2018 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -43,18 +43,17 @@ package javax.mail.internet;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectStreamException;
-import java.util.Date;
+import java.text.DateFormatSymbols;
+import java.text.FieldPosition;
+import java.text.NumberFormat;
+import java.text.ParseException;
+import java.text.ParsePosition;
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.Locale;
 import java.util.TimeZone;
 import java.util.logging.Level;
-import java.text.DateFormatSymbols;
-import java.text.SimpleDateFormat;
-import java.text.NumberFormat;
-import java.text.FieldPosition;
-import java.text.ParsePosition;
-import java.text.ParseException;
-
 import com.sun.mail.util.MailLogger;
 
 /**

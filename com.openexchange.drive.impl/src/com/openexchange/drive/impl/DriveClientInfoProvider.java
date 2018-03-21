@@ -64,12 +64,16 @@ import com.openexchange.session.Session;
  */
 public class DriveClientInfoProvider implements ClientInfoProvider {
 
+    /**
+     * Initializes a new {@link DriveClientInfoProvider}.
+     */
+    public DriveClientInfoProvider() {
+        super();
+    }
+
     @Override
     public ClientInfo getClientInfo(Session session) {
-        if (null != session) {
-            return getClientInfo(session.getClient());
-        }
-        return null;
+        return null == session ? null : getClientInfo(session.getClient());
     }
 
     @Override
@@ -78,16 +82,16 @@ public class DriveClientInfoProvider implements ClientInfoProvider {
             DriveClientType type = DriveClientType.parse(clientId);
             switch (type) {
                 case ANDROID:
-                    return new DriveClientInfo("Android", null, null);
+                    return new DriveClientInfo("Android", null, null, "android");
                 case IOS:
-                    return new DriveClientInfo("iOS", null, null);
+                    return new DriveClientInfo("iOS", null, null, "ios");
                 case MAC_OS:
-                    return new DriveClientInfo("Mac OS", null, null);
+                    return new DriveClientInfo("Mac OS", null, null, "macos");
                 case WINDOWS:
-                    return new DriveClientInfo("Windows", null, null);
+                    return new DriveClientInfo("Windows", null, null, "windows");
                 default:
                     if ("OXDrive".equals(clientId)) {
-                        return new DriveClientInfo(null, null, null);
+                        return new DriveClientInfo(null, null, null, null);
                     }
                     return null;
             }

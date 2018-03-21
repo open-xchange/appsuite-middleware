@@ -14,7 +14,7 @@ BuildRequires: java-1_8_0-openjdk-devel
 BuildRequires: java-1.8.0-openjdk-devel
 %endif
 Version:       @OXVERSION@
-%define        ox_release 0
+%define        ox_release 3
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -24,12 +24,6 @@ Source:        %{name}_%{version}.orig.tar.bz2
 Summary:       The Open-Xchange backend publish extension
 Autoreqprov:   no
 Requires:      open-xchange-core >= @OXVERSION@
-Provides:      open-xchange-publish-json = %{version}
-Obsoletes:     open-xchange-publish-json < %{version}
-Provides:      open-xchange-publish-microformats = %{version}
-Obsoletes:     open-xchange-publish-microformats < %{version}
-Provides:      open-xchange-templating-json = %{version}
-Obsoletes:     open-xchange-templating-json < %{version}
 
 %description
 Add the feature to publish content to the backend installation.
@@ -62,6 +56,12 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 %config(noreplace) /opt/open-xchange/templates/*
 
 %changelog
+* Tue Feb 20 2018 Marcus Klein <marcus.klein@open-xchange.com>
+Third preview of 7.10.0 release
+* Fri Feb 02 2018 Marcus Klein <marcus.klein@open-xchange.com>
+Second preview for 7.10.0 release
+* Fri Dec 01 2017 Marcus Klein <marcus.klein@open-xchange.com>
+First preview for 7.10.0 release
 * Thu Oct 12 2017 Marcus Klein <marcus.klein@open-xchange.com>
 prepare for 7.10.0 release
 * Fri May 19 2017 Marcus Klein <marcus.klein@open-xchange.com>

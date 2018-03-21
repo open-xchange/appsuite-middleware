@@ -67,14 +67,14 @@ import com.openexchange.html.HtmlService;
 import com.openexchange.id.IDGeneratorService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.quota.QuotaProvider;
+import com.openexchange.snippet.QuotaAwareSnippetService;
+import com.openexchange.snippet.SnippetService;
 import com.openexchange.snippet.mime.MimeSnippetService;
 import com.openexchange.snippet.mime.Services;
 import com.openexchange.snippet.mime.groupware.MimeSnippetCreateTableTask;
 import com.openexchange.snippet.mime.groupware.MimeSnippetDeleteListener;
 import com.openexchange.snippet.mime.groupware.MimeSnippetQuotaProvider;
 import com.openexchange.snippet.mime.groupware.SnippetSizeColumnUpdateTask;
-import com.openexchange.snippet.SnippetService;
-import com.openexchange.snippet.QuotaAwareSnippetService;
 
 /**
  * {@link MimeSnippetActivator} - The activator for MIME Snippet bundle.

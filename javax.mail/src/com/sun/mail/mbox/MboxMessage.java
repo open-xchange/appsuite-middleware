@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 1997-2017 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997-2018 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -40,14 +40,26 @@
 
 package com.sun.mail.mbox;
 
-import java.io.*;
-import java.util.StringTokenizer;
-import java.util.Date;
+import java.io.BufferedInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.PrintStream;
 import java.text.SimpleDateFormat;
-import javax.activation.*;
-import javax.mail.*;
-import javax.mail.internet.*;
+import java.util.Date;
+import java.util.StringTokenizer;
+import javax.activation.DataHandler;
+import javax.mail.Address;
+import javax.mail.Flags;
+import javax.mail.MessageRemovedException;
+import javax.mail.MessagingException;
+import javax.mail.Session;
 import javax.mail.event.MessageChangedEvent;
+import javax.mail.internet.AddressException;
+import javax.mail.internet.InternetAddress;
+import javax.mail.internet.InternetHeaders;
+import javax.mail.internet.MimeMessage;
+import javax.mail.internet.MimePartDataSource;
 import com.sun.mail.util.LineInputStream;
 
 /**

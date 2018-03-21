@@ -116,12 +116,7 @@ public final class SystemSharedFolder {
         final DatabaseFolder retval = new LocalizedDatabaseFolder(fo, false);
         retval.setName(FolderStrings.SYSTEM_SHARED_FOLDER_NAME);
         // Enforce getSubfolders() from storage if at least one shared folder is accessible for user
-        ConditionTreeMap treeMap;
-        try {
-            treeMap = ConditionTreeMapManagement.getInstance().optMapFor(ctx.getContextId());
-        } catch (final OXException e) {
-            treeMap = null;
-        }
+        ConditionTreeMap treeMap = ConditionTreeMapManagement.getInstance().optMapFor(ctx.getContextId());
         if (null != treeMap) {
             /*
              * Set to null if a shared folder exists otherwise to empty array to indicate no subfolders

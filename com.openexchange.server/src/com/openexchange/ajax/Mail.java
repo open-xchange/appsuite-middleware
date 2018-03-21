@@ -135,8 +135,11 @@ import com.openexchange.java.Charsets;
 import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
 import com.openexchange.json.OXJSONWriter;
+import com.openexchange.mail.FlaggingMode;
 import com.openexchange.mail.FullnameArgument;
 import com.openexchange.mail.MailExceptionCode;
+import com.openexchange.mail.MailFetchListener;
+import com.openexchange.mail.MailFetchListenerRegistry;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.MailJSONField;
 import com.openexchange.mail.MailListField;
@@ -174,6 +177,7 @@ import com.openexchange.mail.mime.MimeMailException;
 import com.openexchange.mail.mime.MimeMailExceptionCode;
 import com.openexchange.mail.mime.MimeTypes;
 import com.openexchange.mail.mime.QuotedInternetAddress;
+import com.openexchange.mail.mime.converters.DefaultConverterConfig;
 import com.openexchange.mail.mime.converters.MimeMessageConverter;
 import com.openexchange.mail.mime.filler.MimeMessageFiller;
 import com.openexchange.mail.structure.parser.MIMEStructureParser;
@@ -3412,7 +3416,7 @@ public class Mail extends PermissionServlet {
                 final String[] ids;
                 final MailServletInterface mailInterface = MailServletInterface.getInstance(session);
                 try {
-                    ids = mailInterface.appendMessages(folder, new MailMessage[] { MimeMessageConverter.convertMessage(data.getMail()) }, force);
+                    ids = mailInterface.appendMessages(folder, new MailMessage[] { MimeMessageConverter.convertMessage(data.getMail(), new DefaultConverterConfig(mailInterface.getMailConfig())) }, force);
                     if (flags > 0) {
                         mailInterface.updateMessageFlags(folder, ids, flags, true);
                     }
@@ -3620,7 +3624,7 @@ public class Mail extends PermissionServlet {
                     final boolean quit = messages.remove(POISON);
                     for (final MimeMessage message : messages) {
                         message.getHeader("Date", null);
-                        final MailMessage mm = MimeMessageConverter.convertMessage(message);
+                        final MailMessage mm = MimeMessageConverter.convertMessage(message, new DefaultConverterConfig(mailInterface.getMailConfig()));
                         mails.add(mm);
                     }
                     messages.clear();
@@ -3773,11 +3777,10 @@ public class Mail extends PermissionServlet {
                     final List<MailMessage> mails = new ArrayList<MailMessage>(messages.size());
                     for (final MimeMessage message : messages) {
                         message.getHeader("Date", null);
-                        final MailMessage mm = MimeMessageConverter.convertMessage(message);
+                        final MailMessage mm = MimeMessageConverter.convertMessage(message, new DefaultConverterConfig(mailInterface.getMailConfig()));
                         mails.add(mm);
                     }
                     messages.clear();
-                    mailInterface = MailServletInterface.getInstance(session);
                     try {
                         final String[] ids = mailInterface.importMessages(folder, mails.toArray(new MailMessage[mails.size()]), force);
                         mails.clear();
@@ -4169,16 +4172,7 @@ public class Mail extends PermissionServlet {
                 MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = mailInterface.getMailAccess();
                 FullnameArgument fa = MailFolderUtility.prepareMailFolderParam(folder);
                 MailMessage[] messages = mailAccess.getMessageStorage().getMessages(fa.getFullName(), mailIDs, new MailField[] { MailField.FULL });
-
-                // Check if mail authenticity handler is available
-                MailAuthenticityHandler handler = null;
-                if (mailAccess.getAccountId() == MailAccount.DEFAULT_ID) {
-                    MailAuthenticityHandlerRegistry authenticityHandlerRegistry = ServerServiceRegistry.getInstance().getService(MailAuthenticityHandlerRegistry.class);
-                    if (null != authenticityHandlerRegistry) {
-                        handler = authenticityHandlerRegistry.getHighestRankedHandlerFor(session);
-                    }
-                }
-
+                List<MailFetchListener> fetchListeners = MailFetchListenerRegistry.getFetchListeners();
                 int length = messages.length;
                 for (int i = 0; i < length; i++) {
                     MailMessage m = messages[i];
@@ -4187,10 +4181,30 @@ public class Mail extends PermissionServlet {
                         response = new Response(session);
                         response.setException(MailExceptionCode.MAIL_NOT_FOUND.create(mailIDs[i], folder));
                     } else {
-                        // Check for mail authenticity
-                        if (null != handler) {
-                            handler.handle(session, m);
+                        // Check color label vs. \Flagged flag
+                        if (m.getColorLabel() == 0) {
+                            // No color label set; check if \Flagged
+                            if (m.isFlagged()) {
+                                FlaggingMode mode = FlaggingMode.getFlaggingMode(session);
+                                if (mode.equals(FlaggingMode.FLAGGED_IMPLICIT)) {
+                                    m.setColorLabel(FlaggingMode.getFlaggingColor(session));
+                                }
+                            }
+                        } else {
+                            // Color label set. Check whether to swallow that information in case only \Flagged should be advertised
+                            FlaggingMode mode = FlaggingMode.getFlaggingMode(session);
+                            if (mode.equals(FlaggingMode.FLAGGED_ONLY)) {
+                                m.setColorLabel(0);
+                            }
                         }
+
+                        // Check for mail fetch listeners
+                        if (null != fetchListeners) {
+                            for (MailFetchListener listener : fetchListeners) {
+                                m = listener.onSingleMailFetch(m, mailAccess);
+                            }
+                        }
+
                         JSONObject jMail = MailConverter.getInstance().convertSingle4Get(m, containers[i], warnings, session, mailInterface);
                         response = new Response(session);
                         response.setData(jMail);

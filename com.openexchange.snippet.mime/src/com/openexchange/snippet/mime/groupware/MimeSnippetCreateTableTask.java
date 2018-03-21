@@ -55,6 +55,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import com.openexchange.database.AbstractCreateTableImpl;
+import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.Attributes;
 import com.openexchange.groupware.update.PerformParameters;
@@ -63,7 +64,6 @@ import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskV2;
 import com.openexchange.snippet.db.Tables;
 import com.openexchange.snippet.mime.Services;
-import com.openexchange.tools.sql.DBUtils;
 
 /**
  * {@link MimeSnippetCreateTableTask}
@@ -112,7 +112,7 @@ public final class MimeSnippetCreateTableTask extends AbstractCreateTableImpl im
         } catch (final SQLException e) {
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } finally {
-            DBUtils.closeSQLStuff(stmt);
+            Databases.closeSQLStuff(stmt);
         }
     }
 
@@ -123,7 +123,7 @@ public final class MimeSnippetCreateTableTask extends AbstractCreateTableImpl im
             rs = metaData.getTables(null, null, table, new String[] { "TABLE" });
             return (rs.next() && rs.getString("TABLE_NAME").equals(table));
         } finally {
-            DBUtils.closeSQLStuff(rs);
+            Databases.closeSQLStuff(rs);
         }
     }
 

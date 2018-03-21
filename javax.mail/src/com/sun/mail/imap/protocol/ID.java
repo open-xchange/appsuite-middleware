@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 1997-2017 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997-2018 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -40,8 +40,12 @@
 
 package com.sun.mail.imap.protocol;
 
-import java.util.*;
-import com.sun.mail.iap.*;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+import com.sun.mail.iap.Argument;
+import com.sun.mail.iap.ProtocolException;
+import com.sun.mail.iap.Response;
 
 /**
  * This class represents the response to the ID command. <p>

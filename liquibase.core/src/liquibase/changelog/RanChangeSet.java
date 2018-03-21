@@ -1,8 +1,7 @@
 package liquibase.changelog;
 
-import liquibase.change.CheckSum;
-
 import java.util.Date;
+import liquibase.change.CheckSum;
 
 /**
  * Encapsulates information about a previously-ran change set.  Used to build rollback statements. 

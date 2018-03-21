@@ -69,10 +69,10 @@ import com.openexchange.osgi.SimpleRegistryListener;
 import com.openexchange.osgi.Tools;
 import com.openexchange.passwordmechs.PasswordMechFactory;
 import com.openexchange.server.services.ServerServiceRegistry;
-import com.openexchange.share.ShareService;
-import com.openexchange.share.groupware.ModuleSupport;
 import com.openexchange.session.reservation.Enhancer;
 import com.openexchange.session.reservation.SessionReservationService;
+import com.openexchange.share.ShareService;
+import com.openexchange.share.groupware.ModuleSupport;
 import com.openexchange.tokenlogin.TokenLoginService;
 
 /**

@@ -53,8 +53,11 @@ import java.io.IOException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.opensaml.saml2.core.Assertion;
+import org.opensaml.saml2.core.Attribute;
+import org.opensaml.saml2.core.AttributeStatement;
 import org.opensaml.saml2.core.LogoutRequest;
 import org.opensaml.saml2.core.Response;
+import org.opensaml.xml.schema.XSString;
 import com.openexchange.exception.OXException;
 import com.openexchange.saml.spi.AbstractSAMLBackend;
 import com.openexchange.saml.spi.AuthenticationInfo;
@@ -85,7 +88,22 @@ public class TestSAMLBackend extends AbstractSAMLBackend {
 
     @Override
     protected AuthenticationInfo doResolveAuthnResponse(Response response, Assertion assertion) throws OXException {
-        AuthenticationInfo authInfo = new AuthenticationInfo(1, 1);
+        String identifier = null;
+        outer: for (AttributeStatement statement : assertion.getAttributeStatements()) {
+            for (Attribute attribute : statement.getAttributes()) {
+                if ("urn:open-xchange:saml:userID".equals(attribute.getName())) {
+                    XSString stringValue = (XSString) attribute.getAttributeValues().get(0);
+                    identifier = stringValue.getValue();
+                    break outer;
+                }
+            }
+        }
+        AuthenticationInfo authInfo;
+        if (null != identifier && "oxuser1".equals(identifier)) {
+            authInfo = new AuthenticationInfo(1, 1);
+        } else {
+            authInfo = new AuthenticationInfo(-1, -1);
+        }
         authInfo.setProperty("com.openexchange.saml.test.IsTest", Boolean.TRUE.toString());
         return authInfo;
     }

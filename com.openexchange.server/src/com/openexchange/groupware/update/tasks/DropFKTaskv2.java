@@ -49,8 +49,8 @@
 
 package com.openexchange.groupware.update.tasks;
 
-import static com.openexchange.tools.sql.DBUtils.autocommit;
-import static com.openexchange.tools.sql.DBUtils.rollback;
+import static com.openexchange.database.Databases.autocommit;
+import static com.openexchange.database.Databases.rollback;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
@@ -63,7 +63,6 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
-import com.openexchange.tools.sql.DBUtils;
 import com.openexchange.tools.update.Column;
 import com.openexchange.tools.update.Tools;
 
@@ -181,7 +180,7 @@ public final class DropFKTaskv2 extends UpdateTaskAdapter {
                 stmt = con.prepareStatement("ALTER TABLE " + table + " DROP FOREIGN KEY " + keyName);
                 modified |= (stmt.executeUpdate() > 0);
             } finally {
-                DBUtils.closeSQLStuff(null, stmt);
+                Databases.closeSQLStuff(null, stmt);
             }
         }
         return modified;
@@ -195,7 +194,7 @@ public final class DropFKTaskv2 extends UpdateTaskAdapter {
                 stmt = con.prepareStatement("ALTER TABLE " + table + " DROP FOREIGN KEY " + foreignKeyName);
                 modified = stmt.executeUpdate() > 0;
             } finally {
-                DBUtils.closeSQLStuff(null, stmt);
+                Databases.closeSQLStuff(null, stmt);
             }
         } catch (final Exception e) {
             // Ignore

@@ -338,7 +338,17 @@ public class PGPDecrypter {
                         //Writing the decrypted message to the output stream
                         output.write(buffer, 0, len);
                     }
-                    pgpObject = plainFact.nextObject();
+                    try {
+                        pgpObject = plainFact.nextObject();
+                    } catch (IOException ex) {
+                        // If next object is a signature, and we simply don't know the algorithm, don't fail
+                        // Ignore signature for now
+                        if (ex.getMessage() != null && ex.getMessage().contains("unknown signature key algorithm")) {
+                            pgpObject = null;
+                        } else {
+                            throw ex;
+                        }
+                    }
                 }
 
                 //handling one pass signatures for initializing signature calculation

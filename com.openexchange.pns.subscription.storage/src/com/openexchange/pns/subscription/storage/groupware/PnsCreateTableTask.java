@@ -49,16 +49,16 @@
 
 package com.openexchange.pns.subscription.storage.groupware;
 
-import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
+import static com.openexchange.database.Databases.closeSQLStuff;
 import static com.openexchange.tools.sql.DBUtils.tableExists;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
-import com.openexchange.tools.sql.DBUtils;
 
 /**
  * {@link PnsCreateTableTask} - Inserts necessary tables.
@@ -109,10 +109,11 @@ public class PnsCreateTableTask extends UpdateTaskAdapter {
         } catch (SQLException e) {
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } finally {
+            closeSQLStuff(stmt);
             if (rollback) {
-                DBUtils.rollback(con);
+                Databases.rollback(con);
             }
-            DBUtils.autocommit(con);
+            Databases.autocommit(con);
         }
     }
 }

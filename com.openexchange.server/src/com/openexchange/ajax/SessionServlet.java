@@ -223,9 +223,9 @@ public abstract class SessionServlet extends AJAXServlet {
                 // Drop Open-Xchange cookies
                 SessiondService sessiondService = ServerServiceRegistry.getInstance().getService(SessiondService.class);
                 String sessionId = SessionUtility.getSessionId(req);
-                SessionResult<ServerSession> result = SessionUtility.getSession(req, resp, sessionId, sessiondService);
-                if (null != result.getSession()) {
-                    SessionUtility.removeOXCookies(result.getSession(), req, resp);
+                Session session = sessionId.equals(req.getAttribute("__session.absent")) ? null : sessiondService.getSession(sessionId);
+                if (null != session) {
+                    SessionUtility.removeOXCookies(session, req, resp);
                 }
                 SessionUtility.removeJSESSIONID(req, resp);
                 sessiondService.removeSession(sessionId);
@@ -309,7 +309,7 @@ public abstract class SessionServlet extends AJAXServlet {
      * @throws IOException If an I/O error occurs
      */
     protected void handleOXException(OXException e, int statusCode, String reasonPhrase, HttpServletRequest req, HttpServletResponse resp, boolean checkUploadQuota, boolean doLog) throws IOException {
-        if (checkUploadQuota && (UploadException.UploadCode.MAX_UPLOAD_SIZE_EXCEEDED.equals(e) || UploadException.UploadCode.MAX_UPLOAD_FILE_SIZE_EXCEEDED.equals(e) || UploadException.UploadCode.MAX_STORAGE_SIZE_EXCEEDED.equals(e))) {
+        if (checkUploadQuota && (UploadException.UploadCode.MAX_UPLOAD_SIZE_EXCEEDED.equals(e) || UploadException.UploadCode.MAX_UPLOAD_FILE_SIZE_EXCEEDED.equals(e))) {
             // An upload failed
             LOG.debug("", e);
             String sLoc = e.getProperty(OXExceptionConstants.PROPERTY_LOCALE);

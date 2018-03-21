@@ -49,20 +49,15 @@
 
 package com.openexchange.folderstorage.database.getfolder;
 
-import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.database.DatabaseFolder;
 import com.openexchange.group.GroupStorage;
 import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.i18n.FolderStrings;
-import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.server.impl.OCLPermission;
 

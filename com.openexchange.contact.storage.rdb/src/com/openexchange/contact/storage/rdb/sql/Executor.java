@@ -49,7 +49,6 @@
 
 package com.openexchange.contact.storage.rdb.sql;
 
-import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -77,6 +76,7 @@ import com.openexchange.contact.storage.rdb.search.ContactSearchAdapter;
 import com.openexchange.contact.storage.rdb.search.FulltextAutocompleteAdapter;
 import com.openexchange.contact.storage.rdb.search.SearchAdapter;
 import com.openexchange.contact.storage.rdb.search.SearchTermAdapter;
+import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.contact.helpers.ContactField;
@@ -141,7 +141,7 @@ public class Executor {
             resultSet = logExecuteQuery(stmt);
             return resultSet.next() ? resultSet.getLong(1) : 0;
         } finally {
-            closeSQLStuff(resultSet, stmt);
+            Databases.closeSQLStuff(resultSet, stmt);
         }
     }
 
@@ -182,7 +182,7 @@ public class Executor {
             int count = resultSet.next() ? resultSet.getInt(1) : 0;
             return count;
         } finally {
-            closeSQLStuff(resultSet, stmt);
+            Databases.closeSQLStuff(resultSet, stmt);
         }
     }
 
@@ -213,7 +213,7 @@ public class Executor {
             resultSet = logExecuteQuery(stmt);
             return new ContactReader(contextID, connection, resultSet).readContact(fields, false);
         } finally {
-            closeSQLStuff(resultSet, stmt);
+            Databases.closeSQLStuff(resultSet, stmt);
         }
     }
 
@@ -234,7 +234,7 @@ public class Executor {
         resultSet = logExecuteQuery(stmt);
             return new ContactReader(contextID, connection, resultSet).readContact(fields, false);
     } finally {
-        closeSQLStuff(resultSet, stmt);
+            Databases.closeSQLStuff(resultSet, stmt);
     }
 }
 
@@ -259,7 +259,7 @@ public class Executor {
             resultSet = logExecuteQuery(stmt);
             return resultSet.next() ? new Date(resultSet.getLong(1)) : null;
         } finally {
-            closeSQLStuff(resultSet, stmt);
+            Databases.closeSQLStuff(resultSet, stmt);
         }
     }
 
@@ -273,6 +273,7 @@ public class Executor {
      */
     public Map<Integer, Date> selectNewestAttachmentDates(final Connection connection, final int contextID, final int objectIDs[]) throws SQLException {
         final StringBuilder stringBuilder = new StringBuilder();
+        // GROUP BY CLAUSE: ensure ONLY_FULL_GROUP_BY compatibility
         stringBuilder.append("SELECT attached,MAX(creation_date) FROM prg_attachment WHERE cid=? AND module=? AND attached IN (")
         		.append(Tools.toCSV(objectIDs)).append(") GROUP BY attached;");
         PreparedStatement stmt = null;
@@ -288,7 +289,7 @@ public class Executor {
             }
             return dates;
         } finally {
-            closeSQLStuff(resultSet, stmt);
+            Databases.closeSQLStuff(resultSet, stmt);
         }
     }
 
@@ -369,7 +370,7 @@ public class Executor {
             resultSet = logExecuteQuery(stmt);
             return new ContactReader(contextID, connection, resultSet).readContacts(fields, false);
         } finally {
-            closeSQLStuff(resultSet, stmt);
+            Databases.closeSQLStuff(resultSet, stmt);
         }
     }
 
@@ -446,7 +447,7 @@ public class Executor {
             resultSet = logExecuteQuery(stmt);
             return new ContactReader(contextID, connection, resultSet).readContacts(fields, false);
         } finally {
-            closeSQLStuff(resultSet, stmt);
+            Databases.closeSQLStuff(resultSet, stmt);
         }
     }
 
@@ -515,7 +516,7 @@ public class Executor {
             resultSet = logExecuteQuery(stmt);
             return new ContactReader(contextID, connection, resultSet).readContacts(fields, false);
         } finally {
-            closeSQLStuff(resultSet, stmt);
+            Databases.closeSQLStuff(resultSet, stmt);
         }
     }
 
@@ -566,7 +567,7 @@ public class Executor {
             resultSet = logExecuteQuery(stmt);
             return new ContactReader(contextID, connection, resultSet).readContacts(fields, true);
         } finally {
-            closeSQLStuff(resultSet, stmt);
+            Databases.closeSQLStuff(resultSet, stmt);
         }
     }
 
@@ -575,7 +576,8 @@ public class Executor {
         /*
          * construct query string
          */
-        SearchAdapter adapter = new ContactSearchAdapter(contactSearch, contextID, fields, getCharset(sortOptions), forUser);
+        boolean utf8mb4 = Databases.getCharacterSet(connection).contains("utf8mb4");
+        SearchAdapter adapter = new ContactSearchAdapter(contactSearch, contextID, fields, getCharset(sortOptions), utf8mb4, forUser);
         StringBuilder stringBuilder = adapter.getClause();
         if (null != sortOptions && false == SortOptions.EMPTY.equals(sortOptions)) {
             stringBuilder.append(' ').append(Tools.getOrderClause(sortOptions));
@@ -605,7 +607,7 @@ public class Executor {
             }
             return new ContactReader(contextID, connection, resultSet).readContacts(fields, withUseCount);
         } finally {
-            closeSQLStuff(resultSet, stmt);
+            Databases.closeSQLStuff(resultSet, stmt);
         }
     }
 
@@ -643,7 +645,7 @@ public class Executor {
             }
             return members.toArray(new DistListMember[members.size()]);
         } finally {
-            closeSQLStuff(resultSet, stmt);
+            Databases.closeSQLStuff(resultSet, stmt);
         }
     }
 
@@ -689,7 +691,7 @@ public class Executor {
             }
             return members;
         } finally {
-            closeSQLStuff(resultSet, stmt);
+            Databases.closeSQLStuff(resultSet, stmt);
         }
     }
 
@@ -728,7 +730,7 @@ public class Executor {
             }
             return members;
         } finally {
-            closeSQLStuff(resultSet, stmt);
+            Databases.closeSQLStuff(resultSet, stmt);
         }
     }
 
@@ -743,7 +745,7 @@ public class Executor {
             Mappers.CONTACT.setParameters(stmt, contact, fields);
             return logExecuteUpdate(stmt);
         } finally {
-            closeSQLStuff(stmt);
+            Databases.closeSQLStuff(stmt);
         }
     }
 
@@ -759,7 +761,7 @@ public class Executor {
             Mappers.DISTLIST.setParameters(stmt, member, fields);
             return logExecuteUpdate(stmt);
         } finally {
-            closeSQLStuff(stmt);
+            Databases.closeSQLStuff(stmt);
         }
     }
 
@@ -828,7 +830,7 @@ public class Executor {
              */
             return logExecuteUpdate(stmt);
         } finally {
-            closeSQLStuff(stmt);
+            Databases.closeSQLStuff(stmt);
         }
     }
 
@@ -912,7 +914,7 @@ public class Executor {
              */
             return logExecuteUpdate(stmt);
         } finally {
-            closeSQLStuff(stmt);
+            Databases.closeSQLStuff(stmt);
         }
     }
 
@@ -942,7 +944,7 @@ public class Executor {
         }
         return logExecuteUpdate(stmt);
     } finally {
-        closeSQLStuff(stmt);
+            Databases.closeSQLStuff(stmt);
     }
 }
 
@@ -987,7 +989,7 @@ public class Executor {
             }
             return logExecuteUpdate(stmt);
         } finally {
-            closeSQLStuff(stmt);
+            Databases.closeSQLStuff(stmt);
         }
     }
 
@@ -1012,7 +1014,7 @@ public class Executor {
             }
             return logExecuteUpdate(stmt);
         } finally {
-            closeSQLStuff(stmt);
+            Databases.closeSQLStuff(stmt);
         }
     }
 
@@ -1050,7 +1052,7 @@ public class Executor {
             }
             return logExecuteUpdate(stmt);
         } finally {
-            closeSQLStuff(stmt);
+            Databases.closeSQLStuff(stmt);
         }
     }
 
@@ -1067,7 +1069,7 @@ public class Executor {
             stmt.setInt(2 + fields.length, member.getEntryID());
             return logExecuteUpdate(stmt);
         } finally {
-            closeSQLStuff(stmt);
+            Databases.closeSQLStuff(stmt);
         }
     }
 
@@ -1096,7 +1098,7 @@ public class Executor {
                 //} catch (SQLException e) {
                 //    LOG.warn("Could not delete contacts from object_use_count table: {}", e.getMessage());
             } finally {
-                closeSQLStuff(stmt);
+                Databases.closeSQLStuff(stmt);
             }
         }
     }
@@ -1119,7 +1121,7 @@ public class Executor {
             //} catch (SQLException e) {
             //    LOG.warn("Could not delete contact from object_use_count table: {}", e.getMessage());
         } finally {
-            closeSQLStuff(stmt);
+            Databases.closeSQLStuff(stmt);
         }
     }
 
@@ -1161,7 +1163,7 @@ public class Executor {
             deleteFromObjectUseCountTable(connection, contextID, folderID, objectIDs);
             return result;
         } finally {
-            closeSQLStuff(stmt);
+            Databases.closeSQLStuff(stmt);
         }
     }
 
@@ -1191,7 +1193,7 @@ public class Executor {
             deleteSingleFromObjectUseCountTable(connection, contextID, objectID);
             return result;
         } finally {
-            closeSQLStuff(stmt);
+            Databases.closeSQLStuff(stmt);
         }
     }
 

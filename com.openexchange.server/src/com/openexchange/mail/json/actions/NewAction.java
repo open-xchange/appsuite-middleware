@@ -249,7 +249,8 @@ public final class NewAction extends AbstractMailAction implements EnqueuableAJA
         List<OXException> warnings = new ArrayList<OXException>();
         String msgIdentifier = null;
         UserSettingMail userSettingMail = null;
-        {
+        ComposeTransportResult transportResult = null;
+        try {
             JSONObject jMail;
             {
                 String json0 = uploadEvent.getFormField(UPLOAD_FORMFIELD_MAIL);
@@ -347,7 +348,7 @@ public final class NewAction extends AbstractMailAction implements EnqueuableAJA
             }
 
             // As new/transport message
-            ComposeTransportResult transportResult = composeHandler.createTransportResult(composeRequest);
+            transportResult = composeHandler.createTransportResult(composeRequest);
             List<? extends ComposedMailMessage> composedMails = transportResult.getTransportMessages();
             ComposedMailMessage sentMessage = transportResult.getSentMessage();
             boolean transportEqualToSent = transportResult.isTransportEqualToSent();
@@ -396,8 +397,17 @@ public final class NewAction extends AbstractMailAction implements EnqueuableAJA
 
                 // Append messages
                 String[] ids = mailInterface.appendMessages(folder, new MailMessage[] { mm }, false);
+
+                // Commit results as messages were appended
+                {
+                    transportResult.commit();
+                    transportResult.finish();
+                    transportResult = null;
+                }
+
                 msgIdentifier = ids[0];
                 mailInterface.updateMessageFlags(folder, ids, MailMessage.FLAG_SEEN, true);
+
                 return resultFor(new JSONObject(2).put(FolderChildFields.FOLDER_ID, folder).put(DataFields.ID, ids[0]));
             }
 
@@ -487,6 +497,14 @@ public final class NewAction extends AbstractMailAction implements EnqueuableAJA
             String remoteAddress = null == servletRequest ? request.getRemoteAddress() : servletRequest.getRemoteAddr();
             List<String> ids = mailInterface.sendMessages(composedMails, sentMessage, transportEqualToSent, sendType, accountId, usm, new MtaStatusInfo(), remoteAddress);
             msgIdentifier = null == ids || ids.isEmpty() ? null : ids.get(0);
+            if (null != msgIdentifier) {
+                // Commit results as actual transport was executed
+                {
+                    transportResult.commit();
+                    transportResult.finish();
+                    transportResult = null;
+                }
+            }
 
             // Apply composition space state(s)
             if (null != csid) {
@@ -505,29 +523,35 @@ public final class NewAction extends AbstractMailAction implements EnqueuableAJA
             } catch (final Exception e) {
                 LOG.warn("Contact collector could not be triggered.", e);
             }
-        }
 
-        if (msgIdentifier == null) {
-            if (null != userSettingMail && userSettingMail.isNoCopyIntoStandardSentFolder()) {
+            if (msgIdentifier == null) {
+                if (userSettingMail.isNoCopyIntoStandardSentFolder()) {
+                    final AJAXRequestResult result = resultFor(null, false);
+                    result.addWarnings(warnings);
+                    return result;
+                }
+                if (warnings.isEmpty()) {
+                    throw MailExceptionCode.SEND_FAILED_UNKNOWN.create();
+                }
                 final AJAXRequestResult result = resultFor(null, false);
                 result.addWarnings(warnings);
                 return result;
             }
-            if (warnings.isEmpty()) {
-                throw MailExceptionCode.SEND_FAILED_UNKNOWN.create();
-            }
-            final AJAXRequestResult result = resultFor(null, false);
+
+            /*
+             * Create JSON response object
+             */
+            boolean plainJson = AJAXRequestDataTools.parseBoolParameter(PLAIN_JSON, request);
+            AJAXRequestResult result = resultFor(msgIdentifier, plainJson);
             result.addWarnings(warnings);
             return result;
+        } finally {
+            if (transportResult != null) {
+                transportResult.rollback();
+                transportResult.finish();
+                transportResult = null;
+            }
         }
-
-        /*
-         * Create JSON response object
-         */
-        boolean plainJson = AJAXRequestDataTools.parseBoolParameter(PLAIN_JSON, request);
-        AJAXRequestResult result = resultFor(msgIdentifier, plainJson);
-        result.addWarnings(warnings);
-        return result;
     }
 
     private AJAXRequestResult resultFor(String msgIdentifier, boolean asJsonObject) {
@@ -672,7 +696,7 @@ public final class NewAction extends AbstractMailAction implements EnqueuableAJA
         MailMessage getMail();
     }
 
-    private class PutNewMailDataImpl implements PutNewMailData {
+    private static class PutNewMailDataImpl implements PutNewMailData {
 
         private final MailMessage mail;
         private final InternetAddress fromAddress;

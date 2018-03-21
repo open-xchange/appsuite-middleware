@@ -32,7 +32,6 @@
 package net.fortuna.ical4j.model.property;
 
 import java.text.ParseException;
-
 import net.fortuna.ical4j.model.Date;
 import net.fortuna.ical4j.model.DateTime;
 import net.fortuna.ical4j.model.ParameterList;

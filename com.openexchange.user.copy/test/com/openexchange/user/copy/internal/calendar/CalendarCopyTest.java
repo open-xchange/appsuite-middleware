@@ -116,7 +116,7 @@ public class CalendarCopyTest extends AbstractUserCopyTest {
         try {
             mapping = copyTask.copyUser(getObjectMappingWithFolders());
         } catch (final OXException e) {
-            DBUtils.rollback(dstCon);
+            Databases.rollback(dstCon);
             e.printStackTrace();
             fail("A UserCopyException occurred.");
         }        
@@ -214,7 +214,7 @@ public class CalendarCopyTest extends AbstractUserCopyTest {
     @After
     public void tearDown()
  throws Exception {
-        DBUtils.autocommit(dstCon);
+        Databases.autocommit(dstCon);
         deleteAllFromTablesForCid(dstCtxId, "cid", dstCon, "prg_dates", "prg_dates_members", "prg_date_rights", "dateExternal");
         super.tearDown();
     }

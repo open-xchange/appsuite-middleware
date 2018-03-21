@@ -54,11 +54,11 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
+import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
-import com.openexchange.tools.sql.DBUtils;
 import com.openexchange.tools.update.Column;
 import com.openexchange.tools.update.Tools;
 
@@ -101,9 +101,9 @@ public class DelDatesMembersPrimaryKeyUpdateTask extends UpdateTaskAdapter {
             throw UpdateExceptionCodes.OTHER_PROBLEM.create(e, e.getMessage());
         } finally {
             if (rollback) {
-                DBUtils.rollback(con);
+                Databases.rollback(con);
             }
-            DBUtils.autocommit(con);
+            Databases.autocommit(con);
         }
     }
 
@@ -164,11 +164,11 @@ public class DelDatesMembersPrimaryKeyUpdateTask extends UpdateTaskAdapter {
                     stmt2.setInt(newPos++, cid);
                     stmt2.execute();
                 } finally {
-                    DBUtils.closeSQLStuff(stmt2);
+                    Databases.closeSQLStuff(stmt2);
                 }
             }
         } finally {
-            DBUtils.closeSQLStuff(rs, stmt);
+            Databases.closeSQLStuff(rs, stmt);
         }
     }
 

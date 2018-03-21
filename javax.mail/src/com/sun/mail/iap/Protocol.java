@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 1997-2017 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997-2018 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -40,25 +40,42 @@
 
 package com.sun.mail.iap;
 
+import java.io.BufferedOutputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.PrintStream;
+import java.lang.reflect.Field;
+import java.net.InetAddress;
+import java.net.Socket;
+import java.net.SocketException;
+import java.net.UnknownHostException;
+import java.nio.channels.SocketChannel;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Properties;
-import java.io.*;
-import java.lang.reflect.Field;
-import java.nio.channels.SocketChannel;
-import java.net.*;
+import java.util.Set;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
-
 import javax.net.ssl.SSLSocket;
-
+import com.sun.mail.imap.CommandEvent;
+import com.sun.mail.imap.CommandListener;
 import com.sun.mail.imap.GreetingListener;
 import com.sun.mail.imap.IMAPStore;
 import com.sun.mail.imap.ProtocolListener;
+import com.sun.mail.imap.ProtocolListenerCollection;
 import com.sun.mail.imap.ResponseEvent;
-import com.sun.mail.util.*;
-import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.atomic.AtomicInteger;
+import com.sun.mail.util.MailLogger;
+import com.sun.mail.util.PropUtil;
+import com.sun.mail.util.SocketFetcher;
+import com.sun.mail.util.TraceInputStream;
+import com.sun.mail.util.TraceOutputStream;
 
 /**
  * General protocol handling code for IMAP-like protocols. <p>
@@ -221,7 +238,8 @@ public class Protocol {
      */
     public Protocol(InputStream in, PrintStream out, Properties props,
 				boolean debug) throws IOException {
-    this.auditLogEnabled = null == props ? false : PropUtil.getBooleanProperty(props, prefix + ".auditLog.enabled", false);
+    prefix = "mail.imap";
+    this.auditLogEnabled = null == props ? false : PropUtil.getBooleanProperty(props, "mail.imap" + ".auditLog.enabled", false);
     this.host = "localhost";
 	this.port = 143;
 	this.user = null;
@@ -370,13 +388,41 @@ public class Protocol {
     }
 
     public String writeCommand(String command, Argument args) 
+        throws IOException, ProtocolException {
+        return writeCommand(command, args, IMAPStore.getProtocolListeners());
+    }
+
+    protected String writeCommand(String command, Argument args, ProtocolListenerCollection optCommandListeners) 
 		throws IOException, ProtocolException {
 	// assert Thread.holdsLock(this);
 	// can't assert because it's called from constructor
-	String tag = "A" + Integer.toString(tagCounter++, 10); // unique tag
+	String tag = new StringBuilder(6).append('A').append(Integer.toString(tagCounter++, 10)).toString(); // unique tag
+
+	if (null != optCommandListeners) {
+	    Iterator<CommandListener> it = optCommandListeners.commandListeners();
+	    if (it.hasNext()) {
+	        CommandEvent commandEvent = CommandEvent.builder()
+                .setArgs(args)
+                .setCommand(command)
+                .setHost(host)
+                .setPort(port)
+                .setTag(tag)
+                .setUser(user)
+                .build();
+	        boolean applicable;
+	        do {
+	            CommandListener listener = it.next();
+                applicable = listener.onBeforeCommandIssued(commandEvent);
+	            if (false == applicable) {
+	                // Remove non-applicable listener from collection to prevent from calling it unnecessarily later on
+                    it.remove();
+                }
+            } while (it.hasNext());
+        }
+    }
 
 	output.writeBytes(tag + " " + command);
-    
+
 	if (args != null) {
 	    output.write(' ');
 	    args.write(this);
@@ -404,11 +450,11 @@ public class Protocol {
 	Response r = null;
 
 	// write the command
-	List<ProtocolListener> protocolListeners = IMAPStore.getProtocolListeners();
+	ProtocolListenerCollection protocolListeners = IMAPStore.getProtocolListeners();
 	boolean measure = null != protocolListeners || auditLogEnabled;
 	long start = measure ? System.currentTimeMillis() : 0L;
 	try {
-	    tag = writeCommand(command, args);
+	    tag = writeCommand(command, args, protocolListeners);
 	} catch (LiteralException lex) {
 	    v.add(lex.getResponse());
 	    done = true;
@@ -460,25 +506,28 @@ public class Protocol {
             com.sun.mail.imap.AuditLog.LOG.info("command='{}' time={} timestamp={} taggedResponse='{}'", (null == args ? command : command + " " + args.toString()), Long.valueOf(executionMillis), Long.valueOf(end), null == taggedResp ? "<none>" : taggedResp.toString());
 	    }
 	    if (null != protocolListeners) {
-	        ResponseEvent responseEvent = ResponseEvent.builder()
-	            .setArgs(args)
-	            .setCommand(command)
-	            .setExecutionMillis(executionMillis)
-	            .setHost(host)
-	            .setPort(port)
-	            .setResponses(responses)
-	            .setTag(tag)
-	            .setTerminatedTmestamp(end)
-	            .setStatusResponse(ResponseEvent.StatusResponse.statusResponseFor(responses[responses.length - 1]))
-	            .setUser(user)
-	            .build();
-	        
-            for (ProtocolListener protocolListener : protocolListeners) {
-                try {
-                    protocolListener.onResponse(responseEvent);
-                } catch (ProtocolException e) {
-                    logger.log(java.util.logging.Level.FINE, "Failed protocol listener " + protocolListener.getClass().getName(), e);
-                }
+	        Iterator<ProtocolListener> it = protocolListeners.protocolListeners();
+	        if (it.hasNext()) {
+	            ResponseEvent responseEvent = ResponseEvent.builder()
+                    .setArgs(args)
+                    .setCommand(command)
+                    .setExecutionMillis(executionMillis)
+                    .setHost(host)
+                    .setPort(port)
+                    .setResponses(responses)
+                    .setTag(tag)
+                    .setTerminatedTmestamp(end)
+                    .setStatusResponse(ResponseEvent.StatusResponse.statusResponseFor(responses[responses.length - 1]))
+                    .setUser(user)
+                    .build();
+	            do {
+                    ProtocolListener protocolListener = it.next();
+                    try {
+                        protocolListener.onResponse(responseEvent);
+                    } catch (ProtocolException e) {
+                        logger.log(java.util.logging.Level.FINE, "Failed protocol listener " + protocolListener.getClass().getName(), e);
+                    }
+                } while (it.hasNext());
             }
         }
 	}

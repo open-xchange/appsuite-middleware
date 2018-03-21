@@ -373,7 +373,9 @@ public final class PGPKeysUtil {
         PGPPublicKey publicMasterKey = publicKeyRing.getPublicKey();
         PGPPublicKey newPublicMasterKey = addUID(publicMasterKey, privateKey, userId);
         publicKeyRing = PGPPublicKeyRing.removePublicKey(publicKeyRing, publicMasterKey);
-        publicKeyRing = PGPPublicKeyRing.insertPublicKey(publicKeyRing, newPublicMasterKey);
+        if (null != publicKeyRing) {            
+            publicKeyRing = PGPPublicKeyRing.insertPublicKey(publicKeyRing, newPublicMasterKey);
+        }
         return publicKeyRing;
     }
 

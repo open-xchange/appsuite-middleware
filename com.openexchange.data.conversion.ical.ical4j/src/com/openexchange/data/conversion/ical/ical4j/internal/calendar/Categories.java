@@ -51,13 +51,14 @@ package com.openexchange.data.conversion.ical.ical4j.internal.calendar;
 import java.util.Iterator;
 import java.util.List;
 import java.util.TimeZone;
-import net.fortuna.ical4j.model.PropertyList;
-import net.fortuna.ical4j.model.component.CalendarComponent;
 import com.openexchange.data.conversion.ical.ConversionWarning;
 import com.openexchange.data.conversion.ical.Mode;
 import com.openexchange.data.conversion.ical.ical4j.internal.AbstractVerifyingAttributeConverter;
 import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.java.Strings;
+import net.fortuna.ical4j.model.PropertyList;
+import net.fortuna.ical4j.model.component.CalendarComponent;
 
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
@@ -79,8 +80,7 @@ public class Categories<T extends CalendarComponent, U extends CalendarObject> e
 
     @Override
     public boolean hasProperty(final T t) {
-        final PropertyList categoriesList = t.getProperties("CATEGORIES");
-        return categoriesList.size() > 0;
+        return true;
     }
 
     @Override
@@ -96,6 +96,7 @@ public class Categories<T extends CalendarComponent, U extends CalendarObject> e
         if(bob.length() > 0) {
             bob.setLength(bob.length()-1);
         }
-        cObj.setCategories(bob.toString());
+        String value = bob.toString();
+        cObj.setCategories(Strings.isEmpty(value) ? null : value);
     }
 }

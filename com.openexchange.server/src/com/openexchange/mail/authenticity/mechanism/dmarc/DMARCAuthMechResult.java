@@ -50,8 +50,8 @@
 package com.openexchange.mail.authenticity.mechanism.dmarc;
 
 import com.openexchange.mail.authenticity.mechanism.AbstractAuthMechResult;
-import com.openexchange.mail.authenticity.mechanism.MailAuthenticityMechanism;
 import com.openexchange.mail.authenticity.mechanism.DefaultMailAuthenticityMechanism;
+import com.openexchange.mail.authenticity.mechanism.MailAuthenticityMechanism;
 
 /**
  * {@link DMARCAuthMechResult}

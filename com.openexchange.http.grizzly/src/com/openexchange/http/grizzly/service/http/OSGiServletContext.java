@@ -91,17 +91,17 @@
 
 package com.openexchange.http.grizzly.service.http;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.EventListener;
+import javax.servlet.Filter;
 import org.glassfish.grizzly.http.util.MimeType;
 import org.glassfish.grizzly.servlet.FilterChainFactory;
 import org.glassfish.grizzly.servlet.FilterRegistration;
 import org.glassfish.grizzly.servlet.WebappContext;
 import org.osgi.service.http.HttpContext;
-import javax.servlet.Filter;
-import java.net.URL;
-import java.net.MalformedURLException;
-import java.io.InputStream;
-import java.io.IOException;
-import java.util.EventListener;
 
 /**
  * OSGi {@link WebappContext} integration.

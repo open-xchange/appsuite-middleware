@@ -95,12 +95,8 @@ public class DefaultDriveShareInfo implements DriveShareInfo, SubfolderAwareShar
     }
 
     @Override
-    public Boolean isIncludeSubfolders() {
-        if(shareInfo instanceof SubfolderAwareShareInfo) {
-            return ((SubfolderAwareShareInfo) shareInfo).isIncludeSubfolders();
-        } else {
-            return false;
-        }
+    public boolean isIncludeSubfolders() {
+        return shareInfo instanceof SubfolderAwareShareInfo ? ((SubfolderAwareShareInfo) shareInfo).isIncludeSubfolders() : false;
     }
 
 }

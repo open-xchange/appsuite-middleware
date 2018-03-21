@@ -97,7 +97,7 @@ public class EnqueuedStanza implements Comparable<EnqueuedStanza>{
 
     @Override
     public boolean equals(Object obj) {
-        return ((EnqueuedStanza)obj).sequenceNumber == sequenceNumber;
+        return obj instanceof EnqueuedStanza ? ((EnqueuedStanza) obj).sequenceNumber == sequenceNumber : false;
     }
 
     protected int getInfinity() {

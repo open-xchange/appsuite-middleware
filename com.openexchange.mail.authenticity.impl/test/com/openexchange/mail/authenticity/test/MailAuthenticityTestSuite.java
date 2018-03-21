@@ -51,15 +51,24 @@ package com.openexchange.mail.authenticity.test;
 
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
-import com.openexchange.test.concurrent.ParallelSuite;
 
 /**
  * {@link MailAuthenticityTestSuite}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-@RunWith(ParallelSuite.class)
-@Suite.SuiteClasses({ TestMailAuthenticityHandler.class, TestMailAuthenticityStatusMatrix.class })
-public final class MailAuthenticityTestSuite {
+@RunWith(Suite.class)
+@Suite.SuiteClasses({
+    TestMailAuthenticityHandler.class,
+    TestMailAuthenticityStatusMatrix.class,
+    StandardAuthenticationResultsValidatorTest.class
+})
+public class MailAuthenticityTestSuite {
 
+    /**
+     * Initializes a new {@link MailAuthenticityTestSuite}.
+     */
+    public MailAuthenticityTestSuite() {
+        super();
+    }
 }

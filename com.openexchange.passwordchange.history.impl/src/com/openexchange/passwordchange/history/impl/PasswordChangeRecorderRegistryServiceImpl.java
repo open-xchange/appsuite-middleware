@@ -61,9 +61,9 @@ import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.java.Strings;
-import com.openexchange.passwordchange.history.PasswordChangeRecorderRegistryService;
-import com.openexchange.passwordchange.history.PasswordChangeRecorderException;
 import com.openexchange.passwordchange.history.PasswordChangeRecorder;
+import com.openexchange.passwordchange.history.PasswordChangeRecorderException;
+import com.openexchange.passwordchange.history.PasswordChangeRecorderRegistryService;
 import com.openexchange.user.UserService;
 
 /**

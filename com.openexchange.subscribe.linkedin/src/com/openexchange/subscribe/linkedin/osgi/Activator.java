@@ -50,7 +50,6 @@
 package com.openexchange.subscribe.linkedin.osgi;
 
 import com.openexchange.context.ContextService;
-import com.openexchange.database.DatabaseService;
 import com.openexchange.oauth.OAuthAccountDeleteListener;
 import com.openexchange.oauth.OAuthServiceMetaData;
 import com.openexchange.oauth.linkedin.LinkedInService;

@@ -199,7 +199,7 @@ public class AdvertisementTest extends AbstractConfigAwareAjaxSession {
 
             GetConfigRequest req = new GetConfigRequest();
             GetConfigResponse response = getAjaxClient().execute(req);
-            assertTrue("Response has errors: " + response.getErrorMessage(), !response.hasError());
+            assertTrue("Response has errors: " + getErrorMessage(response), !response.hasError());
             assertEquals("The server returned the wrong configuration.", adConfig, response.getData());
 
             AJAXClient client2 = new AJAXClient(testContext.acquireUser());
@@ -233,7 +233,7 @@ public class AdvertisementTest extends AbstractConfigAwareAjaxSession {
 
             GetConfigRequest req = new GetConfigRequest();
             GetConfigResponse response = getAjaxClient().execute(req);
-            assertTrue("Response has errors: " + response.getErrorMessage(), !response.hasError());
+            assertTrue("Response has errors: " + getErrorMessage(response), !response.hasError());
             assertEquals("The server returned the wrong configuration.", adConfig, response.getData());
         } catch (Exception e) {
             LoggerFactory.getLogger(AdvertisementTest.class).error("Test failed with error: {}", e.getMessage(), e);
@@ -264,7 +264,7 @@ public class AdvertisementTest extends AbstractConfigAwareAjaxSession {
         // Check if configuration is available
         GetConfigRequest req = new GetConfigRequest();
         GetConfigResponse response = getAjaxClient().execute(req);
-        assertTrue("Response has errors: " + response.getErrorMessage(), !response.hasError());
+        assertTrue("Response has errors: " + getErrorMessage(response), !response.hasError());
         assertEquals("The server returned the wrong configuration.", adConfig, response.getData());
         // Remove configuration again
         advertisementApi.deleteAdvertisementByResellerAndPackage(DEFAULT, pack);
@@ -297,7 +297,7 @@ public class AdvertisementTest extends AbstractConfigAwareAjaxSession {
             assertTrue("Unexpected status: " + statusLine, Arrays.contains(new int[] { 200, 201 }, statusLine));
             GetConfigRequest req = new GetConfigRequest();
             GetConfigResponse response = getAjaxClient().execute(req);
-            assertTrue("Response has errors: " + response.getErrorMessage(), !response.hasError());
+            assertTrue("Response has errors: " + getErrorMessage(response), !response.hasError());
             assertEquals("The server returned the wrong configuration.", adConfig, response.getData());
 
             // Create Preview
@@ -309,7 +309,7 @@ public class AdvertisementTest extends AbstractConfigAwareAjaxSession {
             // Check if preview configuration is available
             req = new GetConfigRequest();
             response = getAjaxClient().execute(req);
-            assertTrue("Response has errors: " + response.getErrorMessage(), !response.hasError());
+            assertTrue("Response has errors: " + getErrorMessage(response), !response.hasError());
             assertEquals("The server returned the wrong configuration.", previewConfig, response.getData());
 
             // Remove preview configuration
@@ -318,7 +318,7 @@ public class AdvertisementTest extends AbstractConfigAwareAjaxSession {
 
             // Check if configuration is back to the old one again
             response = getAjaxClient().execute(req);
-            assertTrue("Response has errors: " + response.getErrorMessage(), !response.hasError());
+            assertTrue("Response has errors: " + getErrorMessage(response), !response.hasError());
             assertEquals("The server returned the wrong configuration.", adConfig, response.getData());
         } catch (Exception e) {
             LoggerFactory.getLogger(AdvertisementTest.class).error("Test failed with error: {}", e.getMessage(), e);
@@ -327,6 +327,10 @@ public class AdvertisementTest extends AbstractConfigAwareAjaxSession {
             advertisementApi.deleteAdvertisementByResellerAndPackage(DEFAULT, pack);
             advertisementApi.deleteAdvertisementByUserId(ctxId, userId);
         }
+    }
+
+    private String getErrorMessage(GetConfigResponse response) {
+        return response.getException() != null ? response.getException().getMessage() : null;
     }
 
     private static JSONValue generateAdConfig() throws JSONException {
@@ -364,5 +368,10 @@ public class AdvertisementTest extends AbstractConfigAwareAjaxSession {
     @Override
     protected String getReloadables() {
         return reloadables;
+    }
+
+    @Override
+    protected String getScope() {
+        return "user";
     }
 }

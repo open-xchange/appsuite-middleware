@@ -49,8 +49,6 @@
 
 package com.openexchange.groupware.tools.mappings.json;
 
-import gnu.trove.map.TIntObjectMap;
-import gnu.trove.map.hash.TIntObjectHashMap;
 import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.EnumSet;
@@ -69,6 +67,8 @@ import org.json.JSONObject;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.tools.mappings.DefaultMapper;
 import com.openexchange.session.Session;
+import gnu.trove.map.TIntObjectMap;
+import gnu.trove.map.hash.TIntObjectHashMap;
 
 /**
  * {@link DefaultJsonMapper} - Abstract {@link JsonMapper} implementation.
@@ -89,6 +89,11 @@ public abstract class DefaultJsonMapper<O, E extends Enum<E>> extends DefaultMap
 	 */
 	protected final TIntObjectMap<E> columnMap;
 
+    /**
+     * The mapped fields
+     */
+    protected final E[] mappedFields;
+
 	/**
 	 * Initializes a new {@link DefaultJsonMapper}.
 	 */
@@ -96,9 +101,12 @@ public abstract class DefaultJsonMapper<O, E extends Enum<E>> extends DefaultMap
 		super();
 		this.mappings = createMappings();
 		this.columnMap = new TIntObjectHashMap<E>(this.mappings.size());
-		for (final Entry<E, ? extends JsonMapping<? extends Object, O>> entry : this.mappings.entrySet()) {
-			this.columnMap.put(entry.getValue().getColumnID(), entry.getKey());
-		}
+        for (final Entry<E, ? extends JsonMapping<? extends Object, O>> entry : this.mappings.entrySet()) {
+            if (entry.getValue().getColumnID() != null) {
+                this.columnMap.put(entry.getValue().getColumnID(), entry.getKey());
+            }
+        }
+        this.mappedFields = mappings.keySet().toArray(newArray(mappings.keySet().size()));
 	}
 
 	@Override
@@ -152,26 +160,6 @@ public abstract class DefaultJsonMapper<O, E extends Enum<E>> extends DefaultMap
 	public void serialize(O object, JSONObject to, E[] fields, final TimeZone timeZone) throws JSONException, OXException {
 		this.serialize(object, to, fields, timeZone, null);
 	}
-
-//	@Override
-//	public JSONArray serialize(final List<O> objects, final E[] fields) throws JSONException, OXException {
-//		return this.serialize(objects, fields, null);
-//	}
-//
-//	@Override
-//	public JSONArray serialize(final List<O> objects, final E[] fields, String timeZoneID) throws JSONException, OXException {
-//		return this.serialize(objects, fields, timeZoneID, null);
-//	}
-//
-//	@Override
-//	public JSONArray serialize(List<O> objects, E[] fields, String timeZoneID, Session session) throws JSONException, OXException {
-//		final JSONArray jsonArray = new JSONArray();
-//		TimeZone timeZone = null != timeZoneID ? getTimeZone(timeZoneID) : null;
-//		for (final O object : objects) {
-//			jsonArray.put(this.serialize(object, fields, timeZone, session));
-//		}
-//		return jsonArray;
-//	}
 
 	@Override
 	public JSONArray serialize(List<O> objects, E[] fields, String timeZoneID, Session session) throws JSONException, OXException {
@@ -250,28 +238,18 @@ public abstract class DefaultJsonMapper<O, E extends Enum<E>> extends DefaultMap
     }
 
 	@Override
-	public int[] getColumnIDs(final E[] fields) throws OXException {
-		if (null == fields) {
-			throw new IllegalArgumentException("fields");
-		}
-		final int[] columnIDs = new int[fields.length];
-		for (int i = 0; i < fields.length; i++) {
-			columnIDs[i] = this.get(fields[i]).getColumnID();
-		}
-		return columnIDs;
-	}
-
-	@Override
 	public E[] getFields(final int[] columnIDs) throws OXException {
 		return this.getFields(columnIDs, null, (E[])null);
 	}
 
-	@Override
+	@SuppressWarnings("unchecked")
+    @Override
     public E[] getFields(final int[] columnIDs, final E... mandatoryFields) throws OXException {
 		return this.getFields(columnIDs, null, mandatoryFields);
     }
 
-	@Override
+	@SuppressWarnings("unchecked")
+    @Override
     public E[] getFields(final int[] columnIDs, final EnumSet<E> illegalFields, final E... mandatoryFields) throws OXException {
 		if (null == columnIDs) {
 			throw new IllegalArgumentException("columnIDs");
@@ -292,9 +270,19 @@ public abstract class DefaultJsonMapper<O, E extends Enum<E>> extends DefaultMap
     }
 
 	@Override
-	protected EnumMap<E, ? extends JsonMapping<? extends Object, O>> getMappings() {
+    public EnumMap<E, ? extends JsonMapping<? extends Object, O>> getMappings() {
 		return this.mappings;
 	}
+
+    /**
+     * Gets all mapped fields in an array.
+     *
+     * @return The mapped fields
+     */
+    @Override
+    public E[] getMappedFields() {
+        return mappedFields;
+    }
 
 	/**
 	 * Creates the mappings for all possible values of the underlying enum.

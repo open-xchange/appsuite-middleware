@@ -1,0 +1,25 @@
+/chronos/account?action=probe:
+  put:
+    operationId: probe
+    tags:
+      - Chronos
+      - ICal
+    summary: Probe to check given ICal calendar properties before creating a new account.
+    consumes:
+      - application/json
+    parameters:
+      - $ref: "#/parameters/gblQueryParamSession"
+      - in: body
+        name: body
+        description: |
+          The properties to check.
+        required: true
+        schema:
+          $ref: "#/definitions/CalendarAccountProbeData"
+    responses:
+      200:
+        description: |
+          A JSON object describing the possible calendar accounts. In case of errors the responsible fields in the
+          response are filled (see [Error handling](#error-handling)).
+        schema:
+          $ref: "#/definitions/CalendarAccountProbeResponse"

@@ -63,9 +63,9 @@ import com.openexchange.user.UserService;
 import com.openexchange.user.json.Constants;
 import com.openexchange.user.json.UserContactResultConverter;
 import com.openexchange.user.json.actions.UserActionFactory;
+import com.openexchange.user.json.actions.UserMeActionFactory;
 import com.openexchange.user.json.anonymizer.ContactAnonymizerService;
 import com.openexchange.user.json.anonymizer.UserAnonymizerService;
-import com.openexchange.user.json.actions.UserMeActionFactory;
 
 /**
  * {@link UserJSONActivator} - Activator for JSON user interface.

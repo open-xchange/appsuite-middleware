@@ -168,28 +168,19 @@ import com.openexchange.user.UserService;
  */
 public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefaultValues {
 
-    private class MethodAndNames {
+    private static class MethodAndName {
 
-        private final Method method;
-
-        private final String name;
+        final Method method;
+        final String name;
 
         /**
          * @param method
          * @param name
          */
-        public MethodAndNames(final Method method, final String name) {
+        public MethodAndName(final Method method, final String name) {
             super();
             this.method = method;
             this.name = name;
-        }
-
-        public Method getMethod() {
-            return this.method;
-        }
-
-        public String getName() {
-            return this.name;
         }
 
     }
@@ -467,16 +458,18 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             }
             // Insert new ones
             if (!capsToInsert.isEmpty()) {
-                for (final String capToAdd : capsToAdd) {
-                    final String minusCap = "-" + capToAdd;
-                    if (existing.contains(minusCap)) {
-                        if (null == stmt) {
-                            stmt = con.prepareStatement("DELETE FROM capability_user WHERE cid=? AND user=? AND cap=?");
-                            stmt.setInt(1, contextId);
-                            stmt.setInt(2, user.getId().intValue());
+                if (capsToAdd != null) {
+                    for (final String capToAdd : capsToAdd) {
+                        final String minusCap = "-" + capToAdd;
+                        if (existing.contains(minusCap)) {
+                            if (null == stmt) {
+                                stmt = con.prepareStatement("DELETE FROM capability_user WHERE cid=? AND user=? AND cap=?");
+                                stmt.setInt(1, contextId);
+                                stmt.setInt(2, user.getId().intValue());
+                            }
+                            stmt.setString(3, minusCap);
+                            stmt.addBatch();
                         }
-                        stmt.setString(3, minusCap);
-                        stmt.addBatch();
                     }
                 }
                 if (null != stmt) {
@@ -887,7 +880,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             notallowed.add("Locale");
             notallowed.add("Spam_filter_enabled");
 
-            List<MethodAndNames> methodlist = getGetters(theMethods);
+            List<MethodAndName> methodlist = getGetters(theMethods);
 
             StringBuilder contact_query = new StringBuilder("UPDATE prg_contacts SET ");
 
@@ -897,13 +890,13 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             boolean prg_contacts_update_needed = false;
             boolean displayNameUpdate = false;
 
-            for (final MethodAndNames methodandname : methodlist) {
+            for (final MethodAndName methodandname : methodlist) {
                 // First we have to check which return value we have. We have to
                 // distinguish four types
-                final Method method = methodandname.getMethod();
+                final Method method = methodandname.method;
                 final Method methodbool = getMethodforbooleanparameter(method);
                 final boolean test = ((Boolean) methodbool.invoke(usrdata, (Object[]) null)).booleanValue();
-                final String methodname = methodandname.getName();
+                final String methodname = methodandname.name;
                 final String returntype = method.getReturnType().getName();
                 if (returntype.equalsIgnoreCase("java.lang.String")) {
                     final String result = (java.lang.String) method.invoke(usrdata, (Object[]) null);
@@ -1833,15 +1826,15 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 final Class<? extends User> c = usrdata.getClass();
                 final Method[] theMethods = c.getMethods();
 
-                List<MethodAndNames> methodlist = getGetters(theMethods);
+                List<MethodAndName> methodlist = getGetters(theMethods);
 
                 StringBuilder contactInsert = new StringBuilder("INSERT INTO prg_contacts (cid,userid,creating_date,created_from,changing_date,changed_from,fid,intfield01,field90,uid,");
                 StringBuilder placeHolders = new StringBuilder();
                 List<Method> methodlist2 = new LinkedList<>();
-                for (MethodAndNames methodandname : methodlist) {
+                for (MethodAndName methodandname : methodlist) {
                     // First we have to check which return value we have. We have to distinguish four types.
-                    final Method method = methodandname.getMethod();
-                    final String methodName = methodandname.getName();
+                    final Method method = methodandname.method;
+                    final String methodName = methodandname.name;
                     final Class<?> returnType = method.getReturnType();
                     if (String.class.equals(returnType)) {
                         final String result = (String) method.invoke(usrdata, (Object[]) null);
@@ -3097,15 +3090,6 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 stmt.executeUpdate();
                 stmt.close();
 
-                /*-
-                 *
-                try {
-                    ClientAdminThread.cache.reinitAccessCombinations();
-                } catch (Exception e) {
-                    log.error("", e);
-                }
-                 *
-                 */
                 // JCS
                 {
                     CacheService cacheService = AdminServiceRegistry.getInstance().getService(CacheService.class);
@@ -3627,8 +3611,8 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
         }
     }
 
-    private List<MethodAndNames> getGetters(final Method[] theMethods) {
-        final List<MethodAndNames> retlist = new LinkedList<>();
+    private List<MethodAndName> getGetters(final Method[] theMethods) {
+        final List<MethodAndName> retlist = new LinkedList<>();
 
         // Define the returntypes we search for
         final HashSet<String> returntypes = new HashSet<>(4);
@@ -3648,7 +3632,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                     if (null != Mapper.method2field.get(methodnamewithoutprefix)) {
                         final String returntype = method.getReturnType().getName();
                         if (returntypes.contains(returntype)) {
-                            retlist.add(new MethodAndNames(method, methodnamewithoutprefix));
+                            retlist.add(new MethodAndName(method, methodnamewithoutprefix));
                         }
                     }
                 }
@@ -3658,7 +3642,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                     if (null != Mapper.method2field.get(methodnamewithoutprefix)) {
                         final String returntype = method.getReturnType().getName();
                         if (returntypes.contains(returntype)) {
-                            retlist.add(new MethodAndNames(method, methodnamewithoutprefix));
+                            retlist.add(new MethodAndName(method, methodnamewithoutprefix));
                         }
                     }
                 }

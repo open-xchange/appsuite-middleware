@@ -99,6 +99,7 @@ public final class ContextDatabaseAssignmentImpl implements ContextDatabaseAssig
     private static final String CACHE_NAME = "OXDBPoolCache";
 
     private static class CacheLockHolder {
+        // Wrapper class to initialize only when needed
         static final CacheLock fallbackGlobalCacheLock = CacheLock.cacheLockFor(new ReentrantLock(true));
     }
 
@@ -131,6 +132,15 @@ public final class ContextDatabaseAssignmentImpl implements ContextDatabaseAssig
         return getAssignment(null, contextId, true);
     }
 
+    /**
+     * Gets the assignment for specified context.
+     *
+     * @param con The (optional) connection to use
+     * @param contextId The context identifier
+     * @param errorOnAbsence <code>true</code> to throw an error in case no such assignment exists; otherwise <code>false</code>
+     * @return The assignment or <code>null</code> (if parameter <code>errorOnAbsence</code> has been set to <code>false</code>)
+     * @throws OXException If loading the assignment fails or no such assignment exists (if parameter <code>errorOnAbsence</code> has been set to <code>true</code>)
+     */
     private AssignmentImpl getAssignment(Connection con, int contextId, boolean errorOnAbsence) throws OXException {
         CacheService myCacheService = this.cacheService;
         Cache myCache = this.cache;
@@ -352,6 +362,10 @@ public final class ContextDatabaseAssignmentImpl implements ContextDatabaseAssig
 
     private void deleteAssignmentDB(Connection con, int contextId) throws OXException {
         AssignmentImpl assignment = getAssignment(con, contextId, false);
+        if (null == assignment) {
+            // No such assignment, hence no need for deletion
+            return;
+        }
 
         PreparedStatement stmt = null;
         try {
@@ -596,13 +610,13 @@ public final class ContextDatabaseAssignmentImpl implements ContextDatabaseAssig
             PreparedStatement stmt = null;
             ResultSet rs = null;
             try {
-                stmt = con.prepareStatement("SELECT db_schema, server_id FROM context_server2db_pool WHERE write_db_pool_id=? GROUP by db_schema");
+                // GROUP BY CLAUSE: ensure ONLY_FULL_GROUP_BY compatibility
+                stmt = con.prepareStatement("SELECT db_schema FROM context_server2db_pool WHERE write_db_pool_id=? AND server_id=? GROUP by db_schema");
                 stmt.setInt(1, clusterEntry.getKey().intValue());
+                stmt.setInt(2, serverId);
                 rs = stmt.executeQuery();
                 while (rs.next()) {
-                    if (serverId == rs.getInt(2)) {
-                        allSchemas.put(rs.getString(1), clusterEntry.getValue());
-                    }
+                    allSchemas.put(rs.getString(1), clusterEntry.getValue());
                 }
             } catch (SQLException e) {
                 throw DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());

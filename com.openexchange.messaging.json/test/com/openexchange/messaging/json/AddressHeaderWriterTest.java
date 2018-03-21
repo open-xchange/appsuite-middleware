@@ -50,6 +50,9 @@
 package com.openexchange.messaging.json;
 
 import static com.openexchange.json.JSONAssertion.assertValidates;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
@@ -62,10 +65,6 @@ import com.openexchange.json.JSONAssertion;
 import com.openexchange.messaging.MessagingHeader;
 import com.openexchange.messaging.StringMessageHeader;
 import com.openexchange.messaging.generic.internet.MimeAddressMessagingHeader;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import static org.junit.Assert.*;
 
 /**
  * {@link AddressHeaderWriterTest}

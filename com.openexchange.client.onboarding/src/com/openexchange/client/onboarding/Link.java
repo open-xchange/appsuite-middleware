@@ -49,8 +49,6 @@
 
 package com.openexchange.client.onboarding;
 
-import com.openexchange.client.onboarding.LinkType;
-
 /**
  * {@link Link} - A link for a scenario having type set to "link".
  *

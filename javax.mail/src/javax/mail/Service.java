@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 1997-2017 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997-2018 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -40,11 +40,14 @@
 
 package javax.mail;
 
-import java.io.*;
-import java.net.*;
-import java.util.*;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+import java.util.EventListener;
+import java.util.Vector;
 import java.util.concurrent.Executor;
-import javax.mail.event.*;
+import javax.mail.event.ConnectionEvent;
+import javax.mail.event.ConnectionListener;
+import javax.mail.event.MailEvent;
 
 /**
  * An abstract class that contains the functionality

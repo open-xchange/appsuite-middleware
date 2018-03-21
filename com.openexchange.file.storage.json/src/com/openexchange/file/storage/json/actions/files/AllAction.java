@@ -163,7 +163,7 @@ public class AllAction extends AbstractListingAction {
 
     // ---------------------------------------------------------------------------------------------------------------------------------
 
-    private final class ListBasedTimedResult implements TimedResult<File> {
+    private static final class ListBasedTimedResult implements TimedResult<File> {
 
         private final long sequenceNumber;
         private final SearchIterator<File> results;
@@ -188,7 +188,7 @@ public class AllAction extends AbstractListingAction {
         }
     }
 
-    private final class DelegatingTimedResult implements TimedResult<File> {
+    private static final class DelegatingTimedResult implements TimedResult<File> {
 
         private final long sequenceNumber;
         private final SearchIterator<File> results;

@@ -56,11 +56,11 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Set;
 import java.util.UUID;
+import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.java.util.UUIDs;
-import com.openexchange.tools.sql.DBUtils;
 import com.openexchange.tools.update.Column;
 import com.openexchange.tools.update.Tools;
 
@@ -83,7 +83,7 @@ public class MigrateUUIDsForUserAliasTable extends AbstractUserAliasTableUpdateT
         Connection connection = params.getConnection();
         boolean rollback = false;
         try {
-            DBUtils.startTransaction(connection);
+            Databases.startTransaction(connection);
             rollback = true;
 
             if (!Tools.columnExists(connection, "user_alias", "uuid")) {
@@ -105,9 +105,9 @@ public class MigrateUUIDsForUserAliasTable extends AbstractUserAliasTableUpdateT
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } finally {
             if (rollback) {
-                DBUtils.rollback(connection);
+                Databases.rollback(connection);
             }
-            DBUtils.autocommit(connection);
+            Databases.autocommit(connection);
         }
 
     }
@@ -136,8 +136,8 @@ public class MigrateUUIDsForUserAliasTable extends AbstractUserAliasTableUpdateT
             }
             preparedStatment.executeBatch();
         } finally {
-            DBUtils.closeSQLStuff(resultSet, statement);
-            DBUtils.closeSQLStuff(preparedStatment);
+            Databases.closeSQLStuff(resultSet, statement);
+            Databases.closeSQLStuff(preparedStatment);
         }
     }
 
@@ -157,7 +157,7 @@ public class MigrateUUIDsForUserAliasTable extends AbstractUserAliasTableUpdateT
             }
             preparedStatment.executeBatch();
         } finally {
-            DBUtils.closeSQLStuff(preparedStatment);
+            Databases.closeSQLStuff(preparedStatment);
         }
     }
 

@@ -49,8 +49,11 @@
 
 package com.openexchange.file.storage.composition.internal;
 
-import static com.openexchange.file.storage.composition.internal.FileStorageTools.*;
-import static com.openexchange.file.storage.composition.internal.idmangling.IDManglingFolder.*;
+import static com.openexchange.file.storage.composition.internal.FileStorageTools.containsForeignPermissions;
+import static com.openexchange.file.storage.composition.internal.FileStorageTools.getEventProperties;
+import static com.openexchange.file.storage.composition.internal.FileStorageTools.getPath;
+import static com.openexchange.file.storage.composition.internal.idmangling.IDManglingFolder.withRelativeID;
+import static com.openexchange.file.storage.composition.internal.idmangling.IDManglingFolder.withUniqueID;
 import java.text.Collator;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -60,6 +63,7 @@ import java.util.Dictionary;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
 import com.openexchange.exception.OXException;
@@ -80,6 +84,7 @@ import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.FileStorageFolderAccess;
 import com.openexchange.file.storage.FileStorageFolderType;
 import com.openexchange.file.storage.FileStoragePermission;
+import com.openexchange.file.storage.FileStorageRestoringFolderAccess;
 import com.openexchange.file.storage.FileStorageService;
 import com.openexchange.file.storage.FolderStatsAware;
 import com.openexchange.file.storage.PathKnowingFileStorageFolderAccess;
@@ -206,7 +211,7 @@ public abstract class AbstractCompositingIDBasedFolderAccess extends AbstractCom
         FolderID parentFolderID = new FolderID(toCreate.getParentId());
         FileStorageFolderAccess folderAccess = getFolderAccess(parentFolderID);
         if (containsForeignPermissions(session.getUserId(), toCreate) && false == PermissionAware.class.isInstance(folderAccess)) {
-            throw FileStorageExceptionCodes.NO_PERMISSION_SUPPORT.create(FileStorageTools.getAccountName(this, parentFolderID), parentFolderID, session.getContextId());
+            throw FileStorageExceptionCodes.NO_PERMISSION_SUPPORT.create(FileStorageTools.getAccountName(this, parentFolderID), parentFolderID, Integer.valueOf(session.getContextId()));
         }
         FolderID[] path = getPathIds(parentFolderID.getFolderId(), parentFolderID.getAccountId(), parentFolderID.getService(), folderAccess);
         String newID = folderAccess.createFolder(withRelativeID(toCreate));
@@ -225,13 +230,13 @@ public abstract class AbstractCompositingIDBasedFolderAccess extends AbstractCom
         FolderID folderID = new FolderID(identifier);
         FileStorageFolderAccess folderAccess = getFolderAccess(folderID);
         if (containsForeignPermissions(session.getUserId(), toUpdate) && false == PermissionAware.class.isInstance(folderAccess)) {
-            throw FileStorageExceptionCodes.NO_PERMISSION_SUPPORT.create(FileStorageTools.getAccountName(this, folderID), folderID, session.getContextId());
+            throw FileStorageExceptionCodes.NO_PERMISSION_SUPPORT.create(FileStorageTools.getAccountName(this, folderID), folderID, Integer.valueOf(session.getContextId()));
         }
         FolderID[] path = getPathIds(folderID.getFolderId(), folderID.getAccountId(), folderID.getService(), folderAccess);
         String newID;
         if (cascadePermissions) {
             if (false == PermissionAware.class.isInstance(folderAccess)) {
-                throw FileStorageExceptionCodes.NO_PERMISSION_SUPPORT.create(FileStorageTools.getAccountName(this, folderID), folderID, session.getContextId());
+                throw FileStorageExceptionCodes.NO_PERMISSION_SUPPORT.create(FileStorageTools.getAccountName(this, folderID), folderID, Integer.valueOf(session.getContextId()));
             }
             newID = ((PermissionAware) folderAccess).updateFolder(folderID.getFolderId(), withRelativeID(toUpdate), cascadePermissions);
         } else {
@@ -492,7 +497,7 @@ public abstract class AbstractCompositingIDBasedFolderAccess extends AbstractCom
         } finally {
             SearchIterators.close(searchIterator);
         }
-        return Long.valueOf(totalSize);
+        return totalSize;
     }
 
     @Override
@@ -518,7 +523,16 @@ public abstract class AbstractCompositingIDBasedFolderAccess extends AbstractCom
         } finally {
             SearchIterators.close(searchIterator);
         }
-        return Long.valueOf(numFiles);
+        return numFiles;
+    }
+
+    @Override
+    public Map<String, FileStorageFolder[]> restoreFolderFromTrash(List<String> folderIds, String defaultDestFolderId) throws OXException {
+        FileStorageFolderAccess folderAccess = getFolderAccess(new FolderID(defaultDestFolderId));
+        if(folderAccess instanceof FileStorageRestoringFolderAccess) {
+            return ((FileStorageRestoringFolderAccess) folderAccess).restoreFolderFromTrash(folderIds, defaultDestFolderId);
+        }
+        return Collections.emptyMap();
     }
 
     private void fire(final Event event) {

@@ -50,9 +50,12 @@
 package com.openexchange.ajax.find;
 
 import static org.junit.Assert.fail;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Random;
 import java.util.UUID;
@@ -80,6 +83,8 @@ import com.openexchange.find.facet.Filter;
 import com.openexchange.find.facet.FilterBuilder;
 import com.openexchange.find.facet.Option;
 import com.openexchange.find.facet.SimpleFacet;
+import com.openexchange.i18n.I18nServiceRegistry;
+import com.openexchange.server.ServiceLookup;
 import com.openexchange.test.FolderTestManager;
 
 /**
@@ -94,6 +99,8 @@ public abstract class AbstractFindTest extends AbstractAJAXSession {
     protected AJAXClient client2;
 
     protected FolderTestManager folderManager2;
+    
+    protected I18nServiceRegistry i18nServiceRegistry;
 
     /**
      * Default constructor.
@@ -110,6 +117,7 @@ public abstract class AbstractFindTest extends AbstractAJAXSession {
         random = new Random();
         client2 = getClient2();
         folderManager2 = new FolderTestManager(client2);
+        i18nServiceRegistry = mock(I18nServiceRegistry.class);
     }
 
     @After

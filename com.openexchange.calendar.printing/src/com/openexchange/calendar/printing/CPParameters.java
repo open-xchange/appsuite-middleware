@@ -49,6 +49,7 @@
 
 package com.openexchange.calendar.printing;
 
+import java.io.File;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
@@ -258,8 +259,33 @@ public class CPParameters {
         workWeekDuration = extractOptionalIntParam(req, PARAMETER_WORK_WEEK_DURATION);
         folder = extractOptionalIntParam(req, AJAXServlet.PARAMETER_FOLDERID);
         template = extractMandatoryStringParam(req, AJAXServlet.PARAMETER_TEMPLATE);
+        if (isInvalidTemplateName(template)) {
+            template = null;
+            unparseableFields.add(AJAXServlet.PARAMETER_TEMPLATE);
+            missingMandatoryFields.add(AJAXServlet.PARAMETER_TEMPLATE);
+        }
         usertemplate = extractOptionalStringParam(req, PARAMETER_USERTEMPLATE);
+        if (isInvalidTemplateName(usertemplate)) {
+            usertemplate = null;
+            unparseableFields.add(PARAMETER_USERTEMPLATE);
+            missingOptionalFields.add(PARAMETER_USERTEMPLATE);
+        }
         timezone = extractOptionalTimezoneParam(req, AJAXServlet.PARAMETER_TIMEZONE);
+    }
+
+    private static boolean isInvalidTemplateName(String templateName) {
+        if (null == templateName) {
+            return false;
+        }
+
+        char[] seps = new char[] { '/', '\\', File.pathSeparatorChar };
+        for (char sep : seps) {
+            if (templateName.indexOf(sep) >= 0) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private Date extractOptionalDateParam(HttpServletRequest req, String parameter, TimeZone zone) {
@@ -306,21 +332,6 @@ public class CPParameters {
             } catch (NumberFormatException e) {
                 unparseableFields.add(parameter);
                 missingOptionalFields.add(parameter);
-            }
-        }
-        return -1;
-    }
-
-    private int extractMandatoryIntParam(HttpServletRequest req, String parameter) {
-        String val = req.getParameter(parameter);
-        if (val == null) {
-            missingMandatoryFields.add(parameter);
-        } else {
-            try {
-                return Integer.valueOf(val).intValue();
-            } catch (NumberFormatException e) {
-                unparseableFields.add(parameter);
-                missingMandatoryFields.add(parameter);
             }
         }
         return -1;

@@ -51,10 +51,10 @@ package com.openexchange.passwordchange.history.impl.events;
 
 import static com.openexchange.java.Autoboxing.I;
 import com.openexchange.exception.OXException;
-import com.openexchange.passwordchange.history.PasswordChangeRecorderRegistryService;
-import com.openexchange.passwordchange.history.PasswordChangeRecorderException;
 import com.openexchange.passwordchange.history.PasswordChangeClients;
 import com.openexchange.passwordchange.history.PasswordChangeRecorder;
+import com.openexchange.passwordchange.history.PasswordChangeRecorderException;
+import com.openexchange.passwordchange.history.PasswordChangeRecorderRegistryService;
 import com.openexchange.passwordchange.history.impl.PasswordChangeInfoImpl;
 
 /**

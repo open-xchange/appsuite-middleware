@@ -49,9 +49,6 @@
 
 package com.openexchange.sso.action;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
 import java.util.Locale;
 import java.util.Set;
 import org.json.JSONException;

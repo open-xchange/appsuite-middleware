@@ -50,11 +50,11 @@
 package com.openexchange.groupware.reminder.internal;
 
 import static com.openexchange.java.Autoboxing.I;
-import gnu.trove.map.TIntObjectMap;
-import gnu.trove.map.hash.TIntObjectHashMap;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.reminder.ReminderExceptionCode;
 import com.openexchange.groupware.reminder.TargetService;
+import gnu.trove.map.TIntObjectMap;
+import gnu.trove.map.hash.TIntObjectHashMap;
 
 /**
  * Registry for the {@link TargetService} instances.

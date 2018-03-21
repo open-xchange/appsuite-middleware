@@ -50,6 +50,9 @@
 package com.openexchange.messaging.json;
 
 import static com.openexchange.json.JSONAssertion.assertValidates;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -77,10 +80,6 @@ import com.openexchange.messaging.StringContent;
 import com.openexchange.tools.encoding.Base64;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.SimServerSession;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import static org.junit.Assert.*;
 
 /**
  * {@link MessagingMessageWriterTest}

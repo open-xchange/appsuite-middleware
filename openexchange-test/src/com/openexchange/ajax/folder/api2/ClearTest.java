@@ -54,7 +54,6 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import java.util.Date;
 import org.json.JSONArray;
-import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.folder.actions.ClearRequest;
 import com.openexchange.ajax.folder.actions.DeleteRequest;

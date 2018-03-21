@@ -114,19 +114,15 @@ public class TransformImageAction implements IFileResponseRendererAction {
      * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
      * @since v7.8.1
      */
-    protected final class TransformedImageInputStreamClosure implements FileHolder.InputStreamClosure {
+    protected static final class TransformedImageInputStreamClosure implements FileHolder.InputStreamClosure {
 
         /**
          * Initializes a new {@link TransformedImageInputStreamClosure}.
-         * @param transformedImage
          */
         TransformedImageInputStreamClosure(BasicTransformedImage transformedImage) {
             m_transformedImage = transformedImage;
         }
 
-        /* (non-Javadoc)
-         * @see com.openexchange.ajax.fileholder.IFileHolder.InputStreamClosure#newStream()
-         */
         @Override
         public InputStream newStream() throws OXException, IOException {
             return m_transformedImage.getImageStream();
@@ -422,28 +418,22 @@ public class TransformImageAction implements IFileResponseRendererAction {
                 resultFile = getCachedResource(session, cacheKey, xformParams);
             }
 
-            // if we got a result from the cach,
-            // we have a valid file here and can return;
+            // if we got a result from the cache, we have a valid file here and can return;
             if (null == resultFile) {
                 final String sourceFormatName = lowerCase(Utility.getImageFormat(sourceMimeType));
 
-                // validating the input repetitive input file
-                try (final InputStream repetitiveInputStm = repetitiveFile.getStream()) {
-
-                    if (null == repetitiveInputStm) {
+                // Check for an animated .gif or SVG image, if resultFile is not already valid
+                // and return this, since no valid transformation is possible here
+                if ("svg".equals(sourceFormatName)) {
+                    resultFile = repetitiveFile;
+                } else {
+                    Boolean animatedGifResult = isAnimatedGif(sourceFormatName, repetitiveFile);
+                    if (null == animatedGifResult) {
                         resultFile = repetitiveFile;
-
                         if (LOG.isWarnEnabled()) {
                             LOG.warn("(Possible) Image file misses stream data");
                         }
-                    }
-
-                    // Check for an animated .gif or svg image, if resultFile is not already valid
-                    // and return this, since no valid transformation is possible here
-                    if ((null == resultFile) &&
-                        (("svg".equals(sourceFormatName) ||
-                         ("gif".equals(sourceFormatName) && ImageUtils.isAnimatedGif(repetitiveInputStm))))) {
-
+                    } else if (animatedGifResult.booleanValue()) {
                         resultFile = repetitiveFile;
                     }
                 }
@@ -451,12 +441,11 @@ public class TransformImageAction implements IFileResponseRendererAction {
                 // no result file so far => use cache and transformation path
                 if (null == resultFile) {
                     final String fileName = repetitiveFile.getName();
-
                     try {
                         // Image transformation path, if we don't have a valid result by now
                         BasicTransformedImage transformedImage = null;
 
-                        try  {
+                        try {
                             if (null == (transformedImage = performTransformImage(session, repetitiveFile, xformParams, cacheKey, fileName))) {
                                 resultFile = repetitiveFile;
                             }
@@ -504,7 +493,7 @@ public class TransformImageAction implements IFileResponseRendererAction {
                         Streams.close(resultFile);
                         resultFile = repetitiveFile;
                     } finally {
-                        if (resultFile != repetitiveFile)  {
+                        if (resultFile != repetitiveFile) {
                             Streams.close(repetitiveFile);
                         }
                     }
@@ -645,6 +634,23 @@ public class TransformImageAction implements IFileResponseRendererAction {
              "image/png".equals(sourceMimeType))) ?
                  sourceMimeType :
                      "image/jpeg";
+    }
+
+    private static Boolean isAnimatedGif(String sourceFormatName, IFileHolder repetitiveFile) throws IOException, OXException {
+        if (false == "gif".equals(sourceFormatName)) {
+            return Boolean.FALSE;
+        }
+
+        InputStream repetitiveInputStm = repetitiveFile.getStream();
+        if (null == repetitiveInputStm) {
+            return null;
+        }
+
+        try {
+            return ImageUtils.isAnimatedGif(repetitiveInputStm) ? Boolean.TRUE : Boolean.FALSE;
+        } finally {
+            Streams.close(repetitiveInputStm);
+        }
     }
 
     /**

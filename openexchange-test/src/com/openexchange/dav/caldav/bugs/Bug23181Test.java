@@ -49,7 +49,9 @@
 
 package com.openexchange.dav.caldav.bugs;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -243,7 +245,12 @@ public class Bug23181Test extends CalDAVTest {
         appointment.setIgnoreConflicts(true);
         appointment.setParentFolderID(manager2.getClient().getValues().getPrivateAppointmentFolder());
         appointment.setSequence(0);
-        manager2.insert(appointment);
+        appointment = manager2.insert(appointment);
+        /*
+         * update the appointment once to increase the sequence number
+         */
+        appointment.setLocation("new location");
+        manager2.update(appointment);
         /*
          * try to confirm updated appointment as user A in client
          */

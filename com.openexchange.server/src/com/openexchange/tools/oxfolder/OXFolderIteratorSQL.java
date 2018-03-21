@@ -51,13 +51,6 @@ package com.openexchange.tools.oxfolder;
 
 import static com.openexchange.tools.oxfolder.OXFolderUtility.folderModule2String;
 import static com.openexchange.tools.sql.DBUtils.closeResources;
-import gnu.trove.iterator.TIntIntIterator;
-import gnu.trove.list.TIntList;
-import gnu.trove.list.array.TIntArrayList;
-import gnu.trove.map.TIntIntMap;
-import gnu.trove.map.hash.TIntIntHashMap;
-import gnu.trove.set.TIntSet;
-import gnu.trove.set.hash.TIntHashSet;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -67,12 +60,11 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
-import java.util.Queue;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.group.GroupStorage;
 import com.openexchange.groupware.EnumComponent;
@@ -96,7 +88,13 @@ import com.openexchange.tools.iterator.SearchIteratorExceptionCodes;
 import com.openexchange.tools.oxfolder.memory.Condition;
 import com.openexchange.tools.oxfolder.memory.ConditionTreeMap;
 import com.openexchange.tools.oxfolder.memory.ConditionTreeMapManagement;
-import com.openexchange.tools.sql.DBUtils;
+import gnu.trove.iterator.TIntIntIterator;
+import gnu.trove.list.TIntList;
+import gnu.trove.list.array.TIntArrayList;
+import gnu.trove.map.TIntIntMap;
+import gnu.trove.map.hash.TIntIntHashMap;
+import gnu.trove.set.TIntSet;
+import gnu.trove.set.hash.TIntHashSet;
 
 /**
  * This class provides SQL related methods to fill instances of <code>com.openexchange.tools.iterator.FolderObjectIterator</code>
@@ -700,7 +698,7 @@ public final class OXFolderIteratorSQL {
             /*
              * Ensure ordering of private default folder follows: calendar, contacts, tasks
              */
-            final List<FolderObject> list = new FolderObjectIterator(rs, stmt, false, ctx, readCon, closeCon).asList();
+            @SuppressWarnings("resource") final List<FolderObject> list = new FolderObjectIterator(rs, stmt, false, ctx, readCon, closeCon).asList();
             if (list.size() >= 3 && (list.get(0).getModule() != CALENDAR || list.get(1).getModule() != CONTACT || list.get(2).getModule() != TASK)) {
                 final FolderObject[] defaultFolders = new FolderObject[] { list.remove(0), list.remove(0), list.remove(0) };
                 /*
@@ -1270,7 +1268,7 @@ public final class OXFolderIteratorSQL {
                 fuid2parent.put(fuid, rs.getInt(2));
                 fuids.add(fuid);
             } while (rs.next());
-            DBUtils.closeSQLStuff(rs, stmt);
+            Databases.closeSQLStuff(rs, stmt);
             rs = null;
             stmt = null;
             /*
@@ -1308,139 +1306,6 @@ public final class OXFolderIteratorSQL {
             closeResources(rs, stmt, closeReadCon ? rc : null, true, ctx);
             throw e;
         }
-    }
-
-    private static String buildQueryNonTreeVisibleFolders(final Integer module, final int userId, final int[] groups, final UserConfiguration userConfig, final Context ctx) throws OXException {
-        /*
-         * SQL select string for condition
-         */
-        String sqlStr = getSQLUserVisibleFolders("ot.fuid", permissionIds(userId, groups, ctx), StringCollection.getSqlInString(userConfig.getAccessibleModules()), null, null);
-        sqlStr = sqlStr.replaceAll("ot\\.", "pt.").replaceAll("op\\.", "pp.");
-        sqlStr = sqlStr.replaceAll(" ot", " pt").replaceAll(" op", " pp");
-        /*
-         * Fill values
-         */
-        {
-            final String regex = "\\?";
-            final String sContextId = String.valueOf(ctx.getContextId());
-            final String sUserId = String.valueOf(userId);
-            // sqlStr = sqlStr.replaceFirst(regex, sContextId);
-            // sqlStr = sqlStr.replaceFirst(regex, sUserId);
-            sqlStr = sqlStr.replaceFirst(regex, sContextId);
-            sqlStr = sqlStr.replaceFirst(regex, sContextId);
-            sqlStr = sqlStr.replaceFirst(regex, sUserId);
-            sqlStr = sqlStr.replaceFirst(regex, sContextId);
-            sqlStr = sqlStr.replaceFirst(regex, sContextId);
-        }
-        /*
-         * Main SQL select string
-         */
-        final StringBuilder condBuilder = new StringBuilder(32).append("AND ot.type = ").append(PUBLIC);
-        if (null != module) {
-            condBuilder.append(" AND ot.module = ").append(module);
-        }
-        condBuilder.append(" AND ot.parent NOT IN (").append(sqlStr).append(')');
-        return getSQLUserVisibleFolders(FolderObjectIterator.getFieldsForSQL(STR_OT), permissionIds(userId, groups, ctx), StringCollection.getSqlInString(userConfig.getAccessibleModules()), condBuilder.toString(), getOrderBy(STR_OT, "module", "fname"));
-    }
-
-    private static final String SQL_SEL_ALL_PUB = "SELECT fuid FROM oxfolder_tree WHERE cid = ? AND type = ? ORDER BY fuid";
-
-    private static final String SQL_SEL_ALL_PUB_MODULE = "SELECT fuid FROM oxfolder_tree WHERE cid = ? AND type = ? AND module = ? ORDER BY fuid";
-
-    private static SearchIterator<FolderObject> getVisibleFoldersNotSeenInTreeView(final Integer module, final int userId, final int[] groups, final UserConfiguration userConfig, final Context ctx, final Connection readCon) throws OXException {
-        Connection rc = readCon;
-        boolean closeReadCon = false;
-        PreparedStatement stmt = null;
-        ResultSet rs = null;
-        final int contextId = ctx.getContextId();
-        try {
-            if (readCon == null) {
-                rc = DBPool.pickup(ctx);
-                closeReadCon = true;
-            }
-            int pos = 1;
-            /*
-             * 1.) Select all user-visible public folders
-             */
-            {
-                final StringBuilder condBuilder = new StringBuilder(32).append("AND ot.type = ").append(PUBLIC);
-                if (null != module) {
-                    condBuilder.append(" AND ot.module = ").append(module.intValue());
-                }
-                final String sqlSelectStr = getSQLUserVisibleFolders(FolderObjectIterator.getFieldsForSQL(STR_OT), permissionIds(userId, groups, ctx), StringCollection.getSqlInString(userConfig.getAccessibleModules()), condBuilder.toString(), getOrderBy(STR_OT, "module", "fname"));
-                stmt = rc.prepareStatement(sqlSelectStr);
-            }
-            // stmt.setInt(pos++, contextId);
-            // stmt.setInt(pos++, userId);
-            stmt.setInt(pos++, contextId);
-            stmt.setInt(pos++, contextId);
-            stmt.setInt(pos++, userId);
-            stmt.setInt(pos++, contextId);
-            stmt.setInt(pos++, contextId);
-
-            rs = executeQuery(stmt);
-            /*
-             * asQueue() already closes all resources
-             */
-            final Queue<FolderObject> q = new FolderObjectIterator(rs, stmt, false, ctx, rc, closeReadCon).asQueue();
-            final int size = q.size();
-            if (size == 0) {
-                /*
-                 * Set resources to null since they were already closed by asQueue() method
-                 */
-                rs = null;
-                stmt = null;
-                rc = null;
-                return FolderObjectIterator.EMPTY_FOLDER_ITERATOR;
-            }
-            /*
-             * 2.) All non-user-visible public folders
-             */
-            if (readCon == null) {
-                rc = DBPool.pickup(ctx);
-            }
-            stmt = rc.prepareStatement(null == module ? SQL_SEL_ALL_PUB : SQL_SEL_ALL_PUB_MODULE);
-            pos = 1;
-            stmt.setInt(pos++, contextId);
-            stmt.setInt(pos++, PUBLIC);
-            if (null != module) {
-                stmt.setInt(pos, module.intValue());
-            }
-            rs = executeQuery(stmt);
-            final TIntSet nonVisibleSet = new TIntHashSet(1024);
-            while (rs.next()) {
-                nonVisibleSet.add(rs.getInt(1));
-            }
-            rs.close();
-            rs = null;
-            stmt.close();
-            stmt = null;
-            nonVisibleSet.removeAll(queue2IDSet(q, size));
-            /*
-             * 3.) Filter all visible public folders with a non-visible parent
-             */
-            for (final Iterator<FolderObject> iter = q.iterator(); iter.hasNext();) {
-                if (!nonVisibleSet.contains(iter.next().getParentFolderID())) {
-                    iter.remove();
-                }
-            }
-            return new FolderObjectIterator(q, false);
-        } catch (final SQLException e) {
-            throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
-        } catch (final RuntimeException t) {
-            throw OXFolderExceptionCode.RUNTIME_ERROR.create(t, Integer.valueOf(contextId));
-        } finally {
-            closeResources(rs, stmt, closeReadCon ? rc : null, true, ctx);
-        }
-    }
-
-    private static TIntSet queue2IDSet(final Queue<FolderObject> q, final int size) {
-        final TIntSet retval = new TIntHashSet(size);
-        final Iterator<FolderObject> iter = q.iterator();
-        for (int i = size; i-- > 0;) {
-            retval.add(iter.next().getObjectID());
-        }
-        return retval;
     }
 
     /**
@@ -2013,6 +1878,7 @@ public final class OXFolderIteratorSQL {
      * @throws OXException If a folder error occurs
      */
     public static SearchIterator<FolderObject> getModifiedFoldersSince(final Date since, final int[] modules, final Context ctx, final Connection con) throws OXException {
+        // GROUP BY CLAUSE: ensure ONLY_FULL_GROUP_BY compatibility
         final StringBuilder sb = new StringBuilder(256).append(STR_SELECT);
         sb.append(FolderObjectIterator.getFieldsForSQL(STR_OT)).append(" FROM oxfolder_tree AS ot");
         final long time = since.getTime();

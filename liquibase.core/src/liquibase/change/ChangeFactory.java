@@ -1,10 +1,14 @@
 package liquibase.change;
 
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Map;
+import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
+import java.util.concurrent.ConcurrentHashMap;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.servicelocator.ServiceLocator;
-
-import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Factory class for constructing the correct liquibase.change.Change implementation based on a command name.

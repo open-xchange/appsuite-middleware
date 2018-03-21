@@ -52,12 +52,12 @@ package com.openexchange.folderstorage.virtual.sql;
 import java.sql.Connection;
 import java.sql.SQLException;
 import com.openexchange.database.DatabaseService;
+import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.Folder;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
 import com.openexchange.folderstorage.virtual.osgi.Services;
 import com.openexchange.session.Session;
-import com.openexchange.tools.sql.DBUtils;
 
 /**
  * {@link Update} - SQL for updating a virtual folder.
@@ -92,16 +92,16 @@ public final class Update {
             Insert.insertFolder(cid, tree, user, folder, null, session, con);
             con.commit(); // COMMIT
         } catch (final SQLException e) {
-            DBUtils.rollback(con); // ROLLBACK
+            Databases.rollback(con); // ROLLBACK
             throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
         } catch (final OXException e) {
-            DBUtils.rollback(con); // ROLLBACK
+            Databases.rollback(con); // ROLLBACK
             throw e;
         } catch (final Exception e) {
-            DBUtils.rollback(con); // ROLLBACK
+            Databases.rollback(con); // ROLLBACK
             throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
-            DBUtils.autocommit(con);
+            Databases.autocommit(con);
             databaseService.backWritable(cid, con);
         }
     }

@@ -51,7 +51,6 @@ package com.openexchange.ajax.importexport;
 
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
-
 import com.openexchange.test.concurrent.ParallelSuite;
 
 /**
@@ -59,10 +58,10 @@ import com.openexchange.test.concurrent.ParallelSuite;
  */
 @RunWith(ParallelSuite.class)
 @Suite.SuiteClasses({
-    ICalImportTest.class,
     ICalTaskExportTest.class,
     ICalAppointmentExportTest.class,
     ICalSeriesTests.class,
+    ICalSingleAndBatchExportTest.class,
     Bug9840Test.class,
     Bug11724Test.class,
     Bug11868Test.class,

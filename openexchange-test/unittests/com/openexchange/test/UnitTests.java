@@ -66,15 +66,6 @@ import org.junit.runners.Suite;
     com.openexchange.webdav.protocol.util.UtilsTest.class,
     com.openexchange.groupware.results.AbstractTimedResultTest.class,
 
-    com.openexchange.groupware.CalendarTest.class,
-    com.openexchange.groupware.CalendarRecurringTests.class,
-    com.openexchange.groupware.AppointmentBugTests.class,
-
-    com.openexchange.groupware.calendar.calendarsqltests.CalendarSqlTestSuite.class,
-    com.openexchange.groupware.calendar.ConflictHandlerTest.class,
-    com.openexchange.groupware.calendar.CalendarDowngradeUserTest.class,
-    com.openexchange.groupware.calendar.RecurringCalculationTest.class,
-
     com.openexchange.tools.file.SaveFileActionTest.class,
     com.openexchange.tools.update.IndexTest.class,
 
@@ -123,18 +114,13 @@ import org.junit.runners.Suite;
     com.openexchange.groupware.attach.AttachmentBaseTest.class,
 
     com.openexchange.data.conversion.ical.ICalParserBasicTests.class,
-    com.openexchange.data.conversion.ical.ICalParserBugTests.class,
-    com.openexchange.data.conversion.ical.bugs.UnitTests.class,
     com.openexchange.data.conversion.ical.ICalEmitterTest.class,
     com.openexchange.groupware.importexport.ImportExportStandaloneSuite.class,
-    com.openexchange.groupware.importexport.importers.Bug12380RecoveryParserTest.class,
 
     com.openexchange.webdav.action.behaviour.RequestSpecificBehaviourRegistryTest.class,
     com.openexchange.webdav.action.behaviour.UserAgentBehaviourTest.class,
 
     com.openexchange.webdav.action.ApacheURLDecoderTest.class,
-
-    com.openexchange.groupware.attach.CopyAttachmentsForChangeExceptionsTest.class,
 
     com.openexchange.groupware.container.DataObjectTest.class,
     com.openexchange.groupware.container.FolderChildObjectTest.class,
@@ -160,8 +146,6 @@ import org.junit.runners.Suite;
     // Slow Tests
     com.openexchange.webdav.protocol.ProtocolTestSuite.class,
     com.openexchange.webdav.action.ActionTestSuite.class,
-    com.openexchange.groupware.calendar.SlowCalendarTests.class,
-    com.openexchange.tools.file.FileStorageTest.class,
     // Pretty outdated since v6.18.0
     // com.openexchange.tools.file.FileStorageThreadTest.class,
     com.openexchange.tools.file.QuotaFileStorageTest.class,

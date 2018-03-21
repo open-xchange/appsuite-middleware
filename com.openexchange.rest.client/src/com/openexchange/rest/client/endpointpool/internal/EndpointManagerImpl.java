@@ -60,8 +60,8 @@ import org.apache.http.client.HttpClient;
 import com.openexchange.osgi.ExceptionUtils;
 import com.openexchange.rest.client.endpointpool.Endpoint;
 import com.openexchange.rest.client.endpointpool.EndpointAvailableStrategy;
-import com.openexchange.rest.client.endpointpool.EndpointManager;
 import com.openexchange.rest.client.endpointpool.EndpointAvailableStrategy.AvailableResult;
+import com.openexchange.rest.client.endpointpool.EndpointManager;
 import com.openexchange.timer.ScheduledTimerTask;
 import com.openexchange.timer.TimerService;
 

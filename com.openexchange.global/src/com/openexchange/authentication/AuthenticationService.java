@@ -49,6 +49,7 @@
 
 package com.openexchange.authentication;
 
+import javax.security.auth.login.LoginException;
 import com.openexchange.exception.OXException;
 
 /**

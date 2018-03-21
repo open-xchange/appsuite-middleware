@@ -236,7 +236,7 @@ properties:
       tags: ["Mail","SMTP"]
     - key: com.openexchange.smtp.setPrimaryAddressHeader
       description: |
-        If set an additional header is added to every outgoing mail send via primary account. Every character of the header needs to be a 7-bit, non-control, 
+        If set an additional header is added to every outgoing mail send via the primary mail account. Every character of the header needs to be a 7-bit, non-control, 
         non-whitespace ASCII character.
  
         Example

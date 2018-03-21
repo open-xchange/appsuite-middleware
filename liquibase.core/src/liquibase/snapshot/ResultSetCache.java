@@ -1,16 +1,20 @@
 package liquibase.snapshot;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import liquibase.database.Database;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.DatabaseException;
 import liquibase.executor.jvm.ColumnMapRowMapper;
 import liquibase.executor.jvm.RowMapperResultSetExtractor;
 import liquibase.util.StringUtils;
-
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.*;
 
 class ResultSetCache {
     private int timesSingleQueried = 0;

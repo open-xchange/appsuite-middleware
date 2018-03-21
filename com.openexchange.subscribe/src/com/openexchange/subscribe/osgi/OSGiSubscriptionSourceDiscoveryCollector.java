@@ -50,9 +50,7 @@
 package com.openexchange.subscribe.osgi;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
@@ -70,31 +68,31 @@ import com.openexchange.subscribe.SubscriptionSourceDiscoveryService;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  *
  */
-public class OSGiSubscriptionSourceDiscoveryCollector implements ServiceTrackerCustomizer, SubscriptionSourceDiscoveryService {
+public class OSGiSubscriptionSourceDiscoveryCollector implements ServiceTrackerCustomizer<SubscriptionSourceDiscoveryService, SubscriptionSourceDiscoveryService>, SubscriptionSourceDiscoveryService {
 
     private final BundleContext context;
-    private final ServiceTracker tracker;
-    private final List<ServiceReference> references = new ArrayList<ServiceReference>();
+    private final ServiceTracker<SubscriptionSourceDiscoveryService, SubscriptionSourceDiscoveryService> tracker;
+    private final List<ServiceReference<SubscriptionSourceDiscoveryService>> references = new ArrayList<ServiceReference<SubscriptionSourceDiscoveryService>>();
 
     private final CompositeSubscriptionSourceDiscoveryService delegate = new CompositeSubscriptionSourceDiscoveryService();
 
     public OSGiSubscriptionSourceDiscoveryCollector(final BundleContext context) {
         this.context = context;
-        this.tracker = new ServiceTracker(context, SubscriptionSourceDiscoveryService.class.getName(), this);
+        this.tracker = new ServiceTracker<SubscriptionSourceDiscoveryService, SubscriptionSourceDiscoveryService>(context, SubscriptionSourceDiscoveryService.class.getName(), this);
         tracker.open();
     }
 
     public void close() {
         delegate.clear();
-        for(final ServiceReference reference : references) {
+        for (final ServiceReference<SubscriptionSourceDiscoveryService> reference : references) {
             context.ungetService(reference);
         }
         tracker.close();
     }
 
     @Override
-    public Object addingService(final ServiceReference reference) {
-        final SubscriptionSourceDiscoveryService service = (SubscriptionSourceDiscoveryService) context.getService(reference);
+    public SubscriptionSourceDiscoveryService addingService(final ServiceReference<SubscriptionSourceDiscoveryService> reference) {
+        final SubscriptionSourceDiscoveryService service = context.getService(reference);
         if(service.getClass() == getClass()) {
             context.ungetService(reference);
             return service;
@@ -104,13 +102,13 @@ public class OSGiSubscriptionSourceDiscoveryCollector implements ServiceTrackerC
     }
 
     @Override
-    public void modifiedService(final ServiceReference reference, final Object service) {
+    public void modifiedService(final ServiceReference<SubscriptionSourceDiscoveryService> reference, final SubscriptionSourceDiscoveryService service) {
 
     }
 
     @Override
-    public void removedService(final ServiceReference reference, final Object service) {
-        delegate.removeSubscriptionSourceDiscoveryService((SubscriptionSourceDiscoveryService) service);
+    public void removedService(final ServiceReference<SubscriptionSourceDiscoveryService> reference, final SubscriptionSourceDiscoveryService service) {
+        delegate.removeSubscriptionSourceDiscoveryService(service);
         references.remove(reference);
         context.ungetService(reference);
     }

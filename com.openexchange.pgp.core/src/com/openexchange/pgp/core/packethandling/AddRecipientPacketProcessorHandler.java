@@ -55,11 +55,8 @@ import java.util.List;
 import org.bouncycastle.bcpg.ContainedPacket;
 import org.bouncycastle.bcpg.Packet;
 import org.bouncycastle.bcpg.PublicKeyEncSessionPacket;
-import org.bouncycastle.openpgp.PGPException;
 import org.bouncycastle.openpgp.PGPPrivateKey;
 import org.bouncycastle.openpgp.PGPPublicKey;
-import org.bouncycastle.openpgp.operator.PGPKeyEncryptionMethodGenerator;
-import org.bouncycastle.openpgp.operator.bc.BcPublicKeyKeyEncryptionMethodGenerator;
 import com.openexchange.pgp.core.PGPSessionDecrypter;
 
 /**

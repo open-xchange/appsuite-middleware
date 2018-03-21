@@ -54,7 +54,7 @@ import org.jdom2.Element;
 import com.openexchange.dav.DAVProtocol;
 import com.openexchange.dav.PreconditionException;
 import com.openexchange.dav.actions.PROPFINDAction;
-import com.openexchange.dav.resources.CommonFolderCollection;
+import com.openexchange.dav.resources.FolderCollection;
 import com.openexchange.webdav.action.WebdavRequest;
 import com.openexchange.webdav.action.WebdavResponse;
 import com.openexchange.webdav.protocol.Protocol;
@@ -98,7 +98,7 @@ public class SyncCollection extends PROPFINDAction {
         /*
          * query sync status from targeted folder collection
          */
-        CommonFolderCollection<?> folderCollection = requireResource(request, CommonFolderCollection.class);
+        FolderCollection<?> folderCollection = requireResource(request, FolderCollection.class);
         SyncStatus<WebdavResource> syncStatus = folderCollection.getSyncStatus(syncToken);
         /*
          * marshal multistatus response
@@ -116,6 +116,18 @@ public class SyncCollection extends PROPFINDAction {
                     multistatusElement.addContent(new Element("response", Protocol.DAV_NS)
                         .addContent(helper.marshalHREF(resource.getUrl(), resource.isCollection()))
                         .addContent(helper.marshalStatus(status))
+                    );
+                }
+            } else if (DAVProtocol.SC_INSUFFICIENT_STORAGE == status) {
+                /*
+                 * marshal HTTP 507 response in case of truncated results 
+                 */
+                for (WebdavStatus<WebdavResource> webdavStatus : syncStatus.toIterable(status)) {
+                    WebdavResource resource = webdavStatus.getAdditional();
+                    multistatusElement.addContent(new Element("response", Protocol.DAV_NS)
+                        .addContent(helper.marshalHREF(resource.getUrl(), resource.isCollection()))
+                        .addContent(helper.marshalStatus(status))
+                        .addContent(new Element("error", Protocol.DAV_NS).addContent(new Element("number-of-matches-within-limits", Protocol.DAV_NS.getURI())))
                     );
                 }
             } else {

@@ -50,11 +50,6 @@
 package com.openexchange.tools.oxfolder;
 
 import static com.openexchange.java.Autoboxing.I;
-import gnu.trove.list.TIntList;
-import gnu.trove.list.array.TIntArrayList;
-import gnu.trove.list.linked.TIntLinkedList;
-import gnu.trove.set.TIntSet;
-import gnu.trove.set.hash.TIntHashSet;
 import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -103,6 +98,11 @@ import com.openexchange.share.recipient.RecipientType;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
 import com.openexchange.user.UserService;
+import gnu.trove.list.TIntList;
+import gnu.trove.list.array.TIntArrayList;
+import gnu.trove.list.linked.TIntLinkedList;
+import gnu.trove.set.TIntSet;
+import gnu.trove.set.hash.TIntHashSet;
 
 /**
  * {@link OXFolderUtility} - Provides utility methods for folder operations.

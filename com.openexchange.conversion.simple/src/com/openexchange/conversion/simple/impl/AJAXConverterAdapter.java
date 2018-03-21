@@ -71,13 +71,13 @@ public class AJAXConverterAdapter implements SimpleConverter{
 
 	public AJAXConverterAdapter(Converter converter) {
 		this.converter = converter;
-	}
+    }
 
-	public Object convert(String from, String to, Object data,
-			ServerSession session) throws OXException {
-		AJAXRequestResult result = new AJAXRequestResult(data, from);
-		converter.convert(from, to, new AJAXRequestData(), result, session);
-		return result.getResultObject();
-	}
+    @Override
+    public Object convert(String from, String to, Object data, ServerSession session) throws OXException {
+        AJAXRequestResult result = new AJAXRequestResult(data, from);
+        converter.convert(from, to, new AJAXRequestData(), result, session);
+        return result.getResultObject();
+    }
 
 }

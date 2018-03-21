@@ -70,15 +70,6 @@ import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
-import net.htmlparser.jericho.Attribute;
-import net.htmlparser.jericho.CharacterReference;
-import net.htmlparser.jericho.Element;
-import net.htmlparser.jericho.EndTag;
-import net.htmlparser.jericho.HTMLElementName;
-import net.htmlparser.jericho.OutputDocument;
-import net.htmlparser.jericho.Segment;
-import net.htmlparser.jericho.Source;
-import net.htmlparser.jericho.StartTag;
 import org.apache.commons.lang.math.IntRange;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
@@ -106,6 +97,15 @@ import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.tools.HashUtility;
 import com.openexchange.tools.regex.MatcherReplacer;
+import net.htmlparser.jericho.Attribute;
+import net.htmlparser.jericho.CharacterReference;
+import net.htmlparser.jericho.Element;
+import net.htmlparser.jericho.EndTag;
+import net.htmlparser.jericho.HTMLElementName;
+import net.htmlparser.jericho.OutputDocument;
+import net.htmlparser.jericho.Segment;
+import net.htmlparser.jericho.Source;
+import net.htmlparser.jericho.StartTag;
 
 /**
  * {@link HtmlProcessing} - Various methods for HTML processing for mail module.

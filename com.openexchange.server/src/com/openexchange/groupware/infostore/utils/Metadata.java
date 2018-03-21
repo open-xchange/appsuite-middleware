@@ -85,6 +85,7 @@ public class Metadata {
     public static final int META = 23;
     public static final int OBJECT_PERMISSIONS = 108;
     public static final int SHAREABLE = 109;
+    public static final int ORIGIN = 712;
 
 
     public static final Metadata LAST_MODIFIED_LITERAL = new Metadata(LAST_MODIFIED, "last_modified");
@@ -101,7 +102,7 @@ public class Metadata {
     public static final Metadata CREATED_BY_LITERAL = new Metadata(CREATED_BY, "created_by");
     public static final Metadata FILENAME_LITERAL = new Metadata(FILENAME, "filename", InfostoreStrings.FIELD_FILE_NAME);
     public static final Metadata FILE_MIMETYPE_LITERAL = new Metadata(FILE_MIMETYPE, "file_mimetype");
-    public static final Metadata SEQUENCE_NUMBER_LITERAL = new Metadata(SEQUENCE_NUMBER, "sequence_number");
+    public static final Metadata SEQUENCE_NUMBER_LITERAL = new Metadata(SEQUENCE_NUMBER, "last_modified");
     public static final Metadata CATEGORIES_LITERAL = new Metadata(CATEGORIES, "categories");
     public static final Metadata LOCKED_UNTIL_LITERAL = new Metadata(LOCKED_UNTIL, "locked_until");
     public static final Metadata FILE_MD5SUM_LITERAL = new Metadata(FILE_MD5SUM, "file_md5sum");
@@ -114,6 +115,7 @@ public class Metadata {
     public static final Metadata META_LITERAL = new Metadata(META, "meta");
     public static final Metadata OBJECT_PERMISSIONS_LITERAL = new Metadata(OBJECT_PERMISSIONS, "object_permissions");
     public static final Metadata SHAREABLE_LITERAL = new Metadata(SHAREABLE, "shareable");
+    public static final Metadata ORIGIN_LITERAL = new Metadata(ORIGIN, "origin");
 
 
     public static final Metadata[] VALUES_ARRAY = new Metadata[]{
@@ -143,7 +145,8 @@ public class Metadata {
         NUMBER_OF_VERSIONS_LITERAL,
         META_LITERAL,
         OBJECT_PERMISSIONS_LITERAL,
-        SHAREABLE_LITERAL
+        SHAREABLE_LITERAL,
+        ORIGIN_LITERAL
     };
 
     public static final Metadata[] HTTPAPI_VALUES_ARRAY = new Metadata[]{
@@ -171,7 +174,8 @@ public class Metadata {
         NUMBER_OF_VERSIONS_LITERAL,
         META_LITERAL,
         OBJECT_PERMISSIONS_LITERAL,
-        SHAREABLE_LITERAL
+        SHAREABLE_LITERAL,
+        ORIGIN_LITERAL
     };
 
     public static final List<Metadata> VALUES = Collections.unmodifiableList(Arrays.asList(VALUES_ARRAY));
@@ -243,6 +247,7 @@ public class Metadata {
         case META : return META_LITERAL;
         case OBJECT_PERMISSIONS: return OBJECT_PERMISSIONS_LITERAL;
         case SHAREABLE: return SHAREABLE_LITERAL;
+        case ORIGIN: return ORIGIN_LITERAL;
         default : return null;
         }
     }
@@ -294,6 +299,7 @@ public class Metadata {
         case META : return switcher.meta();
         case OBJECT_PERMISSIONS: return switcher.objectPermissions();
         case SHAREABLE: return switcher.shareable();
+        case ORIGIN: return switcher.origin();
         default : return null;
         }
     }
@@ -317,6 +323,26 @@ public class Metadata {
         }
 
         return columns;
+    }
+
+    /**
+     * Checks if specified metadata array contains given metadata element.
+     *
+     * @param metadata The metadata array
+     * @param m The metadata element
+     * @return <code>true</code> if contained; otherwise <code>false</code>
+     */
+    public static boolean contains(Metadata[] metadata, Metadata m) {
+        if (null == metadata || metadata.length <= 0 || null == m) {
+            return false;
+        }
+
+        for (Metadata meta : metadata) {
+            if (m.equals(meta)) {
+                return true;
+            }
+        }
+        return false;
     }
 
 }

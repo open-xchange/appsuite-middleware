@@ -50,9 +50,6 @@
 package com.openexchange.mail.api;
 
 import static com.openexchange.mail.utils.ProviderUtility.toSocketAddrString;
-import gnu.trove.iterator.TIntIterator;
-import gnu.trove.set.TIntSet;
-import gnu.trove.set.hash.TIntHashSet;
 import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
@@ -99,6 +96,9 @@ import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.threadpool.ThreadPools;
 import com.openexchange.tools.session.ServerSession;
+import gnu.trove.iterator.TIntIterator;
+import gnu.trove.set.TIntSet;
+import gnu.trove.set.hash.TIntHashSet;
 
 /**
  * {@link MailConfig} - The user-specific mail properties; e.g. containing user's login data.

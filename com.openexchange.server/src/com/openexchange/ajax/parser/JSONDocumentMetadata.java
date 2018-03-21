@@ -60,6 +60,7 @@ import org.json.JSONObject;
 import com.openexchange.groupware.container.ObjectPermission;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.InfostoreFacade;
+import com.openexchange.groupware.infostore.InfostoreFolderPath;
 import com.openexchange.groupware.infostore.utils.Metadata;
 import com.openexchange.groupware.infostore.utils.URLHelper;
 
@@ -583,6 +584,20 @@ public class JSONDocumentMetadata implements DocumentMetadata {
 
     @Override
     public void setOriginalFolderId(long id) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void setSequenceNumber(long sequenceNumber) {
+        throw new UnsupportedOperationException();
+    }
+
+    public InfostoreFolderPath getOriginFolderPath() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void setOriginFolderPath(InfostoreFolderPath originFolderPath) {
         throw new UnsupportedOperationException();
     }
 

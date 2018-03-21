@@ -147,7 +147,7 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
 
     }
 
-    protected class OptionAndMethod {
+    protected static class OptionAndMethod {
 
         private Method method = null;
 
@@ -217,6 +217,7 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
         accessPublication(20, OPT_ACCESS_PUBLICATION, false),
         accessActiveSync(21, OPT_ACCESS_ACTIVE_SYNC, false),
         accessUsm(22, OPT_ACCESS_USM, false),
+        @Deprecated
         accessOlox20(23, OPT_ACCESS_OLOX20, false),
         accessDeniedPortal(24, OPT_ACCESS_DENIED_PORTAL, false),
         accessGlobalAddressBookDisabled(25, OPT_DISABLE_GAB, false);
@@ -464,7 +465,7 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
     protected static final String OPT_ACCESS_TASKS = "access-tasks";
     protected static final String OPT_ACCESS_VCARD = "access-vcard";
     protected static final String OPT_ACCESS_WEBDAV = "access-webdav";
-    /** @deprecated */
+    @Deprecated
     protected static final String OPT_ACCESS_WEBDAV_XML = "access-webdav-xml";
     protected static final String OPT_ACCESS_WEBMAIL = "access-webmail";
     protected static final String OPT_ACCESS_EDIT_GROUP = "access-edit-group";
@@ -476,6 +477,7 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
     protected static final String OPT_ACCESS_PUBLICATION = "access-publication";
     protected static final String OPT_ACCESS_ACTIVE_SYNC = "access-active-sync";
     protected static final String OPT_ACCESS_USM = "access-usm";
+    @Deprecated
     protected static final String OPT_ACCESS_OLOX20 = "access-olox20";
     protected static final String OPT_ACCESS_DENIED_PORTAL = "access-denied-portal";
     protected static final String OPT_DISABLE_GAB = "access-global-address-book-disabled";
@@ -651,7 +653,7 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
     protected CLIOption accessTasksOption = null;
     protected CLIOption accessVcardOption = null;
     protected CLIOption accessWebdavOption = null;
-    /** @deprecated */
+    @Deprecated
     protected CLIOption accessWebdavXmlOption = null;
     protected CLIOption accessWebmailOption = null;
     protected CLIOption accessEditGroupOption = null;
@@ -663,6 +665,7 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
     protected CLIOption accessSubscription = null;
     protected CLIOption accessActiveSync = null;
     protected CLIOption accessUSM = null;
+    @Deprecated
     protected CLIOption accessOLOX20 = null;
     protected CLIOption accessDeniedPortal = null;
     protected CLIOption accessGAB = null;
@@ -2482,7 +2485,7 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
         this.accessPublication = setLongOpt(admp, OPT_ACCESS_PUBLICATION, "on/off", "Publication access (Default is off)", true, false, true);
         this.accessActiveSync = setLongOpt(admp, OPT_ACCESS_ACTIVE_SYNC, "on/off", "Exchange Active Sync access (Default is off)", true, false, true);
         this.accessUSM = setLongOpt(admp, OPT_ACCESS_USM, "on/off", "Universal Sync access (Default is off)", true, false, true);
-        this.accessOLOX20 = setLongOpt(admp, OPT_ACCESS_OLOX20, "on/off", "OLOX v2.0 access (Default is off)", true, false, true);
+        this.accessOLOX20 = setLongOpt(admp, OPT_ACCESS_OLOX20, "on/off", "OLOX v2.0 access (Default is off) [DEPRECATED]", true, false, true);
         this.accessDeniedPortal = setLongOpt(admp, OPT_ACCESS_DENIED_PORTAL, "on/off", "Denies portal access (Default is off)", true, false, true);
         this.accessGAB = setLongOpt(admp, OPT_DISABLE_GAB, "on/off", "Disable Global Address Book access (Default is off)", true, false, true);
         this.accessPublicFolderEditable = setLongOpt(admp, OPT_ACCESS_PUBLIC_FOLDER_EDITABLE, "on/off", "Whether public folder(s) is/are editable (Default is off). Applies only to context admin user.", true, false, true);

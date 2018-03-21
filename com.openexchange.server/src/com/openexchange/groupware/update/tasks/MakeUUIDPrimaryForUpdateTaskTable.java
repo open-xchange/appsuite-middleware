@@ -49,10 +49,10 @@
 
 package com.openexchange.groupware.update.tasks;
 
-import static com.openexchange.tools.sql.DBUtils.autocommit;
-import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
-import static com.openexchange.tools.sql.DBUtils.rollback;
-import static com.openexchange.tools.sql.DBUtils.startTransaction;
+import static com.openexchange.database.Databases.autocommit;
+import static com.openexchange.database.Databases.closeSQLStuff;
+import static com.openexchange.database.Databases.rollback;
+import static com.openexchange.database.Databases.startTransaction;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;

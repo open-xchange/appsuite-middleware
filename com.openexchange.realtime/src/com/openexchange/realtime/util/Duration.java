@@ -50,8 +50,8 @@
 package com.openexchange.realtime.util;
 
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
-import static java.util.concurrent.TimeUnit.SECONDS;
 import static java.util.concurrent.TimeUnit.MINUTES;
+import static java.util.concurrent.TimeUnit.SECONDS;
 import java.util.concurrent.TimeUnit;
 import org.apache.commons.lang.Validate;
 

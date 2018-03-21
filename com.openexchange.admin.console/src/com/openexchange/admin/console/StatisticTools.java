@@ -88,7 +88,6 @@ public class StatisticTools extends AbstractJMXTools {
     private static final char OPT_STATS_SHORT = 'x';
     private static final String OPT_STATS_LONG = "xchangestats";
 
-    private static final char OPT_TPSTATS_SHORT = 'p';
     private static final String OPT_TPSTATS_LONG = "threadpoolstats";
 
     private static final char OPT_RUNTIME_STATS_SHORT = 'r';
@@ -464,13 +463,11 @@ public class StatisticTools extends AbstractJMXTools {
             "shows Open-Xchange stats",
             false,
             NeededQuadState.notneeded);
-        this.threadpoolstats = setShortLongOpt(
-            parser,
-            OPT_TPSTATS_SHORT,
+        this.threadpoolstats = setLongOpt(parser,
             OPT_TPSTATS_LONG,
             "shows OX-Server threadpool stats",
             false,
-            NeededQuadState.notneeded);
+            false);
         this.runtimestats = setShortLongOpt(
             parser,
             OPT_RUNTIME_STATS_SHORT,

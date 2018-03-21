@@ -12,8 +12,8 @@ If unified quota is enabled/available for a certain user, the value ``"unified"`
 
 Setup & configure the Cassandra connector through installing package `open-xchange-cassandra` and setting the properties:
 
- - [com.openexchange.nosql.cassandra.clusterContactPoints](/components/middleware/config{{ site.baseurl }}/index.html#com.openexchange.nosql.cassandra.clusterContactPoints)
- - [com.openexchange.nosql.cassandra.port](/config{{ site.baseurl }}/index.html#com.openexchange.nosql.cassandra.port)
+ - [com.openexchange.nosql.cassandra.clusterContactPoints](/components/middleware/config{{ site.baseurl }}/index.html#com.openexchange.nosql.cassandra.clusterContactPoints)
+ - [com.openexchange.nosql.cassandra.port](/config{{ site.baseurl }}/index.html#com.openexchange.nosql.cassandra.port)
 
 *(There a more Cassandra properties to set. See [Cassandra configuration](https://documentation.open-xchange.com/components/middleware/config/develop/index.html#mode=features&feature=Cassandra))*
 

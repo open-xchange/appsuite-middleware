@@ -49,7 +49,9 @@
 
 package com.openexchange.folderstorage.outlook;
 
+import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
@@ -58,6 +60,10 @@ import com.openexchange.folderstorage.AltNameAwareFolder;
 import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.Folder;
 import com.openexchange.folderstorage.FolderExtension;
+import com.openexchange.folderstorage.FolderField;
+import com.openexchange.folderstorage.FolderPath;
+import com.openexchange.folderstorage.FolderProperty;
+import com.openexchange.folderstorage.ParameterizedFolder;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.Type;
 import com.openexchange.i18n.LocaleTools;
@@ -68,7 +74,7 @@ import com.openexchange.i18n.tools.StringHelper;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class OutlookFolder implements FolderExtension, AltNameAwareFolder {
+public final class OutlookFolder implements FolderExtension, AltNameAwareFolder, ParameterizedFolder {
 
     private static final long serialVersionUID = 1076412172524386127L;
 
@@ -95,6 +101,7 @@ public final class OutlookFolder implements FolderExtension, AltNameAwareFolder 
 
     private String newId;
 
+    private Map<FolderField, FolderProperty> properties;
 
     /**
      * Initializes a {@link OutlookFolder} with specified real folder.
@@ -105,6 +112,13 @@ public final class OutlookFolder implements FolderExtension, AltNameAwareFolder 
         super();
         realFolder = source;
         modifiedBy = -1;
+        properties = new HashMap<FolderField, FolderProperty>(4);
+        if (ParameterizedFolder.class.isInstance(source)) {
+            Map<FolderField, FolderProperty> sourceProperties = ((ParameterizedFolder) source).getProperties();
+            if (null != sourceProperties) {
+                properties.putAll(sourceProperties);
+            }
+        }
     }
 
     /**
@@ -142,6 +156,10 @@ public final class OutlookFolder implements FolderExtension, AltNameAwareFolder 
                     cloneSub[i] = thisSub[i];
                 }
                 clone.subfolders = cloneSub;
+            }
+            if (properties != null) {
+                final Map<FolderField, FolderProperty> cloneProps = new HashMap<FolderField, FolderProperty>(properties);
+                clone.properties = cloneProps;
             }
             return clone;
         } catch (final CloneNotSupportedException e) {
@@ -451,7 +469,15 @@ public final class OutlookFolder implements FolderExtension, AltNameAwareFolder 
         // Nothing to do
     }
 
+    @Override
+    public FolderPath getOriginPath() {
+        return realFolder.getOriginPath();
+    }
 
+    @Override
+    public void setOriginPath(FolderPath originPath) {
+        realFolder.setOriginPath(originPath);
+    }
 
     @Override
     public void setMeta(Map<String, Object> meta) {
@@ -468,6 +494,20 @@ public final class OutlookFolder implements FolderExtension, AltNameAwareFolder 
             return null;
         }
         return new Date(d.getTime());
+    }
+
+    @Override
+    public void setProperty(final FolderField name, final Object value) {
+        if (null == value) {
+            properties.remove(name);
+        } else {
+            properties.put(name, new FolderProperty(name.getName(), value));
+        }
+    }
+
+    @Override
+    public Map<FolderField, FolderProperty> getProperties() {
+        return Collections.unmodifiableMap(properties);
     }
 
     @Override

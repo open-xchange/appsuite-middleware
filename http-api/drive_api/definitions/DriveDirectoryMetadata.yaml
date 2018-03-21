@@ -50,3 +50,9 @@ properties:
     description: Metadata for the contained files. Only set if metadata is retrieved through [Metadata synchronization](#metadata-synchronization).
     items:
       $ref: "#/definitions/DriveFileMetadata"
+  name:
+    type: string
+    description: The name of the folder.
+  path:
+    type: string
+    description: The path of the folder.

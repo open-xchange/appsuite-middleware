@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 1997-2017 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997-2018 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -40,12 +40,36 @@
 
 package com.sun.mail.mbox;
 
-import javax.mail.*;
-import javax.mail.event.*;
-import javax.mail.internet.*;
-import javax.mail.util.*;
-import java.io.*;
-import java.util.*;
+import java.io.BufferedOutputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.EOFException;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.PrintStream;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.StringTokenizer;
+import javax.mail.Address;
+import javax.mail.Flags;
+import javax.mail.Folder;
+import javax.mail.FolderNotFoundException;
+import javax.mail.Message;
+import javax.mail.MessageRemovedException;
+import javax.mail.MessagingException;
+import javax.mail.URLName;
+import javax.mail.event.ConnectionEvent;
+import javax.mail.event.FolderEvent;
+import javax.mail.internet.InternetAddress;
+import javax.mail.internet.InternetHeaders;
+import javax.mail.internet.MimeMessage;
+import javax.mail.internet.SharedInputStream;
+import javax.mail.util.SharedByteArrayInputStream;
 import com.sun.mail.util.LineInputStream;
 
 /**

@@ -107,6 +107,7 @@ import com.openexchange.share.GuestInfo;
 import com.openexchange.share.ShareInfo;
 import com.openexchange.share.ShareService;
 import com.openexchange.share.ShareTarget;
+import com.openexchange.share.groupware.ModuleSupport;
 import com.openexchange.share.recipient.RecipientType;
 import com.openexchange.share.recipient.ShareRecipient;
 import com.openexchange.threadpool.ThreadPools;
@@ -691,7 +692,6 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
          * check added guest permissions
          */
         if (comparedPermissions.hasAddedGuests()) {
-            Permission addedAnonymousPermission = null;
             List<Integer> addedGuests = comparedPermissions.getAddedGuests();
             for (Integer guestID : addedGuests) {
                 /*
@@ -699,23 +699,15 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
                  */
                 GuestInfo guestInfo = comparedPermissions.getGuestInfo(guestID);
                 Permission guestPermission = comparedPermissions.getAddedGuestPermission(guestID);
-                checkGuestPermission(folder, guestPermission, guestInfo);
-                if (isAnonymous(guestInfo)) {
-                    /*
-                     * allow only one anonymous permission
-                     */
-                    if (null == addedAnonymousPermission) {
-                        addedAnonymousPermission = guestPermission;
-                    } else {
-                        throw invalidPermissions(folder, guestPermission);
-                    }
-                }
+                checkGuestPermission(session, folder, guestPermission, guestInfo);
             }
+
             /*
              * check for an already existing anonymous permission if a new one should be added
              */
-            if (null != addedAnonymousPermission && containsOriginalAnonymousPermission(comparedPermissions)) {
-                throw invalidPermissions(folder, addedAnonymousPermission);
+            Permission invalidPermission = containsOriginalAnonymousPermission(comparedPermissions);
+            if (invalidPermission != null) {
+                throw invalidPermissions(folder, invalidPermission);
             }
         }
         /*
@@ -728,25 +720,19 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
                  */
                 GuestInfo guestInfo = comparedPermissions.getGuestInfo(guestID);
                 Permission guestPermission = comparedPermissions.getModifiedGuestPermission(guestID);
-                checkGuestPermission(folder, guestPermission, guestInfo);
+                checkGuestPermission(session, folder, guestPermission, guestInfo);
             }
         }
         /*
          * check new guest permissions
          */
         if (comparedPermissions.hasNewGuests()) {
-            GuestPermission newAnonymousPermission = null;
             for (GuestPermission guestPermission : comparedPermissions.getNewGuestPermissions()) {
                 if (guestPermission.getRecipient().getType() == RecipientType.ANONYMOUS) {
                     /*
                      * allow only one anonymous permission with "read-only" permission bits
                      */
                     checkIsLinkPermission(folder, guestPermission);
-                    if (null == newAnonymousPermission) {
-                        newAnonymousPermission = guestPermission;
-                    } else {
-                        throw invalidPermissions(folder, guestPermission);
-                    }
                 } else if (isReadOnlySharing(folder)) {
                     /*
                      * allow only "read-only" permissions for invited guests in non-infostore folders
@@ -757,8 +743,9 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
             /*
              * check for an already existing anonymous permission if a new one should be added
              */
-            if (null != newAnonymousPermission && containsOriginalAnonymousPermission(comparedPermissions)) {
-                throw invalidPermissions(folder, newAnonymousPermission);
+            Permission invalidPermission = containsOriginalAnonymousPermission(comparedPermissions);
+            if (invalidPermission!=null ) {
+                throw invalidPermissions(folder, invalidPermission);
             }
         }
     }
@@ -770,37 +757,38 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
      * @param comparedPermissions The compared permissions to check
      * @return <code>true</code> if there's an "anonymous" entity in the original permissions, <code>false</code>, otherwise
      */
-    private static boolean containsOriginalAnonymousPermission(ComparedFolderPermissions comparedPermissions) throws OXException {
+    private static Permission containsOriginalAnonymousPermission(ComparedFolderPermissions comparedPermissions) throws OXException {
         Collection<Permission> originalPermissions = comparedPermissions.getOriginalPermissions();
         if (null != originalPermissions && 0 < originalPermissions.size()) {
             for (Permission originalPermission : originalPermissions) {
                 if (false == originalPermission.isGroup() && !comparedPermissions.isSystemPermission(originalPermission) && originalPermission.getType() == FolderPermissionType.NORMAL) {
                     GuestInfo guestInfo = comparedPermissions.getGuestInfo(originalPermission.getEntity());
                     if (null != guestInfo && isAnonymous(guestInfo)) {
-                        return true;
+                        return originalPermission;
                     }
                 }
             }
         }
-        return false;
+        return null;
     }
 
     /**
      * Checks if a specific guest permission is allowed for a folder or not.
      *
+     * @param session The current session
      * @param folder The folder where the permission should be applied to
      * @param permission The guest permission
      * @param guestInfo The guest information for the added permission
      * @throws OXException
      */
-    private static void checkGuestPermission(Folder folder, Permission permission, GuestInfo guestInfo) throws OXException {
+    private static void checkGuestPermission(ServerSession session, Folder folder, Permission permission, GuestInfo guestInfo) throws OXException {
         if (isAnonymous(guestInfo)) {
             /*
              * allow only one anonymous permission with "read-only" permission bits, matching the guest's fixed target
              */
             checkIsLinkPermission(folder, permission);
             // Only check not inherited permissions because inherited permissions are only applied internally and doesn't needed to be checked
-            if(permission.getType() != FolderPermissionType.INHERITED && isNotEqualsTarget(folder, guestInfo.getLinkTarget())) {
+            if(permission.getType() != FolderPermissionType.INHERITED && isNotEqualsTarget(session, folder, guestInfo.getLinkTarget())) {
                 throw invalidPermissions(folder, permission);
             }
         } else if (isReadOnlySharing(folder)) {
@@ -851,8 +839,26 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
         }
     }
 
-    private static boolean isNotEqualsTarget(Folder folder, ShareTarget target) {
-        return !(new ShareTarget(folder.getContentType().getModule(), folder.getID()).equals(target));
+    private static boolean isNotEqualsTarget(ServerSession session, Folder folder, ShareTarget target) throws OXException {
+        ShareTarget folderTarget = new ShareTarget(folder.getContentType().getModule(), folder.getID());
+        if (folderTarget.equals(target)) {
+            return false;
+        }
+        /*
+         * also try adjusted share target & underlying real folder
+         */
+        ShareTarget adjustedTarget = FolderStorageServices.getService(ModuleSupport.class).adjustTarget(folderTarget, session, session.getUserId());
+        if (adjustedTarget.equals(target)) {
+            return false;
+        }
+        if (false == adjustedTarget.getFolderToLoad().equals(adjustedTarget.getFolder())) {
+            ShareTarget realTarget = new ShareTarget(adjustedTarget);
+            realTarget.setFolder(adjustedTarget.getFolderToLoad());
+            if (realTarget.equals(target)) {
+                return false;
+            }
+        }
+        return true;
     }
 
     private static boolean isAnonymous(GuestInfo guestInfo) {
@@ -1047,6 +1053,19 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
     protected static boolean supportsAutoRename(Folder folder) {
         Set<String> supportedCapabilities = null == folder ? null : folder.getSupportedCapabilities();
         return null != supportedCapabilities && supportedCapabilities.contains(CAPABILITY_AUTO_RENAME_FOLDERS);
+    }
+
+    private static final String CAPABILITY_RESTORE = Strings.asciiLowerCase(FileStorageCapability.RESTORE.name());
+
+    /**
+     * Checks of specified folder supports the {@link FileStorageCapability#RESTORE RESTORE} capability.
+     *
+     * @param folder The folder to check
+     * @return <code>true</code> if specified folder supports that capability; otherwise <code>false</code>
+     */
+    protected static boolean supportsRestore(Folder folder) {
+        Set<String> supportedCapabilities = null == folder ? null : folder.getSupportedCapabilities();
+        return null != supportedCapabilities && supportedCapabilities.contains(CAPABILITY_RESTORE);
     }
 
     // -----------------------------------------------------------------------------------------------

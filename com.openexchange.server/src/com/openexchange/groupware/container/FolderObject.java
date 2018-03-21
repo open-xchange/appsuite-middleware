@@ -65,6 +65,7 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.i18n.FolderStrings;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.i18n.tools.StringHelper;
@@ -346,6 +347,10 @@ public class FolderObject extends FolderChildObject implements Cloneable {
     protected String fullName;
 
     protected boolean b_fullName;
+
+    protected boolean b_originPath;
+
+    protected FolderPathObject originPath;
 
     /**
      * Initializes a new {@link FolderObject}
@@ -1063,6 +1068,24 @@ public class FolderObject extends FolderChildObject implements Cloneable {
         b_fullName = false;
     }
 
+    public boolean containsOriginPath() {
+        return b_originPath;
+    }
+
+    public void setOriginPath(FolderPathObject originPath) {
+        this.originPath = originPath;
+        b_originPath = true;
+    }
+
+    public FolderPathObject getOriginPath() {
+        return originPath;
+    }
+
+    public void removeOriginPath() {
+        originPath = null;
+        b_originPath = false;
+    }
+
     @Override
     public final void reset() {
         super.reset();
@@ -1075,6 +1098,7 @@ public class FolderObject extends FolderChildObject implements Cloneable {
         removeSubfolderFlag();
         removeSubfolderIds();
         removeFullName();
+        removeOriginPath();
     }
 
     /**
@@ -1087,7 +1111,7 @@ public class FolderObject extends FolderChildObject implements Cloneable {
     }
 
     /**
-     * Fills this folder with all availbable values from given folder and returns itself.
+     * Fills this folder with all available values from given folder and returns itself.
      *
      * @param other The other instance of <code>{@link FolderObject}</code> serving as source
      * @param overwrite <code>true</code> to overwrite even if value is already present; <code>false</code> to only fill value if not
@@ -1146,6 +1170,9 @@ public class FolderObject extends FolderChildObject implements Cloneable {
         }
         if (other.containsType() && (overwrite || !containsType())) {
             setType(other.getType());
+        }
+        if (other.containsOriginPath() && (overwrite || !containsOriginPath())) {
+            setOriginPath(other.getOriginPath());
         }
         return this;
     }
@@ -1304,11 +1331,14 @@ public class FolderObject extends FolderChildObject implements Cloneable {
         return maxPerm;
     }
 
-    private final EffectivePermission calcEffectiveUserPermission(final int userId, final UserConfiguration userConfig) {
+    private final EffectivePermission calcEffectiveUserPermission(final int userId, final UserConfiguration userConfig) throws OXException {
         final EffectivePermission maxPerm = new EffectivePermission(userId, getObjectID(), getType(userId), getModule(), getCreatedBy(), userConfig);
         final int[] idArr;
         {
-            final int[] groups = userConfig.getGroups();
+            int[] groups = userConfig.getGroups();
+            if (null == groups) {
+                groups = UserStorage.getInstance().getUser(userId, userConfig.getContext()).getGroups();
+            }
             idArr = new int[groups.length + 1];
             idArr[0] = userId;
             System.arraycopy(groups, 0, idArr, 1, groups.length);
@@ -1417,6 +1447,9 @@ public class FolderObject extends FolderChildObject implements Cloneable {
             } catch (final OXException e) {
                 sb.append("");
             }
+        }
+        if (containsOriginPath()) {
+            sb.append(" Origin Path=").append(getOriginPath());
         }
         return sb.toString();
     }
@@ -1597,7 +1630,7 @@ public class FolderObject extends FolderChildObject implements Cloneable {
         final int size = original.size();
         final ArrayList<Integer> copy = new ArrayList<Integer>(original.size());
         for (int i = 0; i < size; i++) {
-            copy.add(Integer.valueOf(original.get(i).intValue()));
+            copy.add(original.get(i));
         }
         return copy;
     }

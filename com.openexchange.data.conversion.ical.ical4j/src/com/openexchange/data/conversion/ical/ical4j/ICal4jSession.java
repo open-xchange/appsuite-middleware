@@ -49,11 +49,11 @@
 
 package com.openexchange.data.conversion.ical.ical4j;
 
-import net.fortuna.ical4j.model.Calendar;
-import net.fortuna.ical4j.model.property.XProperty;
 import com.openexchange.data.conversion.ical.ICalSession;
 import com.openexchange.data.conversion.ical.Mode;
 import com.openexchange.data.conversion.ical.ZoneInfo;
+import net.fortuna.ical4j.model.Calendar;
+import net.fortuna.ical4j.model.property.XProperty;
 
 /**
  *

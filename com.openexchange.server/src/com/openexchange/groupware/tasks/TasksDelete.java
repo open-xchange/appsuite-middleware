@@ -207,13 +207,13 @@ public class TasksDelete implements DeleteListener {
                     // removeUserFromParticipants()
                     foldStor.deleteFolder(ctx, con, taskId, folderId, type);
                 } else if (ctx.getMailadmin() == userId || StorageType.DELETED == type || null == folder) {
-                    TaskLogic.removeTask(session, ctx, con, folderId, taskId, type);
+                    TaskLogic.removeTask(session, ctx, con, folderId, taskId, type, false);
                 } else if (Tools.isFolderPublic(folder)) {
                     foldStor.deleteFolder(ctx, con, taskId, folderId, type);
                     final Folder aFolder = new Folder(folderId, destUser);
                     foldStor.insertFolder(ctx, con, taskId, aFolder, type);
                 } else if (Tools.isFolderPrivate(folder)) {
-                    TaskLogic.removeTask(session, ctx, con, folderId, taskId, type);
+                    TaskLogic.removeTask(session, ctx, con, folderId, taskId, type, false);
                 } else {
                     throw TaskExceptionCode.UNIMPLEMENTED.create();
                 }

@@ -63,7 +63,6 @@ import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.Type;
 import com.openexchange.folderstorage.UserizedFolder;
-import com.openexchange.folderstorage.database.contentType.CalendarContentType;
 import com.openexchange.folderstorage.database.contentType.ContactContentType;
 import com.openexchange.folderstorage.database.contentType.TaskContentType;
 import com.openexchange.folderstorage.type.PrivateType;
@@ -180,7 +179,7 @@ public class Folders {
     private static ContentType getContentType(Module module) {
         switch (module) {
             case CALENDAR:
-                return CalendarContentType.getInstance();
+                return com.openexchange.folderstorage.calendar.contentType.CalendarContentType.getInstance();
             case CONTACTS:
                 return ContactContentType.getInstance();
             case TASKS:

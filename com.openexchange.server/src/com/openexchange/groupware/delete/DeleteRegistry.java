@@ -61,7 +61,6 @@ import com.openexchange.folderstorage.outlook.OutlookFolderDeleteListener;
 import com.openexchange.group.internal.GroupDeleteListener;
 import com.openexchange.groupware.attach.impl.AttachmentContextDelete;
 import com.openexchange.groupware.attach.impl.AttachmentDelDelete;
-import com.openexchange.groupware.calendar.CalendarAdministrationService;
 import com.openexchange.groupware.contact.ContactDeleteListener;
 import com.openexchange.groupware.delete.objectusagecount.ObjectUsageCountDeleteListener;
 import com.openexchange.groupware.filestore.FileStorageRemover;
@@ -74,7 +73,6 @@ import com.openexchange.java.Strings;
 import com.openexchange.mail.usersetting.UserSettingMailDeleteListener;
 import com.openexchange.mailaccount.internal.MailAccountDeleteListener;
 import com.openexchange.preferences.UserSettingServerDeleteListener;
-import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.sessiond.impl.SessionDeleteListener;
 import com.openexchange.tools.file.QuotaUsageDelete;
 import com.openexchange.tools.file.UserQuotaUsageDelete;
@@ -183,7 +181,6 @@ public final class DeleteRegistry {
             new InfostoreDelete(),
             new ContactDeleteListener(),
             new GroupDeleteListener(),
-            ServerServiceRegistry.getInstance().getService(CalendarAdministrationService.class),
             /*
              * Delete user configuration & settings
              */

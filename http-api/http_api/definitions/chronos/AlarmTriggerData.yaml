@@ -1,0 +1,34 @@
+type: array
+description: An array of alarm trigger objects
+items:
+  type: object
+  title: AlarmTrigger
+  properties:
+    action:
+      type: string
+      description: The action of the alarm. E.g. "DISPLAY"
+      readOnly: true
+    account:
+      type: integer
+      description: The id of the calendar account
+      readOnly: true
+    folder:
+      type: string
+      description: The folder identifier.
+      readOnly: true
+    time:
+      type: string
+      description: The trigger time of the alarm as a utc date-time value as specified in rfc 5545 chapter 3.3.5. E.g. "20170708T220000Z".
+      readOnly: true
+    eventId:
+      type: string
+      description: The identifier of the event.
+      readOnly: true
+    recurrenceId:
+      type: string
+      description: The identifier of the recurrence this alarm belongs to.
+      readOnly: true
+    alarmId:
+      type: string
+      description: The identifier of the alarm.
+      readOnly: true

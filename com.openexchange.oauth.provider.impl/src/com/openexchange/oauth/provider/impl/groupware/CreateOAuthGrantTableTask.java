@@ -53,12 +53,12 @@ import static com.openexchange.tools.update.Tools.tableExists;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.tools.sql.DBUtils;
 
 /**
  * {@link CreateOAuthGrantTableTask}
@@ -85,7 +85,7 @@ public class CreateOAuthGrantTableTask extends UpdateTaskAdapter {
         Connection con = params.getConnection();
         boolean rollback = false;
         try {
-            DBUtils.startTransaction(con); // BEGIN
+            Databases.startTransaction(con); // BEGIN
             rollback = true;
 
             perform(con);
@@ -96,9 +96,9 @@ public class CreateOAuthGrantTableTask extends UpdateTaskAdapter {
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } finally {
             if (rollback) {
-                DBUtils.rollback(con);
+                Databases.rollback(con);
             }
-            DBUtils.autocommit(con);
+            Databases.autocommit(con);
         }
     }
 
@@ -111,7 +111,7 @@ public class CreateOAuthGrantTableTask extends UpdateTaskAdapter {
                 if (!tableExists(con, tableNames[i])) {
                     stmt = con.prepareStatement(createStmts[i]);
                     stmt.executeUpdate();
-                    DBUtils.closeSQLStuff(stmt);
+                    Databases.closeSQLStuff(stmt);
                     stmt = null;
                 }
             }
@@ -120,7 +120,7 @@ public class CreateOAuthGrantTableTask extends UpdateTaskAdapter {
         } catch (RuntimeException e) {
             throw UpdateExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
-            DBUtils.closeSQLStuff(stmt);
+            Databases.closeSQLStuff(stmt);
         }
     }
 

@@ -246,8 +246,12 @@ public class DovecotPushRESTService {
 
     private MailMessage asMessage(long uid, String fullName, String from, String subject, int unread) throws MessagingException {
         MailMessage mailMessage = new IDMailMessage(Long.toString(uid), fullName);
-        mailMessage.addFrom(QuotedInternetAddress.parseHeader(from, true));
-        mailMessage.setSubject(null == subject ? null : MimeMessageUtility.decodeEnvelopeSubject(subject), true);
+        if (null != from) {
+            mailMessage.addFrom(QuotedInternetAddress.parseHeader(from, true));
+        }
+        if (null != subject) {
+            mailMessage.setSubject(MimeMessageUtility.decodeEnvelopeSubject(subject), true);
+        }
         if (unread >= 0) {
             mailMessage.setUnreadMessages(unread);
         }

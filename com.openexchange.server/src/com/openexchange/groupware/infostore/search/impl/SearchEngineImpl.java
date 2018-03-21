@@ -49,7 +49,9 @@
 
 package com.openexchange.groupware.infostore.search.impl;
 
-import static com.openexchange.groupware.infostore.InfostoreSearchEngine.*;
+import static com.openexchange.groupware.infostore.InfostoreSearchEngine.ASC;
+import static com.openexchange.groupware.infostore.InfostoreSearchEngine.DESC;
+import static com.openexchange.groupware.infostore.InfostoreSearchEngine.NOT_SET;
 import static com.openexchange.java.Autoboxing.I;
 import java.io.InputStream;
 import java.sql.Connection;
@@ -75,6 +77,7 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.InfostoreExceptionCodes;
+import com.openexchange.groupware.infostore.InfostoreFolderPath;
 import com.openexchange.groupware.infostore.database.impl.DocumentMetadataImpl;
 import com.openexchange.groupware.infostore.database.impl.InfostoreQueryCatalog;
 import com.openexchange.groupware.infostore.database.impl.InfostoreSecurityImpl;
@@ -90,7 +93,6 @@ import com.openexchange.tools.iterator.SearchIteratorAdapter;
 import com.openexchange.tools.iterator.SearchIteratorExceptionCodes;
 import com.openexchange.tools.iterator.SearchIterators;
 import com.openexchange.tools.session.ServerSession;
-import com.openexchange.tools.sql.DBUtils;
 import com.openexchange.tools.sql.SearchStrings;
 
 /**
@@ -110,7 +112,8 @@ public class SearchEngineImpl extends DBService {
     }
 
     public SearchEngineImpl(final DBProvider provider) {
-        super(provider);
+        super();
+        setProvider(provider);
         security.setProvider(provider);
     }
 
@@ -164,10 +167,13 @@ public class SearchEngineImpl extends DBService {
         } finally {
             if (!successful) {
                 if (iter != null) {
+                    // Database resources managed/closed by InfostoreSearchIterator instance
                     SearchIterators.close(iter);
-                } else if (con != null) {
-                    releaseReadConnection(session.getContext(), con);
-                    DBUtils.closeSQLStuff(stmt);
+                } else {
+                    Databases.closeSQLStuff(stmt);
+                    if (con != null) {
+                        releaseReadConnection(session.getContext(), con);
+                    }
                 }
             }
         }
@@ -277,7 +283,7 @@ public class SearchEngineImpl extends DBService {
                         SearchIterators.close(iter);
                     } else if (con != null) {
                         releaseReadConnection(session.getContext(), con);
-                        DBUtils.closeSQLStuff(stmt);
+                        Databases.closeSQLStuff(stmt);
                     }
                 }
             }
@@ -489,7 +495,7 @@ public class SearchEngineImpl extends DBService {
                 LOG.error("", e);
                 throw InfostoreExceptionCodes.SQL_PROBLEM.create(e, sqlQuery.toString());
             } finally {
-                DBUtils.closeSQLStuff(results, statement);
+                Databases.closeSQLStuff(results, statement);
             }
             if (0 == objectIDs.size()) {
                 return SearchIteratorAdapter.emptyIterator();
@@ -520,7 +526,7 @@ public class SearchEngineImpl extends DBService {
                     if (iter != null) {
                         SearchIterators.close(iter);
                     } else if (connection != null) {
-                        DBUtils.closeSQLStuff(stmt);
+                        Databases.closeSQLStuff(stmt);
                     }
                 }
             }
@@ -594,7 +600,7 @@ public class SearchEngineImpl extends DBService {
                     retval.add("infostore_document.filename");
                     break Metadata2DBSwitch;
                 case Metadata.SEQUENCE_NUMBER:
-                    retval.add("infostore.id");
+                    retval.add("infostore.last_modified");
                     break Metadata2DBSwitch;
                 case Metadata.ID:
                     retval.add("infostore.id");
@@ -631,6 +637,9 @@ public class SearchEngineImpl extends DBService {
                     break Metadata2DBSwitch;
                 case Metadata.META:
                     retval.add("infostore_document.meta");
+                    break Metadata2DBSwitch;
+                case Metadata.ORIGIN:
+                    retval.add("infostore.origin");
                     break Metadata2DBSwitch;
             }
         }
@@ -896,6 +905,12 @@ public class SearchEngineImpl extends DBService {
                             } finally {
                                 Streams.close(jsonBlobStream);
                             }
+                        }
+                        break;
+                    case Metadata.ORIGIN:
+                        String sFolderPath = result.getString(++columnIndex);
+                        if (false == result.wasNull() &&  null != sFolderPath) {
+                            retval.setOriginFolderPath(InfostoreFolderPath.parseFrom(sFolderPath));
                         }
                         break;
                     default:

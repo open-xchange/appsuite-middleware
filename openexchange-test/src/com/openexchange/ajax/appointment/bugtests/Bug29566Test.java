@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the Open-Xchange, Inc. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2016-2020 OX Software GmbH
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -50,7 +50,9 @@
 package com.openexchange.ajax.appointment.bugtests;
 
 import static com.openexchange.groupware.calendar.TimeTools.D;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
@@ -124,15 +126,18 @@ public class Bug29566Test extends AbstractAJAXSession {
         user2.setConfirm(Appointment.NONE);
         clone.setParticipants(new Participant[] { user, user2 });
         clone.setUsers(new UserParticipant[] { user, user2 });
-
         catm2.update(clone);
 
-        assertFalse("No error expected.", catm2.getLastResponse().hasError());
+        if (shared) {
+            assertTrue("Error expected.", catm2.getLastResponse().hasError());
+            assertEquals("Wrong error.", OXCalendarExceptionCodes.LOAD_PERMISSION_EXCEPTION_5.getNumber(), catm2.getLastResponse().getException().getCode());
+        } else {
+            assertFalse("No error expected.", catm2.getLastResponse().hasError());
 
-        Appointment loaded = catm.get(appointment);
-        assertEquals("Expected two participants.", 2, loaded.getParticipants().length);
-        assertEquals("Expected two users.", 2, loaded.getUsers().length);
-
+            Appointment loaded = catm.get(appointment);
+            assertEquals("Expected two participants.", 2, loaded.getParticipants().length);
+            assertEquals("Expected two users.", 2, loaded.getUsers().length);
+        }
     }
 
     @Test

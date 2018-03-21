@@ -53,7 +53,6 @@ import java.util.Comparator;
 import java.util.Formatter;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
 import edu.emory.mathcs.backport.java.util.Arrays;
 
 public class ContactFieldDocumentor {

@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 1997-2017 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997-2018 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -41,12 +41,14 @@
 package com.sun.mail.imap;
 
 
-import javax.mail.*;
-import javax.mail.internet.*;
-
-import com.sun.mail.imap.protocol.*;
 import java.util.ArrayList;
 import java.util.List;
+import javax.mail.BodyPart;
+import javax.mail.MessagingException;
+import javax.mail.MultipartDataSource;
+import javax.mail.internet.MimePart;
+import javax.mail.internet.MimePartDataSource;
+import com.sun.mail.imap.protocol.BODYSTRUCTURE;
 
 /**
  * This class 

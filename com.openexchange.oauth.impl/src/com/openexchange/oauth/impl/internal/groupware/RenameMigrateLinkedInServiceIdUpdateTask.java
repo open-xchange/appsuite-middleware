@@ -49,19 +49,19 @@
 
 package com.openexchange.oauth.impl.internal.groupware;
 
-import static com.openexchange.tools.sql.DBUtils.autocommit;
-import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
-import static com.openexchange.tools.sql.DBUtils.startTransaction;
+import static com.openexchange.database.Databases.autocommit;
+import static com.openexchange.database.Databases.closeSQLStuff;
+import static com.openexchange.database.Databases.startTransaction;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
 import com.openexchange.oauth.KnownApi;
 import com.openexchange.oauth.scope.OXScope;
-import com.openexchange.tools.sql.DBUtils;
 
 /**
  * {@link RenameMigrateLinkedInServiceIdUpdateTask}
@@ -109,7 +109,7 @@ public class RenameMigrateLinkedInServiceIdUpdateTask extends UpdateTaskAdapter 
         } finally {
             closeSQLStuff(stmt);
             if (rollback) {
-                DBUtils.rollback(writeCon);
+                Databases.rollback(writeCon);
             }
             autocommit(writeCon);
         }

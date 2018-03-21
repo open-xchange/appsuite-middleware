@@ -51,8 +51,8 @@ package com.openexchange.calendar.printing.days;
 
 import java.util.Calendar;
 import java.util.Date;
-import com.openexchange.calendar.printing.CPAppointment;
 import com.openexchange.calendar.printing.CPCalendar;
+import com.openexchange.calendar.printing.CPEvent;
 
 /**
  * {@link CalendarTools}
@@ -113,11 +113,11 @@ public class CalendarTools {
         }
     }
 
-    public static boolean overlaps(CPAppointment appointment1, CPAppointment appointment2) {
+    public static boolean overlaps(CPEvent appointment1, CPEvent appointment2) {
         return overlaps(appointment2, appointment1.getStartDate(), appointment1.getEndDate());
     }
 
-    public static boolean overlaps(CPAppointment appointment, Date startDate, Date endDate) {
+    public static boolean overlaps(CPEvent appointment, Date startDate, Date endDate) {
         return appointment.getStartDate().before(endDate) && appointment.getEndDate().after(startDate);
     }
 }

@@ -49,18 +49,18 @@
 
 package com.openexchange.groupware.update.tasks;
 
+import static com.openexchange.database.Databases.autocommit;
 import static com.openexchange.groupware.update.UpdateConcurrency.BACKGROUND;
-import static com.openexchange.tools.sql.DBUtils.autocommit;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.Attributes;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.TaskAttributes;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
-import com.openexchange.tools.sql.DBUtils;
 
 /**
  * {@link InfostoreClearDelTablesTask} - Removes obsolete data from the 'del_infostore_document' table.
@@ -121,9 +121,9 @@ public class InfostoreClearDelTablesTask extends UpdateTaskAdapter {
         } catch (RuntimeException e) {
             throw UpdateExceptionCodes.OTHER_PROBLEM.create(e, e.getMessage());
         } finally {
-            DBUtils.closeSQLStuff(stmt);
+            Databases.closeSQLStuff(stmt);
             if (rollback) {
-                DBUtils.rollback(con);
+                Databases.rollback(con);
             }
             autocommit(con);
         }

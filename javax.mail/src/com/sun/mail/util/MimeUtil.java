@@ -40,9 +40,9 @@
 
 package com.sun.mail.util;
 
-import java.lang.reflect.*;
-import java.security.*;
-
+import java.lang.reflect.Method;
+import java.security.AccessController;
+import java.security.PrivilegedAction;
 import javax.mail.internet.MimePart;
 
 /**

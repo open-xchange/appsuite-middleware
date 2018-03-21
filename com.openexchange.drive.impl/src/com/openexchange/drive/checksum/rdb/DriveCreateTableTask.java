@@ -49,17 +49,17 @@
 
 package com.openexchange.drive.checksum.rdb;
 
-import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
+import static com.openexchange.database.Databases.closeSQLStuff;
 import static com.openexchange.tools.sql.DBUtils.tableExists;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import com.openexchange.database.Databases;
 import com.openexchange.drive.DriveExceptionCodes;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
-import com.openexchange.tools.sql.DBUtils;
 
 /**
  * {@link DriveCreateTableTask}
@@ -110,9 +110,9 @@ public class DriveCreateTableTask extends UpdateTaskAdapter {
             throw DriveExceptionCodes.DB_ERROR.create(e, e.getMessage());
         } finally {
             if (rollback) {
-                DBUtils.rollback(writeCon);
+                Databases.rollback(writeCon);
             }
-            DBUtils.autocommit(writeCon);
+            Databases.autocommit(writeCon);
         }
     }
 

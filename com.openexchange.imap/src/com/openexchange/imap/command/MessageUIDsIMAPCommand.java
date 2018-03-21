@@ -49,14 +49,14 @@
 
 package com.openexchange.imap.command;
 
-import gnu.trove.list.TLongList;
-import gnu.trove.list.array.TLongArrayList;
 import javax.mail.Message;
 import javax.mail.MessagingException;
 import com.sun.mail.iap.Response;
 import com.sun.mail.imap.IMAPFolder;
 import com.sun.mail.imap.protocol.FetchResponse;
 import com.sun.mail.imap.protocol.UID;
+import gnu.trove.list.TLongList;
+import gnu.trove.list.array.TLongArrayList;
 
 /**
  * {@link MessageUIDsIMAPCommand} - gets the corresponding message UIDs to given array of <code>Message</code> as an array of

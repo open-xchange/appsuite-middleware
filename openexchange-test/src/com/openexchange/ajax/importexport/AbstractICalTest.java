@@ -49,14 +49,12 @@
 
 package com.openexchange.ajax.importexport;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.TimeZone;
-import org.json.JSONException;
 import org.junit.Before;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.framework.Executor;
@@ -70,8 +68,6 @@ import com.openexchange.data.conversion.ical.ical4j.internal.UserResolver;
 import com.openexchange.data.conversion.ical.ical4j.internal.calendar.Participants;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Types;
-import com.openexchange.groupware.calendar.CalendarDataObject;
-import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
@@ -94,8 +90,6 @@ public class AbstractICalTest extends AbstractAJAXSession {
 
     protected Date endTime = null;
 
-    protected int appointmentFolderId = -1;
-
     protected int taskFolderId = -1;
 
     protected int userId = -1;
@@ -110,8 +104,6 @@ public class AbstractICalTest extends AbstractAJAXSession {
     @Before
     public void setUp() throws Exception {
         super.setUp();
-
-        appointmentFolderId = getClient().getValues().getPrivateAppointmentFolder();
 
         taskFolderId = getClient().getValues().getPrivateTaskFolder();
 
@@ -148,23 +140,6 @@ public class AbstractICalTest extends AbstractAJAXSession {
                 return null;
             }
         };
-    }
-
-    public Appointment[] exportAppointment(final int folderId, final Context ctx) throws IOException, ConversionWarning, OXException, JSONException {
-        final ICalExportRequest request = new ICalExportRequest(folderId);
-        final ICalExportResponse response = Executor.execute(getClient(), request);
-
-        final ICalParser parser = new ICal4JParser();
-        final List<ConversionError> errors = new LinkedList<ConversionError>();
-        final List<ConversionWarning> warnings = new LinkedList<ConversionWarning>();
-        final List<CalendarDataObject> exportData = parser.parseAppointments(response.getICal(), timeZone, ctx, errors, warnings).getImportedObjects();
-        if (!errors.isEmpty()) {
-            throw errors.get(0);
-        }
-        if (!warnings.isEmpty()) {
-            throw warnings.get(0);
-        }
-        return exportData.toArray(new Appointment[exportData.size()]);
     }
 
     public Task[] exportTask(final TimeZone timeZone, final Context ctx) throws Exception, OXException {

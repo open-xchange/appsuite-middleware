@@ -49,7 +49,9 @@
 
 package com.openexchange.file.storage.composition;
 
+import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageCapability;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
@@ -423,5 +425,15 @@ public interface IDBasedFolderAccess extends TransactionAware, WarningsAware {
      * @return The total size of all document versions in a folder, or <code>-1</code> if unknown
      */
     long getTotalSize(String folderId) throws OXException;
+
+    /**
+     * Restores folders from trash to their origin locations
+     *
+     * @param folderIds The identifiers of the folders to restore
+     * @param defaultDestFolderId The identifier of the default destination folder
+     * @return The restored paths mapped by folder id
+     * @throws OXException If restore fails
+     */
+     Map<String, FileStorageFolder[]> restoreFolderFromTrash(List<String> folderIds, String defaultDestFolderId) throws OXException;
 
 }

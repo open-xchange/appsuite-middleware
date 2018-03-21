@@ -118,7 +118,7 @@ public final class MailFolderImpl extends AbstractFolder implements FolderExtens
     private static final String CAPABILITY_STORE_SEEN = "STORE_SEEN";
     private static final String CAPABILITY_FOLDER_VALIDITY = "FOLDER_VALIDITY";
     private static final String CAPABILITY_FILENAME_SEARCH = "FILENAME_SEARCH";
-    private static final String CAPABILITY_ATTACHMENT_SEARCH = "ATTACHMENT_SEARCH";
+    private static final String CAPABILITY_ATTACHMENT_MARKER = "ATTACHMENT_MARKER";
     private static final String CAPABILITY_TEXT_PREVIEW = "TEXT_PREVIEW";
 
     /**
@@ -323,8 +323,8 @@ public final class MailFolderImpl extends AbstractFolder implements FolderExtens
         if (mailCapabilities.hasFileNameSearch()) {
             addSupportedCapabilities(CAPABILITY_FILENAME_SEARCH);
         }
-        if (mailCapabilities.hasAttachmentSearch()) {
-            addSupportedCapabilities(CAPABILITY_ATTACHMENT_SEARCH);
+        if (mailCapabilities.hasAttachmentMarker()) {
+            addSupportedCapabilities(CAPABILITY_ATTACHMENT_MARKER);
         }
         if (mailCapabilities.hasFolderValidity()) {
             addSupportedCapabilities(CAPABILITY_FOLDER_VALIDITY);

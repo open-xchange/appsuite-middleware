@@ -687,8 +687,10 @@ public final class PushManagerRegistry implements PushListenerService {
 
     /**
      * Stops all permanent listeners.
+     *
+     * @param tryToReconnect Whether a reconnect attempt is supposed to be performed
      */
-    public void stopAllPermanentListener() {
+    public void stopAllPermanentListener(boolean tryToReconnect) {
         synchronized (this) {
             for (Iterator<PushManagerService> pushManagersIterator = map.values().iterator(); pushManagersIterator.hasNext();) {
                 PushManagerService pushManager = pushManagersIterator.next();
@@ -711,7 +713,7 @@ public final class PushManagerRegistry implements PushListenerService {
                             int contextId = pushUserInfo.getContextId();
                             try {
                                 // Stop listener for session
-                                boolean stopped = stopPermanentListenerFor(pushUserInfo.getPushUser(), extendedService, true);
+                                boolean stopped = stopPermanentListenerFor(pushUserInfo.getPushUser(), extendedService, tryToReconnect);
                                 if (stopped) {
                                     LOG.debug("Stopped push listener for user {} in context {} by push manager \"{}\"", Integer.valueOf(userId), Integer.valueOf(contextId), pushManager);
                                 }

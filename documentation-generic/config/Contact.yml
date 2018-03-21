@@ -378,8 +378,10 @@ properties:
   - key: com.openexchange.contact.showDepartments
     description: |
       Defines whether the departments will be shown as part of the display name. This only affects results that are found under the Global Address Book
+
+      JSLob: io.ox/contacts//showDepartment
     defaultValue: false
-    version: 7.10
+    version: 7.10.0
     reloadable: true
     configcascadeAware: false
     related: 

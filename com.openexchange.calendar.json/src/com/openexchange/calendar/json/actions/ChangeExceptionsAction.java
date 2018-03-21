@@ -49,25 +49,17 @@
 
 package com.openexchange.calendar.json.actions;
 
-import java.sql.SQLException;
-import java.util.Arrays;
-import java.util.Date;
+import java.util.List;
 import org.json.JSONException;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.calendar.json.AppointmentAJAXRequest;
 import com.openexchange.calendar.json.AppointmentActionFactory;
+import com.openexchange.chronos.Event;
+import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
-import com.openexchange.groupware.calendar.CalendarCollectionService;
-import com.openexchange.groupware.calendar.CalendarDataObject;
-import com.openexchange.groupware.calendar.OXCalendarExceptionCodes;
 import com.openexchange.oauth.provider.resourceserver.annotations.OAuthAction;
-import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.tools.session.ServerSession;
-
 /**
  * {@link ChangeExceptionsAction}
  *
@@ -79,38 +71,18 @@ public class ChangeExceptionsAction extends AppointmentAction {
     /**
      * Initializes a new {@link ChangeExceptionsAction}.
      *
-     * @param services
+     * @param services A service lookup reference
      */
     public ChangeExceptionsAction(final ServiceLookup services) {
         super(services);
     }
 
     @Override
-    protected AJAXRequestResult perform(final AppointmentAJAXRequest req) throws OXException, JSONException {
-        final int id = req.checkInt(AJAXServlet.PARAMETER_ID);
-        final int inFolder = req.checkInt(AJAXServlet.PARAMETER_FOLDERID);
-        final int[] columns = req.checkIntArray(AJAXServlet.PARAMETER_COLUMNS);
-
-        final ServerSession session = req.getSession();
-
-        final AppointmentSqlFactoryService sqlFactoryService = getService();
-        if (null == sqlFactoryService) {
-            throw ServiceExceptionCode.serviceUnavailable(AppointmentSqlFactoryService.class);
-        }
-        final AppointmentSQLInterface appointmentSql = sqlFactoryService.createAppointmentSql(session);
-
-        Date timestamp = null;
-        try {
-            final CalendarDataObject master = appointmentSql.getObjectById(id, inFolder); // Check for read rights.
-            timestamp = master.getLastModified();
-        } catch (final SQLException e) {
-            throw OXCalendarExceptionCodes.CALENDAR_SQL_ERROR.create(e, new Object[0]);
-        }
-
-        final CalendarCollectionService collection = getService(CalendarCollectionService.class);
-        final CalendarDataObject[] appointments = collection.getChangeExceptionsByRecurrence(id, _appointmentFields, session);
-
-        return new AJAXRequestResult(Arrays.asList(appointments), timestamp, "appointment");
+    protected AJAXRequestResult perform(CalendarSession session, AppointmentAJAXRequest request) throws OXException, JSONException {
+        String folderId = request.checkParameter(AJAXServlet.PARAMETER_FOLDERID);
+        String objectId = request.checkParameter(AJAXServlet.PARAMETER_ID);
+        List<Event> events = session.getCalendarService().getChangeExceptions(session, folderId, objectId);
+        return getAppointmentResultWithTimestamp(getEventConverter(session), events);
     }
 
 }

@@ -58,7 +58,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.apache.commons.lang3.StringEscapeUtils;
+import org.apache.commons.text.StringEscapeUtils;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.configuration.ServerConfig.Property;
 import com.openexchange.java.Streams;
@@ -118,30 +118,32 @@ public class TestServlet extends HttpServlet {
             }
             page.append("<br>");
         }
-        page.append("</p><p>The content: ").append(saneScriptTags(this.getBody(req)));
+        page.append("</p><p>The content: ").append(StringEscapeUtils.escapeHtml4(saneScriptTags(this.getBody(req))));
         page.append("</p></body>\n</html>");
 
-        /*boolean found = false;
-        {
-            Cookie[] cookies = req.getCookies();
-            if (null != cookies) {
-                for (int i = cookies.length; !found && i-- > 0;) {
-                    Cookie cookie = cookies[i];
-                    if ("check-me".equals(cookie.getName())) {
-                        found = true;
-                        System.out.println("Cookie found!");
-                    }
-                }
-            }
-        }
-
-        if (!found) {
-            Cookie cookie = new Cookie("check-me", "foobariscool");
-            cookie.setPath("/");
-            cookie.setMaxAge(10);
-            resp.addCookie(cookie);
-            System.out.println("Cookie added!");
-        }*/
+        /*
+         * boolean found = false;
+         * {
+         * Cookie[] cookies = req.getCookies();
+         * if (null != cookies) {
+         * for (int i = cookies.length; !found && i-- > 0;) {
+         * Cookie cookie = cookies[i];
+         * if ("check-me".equals(cookie.getName())) {
+         * found = true;
+         * System.out.println("Cookie found!");
+         * }
+         * }
+         * }
+         * }
+         * 
+         * if (!found) {
+         * Cookie cookie = new Cookie("check-me", "foobariscool");
+         * cookie.setPath("/");
+         * cookie.setMaxAge(10);
+         * resp.addCookie(cookie);
+         * System.out.println("Cookie added!");
+         * }
+         */
 
         resp.setContentType("text/html; charset=UTF-8");
         final byte[] output = page.toString().getBytes(com.openexchange.java.Charsets.UTF_8);
@@ -225,7 +227,7 @@ public class TestServlet extends HttpServlet {
                 do {
                     sb.append(c, 0, count);
                 } while ((count = isr.read(c)) > 0);
-                return sb.toString();
+                return StringEscapeUtils.escapeHtml4(sb.toString());
             }
             return "";
         } catch (final UnsupportedEncodingException e) {

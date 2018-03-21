@@ -80,10 +80,6 @@ public class Starter implements Initialization {
      */
     com.openexchange.cache.registry.CacheAvailabilityRegistryInit.getInstance(),
     /**
-     * Reads the calendar.properties.
-     */
-    com.openexchange.groupware.calendar.CalendarConfig.getInstance(),
-    /**
      * Initialization for custom charset provider
      */
     new com.openexchange.charset.CustomCharsetProviderInit(),

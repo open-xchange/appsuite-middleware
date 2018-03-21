@@ -52,13 +52,13 @@ package liquibase.precondition.ext;
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import org.apache.commons.lang.Validate;
 import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.CustomPreconditionErrorException;
 import liquibase.exception.CustomPreconditionFailedException;
 import liquibase.precondition.CustomPrecondition;
-import org.apache.commons.lang.Validate;
 
 /**
  * Checks if the denoted column is allowed to hold <code>NULL</code> values.
@@ -101,6 +101,7 @@ public class IsNullPrecondition implements CustomPrecondition {
      */
     @Override
     public void check(final Database database) throws CustomPreconditionFailedException, CustomPreconditionErrorException {
+        ResultSet rsColumns = null;
         try {
             Validate.notNull(database, "Database provided by Liquibase might not be null!");
 
@@ -116,7 +117,7 @@ public class IsNullPrecondition implements CustomPrecondition {
 
             boolean columnFound = false;
             DatabaseMetaData meta = connection.getUnderlyingConnection().getMetaData();
-            ResultSet rsColumns = meta.getColumns(null, null, tableName, null);
+            rsColumns = meta.getColumns(null, null, tableName, null);
             if (!rsColumns.next()) {
                 throw new CustomPreconditionErrorException("No columns for table " + tableName + " found! Aborting database migration execution for the given changeset.");
             }
@@ -147,6 +148,10 @@ public class IsNullPrecondition implements CustomPrecondition {
             throw new CustomPreconditionErrorException("Error while evaluating type of column " + columnName + " in table " + tableName + ".", sqlException);
         } catch (RuntimeException e) {
             throw new CustomPreconditionErrorException("Unexpected error", e);
+        } finally {
+            if (null != rsColumns) {
+                try { rsColumns.close(); } catch (SQLException e) { /* Ignore */ }
+            }
         }
     }
 }

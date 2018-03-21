@@ -49,7 +49,8 @@
 
 package com.openexchange.drive.impl.checksum;
 
-import static com.openexchange.java.Autoboxing.*;
+import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.java.Autoboxing.L;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;

@@ -54,7 +54,7 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
-import com.openexchange.tools.sql.DBUtils;
+import com.openexchange.database.Databases;
 
 /**
  * Build a subclass of {@link SimpleStatementsUpdateTask} if all you want to do is execute a bunch of statements.
@@ -107,7 +107,7 @@ public abstract class SimpleStatementsUpdateTask extends SimpleUpdateTask {
                 stmt.execute();
             } finally {
                 if (stmt != null) {
-                    DBUtils.closeSQLStuff(stmt);
+                    Databases.closeSQLStuff(stmt);
                 }
             }
         }

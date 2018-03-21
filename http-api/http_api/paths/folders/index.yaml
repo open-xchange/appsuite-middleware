@@ -11,3 +11,4 @@ requests:
   - AllVisibleRequest.yaml
   - SharesRequest.yaml
   - NotifyRequest.yaml
+  - RestoreRequest.yaml

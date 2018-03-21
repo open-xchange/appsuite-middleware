@@ -55,12 +55,12 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.LinkedList;
 import java.util.List;
+import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.delete.DeleteEvent;
 import com.openexchange.groupware.delete.DeleteFailedExceptionCodes;
 import com.openexchange.groupware.delete.DeleteListener;
 import com.openexchange.push.impl.PushManagerRegistry;
-import com.openexchange.tools.sql.DBUtils;
 
 /**
  * {@link PushDeleteListener}
@@ -98,7 +98,7 @@ public final class PushDeleteListener implements DeleteListener {
             } catch (Exception e) {
                 throw DeleteFailedExceptionCodes.ERROR.create(e, e.getMessage());
             } finally {
-                DBUtils.closeSQLStuff(stmt);
+                Databases.closeSQLStuff(stmt);
             }
         } else if (DeleteEvent.TYPE_CONTEXT == event.getType()) {
             // Cleanse from database
@@ -114,7 +114,7 @@ public final class PushDeleteListener implements DeleteListener {
                     do {
                         userIds.add(Integer.valueOf(rs.getInt(1)));
                     } while (rs.next());
-                    DBUtils.closeSQLStuff(rs, stmt);
+                    Databases.closeSQLStuff(rs, stmt);
                     rs = null;
                     stmt = null;
 
@@ -123,7 +123,7 @@ public final class PushDeleteListener implements DeleteListener {
                         PushManagerRegistry.getInstance().unregisterAllPermanentListenersFor(userId.intValue(), contextId);
                     }
                 } else {
-                    DBUtils.closeSQLStuff(rs, stmt);
+                    Databases.closeSQLStuff(rs, stmt);
                     rs = null;
                     stmt = null;
                 }
@@ -137,7 +137,7 @@ public final class PushDeleteListener implements DeleteListener {
             } catch (Exception e) {
                 throw DeleteFailedExceptionCodes.ERROR.create(e, e.getMessage());
             } finally {
-                DBUtils.closeSQLStuff(rs, stmt);
+                Databases.closeSQLStuff(rs, stmt);
             }
         }
     }

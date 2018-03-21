@@ -109,7 +109,7 @@ public abstract class AbstractMailAction implements AJAXActionService, MailActio
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AbstractMailAction.class);
 
-    private final class MailInterfacePostProcessor implements AJAXRequestResultPostProcessor {
+    private static final class MailInterfacePostProcessor implements AJAXRequestResultPostProcessor {
 
         private final MailServletInterface newMailInterface;
 
@@ -586,5 +586,10 @@ public abstract class AbstractMailAction implements AJAXActionService, MailActio
             uid = args[0] == null ? null : args[0].toString();
         }
         return uid;
+    }
+
+    protected boolean getIgnoreDeleted(MailRequest mailRequest, boolean defaultValue) {
+        String parameter = mailRequest.getParameter("deleted");
+        return parameter == null ? defaultValue : !AJAXRequestDataTools.parseBoolParameter(parameter);
     }
 }

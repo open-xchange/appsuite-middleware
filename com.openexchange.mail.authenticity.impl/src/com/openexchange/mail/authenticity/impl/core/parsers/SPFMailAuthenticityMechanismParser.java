@@ -51,6 +51,7 @@ package com.openexchange.mail.authenticity.impl.core.parsers;
 
 import java.util.Map;
 import com.openexchange.java.Strings;
+import com.openexchange.mail.authenticity.impl.core.MailAuthenticityFragmentPhrases;
 import com.openexchange.mail.authenticity.mechanism.AuthenticityMechanismResult;
 import com.openexchange.mail.authenticity.mechanism.DefaultMailAuthenticityMechanism;
 import com.openexchange.mail.authenticity.mechanism.MailAuthenticityMechanismResult;
@@ -79,7 +80,11 @@ public class SPFMailAuthenticityMechanismParser extends AbstractMailAuthenticity
      */
     @Override
     AuthenticityMechanismResult parseMechanismResult(String value) {
-        return SPFResult.valueOf(value);
+        try {
+            return SPFResult.valueOf(value);
+        } catch (IllegalArgumentException e) {
+            return SPFResult.FAIL;
+        }
     }
 
     /*
@@ -90,12 +95,16 @@ public class SPFMailAuthenticityMechanismParser extends AbstractMailAuthenticity
     @Override
     MailAuthenticityMechanismResult createResult(String domain, AuthenticityMechanismResult mechResult, String mechanismName, boolean domainMatch, Map<String, String> attributes) {
         SPFAuthMechResult result = new SPFAuthMechResult(domain, (SPFResult) mechResult);
-        result.setReason(extractComment(mechanismName));
         result.setDomainMatch(domainMatch);
         result.addProperty("mail_from", result.getDomain());
-        if (!Strings.isEmpty(result.getClientIP())) {
+        String reason;
+        if (Strings.isNotEmpty(result.getClientIP())) {
             result.addProperty("client_ip", result.getClientIP());
+            reason = compileReasonPhrase(mechResult, MailAuthenticityFragmentPhrases.WITH_IP, result.getClientIP());
+        } else {
+            reason = compileReasonPhrase(mechResult, MailAuthenticityFragmentPhrases.WITH_DOMAIN, result.getDomain());
         }
+        result.setReason(reason);
         return result;
     }
 }

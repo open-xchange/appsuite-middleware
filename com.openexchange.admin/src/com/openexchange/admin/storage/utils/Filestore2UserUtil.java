@@ -50,7 +50,6 @@
 package com.openexchange.admin.storage.utils;
 
 import static com.openexchange.database.DBPoolingExceptionCodes.NOT_RESOLVED_SERVER;
-import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
@@ -1086,7 +1085,7 @@ public class Filestore2UserUtil {
             rs = metaData.getTables(null, null, table, new String[] { "TABLE" });
             retval = (rs.next() && rs.getString("TABLE_NAME").equalsIgnoreCase(table));
         } finally {
-            closeSQLStuff(rs);
+            Databases.closeSQLStuff(rs);
         }
         return retval;
     }
@@ -1101,7 +1100,7 @@ public class Filestore2UserUtil {
                 retval = rs.getString(4).equalsIgnoreCase(column);
             }
         } finally {
-            closeSQLStuff(rs);
+            Databases.closeSQLStuff(rs);
         }
         return retval;
     }

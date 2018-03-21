@@ -16,6 +16,7 @@
  */
 package org.apache.tika;
 
+import static org.junit.Assert.assertEquals;
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -24,10 +25,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import org.apache.tika.utils.RereadableInputStream;
 import org.junit.Test;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import static org.junit.Assert.*;
 
 public class TestRereadableInputStream {
     private final int TEST_SIZE = 3;

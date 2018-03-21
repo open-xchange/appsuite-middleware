@@ -66,7 +66,6 @@ import javax.servlet.ServletRequest;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import net.sf.uadetector.UserAgentFamily;
 import org.slf4j.Logger;
 import com.google.common.collect.ImmutableSet;
 import com.openexchange.ajax.fields.Header;
@@ -103,6 +102,7 @@ import com.openexchange.tools.servlet.http.Tools;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
 import com.openexchange.uadetector.UserAgentParser;
+import net.sf.uadetector.UserAgentFamily;
 
 
 /**
@@ -550,12 +550,12 @@ public final class SessionUtility {
     public static SessionResult<ServerSession> getSession(CookieHashSource source, HttpServletRequest req, HttpServletResponse resp, String sessionId, SessiondService sessiondService, SessionSecretChecker optChecker) throws OXException {
         Session session = sessiondService.getSession(sessionId);
         if (null == session) {
-            if (!"unset".equals(sessionId)) {
+            req.setAttribute("__session.absent", sessionId);
+            if (false == "unset".equals(sessionId)) {
                 LOG.info("There is no session associated with session identifier: {}", sessionId);
             }
-            /*
-             * Session MISS -- Consult session inspector
-             */
+
+            // Session MISS -- Consult session inspector
             if (Reply.STOP == SessionInspector.getInstance().getChain().onSessionMiss(sessionId, req, resp)) {
                 return new SessionResult<ServerSession>(Reply.STOP, null);
             }

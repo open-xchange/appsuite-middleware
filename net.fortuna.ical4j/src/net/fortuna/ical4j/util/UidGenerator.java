@@ -32,7 +32,6 @@
 package net.fortuna.ical4j.util;
 
 import java.net.SocketException;
-
 import net.fortuna.ical4j.model.DateTime;
 import net.fortuna.ical4j.model.property.Uid;
 

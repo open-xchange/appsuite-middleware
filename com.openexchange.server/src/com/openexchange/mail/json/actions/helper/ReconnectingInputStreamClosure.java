@@ -126,21 +126,26 @@ public final class ReconnectingInputStreamClosure implements IFileHolder.InputSt
     private InputStream reconnectAndGetStream() throws OXException {
         FullnameArgument fa = MailFolderUtility.prepareMailFolderParam(folderPath);
         MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> ma = null;
+        ThresholdFileHolder newTfh = null;
         try {
             ma = MailAccess.getInstance(session, fa.getAccountId());
             ma.connect(false);
-            final ThresholdFileHolder newTfh = new ThresholdFileHolder();
+
+            newTfh = new ThresholdFileHolder();
             if (image) {
                 newTfh.write(ma.getMessageStorage().getImageAttachment(fa.getFullName(), uid, id).getInputStream());
             } else {
                 newTfh.write(ma.getMessageStorage().getAttachment(fa.getFullName(), uid, id).getInputStream());
             }
             this.tfh = newTfh;
-            return newTfh.getStream();
+            InputStream stream = newTfh.getStream();
+            newTfh = null;
+            return stream;
         } finally {
             if (null != ma) {
                 ma.close(true);
             }
+            Streams.close(newTfh);
         }
     }
 }

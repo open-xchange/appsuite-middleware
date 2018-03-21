@@ -54,7 +54,6 @@ import org.jsoup.nodes.Element;
 import org.junit.rules.TestWatcher;
 import org.junit.runner.Description;
 import org.junit.runners.Suite.SuiteClasses;
-import com.openexchange.java.Strings;
 import com.openexchange.test.report.AssertationResults;
 import com.openexchange.test.report.util.FileUtil;
 

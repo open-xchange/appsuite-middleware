@@ -2,9 +2,8 @@
 
 Name:           open-xchange-meta
 BuildArch:      noarch
-#!BuildIgnore:  post-build-checks
 Version:        @OXVERSION@
-%define         ox_release 0
+%define         ox_release 3
 Release:        %{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GPL-2.0
@@ -186,19 +185,6 @@ Authors:
     Open-Xchange
 
 # ----------------------------------------------------------------------------------------------------
-%package -n     open-xchange-meta-outlook
-Group:          Applications/Productivity
-Summary:        The Open-Xchange Meta package for Outlook OXtender
-Requires:       open-xchange-outlook-updater, open-xchange-outlook-updater-oxtender2, open-xchange-usm, open-xchange-folder-json
-
-%description -n open-xchange-meta-outlook
-The Open-Xchange Meta package for Outlook OXtender
-
-Authors:
---------
-    Open-Xchange
-
-# ----------------------------------------------------------------------------------------------------
 %package -n     open-xchange-meta-cpanel
 Group:          Applications/Productivity
 Summary:        The Open-Xchange Meta package for OX into cPanel integration
@@ -265,6 +251,20 @@ Requires:       open-xchange, open-xchange-core, open-xchange-imap, open-xchange
 
 %description -n open-xchange-meta-backend-ox6
 The Open-Xchange Meta package for OX6 backend packages
+
+Authors:
+--------
+    Open-Xchange
+
+# --- transitional packages --------------------------------------------------------------------------
+# ----------------------------------------------------------------------------------------------------
+%package -n     open-xchange-linkedin
+Group:          Applications/Productivity
+Summary:        The Open-Xchange Meta package for OX6 backend packages
+
+%description -n open-xchange-linkedin
+Emtpy transitional package as the integration of Open-Xchange with LinkedIn was
+discontinued. This package can be removed.
 
 Authors:
 --------
@@ -357,15 +357,21 @@ Authors:
 %defattr(-,root,root)
 %doc README.TXT
 
-%files -n open-xchange-meta-outlook
-%defattr(-,root,root)
-%doc README.TXT
-
 %files -n open-xchange-meta-cpanel
 %defattr(-,root,root)
 %doc README.TXT
 
+%files -n open-xchange-linkedin
+%defattr(-,root,root)
+%doc README.TXT
+
 %changelog
+* Tue Feb 20 2018 Carsten Hoeger <choeger@open-xchange.com>
+Third preview of 7.10.0 release
+* Fri Feb 02 2018 Carsten Hoeger <choeger@open-xchange.com>
+Second preview for 7.10.0 release
+* Fri Dec 01 2017 Carsten Hoeger <choeger@open-xchange.com>
+First preview for 7.10.0 release
 * Thu Oct 12 2017 Carsten Hoeger <choeger@open-xchange.com>
 prepare for 7.10.0 release
 * Fri May 19 2017 Carsten Hoeger <choeger@open-xchange.com>

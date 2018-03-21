@@ -10,7 +10,7 @@ reseller and package to an advertisement config. Here reseller references the na
 entry can be replaced by the default value "default". For example if you have no reseller and two packages with the names "packA" and "packB" you use "default" for the reseller and either "packA" or "packB" for the package. 
 Which packages are available depends on the configuration of the middleware. Furmost it depends on which package scheme is configured. The scheme determines how the package will be retrieved. 
 The package scheme can be configured per reseller via the 
-[com.openexchange.advertisement.[reseller].packageScheme](/components/middleware/config{{ site.baseurl }}/index.html#com.openexchange.advertisement.[reseller].packageScheme) property. 
+[com.openexchange.advertisement.[reseller].packageScheme](/components/middleware/config{{ site.baseurl }}/index.html#com.openexchange.advertisement.[reseller].packageScheme) property. 
 There are currently three possible package schemes:
 
 #### Global
@@ -39,8 +39,8 @@ For the normal HTTP API a new module named "advertisement" was introduced. For m
 
 This section describes the requests which are used by an admin tool to manage the configurations. These requests using basic auth authorization. Therefore in order to use them one has to configure the basic auth credentials first:
 
-[com.openexchange.rest.services.basic-auth.login](/components/middleware/config{{ site.baseurl }}/index.html#com.openexchange.rest.services.basic-auth.login)  
-[com.openexchange.rest.services.basic-auth.password](/components/middleware/config{{ site.baseurl }}/index.html#com.openexchange.rest.services.basic-auth.password)
+[com.openexchange.rest.services.basic-auth.login](/components/middleware/config{{ site.baseurl }}/index.html#com.openexchange.rest.services.basic-auth.login)  
+[com.openexchange.rest.services.basic-auth.password](/components/middleware/config{{ site.baseurl }}/index.html#com.openexchange.rest.services.basic-auth.password)
 
 ### Set configuration by user id and context id
 

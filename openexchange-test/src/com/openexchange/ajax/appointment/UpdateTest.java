@@ -50,7 +50,9 @@
 package com.openexchange.ajax.appointment;
 
 import static com.openexchange.groupware.calendar.TimeTools.D;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
@@ -133,7 +135,7 @@ public class UpdateTest extends AppointmentTest {
         Appointment appointmentObj = CalendarTestManager.createAppointmentObject(appointmentFolderId, "testUpdateRecurrence", new Date(startTime), new Date(endTime));
         appointmentObj.setRecurrenceType(Appointment.DAILY);
         appointmentObj.setInterval(1);
-        appointmentObj.setOrganizer(testUser.getUser());
+        appointmentObj.setOrganizer(getClient().getValues().getDefaultAddress());
         appointmentObj.setUntil(until);
         appointmentObj.setIgnoreConflicts(true);
 
@@ -149,7 +151,7 @@ public class UpdateTest extends AppointmentTest {
         appointmentObj = CalendarTestManager.createAppointmentObject(appointmentFolderId, "testUpdateRecurrence - exception", new Date(newStartTime), new Date(newEndTime));
         appointmentObj.setRecurrencePosition(changeExceptionPosition);
         appointmentObj.setIgnoreConflicts(true);
-        appointmentObj.setOrganizer(testUser.getUser());
+        appointmentObj.setOrganizer(getClient().getValues().getDefaultAddress());
         appointmentObj.setLastModified(new Date(Long.MAX_VALUE));
         appointmentObj.setObjectID(objectId);
 
@@ -188,7 +190,6 @@ public class UpdateTest extends AppointmentTest {
 
         appointmentObj.setStartDate(calendarStart.getTime());
         appointmentObj.setEndDate(calendarEnd.getTime());
-        appointmentObj.setOrganizer(testUser.getUser());
 
         final Calendar recurrenceStart = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
         final int startDay = calendarStart.get(Calendar.DAY_OF_MONTH);

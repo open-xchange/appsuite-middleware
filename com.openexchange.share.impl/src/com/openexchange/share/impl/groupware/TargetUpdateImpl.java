@@ -66,6 +66,7 @@ import com.openexchange.folderstorage.FolderService;
 import com.openexchange.folderstorage.FolderServiceDecorator;
 import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.Permission;
+import com.openexchange.folderstorage.SetterAwareFolder;
 import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
@@ -124,19 +125,11 @@ public class TargetUpdateImpl extends AbstractTargetUpdate {
         for (TargetProxy proxy : proxies) {
             FolderTargetProxy folderTargetProxy = ((FolderTargetProxy) proxy);
             UserizedFolder folder = folderTargetProxy.getFolder();
-            AbstractFolder toUpdate = new AbstractFolder() {
-
-                private static final long serialVersionUID = -842650996626709735L;
-
-                @Override
-                public boolean isGlobalID() {
-                    return false;
-                }
-            };
-            toUpdate.setTreeID(folder.getTreeID());
-            toUpdate.setPermissions(folder.getPermissions());
-            toUpdate.setID(folder.getID());
-            folderService.updateFolder(toUpdate, folder.getLastModifiedUTC(), parameters.getSession(), parameters.getFolderServiceDecorator());
+            FolderUpdate folderUpdate = new FolderUpdate();
+            folderUpdate.setTreeID(folder.getTreeID());
+            folderUpdate.setID(folder.getID());
+            folderUpdate.setPermissions(folder.getPermissions());
+            folderService.updateFolder(folderUpdate, folder.getLastModifiedUTC(), parameters.getSession(), parameters.getFolderServiceDecorator());
 
             if (folder.getContentType().getModule() == FolderObject.INFOSTORE) {
                 // Add permission to sub folders
@@ -170,9 +163,10 @@ public class TargetUpdateImpl extends AbstractTargetUpdate {
         List<Permission> filtered = new ArrayList<>(added.size());
         for (Permission add : added) {
             if(add.getType() == FolderPermissionType.LEGATOR) {
-                add.setPermissionLegator(folder.getParentID());
-                add.setType(FolderPermissionType.INHERITED);
-                filtered.add(add);
+                Permission clone = (Permission) add.clone();
+                clone.setPermissionLegator(folder.getParentID());
+                clone.setType(FolderPermissionType.INHERITED);
+                filtered.add(clone);
             }
         }
 
@@ -216,18 +210,10 @@ public class TargetUpdateImpl extends AbstractTargetUpdate {
         FolderService folderService = getFolderService();
         for (TargetProxy proxy : proxies) {
             UserizedFolder folder = ((FolderTargetProxy) proxy).getFolder();
-            AbstractFolder toTouch = new AbstractFolder() {
-
-                private static final long serialVersionUID = -842650996626709735L;
-
-                @Override
-                public boolean isGlobalID() {
-                    return false;
-                }
-            };
-            toTouch.setTreeID(folder.getTreeID());
-            toTouch.setID(folder.getID());
-            folderService.updateFolder(toTouch, folder.getLastModifiedUTC(), parameters.getSession(), parameters.getFolderServiceDecorator());
+            FolderUpdate folderUpdate = new FolderUpdate();
+            folderUpdate.setTreeID(folder.getTreeID());
+            folderUpdate.setID(folder.getID());
+            folderService.updateFolder(folderUpdate, folder.getLastModifiedUTC(), parameters.getSession(), parameters.getFolderServiceDecorator());
         }
     }
 
@@ -314,6 +300,38 @@ public class TargetUpdateImpl extends AbstractTargetUpdate {
 
     private <T> T getService(Class<T> clazz) throws OXException {
         return Tools.requireService(clazz, services);
+    }
+
+    private static final class FolderUpdate extends AbstractFolder implements SetterAwareFolder {
+
+        private static final long serialVersionUID = -8615729293509593034L;
+
+        private boolean containsSubscribed;
+
+        /**
+         * Initializes a new {@link FolderUpdate}.
+         */
+        public FolderUpdate() {
+            super();
+            subscribed = true;
+        }
+
+        @Override
+        public boolean isGlobalID() {
+            return false;
+        }
+
+        @Override
+        public void setSubscribed(boolean subscribed) {
+            super.setSubscribed(subscribed);
+            containsSubscribed = true;
+        }
+
+        @Override
+        public boolean containsSubscribed() {
+            return containsSubscribed;
+        }
+
     }
 
 }

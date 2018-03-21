@@ -1,0 +1,102 @@
+feature_name: ICal Calendar Provider
+properties:
+    - key: com.openexchange.calendar.ical.refreshInterval
+      description: |
+        Defines the default refresh interval of the calendar feeds.
+      defaultValue: 10080
+      version: 7.10.0
+      reloadable: true
+      configcascadeAware: true
+      related: 
+      file: calendar.properties
+      packageName: open-xchange-core
+      tags: ["Calendar", "ICal Calendar Provider"]
+    - key: com.openexchange.calendar.ical.retryAfterErrorInterval
+      description: |
+        Defines the default timeout interval (in seconds) for contacting the external resource after an error occurred.
+      defaultValue: 3600
+      version: 7.10.0
+      reloadable: true
+      configcascadeAware: true
+      related: 
+      file: calendar.properties
+      packageName: open-xchange-core
+      tags: ["Calendar", "ICal Calendar Provider"]
+    - key: com.openexchange.calendar.ical.blacklistedHosts
+      description: |
+        Defines hosts that are blacklisted which means that they are not allowed to be accessed.
+      defaultValue: 127.0.0.1-127.255.255.255,localhost
+      version: 7.10.0
+      reloadable: true
+      configcascadeAware: true
+      related: 
+      file: calendar.properties
+      packageName: open-xchange-core
+      tags: ["Calendar", "ICal Calendar Provider"]
+    - key: com.openexchange.calendar.ical.schemes
+      description: |
+        Defines schemes that are allowed to access a feed. All given schemes have to support port 80 or 443.
+      defaultValue: http, https, webcal
+      version: 7.10.0
+      reloadable: true
+      configcascadeAware: true
+      related: 
+      file: calendar.properties
+      packageName: open-xchange-core
+      tags: ["Calendar", "ICal Calendar Provider"]
+    - key: com.openexchange.calendar.ical.maxFileSize
+      description: |
+        Defines the maximum size of an ICal file that will be allowed for processing. Feeds that exceed this limit cannot be subscribed.
+      defaultValue: 5MB
+      version: 7.10.0
+      reloadable: true
+      configcascadeAware: true
+      related: 
+      file: calendar.properties
+      packageName: open-xchange-core
+      tags: ["Calendar", "ICal Calendar Provider"]
+    - key: com.openexchange.calendar.ical.maxConnections
+      description: |
+        Defines the maximum possible number of connections used to access the calendar feed.
+      defaultValue: 1000
+      version: 7.10.0
+      reloadable: true
+      configcascadeAware: true
+      related: 
+      file: calendar.properties
+      packageName: open-xchange-core
+      tags: ["Calendar", "ICal Calendar Provider"]
+    - key: com.openexchange.calendar.ical.maxConnectionsPerRoute
+      description: |
+        Defines the maximum possible number of connections per host used to access the calendar feed.
+      defaultValue: 100
+      version: 7.10.0
+      reloadable: true
+      configcascadeAware: true
+      related: 
+      file: calendar.properties
+      packageName: open-xchange-core
+      tags: ["Calendar", "ICal Calendar Provider"]
+    - key: com.openexchange.calendar.ical.connectionTimeout
+      description: |
+        Defines the connection timeout.
+      defaultValue: 5000
+      version: 7.10.0
+      reloadable: true
+      configcascadeAware: true
+      related: 
+      file: calendar.properties
+      packageName: open-xchange-core
+      tags: ["Calendar", "ICal Calendar Provider"]
+    - key: com.openexchange.calendar.ical.socketReadTimeout
+      description: |
+        Defines the timeout on waiting to read data
+      defaultValue: 30000
+      version: 7.10.0
+      reloadable: true
+      configcascadeAware: true
+      related: 
+      file: calendar.properties
+      packageName: open-xchange-core
+      tags: ["Calendar", "ICal Calendar Provider"]
+      

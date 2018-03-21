@@ -116,9 +116,15 @@ public final class SieveHandlerFactory {
                     break;
                 case USER:
                     user = getUser(creds);
+                    if (user.isGuest()) {
+                        throw MailFilterExceptionCode.INVALID_USER_SPECIFIED.create();
+                    }
                     String mailServerURL = user.getImapServer();
                     try {
                         URI uri = URIParser.parse(IDNA.toASCII(mailServerURL), URIDefaults.IMAP);
+                        if (null == uri) {
+                            throw MailFilterExceptionCode.UNABLE_TO_EXTRACT_SIEVE_SERVER_URI.create();
+                        }
                         sieveServer = uri.getHost();
                     } catch (final URISyntaxException e) {
                         throw MailFilterExceptionCode.NO_SERVERNAME_IN_SERVERURL.create(e, mailServerURL);

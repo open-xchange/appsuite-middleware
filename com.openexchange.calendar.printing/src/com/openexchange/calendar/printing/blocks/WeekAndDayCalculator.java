@@ -53,15 +53,15 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
-import com.openexchange.calendar.printing.CPAppointment;
 import com.openexchange.calendar.printing.CPCalendar;
+import com.openexchange.calendar.printing.CPEvent;
 
 /**
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
 public abstract class WeekAndDayCalculator {
 
-    private CPCalendar calendar = new CPCalendar();
+    private CPCalendar calendar = CPCalendar.getCalendar();
 
     public void setCalendar(CPCalendar calendar) {
         this.calendar = calendar;
@@ -161,22 +161,22 @@ public abstract class WeekAndDayCalculator {
         return Integer.valueOf(calendar.get(Calendar.DAY_OF_WEEK));
     }
 
-    public boolean isOnTwoDays(CPAppointment appointment) {
+    public boolean isOnTwoDays(CPEvent appointment) {
         return isOnDifferentDays(appointment.getStartDate(), appointment.getEndDate());
     }
 
-    public boolean isInTwoWeeks(CPAppointment appointment) {
+    public boolean isInTwoWeeks(CPEvent appointment) {
         return isInDifferentWeeks(appointment.getStartDate(), appointment.getEndDate());
     }
 
-    public boolean isInTwoMonths(CPAppointment appointment) {
+    public boolean isInTwoMonths(CPEvent appointment) {
         return isInDifferentMonths(appointment.getStartDate(), appointment.getEndDate());
     }
 
     /**
      * @return true if start or end date are in work week, false otherwise (also if not set at all)
      */
-    public boolean isWorkWeekAppointment(CPAppointment appointment) {
+    public boolean isWorkWeekAppointment(CPEvent appointment) {
         if (appointment.getStartDate() == null) {
             return false;
         }

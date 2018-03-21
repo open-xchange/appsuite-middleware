@@ -40,13 +40,26 @@
 
 package com.sun.mail.util;
 
-import java.io.*;
-import java.net.*;
-import java.util.concurrent.*;
+import java.io.FileDescriptor;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.lang.reflect.Method;
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
+import java.net.Socket;
+import java.net.SocketAddress;
+import java.net.SocketException;
+import java.net.SocketOption;
+import java.nio.channels.SocketChannel;
 import java.util.Collections;
 import java.util.Set;
-import java.nio.channels.SocketChannel;
-import java.lang.reflect.*;
+import java.util.concurrent.Callable;
+import java.util.concurrent.Executors;
+import java.util.concurrent.RejectedExecutionException;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 
 /**
  * A special Socket that uses a ScheduledExecutorService to

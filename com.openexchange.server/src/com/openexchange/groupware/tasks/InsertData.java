@@ -49,10 +49,10 @@
 
 package com.openexchange.groupware.tasks;
 
+import static com.openexchange.database.Databases.autocommit;
+import static com.openexchange.database.Databases.rollback;
 import static com.openexchange.groupware.tasks.StorageType.ACTIVE;
 import static com.openexchange.java.Autoboxing.I;
-import static com.openexchange.tools.sql.DBUtils.autocommit;
-import static com.openexchange.tools.sql.DBUtils.rollback;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Set;

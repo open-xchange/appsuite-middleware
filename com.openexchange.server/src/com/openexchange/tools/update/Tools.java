@@ -49,8 +49,8 @@
 
 package com.openexchange.tools.update;
 
-import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.database.Databases.closeSQLStuff;
+import static com.openexchange.java.Autoboxing.I;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;

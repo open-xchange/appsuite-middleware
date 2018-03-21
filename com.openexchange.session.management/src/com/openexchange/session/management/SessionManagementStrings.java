@@ -63,6 +63,12 @@ public class SessionManagementStrings implements LocalizableStrings {
     /** The string constant for unknown location; <code>"unknown location"</code> */
     public static final String UNKNOWN_LOCATION = "unknown location";
 
+    // Unknown device
+    public static final String UNKNOWN_DEVICE = "Unknown device";
+
+    // Intranet
+    public static final String INTRANET_LOCATION = "Intranet";
+
     private SessionManagementStrings() {
         super();
     }

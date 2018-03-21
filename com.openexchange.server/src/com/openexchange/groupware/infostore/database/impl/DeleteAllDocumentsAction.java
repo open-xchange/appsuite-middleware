@@ -77,7 +77,7 @@ public class DeleteAllDocumentsAction extends AbstractDocumentListAction {
 
                 @Override
                 public void fillStatement() throws SQLException {
-                    fillStmt(stmt, getQueryCatalog().getWritableDocumentFields(), doc, Integer.valueOf(getContext().getContextId()));
+                    fillStmt(stmt, getQueryCatalog().getWritableDocumentFields(), doc, Long.valueOf(System.currentTimeMillis()), Integer.valueOf(getContext().getContextId()));
                 }
 
             };

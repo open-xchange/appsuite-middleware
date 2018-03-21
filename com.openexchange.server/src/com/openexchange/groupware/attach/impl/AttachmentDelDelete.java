@@ -52,11 +52,11 @@ package com.openexchange.groupware.attach.impl;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.delete.ContextDelete;
 import com.openexchange.groupware.delete.DeleteEvent;
 import com.openexchange.groupware.delete.DeleteFailedExceptionCodes;
-import com.openexchange.tools.sql.DBUtils;
 
 /**
  * AttachmentDelDelete
@@ -78,7 +78,7 @@ public class AttachmentDelDelete extends ContextDelete {
         } catch (final SQLException e) {
             throw DeleteFailedExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
-            DBUtils.closeSQLStuff(stmt);
+            Databases.closeSQLStuff(stmt);
         }
     }
 }

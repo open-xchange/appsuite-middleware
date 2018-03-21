@@ -46,6 +46,7 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+
 package com.openexchange.find.basic;
 
 import java.util.concurrent.atomic.AtomicReference;
@@ -114,7 +115,7 @@ public class Services {
     public static ConfigurationService getConfigurationService() throws OXException {
         return requireService(ConfigurationService.class);
     }
-    
+
     public static LeanConfigurationService getLeanConfigurationService() throws OXException {
         return requireService(LeanConfigurationService.class);
     }
@@ -137,6 +138,10 @@ public class Services {
             throw ServiceExceptionCode.absentService(clazz);
         }
         return service;
+    }
+
+    public static <T> T optionalService(Class<T> clazz) {
+        return getServiceLookup().getOptionalService(clazz);
     }
 
     private static ServiceLookup getServiceLookup() {

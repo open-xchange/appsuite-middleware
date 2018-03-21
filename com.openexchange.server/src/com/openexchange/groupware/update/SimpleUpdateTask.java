@@ -51,8 +51,8 @@ package com.openexchange.groupware.update;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
-import com.openexchange.tools.sql.DBUtils;
 
 /**
  * A {@link SimpleUpdateTask} handles connection management for update tasks. Implement the {@link #perform(Connection)} method
@@ -84,9 +84,9 @@ public abstract class SimpleUpdateTask extends UpdateTaskAdapter {
             throw UpdateExceptionCodes.OTHER_PROBLEM.create(e, e.getMessage());
         } finally {
             if (rollback) {
-                DBUtils.rollback(con);
+                Databases.rollback(con);
             }
-            DBUtils.autocommit(con);
+            Databases.autocommit(con);
         }
     }
 

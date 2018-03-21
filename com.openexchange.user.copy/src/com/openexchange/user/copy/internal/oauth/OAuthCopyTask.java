@@ -59,6 +59,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.id.IDGeneratorService;
@@ -83,7 +84,7 @@ public class OAuthCopyTask implements CopyUserTaskService {
     private static final String SELECT_ACCOUNTS =
         "SELECT " +
             "id, displayName, accessToken, accessSecret, " +
-            "serviceId FROM oauthAccounts " +
+            "serviceId, scope FROM oauthAccounts " +
         "WHERE " +
             "cid = ? " +
         "AND " +
@@ -92,9 +93,9 @@ public class OAuthCopyTask implements CopyUserTaskService {
     private static final String INSERT_ACCOUNTS =
         "INSERT INTO " +
             "oauthAccounts " +
-            "(cid, user, id, displayName, accessToken, accessSecret, serviceId) " +
+            "(cid, user, id, displayName, accessToken, accessSecret, serviceId, scope) " +
         "VALUES " +
-            "(?, ?, ?, ?, ?, ?, ?)";
+            "(?, ?, ?, ?, ?, ?, ?, ?)";
 
     private final IDGeneratorService idService;
 
@@ -167,7 +168,7 @@ public class OAuthCopyTask implements CopyUserTaskService {
     }
 
     public Map<Integer, Integer> exchangeOAuthIds(final Connection con, final List<OAuthAccount> accounts, final Context ctx) throws OXException {
-        final Map<Integer, Integer> mapping = new HashMap<Integer, Integer>();
+        final Map<Integer, Integer> mapping = new HashMap<>();
         for (final OAuthAccount account : accounts) {
             try {
                 final int oldId = account.getId();
@@ -184,7 +185,7 @@ public class OAuthCopyTask implements CopyUserTaskService {
     }
 
     List<OAuthAccount> loadOAuthAccountsFromDB(final Connection con, final int uid, final int cid) throws OXException {
-        final List<OAuthAccount> accounts = new ArrayList<OAuthAccount>();
+        final List<OAuthAccount> accounts = new ArrayList<>();
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
@@ -201,13 +202,13 @@ public class OAuthCopyTask implements CopyUserTaskService {
                 account.setAccessToken(rs.getString(i++));
                 account.setAccessSecret(rs.getString(i++));
                 account.setServiceId(rs.getString(i++));
-
+                account.setScope(rs.getString(i++));
                 accounts.add(account);
             }
         } catch (final SQLException e) {
             throw UserCopyExceptionCodes.SQL_PROBLEM.create(e);
         } finally {
-            DBUtils.closeSQLStuff(rs, stmt);
+            Databases.closeSQLStuff(rs, stmt);
         }
 
         return accounts;
@@ -226,7 +227,7 @@ public class OAuthCopyTask implements CopyUserTaskService {
                 stmt.setString(i++, account.getAccessToken());
                 stmt.setString(i++, account.getAccessSecret());
                 stmt.setString(i++, account.getServiceId());
-
+                stmt.setString(i++, account.getScope());
                 stmt.addBatch();
             }
 
@@ -234,7 +235,7 @@ public class OAuthCopyTask implements CopyUserTaskService {
         } catch (final SQLException e) {
             throw UserCopyExceptionCodes.SQL_PROBLEM.create(e);
         } finally {
-            DBUtils.closeSQLStuff(stmt);
+            Databases.closeSQLStuff(stmt);
         }
     }
 }

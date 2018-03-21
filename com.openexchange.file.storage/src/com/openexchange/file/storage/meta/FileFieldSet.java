@@ -54,6 +54,7 @@ import java.util.List;
 import java.util.Map;
 import com.openexchange.file.storage.AbstractFileFieldSwitcher;
 import com.openexchange.file.storage.FileStorageObjectPermission;
+import com.openexchange.file.storage.FolderPath;
 
 /**
  * {@link FileFieldSet}
@@ -88,7 +89,10 @@ public class FileFieldSet extends AbstractFileFieldSwitcher {
 
     @Override
     public Object created(final Object... args) {
-        md(args).setCreated(date(1, args));
+        Date date = date(1, args);
+        if (date != null) {
+            md(args).setCreated(date);
+        }
         return ret(args);
     }
 
@@ -147,13 +151,19 @@ public class FileFieldSet extends AbstractFileFieldSwitcher {
 
     @Override
     public Object lastModified(final Object... args) {
-        md(args).setLastModified(date(1, args));
+        Date date = date(1, args);
+        if(date != null) {
+            md(args).setLastModified(date);
+        }
         return ret(args);
     }
 
     @Override
     public Object lastModifiedUtc(final Object... args) {
-        md(args).setLastModified(date(1, args));
+        Date date = date(1, args);
+        if(date != null) {
+            md(args).setLastModified(date);
+        }
         return ret(args);
     }
 
@@ -208,19 +218,29 @@ public class FileFieldSet extends AbstractFileFieldSwitcher {
 
     @Override
     public Object meta(Object... args) {
-        md(args).setMeta((Map<String, Object>) args[1]);
+        if(args[1] instanceof Map<?,?>) {
+            md(args).setMeta((Map<String, Object>) args[1]);
+        }
         return null;
     }
 
     @Override
     public Object objectPermissions(Object... args) {
-        md(args).setObjectPermissions((List<FileStorageObjectPermission>) args[1]);
+        if(args[1] instanceof List<?>) {
+            md(args).setObjectPermissions((List<FileStorageObjectPermission>) args[1]);
+        }
         return null;
     }
 
     @Override
     public Object shareable(Object... args) {
         md(args).setShareable(bool(1, args));
+        return null;
+    }
+
+    @Override
+    public Object origin(Object... args) {
+        md(args).setOrigin((FolderPath) args[1]);
         return null;
     }
 

@@ -61,7 +61,7 @@ import com.openexchange.hazelcast.serialization.AbstractCustomPortable;
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.8.1
  */
-public class SMSBucket extends AbstractCustomPortable {
+public class SMSBucket extends AbstractCustomPortable implements Cloneable {
 
     private static final int SMS_BUCKET_ID = 500;
 

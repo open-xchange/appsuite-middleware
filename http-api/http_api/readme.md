@@ -119,9 +119,9 @@ After defining the parameter you can use it in a request's `parameters` section 
 ```
 
 ## Add a new request
-To add a new request, first navigate to the folder of the module the request belongs to. As an example, this might be
-_http_api/paths/08-groups/_. **All requests are stored in a corresponding module folder inside the _paths/_ folder.**
-It is possible that the module folder is divided into several subfolders, too (for an example see _http_api/paths/30-messaging/_).
+To add a new request, first navigate to the folder of the module the request belongs to in the _paths_ directory. As an example, this might be
+_http_api/paths/groups/_. **All requests are stored in a corresponding module folder inside the _paths/_ folder.**
+It is possible that the module folder is divided into several subfolders, too (for an example see _http_api/paths/messaging/_).
 Nevertheless, usually the request files are stored directly in the module's folder. Back to the example, we now want to add
 a `/group?action=has` request. To do so, add a new empty YAML file _HasRequest.yaml_ to the corresponding module folder. A naming
 convention for request files is to use the request's action name with a starting uppercase letter followed by "Request".
@@ -453,8 +453,7 @@ properties:
 ## Add a new module
 If you want to add a new module open the base _index.yaml_ of folder _http_api/_ and go to section `tags`. Then
 add a new list element (`-`) to the global tags list and specify the tag name and a description.  
-Afterwards go to _http_api/paths/_ and add a new subfolder for the module. The naming convention is
-_modulenumber-modulename_. At last go to _http_api/definitions/_, add a subfolder with the name of the module
+Afterwards go to _http_api/paths/_ and add a new subfolder for the module. At last go to _http_api/definitions/_, add a subfolder with the name of the module
 and open the _index.yaml_ in the _definitions/_ folder. Add a new section introduced with
 
 ```yaml

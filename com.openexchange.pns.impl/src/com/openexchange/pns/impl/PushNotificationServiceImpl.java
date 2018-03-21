@@ -49,7 +49,8 @@
 
 package com.openexchange.pns.impl;
 
-import static com.openexchange.java.Autoboxing.*;
+import static com.openexchange.java.Autoboxing.Coll2i;
+import static com.openexchange.java.Autoboxing.I;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;

@@ -73,6 +73,7 @@ import com.openexchange.folderstorage.ContentTypeDiscoveryService;
 import com.openexchange.folderstorage.FolderService;
 import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.cache.osgi.CacheFolderStorageActivator;
+import com.openexchange.folderstorage.calendar.osgi.CalendarFolderStorageActivator;
 import com.openexchange.folderstorage.database.osgi.DatabaseFolderStorageActivator;
 import com.openexchange.folderstorage.filestorage.osgi.FileStorageFolderStorageActivator;
 import com.openexchange.folderstorage.internal.ConfiguredDefaultPermissions;
@@ -88,6 +89,7 @@ import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.objectusecount.ObjectUseCountService;
 import com.openexchange.osgi.Tools;
 import com.openexchange.share.ShareService;
+import com.openexchange.share.groupware.ModuleSupport;
 import com.openexchange.share.notification.ShareNotificationService;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.user.UserService;
@@ -212,6 +214,7 @@ public final class FolderStorageActivator implements BundleActivator {
     private static final Class<?>[] TRACKED_SERVICES = new Class<?>[] {
         ShareService.class,
         ShareNotificationService.class,
+        ModuleSupport.class,
         UserService.class,
         DatabaseService.class,
         UserPermissionService.class,
@@ -260,11 +263,12 @@ public final class FolderStorageActivator implements BundleActivator {
             }
 
             // Start other activators
-            activators = new ArrayList<BundleActivator>(8);
+            activators = new ArrayList<BundleActivator>(9);
             activators.add(new DatabaseFolderStorageActivator()); // Database impl
             activators.add(new MailFolderStorageActivator()); // Mail impl
             activators.add(new MessagingFolderStorageActivator()); // Messaging impl
             activators.add(new FileStorageFolderStorageActivator()); // File storage impl
+            activators.add(new CalendarFolderStorageActivator()); // Calendar storage impl
             activators.add(new CacheFolderStorageActivator()); // Cache impl
             activators.add(new OutlookFolderStorageActivator()); // MS Outlook storage activator
             activators.add(new VirtualFolderStorageActivator()); // Virtual storage activator

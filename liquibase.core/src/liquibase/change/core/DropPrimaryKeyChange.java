@@ -1,15 +1,18 @@
 package liquibase.change.core;
 
-import liquibase.change.*;
+import java.util.ArrayList;
+import java.util.List;
+import liquibase.change.AbstractChange;
+import liquibase.change.ChangeMetaData;
+import liquibase.change.ColumnConfig;
+import liquibase.change.DatabaseChange;
+import liquibase.change.DatabaseChangeProperty;
 import liquibase.database.Database;
 import liquibase.database.core.SQLiteDatabase;
 import liquibase.database.core.SQLiteDatabase.AlterTableVisitor;
-import liquibase.structure.core.Index;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.DropPrimaryKeyStatement;
-
-import java.util.ArrayList;
-import java.util.List;
+import liquibase.structure.core.Index;
 
 /**
  * Removes an existing primary key.

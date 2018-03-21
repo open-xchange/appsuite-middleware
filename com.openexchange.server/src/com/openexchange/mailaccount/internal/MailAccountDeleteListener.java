@@ -49,12 +49,7 @@
 
 package com.openexchange.mailaccount.internal;
 
-import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
-import gnu.trove.list.TIntList;
-import gnu.trove.list.array.TIntArrayList;
-import gnu.trove.procedure.TIntErrorAwareAbstractProcedure;
-import gnu.trove.set.TIntSet;
-import gnu.trove.set.hash.TIntHashSet;
+import static com.openexchange.database.Databases.closeSQLStuff;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -72,6 +67,11 @@ import com.openexchange.groupware.delete.DeleteListener;
 import com.openexchange.mailaccount.MailAccountExceptionCodes;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.server.services.ServerServiceRegistry;
+import gnu.trove.list.TIntList;
+import gnu.trove.list.array.TIntArrayList;
+import gnu.trove.procedure.TIntErrorAwareAbstractProcedure;
+import gnu.trove.set.TIntSet;
+import gnu.trove.set.hash.TIntHashSet;
 
 /**
  * {@link MailAccountDeleteListener} - {@link DeleteListener} for mail account storage.

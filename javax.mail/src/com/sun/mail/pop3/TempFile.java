@@ -40,7 +40,8 @@
 
 package com.sun.mail.pop3;
 
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
 
 /**
  * A temporary file used to cache POP3 messages.

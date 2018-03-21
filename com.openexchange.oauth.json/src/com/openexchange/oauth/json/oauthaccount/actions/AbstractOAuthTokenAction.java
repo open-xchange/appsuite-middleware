@@ -90,10 +90,10 @@ import com.openexchange.oauth.OAuthServiceMetaData;
 import com.openexchange.oauth.json.AbstractOAuthAJAXActionService;
 import com.openexchange.oauth.json.Services;
 import com.openexchange.oauth.json.oauthaccount.AccountField;
-import com.openexchange.oauth.scope.OXScope;
-import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.oauth.scope.OAuthScope;
 import com.openexchange.oauth.scope.OAuthScopeRegistry;
+import com.openexchange.oauth.scope.OXScope;
+import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 

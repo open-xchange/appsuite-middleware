@@ -57,8 +57,8 @@ import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
 import com.openexchange.oauth.provider.rmi.client.ClientDataDto;
 import com.openexchange.oauth.provider.rmi.client.ClientDto;
 import com.openexchange.oauth.provider.rmi.client.IconDto;
-import com.openexchange.oauth.provider.rmi.client.RemoteClientManagementException;
 import com.openexchange.oauth.provider.rmi.client.RemoteClientManagement;
+import com.openexchange.oauth.provider.rmi.client.RemoteClientManagementException;
 
 
 /**

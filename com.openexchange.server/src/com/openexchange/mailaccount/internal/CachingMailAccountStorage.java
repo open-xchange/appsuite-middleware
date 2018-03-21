@@ -49,9 +49,9 @@
 
 package com.openexchange.mailaccount.internal;
 
+import static com.openexchange.database.Databases.autocommit;
+import static com.openexchange.database.Databases.rollback;
 import static com.openexchange.mail.utils.ProviderUtility.toSocketAddrString;
-import static com.openexchange.tools.sql.DBUtils.autocommit;
-import static com.openexchange.tools.sql.DBUtils.rollback;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -336,8 +336,8 @@ final class CachingMailAccountStorage implements MailAccountStorageService {
     }
 
     @Override
-    public boolean incrementFailedMailAuthCount(int accountId, int userId, int contextId) throws OXException {
-        boolean disabled = delegate.incrementFailedMailAuthCount(accountId, userId, contextId);
+    public boolean incrementFailedMailAuthCount(int accountId, int userId, int contextId, Exception optReason) throws OXException {
+        boolean disabled = delegate.incrementFailedMailAuthCount(accountId, userId, contextId, optReason);
         if (disabled) {
             invalidateMailAccount(accountId, userId, contextId);
         }
@@ -345,8 +345,8 @@ final class CachingMailAccountStorage implements MailAccountStorageService {
     }
 
     @Override
-    public boolean incrementFailedTransportAuthCount(int accountId, int userId, int contextId) throws OXException {
-        boolean disabled = delegate.incrementFailedTransportAuthCount(accountId, userId, contextId);
+    public boolean incrementFailedTransportAuthCount(int accountId, int userId, int contextId, Exception optReason) throws OXException {
+        boolean disabled = delegate.incrementFailedTransportAuthCount(accountId, userId, contextId, optReason);
         if (disabled) {
             invalidateMailAccount(accountId, userId, contextId);
         }

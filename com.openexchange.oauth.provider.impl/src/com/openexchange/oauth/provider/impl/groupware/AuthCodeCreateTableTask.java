@@ -54,13 +54,13 @@ import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
 import com.openexchange.oauth.provider.exceptions.OAuthProviderExceptionCodes;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.tools.sql.DBUtils;
 
 /**
  * {@link AuthCodeCreateTableTask}
@@ -99,9 +99,9 @@ public class AuthCodeCreateTableTask extends UpdateTaskAdapter {
             throw UpdateExceptionCodes.OTHER_PROBLEM.create(e, e.getMessage());
         } finally {
             if (rollback) {
-                DBUtils.rollback(con);
+                Databases.rollback(con);
             }
-            DBUtils.autocommit(con);
+            Databases.autocommit(con);
         }
     }
 
@@ -122,7 +122,7 @@ public class AuthCodeCreateTableTask extends UpdateTaskAdapter {
         } catch (RuntimeException e) {
             throw OAuthProviderExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
-            DBUtils.closeSQLStuff(stmt);
+            Databases.closeSQLStuff(stmt);
         }
     }
 
@@ -138,7 +138,7 @@ public class AuthCodeCreateTableTask extends UpdateTaskAdapter {
             rs = metaData.getTables(null, null, table, new String[] { "TABLE" });
             return (rs.next() && rs.getString("TABLE_NAME").equalsIgnoreCase(table));
         } finally {
-            DBUtils.closeSQLStuff(rs);
+            Databases.closeSQLStuff(rs);
         }
     }
 

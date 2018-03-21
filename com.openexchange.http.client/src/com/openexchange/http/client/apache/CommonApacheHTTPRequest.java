@@ -166,7 +166,7 @@ public abstract class CommonApacheHTTPRequest<T extends HTTPGenericRequestBuilde
         } catch (URIException x) {
             throw OxHttpClientExceptionCodes.APACHE_CLIENT_ERROR.create(x.getMessage(), x);
         } catch (MalformedURLException e) {
-            throw OxHttpClientExceptionCodes.APACHE_CLIENT_ERROR.create(e.getMessage(), e);
+            throw OxHttpClientExceptionCodes.APACHE_CLIENT_ERROR.create(e, e.getMessage());
         }
     }
 

@@ -210,11 +210,11 @@ public interface IIMAPProperties extends IMailProperties {
     public String getSSLCipherSuites();
 
     /**
-     * Checks if attachment search is enabled.
-     * 
-     * @return <code>true</code> if attachment search is enabled for the underlying IMAP; otherwise <code>false</code>
+     * Checks if attachment marker is enabled.
+     *
+     * @return <code>true</code> if attachment marker is enabled for the underlying IMAP; otherwise <code>false</code>
      */
-    public boolean isAttachmentSearchEnabled();
+    public boolean isAttachmentMarkerEnabled();
 
     /**
      * Gets the map holding IMAP servers with new ACL Extension.

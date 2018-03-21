@@ -50,13 +50,13 @@
 package com.openexchange.filestore.sproxyd;
 
 import static com.openexchange.filestore.sproxyd.SproxydBufferedInputStream.getRelativeRange;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import java.util.Arrays;
 import org.junit.Test;
 import com.openexchange.filestore.sproxyd.chunkstorage.Chunk;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import static org.junit.Assert.*;
 
 /**
  * {@link SproxydBufferedInputStreamTest}

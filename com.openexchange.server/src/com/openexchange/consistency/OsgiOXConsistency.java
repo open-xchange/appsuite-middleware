@@ -72,6 +72,7 @@ import com.openexchange.database.provider.DBPoolProvider;
 import com.openexchange.exception.OXException;
 import com.openexchange.filestore.FileStorage;
 import com.openexchange.filestore.FileStorage2EntitiesResolver;
+import com.openexchange.filestore.FileStorageCodes;
 import com.openexchange.filestore.FileStorages;
 import com.openexchange.groupware.attach.AttachmentBase;
 import com.openexchange.groupware.attach.AttachmentExceptionCodes;
@@ -84,7 +85,6 @@ import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.sql.DBUtils;
 import edu.emory.mathcs.backport.java.util.Collections;
-import com.openexchange.filestore.FileStorageCodes;
 
 /**
  * Provides the integration of the consistency tool in the OSGi OX.

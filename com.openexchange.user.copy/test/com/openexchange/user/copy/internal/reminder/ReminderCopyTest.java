@@ -116,7 +116,7 @@ public class ReminderCopyTest extends AbstractUserCopyTest {
             stmt.setInt(2, 111);
             stmt.execute();
         } finally {
-            DBUtils.closeSQLStuff(stmt);
+            Databases.closeSQLStuff(stmt);
         }
     }
 
@@ -153,7 +153,7 @@ public class ReminderCopyTest extends AbstractUserCopyTest {
             e.printStackTrace();
             fail("A UserCopyException occurred.");
         } finally {
-            DBUtils.autocommit(dstCon);
+            Databases.autocommit(dstCon);
         }
         final ReminderObject[] copiedReminders = ReminderStorage.getInstance().selectReminder(dstCtx, dstCon, dstUserId, end);
         checkReminders(convertArrayToMap(srcReminders), convertArrayToMap(copiedReminders), mapping);

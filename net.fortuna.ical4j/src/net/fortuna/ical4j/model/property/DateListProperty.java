@@ -34,7 +34,6 @@ package net.fortuna.ical4j.model.property;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.text.ParseException;
-
 import net.fortuna.ical4j.model.DateList;
 import net.fortuna.ical4j.model.Parameter;
 import net.fortuna.ical4j.model.ParameterList;

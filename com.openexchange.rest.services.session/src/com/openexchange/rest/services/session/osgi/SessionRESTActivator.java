@@ -49,6 +49,7 @@
 
 package com.openexchange.rest.services.session.osgi;
 
+import com.openexchange.ajax.requesthandler.crypto.CryptographicServiceAuthenticationFactory;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.rest.services.session.SessionRESTService;
 import com.openexchange.sessiond.SessiondService;
@@ -60,6 +61,13 @@ import com.openexchange.sessiond.SessiondService;
  */
 public class SessionRESTActivator extends HousekeepingActivator {
 
+    /**
+     * Initializes a new {@link SessionRESTActivator}.
+     */
+    public SessionRESTActivator() {
+        super();
+    }
+
     @Override
     protected Class<?>[] getNeededServices() {
         return new Class<?>[] { SessiondService.class };
@@ -67,6 +75,11 @@ public class SessionRESTActivator extends HousekeepingActivator {
 
     @Override
     protected void startBundle() throws Exception {
+        // Track optional CryptographicServiceAuthenticationFactory service
+        trackService(CryptographicServiceAuthenticationFactory.class);
+        openTrackers();
+
+        // Register session REST end-point
         registerService(SessionRESTService.class, new SessionRESTService(this));
     }
 

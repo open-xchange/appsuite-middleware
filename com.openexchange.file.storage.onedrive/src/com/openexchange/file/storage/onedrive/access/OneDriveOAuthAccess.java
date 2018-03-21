@@ -212,7 +212,7 @@ public class OneDriveOAuthAccess extends AbstractOAuthAccess {
         return scribeOAuthService.isExpired(liveconnectOAuthAccount.getToken());
     }
 
-    private class OneDriveReauthorizeClusterTask extends AbstractReauthorizeClusterTask implements ClusterTask<OAuthAccount> {
+    private static class OneDriveReauthorizeClusterTask extends AbstractReauthorizeClusterTask implements ClusterTask<OAuthAccount> {
 
         /**
          * Initialises a new {@link OneDriveOAuthAccess.OneDriveReauthorizeClusterTask}.
@@ -272,7 +272,7 @@ public class OneDriveOAuthAccess extends AbstractOAuthAccess {
             }
             return OAuthExceptionCodes.INVALID_ACCOUNT.create(e, new Object[0]);
         }
-        return OAuthExceptionCodes.OAUTH_ERROR.create(exMessage, e);
+        return OAuthExceptionCodes.OAUTH_ERROR.create(e, exMessage);
     }
 
     private static String parseErrorFrom(String message) {

@@ -183,6 +183,9 @@ public final class FileStorageExceptionMessages implements LocalizableStrings {
     // A file with that name already exists.
     public static final String FILE_ALREADY_EXISTS = "A file with that name already exists.";
 
+    // Restore from trash is not supported.
+    public static final String NO_RESTORE_SUPPORT_MSG = "Restore from trash is not supported";
+
     /**
      * Initializes a new {@link OXExceptionMessages}.
      */

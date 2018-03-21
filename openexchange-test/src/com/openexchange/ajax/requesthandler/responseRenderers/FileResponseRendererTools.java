@@ -138,7 +138,7 @@ public class FileResponseRendererTools {
     }
 
     private static byte[] readFile(String filename) throws IOException {
-        String testDataDir = AJAXConfig.getProperty(AJAXConfig.Property.TEST_MAIL_DIR);
+        String testDataDir = AJAXConfig.getProperty(AJAXConfig.Property.TEST_DIR);
         final File file = new File(testDataDir, filename);
         final InputStream is = new FileInputStream(file);
         final byte[] bytes = IOUtils.toByteArray(is);

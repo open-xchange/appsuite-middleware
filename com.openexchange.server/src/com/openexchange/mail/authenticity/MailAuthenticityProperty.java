@@ -82,7 +82,7 @@ public enum MailAuthenticityProperty implements Property {
      * Defines whether metrics of the core handler will be logged for future assertion purposes.
      * Disabled by default.
      */
-    LOG_METRICS("logMetrics", false);
+    LOG_METRICS("logMetrics", Boolean.FALSE);
 
     private final Object defaultValue;
     private final String fqn;

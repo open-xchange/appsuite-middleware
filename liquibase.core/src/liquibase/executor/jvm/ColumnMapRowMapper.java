@@ -1,12 +1,11 @@
 package liquibase.executor.jvm;
 
-import liquibase.util.JdbcUtils;
-
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import liquibase.util.JdbcUtils;
 
 /**
  * {@link RowMapper} implementation that creates a <code>java.util.Map</code>

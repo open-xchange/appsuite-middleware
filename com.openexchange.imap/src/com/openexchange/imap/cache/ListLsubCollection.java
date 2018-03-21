@@ -50,7 +50,6 @@
 package com.openexchange.imap.cache;
 
 import static com.openexchange.imap.IMAPCommandsCollection.performCommand;
-import gnu.trove.map.hash.TObjectIntHashMap;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -92,6 +91,7 @@ import com.sun.mail.imap.protocol.IMAPProtocol;
 import com.sun.mail.imap.protocol.IMAPResponse;
 import com.sun.mail.imap.protocol.Namespaces;
 import com.sun.mail.imap.protocol.Namespaces.Namespace;
+import gnu.trove.map.hash.TObjectIntHashMap;
 
 /**
  * {@link ListLsubCollection}
@@ -915,6 +915,9 @@ final class ListLsubCollection implements Serializable {
         String command = lsub ? "LSUB" : "LIST";
         String sCmd = new StringBuilder(command).append(" \"\" \"*\"").toString();
 
+        if(protocol == null && responses == null) {
+            throw new IllegalArgumentException("Unable to perform ListLsubCommand wihtout protocol and responses!");
+        }
         Response[] r = null == responses ? performCommand(protocol, sCmd) : responses;
         LOG.debug("{} cache filled with >>{}<< which returned {} response line(s).", (command), sCmd, Integer.valueOf(r.length));
 
@@ -1009,8 +1012,10 @@ final class ListLsubCollection implements Serializable {
         } else {
             // Dispatch remaining untagged responses
             LogProperties.putProperty(LogProperties.Name.MAIL_COMMAND, sCmd);
-            protocol.notifyResponseHandlers(r);
-            protocol.handleResult(response);
+            if(protocol != null) {
+                protocol.notifyResponseHandlers(r);
+                protocol.handleResult(response);
+            }
         }
     }
 

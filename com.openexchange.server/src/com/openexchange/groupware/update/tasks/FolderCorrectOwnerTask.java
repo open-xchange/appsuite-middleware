@@ -72,7 +72,6 @@ import com.openexchange.groupware.update.UpdateConcurrency;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
 import com.openexchange.java.Reference;
-import com.openexchange.tools.sql.DBUtils;
 import gnu.trove.list.TIntList;
 import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.map.TIntIntMap;
@@ -207,7 +206,7 @@ public final class FolderCorrectOwnerTask extends UpdateTaskAdapter {
             }
             return users;
         } finally {
-            DBUtils.closeSQLStuff(rs, stmt);
+            Databases.closeSQLStuff(rs, stmt);
         }
     }
 
@@ -226,7 +225,7 @@ public final class FolderCorrectOwnerTask extends UpdateTaskAdapter {
             }
 
             int trashId = rs.getInt(1);
-            DBUtils.closeSQLStuff(rs, stmt);
+            Databases.closeSQLStuff(rs, stmt);
             rs = null;
             stmt = null;
 
@@ -234,7 +233,7 @@ public final class FolderCorrectOwnerTask extends UpdateTaskAdapter {
             collectTrashFolders(trashId, folderId2Owner, userId, contextId, con);
             return folderId2Owner;
         } finally {
-            DBUtils.closeSQLStuff(rs, stmt);
+            Databases.closeSQLStuff(rs, stmt);
         }
     }
 
@@ -264,7 +263,7 @@ public final class FolderCorrectOwnerTask extends UpdateTaskAdapter {
                     }
                 }
             } while (rs.next());
-            DBUtils.closeSQLStuff(rs, stmt);
+            Databases.closeSQLStuff(rs, stmt);
             rs = null;
             stmt = null;
 
@@ -272,7 +271,7 @@ public final class FolderCorrectOwnerTask extends UpdateTaskAdapter {
                 collectTrashFolders(childId, folderId2Owner, userId, contextId, con);
             }
         } finally {
-            DBUtils.closeSQLStuff(rs, stmt);
+            Databases.closeSQLStuff(rs, stmt);
         }
     }
 
@@ -299,7 +298,7 @@ public final class FolderCorrectOwnerTask extends UpdateTaskAdapter {
                 list.add(resultMap);
             }
         } finally {
-            DBUtils.closeSQLStuff(stmt);
+            Databases.closeSQLStuff(stmt);
         }
     }
 

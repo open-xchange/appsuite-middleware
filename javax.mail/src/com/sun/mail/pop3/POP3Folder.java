@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 1997-2017 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997-2018 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -40,19 +40,26 @@
 
 package com.sun.mail.pop3;
 
-import javax.mail.*;
-import javax.mail.event.*;
-import java.io.InputStream;
-import java.io.IOException;
 import java.io.EOFException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.lang.reflect.Constructor;
 import java.util.StringTokenizer;
 import java.util.logging.Level;
-import java.lang.reflect.Constructor;
-
+import javax.mail.AuthenticationFailedException;
+import javax.mail.FetchProfile;
+import javax.mail.Flags;
+import javax.mail.Folder;
+import javax.mail.FolderClosedException;
+import javax.mail.FolderNotFoundException;
+import javax.mail.Message;
+import javax.mail.MessageRemovedException;
+import javax.mail.MessagingException;
+import javax.mail.MethodNotSupportedException;
+import javax.mail.UIDFolder;
+import javax.mail.event.ConnectionEvent;
 import com.sun.mail.util.LineInputStream;
 import com.sun.mail.util.MailLogger;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * A POP3 Folder (can only be "INBOX").
@@ -86,7 +93,7 @@ public class POP3Folder extends Folder {
 	if (name.equalsIgnoreCase("INBOX"))
 	    exists = true;
 	logger = new MailLogger(this.getClass(),
-				"DEBUG POP3", store.getSession());
+				"DEBUG POP3", store.getSession().getDebug(), store.getSession().getDebugOut());
     }
 
     @Override

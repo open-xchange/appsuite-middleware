@@ -96,4 +96,40 @@ public class FetchResponseTest {
         Assert.assertEquals("Unexpected nested mulipart count.", 0, nestedMulti.bodies.length);
     }
 
+     @Test
+     public void testParseSnippetResponse() throws IOException, ProtocolException {
+        IMAPResponse response = new IMAPResponse("* 6336 FETCH (UID 92796 INTERNALDATE \"15-Jan-2018 12:42:19 +0100\" RFC822.SIZE 33590 FLAGS (\\Seen) ENVELOPE (\"Mon, 15 Jan 2018 12:41:58 +0100 (CET)\" \"[reports-services] Bi-Weekly report CW51/CW52/CW1/CW2 2018 TalkTalk\" ((\"Diego Giron\" NIL \"diego.giron\" \"open-xchange.com\")) ((\"reports-services\" NIL \"reports-services-bounces\" \"open-xchange.com\")) ((\"Diego Giron\" NIL \"diego.giron\" \"open-xchange.com\")) ((NIL NIL \"reports-services\" \"open-xchange.com\")) NIL NIL \"<1757567916.3536.1512385130737@appsuite.open-xchange.com>\" \"<1965994247.484.1516016518443@appsuite-dev.open-xchange.com>\") BODYSTRUCTURE (((\"text\" \"plain\" (\"charset\" \"UTF-8\") NIL NIL \"quoted-printable\" 6019 129 NIL NIL NIL NIL)((\"text\" \"html\" (\"charset\" \"UTF-8\") NIL NIL \"quoted-printable\" 11635 253 NIL NIL NIL NIL)(\"image\" \"png\" NIL \"<ff73932de1344096947f9a9b22997cfa>\" NIL \"base64\" 8300 NIL (\"inline\" NIL) NIL NIL) \"related\" (\"boundary\" \"----=_Part_482_454602123.1516016518201\") NIL NIL NIL) \"alternative\" (\"boundary\" \"----=_Part_481_612880287.1516016518201\") NIL NIL NIL)(\"text\" \"plain\" (\"charset\" \"utf-8\") NIL NIL \"base64\" 252 4 NIL (\"inline\" NIL) NIL NIL) \"mixed\" (\"boundary\" \"===============0103388668==\") NIL NIL NIL) SNIPPET FUZZY {100}\r\n" +
+            "Bi-Weekly report CW51/CW52/CW1/CW2 2018 TalkTalk Executive management summary * HL Project plan stat BODY[HEADER.FIELDS (IMPORTANCE X-PRIORITY X-OPEN-XCHANGE-SHARE-URL)] {37}\r\n" +
+            "X-Priority: 3\r\n" +
+            "Importance: Medium\r\n" +
+            "\r\n" +
+            ")");
+        FetchResponse fetchResponse = new FetchResponse(response);
+
+        int itemCount = fetchResponse.getItemCount();
+        Assert.assertEquals("Unexpected item count.", 8, itemCount);
+
+        SNIPPET snippet = fetchResponse.getItem(SNIPPET.class);
+        Assert.assertNotNull(snippet);
+        Assert.assertTrue(snippet.getText().length() > 0);
+        Assert.assertEquals("Bi-Weekly report CW51/CW52/CW1/CW2 2018 TalkTalk Executive management summary * HL Project plan stat", snippet.getText());
+
+
+        response = new IMAPResponse("* 6336 FETCH (UID 92796 INTERNALDATE \"15-Jan-2018 12:42:19 +0100\" RFC822.SIZE 33590 FLAGS (\\Seen) ENVELOPE (\"Mon, 15 Jan 2018 12:41:58 +0100 (CET)\" \"[reports-services] Bi-Weekly report CW51/CW52/CW1/CW2 2018 TalkTalk\" ((\"Diego Giron\" NIL \"diego.giron\" \"open-xchange.com\")) ((\"reports-services\" NIL \"reports-services-bounces\" \"open-xchange.com\")) ((\"Diego Giron\" NIL \"diego.giron\" \"open-xchange.com\")) ((NIL NIL \"reports-services\" \"open-xchange.com\")) NIL NIL \"<1757567916.3536.1512385130737@appsuite.open-xchange.com>\" \"<1965994247.484.1516016518443@appsuite-dev.open-xchange.com>\") BODYSTRUCTURE (((\"text\" \"plain\" (\"charset\" \"UTF-8\") NIL NIL \"quoted-printable\" 6019 129 NIL NIL NIL NIL)((\"text\" \"html\" (\"charset\" \"UTF-8\") NIL NIL \"quoted-printable\" 11635 253 NIL NIL NIL NIL)(\"image\" \"png\" NIL \"<ff73932de1344096947f9a9b22997cfa>\" NIL \"base64\" 8300 NIL (\"inline\" NIL) NIL NIL) \"related\" (\"boundary\" \"----=_Part_482_454602123.1516016518201\") NIL NIL NIL) \"alternative\" (\"boundary\" \"----=_Part_481_612880287.1516016518201\") NIL NIL NIL)(\"text\" \"plain\" (\"charset\" \"utf-8\") NIL NIL \"base64\" 252 4 NIL (\"inline\" NIL) NIL NIL) \"mixed\" (\"boundary\" \"===============0103388668==\") NIL NIL NIL) SNIPPET (FUZZY {100}\r\n" +
+            "Bi-Weekly report CW51/CW52/CW1/CW2 2018 TalkTalk Executive management summary * HL Project plan stat) BODY[HEADER.FIELDS (IMPORTANCE X-PRIORITY X-OPEN-XCHANGE-SHARE-URL)] {37}\r\n" +
+            "X-Priority: 3\r\n" +
+            "Importance: Medium\r\n" +
+            "\r\n" +
+            ")");
+        fetchResponse = new FetchResponse(response);
+
+        itemCount = fetchResponse.getItemCount();
+        Assert.assertEquals("Unexpected item count.", 8, itemCount);
+
+        snippet = fetchResponse.getItem(SNIPPET.class);
+        Assert.assertNotNull(snippet);
+        Assert.assertTrue(snippet.getText().length() > 0);
+        Assert.assertEquals("Bi-Weekly report CW51/CW52/CW1/CW2 2018 TalkTalk Executive management summary * HL Project plan stat", snippet.getText());
+    }
+
 }

@@ -49,17 +49,13 @@
 
 package com.openexchange.ajax.sessionmanagement.tests;
 
+import static org.hamcrest.Matchers.is;
 import java.util.Collection;
 import org.junit.Assert;
 import org.junit.Test;
-import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.sessionmanagement.AbstractSessionManagementTest;
-import com.openexchange.ajax.sessionmanagement.actions.AllRequest;
-import com.openexchange.ajax.sessionmanagement.actions.AllResponse;
-import com.openexchange.ajax.sessionmanagement.actions.ClearRequest;
-import com.openexchange.ajax.sessionmanagement.actions.ClearResponse;
-import com.openexchange.session.management.ManagedSession;
-import static org.hamcrest.Matchers.is;
+import com.openexchange.testing.httpclient.models.AllSessionsResponse;
+import com.openexchange.testing.httpclient.models.SessionManagementData;
 
 /**
  * {@link RemoveAllOtherSessionsTest}
@@ -74,19 +70,14 @@ public class RemoveAllOtherSessionsTest extends AbstractSessionManagementTest {
 
     @Test
     public void testRemoveAllOtherSessions() throws Exception {
-        String sessionId = getClient().getSession().getId();
-        ClearRequest request = new ClearRequest();
-        ClearResponse response = getClient().execute(request);
+        String sessionId = apiClient.getSession();
 
-        Assert.assertFalse(response.hasError());
-
-        AllRequest getRequest = new AllRequest();
-        AllResponse getResponse = getClient().execute(getRequest);
-        Assert.assertFalse(getResponse.hasError());
-        Collection<ManagedSession> sessions = getResponse.getSessions();
+        getApi().clear(sessionId);
+        AllSessionsResponse response = getApi().all(sessionId);
+        Collection<SessionManagementData> sessions = response.getData();
         Assert.assertThat("Not all clients has been removed", new Integer(1), is(Integer.valueOf(sessions.size())));
 
-        for (ManagedSession session : sessions) {
+        for (SessionManagementData session : sessions) {
             Assert.assertThat("Wrong client is still loged in", sessionId, is(session.getSessionId()));
         }
 
@@ -95,23 +86,23 @@ public class RemoveAllOtherSessionsTest extends AbstractSessionManagementTest {
     @Test
     public void testRemoveAllOtherSessionsWithoutBlacklisted() throws Exception {
         // Third client
-        @SuppressWarnings("unused") AJAXClient blackListed = generateClient(BLACKLISTED_CLIENT, testUser);
+        String sessionId = apiClient.getSession();
 
-        String sessionId = getClient().getSession().getId();
-        ClearRequest request = new ClearRequest();
-        ClearResponse response = getClient().execute(request);
-
-        Assert.assertFalse(response.hasError());
-
-        AllRequest getRequest = new AllRequest();
-        AllResponse getResponse = getClient().execute(getRequest);
-        Assert.assertFalse(getResponse.hasError());
-        Collection<ManagedSession> sessions = getResponse.getSessions();
+        AllSessionsResponse response = getApi().all(sessionId);
+        Collection<SessionManagementData> sessions = response.getData();
 
         // Should not see blacklisted client
-        Assert.assertThat("Not all clients has been removed", new Integer(1), is(Integer.valueOf(sessions.size())));
+        Assert.assertThat("Blacklisted client is visible!", Integer.valueOf(sessions.size()), is(Integer.valueOf(2)));
 
-        for (ManagedSession session : sessions) {
+        getApi().clear(sessionId);
+
+        response = getApi().all(sessionId);
+        sessions = response.getData();
+
+        // Should not see blacklisted client, client2 should have been loged out
+        Assert.assertThat("Not all clients has been removed", Integer.valueOf(sessions.size()), is(Integer.valueOf(1)));
+
+        for (SessionManagementData session : sessions) {
             Assert.assertThat("Wrong client is still loged in", sessionId, is(session.getSessionId()));
         }
     }

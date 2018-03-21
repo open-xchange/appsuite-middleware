@@ -65,14 +65,15 @@ import com.openexchange.mail.MailFetchListener;
 import com.openexchange.mail.authenticity.MailAuthenticityHandler;
 import com.openexchange.mail.authenticity.MailAuthenticityHandlerRegistry;
 import com.openexchange.mail.authenticity.MailAuthenticityProperty;
+import com.openexchange.mail.authenticity.impl.core.CustomRuleChecker;
 import com.openexchange.mail.authenticity.impl.core.MailAuthenticityFetchListener;
 import com.openexchange.mail.authenticity.impl.core.MailAuthenticityHandlerImpl;
 import com.openexchange.mail.authenticity.impl.core.MailAuthenticityHandlerRegistryImpl;
 import com.openexchange.mail.authenticity.impl.core.MailAuthenticityJSlobEntry;
 import com.openexchange.mail.authenticity.impl.core.metrics.MailAuthenticityMetricFileLogger;
 import com.openexchange.mail.authenticity.impl.core.metrics.MailAuthenticityMetricLogger;
-import com.openexchange.mail.authenticity.impl.trusted.internal.TrustedMailAuthenticityHandler;
 import com.openexchange.mail.authenticity.impl.trusted.internal.TrustedMailDataSource;
+import com.openexchange.mail.authenticity.impl.trusted.internal.TrustedMailServiceImpl;
 import com.openexchange.mailaccount.UnifiedInboxManagement;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.threadpool.ThreadPoolService;
@@ -109,17 +110,21 @@ public class MailAuthenticityActivator extends HousekeepingActivator {
         final MailAuthenticityHandlerRegistryImpl registry = new MailAuthenticityHandlerRegistryImpl(getService(LeanConfigurationService.class), context);
         registerService(MailAuthenticityHandlerRegistry.class, registry);
 
-        registerService(MailAuthenticityMetricLogger.class, new MailAuthenticityMetricFileLogger());
-        trackService(MailAuthenticityMetricLogger.class);
+        LeanConfigurationService leanConfigService = getService(LeanConfigurationService.class);
+        if (leanConfigService.getBooleanProperty(MailAuthenticityProperty.LOG_METRICS)) {
+            registerService(MailAuthenticityMetricLogger.class, new MailAuthenticityMetricFileLogger());
+            trackService(MailAuthenticityMetricLogger.class);
+        }
 
         track(MailAuthenticityHandler.class, registry);
         openTrackers();
 
         ConfigurationService configurationService = getService(ConfigurationService.class);
-        TrustedMailAuthenticityHandler authenticationHandler = new TrustedMailAuthenticityHandler(configurationService);
+        TrustedMailServiceImpl authenticationHandler = new TrustedMailServiceImpl(configurationService);
         registerService(ForcedReloadable.class, authenticationHandler);
-
-        final MailAuthenticityHandlerImpl handlerImpl = new MailAuthenticityHandlerImpl(authenticationHandler, this);
+        CustomRuleChecker ruleChecker = new CustomRuleChecker(leanConfigService);
+        registerService(Reloadable.class, ruleChecker);
+        final MailAuthenticityHandlerImpl handlerImpl = new MailAuthenticityHandlerImpl(authenticationHandler, this, ruleChecker);
         registerService(MailAuthenticityHandler.class, handlerImpl);
         registerService(Reloadable.class, new ConfigReloader(registry, handlerImpl));
 

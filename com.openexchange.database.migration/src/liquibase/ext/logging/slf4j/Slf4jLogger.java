@@ -49,11 +49,11 @@
 
 package liquibase.ext.logging.slf4j;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import liquibase.changelog.ChangeSet;
 import liquibase.changelog.DatabaseChangeLog;
 import liquibase.logging.core.AbstractLogger;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * An implementation of the Liquibase Logger that sends log output to SLF4J.

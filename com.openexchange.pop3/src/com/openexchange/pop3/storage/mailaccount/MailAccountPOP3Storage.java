@@ -49,9 +49,7 @@
 
 package com.openexchange.pop3.storage.mailaccount;
 
-import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
-import gnu.trove.map.TIntObjectMap;
-import gnu.trove.map.hash.TIntObjectHashMap;
+import static com.openexchange.database.Databases.closeSQLStuff;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.security.SecureRandom;
@@ -107,6 +105,8 @@ import com.openexchange.session.Session;
 import com.sun.mail.pop3.POP3Folder;
 import com.sun.mail.pop3.POP3Message;
 import com.sun.mail.pop3.POP3Store;
+import gnu.trove.map.TIntObjectMap;
+import gnu.trove.map.hash.TIntObjectHashMap;
 
 /**
  * {@link MailAccountPOP3Storage} - The built-in mail account POP3 storage.

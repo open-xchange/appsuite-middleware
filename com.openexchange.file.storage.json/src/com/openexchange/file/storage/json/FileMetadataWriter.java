@@ -62,7 +62,6 @@ import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.File.Field;
 import com.openexchange.file.storage.FileFieldHandler;
 import com.openexchange.file.storage.json.actions.files.AJAXInfostoreRequest;
-import com.openexchange.file.storage.json.osgi.FileFieldCollector;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIterators;
 
@@ -87,7 +86,7 @@ public class FileMetadataWriter {
      */
     public FileMetadataWriter(FileFieldCollector fieldCollector) {
         super();
-        this.fieldCollector = fieldCollector;
+        this.fieldCollector = null == fieldCollector ? FileFieldCollector.EMPTY : fieldCollector;
     }
 
     /**
@@ -107,15 +106,13 @@ public class FileMetadataWriter {
         /*
          * render additional fields if available
          */
-        if (null != fieldCollector) {
-            List<AdditionalFileField> additionalFields = fieldCollector.getFields();
-            for (AdditionalFileField additionalField : additionalFields) {
-                try {
-                    Object value = additionalField.getValue(file, request.getSession());
-                    jsonObject.put(additionalField.getColumnName(), additionalField.renderJSON(request.getRequestData(), value));
-                } catch (JSONException e) {
-                    LOG.error("Error writing field: {}", additionalField.getColumnName(), e);
-                }
+        List<AdditionalFileField> additionalFields = fieldCollector.getFields();
+        for (AdditionalFileField additionalField : additionalFields) {
+            try {
+                Object value = additionalField.getValue(file, request.getSession());
+                jsonObject.put(additionalField.getColumnName(), additionalField.renderJSON(request.getRequestData(), value));
+            } catch (JSONException e) {
+                LOG.error("Error writing field: {}", additionalField.getColumnName(), e);
             }
         }
         return jsonObject;
@@ -143,7 +140,7 @@ public class FileMetadataWriter {
         /*
          * render additional fields if available
          */
-        if (null != fieldCollector && additionalColumns != null && additionalColumns.length > 0) {
+        if (additionalColumns != null && additionalColumns.length > 0) {
             List<AdditionalFileField> additionalFields = fieldCollector.getFields(additionalColumns);
             for (AdditionalFileField additionalField : additionalFields) {
                 try {
@@ -168,22 +165,21 @@ public class FileMetadataWriter {
         int[] columns = request.getRequestedColumns();
         List<Field> fields = Field.get(columns);
         try {
-            if (columns.length == fields.size()) {
-                /*
-                 * prefer to write iteratively if only regular file fields requested
-                 */
-                JsonFieldHandler handler = new JsonFieldHandler(request);
-                JSONArray filesArray = new JSONArray(32);
-                while (searchIterator.hasNext()) {
-                    filesArray.put(writeArray(handler, searchIterator.next(), fields));
-                }
-                return filesArray;
-            } else {
+            if (columns.length != fields.size()) {
                 /*
                  * convert pre-loaded files to allow batch retrieval for additional fields
                  */
                 return write(request, SearchIterators.asList(searchIterator));
             }
+            /*
+             * prefer to write iteratively if only regular file fields requested
+             */
+            JsonFieldHandler handler = new JsonFieldHandler(request);
+            JSONArray filesArray = new JSONArray(32);
+            while (searchIterator.hasNext()) {
+                filesArray.put(writeArray(handler, searchIterator.next(), fields));
+            }
+            return filesArray;
         } finally {
             SearchIterators.close(searchIterator);
         }
@@ -202,10 +198,11 @@ public class FileMetadataWriter {
          */
         int[] columns = request.getRequestedColumns();
         Map<Integer, List<Object>> additionalFieldValues = null;
-        if (null != fieldCollector) {
+        {
             List<AdditionalFileField> additionalFields = fieldCollector.getFields(columns);
-            if (0 < additionalFields.size()) {
-                additionalFieldValues = new HashMap<Integer, List<Object>>(additionalFields.size());
+            int size = additionalFields.size();
+            if (0 < size) {
+                additionalFieldValues = new HashMap<Integer, List<Object>>(size);
                 for (AdditionalFileField additionalField : additionalFields) {
                     List<Object> values = additionalField.getValues(files, request.getSession());
                     additionalFieldValues.put(Integer.valueOf(additionalField.getColumnID()), values);
@@ -227,7 +224,12 @@ public class FileMetadataWriter {
                 } else {
                     List<Object> fieldValues = null != additionalFieldValues ? additionalFieldValues.get(Integer.valueOf(column)) : null;
                     if (null != fieldValues) {
-                        fileArray.put(fieldCollector.getField(column).renderJSON(request.getRequestData(), fieldValues.get(i)));
+                        AdditionalFileField additionalFileField = fieldCollector.getField(column);
+                        if (null != additionalFileField) {
+                            fileArray.put(additionalFileField.renderJSON(request.getRequestData(), fieldValues.get(i)));
+                        } else {
+                            fileArray.put(JSONObject.NULL);
+                        }
                     } else {
                         fileArray.put(JSONObject.NULL);
                     }

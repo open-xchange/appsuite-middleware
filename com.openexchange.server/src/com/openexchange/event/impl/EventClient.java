@@ -70,7 +70,7 @@ import com.openexchange.folder.FolderService;
 import com.openexchange.group.Group;
 import com.openexchange.group.GroupService;
 import com.openexchange.groupware.Types;
-import com.openexchange.groupware.calendar.CalendarCollectionService;
+import com.openexchange.groupware.calendar.CalendarCollectionUtils;
 import com.openexchange.groupware.calendar.RecurringResultsInterface;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.CalendarObject;
@@ -203,10 +203,9 @@ public class EventClient {
             return new Date[] { appointment.getStartDate(), appointment.getEndDate() };
         }
 
-        CalendarCollectionService calColl = ServerServiceRegistry.getInstance().getService(CalendarCollectionService.class);
         RecurringResultsInterface recuResults = null;
         try {
-            recuResults = calColl.calculateFirstRecurring(appointment);
+            recuResults = CalendarCollectionUtils.calculateRecurring(appointment, 0, 0, 1, CalendarCollectionUtils.MAX_OCCURRENCESE, true);
         } catch (final OXException e) {
             LOG.error("Failed calculating recurrence {}", appointment.getObjectID(), e);
         }

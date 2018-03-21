@@ -1,0 +1,18 @@
+/drive?action=trashContents:
+  get:
+    operationId: getTrashContent
+    tags:
+      - Drive
+    summary: Retrieves the content of the trash folder
+    description: |
+      Retrieves the files and folders of the root level of the users trash folder.
+    parameters:
+      - $ref: "#/parameters/gblQueryParamSession"
+      - $ref: "#/parameters/gblQueryParamRoot"
+    responses:
+      200:
+        description: |
+          A JSON object holding the files and folders of the trash folder.
+          If no trash folder is available, an empty response is returned.
+        schema:
+          $ref: "#/definitions/TrashFolderResponse"

@@ -51,7 +51,6 @@ package com.openexchange.report.appsuite.serialization;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileReader;
@@ -69,7 +68,6 @@ import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.ListIterator;
 import java.util.Map;
-import java.util.Scanner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.exception.OXException;

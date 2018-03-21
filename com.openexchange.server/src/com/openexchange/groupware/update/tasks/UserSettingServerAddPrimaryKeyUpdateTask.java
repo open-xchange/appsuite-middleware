@@ -63,7 +63,6 @@ import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
 import com.openexchange.java.util.UUIDs;
-import com.openexchange.tools.sql.DBUtils;
 import com.openexchange.tools.update.Column;
 import com.openexchange.tools.update.Tools;
 
@@ -116,9 +115,9 @@ public class UserSettingServerAddPrimaryKeyUpdateTask extends UpdateTaskAdapter 
             throw UpdateExceptionCodes.OTHER_PROBLEM.create(e, e.getMessage());
         } finally {
             if (rollback) {
-                DBUtils.rollback(con);
+                Databases.rollback(con);
             }
-            DBUtils.autocommit(con);
+            Databases.autocommit(con);
         }
     }
 
@@ -173,6 +172,7 @@ public class UserSettingServerAddPrimaryKeyUpdateTask extends UpdateTaskAdapter 
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
+            // GROUP BY CLAUSE: ensure ONLY_FULL_GROUP_BY compatibility
             stmt = con.prepareStatement("SELECT cid, user, HEX(uuid) FROM user_setting_server GROUP BY cid, user, uuid HAVING count(*) > 1");
             rs = stmt.executeQuery();
 
@@ -398,11 +398,11 @@ public class UserSettingServerAddPrimaryKeyUpdateTask extends UpdateTaskAdapter 
                     }
                     stmt2.execute();
                 } finally {
-                    DBUtils.closeSQLStuff(stmt2);
+                    Databases.closeSQLStuff(stmt2);
                 }
             }
         } finally {
-            DBUtils.closeSQLStuff(rs, stmt);
+            Databases.closeSQLStuff(rs, stmt);
         }
     }
 

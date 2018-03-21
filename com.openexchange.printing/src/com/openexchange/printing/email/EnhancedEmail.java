@@ -52,7 +52,6 @@ package com.openexchange.printing.email;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.server.ServiceLookup;

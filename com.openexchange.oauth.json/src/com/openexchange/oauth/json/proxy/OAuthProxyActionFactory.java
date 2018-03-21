@@ -54,8 +54,8 @@ import java.util.Collection;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
 import com.openexchange.exception.OXException;
-import com.openexchange.oauth.http.OAuthHTTPClientFactory;
 import com.openexchange.oauth.OAuthService;
+import com.openexchange.oauth.http.OAuthHTTPClientFactory;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
 /**

@@ -125,7 +125,4 @@ public class UploadExceptionMessage implements LocalizableStrings {
     // Image upload denied. Its resolution exceeds maximum allowed value of %2$s pixels.
     public final static String IMAGE_RESOLUTION_TOO_HIGH_MSG = "Image upload denied. Its resolution exceeds maximum allowed value of %2$s pixels.";
 
-    // Request rejected because file size (%1$s) exceeds the available storage space of %2$s.
-    public static final String MAX_STORAGE_SIZE_EXCEEDED_MSG = "Request rejected because file size (%1$s) exceeds the available storage space of %2$s.";
-
 }

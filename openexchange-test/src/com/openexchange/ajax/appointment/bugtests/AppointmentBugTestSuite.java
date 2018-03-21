@@ -81,8 +81,6 @@ import com.openexchange.test.concurrent.ParallelSuite;
     Bug15986Test.class,
     Bug16292Test.class,
     Bug16151Test.class,
-    Bug16194Test.class,
-    Bug16211Test.class,
     Bug16089Test.class,
     Bug16107Test.class,
     Bug16441Test.class,
@@ -119,7 +117,6 @@ import com.openexchange.test.concurrent.ParallelSuite;
     Bug32278Test.class,
     Bug32385Test.class,
     Bug33242Test.class,
-    Bug33697Test.class,
     Bug35610Test.class,
     Bug35687Test.class,
     Bug35355Test.class,
@@ -141,7 +138,8 @@ import com.openexchange.test.concurrent.ParallelSuite;
     Bug51918Test.class,
     Bug53073Test.class,
     Bug55690Test.class,
-    Bug56359Test.class
+    Bug56359Test.class,
+    Bug56589Test.class,
 })
 public class AppointmentBugTestSuite {
 

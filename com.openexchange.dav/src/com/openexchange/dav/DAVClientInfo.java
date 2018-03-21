@@ -52,6 +52,7 @@ package com.openexchange.dav;
 import java.util.Locale;
 import com.openexchange.clientinfo.ClientInfo;
 import com.openexchange.clientinfo.ClientInfoType;
+import com.openexchange.java.Strings;
 
 
 /**
@@ -63,20 +64,71 @@ import com.openexchange.clientinfo.ClientInfoType;
 public class DAVClientInfo implements ClientInfo {
 
     private final String app;
+    private final String osFamily;
+    private final String osVersion;
+    private final String client;
+    private final String clientVersion;
+    private final String clientFamily;
+    private final ClientInfoType type;
 
-    public DAVClientInfo(String app) {
+    public DAVClientInfo(String app, String clientFamily) {
+        this(app, null, null, null, null, clientFamily);
+    }
+
+    public DAVClientInfo(String app, String osFamily, String osVersion, String client, String clientVersion, String clientFamily) {
+        this(app, osFamily, osVersion, client, clientVersion, clientFamily, ClientInfoType.DAV);
+    }
+
+    public DAVClientInfo(String app, String osFamily, String osVersion, String client, String clientVersion, String clientFamily, ClientInfoType type) {
         super();
         this.app = app;
+        this.osFamily = osFamily;
+        this.osVersion = osVersion;
+        this.client = client;
+        this.clientVersion = clientVersion;
+        this.clientFamily = clientFamily;
+        this.type = type;
     }
 
     @Override
     public ClientInfoType getType() {
-        return ClientInfoType.SYNC;
+        return type;
     }
 
     @Override
-    public String toString(Locale locale) {
+    public String getDisplayName(Locale locale) {
         return app;
+    }
+
+    @Override
+    public String getOSFamily() {
+        if (Strings.isNotEmpty(osFamily)) {
+            return osFamily.toLowerCase();
+        }
+        return null;
+    }
+
+    @Override
+    public String getOSVersion() {
+        return osVersion;
+    }
+
+    @Override
+    public String getClientName() {
+        if (Strings.isNotEmpty(client)) {
+            return client.toLowerCase();
+        }
+        return null;
+    }
+
+    @Override
+    public String getClientVersion() {
+        return clientVersion;
+    }
+
+    @Override
+    public String getClientFamily() {
+        return clientFamily;
     }
 
 }

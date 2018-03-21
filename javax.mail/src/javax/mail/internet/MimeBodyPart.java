@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 1997-2017 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997-2018 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -40,11 +40,37 @@
 
 package javax.mail.internet;
 
-import javax.mail.*;
-import javax.activation.*;
-import java.io.*;
-import java.util.*;
-import com.sun.mail.util.*;
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
+import java.util.Enumeration;
+import java.util.List;
+import javax.activation.DataHandler;
+import javax.activation.DataSource;
+import javax.activation.FileDataSource;
+import javax.mail.BodyPart;
+import javax.mail.EncodingAware;
+import javax.mail.FolderClosedException;
+import javax.mail.Header;
+import javax.mail.IllegalWriteException;
+import javax.mail.Message;
+import javax.mail.MessageRemovedException;
+import javax.mail.MessagingException;
+import javax.mail.Multipart;
+import javax.mail.Part;
+import com.sun.mail.util.ASCIIUtility;
+import com.sun.mail.util.FolderClosedIOException;
+import com.sun.mail.util.LineOutputStream;
+import com.sun.mail.util.MessageRemovedIOException;
+import com.sun.mail.util.MimeUtil;
+import com.sun.mail.util.PropUtil;
 
 /**
  * This class represents a MIME body part. It implements the 
@@ -174,11 +200,11 @@ public class MimeBodyPart extends BodyPart implements MimePart {
      * @exception	MessagingException for failures
      */
     public MimeBodyPart(InputStream is) throws MessagingException {
-	if (!(is instanceof ByteArrayInputStream) &&
+	super();
+    if (!(is instanceof ByteArrayInputStream) &&
 	    !(is instanceof BufferedInputStream) &&
 	    !(is instanceof SharedInputStream))
 	    is = new BufferedInputStream(is);
-	
 	headers = new InternetHeaders(is);
 
 	if (is instanceof SharedInputStream) {
@@ -189,9 +215,10 @@ public class MimeBodyPart extends BodyPart implements MimePart {
 		content = ASCIIUtility.getBytes(is);
 	    } catch (IOException ioex) {
 		throw new MessagingException("Error reading input stream", ioex);
+	    } finally {
+	        try { is.close(); } catch (Exception e) {/* ignore */}
 	    }
 	}
-
     }
 
     /**

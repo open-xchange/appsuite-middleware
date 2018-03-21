@@ -49,12 +49,12 @@
 
 package com.openexchange.imap.command;
 
-import gnu.trove.list.TIntList;
-import gnu.trove.list.array.TIntArrayList;
-import gnu.trove.list.array.TLongArrayList;
 import java.util.ArrayList;
 import java.util.List;
 import javax.mail.Message;
+import gnu.trove.list.TIntList;
+import gnu.trove.list.array.TIntArrayList;
+import gnu.trove.list.array.TLongArrayList;
 
 /**
  * {@link IMAPNumArgSplitter}

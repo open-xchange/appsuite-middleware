@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 1997-2017 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997-2018 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -40,13 +40,26 @@
 
 package javax.mail.internet;
 
-import javax.mail.*;
-import javax.activation.*;
-import java.util.*;
-import java.io.*;
-import com.sun.mail.util.LineOutputStream;
-import com.sun.mail.util.LineInputStream;
+import java.io.BufferedInputStream;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.EOFException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.util.Collections;
+import java.util.Map;
+import javax.activation.DataSource;
+import javax.mail.BodyPart;
+import javax.mail.IllegalWriteException;
+import javax.mail.MessageAware;
+import javax.mail.MessageContext;
+import javax.mail.MessagingException;
+import javax.mail.Multipart;
+import javax.mail.MultipartDataSource;
 import com.sun.mail.util.ASCIIUtility;
+import com.sun.mail.util.LineInputStream;
+import com.sun.mail.util.LineOutputStream;
 import com.sun.mail.util.PropUtil;
 
 /**
@@ -113,6 +126,11 @@ import com.sun.mail.util.PropUtil;
  */
 
 public class MimeMultipart extends Multipart {
+
+    /**
+     * The string constant for a new line: <code>"\r\n"</code>
+     */
+    private static final String NEWLINE = "\r\n";
 
     /**
      * The DataSource supplying our InputStream.
@@ -566,25 +584,21 @@ public class MimeMultipart extends Multipart {
 
 	// if there's a preamble, write it out
 	if (preamble != null) {
+        // make sure it ends with a newline
 	    String p = preamble;
-	    if (!p.endsWith("\r\n")) {
-            char c = p.charAt(p.length() - 1);
+        if (!p.endsWith(NEWLINE)) {
+            int mlen = p.length() - 1;
+            char c = p.charAt(mlen);
             if (c == '\n') {
-                p = p.substring(0, p.length()-1) + "\r\n";
+                p = p.substring(0, mlen) + NEWLINE;
             } else if (c == '\r') {
-                p = p.substring(0, p.length()-1) + "\r\n";
+                p = p.substring(0, mlen) + NEWLINE;
             } else {
-                p = p + "\r\n";
+                p = p + NEWLINE;
             }
         }
-        byte[] pb = ASCIIUtility.getBytes(p);
-	    los.write(pb);
-	    // make sure it ends with a newline
-	    //if (pb.length > 0 &&
-		//    !(pb[pb.length-1] == '\r' || pb[pb.length-1] == '\n')) {
-		los.writeln();
-	    //}
-	    // XXX - could force a blank line before start boundary
+	    byte[] pb = ASCIIUtility.getBytes(p);
+        los.write(pb);
 	}
 
 	int size = parts.size();
@@ -659,7 +673,6 @@ public class MimeMultipart extends Multipart {
 	    LineInputStream lin = new LineInputStream(in);
 	    StringBuilder preamblesb = null;
 	    String line;
-	    String lineSeparator = null;
 	    while ((line = lin.readLine()) != null) {
 		/*
 		 * Strip trailing whitespace.  Can't use trim method
@@ -703,23 +716,13 @@ public class MimeMultipart extends Multipart {
 		    }
 		}
 
-		// save the preamble after skipping blank lines
-		if (line.length() > 0) {
-		    // if we haven't figured out what the line separator
-		    // is, do it now
-		    if (lineSeparator == null) {
-			try {
-			    lineSeparator =
-				System.getProperty("line.separator", "\n");
-			} catch (SecurityException ex) {
-			    lineSeparator = "\n";
-			}
-		    }
-		    // accumulate the preamble
-		    if (preamblesb == null)
-			preamblesb = new StringBuilder(line.length() + 2);
-		    preamblesb.append(line).append(lineSeparator);
-		}
+        // accumulate the preamble
+        if (preamblesb == null)
+            preamblesb = new StringBuilder(line.length() + 2);
+        if (line.length() > 0) {
+            preamblesb.append(line);
+        }
+        preamblesb.append(NEWLINE);
 	    }
 
 	    if (preamblesb != null)

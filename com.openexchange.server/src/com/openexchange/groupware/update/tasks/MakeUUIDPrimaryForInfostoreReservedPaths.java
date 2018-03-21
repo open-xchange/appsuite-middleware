@@ -53,15 +53,14 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.ProgressState;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
-import com.openexchange.tools.sql.DBUtils;
 import com.openexchange.tools.update.Column;
 import com.openexchange.tools.update.Tools;
-
 
 /**
  * {@link MakeUUIDPrimaryForInfostoreReservedPaths}
@@ -76,7 +75,7 @@ public class MakeUUIDPrimaryForInfostoreReservedPaths extends UpdateTaskAdapter 
         Connection connection = params.getConnection();
         boolean rollback = false;
         try {
-            DBUtils.startTransaction(connection);
+            Databases.startTransaction(connection);
             rollback = true;
 
             final String table = "infostoreReservedPaths";
@@ -96,9 +95,9 @@ public class MakeUUIDPrimaryForInfostoreReservedPaths extends UpdateTaskAdapter 
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } finally {
             if (rollback) {
-                DBUtils.rollback(connection);
+                Databases.rollback(connection);
             }
-            DBUtils.autocommit(connection);
+            Databases.autocommit(connection);
         }
     }
 
@@ -118,7 +117,7 @@ public class MakeUUIDPrimaryForInfostoreReservedPaths extends UpdateTaskAdapter 
                 rows += rs.getInt(1);
             }
         } finally {
-            DBUtils.closeSQLStuff(rs, stmt);
+            Databases.closeSQLStuff(rs, stmt);
         }
         return rows;
     }

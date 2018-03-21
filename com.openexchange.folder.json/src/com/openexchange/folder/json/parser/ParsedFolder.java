@@ -49,11 +49,17 @@
 
 package com.openexchange.folder.json.parser;
 
+import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import com.openexchange.folderstorage.ContentType;
+import com.openexchange.folderstorage.FolderField;
+import com.openexchange.folderstorage.FolderPath;
+import com.openexchange.folderstorage.FolderProperty;
+import com.openexchange.folderstorage.ParameterizedFolder;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.SetterAwareFolder;
 import com.openexchange.folderstorage.Type;
@@ -63,7 +69,7 @@ import com.openexchange.folderstorage.Type;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class ParsedFolder implements SetterAwareFolder {
+public final class ParsedFolder implements SetterAwareFolder, ParameterizedFolder {
 
     private static final long serialVersionUID = 11110622220507954L;
 
@@ -120,6 +126,10 @@ public final class ParsedFolder implements SetterAwareFolder {
     protected Map<String, Object> meta;
 
     protected Set<String> supportedCapbilitites;
+
+    protected Map<FolderField, FolderProperty> properties;
+
+    protected FolderPath originPath;
 
     /**
      * Initializes an empty {@link ParsedFolder}.
@@ -462,6 +472,42 @@ public final class ParsedFolder implements SetterAwareFolder {
     @Override
     public void setSupportedCapabilities(Set<String> capabilities) {
         this.supportedCapbilitites = capabilities;
+    }
+
+    @Override
+   public void setProperty(final FolderField name, final Object value) {
+        if (null == properties) {
+            properties = new HashMap<FolderField, FolderProperty>(4);
+        }
+        if (null == value) {
+            properties.remove(name);
+        } else {
+            properties.put(name, new FolderProperty(name.getName(), value));
+        }
+    }
+
+    @Override
+    public Map<FolderField, FolderProperty> getProperties() {
+        return null != properties ? Collections.unmodifiableMap(properties) : null;
+    }
+
+    /**
+     * Sets the map of extended folder field properties.
+     *
+     * @param properties The folder properties to set
+     */
+    public void setProperties(Map<FolderField, FolderProperty> properties) {
+        this.properties = properties;
+    }
+
+    @Override
+    public FolderPath getOriginPath() {
+        return originPath;
+    }
+
+    @Override
+    public void setOriginPath(FolderPath originPath) {
+        this.originPath = originPath;
     }
 
 }

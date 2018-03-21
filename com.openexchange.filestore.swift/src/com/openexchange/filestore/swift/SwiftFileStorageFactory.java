@@ -63,8 +63,8 @@ import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import org.apache.http.client.HttpClient;
 import org.apache.http.client.utils.URIBuilder;
+import org.apache.http.impl.client.CloseableHttpClient;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -91,6 +91,7 @@ import com.openexchange.filestore.swift.impl.token.Token;
 import com.openexchange.filestore.swift.impl.token.TokenStorage;
 import com.openexchange.filestore.swift.impl.token.TokenStorageImpl;
 import com.openexchange.filestore.utils.DefaultDatabaseAccess;
+import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
 import com.openexchange.rest.client.httpclient.HttpClients;
 import com.openexchange.rest.client.httpclient.HttpClients.ClientConfig;
@@ -369,101 +370,106 @@ public class SwiftFileStorageFactory implements FileStorageProvider {
         int heartbeatInterval = config.getIntProperty(property(filestoreID, "heartbeatInterval"), 60000);
 
         // Create the HTTP client
-        HttpClient httpClient = HttpClients.getHttpClient(ClientConfig.newInstance()
+        CloseableHttpClient httpClient = HttpClients.getHttpClient(ClientConfig.newInstance()
             .setMaxTotalConnections(maxConnections)
             .setMaxConnectionsPerRoute(maxConnectionsPerHost)
             .setConnectionTimeout(connectionTimeout)
             .setSocketReadTimeout(socketReadTimeout));
+        try {
+            // Create the auth info
+            AuthInfo authInfo = new AuthInfo(authValue, authType, tenantName, domain, identityUrl);
 
-        // Create the auth info
-        AuthInfo authInfo = new AuthInfo(authValue, authType, tenantName, domain, identityUrl);
+            // End-points...
+            EndpointPool endpointPool;
+            if (ConfigType.MANUAL == configType) {
+                // Manual end-point configuration
+                String protocol = requireProperty(filestoreID, "protocol", config);
+                String path = requireProperty(filestoreID, "path", config);
+                String hosts = requireProperty(filestoreID, "hosts", config);
 
-        // End-points...
-        EndpointPool endpointPool;
-        if (ConfigType.MANUAL == configType) {
-            // Manual end-point configuration
-            String protocol = requireProperty(filestoreID, "protocol", config);
-            String path = requireProperty(filestoreID, "path", config);
-            String hosts = requireProperty(filestoreID, "hosts", config);
+                List<String> urls = new LinkedList<String>();
+                for (String host : Strings.splitAndTrim(hosts, ",")) {
+                    URIBuilder uriBuilder = new URIBuilder().setScheme(protocol);
+                    String[] hostAndPort = Strings.splitByColon(host);
+                    if (hostAndPort.length == 1) {
+                        uriBuilder.setHost(host);
+                    } else if (hostAndPort.length == 2) {
+                        try {
+                            uriBuilder.setHost(hostAndPort[0]).setPort(Integer.parseInt(hostAndPort[1]));
+                        } catch (NumberFormatException e) {
+                            throw ConfigurationExceptionCodes.INVALID_CONFIGURATION.create(e, "Invalid value for 'com.openexchange.filestore.swift." + filestoreID + ".hosts': " + hosts);
+                        }
+                    } else {
+                        throw ConfigurationExceptionCodes.INVALID_CONFIGURATION.create("Invalid value for 'com.openexchange.filestore.swift." + filestoreID + ".hosts': " + hosts);
+                    }
 
-            List<String> urls = new LinkedList<String>();
-            for (String host : Strings.splitAndTrim(hosts, ",")) {
-                URIBuilder uriBuilder = new URIBuilder().setScheme(protocol);
-                String[] hostAndPort = Strings.splitByColon(host);
-                if (hostAndPort.length == 1) {
-                    uriBuilder.setHost(host);
-                } else if (hostAndPort.length == 2) {
+                    uriBuilder.setPath(path);
                     try {
-                        uriBuilder.setHost(hostAndPort[0]).setPort(Integer.parseInt(hostAndPort[1]));
-                    } catch (NumberFormatException e) {
-                        throw ConfigurationExceptionCodes.INVALID_CONFIGURATION.create(e, "Invalid value for 'com.openexchange.filestore.swift." + filestoreID + ".hosts': " + hosts);
-                    }
-                } else {
-                    throw ConfigurationExceptionCodes.INVALID_CONFIGURATION.create("Invalid value for 'com.openexchange.filestore.swift." + filestoreID + ".hosts': " + hosts);
-                }
-
-                uriBuilder.setPath(path);
-                try {
-                    String baseUrl = uriBuilder.build().toString();
-                    if (baseUrl.endsWith("/")) {
-                        baseUrl = baseUrl.substring(0, baseUrl.length() - 1);
-                    }
-                    urls.add(baseUrl);
-                } catch (URISyntaxException e) {
-                    throw ConfigurationExceptionCodes.INVALID_CONFIGURATION.create(e, "Swift configuration leads to invalid URI: " + uriBuilder.toString());
-                }
-            }
-
-            if (urls.isEmpty()) {
-                throw ConfigurationExceptionCodes.INVALID_CONFIGURATION.create("Invalid value for 'com.openexchange.filestore.swift." + filestoreID + ".hosts': " + hosts);
-            }
-
-            endpointPool = new EndpointPool(filestoreID, urls, httpClient, heartbeatInterval, null, requireService(TimerService.class, services));
-        } else {
-            if (AuthInfo.Type.PASSWORD_V3 != authInfo.getType()) {
-                throw ConfigurationExceptionCodes.INVALID_CONFIGURATION.create("Invalid value for 'com.openexchange.filestore.swift." + filestoreID + ".configType': " + configType.getId() + ". Only supported for " + AuthInfo.Type.PASSWORD_V3.getId() + " auth type.");
-            }
-
-            // By interface, region and container name
-            String sInterface = requireProperty(filestoreID, "interface", config);
-            String region = requireProperty(filestoreID, "region", config);
-            String containerName = requireProperty(filestoreID, "containerName", config);
-
-            try {
-                TokenAndResponse tokenAndResponse = SwiftClient.doAcquireNewToken(userName, authInfo, httpClient);
-                Token initialToken = tokenAndResponse.getToken();
-                JSONArray jCatalog = tokenAndResponse.getJsonResponse().getJSONObject("token").getJSONArray("catalog");
-                JSONArray jEndpoints = null;
-                for (int k = jCatalog.length(), i = 0; null == jEndpoints && k-- > 0; i++) {
-                    JSONObject jCatalogEntry = jCatalog.getJSONObject(i);
-                    if ("swift".equals(jCatalogEntry.optString("name", null)) && "object-store".equals(jCatalogEntry.optString("type", null))) {
-                        jEndpoints = jCatalogEntry.getJSONArray("endpoints");
-                    }
-                }
-                if (null == jEndpoints) {
-                    throw ConfigurationExceptionCodes.INVALID_CONFIGURATION.create("No such catalog entry with \"name\"=\"swift\" and \"type\"=\"object-store\".");
-                }
-
-                int numOfEndpoints = jEndpoints.length();
-                List<String> urls = new ArrayList<String>(numOfEndpoints);
-                for (int k = numOfEndpoints, i = 0; k-- > 0; i++) {
-                    JSONObject jEndpoint = jEndpoints.getJSONObject(i);
-                    if (sInterface.equals(jEndpoint.optString("interface", null)) && region.equals(jEndpoint.optString("region", null))) {
-                        urls.add(jEndpoint.getString("url") + "/" + containerName);
+                        String baseUrl = uriBuilder.build().toString();
+                        if (baseUrl.endsWith("/")) {
+                            baseUrl = baseUrl.substring(0, baseUrl.length() - 1);
+                        }
+                        urls.add(baseUrl);
+                    } catch (URISyntaxException e) {
+                        throw ConfigurationExceptionCodes.INVALID_CONFIGURATION.create(e, "Swift configuration leads to invalid URI: " + uriBuilder.toString());
                     }
                 }
 
                 if (urls.isEmpty()) {
-                    throw ConfigurationExceptionCodes.INVALID_CONFIGURATION.create("No such end-points for \"interface\"=\"" + sInterface + "\" and \"region\"=\"" + region + "\".");
+                    throw ConfigurationExceptionCodes.INVALID_CONFIGURATION.create("Invalid value for 'com.openexchange.filestore.swift." + filestoreID + ".hosts': " + hosts);
                 }
 
-                endpointPool = new EndpointPool(filestoreID, urls, httpClient, heartbeatInterval, initialToken, requireService(TimerService.class, services));
-            } catch (JSONException e) {
-                throw ConfigurationExceptionCodes.INVALID_CONFIGURATION.create(e, "Unexpected JSON response.");
-            }
-        }
+                endpointPool = new EndpointPool(filestoreID, urls, httpClient, heartbeatInterval, null, requireService(TimerService.class, services));
+            } else {
+                if (AuthInfo.Type.PASSWORD_V3 != authInfo.getType()) {
+                    throw ConfigurationExceptionCodes.INVALID_CONFIGURATION.create("Invalid value for 'com.openexchange.filestore.swift." + filestoreID + ".configType': " + configType.getId() + ". Only supported for " + AuthInfo.Type.PASSWORD_V3.getId() + " auth type.");
+                }
 
-        return new SwiftConfig(filestoreID, userName, authInfo, httpClient, endpointPool);
+                // By interface, region and container name
+                String sInterface = requireProperty(filestoreID, "interface", config);
+                String region = requireProperty(filestoreID, "region", config);
+                String containerName = requireProperty(filestoreID, "containerName", config);
+
+                try {
+                    TokenAndResponse tokenAndResponse = SwiftClient.doAcquireNewToken(userName, authInfo, httpClient);
+                    Token initialToken = tokenAndResponse.getToken();
+                    JSONArray jCatalog = tokenAndResponse.getJsonResponse().getJSONObject("token").getJSONArray("catalog");
+                    JSONArray jEndpoints = null;
+                    for (int k = jCatalog.length(), i = 0; null == jEndpoints && k-- > 0; i++) {
+                        JSONObject jCatalogEntry = jCatalog.getJSONObject(i);
+                        if ("swift".equals(jCatalogEntry.optString("name", null)) && "object-store".equals(jCatalogEntry.optString("type", null))) {
+                            jEndpoints = jCatalogEntry.getJSONArray("endpoints");
+                        }
+                    }
+                    if (null == jEndpoints) {
+                        throw ConfigurationExceptionCodes.INVALID_CONFIGURATION.create("No such catalog entry with \"name\"=\"swift\" and \"type\"=\"object-store\".");
+                    }
+
+                    int numOfEndpoints = jEndpoints.length();
+                    List<String> urls = new ArrayList<String>(numOfEndpoints);
+                    for (int k = numOfEndpoints, i = 0; k-- > 0; i++) {
+                        JSONObject jEndpoint = jEndpoints.getJSONObject(i);
+                        if (sInterface.equals(jEndpoint.optString("interface", null)) && region.equals(jEndpoint.optString("region", null))) {
+                            urls.add(jEndpoint.getString("url") + "/" + containerName);
+                        }
+                    }
+
+                    if (urls.isEmpty()) {
+                        throw ConfigurationExceptionCodes.INVALID_CONFIGURATION.create("No such end-points for \"interface\"=\"" + sInterface + "\" and \"region\"=\"" + region + "\".");
+                    }
+
+                    endpointPool = new EndpointPool(filestoreID, urls, httpClient, heartbeatInterval, initialToken, requireService(TimerService.class, services));
+                } catch (JSONException e) {
+                    throw ConfigurationExceptionCodes.INVALID_CONFIGURATION.create(e, "Unexpected JSON response.");
+                }
+            }
+
+            SwiftConfig swiftConfig = new SwiftConfig(filestoreID, userName, authInfo, httpClient, endpointPool);
+            httpClient = null;
+            return swiftConfig;
+        } finally {
+            Streams.close(httpClient);
+        }
     }
 
     private static String requireProperty(String filestoreID, String property, ConfigurationService config) throws OXException {

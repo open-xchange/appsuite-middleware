@@ -29,13 +29,13 @@ msgstr ""
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/ContextSensitiveMessages.java:82
 msgctxt "verb"
 msgid "accepted"
-msgstr "承諾済み"
+msgstr "承諾"
 
 #. The adjective "accepted", like "The users status is 'accepted'."
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/ContextSensitiveMessages.java:85
 msgctxt "adjective"
 msgid "accepted"
-msgstr "承諾済み"
+msgstr "承諾"
 
 #. The verb "declined", like "User A has declined an appointment."
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/ContextSensitiveMessages.java:101
@@ -158,7 +158,7 @@ msgstr "コメント"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar.printing/src/com/openexchange/calendar/printing/templating/Strings.java:62
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/calendar/CalendarStrings.java:99
 msgid "Accepted"
-msgstr "承諾済み"
+msgstr "承諾"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar.printing/src/com/openexchange/calendar/printing/templating/Strings.java:63
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/calendar/CalendarStrings.java:101
@@ -167,7 +167,7 @@ msgstr "辞退"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar.printing/src/com/openexchange/calendar/printing/templating/Strings.java:64
 msgid "Tentatively accepted"
-msgstr "仮承諾済み"
+msgstr "仮承諾"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar.printing/src/com/openexchange/calendar/printing/templating/Strings.java:65
 msgid "Undecided"
@@ -234,44 +234,44 @@ msgstr "日"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/HRRStrings.java:84
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:891
 msgid "Monday"
-msgstr "月曜日"
+msgstr "月曜"
 
 #. Tuesday
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/HRRStrings.java:86
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:894
 msgid "Tuesday"
-msgstr "火曜日"
+msgstr "火曜"
 
 #. Wednesday
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/HRRStrings.java:88
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:897
 msgid "Wednesday"
-msgstr "水曜日"
+msgstr "水曜"
 
 #. Thursday
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/HRRStrings.java:90
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:900
 msgid "Thursday"
-msgstr "木曜日"
+msgstr "木曜"
 
 #. Friday
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/HRRStrings.java:92
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:903
 msgid "Friday"
-msgstr "金曜日"
+msgstr "金曜"
 
 #. Saturday
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/HRRStrings.java:94
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:906
 msgid "Saturday"
-msgstr "土曜日"
+msgstr "土曜"
 
 #. Sunday
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/HRRStrings.java:96
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:909
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:912
 msgid "Sunday"
-msgstr "日曜日"
+msgstr "日曜"
 
 #. -
 #. * Months
@@ -1019,7 +1019,7 @@ msgstr "ミドルネーム"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:67
 msgid "Suffix"
-msgstr "敬称（後）"
+msgstr "敬称"
 
 #. A document's title
 #. Task attribute name
@@ -1028,7 +1028,7 @@ msgstr "敬称（後）"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/infostore/InfostoreStrings.java:70
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/AttributeNames.java:96
 msgid "Title"
-msgstr "敬称（前）"
+msgstr "敬称"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:69
 msgid "Street (home)"
@@ -2427,7 +2427,7 @@ msgstr "⁺∕₋ 1年"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/calendar/CalendarStrings.java:103
 msgid "Tentative"
-msgstr "仮の予定"
+msgstr "仮承諾"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/calendar/CalendarStrings.java:105
 msgid "None"
@@ -2441,7 +2441,7 @@ msgstr "実線"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/calendar/CalendarStrings.java:110
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/tasks/TasksStrings.java:104
 msgid "Series"
-msgstr "アポイント全体"
+msgstr "繰り返し"
 
 #. ------------------------- i18n strings for facet types -------------------------------------- //
 #. Search in folder type (private, public, shared, external)
@@ -2555,7 +2555,7 @@ msgstr "フォルダ"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:72
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/FolderStrings.java:96
 msgid "Contacts"
-msgstr "メンバ"
+msgstr "連絡先"
 
 #. Search in file description.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:78
@@ -4489,7 +4489,7 @@ msgstr "グループ"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/ajax/anonymizer/AnonymizerStrings.java:77
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:663
 msgid "Resource"
-msgstr "設備"
+msgstr "リソース"
 
 #. *
 #. * The value you inserted for %2$s is not correct
@@ -6425,7 +6425,7 @@ msgstr "設定されていません。"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:672
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:699
 msgid "accepted"
-msgstr "承諾済み"
+msgstr "承諾"
 
 #. declined
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:674
@@ -6659,7 +6659,7 @@ msgstr "、%1$s に終了"
 #. Weekday
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:915
 msgid "Weekday"
-msgstr "稼働日"
+msgstr "曜日"
 
 #. Display name of the anonymous guest user.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/Users.java:69

@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 1997-2017 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997-2018 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -40,12 +40,13 @@
 
 package com.sun.mail.dsn;
 
-import java.io.*;
-import java.util.Properties;
 import java.awt.datatransfer.DataFlavor;
-import javax.activation.*;
-import javax.mail.*;
-import javax.mail.internet.*;
+import java.io.IOException;
+import java.io.OutputStream;
+import javax.activation.ActivationDataFlavor;
+import javax.activation.DataContentHandler;
+import javax.activation.DataSource;
+import javax.mail.MessagingException;
 
 
 /**
@@ -90,7 +91,8 @@ public class message_dispositionnotification implements DataContentHandler {
      */
     public Object getContent(DataSource ds) throws IOException {
 	// create a new DispositionNotification
-	try {
+	java.io.InputStream in = null;
+    try {
 	    /*
 	    Session session;
 	    if (ds instanceof MessageAware) {
@@ -106,12 +108,17 @@ public class message_dispositionnotification implements DataContentHandler {
 	    }
 	    return new DispositionNotification(session, ds.getInputStream());
 	    */
-	    return new DispositionNotification(ds.getInputStream());
+        in = ds.getInputStream();
+	    return new DispositionNotification(in);
 	} catch (MessagingException me) {
 	    throw new IOException(
 		    "Exception creating DispositionNotification in " +
 		    "message/disposition-notification DataContentHandler: " +
 		    me.toString());
+	} finally {
+	    if (null != in) {
+            in.close();
+        }
 	}
     }
     

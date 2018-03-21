@@ -52,6 +52,7 @@ import java.io.Serializable;
 import java.util.Hashtable;
 import com.openexchange.admin.rmi.exceptions.DuplicateExtensionException;
 import com.openexchange.admin.rmi.extensions.OXCommonExtension;
+import com.openexchange.admin.rmi.extensions.OXCommonExtensionInterface;
 
 /**
  * This class defines all those methods which make and object capable of being dynamically extended by other
@@ -66,7 +67,7 @@ public abstract class ExtendableDataObject extends EnforceableDataObject impleme
 
     private static final long serialVersionUID = 5125311385480887183L;
 
-    private Hashtable<String, OXCommonExtension> extensions = null;
+    private Hashtable<String, OXCommonExtensionInterface> extensions = null;
 
     private final boolean extensionsset = false;
 
@@ -82,7 +83,7 @@ public abstract class ExtendableDataObject extends EnforceableDataObject impleme
      * @param extension An {@link OXCommonExtension} object
      * @throws DuplicateExtensionException
      */
-    public void addExtension(final OXCommonExtension extension) throws DuplicateExtensionException {
+    public void addExtension(final OXCommonExtensionInterface extension) throws DuplicateExtensionException {
         final String extensionName = extension.getClass().getName();
         if (this.extensions.containsKey(extensionName)) {
             throw new DuplicateExtensionException(extensionName);
@@ -95,7 +96,7 @@ public abstract class ExtendableDataObject extends EnforceableDataObject impleme
      *
      * @return A {@link Hashtable}
      */
-    public Hashtable<String, OXCommonExtension> getAllExtensionsAsHash() {
+    public Hashtable<String, OXCommonExtensionInterface> getAllExtensionsAsHash() {
         return this.extensions;
     }
 
@@ -107,7 +108,7 @@ public abstract class ExtendableDataObject extends EnforceableDataObject impleme
      * @param extname
      * @return
      */
-    public OXCommonExtension getFirstExtensionByName(final String extname) {
+    public OXCommonExtensionInterface getFirstExtensionByName(final String extname) {
         return this.extensions.get(extname);
     }
 
@@ -151,14 +152,14 @@ public abstract class ExtendableDataObject extends EnforceableDataObject impleme
     }
 
     protected void initExtendable() {
-        this.extensions = new Hashtable<String, OXCommonExtension>(3);
+        this.extensions = new Hashtable<String, OXCommonExtensionInterface>(3);
     }
 
     @Override
     protected Object clone() throws CloneNotSupportedException {
         final ExtendableDataObject object = (ExtendableDataObject) super.clone();
         if( this.extensions != null ) {
-            object.extensions = new Hashtable<String, OXCommonExtension>(this.extensions);
+            object.extensions = new Hashtable<String, OXCommonExtensionInterface>(this.extensions);
         }
         return object;
     }
@@ -166,7 +167,7 @@ public abstract class ExtendableDataObject extends EnforceableDataObject impleme
     @Override
     public String toString() {
         final StringBuilder ret = new StringBuilder(super.toString());
-        for (final OXCommonExtension usrext : extensions.values()) {
+        for (final OXCommonExtensionInterface usrext : extensions.values()) {
             ret.append("  ");
             ret.append("Extension ");
             ret.append(usrext.getClass().getName());

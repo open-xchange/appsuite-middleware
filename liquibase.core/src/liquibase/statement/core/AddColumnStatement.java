@@ -1,10 +1,14 @@
 package liquibase.statement.core;
 
-import liquibase.statement.*;
-
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
+import liquibase.statement.AbstractSqlStatement;
+import liquibase.statement.AutoIncrementConstraint;
+import liquibase.statement.ColumnConstraint;
+import liquibase.statement.NotNullConstraint;
+import liquibase.statement.PrimaryKeyConstraint;
+import liquibase.statement.UniqueConstraint;
 
 public class AddColumnStatement extends AbstractSqlStatement {
 

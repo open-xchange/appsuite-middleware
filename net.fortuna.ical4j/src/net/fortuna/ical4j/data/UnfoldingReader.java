@@ -35,11 +35,9 @@ import java.io.IOException;
 import java.io.PushbackReader;
 import java.io.Reader;
 import java.util.Arrays;
-
-import net.fortuna.ical4j.util.CompatibilityHints;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import net.fortuna.ical4j.util.CompatibilityHints;
 
 /**
  * <pre>

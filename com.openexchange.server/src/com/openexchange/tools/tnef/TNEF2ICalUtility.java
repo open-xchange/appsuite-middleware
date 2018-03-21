@@ -55,13 +55,13 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
 import javax.mail.internet.AddressException;
+import com.openexchange.mail.mime.QuotedInternetAddress;
 import net.fortuna.ical4j.model.DateTime;
 import net.fortuna.ical4j.model.TimeZoneRegistry;
 import net.fortuna.ical4j.model.TimeZoneRegistryFactory;
 import net.freeutils.tnef.MAPIProp;
 import net.freeutils.tnef.MAPIPropName;
 import net.freeutils.tnef.MAPIProps;
-import com.openexchange.mail.mime.QuotedInternetAddress;
 
 /**
  * {@link TNEF2ICalUtility}

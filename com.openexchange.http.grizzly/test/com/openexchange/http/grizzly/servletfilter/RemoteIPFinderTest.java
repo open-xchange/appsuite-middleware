@@ -79,7 +79,8 @@ public class RemoteIPFinderTest {
 
     @Test
     public void testEmptyKnownIPv4() {
-        evaluate(emptyRemote, validIPv4Remotes, "192.168.33.224");
+        String remoteIP = IPTools.getRemoteIP(validIPv4Remotes, IPTools.filterIP(emptyRemote));
+        assertNull(remoteIP);
     }
 
     @Test
@@ -101,7 +102,8 @@ public class RemoteIPFinderTest {
 
     @Test
     public void testEmptyKnownIPv6() {
-        evaluate(emptyRemote, validIPv6Remotes, "2001:db8:0:8d3:0:8a2e:70:7344");
+        String remoteIP = IPTools.getRemoteIP(validIPv6Remotes, IPTools.filterIP(emptyRemote));
+        assertNull(remoteIP);
     }
 
     @Test

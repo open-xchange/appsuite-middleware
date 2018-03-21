@@ -59,13 +59,13 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.settings.Setting;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
-import com.openexchange.tools.sql.DBUtils;
 import com.openexchange.user.copy.CopyUserTaskService;
 import com.openexchange.user.copy.ObjectMapping;
 import com.openexchange.user.copy.UserCopyExceptionCodes;
@@ -147,6 +147,9 @@ public class UserSettingsCopyTask implements CopyUserTaskService {
          */
         final UserSettingMailStorage usmStorage = UserSettingMailStorage.getInstance();
         final UserSettingMail srcMailSettings = usmStorage.getUserSettingMail(i(srcUsrId), srcCtx, srcCon);
+        if(srcMailSettings == null) {
+            throw UserCopyExceptionCodes.SAVE_MAIL_SETTINGS_PROBLEM.create();
+        }
         try {
             usmStorage.saveUserSettingMail(srcMailSettings, i(dstUsrId), dstCtx, dstCon);
         } catch (final OXException e) {
@@ -200,7 +203,7 @@ public class UserSettingsCopyTask implements CopyUserTaskService {
         } catch (final SQLException e) {
             throw UserCopyExceptionCodes.SQL_PROBLEM.create(e);
         } finally {
-            DBUtils.closeSQLStuff(rs, stmt);
+            Databases.closeSQLStuff(rs, stmt);
         }
 
         return setting;
@@ -225,7 +228,7 @@ public class UserSettingsCopyTask implements CopyUserTaskService {
         } catch (final SQLException e) {
             throw UserCopyExceptionCodes.SQL_PROBLEM.create(e);
         } finally {
-            DBUtils.closeSQLStuff(stmt);
+            Databases.closeSQLStuff(stmt);
         }
     }
 
@@ -249,7 +252,7 @@ public class UserSettingsCopyTask implements CopyUserTaskService {
         } catch (final SQLException e) {
             throw UserCopyExceptionCodes.SQL_PROBLEM.create(e);
         } finally {
-            DBUtils.closeSQLStuff(rs, stmt);
+            Databases.closeSQLStuff(rs, stmt);
         }
 
         return settings;
@@ -277,7 +280,7 @@ public class UserSettingsCopyTask implements CopyUserTaskService {
         } catch (final SQLException e) {
             throw UserCopyExceptionCodes.SQL_PROBLEM.create(e);
         } finally {
-            DBUtils.closeSQLStuff(stmt);
+            Databases.closeSQLStuff(stmt);
         }
     }
 

@@ -49,8 +49,6 @@
 
 package com.openexchange.unifiedinbox;
 
-import gnu.trove.list.TIntList;
-import gnu.trove.list.array.TIntArrayList;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.FullnameArgument;
 import com.openexchange.mail.MailPath;
@@ -62,6 +60,8 @@ import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.mailaccount.UnifiedInboxUID;
 import com.openexchange.session.Session;
 import com.openexchange.unifiedinbox.utility.UnifiedInboxUtility;
+import gnu.trove.list.TIntList;
+import gnu.trove.list.array.TIntArrayList;
 
 
 /**

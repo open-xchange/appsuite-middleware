@@ -62,7 +62,6 @@ import org.jsoup.nodes.Node;
 import org.jsoup.nodes.TextNode;
 import org.jsoup.nodes.XmlDeclaration;
 import org.jsoup.parser.InterruptedParsingException;
-import org.jsoup.parser.ParseErrorList;
 import org.jsoup.parser.Parser;
 import org.jsoup.select.Elements;
 import org.jsoup.select.NodeVisitor;
@@ -193,7 +192,7 @@ public class JsoupParser {
             document.traverse(new InterruptibleJsoupNodeVisitor(handler));
             handler.finished(document);
         } catch (InterruptedParsingException e) {
-            throw HtmlExceptionCodes.PARSING_FAILED.create("Parser timeout.", e);
+            throw HtmlExceptionCodes.PARSING_FAILED.create(e, "Parser timeout.");
         } catch (StackOverflowError parserOverflow) {
             throw HtmlExceptionCodes.PARSING_FAILED.create("Parser overflow detected.", parserOverflow);
         }

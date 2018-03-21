@@ -121,7 +121,12 @@ final class SessionContainer {
      */
     protected boolean containsUser(final int userId, final int contextId) {
         final ConcurrentMap<Integer, Map<String, Object>> map = userSessions.get(Integer.valueOf(contextId));
-        return null != map && map.containsKey(Integer.valueOf(userId));
+        if (null == map) {
+            return false;
+        }
+
+        Map<String, Object> sessionIds = map.get(Integer.valueOf(userId));
+        return null != sessionIds && !sessionIds.isEmpty();
     }
 
     /**
@@ -342,7 +347,6 @@ final class SessionContainer {
                 sessionIds.remove(sessionId);
             }
         }
-
 
         return sessionControl;
     }

@@ -1,6 +1,21 @@
 package liquibase.parser.core.yaml;
 
-import liquibase.change.*;
+import java.io.File;
+import java.io.InputStream;
+import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
+import org.yaml.snakeyaml.Yaml;
+import liquibase.change.Change;
+import liquibase.change.ChangeFactory;
+import liquibase.change.ChangeParameterMetaData;
+import liquibase.change.ColumnConfig;
+import liquibase.change.ConstraintsConfig;
 import liquibase.changelog.ChangeLogParameters;
 import liquibase.changelog.ChangeSet;
 import liquibase.changelog.DatabaseChangeLog;
@@ -24,12 +39,6 @@ import liquibase.statement.SequenceCurrentValueFunction;
 import liquibase.statement.SequenceNextValueFunction;
 import liquibase.util.ObjectUtil;
 import liquibase.util.file.FilenameUtils;
-import org.yaml.snakeyaml.Yaml;
-
-import java.io.File;
-import java.io.InputStream;
-import java.math.BigInteger;
-import java.util.*;
 
 public class YamlChangeLogParser implements ChangeLogParser {
 
@@ -56,24 +65,28 @@ public class YamlChangeLogParser implements ChangeLogParser {
         try {
             InputStream changeLogStream = resourceAccessor.getResourceAsStream(physicalChangeLogLocation);
 
-            Map changeLogAsMap = null;
+            Map<?,?> changeLogAsMap = null;
             try {
                 changeLogAsMap = yaml.loadAs(changeLogStream, Map.class);
             } catch (Exception e) {
                 throw new ChangeLogParseException("Syntax error in "+getSupportedFileExtension()+": " + e.getMessage(), e);
             }
 
+            if(changeLogAsMap == null) {
+                throw new ChangeLogParseException("Unable to parse changelog.");
+            }
+
             DatabaseChangeLog changeLog = new DatabaseChangeLog(physicalChangeLogLocation);
             changeLog.setChangeLogParameters(changeLogParameters);
-            List rootList = (List) changeLogAsMap.get("databaseChangeLog");
+            List<?> rootList = (List<?>) changeLogAsMap.get("databaseChangeLog");
             if (rootList == null) {
                 throw new ChangeLogParseException("Could not find root databaseChangeLog node");
             }
 
-            for (Map<String, Object> nestedMap : (List<Map>) rootList) {
+            for (Map<String, Object> nestedMap : (List<Map<String,Object>>) rootList) {
                 String objectType = nestedMap.keySet().iterator().next();
                 if (objectType.equals("changeSet")) {
-                    Map<String, Object> changeSetMap = (Map) nestedMap.get("changeSet");
+                    Map<String, Object> changeSetMap = (Map<String, Object>) nestedMap.get("changeSet");
                     if (changeSetMap == null) {
                         throw new ChangeLogParseException("Null changeSet map");
                     }
@@ -94,7 +107,7 @@ public class YamlChangeLogParser implements ChangeLogParser {
 
                         List<Map<String, Object>> changes = null;
                         try {
-                            changes = (List<Map<String, Object>>) getValue(changeSetMap, "changes", List.class, changeLogParameters);
+                            changes = getValue(changeSetMap, "changes", List.class, changeLogParameters);
                         } catch (ClassCastException e) {
                             throw new ChangeLogParseException("Invalid 'changes' format in " + changeSet.toString(false));
                         }
@@ -184,9 +197,6 @@ public class YamlChangeLogParser implements ChangeLogParser {
 
                                         }
                                         value = columnList;
-
-//                                    } else if (!dataType.equals("string")) {
-//                                        System.out.println("other");
                                     }
                                     changeParameterMetaData.setValue(change, value);
                                 }
@@ -197,7 +207,7 @@ public class YamlChangeLogParser implements ChangeLogParser {
 
                         List<Map<String, Object>> preconditions = null;
                         try {
-                            preconditions = (List<Map<String, Object>>) getValue(changeSetMap, "preConditions", List.class, changeLogParameters);
+                            preconditions = getValue(changeSetMap, "preConditions", List.class, changeLogParameters);
                         } catch (ClassCastException e) {
                             throw new ChangeLogParseException("Invalid 'preConditions' format in " + changeSet.toString(false));
                         }
@@ -227,7 +237,7 @@ public class YamlChangeLogParser implements ChangeLogParser {
 
                         List<Map<String, Object>> sqlVisitors = null;
                         try {
-                            sqlVisitors = (List<Map<String, Object>>) getValue(changeSetMap, "modifySql", List.class, changeLogParameters);
+                            sqlVisitors = getValue(changeSetMap, "modifySql", List.class, changeLogParameters);
                         } catch (ClassCastException e) {
                             throw new ChangeLogParseException("Invalid 'modifySql' format in " + changeSet.toString(false));
                         }
@@ -270,7 +280,7 @@ public class YamlChangeLogParser implements ChangeLogParser {
                     }
 
                 } else if (objectType.equals("property")) {
-                    Map<String, Object> propertyMap = (Map) nestedMap.get("property");
+                    Map<String, Object> propertyMap = (Map<String, Object>) nestedMap.get("property");
                     String name = getValue(propertyMap, "name", String.class, changeLogParameters);
                     Object value = getValue(propertyMap, "value", Object.class, changeLogParameters);
                     String file = getValue(propertyMap, "file", String.class, changeLogParameters);
@@ -289,28 +299,27 @@ public class YamlChangeLogParser implements ChangeLogParser {
                         } else {
                             props.load(propertiesStream);
 
-                            for (Map.Entry entry : props.entrySet()) {
+                            for (Map.Entry<?,?> entry : props.entrySet()) {
                                 changeLog.getChangeLogParameters().set(entry.getKey().toString(), entry.getValue().toString(), context, dbms);
                             }
                         }
                     }
                 } else if (objectType.equals("preConditions")) {
-                    List preconditions = (List) nestedMap.get("preConditions");
+                    List<?> preconditions = (List<?>) nestedMap.get("preConditions");
                     if (preconditions == null) {
                         throw new ChangeLogParseException("Null preConditions map");
                     }
 
                     PreconditionContainer rootPrecondition = new PreconditionContainer();
 
-                    for (Map<String, Object> preconditionContainerMap : (List<Map>) preconditions) {
+                    for (Map<String, Object> preconditionContainerMap : (List<Map<String, Object>>) preconditions) {
                         String preconditionName = preconditionContainerMap.keySet().iterator().next();
-                        Map<String, Object> preconditionMap = (Map) preconditionContainerMap.get(preconditionName);
+                        Map<String, Object> preconditionMap = (Map<String, Object>) preconditionContainerMap.get(preconditionName);
                         Precondition precondition = PreconditionFactory.getInstance().create(preconditionName);
 
                         try {
                             for (Map.Entry<String, Object> param : preconditionMap.entrySet()) {
-                                ObjectUtil.setProperty(precondition, (String) param.getKey(), param.getValue().toString());
-//                                precondition.getChangeMetaData().getParameters().get(param.getKey()).setValue(change, param.getValue());
+                                ObjectUtil.setProperty(precondition, param.getKey(), param.getValue().toString());
                             }
                         } catch (Throwable e) {
                             throw new ChangeLogParseException(e);
@@ -321,7 +330,7 @@ public class YamlChangeLogParser implements ChangeLogParser {
 
                     changeLog.setPreconditions(rootPrecondition);
                 } else if (objectType.equals("include")) {
-                    Map<String, Object> includeMap = (Map) nestedMap.get("include");
+                    Map<String, Object> includeMap = (Map<String, Object>) nestedMap.get("include");
                     String file = getValue(includeMap, "file", String.class, changeLogParameters);
                     if (file == null) {
                         throw new ChangeLogParseException("Missing include 'file' attribute");
@@ -332,14 +341,6 @@ public class YamlChangeLogParser implements ChangeLogParser {
 
                 } else if (objectType.equals("includeAll")) {
                     throw new ChangeLogParseException("includeAll not yet supported in "+getSupportedFileExtension());
-//                    Map<String, Object> includeAllMap = (Map) nestedMap.get("includeAll");
-//                    String path = getValue(includeAllMap, "path", String.class, changeLogParameters);
-//                    if (path == null) {
-//                        throw new ChangeLogParseException("Missing includeAll 'file' attribute");
-//                    }
-//                    path = path.replace('\\', '/');
-//                    boolean isRelativeToChangelogFile = getValue(includeAllMap, "relativeToChangelogFile", Boolean.class, false, changeLogParameters);
-//                    handleIncludedChangeLog(fileName, isRelativeToChangelogFile, physicalChangeLogLocation);
                 } else {
                     throw new ChangeLogParseException("Unexpected databaseChangeLog node: " + objectType);
                 }
@@ -411,7 +412,7 @@ public class YamlChangeLogParser implements ChangeLogParser {
         return getValue(map, key, type, null, changeLogParameters);
     }
 
-    private void checkRequiredAttribute(String outerNode, String key, Map map) throws ChangeLogParseException {
+    private void checkRequiredAttribute(String outerNode, String key, Map<?,?> map) throws ChangeLogParseException {
         if (!map.containsKey(key)) {
             throw new ChangeLogParseException(outerNode + " is missing required attribute " + key);
         }

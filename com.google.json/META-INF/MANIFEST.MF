@@ -1,0 +1,12 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Given JSON-like content, The JSON Sanitizer converts it to valid JSON
+Bundle-SymbolicName: com.google.json
+Bundle-Version: 1.2.0
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Bundle-ClassPath: lib/json-sanitizer-1.2.0.jar,
+ .
+Import-Package: javax.annotation,
+ javax.annotation.concurrent,
+ javax.annotation.meta
+Export-Package: com.google.json;version="1.2.0"

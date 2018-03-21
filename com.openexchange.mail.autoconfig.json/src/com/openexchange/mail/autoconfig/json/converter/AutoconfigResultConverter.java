@@ -93,9 +93,10 @@ public class AutoconfigResultConverter implements ResultConverter {
         }
 
         try {
+            boolean noTransport = null == autoconfig.getTransportServer();
             JSONObject json = new JSONObject(16);
             json.put("login", autoconfig.getUsername());
-            json.put("transport_login", autoconfig.getUsername());
+            json.put("transport_login", noTransport ? null : autoconfig.getUsername());
             json.put("mail_server", autoconfig.getMailServer());
             json.put("transport_server", autoconfig.getTransportServer());
             json.put("mail_port", autoconfig.getMailPort());
@@ -105,7 +106,7 @@ public class AutoconfigResultConverter implements ResultConverter {
             json.put("mail_secure", autoconfig.isMailSecure());
             json.put("transport_secure", autoconfig.isTransportSecure());
             json.put("mail_starttls", autoconfig.isMailStartTls());
-            json.put("transport_starttls", autoconfig.isTransportStartTls());
+            json.put("transport_starttls", noTransport ? null :  Boolean.valueOf(autoconfig.isTransportStartTls()));
             Integer mailOAuthId = autoconfig.getMailOAuthId();
             if (null != mailOAuthId) {
                 json.put("mail_oauth", mailOAuthId);

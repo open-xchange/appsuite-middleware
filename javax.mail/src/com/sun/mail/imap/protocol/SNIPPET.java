@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 1997-2017 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997-2018 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -40,7 +40,7 @@
 
 package com.sun.mail.imap.protocol;
 
-import com.sun.mail.iap.*;
+import com.sun.mail.iap.ParsingException;
 
 /**
  * The SNIPPET fetch response item.
@@ -64,17 +64,39 @@ public class SNIPPET implements Item {
     public SNIPPET(FetchResponse r) throws ParsingException {
 	r.skipSpaces();
 
-	algorithm = r.readString(' ');
-	if (r.readByte() != ' ') {
-        throw new ParsingException("SNIPPET parse error: missing space at algorithm end");
-    }
+	byte b = r.peekByte();
+	if (b == '(') {
+	    // Expect: ``SNIPPET (FUZZY "Some text")''
+	    r.readByte();
+	    algorithm = r.readString(' ');
+	    if (r.readByte() != ' ') {
+	        throw new ParsingException("SNIPPET parse error: missing space at algorithm end");
+	    }
 
-	String text = r.readUtf8AtomString();
-	if (text != null && text.equalsIgnoreCase("NIL")) {
-	    // Snippet is empty
-	    text = "";
+	    String text = r.readUtf8AtomString();
+	    if ("NIL".equalsIgnoreCase(text)) {
+	        // Snippet is empty
+	        text = "";
+	    }
+	    this.text = text;
+
+	    if (!r.isNextNonSpace(')')) // eat the end ')'
+	        throw new ParsingException(
+	        "SNIPPET parse error: missing ``)'' at end");
+	} else {
+        // Expect: ``SNIPPET FUZZY "Some text"''
+	    algorithm = r.readString(' ');
+	    if (r.readByte() != ' ') {
+	        throw new ParsingException("SNIPPET parse error: missing space at algorithm end");
+	    }
+
+	    String text = r.readUtf8AtomString();
+	    if ("NIL".equalsIgnoreCase(text)) {
+	        // Snippet is empty
+	        text = "";
+	    }
+	    this.text = text;
 	}
-	this.text = text;
     }
 
     /**

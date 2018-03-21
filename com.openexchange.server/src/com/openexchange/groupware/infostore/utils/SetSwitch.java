@@ -57,6 +57,7 @@ import java.util.List;
 import java.util.Map;
 import com.openexchange.groupware.container.ObjectPermission;
 import com.openexchange.groupware.infostore.DocumentMetadata;
+import com.openexchange.groupware.infostore.InfostoreFolderPath;
 
 public class SetSwitch implements MetadataSwitcher{
 
@@ -185,9 +186,10 @@ public class SetSwitch implements MetadataSwitcher{
 	}
 
 	@Override
-    public Object sequenceNumber() {
-		//impl.setSequenceNumber((Long)value);
-		return null;
+	public Object sequenceNumber() {
+	    if(null == value) { return null; }
+	    impl.setSequenceNumber((Long)value);
+	    return null;
 	}
 
 	@Override
@@ -272,6 +274,15 @@ public class SetSwitch implements MetadataSwitcher{
     public Object shareable() {
         if(null == value) { return null; }
         impl.setShareable(((Boolean)value).booleanValue());
+        return null;
+    }
+
+    @Override
+    public Object origin() {
+        if (null == value) {
+            return null;
+        }
+        impl.setOriginFolderPath((InfostoreFolderPath) value);
         return null;
     }
 

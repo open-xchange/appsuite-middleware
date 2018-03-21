@@ -616,7 +616,7 @@ public class PermanentListenerRescheduler implements ServiceTrackerCustomizer<Ha
                             Map<Member, Future<Boolean>> futureMap = executor.submitToMembers(new PortableDropAllPermanentListenerCallable(master.getUuid()), capableMembers);
 
                             // Stop all on local node, too
-                            PushManagerRegistry.getInstance().stopAllPermanentListener();
+                            PushManagerRegistry.getInstance().stopAllPermanentListener(false); // No reconnect since we are going to restart them in cluster
 
                             // Await remote nodes to stop permanent listeners
                             for (Map.Entry<Member, Future<Boolean>> entry : futureMap.entrySet()) {

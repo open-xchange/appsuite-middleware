@@ -49,7 +49,6 @@
 
 package com.openexchange.filestore.impl;
 
-import it.geosolutions.imageio.stream.eraf.EnhancedRandomAccessFile;
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -65,6 +64,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.filestore.FileStorage;
 import com.openexchange.filestore.FileStorageCodes;
 import com.openexchange.java.Streams;
+import it.geosolutions.imageio.stream.eraf.EnhancedRandomAccessFile;
 
 /**
  * {@link DefaultFileStorage}

@@ -1,5 +1,7 @@
 package liquibase.snapshot.jvm;
 
+import java.util.HashSet;
+import java.util.Set;
 import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.Database;
 import liquibase.database.core.PostgresDatabase;
@@ -11,9 +13,6 @@ import liquibase.snapshot.InvalidExampleException;
 import liquibase.snapshot.SnapshotGenerator;
 import liquibase.snapshot.SnapshotGeneratorChain;
 import liquibase.structure.DatabaseObject;
-
-import java.util.HashSet;
-import java.util.Set;
 
 public abstract class JdbcSnapshotGenerator implements SnapshotGenerator {
     private Set<DiffStatusListener> statusListeners = new HashSet<DiffStatusListener>();

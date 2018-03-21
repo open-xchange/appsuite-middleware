@@ -128,7 +128,7 @@ public class AutoCompleteShowDepartmentsTest extends AbstractAPIClientSession {
             }
             LOG.info("Acquired user '{}'", testUser);
 
-            ApiClient client = generateClient(testUser);
+            ApiClient client = generateApiClient(testUser);
             client.login(testUser.getLogin(), testUser.getPassword());
             rememberClient(client);
             testUsers.put(testUser.getUser(), testUser);

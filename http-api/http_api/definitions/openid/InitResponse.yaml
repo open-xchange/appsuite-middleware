@@ -1,0 +1,6 @@
+type: object
+properties:
+  $ref: ../common/CommonResponseData.yaml
+  redirect:
+    type: string
+    description: The location where to redirect the user to.

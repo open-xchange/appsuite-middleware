@@ -1,0 +1,79 @@
+/chronos?action=all:
+  get:
+    operationId: getAllEvents
+    tags:
+      - Chronos
+    summary: Gets all events in folder.
+    parameters:
+      - $ref: "#/parameters/gblQueryParamSession"
+      - in: query
+        name: folder
+        type: string
+        description: ID of the folder who contains the events. If not set, all events of the default account will be queried.
+        required: false
+      - in: query
+        name: rangeStart
+        type: string
+        description: |
+          Lower inclusive limit of the queried range as a utc date-time value as specified in rfc 5545 chapter 3.3.5. E.g. "20170708T220000Z". Only events which start on or after this date are returned.
+        required: true
+      - in: query
+        name: rangeEnd
+        type: string
+        description: |
+          Upper exclusive limit of the queried range as a utc date-time value as specified in rfc 5545 chapter 3.3.5. E.g. "20170708T220000Z". Only events which end before this date are returned.
+        required: true
+      - $ref: "#/parameters/QueryParamChronosFields"
+      - $ref: "#/parameters/QueryParamChronosOrder"
+      - $ref: "#/parameters/QueryParamChronosSort"
+      - $ref: "#/parameters/QueryParamChronosExpand"
+      - $ref: "#/parameters/QueryParamChronosExtendedEntities"
+      - $ref: "#/parameters/QueryParamChronosUpdateCache"
+    responses:
+      200:
+        description: |
+          A JSON object containing an array with events. The events are
+          sorted in ascending order by the field `start_date`. In case of errors the responsible fields in the
+          response are filled (see [Error handling](#error-handling)).
+        schema:
+          $ref: "#/definitions/EventsResponse"
+  put:
+    operationId: getAllEventsForMultipleFolders
+    tags:
+      - Chronos
+    summary: Gets all events of multiple folders.
+    consumes:
+      - application/json
+    parameters:
+      - $ref: "#/parameters/gblQueryParamSession"
+      - in: query
+        name: rangeStart
+        type: string
+        description: |
+          Lower inclusive limit of the queried range as a utc date-time value as specified in rfc 5545 chapter 3.3.5. E.g. "20170708T220000Z". Only events which start on or after this date are returned.
+        required: true
+      - in: query
+        name: rangeEnd
+        type: string
+        description: |
+          Upper exclusive limit of the queried range as a utc date-time value as specified in rfc 5545 chapter 3.3.5. E.g. "20170708T220000Z". Only events which end before this date are returned.
+        required: true
+      - $ref: "#/parameters/QueryParamChronosFields"
+      - $ref: "#/parameters/QueryParamChronosOrder"
+      - $ref: "#/parameters/QueryParamChronosSort"
+      - $ref: "#/parameters/QueryParamChronosExpand"
+      - $ref: "#/parameters/QueryParamChronosUpdateCache"
+      - in: body
+        name: body
+        description: A JSON object containing the folder ids.
+        required: true
+        schema:
+          $ref: "#/definitions/ChronosFolderBody"
+    responses:
+      200:
+        description: |
+          A JSON object containing an array with events. The events are
+          sorted in ascending order by the field `start_date`. In case of errors the responsible fields in the
+          response are filled (see [Error handling](#error-handling)).
+        schema:
+          $ref: "#/definitions/MultipleFolderEventsResponse"

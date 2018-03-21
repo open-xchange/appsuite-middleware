@@ -130,7 +130,7 @@ public abstract class AbstractMailTest {
         port = Integer.parseInt(AJAXConfig.getProperty(AJAXConfig.Property.MAIL_PORT));
         password = AJAXConfig.getProperty(AJAXConfig.Property.PASSWORD);
         cid = context.getContextId();
-        testMailDir = AJAXConfig.getProperty(AJAXConfig.Property.TEST_MAIL_DIR);
+        testMailDir = AJAXConfig.getProperty(AJAXConfig.Property.TEST_DIR);
 
         String secondUser2 = config.getSecondUser();
         secondUser = tools.resolveUser(secondUser2, context);

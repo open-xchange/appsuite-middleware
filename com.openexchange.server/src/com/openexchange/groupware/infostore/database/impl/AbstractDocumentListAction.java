@@ -55,6 +55,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
+import com.openexchange.database.Databases;
 import com.openexchange.database.provider.DBProvider;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
@@ -62,7 +63,6 @@ import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.InfostoreExceptionCodes;
 import com.openexchange.groupware.infostore.utils.Metadata;
 import com.openexchange.session.Session;
-import com.openexchange.tools.sql.DBUtils;
 
 public abstract class AbstractDocumentListAction extends AbstractInfostoreAction {
 
@@ -163,7 +163,7 @@ public abstract class AbstractDocumentListAction extends AbstractInfostoreAction
         } catch (final SQLException e) {
             throw InfostoreExceptionCodes.SQL_PROBLEM.create(e, getStatement(stmt));
         } finally {
-            DBUtils.closeSQLStuff(rs, stmt);
+            Databases.closeSQLStuff(rs, stmt);
             if (writeCon != null) {
                 getProvider().releaseWriteConnection(getContext(), writeCon);
             }

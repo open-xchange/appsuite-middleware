@@ -248,8 +248,6 @@ public enum MailListField {
      */
     AUTHENTICATION_MECHANISM_RESULTS(665, MailJSONField.AUTHENTICITY.getKey()),
 
-    CONTENT_TYPE(666, MailJSONField.CONTENT_TYPE.getKey()),
-
     ;
 
     private final int field;

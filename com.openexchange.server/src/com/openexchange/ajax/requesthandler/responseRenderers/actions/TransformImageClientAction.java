@@ -72,6 +72,7 @@ import com.openexchange.imageconverter.api.IImageClient;
 import com.openexchange.imageconverter.api.ImageConverterException;
 import com.openexchange.imagetransformation.BasicTransformedImage;
 import com.openexchange.imagetransformation.ImageTransformations;
+import com.openexchange.java.Streams;
 import com.openexchange.tools.session.ServerSession;
 
 
@@ -79,7 +80,7 @@ import com.openexchange.tools.session.ServerSession;
  * {@link TransformImageClientAction}
  *
  * @author <a href="mailto:kai.ahrens@open-xchange.com">Kai Ahrens</a>
- * @since v7.8.4
+ * @since v7.10.0
  */
 public class TransformImageClientAction extends TransformImageAction {
 
@@ -112,7 +113,7 @@ public class TransformImageClientAction extends TransformImageAction {
                     m_clientStatusValid.set(ret = imageClient.isConnected());
                 } catch (OXException e) {
                     // only tracing here
-                    LOG.trace(e.getMessage());
+                    LOG.trace(Throwables.getRootCause(e).getMessage());
                 }
             }
         }
@@ -140,7 +141,7 @@ public class TransformImageClientAction extends TransformImageAction {
                     }
                 }
             } catch (IOException e) {
-                LOG.error(e.getMessage());
+                LOG.error(Throwables.getRootCause(e).getMessage());
             }
 
             cacheKey = new StringBuilder().append(size).append('-').append(crcImage.getValue()).toString();
@@ -162,14 +163,15 @@ public class TransformImageClientAction extends TransformImageAction {
             if (isValid()) {
                 try {
                     IImageClient imageClient = this.m_imageClient.get();
-                    final InputStream imageInputStm = imageClient.getImage(cacheKey, xformParams.getFormatString(), Integer.toString(session.getContext().getContextId()));
+                    final InputStream imageInputStm = imageClient.getImage(cacheKey, "auto", Integer.toString(session.getContext().getContextId()));
 
                     if (null != imageInputStm) {
                         ret = new FileHolder(imageInputStm, -1, xformParams.getImageMimeType(), cacheKey);
                     }
                 } catch (ImageConverterException e) {
-                    LOG.trace("TransformImageClientAction received an exception when trying to get a cached resource frrom the Image Server: " + Throwables.getRootCause(e));
                     // OK, we just didn't get a result
+                    LOG.trace("TransformImageClientAction received an exception when trying to get a cached resource from the Image Server: " +
+                        Throwables.getRootCause(e).getMessage());
                 }
             } else {
                 ret = super.getCachedResource(session, cacheKey, xformParams);
@@ -205,85 +207,40 @@ public class TransformImageClientAction extends TransformImageAction {
         // check for valid IImageClient interface and use this one for transformation of image =>
         // if not successful, rely on ImageTransformation implementation and call super class method
         if (isValid() && isNotEmpty(cacheKey)) {
-            try (final InputStream srcImageStm = file.getStream()) {
-                if (null != srcImageStm) {
-                    IImageClient imageClient = this.m_imageClient.get();
-                    try (final InputStream resultImageStm = imageClient.cacheAndGetImage(cacheKey, xformParams.getFormatString(), srcImageStm, getContextIdString(session))) {
-                        if (null != resultImageStm) {
+            final InputStream srcImageStm = file.getStream();
+            if (null != srcImageStm) {
+                try {
+                    final IImageClient imageClient = this.m_imageClient.get();
+                    final InputStream resultImageStm = imageClient.cacheAndGetImage(cacheKey, "auto", srcImageStm, getContextIdString(session));
+                    if (null != resultImageStm) {
+                        try {
                             final ThresholdFileHolder imageData = new ThresholdFileHolder();
-                            imageData.write(resultImageStm);
-                            imageData.setContentType(xformParams.getImageMimeType());
-                            imageData.setName(cacheKey);
-                            ret = new BasicTransformedImage() {
-
-                                /**
-                                 * @return
-                                 */
-                                @Override
-                                public long getSize() {
-                                    return imageData.getLength();
+                            try {
+                                imageData.write(resultImageStm);
+                                imageData.setContentType(xformParams.getImageMimeType());
+                                imageData.setName(cacheKey);
+                                ret = new FileHolderBasicTransformedImage(imageData, xformParams);
+                            } finally {
+                                if (null == ret) {
+                                    // FileHolderBasicTransformedImage reference is null, apparently an error occurred. Therefore close ThresholdFileHolder since not needed anymore.
+                                    Streams.close(imageData);
                                 }
-
-                                /**
-                                 * @return
-                                 */
-                                @Override
-                                public String getFormatName() {
-                                    return xformParams.getFormatShortName();
-                                }
-
-                                /**
-                                 * @return
-                                 * @throws OXException
-                                 */
-                                @Override
-                                public byte[] getImageData() throws OXException {
-                                    return imageData.toByteArray();
-
-                                }
-
-                                /**
-                                 * @return
-                                 * @throws OXException
-                                 */
-                                @Override
-                                public InputStream getImageStream() throws OXException {
-                                    return imageData.getStream();
-                                }
-
-                                /**
-                                 * @return
-                                 */
-                                @Override
-                                public IFileHolder getImageFile() {
-                                    return imageData;
-                                }
-
-                                /**
-                                 * Gets the sum of transformation expenses.
-                                 * @see {@link ImageTransformations#LOW_EXPENSE} and {@link ImageTransformations#HIGH_EXPENSE}.
-                                 * @return The expenses.
-                                 */
-                                @Override
-                                public int getTransformationExpenses() {
-                                    return ImageTransformations.HIGH_EXPENSE;
-                                }
-
-                                /**
-                                 * Closes this {@link BasicTransformedImage} instance and releases any system resources associated with it.
-                                 */
-                                @Override
-                                public void close() {
-                                    imageData.close();
-                                }
-                            };
+                            }
+                        } finally {
+                            Streams.close(resultImageStm);
                         }
                     }
+                } finally {
+                    Streams.close(srcImageStm);
                 }
             }
         }
 
-        return (null != ret) ? ret : (isValid() ? null : super.performTransformImage(session, file, xformParams, cacheKey, fileName));
+        if (null != ret) {
+            return ret;
+        }
+
+        return (isValid() ? null : super.performTransformImage(session, file, xformParams, cacheKey, fileName));
     }
 
     // - Implementation --------------------------------------------------------
@@ -297,4 +254,59 @@ public class TransformImageClientAction extends TransformImageAction {
     private final AtomicReference<IImageClient> m_imageClient = new AtomicReference<>(null);
 
     private final AtomicBoolean m_clientStatusValid = new AtomicBoolean(false);
+
+    // - Helper classes --------------------------------------------------------
+
+    /**
+     * A <tt>BasicTransformedImage</tt> implementation backed by a file holder.
+     */
+    private static class FileHolderBasicTransformedImage implements BasicTransformedImage {
+
+        private final ThresholdFileHolder imageData;
+        private final TransformImageParameters xformParams;
+
+        /**
+         * Initializes a new {@link BasicTransformedImageImplementation}.
+         */
+        FileHolderBasicTransformedImage(ThresholdFileHolder imageData, TransformImageParameters xformParams) {
+            this.imageData = imageData;
+            this.xformParams = xformParams;
+        }
+
+        @Override
+        public long getSize() {
+            return imageData.getLength();
+        }
+
+        @Override
+        public String getFormatName() {
+            return xformParams.getFormatShortName();
+        }
+
+        @Override
+        public byte[] getImageData() throws OXException {
+            return imageData.toByteArray();
+
+        }
+
+        @Override
+        public InputStream getImageStream() throws OXException {
+            return imageData.getStream();
+        }
+
+        @Override
+        public IFileHolder getImageFile() {
+            return imageData;
+        }
+
+        @Override
+        public int getTransformationExpenses() {
+            return ImageTransformations.HIGH_EXPENSE;
+        }
+
+        @Override
+        public void close() {
+            imageData.close();
+        }
+    }
 }

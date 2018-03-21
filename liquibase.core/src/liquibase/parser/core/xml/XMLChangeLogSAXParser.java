@@ -2,10 +2,15 @@ package liquibase.parser.core.xml;
 
 import java.io.IOException;
 import java.io.InputStream;
-
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
-
+import org.xml.sax.ErrorHandler;
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
+import org.xml.sax.SAXNotRecognizedException;
+import org.xml.sax.SAXNotSupportedException;
+import org.xml.sax.SAXParseException;
+import org.xml.sax.XMLReader;
 import liquibase.changelog.ChangeLogParameters;
 import liquibase.changelog.DatabaseChangeLog;
 import liquibase.exception.ChangeLogParseException;
@@ -14,14 +19,6 @@ import liquibase.parser.ChangeLogParser;
 import liquibase.resource.ResourceAccessor;
 import liquibase.resource.UtfBomAwareReader;
 import liquibase.util.file.FilenameUtils;
-
-import org.xml.sax.ErrorHandler;
-import org.xml.sax.InputSource;
-import org.xml.sax.SAXException;
-import org.xml.sax.SAXNotRecognizedException;
-import org.xml.sax.SAXNotSupportedException;
-import org.xml.sax.SAXParseException;
-import org.xml.sax.XMLReader;
 
 public class XMLChangeLogSAXParser implements ChangeLogParser {
 

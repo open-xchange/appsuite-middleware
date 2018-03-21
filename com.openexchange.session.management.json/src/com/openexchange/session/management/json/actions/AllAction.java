@@ -68,7 +68,6 @@ import com.openexchange.session.management.ManagedSession;
 import com.openexchange.session.management.SessionManagementService;
 import com.openexchange.session.management.SessionManagementStrings;
 import com.openexchange.tools.session.ServerSession;
-import com.openexchange.user.UserService;
 
 /**
  * {@link AllAction}
@@ -91,16 +90,10 @@ public class AllAction implements AJAXActionService {
         if (null == service) {
             throw ServiceExceptionCode.absentService(SessionManagementService.class);
         }
-        UserService userService = services.getService(UserService.class);
-        Locale locale = Locale.getDefault();
-        if (null != userService) {
-            locale = userService.getUser(session.getUserId(), session.getContextId()).getLocale();
-        }
-        String unknownLocation = SessionManagementStrings.UNKNOWN_LOCATION;
-        StringHelper helper = StringHelper.valueOf(locale);
-        if (null != helper) {
-            unknownLocation = helper.getString(SessionManagementStrings.UNKNOWN_LOCATION);
-        }
+
+        Locale locale = session.getUser().getLocale();
+        String unknownLocation = StringHelper.valueOf(locale).getString(SessionManagementStrings.UNKNOWN_LOCATION);
+
         Collection<ManagedSession> sessions = service.getSessionsForUser(session);
         JSONArray browsers = new JSONArray();
         JSONArray oxapps = new JSONArray();
@@ -109,7 +102,7 @@ public class AllAction implements AJAXActionService {
         JSONArray result = new JSONArray();
         try {
             for (ManagedSession s : sessions) {
-                JSONObject json = new JSONObject(7);
+                JSONObject json = new JSONObject(12);
                 json.put("sessionId", s.getSessionId());
                 json.put("ipAddress", s.getIpAddress());
                 json.put("client", s.getClient());
@@ -124,28 +117,25 @@ public class AllAction implements AJAXActionService {
                 }
                 long lastActive = s.getLastActive();
                 if (0 < lastActive) {
-                    if (lastActive > loginTime) {
-                        json.put("lastActive", lastActive);
-                    } else {
-                        json.put("lastActive", loginTime);
-                    }
+                    json.put("lastActive", lastActive > loginTime ? lastActive : loginTime);
                 }
                 JSONObject deviceInfo = getDeviceInfo(s, locale);
                 if (null != deviceInfo) {
                     json.put("device", deviceInfo);
-                    String type = deviceInfo.getString("type");
+                    String type = deviceInfo.getJSONObject("client").getString("type");
                     switch (type) {
                         case "browser":
-                            browsers.add(0, json);
+                            browsers.put(json);
                             break;
                         case "oxapp":
-                            oxapps.add(0, json);
+                            oxapps.put(json);
                             break;
-                        case "sync":
-                            syncapps.add(0, json);
+                        case "eas":
+                        case "dav":
+                            syncapps.put(json);
                             break;
                         default:
-                            others.add(0, json);
+                            others.put(json);
                             break;
                     }
                 }
@@ -168,25 +158,34 @@ public class AllAction implements AJAXActionService {
         return new AJAXRequestResult(result, "json");
     }
 
-    private JSONObject getDeviceInfo(ManagedSession session, Locale locale) {
-        JSONObject deviceInfo = new JSONObject(2);
-        try {
-            ClientInfoService service = services.getService(ClientInfoService.class);
-            if (null != service) {
-                ClientInfo info = service.getClientInfo(session.getSession());
-                if (null != info) {
-                    deviceInfo.put("info", info.toString(locale));
-                    deviceInfo.put("type", info.getType().getName());
-                    return deviceInfo;
-                }
+    private JSONObject getDeviceInfo(ManagedSession session, Locale locale) throws JSONException {
+        ClientInfoService service = services.getService(ClientInfoService.class);
+        if (null != service) {
+            ClientInfo info = service.getClientInfo(session.getSession());
+            if (null != info) {
+                JSONObject jDeviceInfo = new JSONObject(3);
+                jDeviceInfo.put("displayName", info.getDisplayName(locale));
+                JSONObject jOS = new JSONObject(2);
+                jOS.put("name", info.getOSFamily());
+                jOS.put("version", info.getOSVersion());
+                jDeviceInfo.put("os", jOS);
+                JSONObject jClient = new JSONObject(4);
+                jClient.put("name", info.getClientName());
+                jClient.put("version", info.getClientVersion());
+                jClient.put("type", info.getType().getName());
+                jClient.put("family", info.getClientFamily());
+                jDeviceInfo.put("client", jClient);
+                return jDeviceInfo;
             }
-            deviceInfo.put("info", "unknown");
-            deviceInfo.put("type", "other");
-            return deviceInfo;
-        } catch (JSONException e) {
-            // will not happen
         }
-        return deviceInfo;
+
+        // Either missing service or no such ClientInfo instance for specified session
+        JSONObject jUnknownDeviceInfo = new JSONObject(3);
+        jUnknownDeviceInfo.put("displayName", StringHelper.valueOf(locale).getString(SessionManagementStrings.UNKNOWN_DEVICE));
+        JSONObject jClient = new JSONObject(1);
+        jClient.put("type", "other");
+        jUnknownDeviceInfo.put("client", jClient);
+        return jUnknownDeviceInfo;
     }
 
 }

@@ -16,6 +16,9 @@
  */
 package org.apache.tika.parser.txt;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import java.io.ByteArrayInputStream;
 import java.io.StringWriter;
 import org.apache.tika.metadata.Metadata;
@@ -27,10 +30,6 @@ import org.apache.tika.sax.WriteOutContentHandler;
 import org.junit.Test;
 import org.xml.sax.ContentHandler;
 import org.xml.sax.helpers.DefaultHandler;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import static org.junit.Assert.*;
 
 public class TXTParserTest {
     private Parser parser = new TXTParser();

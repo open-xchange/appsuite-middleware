@@ -331,6 +331,11 @@ public final class ThresholdFileHolder implements IFileHolder {
         if (null == in) {
             return this;
         }
+        if (in instanceof ThresholdFileHolderInputStream) {
+            ThresholdFileHolder fileHolder = ((ThresholdFileHolderInputStream) in).getFileHolder();
+            copy(fileHolder, this, true);
+            return this;
+        }
         return write(new InputStreamReadable(in));
     }
 
@@ -397,6 +402,18 @@ public final class ThresholdFileHolder implements IFileHolder {
         } finally {
             Streams.close(in);
             Streams.close(out);
+        }
+        return this;
+    }
+
+    /**
+     * Writes zero bytes to this file holder; just for initialization purpose.
+     *
+     * @return This file holder
+     */
+    public ThresholdFileHolder writeZeroBytes() {
+        if (null == tempFile && null == buf) {
+            buf = Streams.newByteArrayOutputStream(initalCapacity);
         }
         return this;
     }
@@ -558,27 +575,41 @@ public final class ThresholdFileHolder implements IFileHolder {
      * @throws OXException If returning a copy fails
      */
     public ThresholdFileHolder copy() throws OXException {
-        final ThresholdFileHolder copy = new ThresholdFileHolder();
-        copy.count = count;
-        copy.contentType = contentType;
-        copy.delivery = delivery;
-        copy.disposition = disposition;
-        copy.name = name;
+        return copy(this, new ThresholdFileHolder(autoManaged), false);
+    }
+
+    /**
+     * Creates a copy from source file holder.
+     *
+     * @param source The source file holder to copy from
+     * @param copy The file holder to copy to
+     * @param onlyData <code>true</code> if only source's data is supposed to be copied; otherwise <code>false</code> to include meta-data as well
+     * @return The copy
+     * @throws OXException If returning a copy fails
+     */
+    private static ThresholdFileHolder copy(ThresholdFileHolder source, ThresholdFileHolder copy, boolean onlyData) throws OXException {
+        copy.count = source.count;
+        if (false == onlyData) {
+            copy.contentType = source.contentType;
+            copy.delivery = source.delivery;
+            copy.disposition = source.disposition;
+            copy.name = source.name;
+        }
 
         // Check if content is available
-        if (count <= 0) {
+        if (source.count <= 0) {
             // No content to make a copy of
             return copy;
         }
 
         // Check internal buffer vs temp. file
-        final ByteArrayOutputStream buf = this.buf;
+        final ByteArrayOutputStream buf = source.buf;
         if (null != buf) {
             copy.buf = new UnsynchronizedByteArrayOutputStream(buf);
-        } else if (null != tempFile) {
+        } else if (null != source.tempFile) {
             try {
-                final File newTempFile = TmpFileFileHolder.newTempFile(autoManaged);
-                copyFile(tempFile, newTempFile);
+                final File newTempFile = TmpFileFileHolder.newTempFile(source.autoManaged);
+                copyFile(source.tempFile, newTempFile);
                 copy.tempFile = newTempFile;
             } catch (final IOException e) {
                 throw AjaxExceptionCodes.IO_ERROR.create(e, e.getMessage());

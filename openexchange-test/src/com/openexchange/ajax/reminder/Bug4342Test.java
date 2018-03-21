@@ -70,6 +70,7 @@ public class Bug4342Test extends ReminderTest {
         final TimeZone timeZone = getClient().getValues().getTimeZone();
 
         final Calendar c = TimeTools.createCalendar(timeZone);
+        c.add(Calendar.DAY_OF_YEAR, 1);
         final Calendar rCal = TimeTools.createCalendar(timeZone);
         rCal.setTime(c.getTime());
 

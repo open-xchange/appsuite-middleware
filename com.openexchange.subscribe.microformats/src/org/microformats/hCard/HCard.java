@@ -12,7 +12,6 @@
  */
 package org.microformats.hCard;
 
-import com.google.common.collect.ImmutableMap;
 import java.io.Serializable;
 import java.net.URI;
 import java.text.DateFormat;
@@ -28,6 +27,7 @@ import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.ISODateTimeFormat;
+import com.google.common.collect.ImmutableMap;
 
 /**
  * Immutable representation of all data that can legally show up in an HCard.

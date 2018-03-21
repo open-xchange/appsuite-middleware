@@ -55,7 +55,6 @@ import com.openexchange.clientinfo.ClientInfoType;
 import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.java.Strings;
 
-
 /**
  * {@link WebClientInfo}
  *
@@ -66,37 +65,83 @@ public class WebClientInfo implements ClientInfo {
 
     private final String client;
     private final String platform;
+    private final String platformFamily;
     private final String platformVersion;
     private final String browser;
     private final String browserVersion;
+    private final String browserFamily;
 
-    public WebClientInfo(String client, String platform, String platformVersion, String browser, String browserVersion) {
+    public WebClientInfo(String client, String platform, String platformFamily, String platformVersion, String browser, String browserVersion, String browserFamily) {
         this.client = client;
         this.platform = platform;
+        this.platformFamily = platformFamily;
         this.platformVersion = platformVersion;
         this.browser = browser;
         this.browserVersion = browserVersion;
+        this.browserFamily = browserFamily;
     }
 
     @Override
-    public String toString(Locale locale) {
+    public String getDisplayName(Locale locale) {
         StringHelper helper = StringHelper.valueOf(locale);
         String out;
-        if (Strings.isNotEmpty(platform) && Strings.isNotEmpty(platformVersion)) {
-            out = helper.getString(ClientInfoStrings.DEFAULT_CLIENT_INFO_MESSAGE);
-            return String.format(out, client, browser, browserVersion, platform, platformVersion);
-        } else if (Strings.isNotEmpty(browser) && Strings.isNotEmpty(browserVersion)) {
-            out = helper.getString(ClientInfoStrings.CLIENT_BROWSER_INFO_MESSAGE);
-            return String.format(out, client, browser, browserVersion);
-        } else {
-            out = helper.getString(ClientInfoStrings.CLIENT_INFO_MESSAGE);
-            return String.format(out, client);
+
+        if (Strings.isNotEmpty(browser)) {
+            if (Strings.isNotEmpty(platform)) {
+                if (Strings.isNotEmpty(browserVersion)) {
+                    out = helper.getString(ClientInfoStrings.WEB_WITH_CLIENT_CLIENTVERSION_PLATFORM);
+                    return String.format(out, client, browser, browserVersion, platform);
+                } else {
+                    out = helper.getString(ClientInfoStrings.WEB_WITH_CLIENT_PLATFORM);
+                    return String.format(out, client, browser, platform);
+                }
+            } else {
+                if (Strings.isNotEmpty(browserVersion)) {
+                    out = helper.getString(ClientInfoStrings.WEB_WITH_CLIENT_CLIENTVERSION);
+                    return String.format(out, client, browser, browserVersion);
+                } else {
+                    StringBuilder sb = new StringBuilder(client).append(", ").append(browser);
+                    return sb.toString();
+                }
+            }
         }
+        return client;
     }
 
     @Override
     public ClientInfoType getType() {
         return ClientInfoType.BROWSER;
+    }
+
+    @Override
+    public String getOSFamily() {
+        if (Strings.isNotEmpty(platformFamily)) {
+            return platformFamily.toLowerCase();
+        }
+        return null;
+    }
+
+    @Override
+    public String getOSVersion() {
+        return platformVersion;
+    }
+
+    @Override
+    public String getClientName() {
+        if (Strings.isNotEmpty(browser)) {
+            return browser.toLowerCase();
+        }
+        return null;
+    }
+
+    @Override
+    public String getClientVersion() {
+        return browserVersion;
+    }
+
+    @Override
+    public String getClientFamily() {
+        return browserFamily;
     }
 
 }

@@ -79,9 +79,7 @@ public class FolderJSONActivator extends AJAXModuleActivator {
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(FolderJSONActivator.class);
 
     private String module;
-
     private String servletPath;
-
     private FolderFieldRegistry fieldRegistry;
 
     @Override
@@ -100,7 +98,7 @@ public class FolderJSONActivator extends AJAXModuleActivator {
     }
 
     @Override
-    public void startBundle() throws Exception {
+    public synchronized void startBundle() throws Exception {
         try {
             /*
              * Configure
@@ -142,10 +140,11 @@ public class FolderJSONActivator extends AJAXModuleActivator {
     }
 
     @Override
-    public void stopBundle() throws Exception {
+    public synchronized void stopBundle() throws Exception {
         try {
             if (null != fieldRegistry) {
                 fieldRegistry.shutDown();
+                fieldRegistry = null;
                 FolderFieldRegistry.releaseInstance();
             }
             super.stopBundle();
@@ -154,7 +153,7 @@ public class FolderJSONActivator extends AJAXModuleActivator {
              */
             restore();
         } catch (final Exception e) {
-            org.slf4j.LoggerFactory.getLogger(FolderJSONActivator.class).error("", e);
+            LOG.error("", e);
             throw e;
         }
     }

@@ -203,6 +203,11 @@ public class BatchIncrementArguments extends IncrementArguments {
             if (this == obj) {
                 return true;
             }
+
+            if (!(obj instanceof ObjectAndFolder)) {
+                return false;
+            }
+
             ObjectAndFolder other = (ObjectAndFolder) obj;
             if (objectId != other.objectId) {
                 return false;

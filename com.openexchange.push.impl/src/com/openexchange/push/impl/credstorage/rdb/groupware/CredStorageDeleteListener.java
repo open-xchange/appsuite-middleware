@@ -52,11 +52,11 @@ package com.openexchange.push.impl.credstorage.rdb.groupware;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.delete.DeleteEvent;
 import com.openexchange.groupware.delete.DeleteFailedExceptionCodes;
 import com.openexchange.groupware.delete.DeleteListener;
-import com.openexchange.tools.sql.DBUtils;
 
 /**
  * {@link CredStorageDeleteListener}
@@ -94,7 +94,7 @@ public final class CredStorageDeleteListener implements DeleteListener {
             } catch (Exception e) {
                 throw DeleteFailedExceptionCodes.ERROR.create(e, e.getMessage());
             } finally {
-                DBUtils.closeSQLStuff(stmt);
+                Databases.closeSQLStuff(stmt);
             }
         } else if (DeleteEvent.TYPE_CONTEXT == event.getType()) {
             /*
@@ -114,7 +114,7 @@ public final class CredStorageDeleteListener implements DeleteListener {
             } catch (Exception e) {
                 throw DeleteFailedExceptionCodes.ERROR.create(e, e.getMessage());
             } finally {
-                DBUtils.closeSQLStuff(stmt);
+                Databases.closeSQLStuff(stmt);
             }
         }
     }

@@ -2,7 +2,6 @@
 
 Name:          open-xchange-client-onboarding
 BuildArch:     noarch
-#!BuildIgnore: post-build-checks
 %if 0%{?rhel_version} && 0%{?rhel_version} >= 700
 BuildRequires: ant
 %else
@@ -15,7 +14,7 @@ BuildRequires: java-1_8_0-openjdk-devel
 BuildRequires: java-1.8.0-openjdk-devel
 %endif
 Version:       @OXVERSION@
-%define        ox_release 0
+%define        ox_release 3
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -81,7 +80,8 @@ if [ ${1:-0} -eq 2 ]; then # only when updating
     fi
 
     # SoftwareChange_Request-3414
-    sed -i 's/-> Requires "emclient" capability/-> Requires "emclient_basic" or "emclient_premium" capability/' /opt/open-xchange/etc/client-onboarding-scenarios.yml
+    PFILE=/opt/open-xchange/etc/client-onboarding-scenarios.yml
+    $(contains '-> Requires "emclient" capability' $PFILE) && sed -i 's/-> Requires "emclient" capability/-> Requires "emclient_basic" or "emclient_premium" capability/' $PFILE
 
     # SoftwareChange_Request-3954
     PFILE=/opt/open-xchange/etc/client-onboarding.properties
@@ -102,6 +102,20 @@ if [ ${1:-0} -eq 2 ]; then # only when updating
     ox_add_property com.openexchange.client.onboarding.caldav.login.customsource false /opt/open-xchange/etc/client-onboarding-caldav.properties
     ox_add_property com.openexchange.client.onboarding.carddav.login.customsource false /opt/open-xchange/etc/client-onboarding-carddav.properties
     ox_add_property com.openexchange.client.onboarding.eas.login.customsource false /opt/open-xchange/etc/client-onboarding-eas.properties
+
+    # SCR-120
+    scenarios=com.openexchange.client.onboarding.windows.desktop.scenarios
+    enabled_scenarios=com.openexchange.client.onboarding.enabledScenarios
+    pfile=/opt/open-xchange/etc/client-onboarding.properties
+
+    scenarios_line=$(ox_read_property ${scenarios} ${pfile})
+    newline=$(sed -r -e 's/oxupdaterinstall *,? *| *,? *oxupdaterinstall//' <<<${scenarios_line})
+    ox_set_property ${scenarios} "${newline}" ${pfile}
+
+    enabled_scenarios_line=$(ox_read_property ${enabled_scenarios} ${pfile})
+    newline=$(sed -r -e 's/oxupdaterinstall *,? *| *,? *oxupdaterinstall//' <<<${enabled_scenarios_line})
+    ox_set_property ${enabled_scenarios} "${newline}" ${pfile}
+
 fi
 
 %clean
@@ -124,6 +138,12 @@ fi
 %doc com.openexchange.client.onboarding/doc/examples
 
 %changelog
+* Tue Feb 20 2018 Thorben Betten <thorben.betten@open-xchange.com>
+Third preview of 7.10.0 release
+* Fri Feb 02 2018 Thorben Betten <thorben.betten@open-xchange.com>
+Second preview for 7.10.0 release
+* Fri Dec 01 2017 Thorben Betten <thorben.betten@open-xchange.com>
+First preview for 7.10.0 release
 * Thu Oct 12 2017 Thorben Betten <thorben.betten@open-xchange.com>
 prepare for 7.10.0 release
 * Fri May 19 2017 Thorben Betten <thorben.betten@open-xchange.com>

@@ -49,8 +49,8 @@
 
 package com.openexchange.groupware.reminder;
 
+import static com.openexchange.database.Databases.closeSQLStuff;
 import static com.openexchange.java.Autoboxing.I;
-import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -303,7 +303,7 @@ public class ReminderHandler implements ReminderSQLInterface {
         } catch (final NumberFormatException e) {
             throw ReminderExceptionCode.MANDATORY_FIELD_TARGET_ID.create(e, "can't parse number.");
         } finally {
-            DBUtils.closeSQLStuff(ps);
+            Databases.closeSQLStuff(ps);
         }
     }
 
@@ -323,9 +323,9 @@ public class ReminderHandler implements ReminderSQLInterface {
             throw ReminderExceptionCode.DELETE_EXCEPTION.create(exc);
         } finally {
             if (rollback) {
-                DBUtils.rollback(writeCon);
+                Databases.rollback(writeCon);
             }
-            DBUtils.autocommit(writeCon);
+            Databases.autocommit(writeCon);
             DBPool.closeWriterSilent(context, writeCon);
         }
     }
@@ -347,7 +347,7 @@ public class ReminderHandler implements ReminderSQLInterface {
             if (0 == stmt.executeUpdate()) {
                 throw ReminderExceptionCode.NOT_FOUND.create(I(targetId), I(contextId));
             }
-            TargetRegistry.getInstance().getService(module).updateTargetObject(context, con, targetId, userId);
+            //            TargetRegistry.getInstance().getService(module).updateTargetObject(context, con, targetId, userId);
         } catch (final SQLException e) {
             throw ReminderExceptionCode.DELETE_EXCEPTION.create(e);
         } catch (final OXException e) {
@@ -373,9 +373,9 @@ public class ReminderHandler implements ReminderSQLInterface {
             throw ReminderExceptionCode.SQL_ERROR.create(e, e.getMessage());
         } finally {
             if (rollback) {
-                DBUtils.rollback(con);
+                Databases.rollback(con);
             }
-            DBUtils.autocommit(con);
+            Databases.autocommit(con);
             DBPool.closeWriterSilent(context, con);
         }
     }
@@ -393,7 +393,7 @@ public class ReminderHandler implements ReminderSQLInterface {
             if (0 == stmt.executeUpdate()) {
                 throw ReminderExceptionCode.NOT_FOUND.create(I(targetId), I(contextId));
             }
-            TargetRegistry.getInstance().getService(module).updateTargetObject(context, con, targetId);
+            //            TargetRegistry.getInstance().getService(module).updateTargetObject(context, con, targetId);
         } catch (final SQLException e) {
             throw ReminderExceptionCode.SQL_ERROR.create(e, e.getMessage());
         } catch (final OXException e) {
@@ -592,7 +592,7 @@ public class ReminderHandler implements ReminderSQLInterface {
         } catch (final SQLException exc) {
             throw ReminderExceptionCode.SQL_ERROR.create(exc, exc.getMessage());
         } finally {
-            DBUtils.closeSQLStuff(ps);
+            Databases.closeSQLStuff(ps);
         }
     }
 
@@ -640,7 +640,7 @@ public class ReminderHandler implements ReminderSQLInterface {
             throw ReminderExceptionCode.SQL_ERROR.create(e, e.getMessage());
         } finally {
             if (close) {
-                DBUtils.closeSQLStuff(rs, ps);
+                Databases.closeSQLStuff(rs, ps);
                 DBPool.closeReaderSilent(context, con);
             }
         }
@@ -694,7 +694,7 @@ public class ReminderHandler implements ReminderSQLInterface {
             throw ReminderExceptionCode.SQL_ERROR.create(exc, exc.getMessage());
         } finally {
             if (close) {
-                DBUtils.closeSQLStuff(rs, ps);
+                Databases.closeSQLStuff(rs, ps);
                 DBPool.closeReaderSilent(context, readCon);
             }
         }

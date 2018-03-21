@@ -1,0 +1,12 @@
+uri: 
+  type: string
+  description: The universal resource identifier of the user.
+cn:
+  type: string
+  description: The common name of the user.
+email:
+  type: string
+  description: The mail address of the user.
+entity:
+  type: integer
+  description: The internal user identifier.

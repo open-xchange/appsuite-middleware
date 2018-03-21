@@ -40,11 +40,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.StringTokenizer;
-
-import net.fortuna.ical4j.model.parameter.Value;
-
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
+import net.fortuna.ical4j.model.parameter.Value;
 
 /**
  * $Id$ [23-Apr-2004]

@@ -1,17 +1,19 @@
 package liquibase.sqlgenerator.core;
 
+import java.util.List;
 import liquibase.database.Database;
-import liquibase.database.core.*;
-import liquibase.structure.core.Index;
+import liquibase.database.core.MSSQLDatabase;
+import liquibase.database.core.MySQLDatabase;
+import liquibase.database.core.OracleDatabase;
+import liquibase.database.core.PostgresDatabase;
 import liquibase.exception.ValidationErrors;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.DropIndexStatement;
+import liquibase.structure.core.Index;
 import liquibase.structure.core.Table;
 import liquibase.util.StringUtils;
-
-import java.util.List;
 
 public class DropIndexGenerator extends AbstractSqlGenerator<DropIndexStatement> {
 

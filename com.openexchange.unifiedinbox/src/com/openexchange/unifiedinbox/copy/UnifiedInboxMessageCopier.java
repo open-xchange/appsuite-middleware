@@ -49,8 +49,6 @@
 
 package com.openexchange.unifiedinbox.copy;
 
-import gnu.trove.map.TIntObjectMap;
-import gnu.trove.map.hash.TIntObjectHashMap;
 import java.util.Collection;
 import java.util.concurrent.ExecutionException;
 import com.openexchange.exception.OXException;
@@ -69,6 +67,8 @@ import com.openexchange.threadpool.behavior.CallerRunsBehavior;
 import com.openexchange.unifiedinbox.UnifiedInboxAccess;
 import com.openexchange.unifiedinbox.UnifiedInboxException;
 import com.openexchange.unifiedinbox.utility.UnifiedInboxUtility;
+import gnu.trove.map.TIntObjectMap;
+import gnu.trove.map.hash.TIntObjectHashMap;
 
 /**
  * {@link UnifiedInboxMessageCopier} - Copies messages from/to Unified Mail folders.

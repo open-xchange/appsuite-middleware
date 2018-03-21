@@ -40,7 +40,6 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-
 import javax.xml.XMLConstants;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -49,16 +48,6 @@ import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathException;
 import javax.xml.xpath.XPathExpression;
 import javax.xml.xpath.XPathFactory;
-
-import net.fortuna.ical4j.model.CalendarException;
-import net.fortuna.ical4j.model.Component;
-import net.fortuna.ical4j.model.Date;
-import net.fortuna.ical4j.model.DateTime;
-import net.fortuna.ical4j.model.Parameter;
-import net.fortuna.ical4j.model.Property;
-import net.fortuna.ical4j.model.parameter.Value;
-import net.fortuna.ical4j.model.property.Version;
-
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -70,6 +59,14 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
+import net.fortuna.ical4j.model.CalendarException;
+import net.fortuna.ical4j.model.Component;
+import net.fortuna.ical4j.model.Date;
+import net.fortuna.ical4j.model.DateTime;
+import net.fortuna.ical4j.model.Parameter;
+import net.fortuna.ical4j.model.Property;
+import net.fortuna.ical4j.model.parameter.Value;
+import net.fortuna.ical4j.model.property.Version;
 
 /**
  * A {@link CalendarParser} that parses XHTML documents that include calendar data marked up with the hCalendar
@@ -137,7 +134,7 @@ public class HCalendarParser implements CalendarParser {
     
     private static final Log LOG = LogFactory.getLog(HCalendarParser.class);
     
-    private static final DocumentBuilderFactory BUILDER_FACTORY = DocumentBuilderFactory.newInstance();
+    private static final DocumentBuilderFactory BUILDER_FACTORY;
     private static final XPath XPATH = XPathFactory.newInstance().newXPath();
     private static final XPathExpression XPATH_METHOD;
     private static final XPathExpression XPATH_VEVENTS;
@@ -165,8 +162,11 @@ public class HCalendarParser implements CalendarParser {
     private static final SimpleDateFormat HCAL_DATE_TIME_FORMAT = new SimpleDateFormat(HCAL_DATE_TIME_PATTERN);
 
     static {
-        BUILDER_FACTORY.setNamespaceAware(true);
-        BUILDER_FACTORY.setIgnoringComments(true);
+        DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+        factory = safeDbf(factory);
+        factory.setNamespaceAware(true);
+        factory.setIgnoringComments(true);
+        BUILDER_FACTORY = factory;
 
         XPATH_METHOD = compileExpression("//*[contains(@class, 'method')]");
         XPATH_VEVENTS = compileExpression("//*[contains(@class, 'vevent')]");
@@ -188,6 +188,46 @@ public class HCalendarParser implements CalendarParser {
         XPATH_ORGANIZER = compileExpression(".//*[contains(@class, 'organizer')]");
         XPATH_SEQUENCE = compileExpression(".//*[contains(@class, 'sequence')]");
         XPATH_ATTACH = compileExpression(".//*[contains(@class, 'attach')]");
+    }
+
+    private static DocumentBuilderFactory safeDbf(DocumentBuilderFactory dbf) {
+        if (null == dbf) {
+            return dbf;
+        }
+
+        // From http://stackoverflow.com/questions/26488319/how-to-prevent-xml-injection-like-xml-bomb-and-xxe-attack
+        String FEATURE = null;
+        try {
+            // This is the PRIMARY defense. If DTDs (doctypes) are disallowed, almost all XML entity attacks are prevented
+            // Xerces 2 only - http://xerces.apache.org/xerces2-j/features.html#disallow-doctype-decl
+            FEATURE = "http://apache.org/xml/features/disallow-doctype-decl";
+            dbf.setFeature(FEATURE, true);
+
+            // If you can't completely disable DTDs, then at least do the following:
+            // Xerces 1 - http://xerces.apache.org/xerces-j/features.html#external-general-entities
+            // Xerces 2 - http://xerces.apache.org/xerces2-j/features.html#external-general-entities
+            FEATURE = "http://xml.org/sax/features/external-general-entities";
+            dbf.setFeature(FEATURE, false);
+
+            // Xerces 1 - http://xerces.apache.org/xerces-j/features.html#external-parameter-entities
+            // Xerces 2 - http://xerces.apache.org/xerces2-j/features.html#external-parameter-entities
+            FEATURE = "http://xml.org/sax/features/external-parameter-entities";
+            dbf.setFeature(FEATURE, false);
+
+            // and these as well, per Timothy Morgan's 2014 paper: "XML Schema, DTD, and Entity Attacks" (see reference below)
+            dbf.setXIncludeAware(false);
+            dbf.setExpandEntityReferences(false);
+
+            // And, per Timothy Morgan: "If for some reason support for inline DOCTYPEs are a requirement, then
+            // ensure the entity settings are disabled (as shown above) and beware that SSRF attacks
+            // (http://cwe.mitre.org/data/definitions/918.html) and denial
+            // of service attacks (such as billion laughs or decompression bombs via "jar:") are a risk."
+
+        } catch (ParserConfigurationException e) {
+            LOG.warn("ParserConfigurationException was thrown. The feature '" + FEATURE + "' is probably not supported by your XML processor.", e);
+        }
+
+        return dbf;
     }
 
     private static XPathExpression compileExpression(String expr) {

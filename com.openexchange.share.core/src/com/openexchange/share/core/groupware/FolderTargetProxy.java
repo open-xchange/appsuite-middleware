@@ -58,9 +58,10 @@ import com.openexchange.folderstorage.FolderPermissionType;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.Permissions;
 import com.openexchange.folderstorage.UserizedFolder;
+import com.openexchange.groupware.modules.Module;
 import com.openexchange.share.ShareTarget;
 import com.openexchange.share.ShareTargetPath;
-import com.openexchange.share.groupware.DriveTargetProxyType;
+import com.openexchange.share.groupware.KnownTargetProxyType;
 import com.openexchange.share.groupware.SubfolderAwareTargetPermission;
 import com.openexchange.share.groupware.TargetPermission;
 import com.openexchange.share.groupware.TargetProxyType;
@@ -177,7 +178,10 @@ public class FolderTargetProxy extends AbstractTargetProxy {
 
     @Override
     public TargetProxyType getProxyType() {
-        return DriveTargetProxyType.FOLDER;
+        if (null != folder.getContentType() && Module.CALENDAR.getFolderConstant() == folder.getContentType().getModule()) {
+            return KnownTargetProxyType.CALENDAR;
+        }
+        return KnownTargetProxyType.FOLDER;
     }
 
     @Override
@@ -223,7 +227,7 @@ public class FolderTargetProxy extends AbstractTargetProxy {
 
         @Override
         public TargetPermission convert(Permission permission) {
-            return new SubfolderAwareTargetPermission(permission.getEntity(), permission.isGroup(), getBits(permission), permission.getType().getTypeNumber(), permission.getPermissionLegator());
+            return new SubfolderAwareTargetPermission(permission.getEntity(), permission.isGroup(), getBits(permission), null != permission.getType() ? permission.getType().getTypeNumber() : FolderPermissionType.NORMAL.getTypeNumber(), permission.getPermissionLegator());
         }
     };
 

@@ -49,10 +49,6 @@
 
 package com.openexchange.messaging.generic.internal;
 
-import gnu.trove.list.TIntList;
-import gnu.trove.list.array.TIntArrayList;
-import gnu.trove.map.TIntIntMap;
-import gnu.trove.map.hash.TIntIntHashMap;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -83,7 +79,10 @@ import com.openexchange.secret.SecretEncryptionStrategy;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSession;
-import com.openexchange.tools.sql.DBUtils;
+import gnu.trove.list.TIntList;
+import gnu.trove.list.array.TIntArrayList;
+import gnu.trove.map.TIntIntMap;
+import gnu.trove.map.hash.TIntIntHashMap;
 
 /**
  * {@link RdbMessagingAccountStorage} - The messaging account storage backed by database.
@@ -185,7 +184,7 @@ public class RdbMessagingAccountStorage implements MessagingAccountStorage, Secr
         } catch (final SQLException e) {
             throw MessagingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
-            DBUtils.closeSQLStuff(rs, stmt);
+            Databases.closeSQLStuff(rs, stmt);
             databaseService.backReadOnly(contextId, rc);
         }
     }
@@ -255,7 +254,7 @@ public class RdbMessagingAccountStorage implements MessagingAccountStorage, Secr
         } catch (final SQLException e) {
             throw MessagingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
-            DBUtils.closeSQLStuff(rs, stmt);
+            Databases.closeSQLStuff(rs, stmt);
             databaseService.backReadOnly(contextId, rc);
         }
     }
@@ -318,7 +317,7 @@ public class RdbMessagingAccountStorage implements MessagingAccountStorage, Secr
         } catch (final SQLException e) {
             throw MessagingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
-            DBUtils.closeSQLStuff(rs, stmt);
+            Databases.closeSQLStuff(rs, stmt);
             databaseService.backReadOnly(contextId, rc);
         }
     }
@@ -363,7 +362,7 @@ public class RdbMessagingAccountStorage implements MessagingAccountStorage, Secr
         } catch (final SQLException e) {
             throw MessagingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
-            DBUtils.closeSQLStuff(rs, stmt);
+            Databases.closeSQLStuff(rs, stmt);
             databaseService.backReadOnly(contextId, rc);
         }
     }
@@ -425,17 +424,17 @@ public class RdbMessagingAccountStorage implements MessagingAccountStorage, Secr
             wc.commit(); // COMMIT
             return genericConfId;
         } catch (final OXException e) {
-            DBUtils.rollback(wc); // ROLL-BACK
+            Databases.rollback(wc); // ROLL-BACK
             throw e;
         } catch (final SQLException e) {
-            DBUtils.rollback(wc); // ROLL-BACK
+            Databases.rollback(wc); // ROLL-BACK
             throw MessagingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } catch (final RuntimeException e) {
-            DBUtils.rollback(wc); // ROLL-BACK
+            Databases.rollback(wc); // ROLL-BACK
             throw MessagingExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
-            DBUtils.closeSQLStuff(stmt);
-            DBUtils.autocommit(wc);
+            Databases.closeSQLStuff(stmt);
+            Databases.autocommit(wc);
             databaseService.backWritable(contextId, wc);
         }
     }
@@ -464,7 +463,6 @@ public class RdbMessagingAccountStorage implements MessagingAccountStorage, Secr
         final SecretEncryptionService<GenericProperty> encryptionService = getService(SecretEncryptionFactoryService.class).createService(this);
         return encryptionService.decrypt(session, toDecrypt, new GenericProperty(confId, propertyName, serviceId, id, session));
     }
-
 
     @Override
     public void deleteAccount(final String serviceId, final MessagingAccount account, final Session session, final Modifier modifier) throws OXException {
@@ -566,7 +564,7 @@ public class RdbMessagingAccountStorage implements MessagingAccountStorage, Secr
                 } catch (final SQLException e) {
                     throw MessagingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
                 } finally {
-                    DBUtils.closeSQLStuff(stmt);
+                    Databases.closeSQLStuff(stmt);
                 }
             }
         } catch (SQLException e) {
@@ -637,17 +635,17 @@ public class RdbMessagingAccountStorage implements MessagingAccountStorage, Secr
             }
             wc.commit(); // COMMIT
         } catch (final OXException e) {
-            DBUtils.rollback(wc); // ROLL-BACK
+            Databases.rollback(wc); // ROLL-BACK
             throw e;
         } catch (final SQLException e) {
-            DBUtils.rollback(wc); // ROLL-BACK
+            Databases.rollback(wc); // ROLL-BACK
             throw MessagingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } catch (final RuntimeException e) {
-            DBUtils.rollback(wc); // ROLL-BACK
+            Databases.rollback(wc); // ROLL-BACK
             throw MessagingExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
-            DBUtils.closeSQLStuff(stmt);
-            DBUtils.autocommit(wc);
+            Databases.closeSQLStuff(stmt);
+            Databases.autocommit(wc);
             databaseService.backWritable(contextId, wc);
         }
     }
@@ -683,15 +681,11 @@ public class RdbMessagingAccountStorage implements MessagingAccountStorage, Secr
             stmt.setInt(pos, accountId);
             rs = stmt.executeQuery();
             if (!rs.next()) {
-                throw MessagingExceptionCodes.ACCOUNT_NOT_FOUND.create(
-                    Integer.valueOf(accountId),
-                    serviceId,
-                    Integer.valueOf(userId),
-                    Integer.valueOf(contextId));
+                throw MessagingExceptionCodes.ACCOUNT_NOT_FOUND.create(Integer.valueOf(accountId), serviceId, Integer.valueOf(userId), Integer.valueOf(contextId));
             }
             return rs.getInt(1);
         } finally {
-            DBUtils.closeSQLStuff(rs, stmt);
+            Databases.closeSQLStuff(rs, stmt);
         }
     }
 
@@ -748,7 +742,7 @@ public class RdbMessagingAccountStorage implements MessagingAccountStorage, Secr
         } catch (final SQLException e) {
             throw MessagingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
-            DBUtils.closeSQLStuff(rs, stmt);
+            Databases.closeSQLStuff(rs, stmt);
             if (con != null) {
                 databaseService.backReadOnly(contextId, con);
             }
@@ -777,7 +771,7 @@ public class RdbMessagingAccountStorage implements MessagingAccountStorage, Secr
         } catch (final SQLException e) {
             throw MessagingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
-            DBUtils.closeSQLStuff(rs, stmt);
+            Databases.closeSQLStuff(rs, stmt);
             if (con != null) {
                 databaseService.backReadOnly(contextId, con);
             }
@@ -843,7 +837,7 @@ public class RdbMessagingAccountStorage implements MessagingAccountStorage, Secr
         } catch (final SQLException e) {
             throw MessagingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
-            DBUtils.closeSQLStuff(rs, stmt);
+            Databases.closeSQLStuff(rs, stmt);
             if (con != null) {
                 databaseService.backReadOnly(session.getContextId(), con);
             }

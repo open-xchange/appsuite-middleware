@@ -62,7 +62,6 @@ import org.junit.runners.Suite.SuiteClasses;
  */
 @RunWith(Suite.class)
 @SuiteClasses({
-    RoundtripTest.class,
     UserCopyTest.class,
 //temporary removal    MailAttachmentFolderTest.class
 })

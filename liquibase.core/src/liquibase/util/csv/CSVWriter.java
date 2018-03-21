@@ -1,12 +1,11 @@
 package liquibase.util.csv;
 
-import liquibase.util.ISODateFormat;
-
 import java.io.IOException;
 import java.io.Writer;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
+import liquibase.util.ISODateFormat;
 
 public class CSVWriter extends liquibase.util.csv.opencsv.CSVWriter {
     private static final ISODateFormat ISO_DATE_FORMAT = new ISODateFormat();

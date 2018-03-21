@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 1997-2017 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997-2018 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -43,12 +43,13 @@ package javax.mail.internet;
 import java.io.UnsupportedEncodingException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-import java.util.List;
-import java.util.ArrayList;
-import java.util.StringTokenizer;
-import java.util.Locale;
 import java.nio.charset.StandardCharsets;
-import javax.mail.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
+import java.util.StringTokenizer;
+import javax.mail.Address;
+import javax.mail.Session;
 import com.sun.mail.util.PropUtil;
 
 /**

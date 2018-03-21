@@ -1070,6 +1070,11 @@ public class DelegatingComposedMailMessage extends ComposedMailMessage {
     }
 
     @Override
+    public boolean isHasAttachment() {
+        return delegate.isHasAttachment();
+    }
+
+    @Override
     public boolean containsHasAttachment() {
         return delegate.containsHasAttachment();
     }
@@ -1082,6 +1087,26 @@ public class DelegatingComposedMailMessage extends ComposedMailMessage {
     @Override
     public void setHasAttachment(boolean hasAttachment) {
         delegate.setHasAttachment(hasAttachment);
+    }
+
+    @Override
+    public boolean isAlternativeHasAttachment() {
+        return delegate.isAlternativeHasAttachment();
+    }
+
+    @Override
+    public boolean containsAlternativeHasAttachment() {
+        return delegate.containsAlternativeHasAttachment();
+    }
+
+    @Override
+    public void removeAlternativeHasAttachment() {
+        delegate.removeAlternativeHasAttachment();
+    }
+
+    @Override
+    public void setAlternativeHasAttachment(boolean hasAttachment) {
+        delegate.setAlternativeHasAttachment(hasAttachment);
     }
 
     @Override

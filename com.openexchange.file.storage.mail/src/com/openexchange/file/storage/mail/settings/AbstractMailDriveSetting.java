@@ -53,9 +53,9 @@ import org.slf4j.Logger;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.composition.FolderID;
 import com.openexchange.file.storage.mail.FullName;
+import com.openexchange.file.storage.mail.FullName.Type;
 import com.openexchange.file.storage.mail.MailDriveConstants;
 import com.openexchange.file.storage.mail.MailDriveFileStorageService;
-import com.openexchange.file.storage.mail.FullName.Type;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.settings.IValueHandler;
@@ -128,7 +128,11 @@ public abstract class AbstractMailDriveSetting implements PreferencesItemService
                 try {
                     int contextId = userConfig.getContext().getContextId();
                     int userId = userConfig.getUserId();
-                    return userConfig.hasWebMail() && userConfig.hasInfostore() && mailDriveService.isEnabledFor(userId, contextId) && (null != getFullName(userId, contextId));
+                    return userConfig.hasWebMail() &&
+                        userConfig.hasInfostore() &&
+                        !userConfig.isGuest() &&
+                        mailDriveService.isEnabledFor(userId, contextId) &&
+                        (null != getFullName(userId, contextId));
                 } catch (OXException e) {
                     // Failed to check
                     LOG.error("Failed to check Mail Drive availability", e);

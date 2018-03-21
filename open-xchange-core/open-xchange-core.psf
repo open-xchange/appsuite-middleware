@@ -4,6 +4,7 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,rt3,com.ctc.wstx"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,rt3,com.google.android.gcm"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,rt3,com.google.guava"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,rt3,com.google.json"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,rt3,com.clevertap.apns.apns_http2"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,rt3,com.hazelcast"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,rt3,com.openexchange.annotation"/>
@@ -11,7 +12,6 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,rt3,com.openexchange.caching"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,rt3,com.openexchange.caching.events"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,rt3,com.openexchange.caching.events.ms"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,rt3,com.openexchange.calendar"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,rt3,com.openexchange.calendar.json"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,rt3,com.openexchange.capabilities"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,rt3,com.openexchange.capabilities.impl"/>
@@ -22,6 +22,25 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,rt3,com.openexchange.cluster.lock"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,rt3,com.openexchange.cluster.timer"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,rt3,com.openexchange.cluster.timer.impl"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,rt3,com.openexchange.chronos"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,rt3,com.openexchange.chronos.alarm"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,rt3,com.openexchange.chronos.calendar.account.service.impl"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,rt3,com.openexchange.chronos.common"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,rt3,com.openexchange.chronos.compat"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,rt3,com.openexchange.chronos.compat.impl"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,rt3,com.openexchange.chronos.ical"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,rt3,com.openexchange.chronos.ical.ical4j"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,rt3,com.openexchange.chronos.impl"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,rt3,com.openexchange.chronos.itip"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,rt3,com.openexchange.chronos.json"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,rt3,com.openexchange.chronos.provider"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,rt3,com.openexchange.chronos.provider.birthdays"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,rt3,com.openexchange.chronos.provider.caching"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,rt3,com.openexchange.chronos.provider.composition.impl"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,rt3,com.openexchange.chronos.provider.internal"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,rt3,com.openexchange.chronos.recurrence"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,rt3,com.openexchange.chronos.storage"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,rt3,com.openexchange.chronos.storage.rdb"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,rt3,com.openexchange.common"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,rt3,com.openexchange.config.cascade"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,rt3,com.openexchange.config.lean"/>
@@ -71,7 +90,6 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,rt3,com.openexchange.find.basic"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,rt3,com.openexchange.find.json"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,rt3,com.openexchange.folder.json"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,rt3,com.openexchange.freebusy"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,rt3,com.openexchange.frontend.uwa"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,rt3,com.openexchange.frontend.uwa.json"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,rt3,com.openexchange.geolocation"/>
@@ -97,7 +115,6 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,rt3,com.openexchange.imagetransformation"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,rt3,com.openexchange.imagetransformation.java"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,rt3,com.openexchange.importexport"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,rt3,com.openexchange.itip.json"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,rt3,com.openexchange.java"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,rt3,com.openexchange.jcharset"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,rt3,com.openexchange.jolokia"/>
@@ -126,6 +143,7 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,rt3,com.openexchange.management.impl"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,rt3,com.openexchange.message.timeline"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,rt3,com.openexchange.messaging"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,rt3,com.openexchange.metrics"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,rt3,com.openexchange.modules.json"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,rt3,com.openexchange.modules.model"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,rt3,com.openexchange.modules.storage"/>
@@ -155,6 +173,7 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,rt3,com.openexchange.pns.monitoring"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,rt3,com.openexchange.preview"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,rt3,com.openexchange.proxy"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,rt3,com.openexchange.proxy.authenticator"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,rt3,com.openexchange.proxy.servlet"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,rt3,com.openexchange.publish"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,rt3,com.openexchange.publish.basic"/>
