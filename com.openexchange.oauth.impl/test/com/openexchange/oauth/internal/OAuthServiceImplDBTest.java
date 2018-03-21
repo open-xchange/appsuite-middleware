@@ -54,6 +54,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Collections;
 import java.util.HashMap;
@@ -188,6 +189,18 @@ public class OAuthServiceImplDBTest extends SQLTestCase {
 
             @Override
             public void deleteAccount(int userId, int contextId, int accountId) throws OXException {
+                // TODO Auto-generated method stub
+
+            }
+
+            @Override
+            public OAuthAccount getAccount(Session session, int accountId, Connection connection) throws OXException {
+                // TODO Auto-generated method stub
+                return null;
+            }
+
+            @Override
+            public void updateAccount(int userId, int contextId, int accountId, Map<String, Object> arguments, Connection connection) throws OXException {
                 // TODO Auto-generated method stub
 
             }

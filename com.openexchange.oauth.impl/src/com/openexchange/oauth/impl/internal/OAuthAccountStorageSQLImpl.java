@@ -158,16 +158,30 @@ public class OAuthAccountStorageSQLImpl implements OAuthAccountStorage, SecretEn
      */
     @Override
     public OAuthAccount getAccount(Session session, int accountId) throws OXException {
+        return getAccount(session, accountId, null);
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.oauth.OAuthAccountStorage#getAccount(com.openexchange.session.Session, int, java.sql.Connection)
+     */
+    @Override
+    public OAuthAccount getAccount(Session session, int accountId, Connection connection) throws OXException {
         final SecretEncryptionService<PWUpdate> encryptionService = Services.getService(SecretEncryptionFactoryService.class).createService(this);
         final OAuthScopeRegistry scopeRegistry = Services.getService(OAuthScopeRegistry.class);
         int contextId = session.getContextId();
         int userId = session.getUserId();
         final Context context = getContext(contextId);
-        final Connection con = getConnection(true, context);
+        boolean releaseConnection = false;
+        if (connection == null) {
+            connection = getConnection(true, context);
+            releaseConnection = true;
+        }
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
-            stmt = con.prepareStatement("SELECT displayName, accessToken, accessSecret, serviceId, scope, identity FROM oauthAccounts WHERE cid = ? AND user = ? and id = ?");
+            stmt = connection.prepareStatement("SELECT displayName, accessToken, accessSecret, serviceId, scope, identity FROM oauthAccounts WHERE cid = ? AND user = ? and id = ?");
             stmt.setInt(1, contextId);
             stmt.setInt(2, userId);
             stmt.setInt(3, accountId);
@@ -201,7 +215,9 @@ public class OAuthAccountStorageSQLImpl implements OAuthAccountStorage, SecretEn
             throw OAuthExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
             closeSQLStuff(rs, stmt);
-            provider.releaseReadConnection(context, con);
+            if (releaseConnection) {
+                provider.releaseReadConnection(context, connection);
+            }
         }
     }
 
@@ -326,12 +342,26 @@ public class OAuthAccountStorageSQLImpl implements OAuthAccountStorage, SecretEn
      */
     @Override
     public void updateAccount(int userId, int contextId, int accountId, Map<String, Object> arguments) throws OXException {
+        updateAccount(userId, contextId, accountId, arguments, null);
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.oauth.OAuthAccountStorage#updateAccount(int, int, int, java.util.Map, java.sql.Connection)
+     */
+    @Override
+    public void updateAccount(int userId, int contextId, int accountId, Map<String, Object> arguments, Connection connection) throws OXException {
         final List<Setter> list = setterFrom(arguments);
         if (list.isEmpty()) {
             return;
         }
         final Context context = getContext(contextId);
-        final Connection con = getConnection(false, context);
+        boolean releaseConnection = false;
+        if (connection == null) {
+            connection = getConnection(false, context);
+            releaseConnection = true;
+        }
         PreparedStatement stmt = null;
         try {
             final StringBuilder stmtBuilder = new StringBuilder(128).append("UPDATE oauthAccounts SET ");
@@ -341,7 +371,7 @@ public class OAuthAccountStorageSQLImpl implements OAuthAccountStorage, SecretEn
                 stmtBuilder.append(", ");
                 list.get(i).appendTo(stmtBuilder);
             }
-            stmt = con.prepareStatement(stmtBuilder.append(" WHERE cid = ? AND user = ? and id = ?").toString());
+            stmt = connection.prepareStatement(stmtBuilder.append(" WHERE cid = ? AND user = ? and id = ?").toString());
             int pos = 1;
             for (final Setter setter : list) {
                 pos = setter.set(pos, stmt);
@@ -357,7 +387,9 @@ public class OAuthAccountStorageSQLImpl implements OAuthAccountStorage, SecretEn
             throw OAuthExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
             closeSQLStuff(stmt);
-            provider.releaseReadConnection(context, con);
+            if (releaseConnection) {
+                provider.releaseReadConnection(context, connection);
+            }
         }
     }
 
