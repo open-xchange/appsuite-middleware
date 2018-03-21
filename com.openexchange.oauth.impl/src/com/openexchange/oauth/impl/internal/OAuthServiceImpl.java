@@ -323,11 +323,11 @@ public class OAuthServiceImpl implements OAuthService {
              * checks for the user identity and if it's missing it will be fetched from the respective
              * OAuth provider and the account will be updated accordingly
              * 
-             * Therefore this edge case can only happen after an upgrade and only if the account's access was
-             * not initialised before initiating a re-authorise. In that case there is nothing that can be
+             * Therefore this edge case can only happen after an upgrade and only if the user has explicitly revoked 
+             * the access from the third party OAuth provider.In that case there is nothing that can be
              * done from the middleware's point of view, since a hint is required to somehow identify the
              * user's account (no accountId is provided, and no identity exists in the database from where
-             * a match can be found.
+             * a match can be found).
              */
             if (Strings.isNotEmpty(actionHint) && REAUTHORIZE_ACTION_HINT.equals(actionHint)) {
                 throw OAuthExceptionCodes.INVALID_ACCOUNT.create();
