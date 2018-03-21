@@ -230,7 +230,7 @@ public class OAuthAccountStorageSQLImpl implements OAuthAccountStorage, SecretEn
     public void deleteAccount(int userId, int contextId, int accountId) throws OXException {
         final Context context = getContext(contextId);
         final Connection con = getConnection(false, context);
-        boolean rollback = false;
+        boolean rollback = false; 
         PreparedStatement stmt = null;
         try {
             startTransaction(con);

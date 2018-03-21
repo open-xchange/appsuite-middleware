@@ -79,7 +79,7 @@ import com.openexchange.tools.session.ServerSession;
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 public class CallbackAction extends AbstractOAuthTokenAction {
-    
+
     private static final String REAUTHORIZE_ACTION_HINT = "reauthorize";
 
     /**
@@ -113,8 +113,8 @@ public class CallbackAction extends AbstractOAuthTokenAction {
             service = registry.getService(serviceId, session.getUserId(), session.getContextId());
         }
         final Map<String, Object> arguments = processOAuthArguments(requestData, session, service);
-        OAuthAccount oauthAccount = oAuthService.upsertAccount(serviceId, OAuthInteractionType.CALLBACK, arguments, session.getUserId(), session.getContextId(), scopes);
-
+        OAuthAccount oauthAccount = oAuthService.upsertAccount(serviceId, OAuthInteractionType.CALLBACK, arguments, session.getUserId(), session.getContextId(), getAccountId(requestData), scopes);
+        
         // Trigger a reauthorize task if a reauthorize was requested
         String actionHint = (String) arguments.get(OAuthConstants.URLPARAM_ACTION_HINT);
         if (Strings.isNotEmpty(actionHint) && REAUTHORIZE_ACTION_HINT.equals(actionHint)) {

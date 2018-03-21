@@ -53,7 +53,6 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Dictionary;
-import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
@@ -298,7 +297,7 @@ public class OAuthServiceImpl implements OAuthService {
      * @see com.openexchange.oauth.OAuthService#upsertAccount(java.lang.String, java.util.Map, int, int, java.util.Set)
      */
     @Override
-    public OAuthAccount upsertAccount(String serviceMetaData, OAuthInteractionType type, Map<String, Object> arguments, int user, int contextId, Set<OAuthScope> scopes) throws OXException {
+    public OAuthAccount upsertAccount(String serviceMetaData, OAuthInteractionType type, Map<String, Object> arguments, int user, int contextId, int accountId, Set<OAuthScope> scopes) throws OXException {
         DefaultOAuthAccount account = new DefaultOAuthAccount();
         OAuthServiceMetaData service = registry.getService(serviceMetaData, user, contextId);
         account.setMetaData(service);
@@ -314,7 +313,7 @@ public class OAuthServiceImpl implements OAuthService {
         account.setUserIdentity(userIdentity);
         String actionHint = (String) arguments.get(OAuthConstants.ARGUMENT_ACTION_HINT);
         // Search in db for an account matching that id
-        DefaultOAuthAccount existingAccount = (DefaultOAuthAccount) oauthAccountStorage.findByUserIdentity(session, userIdentity, serviceMetaData);
+        DefaultOAuthAccount existingAccount = getExistingAccount(session, userIdentity, serviceMetaData, accountId);
 
         if (existingAccount == null) {
             /*
@@ -323,13 +322,13 @@ public class OAuthServiceImpl implements OAuthService {
              * checks for the user identity and if it's missing it will be fetched from the respective
              * OAuth provider and the account will be updated accordingly
              * 
-             * Therefore this edge case can only happen after an upgrade and only if the user has explicitly revoked 
+             * Therefore this edge case can only happen after an upgrade and only if the user has explicitly revoked
              * the access from the third party OAuth provider.In that case there is nothing that can be
              * done from the middleware's point of view, since a hint is required to somehow identify the
              * user's account (no accountId is provided, and no identity exists in the database from where
              * a match can be found).
              */
-            if (Strings.isNotEmpty(actionHint) && REAUTHORIZE_ACTION_HINT.equals(actionHint)) {
+            if (Strings.isNotEmpty(actionHint) && REAUTHORIZE_ACTION_HINT.equals(actionHint) && existingAccount == null) {
                 throw OAuthExceptionCodes.INVALID_ACCOUNT.create();
             }
             isNull(arguments, OAuthConstants.ARGUMENT_DISPLAY_NAME);
@@ -494,6 +493,27 @@ public class OAuthServiceImpl implements OAuthService {
     }
 
     ///////////////////////////////////// HELPERS //////////////////////////////////////////
+
+    /**
+     * Get the existing account for the specified user identity or account id
+     * 
+     * @param session The {@link Session}
+     * @param userIdentity The user identity
+     * @param serviceMetaData The service id
+     * @param accountId The optional account id
+     * @return The found account or <code>null</code> if none found
+     * @throws OXException if an error is occurred
+     */
+    private DefaultOAuthAccount getExistingAccount(Session session, String userIdentity, String serviceMetaData, int accountId) throws OXException {
+        DefaultOAuthAccount existingAccount = (DefaultOAuthAccount) oauthAccountStorage.findByUserIdentity(session, userIdentity, serviceMetaData);
+        if (existingAccount == null) {
+            // Try by account id if provided; should always be present in case of 'reauthorize'
+            if (accountId > 0) {
+                existingAccount = (DefaultOAuthAccount) oauthAccountStorage.getAccount(session, accountId);
+            }
+        }
+        return existingAccount;
+    }
 
     /**
      * Registers the specified OAuth token for deferred access (i.e. for the provider's call-back)

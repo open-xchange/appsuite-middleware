@@ -122,11 +122,12 @@ public interface OAuthService {
      * @param arguments The arguments appropriate for interaction type
      * @param userId The user identifier
      * @param contextId The context identifier
+     * @param accountId TODO
      * @param scopes The requested scopes
      * @return The newly created or updated {@link OAuthAccount}
      * @throws OXException if any error is occurred
      */
-    OAuthAccount upsertAccount(String serviceId, OAuthInteractionType type, Map<String, Object> arguments, int userId, int contextId, Set<OAuthScope> scopes) throws OXException;
+    OAuthAccount upsertAccount(String serviceId, OAuthInteractionType type, Map<String, Object> arguments, int userId, int contextId, int accountId, Set<OAuthScope> scopes) throws OXException;
 
     /**
      * Creates a new OAuth account completely from specified arguments.

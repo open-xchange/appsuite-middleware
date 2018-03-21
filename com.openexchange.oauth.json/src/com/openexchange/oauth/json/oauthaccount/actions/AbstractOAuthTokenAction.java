@@ -197,6 +197,22 @@ public abstract class AbstractOAuthTokenAction extends AbstractOAuthAJAXActionSe
 
     private static final Pattern P_EXPIRES = Pattern.compile("&expires(=[0-9]+)?$");
 
+    /**
+     * @param requestData
+     * @return
+     */
+    int getAccountId(AJAXRequestData requestData) {
+        String id = requestData.getParameter(AccountField.ID.getName());
+        if (Strings.isEmpty(id)) {
+            return -1;
+        }
+        try {
+            return Integer.parseInt(id);
+        } catch (NumberFormatException e) {
+            return -1;
+        }
+    }
+
     /*
      * Fixes bug 24332
      */

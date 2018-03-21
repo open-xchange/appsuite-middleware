@@ -250,7 +250,7 @@ public class MockOAuthService implements OAuthService {
      * @see com.openexchange.oauth.OAuthService#upsertAccount(java.lang.String, com.openexchange.oauth.OAuthInteractionType, java.util.Map, int, int, java.util.Set)
      */
     @Override
-    public OAuthAccount upsertAccount(String serviceMetaData, OAuthInteractionType type, Map<String, Object> arguments, int user, int contextId, Set<OAuthScope> scopes) throws OXException {
+    public OAuthAccount upsertAccount(String serviceMetaData, OAuthInteractionType type, Map<String, Object> arguments, int user, int contextId, int accountId, Set<OAuthScope> scopes) throws OXException {
         // TODO Auto-generated method stub
         return null;
     }
