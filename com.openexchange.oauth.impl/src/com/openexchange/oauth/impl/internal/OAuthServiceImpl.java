@@ -328,7 +328,7 @@ public class OAuthServiceImpl implements OAuthService {
              * user's account (no accountId is provided, and no identity exists in the database from where
              * a match can be found).
              */
-            if (Strings.isNotEmpty(actionHint) && REAUTHORIZE_ACTION_HINT.equals(actionHint) && existingAccount == null) {
+            if (Strings.isNotEmpty(actionHint) && REAUTHORIZE_ACTION_HINT.equals(actionHint)) {
                 throw OAuthExceptionCodes.INVALID_ACCOUNT.create();
             }
             isNull(arguments, OAuthConstants.ARGUMENT_DISPLAY_NAME);
