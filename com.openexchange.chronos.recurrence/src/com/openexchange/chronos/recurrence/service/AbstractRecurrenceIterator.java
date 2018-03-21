@@ -92,10 +92,9 @@ public abstract class AbstractRecurrenceIterator<T> implements RecurrenceIterato
      * Initializes a new {@link AbstractRecurrenceIterator}.
      *
      * @param config The recurrence configuration to use
-     * @param recurrenceData The underlying recurrence data
+     * @param master The master event containing all necessary information like recurrence rule, star and end date, timezones etc.
      * @param forwardToOccurrence <code>true</code> to fast-forward the iterator to the first occurrence if the recurrence data's start
      *            does not fall into the pattern, <code>false</code> otherwise
-     * @param exceptionDates A sorted array of change- and delete-exception timestamps to ignore during iteration, or <code>null</code> if not set
      * @param start The left side boundary for the calculation. Optional, can be null.
      * @param end The right side boundary for the calculation. Optional, can be null.
      * @param limit The maximum number of calculated instances. Optional, can be null.
@@ -150,7 +149,7 @@ public abstract class AbstractRecurrenceIterator<T> implements RecurrenceIterato
                 if (start != null && candidate + eventDuration > start.getTimeInMillis() ||
                     start != null && 0L == eventDuration && candidate == start.getTimeInMillis() ||
                     startPosition != null && position + 1 >= startPosition.intValue()) {
-                    lookAhead = candidate;
+                    lookAhead = Long.valueOf(candidate);
                     break;
                 } else {
                     position++;
@@ -186,7 +185,7 @@ public abstract class AbstractRecurrenceIterator<T> implements RecurrenceIterato
             return;
         }
 
-        if (limit != null && count >= limit) {
+        if (limit != null && count >= limit.intValue()) {
             ChronosLogger.debug("Reached given limit. Stop calculation.");
             next = null;
             return;
@@ -199,22 +198,22 @@ public abstract class AbstractRecurrenceIterator<T> implements RecurrenceIterato
         }
 
         if (lookAhead == null) {
-            lookAhead = inner.next();
+            lookAhead = Long.valueOf(inner.next());
         }
 
-        while (isException(lookAhead)) {
+        while (isException(lookAhead.longValue())) {
             ChronosLogger.debug("Next instance is exception.");
             position++;
             if (inner.hasNext()) {
-                lookAhead = inner.next();
+                lookAhead = Long.valueOf(inner.next());
             } else {
                 next = null;
                 return;
             }
         }
 
-        if (this.end != null && lookAhead >= this.end.getTimeInMillis()) {
-            ChronosLogger.debug("Next instance ({}) reached end boundary ({}).", lookAhead, this.end.getTimeInMillis());
+        if (this.end != null && lookAhead.longValue() >= this.end.getTimeInMillis()) {
+            ChronosLogger.debug("Next instance ({}) reached end boundary ({}).", lookAhead, Long.valueOf(this.end.getTimeInMillis()));
             next = null;
             return;
         }
