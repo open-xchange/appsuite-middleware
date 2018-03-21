@@ -68,6 +68,7 @@ import com.openexchange.exception.OXException;
  * {@link AbstractRecurrenceIterator}
  *
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
+ * @param <T> The generic type
  * @since v7.10.0
  */
 public abstract class AbstractRecurrenceIterator<T> implements RecurrenceIterator<T> {
@@ -140,7 +141,7 @@ public abstract class AbstractRecurrenceIterator<T> implements RecurrenceIterato
 
     private void init() {
         if (null != start || null != startPosition && 1 < startPosition.intValue()) {
-            while (inner.hasNext()) {
+            while (_hasNext()) {
                 long candidate = inner.next();
                 if (isException(candidate)) {
                     position++;
@@ -158,6 +159,10 @@ public abstract class AbstractRecurrenceIterator<T> implements RecurrenceIterato
         }
 
         innerNext();
+    }
+
+    private boolean _hasNext() {
+        return inner != null && inner.hasNext();
     }
 
     @Override
@@ -191,20 +196,19 @@ public abstract class AbstractRecurrenceIterator<T> implements RecurrenceIterato
             return;
         }
 
-        if (!inner.hasNext() && lookAhead == null) {
-            ChronosLogger.debug("No more instances available.");
-            next = null;
-            return;
-        }
-
         if (lookAhead == null) {
+            if (!_hasNext()) {
+                ChronosLogger.debug("No more instances available.");
+                next = null;
+                return;
+            }
             lookAhead = Long.valueOf(inner.next());
         }
 
         while (isException(lookAhead.longValue())) {
             ChronosLogger.debug("Next instance is exception.");
             position++;
-            if (inner.hasNext()) {
+            if (_hasNext()) {
                 lookAhead = Long.valueOf(inner.next());
             } else {
                 next = null;
@@ -218,12 +222,8 @@ public abstract class AbstractRecurrenceIterator<T> implements RecurrenceIterato
             return;
         }
 
-        if (lookAhead == null) {
-            next = toDateTime(inner.next());
-        } else {
-            next = toDateTime(lookAhead.longValue());
-            lookAhead = null;
-        }
+        next = toDateTime(lookAhead.longValue());
+        lookAhead = null;
         count++;
         position++;
     }
@@ -245,7 +245,7 @@ public abstract class AbstractRecurrenceIterator<T> implements RecurrenceIterato
 
     @Override
     public boolean isLastOccurrence() {
-        return null == lookAhead && false == inner.hasNext() && 0 < getPosition();
+        return null == lookAhead && false == _hasNext() && 0 < getPosition();
     }
 
     /**
