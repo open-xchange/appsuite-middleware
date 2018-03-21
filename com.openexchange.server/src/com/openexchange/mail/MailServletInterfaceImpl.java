@@ -3901,7 +3901,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                     LOG.error("", e);
                 }
             } finally {
-                if (null != mailAccess && null != otherAccess) {
+                if (null != otherAccess) {
                     otherAccess.close(false);
                 }
             }
