@@ -54,6 +54,7 @@ import static com.openexchange.chronos.provider.CalendarFolderProperty.COLOR;
 import static com.openexchange.chronos.provider.CalendarFolderProperty.DESCRIPTION;
 import static com.openexchange.chronos.provider.CalendarFolderProperty.SCHEDULE_TRANSP;
 import static com.openexchange.chronos.provider.CalendarFolderProperty.USED_FOR_SYNC;
+import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.tools.arrays.Arrays.contains;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -347,14 +348,25 @@ public class BirthdaysCalendarAccess implements BasicCalendarAccess, SubscribeAw
             }
         }
         /*
-         * perform search
+         * perform search & collect contacts with birthday
          */
+        List<Contact> contacts = new ArrayList<Contact>();
         SearchIterator<Contact> searchIterator = null;
         try {
-            return SearchIterators.asList(searchIterator = services.getService(ContactService.class).searchContacts(session, searchTerm, sortOptions));
+            searchIterator = services.getService(ContactService.class).searchContacts(session, searchTerm, sortOptions);
+            while (searchIterator.hasNext()) {
+                Contact contact = searchIterator.next();
+                if (null == contact.getBirthday()) {
+                    org.slf4j.LoggerFactory.getLogger(BirthdaysCalendarAccess.class).debug(
+                        "Skipping contact {} due to missing birthday.", I(contact.getObjectID()));
+                    continue;
+                }
+                contacts.add(contact);
+            }
         } finally {
             SearchIterators.close(searchIterator);
         }
+        return contacts;
     }
 
     private AlarmHelper getAlarmHelper() {
@@ -401,8 +413,7 @@ public class BirthdaysCalendarAccess implements BasicCalendarAccess, SubscribeAw
 
     private List<String> getContactFolderIds(Type type) throws OXException {
         List<String> folderIds = new ArrayList<String>();
-        FolderResponse<UserizedFolder[]> visibleFolders = services.getService(FolderService.class)
-            .getVisibleFolders(FolderStorage.REAL_TREE_ID, ContactContentType.getInstance(), type, false, session, null);
+        FolderResponse<UserizedFolder[]> visibleFolders = services.getService(FolderService.class).getVisibleFolders(FolderStorage.REAL_TREE_ID, ContactContentType.getInstance(), type, false, session, null);
         UserizedFolder[] folders = visibleFolders.getResponse();
         if (null != folders && 0 < folders.length) {
             for (UserizedFolder folder : folders) {

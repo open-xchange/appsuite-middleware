@@ -131,8 +131,13 @@ public final class IMAPMailPart extends MailPart implements MimeRawSource, Conne
         super();
         if (loadContent) {
             ThresholdInputStreamProvider tisp = new ThresholdInputStreamProvider();
-            tisp.write(new IMAPInputStream(msg, sectionId, body.size, peek));
-            this.inProvider = tisp;
+            try {
+                tisp.write(new IMAPInputStream(msg, sectionId, body.size, peek));
+                this.inProvider = tisp;
+                tisp = null;
+            } finally {
+                Streams.close(tisp);
+            }
         } else {
             inProvider = new InputStreamProvider() {
 

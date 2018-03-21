@@ -47,41 +47,93 @@
  *
  */
 
-package com.openexchange.test.report.internal.writer;
+package com.openexchange.net.ssl.config.impl.jslob;
 
-import com.openexchange.test.report.TestReportFormatter;
+import java.util.Map;
+import com.openexchange.exception.OXException;
+import com.openexchange.jslob.JSlobEntry;
+import com.openexchange.jslob.JSlobKeys;
+import com.openexchange.net.ssl.config.UserAwareSSLConfigurationService;
+import com.openexchange.session.Session;
 
 /**
- * {@link ConsoleTestReportWriter}. A simple console test report writer
+ * {@link UserCanManageOwnCertificatesJSLobEntry}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class ConsoleTestReportWriter extends AbstractTestReportWriter {
+public class UserCanManageOwnCertificatesJSLobEntry implements JSlobEntry {
+
+    private static final String LOB_NAMESPACE = "security";
+    private static final String LOB_PATH = LOB_NAMESPACE + "/manageCertificates";
+
+    private final UserAwareSSLConfigurationService userAwareSSLConfigurationService;
 
     /**
-     * Initializes a new {@link ConsoleTestReportWriter}.
+     * Initialises a new {@link UserCanManageOwnCertificatesJSLobEntry}.
      */
-    public ConsoleTestReportWriter(TestReportFormatter formatter, String name) {
-        super(formatter, name);
-    }
-    
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.in8.test.report.TestReportWriter#write()
-     */
-    @Override
-    public void write() {
-        System.out.println(formatter.getFormattedReport());
+    public UserCanManageOwnCertificatesJSLobEntry(UserAwareSSLConfigurationService userAwareSSLConfigurationService) {
+        super();
+        this.userAwareSSLConfigurationService = userAwareSSLConfigurationService;
     }
 
     /*
      * (non-Javadoc)
      * 
-     * @see com.openexchange.in8.test.report.internal.writer.AbstractTestReportWriter#processFormattedResult(java.lang.String)
+     * @see com.openexchange.jslob.JSlobEntry#getKey()
      */
     @Override
-    public void processFormattedResult(String formattedResult) {
+    public String getKey() {
+        return JSlobKeys.CORE;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.jslob.JSlobEntry#getPath()
+     */
+    @Override
+    public String getPath() {
+        return LOB_PATH;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.jslob.JSlobEntry#isWritable(com.openexchange.session.Session)
+     */
+    @Override
+    public boolean isWritable(Session session) throws OXException {
+        return false;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.jslob.JSlobEntry#getValue(com.openexchange.session.Session)
+     */
+    @Override
+    public Object getValue(Session session) throws OXException {
+        return userAwareSSLConfigurationService.canManageCertificates(session.getUserId(), session.getContextId());
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.jslob.JSlobEntry#setValue(java.lang.Object, com.openexchange.session.Session)
+     */
+    @Override
+    public void setValue(Object value, Session sessiond) throws OXException {
+        // no-op, read-only
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.jslob.JSlobEntry#metadata(com.openexchange.session.Session)
+     */
+    @Override
+    public Map<String, Object> metadata(Session session) throws OXException {
         // no-op
+        return null;
     }
 }

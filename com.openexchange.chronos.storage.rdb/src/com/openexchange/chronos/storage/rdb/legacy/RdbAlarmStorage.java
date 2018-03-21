@@ -532,7 +532,7 @@ public class RdbAlarmStorage extends RdbStorage implements AlarmStorage {
         /*
          * load reminder minutes from 'prg_dates_members'
          */
-        Map<String, Map<Integer, Integer>> remindersMinutesByUserByID = new HashMap<String, Map<Integer, Integer>>();
+        Map<String, Map<Integer, ReminderData>> remindersByUserByID = new HashMap<String, Map<Integer, ReminderData>>();
         String sql = new StringBuilder()
             .append("SELECT object_id,member_uid,reminder FROM prg_dates_members ")
             .append("WHERE cid=? AND object_id IN (").append(getParameters(eventIDs.size())).append(") AND reminder IS NOT NULL;")
@@ -548,23 +548,23 @@ public class RdbAlarmStorage extends RdbStorage implements AlarmStorage {
                     String eventID = asString(resultSet.getInt("object_id"));
                     Integer userID = I(resultSet.getInt("member_uid"));
                     Integer reminderMinutes = I(resultSet.getInt("reminder"));
-                    Map<Integer, Integer> reminderMinutesByUser = remindersMinutesByUserByID.get(eventID);
-                    if (null == reminderMinutesByUser) {
-                        reminderMinutesByUser = new HashMap<Integer, Integer>();
-                        remindersMinutesByUserByID.put(eventID, reminderMinutesByUser);
+                    ReminderData reminder = new ReminderData(0, i(reminderMinutes), 0L);
+                    Map<Integer, ReminderData> remindersByUser = remindersByUserByID.get(eventID);
+                    if (null == remindersByUser) {
+                        remindersByUser = new HashMap<Integer, ReminderData>();
+                        remindersByUserByID.put(eventID, remindersByUser);
                     }
-                    reminderMinutesByUser.put(userID, reminderMinutes);
+                    remindersByUser.put(userID, reminder);
                 }
             }
         }
-        if (remindersMinutesByUserByID.isEmpty()) {
+        if (remindersByUserByID.isEmpty()) {
             return Collections.emptyMap();
         }
         /*
          * load associated triggers from 'reminder' table
          */
-        eventIDs = remindersMinutesByUserByID.keySet();
-        Map<String, Map<Integer, ReminderData>> remindersByUserByID = new HashMap<String, Map<Integer, ReminderData>>();
+        eventIDs = remindersByUserByID.keySet();
         sql = new StringBuilder()
             .append("SELECT object_id,target_id,userid,alarm,last_modified FROM reminder ")
             .append("WHERE cid=? AND target_id IN (").append(getParameters(eventIDs.size())).append(");")
@@ -578,20 +578,17 @@ public class RdbAlarmStorage extends RdbStorage implements AlarmStorage {
             try (ResultSet resultSet = logExecuteQuery(stmt)) {
                 while (resultSet.next()) {
                     String eventID = asString(resultSet.getInt("target_id"));
-                    Map<Integer, Integer> reminderMinutesByUser = remindersMinutesByUserByID.get(eventID);
-                    if (null != reminderMinutesByUser) {
-                        Integer userID = I(resultSet.getInt("userid"));
-                        Integer reminderMinutes = reminderMinutesByUser.get(userID);
-                        if (null != reminderMinutes) {
-                            int reminderID = resultSet.getInt("object_id");
-                            Timestamp nextTriggerTime = resultSet.getTimestamp("alarm");
-                            ReminderData reminder = new ReminderData(reminderID, i(reminderMinutes), null == nextTriggerTime ? 0L : nextTriggerTime.getTime());
-                            Map<Integer, ReminderData> remindersByUser = remindersByUserByID.get(eventID);
-                            if (null == remindersByUser) {
-                                remindersByUser = new HashMap<Integer, ReminderData>();
-                                remindersByUserByID.put(eventID, remindersByUser);
-                            }
-                            remindersByUser.put(userID, reminder);
+                    Map<Integer, ReminderData> remindersByUser = remindersByUserByID.get(eventID);
+                    if (null == remindersByUser) {
+                        continue;
+                    }
+                    Integer userID = I(resultSet.getInt("userid"));
+                    ReminderData reminder = remindersByUser.get(userID);
+                    if (null != reminder) {
+                        reminder.id = resultSet.getInt("object_id");
+                        Timestamp nextTriggerTime = resultSet.getTimestamp("alarm");
+                        if (null != nextTriggerTime) {
+                            reminder.nextTriggerTime = nextTriggerTime.getTime();
                         }
                     }
                 }

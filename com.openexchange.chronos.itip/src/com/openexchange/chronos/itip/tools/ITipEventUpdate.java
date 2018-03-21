@@ -75,20 +75,28 @@ import com.openexchange.exception.OXException;
  */
 public class ITipEventUpdate implements EventUpdate {
 
+    private final static Set<AttendeeField> IGNOREES = new HashSet<>(4);
+    {
+        IGNOREES.add(AttendeeField.EXTENDED_PARAMETERS);
+        IGNOREES.add(AttendeeField.CN);
+        IGNOREES.add(AttendeeField.CU_TYPE);
+        IGNOREES.add(AttendeeField.ENTITY);
+    }
+
     private EventUpdate delegate;
 
     public ITipEventUpdate(Event originalEvent, Event updatedEvent, boolean considerUnset, EventField... ignoredFields) throws OXException {
         // Make sure EventField.EXTENDED_PROPERTIES is contained in ignordeFields.
         if (ignoredFields == null || ignoredFields.length == 0) {
-            this.delegate = new EventUpdateImpl(originalEvent, updatedEvent, considerUnset, EventField.EXTENDED_PROPERTIES);
+            this.delegate = new EventUpdateImpl(originalEvent, updatedEvent, considerUnset, IGNOREES, EventField.EXTENDED_PROPERTIES);
         } else {
             if (Arrays.stream(ignoredFields).anyMatch(x -> x == EventField.EXTENDED_PROPERTIES)) {
-                this.delegate = new EventUpdateImpl(originalEvent, updatedEvent, considerUnset, ignoredFields);
+                this.delegate = new EventUpdateImpl(originalEvent, updatedEvent, considerUnset, IGNOREES, ignoredFields);
             } else {
                 EventField[] fields = new EventField[ignoredFields.length + 1];
                 System.arraycopy(ignoredFields, 0, fields, 0, ignoredFields.length);
                 fields[fields.length - 1] = EventField.EXTENDED_PROPERTIES;
-                this.delegate = new EventUpdateImpl(originalEvent, updatedEvent, considerUnset, fields);
+                this.delegate = new EventUpdateImpl(originalEvent, updatedEvent, considerUnset, IGNOREES, fields);
             }
         }
     }

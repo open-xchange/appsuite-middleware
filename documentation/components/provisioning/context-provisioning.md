@@ -5,20 +5,24 @@ title: Context provisioning
 This article outlines how context provisioning has been improved starting with v7.10. It describes the preconditions, implemented ideas and changes as well as modified and newly introduced command-line tools.
 
 # Motivation
-Considering our recent standard installations, the number of users/contexts held in our database leaves the dimension of several thousands and enters the range of several millions. The current context provisioning performance simply does not meet the requirements to:
+Considering our recent standard installations, the number of users/contexts held in our database leaves the dimension of several thousands and enters the range of several millions. 
+The current context provisioning performance simply does not meet the requirements to:
 
 * Quickly create, update and delete contexts in such large data sets
 * Bulk create contexts on prepared (pre-created) database schemas
 
-Those drawbacks are mainly driven by a strict automated schema management as well as auto-selection of suitable file storages. This forces usage of heavy locking to prevent concurrency issues and executing expensive COUNT queries, which slows down performance and stresses the CPU usage of the MySQL service drastically. Therefore, the context create and delete mechanism have been revised, trying to resolve the afore-mentioned drawbacks.
+Those drawbacks are mainly driven by a strict automated schema management as well as auto-selection of suitable file storages. 
+This forces usage of heavy locking to prevent concurrency issues and executing expensive COUNT queries, which slows down performance and stresses the CPU usage of the MySQL service drastically. 
+Therefore, the context create and delete mechanism have been revised, trying to resolve the afore-mentioned drawbacks.
 
 # Preconditions
 * The property `"CREATE_CONTEXT_USE_UNIT"` is required to be set to `"context"`. Because of this, the property has been dropped from '/opt/open-xchange/etc/hosting.properties' file
-* There is no more the possibility to specify a cluster weight for a registered database. Thus the assumed weight is always 100% for each database. Therefore, cluster weight has been completey removed from existing provisioning APIs
+* There is no more the possibility to specify a cluster weight for a registered database. Thus the assumed weight is always 100% for each database. Therefore, cluster weight has been completely removed from existing provisioning APIs
 * The "inmemory" bulk creation mode for contexts is no more supported, since the reworked context provisioning renders that option obsolete
 
 # Introduction of count tables
-The biggest change is the usage of count-tables that were introduced by Carsten Höger and Dennis Sieben in a proof of concept implementation for Orange and their main goal is a quick detection of the next suitable file storage and database (schema) for a new context as a quick look-up of a file storage's or database's occupancy is provided. This avoids the need to execute slow/stressing `COUNT` queries. Those tables track:
+The biggest change is the usage of count-tables that were introduced by Carsten Höger and Dennis Sieben in a proof of concept implementation for Orange and their main goal is a quick detection of the next suitable file storage and 
+database (schema) for a new context as a quick look-up of a file storage's or database's occupancy is provided. This avoids the need to execute slow/stressing `COUNT` queries. Those tables track:
 
 * Number of contexts per file storage
 * Number of contexts per database host
@@ -41,16 +45,24 @@ checkcountsconsistency
 ```
 
 # Less lock contention and lenient schema management
-This point cares about trying to eliminate locking as well as big, long-lasting transactions where possible. For selecting the next suitable file storage and/or database (schema), the candidate's counter held in appropriate count table is atomically incremented acting as a "reservation" for the context, which is supposed to be created. That allows to remove locking for the task of file storage / database selection, but still guarantees concurrency. Moreover, those atomic compare-and-set operations do not need to be part of a transaction, lowering overall transaction scope and duration.
+This point cares about trying to eliminate locking as well as big, long-lasting transactions where possible. For selecting the next suitable file storage and/or database (schema), the candidate's counter held in appropriate count table 
+is atomically incremented acting as a "reservation" for the context, which is supposed to be created. That allows to remove locking for the task of file storage / database selection, but still guarantees concurrency. 
+Moreover, those atomic compare-and-set operations do not need to be part of a transaction, lowering overall transaction scope and duration.
 
-As next step, context provisioning gets rid off strict schema management. While during context creation, the auto-creation of a schema (if no suitable one available) is still in place, the context delete operation no more takes care of possibly dropping a schema once the last context in it has been removed. This allows to eliminate the database-backed locking through `SELECT...FOR UPDATE` statements.
+As next step, context provisioning gets rid off strict schema management. While during context creation, the auto-creation of a schema (if no suitable one available) is still in place, the context delete operation 
+no more takes care of possibly dropping a schema once the last context in it has been removed. This allows to eliminate the database-backed locking through `SELECT...FOR UPDATE` statements.
 
-Additionally, the task to auto-select next suitable database schema has been heavily optimized, rendering the `in-memory` schema select strategy obsolete. For that reason, the `in-memory` option has been removed as it no more provides significant performance gains and allows to get rid off the "please use only one provisioning node" burden.
+Additionally, the task to auto-select next suitable database schema has been heavily optimized, rendering the `in-memory` schema select strategy obsolete. 
+For that reason, the `in-memory` option has been removed as it no more provides significant performance gains and allows to get rid off the "please use only one provisioning node" burden.
 
 # Pre-creation of schemas
-As mentioned in previous section, the schema selection is strongly optimized as considering the "Number of contexts per database schema" count table allows a quick detection of a suitable database schema. Meaning, the more schemas are available, the faster (in terms of concurrent) contexts can be created. To further leverage from that optimization, tooling has been introduced to pre-create database schemas either for a newly registered database or for an existing one.
+As mentioned in previous section, the schema selection is strongly optimized as considering the "Number of contexts per database schema" count table allows a quick detection of a suitable database schema. 
+Meaning, the more schemas are available, the faster (in terms of concurrent) contexts can be created. To further leverage from that optimization, tooling has been introduced to pre-create database schemas 
+either for a newly registered database or for an existing one.
 
-Thus, `registerdatabase` utility, is enhanced by `create-userdb-schemas` and `userdb-schema-count` options. The `create-userdb-schemas` option is a flag that signals whether database schemas are supposed to be pre-created. `userdb-schema-count` optionally specifies the number of database schemas that shall be pre-created. If missing, number of schemas is calculated by `maxunit` divided by `CONTEXTS_PER_SCHEMA` config option from '/opt/open-xchange/etc/hosting.properties' file.
+Thus, `registerdatabase` utility, is enhanced by `create-userdb-schemas` and `userdb-schema-count` options. The `create-userdb-schemas` option is a flag that signals whether database schemas are supposed to be pre-created. 
+`userdb-schema-count` optionally specifies the number of database schemas that shall be pre-created. If missing, number of schemas is calculated by `maxunit` divided by `CONTEXTS_PER_SCHEMA` config option 
+from '/opt/open-xchange/etc/hosting.properties' file.
 
 ```
 registerdatabase 
@@ -95,7 +107,8 @@ createschemas
 # Deletion of empty schemas and further schema tooling
 As mentioned previously, no auto-deletion of empty schemas is performed and thus dropping empty schemas now becomes a manual task. To determine the schemas and actually deleting them, several tools are introduced.
 
-`listdatabaseschema` outputs a listing of database schemas and optionally accepts a search pattern similar to the `listdatabase` command-line tool. Moreover, the `only-empty-schemas` argument allows to list only empty schemas, which might be candidates for deletion.
+`listdatabaseschema` outputs a listing of database schemas and optionally accepts a search pattern similar to the `listdatabase` command-line tool. 
+Moreover, the `only-empty-schemas` argument allows to list only empty schemas, which might be candidates for deletion.
 
 ```
 listdatabaseschema 

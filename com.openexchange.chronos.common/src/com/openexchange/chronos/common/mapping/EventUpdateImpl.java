@@ -77,24 +77,37 @@ public class EventUpdateImpl extends DefaultItemUpdate<Event, EventField> implem
     private final SimpleCollectionUpdate<Attachment> attachmentUpdates;
 
     /**
-     * Initializes a new {@link EventUpdateImpl}.
+     * Initializes a new {@link EventUpdateImpl} containing the event update providing the differences.
      *
      * @param originalEvent The original event
      * @param updatedEvent The updated event
      * @param considerUnset <code>true</code> to also consider comparison with not <i>set</i> fields of the original, <code>false</code>, otherwise
      * @param ignoredFields Fields to ignore when determining the differences
-     * @return The event update providing the differences
      */
     public EventUpdateImpl(Event originalEvent, Event updatedEvent, boolean considerUnset, EventField... ignoredFields) throws OXException {
-        this(originalEvent, updatedEvent, getDifferentFields(EventMapper.getInstance(), originalEvent, updatedEvent, considerUnset, ignoredFields));
+        this(originalEvent, updatedEvent, getDifferentFields(EventMapper.getInstance(), originalEvent, updatedEvent, considerUnset, ignoredFields), null);
     }
 
-    EventUpdateImpl(Event originalEvent, Event updatedEvent, Set<EventField> updatedFields) throws OXException {
+    /**
+     * Initializes a new {@link EventUpdateImpl} containing the event update providing the differences.
+     *
+     * @param originalEvent The original event
+     * @param updatedEvent The updated event
+     * @param considerUnset <code>true</code> to also consider comparison with not <i>set</i> fields of the original, <code>false</code>, otherwise
+     * @param ignoredAttendeeFields The {@link AttendeeField}s to ignore when determining the differences
+     * @param ignoredFields Fields to ignore when determining the differences
+     * @throws OXException If building differences fails
+     */
+    public EventUpdateImpl(Event originalEvent, Event updatedEvent, boolean considerUnset, Set<AttendeeField> ignoredAttendeeFields, EventField... ignoredFields) throws OXException {
+        this(originalEvent, updatedEvent, getDifferentFields(EventMapper.getInstance(), originalEvent, updatedEvent, considerUnset, ignoredFields), ignoredAttendeeFields);
+    }
+
+    EventUpdateImpl(Event originalEvent, Event updatedEvent, Set<EventField> updatedFields, Set<AttendeeField> ignoredAttendeeFields) throws OXException {
         super(originalEvent, updatedEvent, updatedFields);
         alarmUpdates = AlarmUtils.getAlarmUpdates(
             null != originalEvent ? originalEvent.getAlarms() : null, null != updatedEvent ? updatedEvent.getAlarms() : null);
         attendeeUpdates = CalendarUtils.getAttendeeUpdates(
-            null != originalEvent ? originalEvent.getAttendees() : null, null != updatedEvent ? updatedEvent.getAttendees() : null);
+            null != originalEvent ? originalEvent.getAttendees() : null, null != updatedEvent ? updatedEvent.getAttendees() : null, true, null != ignoredAttendeeFields ? ignoredAttendeeFields.toArray(new AttendeeField[] {}) : null);
         attachmentUpdates = CalendarUtils.getAttachmentUpdates(
             null != originalEvent ? originalEvent.getAttachments() : null, null != updatedEvent ? updatedEvent.getAttachments() : null);
     }

@@ -850,6 +850,11 @@ public final class Tools {
             return true;
         }
 
+        // Explicitly not requested by client
+        if (AJAXRequestDataTools.parseBoolParameter(request.getParameter("binary"))) {
+            return false;
+        }
+
         // E.g. "Accept: application/json, text/javascript, ..."
         String acceptHdr = request.getHeader(ACCEPT);
         if (Strings.isEmpty(acceptHdr)) {

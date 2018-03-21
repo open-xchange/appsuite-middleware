@@ -56,6 +56,7 @@ import com.openexchange.osgi.annotation.SingletonService;
  * {@link UserAwareSSLConfigurationService}
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @since v7.8.3
  */
 @SingletonService
@@ -95,5 +96,14 @@ public interface UserAwareSSLConfigurationService {
      * @param trustAll <code>true</code> to set if the user would like to trust all connections; otherwise <code>false</code>
      */
     void setTrustAll(int userId, Context context, boolean trustAll);
+
+    /**
+     * Returns <code>true</code> if the user is allowed to manage the SSL certificates; <code>false</code> otherwise
+     * 
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @return <code>true</code> if the user is allowed to manage the SSL certificates; <code>false</code> otherwise
+     */
+    boolean canManageCertificates(int userId, int contextId);
 
 }

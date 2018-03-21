@@ -214,17 +214,15 @@ public class TransformImageClientAction extends TransformImageAction {
                     final InputStream resultImageStm = imageClient.cacheAndGetImage(cacheKey, "auto", srcImageStm, getContextIdString(session));
                     if (null != resultImageStm) {
                         try {
-                            final ThresholdFileHolder imageData = new ThresholdFileHolder();
+                            ThresholdFileHolder imageData = new ThresholdFileHolder();
                             try {
                                 imageData.write(resultImageStm);
                                 imageData.setContentType(xformParams.getImageMimeType());
                                 imageData.setName(cacheKey);
                                 ret = new FileHolderBasicTransformedImage(imageData, xformParams);
+                                imageData = null; // Avoid rpemature closing
                             } finally {
-                                if (null == ret) {
-                                    // FileHolderBasicTransformedImage reference is null, apparently an error occurred. Therefore close ThresholdFileHolder since not needed anymore.
-                                    Streams.close(imageData);
-                                }
+                                Streams.close(imageData);
                             }
                         } finally {
                             Streams.close(resultImageStm);

@@ -162,16 +162,13 @@ public abstract class ICalAttachmentMapping<T extends CalendarComponent, U> exte
         Attachment attachment = new Attachment();
         if (null != property.getBinary()) {
             ThresholdFileHolder fileHolder = new ThresholdFileHolder();
-            boolean error = true; // pessimistic
             try {
                 fileHolder.write(property.getBinary());
                 attachment.setData(fileHolder);
                 property.setBinary(null);
-                error = false;
+                fileHolder = null;
             } finally {
-                if (error) {
-                    Streams.close(fileHolder);
-                }
+                Streams.close(fileHolder);
             }
         } else if (null != property.getUri()) {
             attachment.setUri(property.getUri().toString());

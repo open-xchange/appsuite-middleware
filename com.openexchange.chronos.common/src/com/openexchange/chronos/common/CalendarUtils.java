@@ -1615,7 +1615,21 @@ public class CalendarUtils {
      * @return The collection update
      */
     public static AbstractCollectionUpdate<Attendee, AttendeeField> getAttendeeUpdates(List<Attendee> originalAttendees, List<Attendee> updatedAttendees) throws OXException {
-        return new AbstractCollectionUpdate<Attendee, AttendeeField>(AttendeeMapper.getInstance(), originalAttendees, updatedAttendees) {
+        return getAttendeeUpdates(originalAttendees, updatedAttendees, true, (AttendeeField[]) null);
+    }
+
+    /**
+     * Initializes a new attendee collection update based on the supplied original and updated attendee lists.
+     *
+     * @param originalAttendees The original attendees
+     * @param updatedAttendees The updated attendees
+     * @param considerUnset <code>true</code> to also consider comparison with not <i>set</i> fields of the original, <code>false</code>, otherwise
+     * @param ignoredFields Fields to ignore when determining the differences between updated items
+     * @return The collection update
+     * @throws OXException In case mapping fails
+     */
+    public static AbstractCollectionUpdate<Attendee, AttendeeField> getAttendeeUpdates(List<Attendee> originalAttendees, List<Attendee> updatedAttendees, boolean considerUnset, AttendeeField... ignoredFields) throws OXException {
+        return new AbstractCollectionUpdate<Attendee, AttendeeField>(AttendeeMapper.getInstance(), originalAttendees, updatedAttendees, considerUnset, ignoredFields) {
 
             @Override
             protected boolean matches(Attendee item1, Attendee item2) {
@@ -1885,7 +1899,7 @@ public class CalendarUtils {
     /**
      * Prepends the default account to the given folder id if this is a plain numeric folder id.
      *
-     * @param folderId
+     * @param folderId The folder identifier
      * @return The folder id with the default account as absolute identifier.
      */
     public static String prependDefaultAccount(String folderId) {

@@ -5,7 +5,10 @@ Bundle-SymbolicName: com.openexchange.spamhandler.spamassassin
 Bundle-Version: 7.10.0
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
-Import-Package: com.openexchange.api2,
+Import-Package: com.google.common.annotations,
+ com.google.common.base,
+ com.google.common.collect,
+ com.openexchange.api2,
  com.openexchange.config,
  com.openexchange.config.cascade,
  com.openexchange.exception,
