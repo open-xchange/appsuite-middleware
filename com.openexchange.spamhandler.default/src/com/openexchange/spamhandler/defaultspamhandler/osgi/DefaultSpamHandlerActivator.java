@@ -98,7 +98,7 @@ public final class DefaultSpamHandlerActivator extends HousekeepingActivator {
     @Override
     protected void stopBundle() throws Exception {
         try {
-            cleanUp();
+            super.stopBundle();
             Services.setServiceLookup(null);
         } catch (final Throwable t) {
             LOG.error("", t);
