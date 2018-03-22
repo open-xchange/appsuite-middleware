@@ -214,8 +214,8 @@ public final class BodystructureFetchIMAPCommand extends AbstractIMAPCommand<BOD
         index++;
         final int pos;
         if (this.uid) {
-            final long uid = getItemOf(UID.class, fetchResponse).uid;
-            pos = posMap.get(uid);
+            UID item = getItemOf(UID.class, fetchResponse);
+            pos = item == null ? posMap.getNoEntryValue() : posMap.get(item.uid);
         } else {
             pos = posMap.get(fetchResponse.getNumber());
         }
