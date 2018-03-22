@@ -1626,13 +1626,15 @@ public class SieveHandler {
     private static final Pattern PAT_LIT_LEN = Pattern.compile("\\{([0-9]+)(\\+?)\\}");
 
     private static int parseLiteralLength(final String respLen) {
-        final Matcher matcher = PAT_LIT_LEN.matcher(respLen);
-        if (matcher.matches()) {
-            try {
-                return Integer.parseInt(matcher.group(1));
-            } catch (final NumberFormatException e) {
-                log.error("", e);
-                return -1;
+        if (null != respLen) {
+            final Matcher matcher = PAT_LIT_LEN.matcher(respLen);
+            if (matcher.matches()) {
+                try {
+                    return Integer.parseInt(matcher.group(1));
+                } catch (final NumberFormatException e) {
+                    log.error("", e);
+                    return -1;
+                }
             }
         }
         return -1;
