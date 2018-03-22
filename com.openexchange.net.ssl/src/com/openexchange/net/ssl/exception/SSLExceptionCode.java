@@ -50,6 +50,7 @@
 package com.openexchange.net.ssl.exception;
 
 import java.util.Map;
+import java.util.Map.Entry;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.DisplayableOXExceptionCode;
 import com.openexchange.exception.OXException;
@@ -212,8 +213,8 @@ public enum SSLExceptionCode implements DisplayableOXExceptionCode {
      */
     public OXException create(Map<String, Object> arguments, final Object... args) {
         OXException oxe = create(args);
-        for (String key : arguments.keySet()) {
-            oxe.setArgument(key, arguments.get(key));
+        for (Entry<String, Object> entry : arguments.entrySet()) {
+            oxe.setArgument(entry.getKey(), entry.getValue());
         }
         return oxe;
     }
@@ -227,8 +228,8 @@ public enum SSLExceptionCode implements DisplayableOXExceptionCode {
      */
     public OXException create(final Throwable cause, Map<String, Object> arguments, final Object... args) {
         OXException oxe = OXExceptionFactory.getInstance().create(this, cause, args);
-        for (String key : arguments.keySet()) {
-            oxe.setArgument(key, arguments.get(key));
+        for (Entry<String, Object> entry : arguments.entrySet()) {
+            oxe.setArgument(entry.getKey(), entry.getValue());
         }
         return oxe;
     }
