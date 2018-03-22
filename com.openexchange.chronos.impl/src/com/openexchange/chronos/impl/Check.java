@@ -57,6 +57,7 @@ import static com.openexchange.java.Autoboxing.L;
 import java.util.List;
 import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.Attendee;
+import com.openexchange.chronos.CalendarUserType;
 import com.openexchange.chronos.Classification;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.RecurrenceId;
@@ -189,17 +190,26 @@ public class Check extends com.openexchange.chronos.common.Check {
     }
 
     /**
-     * Checks that the classification is supported based on the given folder's type, if it is not <code>null</code> and different from
-     * {@link Classification#PUBLIC}.
+     * Checks that the classification is supported based on the given folder's type and list of attendees, if it is not <code>null</code>
+     * and different from {@link Classification#PUBLIC}.
      *
      * @param classification The classification to check, or <code>null</code> to skip the check
      * @param folder The target folder for the event
+     * @param attendees The attendees participating in the event
      * @return The passed classification, after it was checked for validity
-     * @throws OXException {@link CalendarExceptionCodes#UNSUPPORTED_CLASSIFICATION}
+     * @throws OXException {@link CalendarExceptionCodes#UNSUPPORTED_CLASSIFICATION_FOR_FOLDER}, {@link CalendarExceptionCodes#UNSUPPORTED_CLASSIFICATION_FOR_RESOURCE}
      */
-    public static Classification classificationIsValid(Classification classification, CalendarFolder folder) throws OXException {
-        if (null != classification && false == Classification.PUBLIC.equals(classification) && PublicType.getInstance().equals(folder.getType())) {
-            throw CalendarExceptionCodes.UNSUPPORTED_CLASSIFICATION.create(String.valueOf(classification), folder.getId(), PublicType.getInstance());
+    public static Classification classificationIsValid(Classification classification, CalendarFolder folder, List<Attendee> attendees) throws OXException {
+        if (null != classification && false == Classification.PUBLIC.equals(classification)) {
+            if (PublicType.getInstance().equals(folder.getType())) {
+                throw CalendarExceptionCodes.UNSUPPORTED_CLASSIFICATION_FOR_FOLDER.create(String.valueOf(classification), folder.getId(), PublicType.getInstance());
+            }
+            if (Classification.PRIVATE.equals(classification)) {
+                List<Attendee> resourceAttendees = CalendarUtils.filter(attendees, Boolean.TRUE, CalendarUserType.RESOURCE, CalendarUserType.ROOM);
+                if (0 < resourceAttendees.size()) {
+                    throw CalendarExceptionCodes.UNSUPPORTED_CLASSIFICATION_FOR_RESOURCE.create(String.valueOf(classification), resourceAttendees.get(0));
+                }
+            }
         }
         return classification;
     }

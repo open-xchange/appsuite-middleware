@@ -114,7 +114,6 @@ public class CreatePerformer extends AbstractUpdatePerformer {
          * prepare event & attendee data for insert, assign parent folder
          */
         Event newEvent = prepareEvent(event);
-        newEvent.setAttendees(Check.maxAttendees(getSelfProtection(), prepareAttendees(event.getAttendees())));
         if (isNullOrEmpty(newEvent.getAttendees())) {
             /*
              * not group-scheduled event (only on a single user's calendar), apply parent folder identifier
@@ -199,10 +198,14 @@ public class CreatePerformer extends AbstractUpdatePerformer {
         Consistency.adjustAllDayDates(event);
         Consistency.adjustTimeZones(session, calendarUserId, event, null);
         /*
+         * attendees
+         */
+        event.setAttendees(Check.maxAttendees(getSelfProtection(), prepareAttendees(eventData.getAttendees())));
+        /*
          * classification, transparency, color, geo
          */
         if (eventData.containsClassification() && null != eventData.getClassification()) {
-            event.setClassification(Check.classificationIsValid(eventData.getClassification(), folder));
+            event.setClassification(Check.classificationIsValid(eventData.getClassification(), folder, event.getAttendees()));
         } else {
             event.setClassification(Classification.PUBLIC);
         }
