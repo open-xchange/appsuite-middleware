@@ -307,7 +307,7 @@ public class AdminActivator extends HousekeepingActivator {
 
         AdminServiceRegistry.getInstance().removeService(ThreadPoolService.class);
 
-        cleanUp();
+        super.stopBundle();
     }
 
     private PropertyHandlerExtended initCache(ConfigurationService service, org.slf4j.Logger logger) throws OXGenericException {
