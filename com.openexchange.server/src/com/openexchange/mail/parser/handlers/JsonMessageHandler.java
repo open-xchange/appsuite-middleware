@@ -560,11 +560,11 @@ public final class JsonMessageHandler implements MailMessageHandler {
         if (numOfAttributes > 0) {
             result = new JSONObject(numOfAttributes);
             JSONArray unconsideredResults = new JSONArray();
-            for (MailAuthenticityResultKey key : attributes.keySet()) {
-                if (!key.isVisible()) {
+            for (Entry<MailAuthenticityResultKey, Object> entry : attributes.entrySet()) {
+                if (!entry.getKey().isVisible()) {
                     continue;
                 }
-                Object object = attributes.get(key);
+                Object object = entry.getValue();
                 if (object instanceof Collection<?>) {
                     Collection<?> col = (Collection<?>) object;
 
@@ -585,7 +585,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
                         }
                     }
                 } else {
-                    result.put(key.getKey(), object);
+                    result.put(entry.getKey().getKey(), entry.getValue());
                 }
             }
             if (MailAuthenticityStatus.TRUSTED.equals(authenticityResult.getStatus()) && authenticityResult.getAttribute(MailAuthenticityResultKey.IMAGE) != null) {
