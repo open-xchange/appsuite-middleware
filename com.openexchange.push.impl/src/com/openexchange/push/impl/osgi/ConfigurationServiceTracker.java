@@ -54,6 +54,7 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.java.Strings;
 import com.openexchange.push.PushClientWhitelist;
 
 /**
@@ -81,17 +82,17 @@ public final class ConfigurationServiceTracker implements ServiceTrackerCustomiz
         final String property = service.getProperty("com.openexchange.push.allowedClients");
         final PushClientWhitelist clientWhitelist = PushClientWhitelist.getInstance();
         clientWhitelist.clear();
-        if (null == property) {
-            final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(ConfigurationServiceTracker.class);
+        if (Strings.isEmpty(property)) {
+            org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(ConfigurationServiceTracker.class);
             log.info("Cleared push client white-list from.");
         } else {
-            final String[] wildcardPatterns = property.split(" *, *", 0);
-            for (final String wildcardPattern : wildcardPatterns) {
-                if (!isEmpty(wildcardPattern)) {
+            String[] wildcardPatterns = Strings.splitByComma(property);
+            for (String wildcardPattern : wildcardPatterns) {
+                if (Strings.isNotEmpty(wildcardPattern)) {
                     clientWhitelist.add(Pattern.compile(wildcardToRegex(removeQuotes(wildcardPattern.trim())), Pattern.CASE_INSENSITIVE));
                 }
             }
-            final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(ConfigurationServiceTracker.class);
+            org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(ConfigurationServiceTracker.class);
             log.info("Built push client white-list from: {}", property);
         }
         return service;
@@ -105,18 +106,6 @@ public final class ConfigurationServiceTracker implements ServiceTrackerCustomiz
     @Override
     public void removedService(final ServiceReference<ConfigurationService> reference, final ConfigurationService service) {
         // no-op
-    }
-
-    private static boolean isEmpty(final String string) {
-        if (null == string) {
-            return true;
-        }
-        final int len = string.length();
-        boolean isWhitespace = true;
-        for (int i = 0; isWhitespace && i < len; i++) {
-            isWhitespace = com.openexchange.java.Strings.isWhitespace(string.charAt(i));
-        }
-        return isWhitespace;
     }
 
     private static String removeQuotes(final String quoted) {

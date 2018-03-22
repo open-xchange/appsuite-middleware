@@ -75,6 +75,7 @@ import com.openexchange.pns.DefaultPushSubscription;
 import com.openexchange.pns.KnownTransport;
 import com.openexchange.pns.PushExceptionCodes;
 import com.openexchange.pns.PushSubscriptionRegistry;
+import com.openexchange.pns.PushSubscriptionResult;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.webdav.action.WebdavRequest;
 import com.openexchange.webdav.action.WebdavResponse;
@@ -209,7 +210,7 @@ public class PushSubscribeResource extends DAVResource {
     protected void registerSubscription(String transportId, String token, List<String> topics, Date expires) throws WebdavProtocolException {
         PushSubscriptionRegistry subscriptionRegistry = factory.getOptionalService(PushSubscriptionRegistry.class);
         if (null == subscriptionRegistry) {
-            DAVProtocol.protocolException(getUrl(), ServiceExceptionCode.absentService(PushSubscriptionRegistry.class), HttpServletResponse.SC_BAD_REQUEST);
+            throw DAVProtocol.protocolException(getUrl(), ServiceExceptionCode.absentService(PushSubscriptionRegistry.class), HttpServletResponse.SC_BAD_REQUEST);
         }
         DefaultPushSubscription subscription = DefaultPushSubscription.builder()
             .client(clientId)
@@ -220,22 +221,54 @@ public class PushSubscribeResource extends DAVResource {
             .userId(factory.getUser().getId())
             .expires(expires)
         .build();
+
+        boolean retry;
+        do {
+            retry = doRegisterSubscription(subscriptionRegistry, subscription);
+        } while (retry);
+    }
+
+    private boolean doRegisterSubscription(PushSubscriptionRegistry subscriptionRegistry, DefaultPushSubscription subscription) throws WebdavProtocolException {
         try {
-            subscriptionRegistry.registerSubscription(subscription);
+            PushSubscriptionResult result = subscriptionRegistry.registerSubscription(subscription);
+            switch (result.getStatus()) {
+                case CONFLICT:
+                    {
+                        // Unsubscribe conflicting subscription
+                        DefaultPushSubscription.Builder builder = DefaultPushSubscription.builder()
+                            .client(subscription.getClient())
+                            .contextId(result.getTokenUsingContextId())
+                            .token(subscription.getToken())
+                            .transportId(subscription.getTransportId())
+                            .userId(result.getTokenUsingUserId());
+                        DefaultPushSubscription subscriptionToDrop = builder.build();
+                        subscriptionRegistry.unregisterSubscription(subscriptionToDrop);
+                        return true;
+                    }
+                case FAIL:
+                    throw result.getError();
+                case OK:
+                    /* fall-through */
+                default:
+                    break;
+            }
+
+            // Success
+            return false;
         } catch (OXException e) {
-            DAVProtocol.protocolException(getUrl(), e, HttpServletResponse.SC_BAD_REQUEST);
+            throw DAVProtocol.protocolException(getUrl(), e, HttpServletResponse.SC_BAD_REQUEST);
         }
     }
 
     protected void unregisterSubscription(String transportId, String token) throws WebdavProtocolException {
         PushSubscriptionRegistry subscriptionRegistry = factory.getOptionalService(PushSubscriptionRegistry.class);
         if (null == subscriptionRegistry) {
-            DAVProtocol.protocolException(getUrl(), ServiceExceptionCode.absentService(PushSubscriptionRegistry.class), HttpServletResponse.SC_BAD_REQUEST);
+            throw DAVProtocol.protocolException(getUrl(), ServiceExceptionCode.absentService(PushSubscriptionRegistry.class), HttpServletResponse.SC_BAD_REQUEST);
         }
         try {
             subscriptionRegistry.unregisterSubscription(token, transportId);
         } catch (OXException e) {
-            DAVProtocol.protocolException(getUrl(), e, HttpServletResponse.SC_BAD_REQUEST);
+            throw DAVProtocol.protocolException(getUrl(), e, HttpServletResponse.SC_BAD_REQUEST);
         }
     }
 

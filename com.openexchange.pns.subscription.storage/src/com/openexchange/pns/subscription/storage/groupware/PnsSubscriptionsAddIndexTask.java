@@ -47,21 +47,66 @@
  *
  */
 
-package com.openexchange.test.report.protocol;
+package com.openexchange.pns.subscription.storage.groupware;
 
-import java.util.List;
+import static com.openexchange.database.Databases.autocommit;
+import static com.openexchange.database.Databases.rollback;
+import java.sql.Connection;
+import java.sql.SQLException;
+import com.openexchange.exception.OXException;
+import com.openexchange.groupware.update.PerformParameters;
+import com.openexchange.groupware.update.UpdateExceptionCodes;
+import com.openexchange.groupware.update.UpdateTaskAdapter;
+import com.openexchange.tools.update.Tools;
 
 /**
- * {@link ConversationProtocolAware}
+ * {@link PnsSubscriptionsAddIndexTask} - Adds an index for 'token', 'transport' and 'client' columns to table "pns_subscription".
  *
- * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.10.0
  */
-public interface ConversationProtocolAware {
+public class PnsSubscriptionsAddIndexTask extends UpdateTaskAdapter {
 
     /**
-     * Returns a list with the Conversation Protocol
-     * 
-     * @return A list with the Conversation Protocol
+     * Initializes a new {@link PnsSubscriptionsAddIndexTask}.
      */
-    List<ConversationProtocol> getConversationProtocol();
+    public PnsSubscriptionsAddIndexTask() {
+        super();
+    }
+
+    @Override
+    public String[] getDependencies() {
+        return new String[] { PnsSubscriptionsReindexTask.class.getName() };
+    }
+
+    @Override
+    public void perform(PerformParameters params) throws OXException {
+        Connection connection = params.getConnection();
+        byte rollback = 0;
+        try {
+            String table = "pns_subscription";
+            String[] columns = new String[] { "token", "transport", "client"};
+            if (null == Tools.existsIndex(connection, table, columns)) {
+                connection.setAutoCommit(false);
+                rollback = 1;
+
+                Tools.createIndex(connection, table, "tokenIndex", columns, false);
+
+                connection.commit();
+                rollback = 2;
+            }
+        } catch (SQLException e) {
+            throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
+        } catch (RuntimeException e) {
+            throw UpdateExceptionCodes.OTHER_PROBLEM.create(e, e.getMessage());
+        } finally {
+            if (rollback > 0) {
+                if (rollback == 1) {
+                    rollback(connection);
+                }
+                autocommit(connection);
+            }
+        }
+    }
+
 }

@@ -86,9 +86,10 @@ import static com.openexchange.chronos.exception.CalendarExceptionMessages.TOO_M
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.TOO_MANY_ATTENDEES_MSG;
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.TOO_MANY_EVENTS_MSG;
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.UID_CONFLICT_MSG;
+import static com.openexchange.chronos.exception.CalendarExceptionMessages.UNSUPPORTED_CLASSIFICATION_FOR_FOLDER_MSG;
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.UNSUPPORTED_CLASSIFICATION_FOR_MOVE_MSG;
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.UNSUPPORTED_CLASSIFICATION_FOR_OCCURRENCE_MSG;
-import static com.openexchange.chronos.exception.CalendarExceptionMessages.UNSUPPORTED_CLASSIFICATION_MSG;
+import static com.openexchange.chronos.exception.CalendarExceptionMessages.UNSUPPORTED_CLASSIFICATION_FOR_RESOURCE_MSG;
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.UNSUPPORTED_FOLDER_MSG;
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.UNSUPPORTED_OPERATION_FOR_PROVIDER_MSG;
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.UNSUPPORTED_RRULE_MSG;
@@ -238,10 +239,15 @@ public enum CalendarExceptionCodes implements DisplayableOXExceptionCode {
      */
     END_BEFORE_START("End before start date [start %1$s, end %2$s]", END_BEFORE_START_MSG, Category.CATEGORY_USER_INPUT, 4221),
     /**
-     * <li>Appointments in non-personal folders must not be classified as \"private\" or \"confidential\".</li>
+     * <li>Appointments in non-personal folders must not be classified as \"private\" or \"secret\".</li>
      * <li>Unsupported classification [classification %1$s, folder %2$d, type %3$s]</li>
      */
-    UNSUPPORTED_CLASSIFICATION("Unsupported classification [classification %1$s, folder %2$d, type %3$s]", UNSUPPORTED_CLASSIFICATION_MSG, Category.CATEGORY_USER_INPUT, 4222),
+    UNSUPPORTED_CLASSIFICATION_FOR_FOLDER("Unsupported classification [classification %1$s, folder %2$d, type %3$s]", UNSUPPORTED_CLASSIFICATION_FOR_FOLDER_MSG, Category.CATEGORY_USER_INPUT, 4222),
+    /**
+     * <li>Appointments with resources must not be classified as \"secret\".".</li>
+     * <li>Unsupported classification [classification %1$s, attendee %2$d]</li>
+     */
+    UNSUPPORTED_CLASSIFICATION_FOR_RESOURCE("Unsupported classification [classification %1$s, attendee %2$d]", UNSUPPORTED_CLASSIFICATION_FOR_RESOURCE_MSG, Category.CATEGORY_USER_INPUT, 42210),
     /**
      * <li>The supplied recurrence rule is not supported. Please use adjust the rule and try again.</li>
      * <li>Unsupported recurrence rule [rule %1$s, part %2$s, error %3$s]</li>

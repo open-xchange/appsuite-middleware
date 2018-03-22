@@ -1137,7 +1137,10 @@ public class ParticipantNotify implements TaskEventInterface2 {
         }
 
         if ((isUpdate || ParticipantNotify.isStatusUpdate(state)) && organizer != null) {
-            addSingleParticipant(getExternalParticipant(new ExternalUserParticipant(organizer), session), participantSet, resourceSet, receivers, all, false);
+            EmailableParticipant externalParticipant = getExternalParticipant(new ExternalUserParticipant(organizer), session);
+            if (externalParticipant != null) {
+                addSingleParticipant(externalParticipant, participantSet, resourceSet, receivers, all, false);
+            }
         }
     }
 

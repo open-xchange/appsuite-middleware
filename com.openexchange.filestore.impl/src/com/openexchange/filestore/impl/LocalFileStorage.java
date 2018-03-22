@@ -177,20 +177,17 @@ public class LocalFileStorage extends DefaultFileStorage {
 
     /**
      * Constructor for subclassing to run tests. It should be removed an the subclass should implement the whole FileStorage interface.
+     *
+     * @throws IOException
      */
-    protected LocalFileStorage() {
+    protected LocalFileStorage() throws IOException {
         this(assignStorage());
     }
 
     //Ugly workaround because someone insisted to make storage final:
-	private static File assignStorage() {
-		try {
-        	return File.createTempFile("test-storage", "tmp");
-		} catch (final IOException e) {
-			e.printStackTrace();
-			return null;
-		}
-	}
+    private static File assignStorage() throws IOException {
+        return File.createTempFile("test-storage", "tmp");
+    }
 
     /**
      * Checks, if Statefile is correct. Especially if nextEntry is right and all Files really exist.

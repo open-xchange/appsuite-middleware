@@ -94,7 +94,7 @@ public class Participants implements ChangeDescriptionGenerator {
     private static final EventField[] FIELDS = new EventField[] { EventField.ATTENDEES };
 
     protected static enum ChangeType {
-        ADD, REMOVE, ACCEPT, DECLINE, TENTATIVE
+        ADD, REMOVE, ACCEPT, DECLINE, TENTATIVE, NEEDS_ACTION
     }
 
     private static final Map<ChangeType, String> PARTICIPANT_MESSAGE_MAP = new HashMap<ChangeType, String>() {
@@ -178,51 +178,14 @@ public class Participants implements ChangeDescriptionGenerator {
         for (Integer attendeeId : attendeeIds) {
             User u = users.getUser(i(attendeeId), ctx);
             ChangeType changeType = attendeeChange.get(attendeeId);
-            if (null == changeType) {
-                continue;
-            }
-            switch (changeType) {
-                case ADD: /* fall-through */
-                case REMOVE:
-                    changes.add(new Sentence(PARTICIPANT_MESSAGE_MAP.get(changeType)).add(u.getDisplayName(), ArgumentType.PARTICIPANT));
-                    break;
-                case ACCEPT:
-                    changes.add(new Sentence(PARTICIPANT_MESSAGE_MAP.get(changeType)).add(u.getDisplayName(), ArgumentType.PARTICIPANT).addStatus(ParticipationStatus.ACCEPTED));
-                    break;
-                case DECLINE:
-                    changes.add(new Sentence(PARTICIPANT_MESSAGE_MAP.get(changeType)).add(u.getDisplayName(), ArgumentType.PARTICIPANT).addStatus(ParticipationStatus.DECLINED));
-                    break;
-                case TENTATIVE:
-                    changes.add(new Sentence(PARTICIPANT_MESSAGE_MAP.get(changeType)).add(u.getDisplayName(), ArgumentType.PARTICIPANT).addStatus(ParticipationStatus.TENTATIVE));
-                    break;
-                default:
-                    break;
-            }
+            writeChange(changes, u.getDisplayName(), changeType);
         }
 
         List<String> externalMails = new ArrayList<String>(externalChange.keySet());
         Collections.sort(externalMails);
         for (String mail : externalMails) {
             ChangeType changeType = externalChange.get(mail);
-            if (changeType == null) {
-                continue;
-            }
-            switch (changeType) {
-                case ADD:
-                case REMOVE:
-                    changes.add(new Sentence(PARTICIPANT_MESSAGE_MAP.get(changeType)).add(mail, ArgumentType.PARTICIPANT));
-                    break;
-                case ACCEPT:
-                    changes.add(new Sentence(PARTICIPANT_MESSAGE_MAP.get(changeType)).add(mail, ArgumentType.PARTICIPANT).addStatus(ParticipationStatus.ACCEPTED));
-                    break;
-                case DECLINE:
-                    changes.add(new Sentence(PARTICIPANT_MESSAGE_MAP.get(changeType)).add(mail, ArgumentType.PARTICIPANT).addStatus(ParticipationStatus.DECLINED));
-                    break;
-                case TENTATIVE:
-                    changes.add(new Sentence(PARTICIPANT_MESSAGE_MAP.get(changeType)).add(mail, ArgumentType.PARTICIPANT).addStatus(ParticipationStatus.TENTATIVE));
-                    break;
-                default: // Skip
-            }
+            writeChange(changes, mail, changeType);
         }
 
         for (Entry<Integer, ChangeType> change : groupChange.entrySet()) {
@@ -256,6 +219,33 @@ public class Participants implements ChangeDescriptionGenerator {
         }
 
         return changes;
+    }
+
+    private void writeChange(List<Sentence> changes, String name, ChangeType changeType) {
+        if (null == changeType) {
+            return;
+        }
+        Sentence s = new Sentence(PARTICIPANT_MESSAGE_MAP.get(changeType)).add(name, ArgumentType.PARTICIPANT);
+        switch (changeType) {
+            case ADD: /* fall-through */
+            case REMOVE:
+                break;
+            case ACCEPT:
+                s.addStatus(ParticipationStatus.ACCEPTED);
+                break;
+            case DECLINE:
+                s.addStatus(ParticipationStatus.DECLINED);
+                break;
+            case TENTATIVE:
+                s.addStatus(ParticipationStatus.TENTATIVE);
+                break;
+            default:
+                s = null;
+                break;
+        }
+        if (null != s) {
+            changes.add(s);
+        }
     }
 
     private void investigateChanges(CollectionUpdate<Attendee, AttendeeField> difference, Set<Integer> userIds, Map<Integer, ChangeType> userChange, Map<String, ChangeType> externalChange, Set<String> external) {
@@ -312,10 +302,12 @@ public class Participants implements ChangeDescriptionGenerator {
      * @return The {@link ChangeType}
      */
     private ChangeType getChangeType(ParticipationStatus newPartStat) {
-        if (newPartStat.equals(ParticipationStatus.DECLINED)) {
+        if (ParticipationStatus.DECLINED.equals(newPartStat)) {
             return ChangeType.DECLINE;
-        } else if (newPartStat.equals(ParticipationStatus.TENTATIVE)) {
+        } else if (ParticipationStatus.TENTATIVE.equals(newPartStat)) {
             return ChangeType.TENTATIVE;
+        } else if (ParticipationStatus.NEEDS_ACTION.equals(newPartStat)) {
+            return ChangeType.NEEDS_ACTION;
         }
         return ChangeType.ACCEPT;
     }

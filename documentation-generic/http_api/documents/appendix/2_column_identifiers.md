@@ -423,7 +423,7 @@ specific field data of single or multiple objects.
 |660 | flagged | String | Special field to sort mails by flagged status.|
 |661 | date | String | The date of a mail message. As configured, either the internal received date or mail's sent date (as given by <code>"Date"</code> header). Supposed to be the replacement for ``sent_date`` (609) or ``received_date`` (610) to let the Open-Xchange Middleware decide based on configuration for ``com.openexchange.mail.preferSentDate`` property what to consider. Supported at both - ``columns`` parameter and ``sort`` parameter.|
 |662 | text\_preview\_if_available | String | A mail's text preview. Only returned if immediately available from mail server. An empty string signals that mail has no body content. ``NULL`` signals not available.|
-|662 | text_preview | String | A mail's text preview. An empty string signals that mail has no body content. Might be slow.|
+|663 | text_preview | String | A mail's text preview. An empty string signals that mail has no body content. Might be slow.|
 |664 | authenticity | JSON | The light-weighted version of the authenticity status result, i.e. the status string.|
 |665 | authenticity | JSON | The heavy-weighted version of the authenticity status results as described in MailData.|
 

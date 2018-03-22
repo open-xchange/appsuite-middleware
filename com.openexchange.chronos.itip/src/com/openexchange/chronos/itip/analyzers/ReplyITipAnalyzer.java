@@ -175,19 +175,16 @@ public class ReplyITipAnalyzer extends AbstractITipAnalyzer {
     }
 
     /**
-     * Ensures the original attendees to be set in the event
+     * Updates the attendee provided by the REPLY in the original event.
+     * Ignores all other changed fields.
      * 
      * @param original The original event
-     * @param update The event to assure the attendees to
+     * @param update The event containing the attendee
      * @return The event with correct set attendees
      * @throws OXException In case event can't be copied or reply is not RFC conform
      */
     private Event ensureAttendees(Event original, Event update) throws OXException {
-        if (null == original) {
-            return update;
-        }
-        Event event = new Event();
-        EventMapper.getInstance().copy(update, event, (EventField[]) null);
+        Event event = EventMapper.getInstance().copy(original, new Event(), (EventField[]) null);
         Attendee reply = getReply(update);
 
         List<Attendee> attendees = new LinkedList<>();
@@ -217,7 +214,7 @@ public class ReplyITipAnalyzer extends AbstractITipAnalyzer {
                 continue;
             }
 
-            if (change.getDiff().getUpdatedFields().size() != 0) {
+            if (false == change.getDiff().getAttendeeUpdates().isEmpty()) {
                 return true;
             }
         }

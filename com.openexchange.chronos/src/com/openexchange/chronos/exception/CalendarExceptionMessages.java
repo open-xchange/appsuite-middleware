@@ -93,9 +93,11 @@ public class CalendarExceptionMessages implements LocalizableStrings {
 
     public static final String END_BEFORE_START_MSG = "The end date lies before the start date. Please correct the appointment times and try again.";
 
-    public static final String UNSUPPORTED_CLASSIFICATION_MSG = "Appointments in non-personal folders must not be classified as \"private\" or \"confidential\".";
+    public static final String UNSUPPORTED_CLASSIFICATION_FOR_FOLDER_MSG = "Appointments in non-personal folders must not be classified as \"private\" or \"secret\".";
 
-    public static final String UNSUPPORTED_CLASSIFICATION_FOR_MOVE_MSG = "Appointments classified as \"private\" or \"confidential\" cannot be moved to this type of folder.";
+    public static final String UNSUPPORTED_CLASSIFICATION_FOR_RESOURCE_MSG = "Appointments with resources must not be classified as \"secret\".";
+
+    public static final String UNSUPPORTED_CLASSIFICATION_FOR_MOVE_MSG = "Appointments classified as \"private\" or \"secret\" cannot be moved to this type of folder.";
 
     public static final String UNSUPPORTED_CLASSIFICATION_FOR_OCCURRENCE_MSG = "Occurrences of appointment series must not be classified differently.";
 

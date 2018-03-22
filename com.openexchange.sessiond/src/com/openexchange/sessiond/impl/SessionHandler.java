@@ -58,6 +58,7 @@ import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Hashtable;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -427,8 +428,12 @@ public final class SessionHandler {
      */
     public static List<String> removeLocalSessions(SessionFilter filter) {
         List<String> sessionIds = findLocalSessions(filter);
-        for (String sessionId : sessionIds) {
-            clearSession(sessionId);
+        Iterator<String> iterator = sessionIds.iterator();
+        while (iterator.hasNext()) {
+            String sessionId = iterator.next();
+            if (false == clearSession(sessionId)) {
+                iterator.remove();
+            }
         }
 
         return sessionIds;

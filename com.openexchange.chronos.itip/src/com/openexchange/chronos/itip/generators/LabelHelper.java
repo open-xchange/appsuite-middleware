@@ -460,12 +460,8 @@ public class LabelHelper {
         public String statusChange(final NotificationParticipant participant, final ParticipationStatus status) {
             String msg = null;
             String statusString = "";
-            if (status.equals(ParticipationStatus.ACCEPTED)) {
-                msg = Messages.ACCEPT_INTRO;
-            } else if (status.equals(ParticipationStatus.DECLINED)) {
-                msg = Messages.DECLINE_INTRO;
-            } else if (status.equals(ParticipationStatus.TENTATIVE)) {
-                msg = Messages.TENTATIVE_INTRO;
+            if (ParticipationStatus.ACCEPTED.equals(status) || ParticipationStatus.TENTATIVE.equals(status) || ParticipationStatus.DECLINED.equals(status)) {
+                msg = Messages.STATUS_CHANGED_INTRO;
             } else {
                 msg = Messages.NONE_INTRO;
                 statusString = Messages.NONE;
