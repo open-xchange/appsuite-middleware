@@ -204,28 +204,28 @@ public abstract class BasicCachingCalendarAccess implements BasicCalendarAccess,
 
     @Override
     public final Event getEvent(String eventId, RecurrenceId recurrenceId) throws OXException {
-        cache();
+        updateCacheIfNeeded();
         containsError();
         return new SingleEventResponseGenerator(this, eventId, recurrenceId).generate();
     }
 
     @Override
     public final List<Event> getEvents(List<EventID> eventIDs) throws OXException {
-        cache();
+        updateCacheIfNeeded();
         containsError();
         return new DedicatedEventsResponseGenerator(this, eventIDs).generate();
     }
 
     @Override
     public List<Event> getEvents() throws OXException {
-        cache();
+        updateCacheIfNeeded();
         containsError();
         return new AccountResponseGenerator(this).generate();
     }
 
     @Override
     public final List<Event> getChangeExceptions(String seriesId) throws OXException {
-        cache();
+        updateCacheIfNeeded();
         containsError();
         return new ChangeExceptionsResponseGenerator(this, seriesId).generate();
     }
@@ -269,36 +269,21 @@ public abstract class BasicCachingCalendarAccess implements BasicCalendarAccess,
         return null;
     }
 
-    private void cache() throws OXException {
-        boolean update = false;
-        try {
-            JSONObject internalConfiguration = account.getInternalConfiguration();
-            if (internalConfiguration == null || internalConfiguration.optJSONObject(CachingCalendarAccessConstants.CACHING) == null) {
-                update = true;
-                return;
-            }
-            JSONObject caching = internalConfiguration.optJSONObject(CachingCalendarAccessConstants.CACHING);
-            Number lastUpdate = (Number) caching.opt(CachingCalendarAccessConstants.LAST_UPDATE);
-            long currentTimeMillis = System.currentTimeMillis();
-            if (lastUpdate == null || lastUpdate.longValue() < 0 || (TimeUnit.MINUTES.toMillis(getCascadedRefreshInterval()) < currentTimeMillis - lastUpdate.longValue())) {
-                update = true;
-                return;
-            }
-            if (currentTimeMillis < lastUpdate.longValue()) {
-                return;
-            }
-            if (this.parameters.contains(CalendarParameters.PARAMETER_UPDATE_CACHE) && this.parameters.get(CalendarParameters.PARAMETER_UPDATE_CACHE, Boolean.class, Boolean.FALSE).booleanValue()) {
-                update = true;
-                return;
-            }
-        } finally {
-            if (update) {
-                update();
-            }
+    protected void updateCacheIfNeeded() throws OXException {
+        JSONObject internalConfiguration = account.getInternalConfiguration();
+        if (internalConfiguration == null || internalConfiguration.optJSONObject(CachingCalendarAccessConstants.CACHING) == null) {
+            update();
+            return;
+        }
+        JSONObject caching = internalConfiguration.optJSONObject(CachingCalendarAccessConstants.CACHING);
+        Number lastUpdate = (Number) caching.opt(CachingCalendarAccessConstants.LAST_UPDATE);
+        long currentTimeMillis = System.currentTimeMillis();
+        if (lastUpdate == null || lastUpdate.longValue() < 0 || (TimeUnit.MINUTES.toMillis(getCascadedRefreshInterval()) < currentTimeMillis - lastUpdate.longValue()) || (currentTimeMillis >= lastUpdate.longValue() && this.parameters.contains(CalendarParameters.PARAMETER_UPDATE_CACHE) && this.parameters.get(CalendarParameters.PARAMETER_UPDATE_CACHE, Boolean.class, Boolean.FALSE).booleanValue())) {
+            update();
         }
     }
 
-    private void update() throws OXException {
+    protected void update() throws OXException {
         boolean holdsLock = acquireUpdateLock();
         try {
             if (holdsLock) {
@@ -759,7 +744,7 @@ public abstract class BasicCachingCalendarAccess implements BasicCalendarAccess,
         if ((null == filters || filters.isEmpty()) && (null == queries || queries.isEmpty())) {
             return getEvents();
         }
-        cache();
+        updateCacheIfNeeded();
         return new SearchHandler(session, account, parameters).searchEvents(filters, queries);
     }
 
@@ -770,7 +755,7 @@ public abstract class BasicCachingCalendarAccess implements BasicCalendarAccess,
      */
     @Override
     public UpdatesResult getUpdatedEvents(long updatedSince) throws OXException {
-        cache();
+        updateCacheIfNeeded();
         return new SyncHandler(session, account, parameters).getUpdatedEvents(updatedSince);
     }
 
@@ -781,7 +766,7 @@ public abstract class BasicCachingCalendarAccess implements BasicCalendarAccess,
      */
     @Override
     public long getSequenceNumber() throws OXException {
-        cache();
+        updateCacheIfNeeded();
         return new SyncHandler(session, account, parameters).getSequenceNumber();
     }
 
@@ -792,7 +777,7 @@ public abstract class BasicCachingCalendarAccess implements BasicCalendarAccess,
      */
     @Override
     public List<Event> resolveResource(String resourceName) throws OXException {
-        cache();
+        updateCacheIfNeeded();
         return new SyncHandler(session, account, parameters).resolveResource(resourceName);
     }
 

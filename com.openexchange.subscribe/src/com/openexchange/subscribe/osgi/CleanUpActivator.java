@@ -67,7 +67,7 @@ public class CleanUpActivator extends HousekeepingActivator {
     private volatile FolderCleanUpEventHandler folderCleanUpEventHandler;
 
     @Override
-    public void startBundle() throws Exception {
+    public synchronized void startBundle() throws Exception {
         final ContextService contexts = getService(ContextService.class);
         final SubscriptionStorage storage = AbstractSubscribeService.STORAGE.get();
         if (null != storage) {
@@ -76,12 +76,13 @@ public class CleanUpActivator extends HousekeepingActivator {
     }
 
     @Override
-    public void stopBundle() throws Exception {
+    public synchronized void stopBundle() throws Exception {
         final FolderCleanUpEventHandler folderCleanUpEventHandler = this.folderCleanUpEventHandler;
         if (null != folderCleanUpEventHandler) {
             folderCleanUpEventHandler.close();
             this.folderCleanUpEventHandler = null;
         }
+        super.stopBundle();
     }
 
     @Override

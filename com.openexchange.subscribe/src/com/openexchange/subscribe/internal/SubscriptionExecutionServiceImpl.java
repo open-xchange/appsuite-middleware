@@ -169,6 +169,9 @@ public class SubscriptionExecutionServiceImpl implements SubscriptionExecutionSe
         if (folderUpdater instanceof FolderUpdaterServiceV2) {
             ((FolderUpdaterServiceV2) folderUpdater).save(data, subscription, optErrors);
         } else {
+            if(folderUpdater == null) {
+                throw SubscriptionErrorMessage.UNEXPECTED_ERROR.create("Missing FolderUpdateService.");
+            }
             folderUpdater.save(data, subscription);
         }
     }

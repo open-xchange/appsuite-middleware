@@ -86,9 +86,4 @@ public class OnboardingEASActivator extends HousekeepingActivator {
         registerService(OnboardingProvider.class, new EASOnboardingProvider(loginSources, this));
     }
 
-    @Override
-    protected void stopBundle() throws Exception {
-        unregisterServices();
-    }
-
 }
