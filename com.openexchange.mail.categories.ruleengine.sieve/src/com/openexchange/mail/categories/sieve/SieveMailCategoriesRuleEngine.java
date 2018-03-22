@@ -357,7 +357,10 @@ public class SieveMailCategoriesRuleEngine implements MailCategoriesRuleEngine {
 
             TestCommand test = rule.getTestCommand();
             Map<TestCommand, List<TestCommand>> toDeleteMap = new HashMap<>();
-            boolean removed = removeValueFromHeader(null, test, value, header, toDeleteMap, rule.getIfCommand());
+            boolean removed = false;
+            if (test != null) {
+                removed = removeValueFromHeader(null, test, value, header, toDeleteMap, rule.getIfCommand());
+            }
             if (removed) {
                 rules2update.add(rule);
             }
