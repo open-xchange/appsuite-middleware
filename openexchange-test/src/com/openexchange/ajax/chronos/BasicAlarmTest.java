@@ -150,6 +150,7 @@ public class BasicAlarmTest extends AbstractAlarmTest {
             EventData updateData = new EventData();
             updateData.setAlarms(Collections.singletonList(alarm));
             updateData.setId(actualEventData.getId());
+            updateData.setLastModified(actualEventData.getLastModified());
 
             expectedEventData = eventManager.updateEvent(updateData);
 
@@ -167,6 +168,7 @@ public class BasicAlarmTest extends AbstractAlarmTest {
             EventData updateData = new EventData();
             updateData.setAlarms(Collections.singletonList(alarm));
             updateData.setId(actualEventData.getId());
+            updateData.setLastModified(actualEventData.getLastModified());
 
             expectedEventData = eventManager.updateEvent(updateData);
 
@@ -183,6 +185,7 @@ public class BasicAlarmTest extends AbstractAlarmTest {
             EventData updateData = new EventData();
             updateData.setAlarms(Collections.singletonList(alarm));
             updateData.setId(actualEventData.getId());
+            updateData.setLastModified(actualEventData.getLastModified());
 
             expectedEventData = eventManager.updateEvent(updateData);
 
