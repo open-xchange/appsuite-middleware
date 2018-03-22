@@ -543,7 +543,9 @@ public final class OXFolderDowngradeSQL {
 				 * entity's permission
 				 */
 				final Permission entityPerm = getEntityPerm(perms, entity);
-				deleteSingleEntityPermission(entityPerm, permTable, writeCon, cid);
+                if (entityPerm != null) {
+                    deleteSingleEntityPermission(entityPerm, permTable, writeCon, cid);
+                }
 			}
 		}
 
