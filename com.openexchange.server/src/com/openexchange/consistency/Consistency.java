@@ -90,6 +90,7 @@ import com.openexchange.groupware.attach.AttachmentBase;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.infostore.database.impl.DatabaseImpl;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.java.Strings;
 import com.openexchange.report.internal.Tools;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.snippet.QuotaAwareSnippetService;
@@ -386,10 +387,7 @@ public abstract class Consistency implements ConsistencyMBean {
                     }
                     throw e;
                 }
-                String contextids = "";
-                for (final Integer c : ctxs) {
-                    contextids += c + ",";
-                }
+                String contextids = Strings.join(ctxs, ",");
                 contextids = contextids.substring(0, contextids.length() - 1);
                 // GROUP BY CLAUSE: ensure ONLY_FULL_GROUP_BY compatibility
                 stmt = poolCon.prepareStatement("SELECT cid FROM login2user WHERE cid IN (" + contextids + ") GROUP BY cid");
