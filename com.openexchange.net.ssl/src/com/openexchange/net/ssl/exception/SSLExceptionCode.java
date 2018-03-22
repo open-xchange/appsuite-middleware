@@ -112,6 +112,8 @@ public enum SSLExceptionCode implements DisplayableOXExceptionCode {
     CERTIFICATE_REVOKED("The certificate with fingerprint '%1$s' for domain '%2$s' was revoked.", CATEGORY_ERROR, 9, SSLExceptionMessages.CERTIFICATE_REVOKED),
     ;
 
+    private static final String EMPTY_STRING = "";
+
     public static final String PREFIX = "SSL";
 
     private final Category category;
@@ -249,6 +251,6 @@ public enum SSLExceptionCode implements DisplayableOXExceptionCode {
             }
             cause = cause.getCause();
         }
-        return new String();
+        return EMPTY_STRING;
     }
 }
