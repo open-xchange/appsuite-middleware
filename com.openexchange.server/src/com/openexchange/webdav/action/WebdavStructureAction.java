@@ -104,7 +104,7 @@ public abstract class WebdavStructureAction extends AbstractAction {
 	}
 
 	protected int chooseReturnCode(final WebdavRequest req) throws WebdavProtocolException {
-		return (req.getDestination().exists()) ? HttpServletResponse.SC_NO_CONTENT : HttpServletResponse.SC_CREATED;
+        return (req.getDestination() != null && req.getDestination().exists()) ? HttpServletResponse.SC_NO_CONTENT : HttpServletResponse.SC_CREATED;
 	}
 
 	protected void checkSame(final WebdavRequest req) throws WebdavProtocolException {
