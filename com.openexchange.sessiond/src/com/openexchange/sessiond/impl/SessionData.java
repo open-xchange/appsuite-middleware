@@ -144,15 +144,11 @@ final class SessionData {
     }
 
     void clear() {
-        synchronized (sessionList) {
-            sessionList.clear();
-        }
+        sessionList.clear();
         randoms.clear();
 
         longTermUserGuardian.clear();
-        synchronized (longTermList) {
-            longTermList.clear();
-        }
+        longTermList.clear();
     }
 
     /**
