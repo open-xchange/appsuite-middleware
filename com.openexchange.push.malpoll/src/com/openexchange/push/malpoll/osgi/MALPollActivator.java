@@ -112,7 +112,7 @@ public final class MALPollActivator extends HousekeepingActivator {
     }
 
     @Override
-    protected void handleAvailability(final Class<?> clazz) {
+    protected synchronized void handleAvailability(final Class<?> clazz) {
         LOG.info("Re-available service: {}", clazz.getName());
         getServiceRegistry().addService(clazz, getService(clazz));
         if (TimerService.class == clazz) {
@@ -125,7 +125,7 @@ public final class MALPollActivator extends HousekeepingActivator {
     }
 
     @Override
-    protected void handleUnavailability(final Class<?> clazz) {
+    protected synchronized void handleUnavailability(final Class<?> clazz) {
         LOG.warn("Absent service: {}", clazz.getName());
         if (TimerService.class == clazz) {
             MALPollPushListenerRegistry.getInstance().closeAll();
@@ -135,7 +135,7 @@ public final class MALPollActivator extends HousekeepingActivator {
     }
 
     @Override
-    protected void startBundle() throws Exception {
+    protected synchronized void startBundle() throws Exception {
         try {
             /*
              * (Re-)Initialize service registry with available services
@@ -230,9 +230,8 @@ public final class MALPollActivator extends HousekeepingActivator {
     }
 
     @Override
-    protected void stopBundle() throws Exception {
+    protected synchronized void stopBundle() throws Exception {
         try {
-            cleanUp();
             /*
              * Clear all running listeners
              */
@@ -255,6 +254,7 @@ public final class MALPollActivator extends HousekeepingActivator {
             global = true;
             folder = null;
             period = 300000L;
+            super.stopBundle();
         } catch (final Exception e) {
             LOG.error("", e);
             throw e;
