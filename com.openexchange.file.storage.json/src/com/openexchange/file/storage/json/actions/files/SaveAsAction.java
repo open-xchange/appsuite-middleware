@@ -68,6 +68,7 @@ import com.openexchange.groupware.attach.util.GetSwitch;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.java.Streams;
+import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -90,6 +91,9 @@ public class SaveAsAction extends AbstractWriteAction {
         final List<Field> sentColumns = request.getSentColumns();
 
         AttachmentBase attachments = request.getAttachmentBase();
+        if (attachments == null) {
+            throw ServiceExceptionCode.absentService(AttachmentBase.class);
+        }
         IDBasedFileAccess fileAccess = request.getFileAccess();
 
         final ServerSession session = request.getSession();
