@@ -378,7 +378,7 @@ public final class IMAPActivator extends HousekeepingActivator {
     @Override
     public void stopBundle() throws Exception {
         try {
-            cleanUp();
+            super.stopBundle();
             /*
              * Clear service registry
              */

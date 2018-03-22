@@ -55,10 +55,11 @@ import org.apache.xmlrpc.XmlRpcException;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.mobile.configuration.json.action.ActionService;
-import com.openexchange.mobile.configuration.json.action.sms.osgi.ActionServiceRegistry;
 import com.openexchange.mobile.configuration.json.container.ProvisioningInformation;
 import com.openexchange.mobile.configuration.json.container.ProvisioningResponse;
 import com.openexchange.mobile.configuration.json.servlet.MobilityProvisioningServlet;
+import com.openexchange.server.ServiceExceptionCode;
+import com.openexchange.server.ServiceLookup;
 
 /**
  *
@@ -68,6 +69,17 @@ import com.openexchange.mobile.configuration.json.servlet.MobilityProvisioningSe
 public class ActionSMS implements ActionService {
 
 	private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MobilityProvisioningServlet.class);
+
+    private final ServiceLookup services;
+
+    /**
+     * Initializes a new {@link ActionSMS}.
+     */
+    public ActionSMS(ServiceLookup services) {
+        super();
+        this.services = services;
+
+    }
 
 	@Override
     public ProvisioningResponse handleAction(
@@ -130,10 +142,13 @@ public class ActionSMS implements ActionService {
 	}
 
 	protected String getFromConfig(final String key) {
-		ConfigurationService configservice;
+        ConfigurationService configservice;
 		String retval = null;
 		try {
-			configservice = ActionServiceRegistry.getServiceRegistry().getService(ConfigurationService.class, true);
+			configservice = services.getService(ConfigurationService.class);
+			if (null == configservice) {
+                throw ServiceExceptionCode.absentService(ConfigurationService.class);
+            }
 			retval = configservice.getProperty(key);
 		} catch (final OXException e) {
 			LOG.error("value for key {} was not found for ACTIONSMS configuration", key);

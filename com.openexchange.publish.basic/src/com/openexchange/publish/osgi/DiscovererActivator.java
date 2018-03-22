@@ -69,12 +69,12 @@ import com.openexchange.userconf.UserConfigurationService;
  */
 public class DiscovererActivator extends HousekeepingActivator {
 
-    private volatile OSGiPublicationTargetCollector pubServiceCollector;
+    private OSGiPublicationTargetCollector pubServiceCollector;
 
-    private volatile OSGiPublicationTargetDiscovererCollector discovererCollector;
+    private OSGiPublicationTargetDiscovererCollector discovererCollector;
 
     @Override
-    public void startBundle() throws Exception {
+    protected synchronized void startBundle() throws Exception {
 
         final OSGiPublicationTargetCollector pubServiceCollector = new OSGiPublicationTargetCollector(context);
         this.pubServiceCollector = pubServiceCollector;
@@ -107,8 +107,8 @@ public class DiscovererActivator extends HousekeepingActivator {
     }
 
     @Override
-    public void stopBundle() throws Exception {
-        cleanUp();
+    protected synchronized void stopBundle() throws Exception {
+        super.stopBundle();
         final OSGiPublicationTargetCollector pubServiceCollector = this.pubServiceCollector;
         if (null != pubServiceCollector) {
             pubServiceCollector.close();

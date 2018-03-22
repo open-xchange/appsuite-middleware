@@ -275,6 +275,9 @@ public class OXContextRestore extends OXCommonImpl implements OXContextRestoreIn
                         if (c == ' ') { // Comment line: "-- " + <rest-of-line>
                             searchcontext = false;
                             final String readLine = in.readLine();
+                            if (null == readLine) {
+                                continue;
+                            }
                             final Matcher dbmatcher = database.matcher(readLine);
                             final Matcher tablematcher = table.matcher(readLine);
                             final Matcher datadumpmatcher = datadump.matcher(readLine);

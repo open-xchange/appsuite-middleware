@@ -113,9 +113,4 @@ public final class AttachmentActivator extends AJAXModuleActivator {
         openTrackers();
     }
 
-    @Override
-    protected void stopBundle() throws Exception {
-        unregisterServices();
-        cleanUp();
-    }
 }
