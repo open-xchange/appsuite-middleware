@@ -662,19 +662,19 @@ final class SessionData {
         if (!randomToken.equals(session.getRandomToken())) {
             final OXException e = SessionExceptionCodes.WRONG_BY_RANDOM.create(session.getSessionID(), session.getRandomToken(), randomToken, sessionId);
             LOG.error("", e);
-            SessionHandler.clearSession(sessionId);
+            SessionHandler.clearSession(sessionId, true);
             return null;
         }
         session.removeRandomToken();
         if (sessionControl.getCreationTime() + randomTokenTimeout < System.currentTimeMillis()) {
-            SessionHandler.clearSession(sessionId);
+            SessionHandler.clearSession(sessionId, true);
             return null;
         }
         return sessionControl;
     }
 
     SessionControl clearSession(final String sessionId) {
-        // A read-write access
+        // Look-up in short-term list
         for (SessionContainer container : sessionList) {
             SessionControl sessionControl = container.removeSessionById(sessionId);
             if (null != sessionControl) {
@@ -691,6 +691,24 @@ final class SessionData {
             }
         }
 
+        // Look-up in long-term list
+        for (SessionMap longTermMap : longTermList) {
+            SessionControl sessionControl = longTermMap.removeBySessionId(sessionId);
+            if (null != sessionControl) {
+                Session session = sessionControl.getSession();
+
+                String random = session.getRandomToken();
+                if (null != random) {
+                    // If session is accessed through random token, random token is removed in the session.
+                    randoms.remove(random);
+                }
+
+                unscheduleTask2MoveSession2FirstContainer(sessionId, true);
+                return sessionControl;
+            }
+        }
+
+        // No such session...
         return null;
     }
 

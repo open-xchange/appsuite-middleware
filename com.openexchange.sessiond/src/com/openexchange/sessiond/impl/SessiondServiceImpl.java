@@ -135,7 +135,7 @@ public class SessiondServiceImpl implements SessiondServiceExtended {
 
     @Override
     public boolean removeSession(final String sessionId) {
-        return SessionHandler.clearSession(sessionId);
+        return (null != SessionHandler.clearSession(sessionId, true));
     }
 
     @Override
