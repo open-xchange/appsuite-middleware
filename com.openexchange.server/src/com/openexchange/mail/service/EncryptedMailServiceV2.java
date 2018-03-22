@@ -56,19 +56,21 @@ import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
 import com.openexchange.session.Session;
 
 /**
- * {@link EncryptedMailService}
+ * {@link EncryptedMailServiceV2}
  *
  * @author <a href="mailto:greg.hill@open-xchange.com">Greg Hill</a>
  * @since v2.8.0
  */
-public interface EncryptedMailService {
+public interface EncryptedMailServiceV2 extends EncryptedMailService {
 
     /**
-     * Encrypts a draft message before saving to the draft folder
+     * Encrypts a {@link MailMessage} for autosave a draft
      *
-     * @param draft
-     * @return a ComposedMailMessage containing the encrypted message
+     * @param message The message to encrypt
+     * @param session The session The session of the user
+     * @param securitySettings The settings used for encryption/signing
+     * @return The encrypted {@link MailMessage}
      * @throws OXException
      */
-    public ComposedMailMessage encryptDraftEmail (ComposedMailMessage draft, Session session, String cryptoAuthentication) throws OXException;
+    public MailMessage encryptAutosaveDraftEmail(MailMessage message, Session session, SecuritySettings securitySettings) throws OXException;
 }

@@ -98,6 +98,7 @@ import com.openexchange.dataretention.DataRetentionService;
 import com.openexchange.dataretention.RetentionData;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
+import com.openexchange.exception.OXExceptionCode;
 import com.openexchange.filemanagement.ManagedFile;
 import com.openexchange.filemanagement.ManagedFileManagement;
 import com.openexchange.folderstorage.cache.CacheFolderStorage;
@@ -171,6 +172,7 @@ import com.openexchange.mail.search.SearchTerm;
 import com.openexchange.mail.search.SearchUtility;
 import com.openexchange.mail.search.service.SearchTermMapper;
 import com.openexchange.mail.service.EncryptedMailService;
+import com.openexchange.mail.service.EncryptedMailServiceV2;
 import com.openexchange.mail.threader.Conversation;
 import com.openexchange.mail.threader.Conversations;
 import com.openexchange.mail.threader.ThreadableMapping;
@@ -3063,7 +3065,14 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                 if (draftMail.getSecuritySettings() != null && draftMail.getSecuritySettings().anythingSet()) {
                     EncryptedMailService encryptor = Services.getServiceLookup().getOptionalService(EncryptedMailService.class);
                     if (encryptor != null) {
-                        filledMail = encryptor.encryptAutosaveDraftEmail(filledMail, session, draftMail.getSecuritySettings());
+                    	if(encryptor instanceof EncryptedMailServiceV2) {
+                    		EncryptedMailServiceV2 encryptorV2 = (EncryptedMailServiceV2) encryptor;
+                    		filledMail = encryptorV2.encryptAutosaveDraftEmail(filledMail, session, draftMail.getSecuritySettings());
+                    	}
+                    	else {
+                    		LOG.error("Could not auto save encrypted draft with obsolete OX Guard. Please update OX Guard.");
+                    		throw MailExceptionCode.UNSUPPORTED_OPERATION.create();
+                    	}
                     }
                 }
 
