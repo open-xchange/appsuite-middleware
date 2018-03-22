@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2017-2020 OX Software GmbH
+ *     Copyright (C) 2016-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,62 +49,68 @@
 
 package com.openexchange.chronos.provider.schedjoules.osgi;
 
-import com.openexchange.chronos.provider.CalendarProvider;
-import com.openexchange.chronos.provider.account.AdministrativeCalendarAccountService;
-import com.openexchange.chronos.provider.schedjoules.BasicSchedJoulesCalendarProvider;
-import com.openexchange.chronos.provider.schedjoules.SchedJoulesUserServiceInterceptor;
-import com.openexchange.chronos.schedjoules.SchedJoulesService;
-import com.openexchange.database.DatabaseService;
-import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.user.UserService;
-import com.openexchange.user.UserServiceInterceptor;
+import java.util.concurrent.atomic.AtomicReference;
+import com.openexchange.server.ServiceLookup;
 
 /**
- * {@link SchedJoulesProviderActivator}
  *
- * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * {@link Services}
+ *
+ * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
+ * @since v7.10.0
  */
-public class SchedJoulesProviderActivator extends HousekeepingActivator {
+public final class Services {
 
     /**
-     * Initialises a new {@link SchedJoulesProviderActivator}.
+     * Initializes a new {@link Services}.
      */
-    public SchedJoulesProviderActivator() {
+    private Services() {
         super();
     }
 
-    /*
-     * (non-Javadoc)
+    private static final AtomicReference<ServiceLookup> REF = new AtomicReference<ServiceLookup>();
+
+    /**
+     * Sets the service lookup.
      *
-     * @see com.openexchange.osgi.DeferredActivator#getNeededServices()
+     * @param serviceLookup The service lookup or <code>null</code>
      */
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { UserService.class, AdministrativeCalendarAccountService.class, SchedJoulesService.class, DatabaseService.class };
+    public static void setServiceLookup(ServiceLookup serviceLookup) {
+        REF.set(serviceLookup);
     }
 
-    /*
-     * (non-Javadoc)
+    /**
+     * Gets the service lookup.
      *
-     * @see com.openexchange.osgi.DeferredActivator#startBundle()
+     * @return The service lookup or <code>null</code>
      */
-    @Override
-    protected void startBundle() throws Exception {
-        Services.setServiceLookup(this);
-
-        registerService(CalendarProvider.class, new BasicSchedJoulesCalendarProvider(this));
-        registerService(UserServiceInterceptor.class, new SchedJoulesUserServiceInterceptor(this));
+    public static ServiceLookup getServiceLookup() {
+        return REF.get();
     }
 
-    /*
-     * (non-Javadoc)
+    /**
+     * Gets the service of specified type
      *
-     * @see com.openexchange.osgi.HousekeepingActivator#stopBundle()
+     * @param clazz The service's class
+     * @return The service
+     * @throws IllegalStateException If an error occurs while returning the demanded service
      */
-    @Override
-    protected void stopBundle() throws Exception {
-        Services.setServiceLookup(null);
-        
-        super.stopBundle();
+    public static <S extends Object> S getService(final Class<? extends S> clazz) {
+        final com.openexchange.server.ServiceLookup serviceLookup = REF.get();
+        if (null == serviceLookup) {
+            throw new IllegalStateException("Missing ServiceLookup instance.");
+        }
+        return serviceLookup.getService(clazz);
+    }
+
+    /**
+     * (Optionally) Gets the service of specified type
+     *
+     * @param clazz The service's class
+     * @return The service or <code>null</code> if absent
+     */
+    public static <S extends Object> S optService(final Class<? extends S> clazz) {
+        ServiceLookup serviceLookup = REF.get();
+        return null == serviceLookup ? null : serviceLookup.getOptionalService(clazz);
     }
 }

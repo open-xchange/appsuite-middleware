@@ -68,6 +68,7 @@ import com.openexchange.chronos.provider.basic.CalendarSettings;
 import com.openexchange.chronos.provider.caching.ExternalCalendarResult;
 import com.openexchange.chronos.provider.caching.basic.BasicCachingCalendarAccess;
 import com.openexchange.chronos.provider.schedjoules.exception.SchedJoulesProviderExceptionCodes;
+import com.openexchange.chronos.provider.schedjoules.osgi.Services;
 import com.openexchange.chronos.schedjoules.SchedJoulesService;
 import com.openexchange.chronos.schedjoules.api.auxiliary.SchedJoulesCalendar;
 import com.openexchange.chronos.service.CalendarParameters;
@@ -150,7 +151,7 @@ public class BasicSchedJoulesCalendarAccess extends BasicCachingCalendarAccess {
             long lastModified = internalConfig.optLong(SchedJoulesFields.LAST_MODIFIED, -1);
             URL url = getFeedURL(internalConfig);
 
-            SchedJoulesService schedJoulesService = services.getService(SchedJoulesService.class);
+            SchedJoulesService schedJoulesService = Services.getService(SchedJoulesService.class);
             SchedJoulesCalendar calendar = schedJoulesService.getCalendar(session.getContextId(), url, eTag, lastModified);
             if (eTag.equals(calendar.getETag())) {
                 return new ExternalCalendarResult(false, Collections.emptyList());
