@@ -510,33 +510,15 @@ public abstract class BasicCommandlineOptions {
     }
 
     protected final int testStringAndGetIntOrDefault(final String test, final int defaultvalue) throws NumberFormatException {
-        final int retval;
-        if (null != test) {
-            retval = Integer.parseInt(test);
-        } else {
-            retval = defaultvalue;
-        }
-        return retval;
+        return null != test ? Integer.parseInt(test) : defaultvalue;
     }
 
     protected final String testStringAndGetStringOrDefault(final String test, final String defaultvalue) {
-        final String retval;
-        if (null != test) {
-            retval = test;
-        } else {
-            retval = defaultvalue;
-        }
-        return retval;
+        return null != test ? test : defaultvalue;
     }
 
     protected final boolean testStringAndGetBooleanOrDefault(final String test, final boolean defaultvalue) {
-        final boolean retval;
-        if (null != test) {
-            retval = Boolean.parseBoolean(test);
-        } else {
-            retval = defaultvalue;
-        }
-        return retval;
+        return null != test ? Boolean.parseBoolean(test) : defaultvalue;
     }
 
     /**
