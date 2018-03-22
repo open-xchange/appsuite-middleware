@@ -65,7 +65,7 @@ import com.openexchange.session.reservation.Reservation;
  */
 public class PortableReservation extends AbstractCustomPortable {
 
-    /** The unique portable class ID of the {@link PortableSession} */
+    /** The unique portable class ID of the {@link PortableReservation} */
     public static final int CLASS_ID = 23;
 
     public static final String PARAMETER_TOKEN = "token";
@@ -91,6 +91,8 @@ public class PortableReservation extends AbstractCustomPortable {
 
     /**
      * Initializes a new {@link PortableReservation}.
+     * 
+     * @param reservation The {@link Reservation}
      */
     public PortableReservation(Reservation reservation) {
         super();

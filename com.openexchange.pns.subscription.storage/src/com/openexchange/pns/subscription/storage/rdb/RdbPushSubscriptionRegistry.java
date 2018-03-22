@@ -81,6 +81,7 @@ import com.openexchange.pns.PushMatch;
 import com.openexchange.pns.PushNotifications;
 import com.openexchange.pns.PushSubscription;
 import com.openexchange.pns.PushSubscriptionRegistry;
+import com.openexchange.pns.PushSubscriptionResult;
 import com.openexchange.pns.subscription.storage.ClientAndTransport;
 import com.openexchange.pns.subscription.storage.MapBackedHits;
 import com.openexchange.pns.subscription.storage.rdb.cache.RdbPushSubscriptionRegistryCache;
@@ -557,9 +558,9 @@ public class RdbPushSubscriptionRegistry implements PushSubscriptionRegistry {
     }
 
     @Override
-    public void registerSubscription(PushSubscription subscription) throws OXException {
+    public PushSubscriptionResult registerSubscription(PushSubscription subscription) throws OXException {
         if (null == subscription) {
-            return;
+            return PushSubscriptionResult.builder().withError(OXException.general("subscription must not be null")).build();
         }
 
         int contextId = subscription.getContextId();
@@ -572,11 +573,14 @@ public class RdbPushSubscriptionRegistry implements PushSubscriptionRegistry {
             autocommit = true;
             rollback = true;
 
-            registerSubscription(subscription, con);
-            modified = true;
+            PushSubscriptionResult result = registerSubscription(subscription, con);
+            if (PushSubscriptionResult.Status.OK == result.getStatus()) {
+                modified = true;
+            }
 
             con.commit();
             rollback = false;
+            return result;
         } catch (SQLException e) {
             throw PushExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
@@ -601,15 +605,33 @@ public class RdbPushSubscriptionRegistry implements PushSubscriptionRegistry {
      * @param con The connection to use
      * @throws OXException If registration fails
      */
-    public void registerSubscription(PushSubscription subscription, Connection con) throws OXException {
+    public PushSubscriptionResult registerSubscription(PushSubscription subscription, Connection con) throws OXException {
         if (null == con) {
-            registerSubscription(subscription);
-            return;
+            return registerSubscription(subscription);
         }
 
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
+            stmt = con.prepareStatement("SELECT cid, user FROM pns_subscription WHERE token=? AND transport=? AND client=?");
+            stmt.setString(1, subscription.getToken());
+            stmt.setString(2, subscription.getTransportId());
+            stmt.setString(3, subscription.getClient());
+            rs = stmt.executeQuery();
+            if (rs.next()) {
+                // Such a token has already been registered for given transport and client. Check to what user that token belongs.
+                int tokenUsingContextId = rs.getInt(1);
+                int tokenUsingUserId = rs.getInt(2);
+                if (tokenUsingContextId == subscription.getContextId() && tokenUsingUserId == subscription.getUserId()) {
+                    // Actually an update, but may force to invalidate some resources as new registration might ship with other topics. Therefore:
+                    return PushSubscriptionResult.builder().withConflictingUserId(tokenUsingUserId, tokenUsingContextId).build();
+                }
+                return PushSubscriptionResult.builder().withConflictingUserId(tokenUsingUserId, tokenUsingContextId).build();
+            }
+            Databases.closeSQLStuff(rs, stmt);
+            stmt = null;
+            rs = null;
+
             List<String> prefixes = null;
             List<String> topics = null;
             boolean isAll = false;
@@ -657,28 +679,45 @@ public class RdbPushSubscriptionRegistry implements PushSubscriptionRegistry {
             stmt.setLong(8, lastModified);
             if (null == subscription.getExpires()) {
                 stmt.setNull(9, Types.BIGINT);
+                stmt.setNull(13, Types.BIGINT);
             } else {
-                stmt.setLong(9, subscription.getExpires().getTime());
+                long expiration = subscription.getExpires().getTime();
+                stmt.setLong(9, expiration);
+                stmt.setLong(13, expiration);
             }
             stmt.setString(10, subscription.getTransportId());
             stmt.setInt(11, isAll ? 1 : 0);
             stmt.setLong(12, lastModified);
-            if (null == subscription.getExpires()) {
-                stmt.setNull(13, Types.BIGINT);
-            } else {
-                stmt.setLong(13, subscription.getExpires().getTime());
-            }
-            int updated = stmt.executeUpdate();
+            int rowCount = stmt.executeUpdate();
             Databases.closeSQLStuff(stmt);
             stmt = null;
 
-            if (1 != updated) {
+            boolean alreadyExists = (1 != rowCount);
+            if (alreadyExists) {
                 // Already exists, so take over existing subscription identifier
                 id = getSubscriptionId(subscription.getUserId(), subscription.getContextId(), subscription.getToken(), subscription.getClient(), con);
+                if (null == id) {
+                    return PushSubscriptionResult.builder().withError(OXException.general("Token registration failed")).build();
+                }
+            }
+
+            // Drop possibly existing entries
+            if (alreadyExists) {
+                stmt = con.prepareStatement("DELETE FROM pns_subscription_topic_exact WHERE id=?");
+                stmt.setBytes(1, id);
+                stmt.executeUpdate();
+                Databases.closeSQLStuff(stmt);
+                stmt = null;
+
+                stmt = con.prepareStatement("DELETE FROM pns_subscription_topic_wildcard WHERE id=?");
+                stmt.setBytes(1, id);
+                stmt.executeUpdate();
+                Databases.closeSQLStuff(stmt);
+                stmt = null;
             }
 
             // Insert individual topics / topic wild-cards (if subscription is not interested in all)
-            if (!isAll) {
+            if (false == isAll) {
                 if (null != prefixes) {
                     stmt = con.prepareStatement("INSERT IGNORE INTO pns_subscription_topic_wildcard (id, cid, topic) VALUES (?, ?, ?)");
                     stmt.setBytes(1, id);
@@ -711,6 +750,8 @@ public class RdbPushSubscriptionRegistry implements PushSubscriptionRegistry {
             if (null != cache) {
                 cache.addAndInvalidateIfPresent(subscription);
             }
+
+            return PushSubscriptionResult.OK_RESULT;
         } catch (SQLException e) {
             throw PushExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {

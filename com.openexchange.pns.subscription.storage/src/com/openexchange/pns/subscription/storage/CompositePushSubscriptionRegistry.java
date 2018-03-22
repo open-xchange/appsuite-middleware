@@ -63,6 +63,7 @@ import com.openexchange.pns.PushSubscription;
 import com.openexchange.pns.PushSubscriptionListener;
 import com.openexchange.pns.PushSubscriptionProvider;
 import com.openexchange.pns.PushSubscriptionRegistry;
+import com.openexchange.pns.PushSubscriptionResult;
 import com.openexchange.pns.subscription.storage.rdb.RdbPushSubscriptionRegistry;
 
 
@@ -167,7 +168,7 @@ public class CompositePushSubscriptionRegistry implements PushSubscriptionRegist
     }
 
     @Override
-    public void registerSubscription(PushSubscription subscription) throws OXException {
+    public PushSubscriptionResult registerSubscription(PushSubscription subscription) throws OXException {
         List<PushSubscriptionListener> listeners = this.listeners.getServiceList();
         for (PushSubscriptionListener listener : listeners) {
             try {
@@ -179,15 +180,19 @@ public class CompositePushSubscriptionRegistry implements PushSubscriptionRegist
             }
         }
 
-        persistentRegistry.registerSubscription(subscription);
+        PushSubscriptionResult result = persistentRegistry.registerSubscription(subscription);
 
-        for (PushSubscriptionListener listener : listeners) {
-            try {
-                listener.addedSubscription(subscription);
-            } catch (Exception e) {
-                LOG.error("Listener {} failed handling performed registration of subscription with topics '{}' for user {} in context {}", listener.getClass().getSimpleName(), subscription.getTopics(), I(subscription.getUserId()), I(subscription.getContextId()), e);
+        if (PushSubscriptionResult.Status.OK == result.getStatus()) {
+            for (PushSubscriptionListener listener : listeners) {
+                try {
+                    listener.addedSubscription(subscription);
+                } catch (Exception e) {
+                    LOG.error("Listener {} failed handling performed registration of subscription with topics '{}' for user {} in context {}", listener.getClass().getSimpleName(), subscription.getTopics(), I(subscription.getUserId()), I(subscription.getContextId()), e);
+                }
             }
         }
+
+        return result;
     }
 
     @Override

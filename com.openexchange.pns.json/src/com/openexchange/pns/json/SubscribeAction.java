@@ -62,6 +62,7 @@ import com.openexchange.pns.DefaultPushSubscription;
 import com.openexchange.pns.PushExceptionCodes;
 import com.openexchange.pns.PushNotifications;
 import com.openexchange.pns.PushSubscriptionRegistry;
+import com.openexchange.pns.PushSubscriptionResult;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
@@ -126,9 +127,40 @@ public class SubscribeAction extends AbstractPushJsonAction {
             .userId(session.getUserId());
         DefaultPushSubscription subscription = builder.build();
 
-        subscriptionRegistry.registerSubscription(subscription);
+        boolean retry;
+        do {
+            retry = doSubscribe(subscription, subscriptionRegistry);
+        } while (retry);
 
         return new AJAXRequestResult(new JSONObject(2).put("success", true), "json");
+    }
+
+    private boolean doSubscribe(DefaultPushSubscription subscription, PushSubscriptionRegistry subscriptionRegistry) throws OXException {
+        PushSubscriptionResult result = subscriptionRegistry.registerSubscription(subscription);
+        switch (result.getStatus()) {
+            case CONFLICT:
+                {
+                    // Unsubscribe conflicting subscription
+                    DefaultPushSubscription.Builder builder = DefaultPushSubscription.builder()
+                        .client(subscription.getClient())
+                        .contextId(result.getTokenUsingContextId())
+                        .token(subscription.getToken())
+                        .transportId(subscription.getTransportId())
+                        .userId(result.getTokenUsingUserId());
+                    DefaultPushSubscription subscriptionToDrop = builder.build();
+                    subscriptionRegistry.unregisterSubscription(subscriptionToDrop);
+                    return true;
+                }
+            case FAIL:
+                throw result.getError();
+            case OK:
+                /* fall-through */
+            default:
+                break;
+        }
+
+        // Success
+        return false;
     }
 
     @Override

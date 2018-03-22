@@ -222,19 +222,8 @@ public abstract class AbstractITipAnalyzer implements ITipAnalyzer {
                 }
             }
 
-            Sentence sentence = null;
-            if (newStatus != null) {
-                if (newStatus.equals(ParticipationStatus.ACCEPTED)) {
-                    sentence = new Sentence(Messages.ACCEPT_INTRO).add(displayName, ArgumentType.PARTICIPANT).add("", ArgumentType.STATUS, newStatus);
-                } else if (newStatus.equals(ParticipationStatus.DECLINED)) {
-                    sentence = new Sentence(Messages.DECLINE_INTRO).add(displayName, ArgumentType.PARTICIPANT).add("", ArgumentType.STATUS, newStatus);
-                } else if (newStatus.equals(ParticipationStatus.TENTATIVE)) {
-                    sentence = new Sentence(Messages.TENTATIVE_INTRO).add(displayName, ArgumentType.PARTICIPANT).add("", ArgumentType.STATUS, newStatus);
-                }
-
-                if (sentence != null) {
-                    change.setIntroduction(sentence.getMessage(wrapper, locale));
-                }
+            if (ParticipationStatus.ACCEPTED.equals(newStatus) || ParticipationStatus.TENTATIVE.equals(newStatus) || ParticipationStatus.DECLINED.equals(newStatus)) {
+                change.setIntroduction(new Sentence(Messages.STATUS_CHANGED_INTRO).add(displayName, ArgumentType.PARTICIPANT).add("", ArgumentType.STATUS, newStatus).getMessage(wrapper, locale));
             }
         } else {
             if (message.getMethod() != ITipMethod.COUNTER) {

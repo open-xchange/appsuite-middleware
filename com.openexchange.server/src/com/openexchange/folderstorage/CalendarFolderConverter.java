@@ -105,6 +105,7 @@ public class CalendarFolderConverter {
         ParameterizedFolder folder = new CalendarStorageFolder(treeId, contentType);
         folder.setAccountID(getQualifiedAccountID(providerId, accountId));
         folder.setID(calendarFolder.getId());
+        folder.setLastModified(calendarFolder.getLastModified());
         folder.setName(calendarFolder.getName());
         folder.setPermissions(getStoragePermissions(calendarFolder.getPermissions()));
         folder.setSubscribed(calendarFolder.isSubscribed());
@@ -119,7 +120,6 @@ public class CalendarFolderConverter {
             GroupwareCalendarFolder groupwareCalendarFolder = (GroupwareCalendarFolder) calendarFolder;
             folder.setCreatedBy(groupwareCalendarFolder.getCreatedBy());
             folder.setCreationDate(groupwareCalendarFolder.getCreationDate());
-            folder.setLastModified(groupwareCalendarFolder.getLastModified());
             folder.setModifiedBy(groupwareCalendarFolder.getModifiedBy());
             folder.setParentID(groupwareCalendarFolder.getParentId());
             folder.setType(getStorageType(groupwareCalendarFolder.getType()));

@@ -98,9 +98,12 @@ public class Messages implements LocalizableStrings {
     public static final String REFRESH_INTRO = "%1$s would like to be brought up to date about the appointment %2$s. Please send another invitation.";
 
     /**
-     * Example: "UserXY has accepted the invitation"
+     * Examples:
+     * <p>"UserXY has accepted the invitation"
+     * <p>"UserXY has declined the invitation"
+     * <p>"UserXY has tentatively accepted the invitation"
      */
-    public static final String ACCEPT_INTRO = "%1$s has %2$s the invitation:";
+    public static final String STATUS_CHANGED_INTRO = "%1$s has %2$s the invitation:";
 
     /**
      * Example: "UserXY has accepted the invitation on behalf of UserAB"
@@ -113,11 +116,6 @@ public class Messages implements LocalizableStrings {
     public static final String ACCEPT_ON_YOUR_BEHALF_INTRO = "%1$s has %2$s the invitation on your behalf:";
 
     /**
-     * Example: "UserXY has declined the invitation"
-     */
-    public static final String DECLINE_INTRO = "%1$s has %2$s the invitation:";
-
-    /**
      * Example: "UserXY has declined the invitation on behalf of UserAB"
      */
     public static final String DECLINE_ON_BEHALF_INTRO = "%1$s has %2$s the invitation on behalf of %3$s:";
@@ -126,11 +124,6 @@ public class Messages implements LocalizableStrings {
      * Example: "UserXY has declined the invitation on your behalf"
      */
     public static final String DECLINE_ON_YOUR_BEHALF_INTRO = "%1$s has %2$s the invitation on your behalf:";
-
-    /**
-     * Example: "UserXY has tentatively accepted the invitation"
-     */
-    public static final String TENTATIVE_INTRO = "%1$s has %2$s the invitation:";
 
     /**
      * Example: "UserXY has tentatively accepted the invitation on behalf of UserAB"
