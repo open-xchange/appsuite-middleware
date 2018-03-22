@@ -73,6 +73,17 @@ public class TestCachingCalendarAccessImpl extends BasicCachingCalendarAccess {
         super(session, account, parameters);
     }
 
+    boolean cacheUpdated = false;
+
+    @Override
+    protected void update() throws OXException {
+        cacheUpdated = true;
+    }
+
+    public boolean getCacheUpdated() {
+        return cacheUpdated;
+    }
+
     /*
      * (non-Javadoc)
      *
@@ -129,7 +140,7 @@ public class TestCachingCalendarAccessImpl extends BasicCachingCalendarAccess {
         // TODO Auto-generated method stub
         return null;
     }
-    
+
     @Override
     protected boolean acquireUpdateLock() throws OXException {
         return true;

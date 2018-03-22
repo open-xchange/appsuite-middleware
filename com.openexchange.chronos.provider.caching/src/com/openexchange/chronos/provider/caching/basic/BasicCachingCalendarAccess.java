@@ -159,8 +159,8 @@ public abstract class BasicCachingCalendarAccess implements BasicCalendarAccess,
         this.session = session;
         this.account = account;
         this.parameters = parameters;
-        this.originInternalConfiguration = new JSONObject(account.getInternalConfiguration());
-        this.originUserConfiguration = new JSONObject(account.getUserConfiguration());
+        this.originInternalConfiguration = account != null ? new JSONObject(account.getInternalConfiguration()) : null;
+        this.originUserConfiguration = account != null ? new JSONObject(account.getUserConfiguration()) : null;
     }
 
     public Session getSession() {
@@ -278,7 +278,7 @@ public abstract class BasicCachingCalendarAccess implements BasicCalendarAccess,
         JSONObject caching = internalConfiguration.optJSONObject(CachingCalendarAccessConstants.CACHING);
         Number lastUpdate = (Number) caching.opt(CachingCalendarAccessConstants.LAST_UPDATE);
         long currentTimeMillis = System.currentTimeMillis();
-        if (lastUpdate == null || lastUpdate.longValue() < 0 || (TimeUnit.MINUTES.toMillis(getCascadedRefreshInterval()) < currentTimeMillis - lastUpdate.longValue()) || (currentTimeMillis >= lastUpdate.longValue() && this.parameters.contains(CalendarParameters.PARAMETER_UPDATE_CACHE) && this.parameters.get(CalendarParameters.PARAMETER_UPDATE_CACHE, Boolean.class, Boolean.FALSE).booleanValue())) {
+        if (lastUpdate == null || lastUpdate.longValue() <= 0 || (TimeUnit.MINUTES.toMillis(getCascadedRefreshInterval()) < currentTimeMillis - lastUpdate.longValue()) || (currentTimeMillis >= lastUpdate.longValue() && this.parameters.contains(CalendarParameters.PARAMETER_UPDATE_CACHE) && this.parameters.get(CalendarParameters.PARAMETER_UPDATE_CACHE, Boolean.class, Boolean.FALSE).booleanValue())) {
             update();
         }
     }
