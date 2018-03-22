@@ -179,7 +179,7 @@ public class RESTExecutor {
      * @return A full URL for making a request.
      */
     private static String buildURL(final String host, final int apiVersion, final String target, final String[] params) {
-        String trgt = new String();
+        String trgt = "";
         if (Strings.isEmpty(target)) {
             if (params != null && params.length > 0) {
                 final StringBuilder sb = new StringBuilder(params.length << 4);
