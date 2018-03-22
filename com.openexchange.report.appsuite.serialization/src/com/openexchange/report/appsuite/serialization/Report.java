@@ -547,10 +547,10 @@ public class Report implements Serializable {
     }
 
     private String getIndentation(int level) {
-        String result = "";
+        StringBuilder indentationBuilder = new StringBuilder();
         for (int i = 0; i < level; i++) {
-            result += "  ";
+            indentationBuilder.append("  ");
         }
-        return result;
+        return indentationBuilder.toString();
     }
 }

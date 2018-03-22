@@ -223,7 +223,8 @@ public class MessagingMessageParser {
                         }
                     } else {
                         final MimeMessagingBodyPart bodyPart = new MimeMessagingBodyPart(mimeMultipartContent);
-                        bodyPart.setContent(content, message.getContentType().toString());
+                        ContentType contentType = message.getContentType();
+                        bodyPart.setContent(content, contentType == null ?  "application/octet-stream" : contentType.toString());
                         bodyPart.setDisposition(message.getDisposition());
                         mimeMultipartContent.addBodyPart(bodyPart);
                     }

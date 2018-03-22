@@ -142,6 +142,9 @@ public class SubscriptionExecutionServiceImpl implements SubscriptionExecutionSe
         try {
             final SubscribeService subscribeService = discoverer.getSource(sourceId).getSubscribeService();
             final Subscription subscription = subscribeService.loadSubscription(session.getContext(), subscriptionId, null);
+            if (subscription == null) {
+                throw SubscriptionErrorMessage.SubscriptionNotFound.create(session.getContextId(), subscriptionId);
+            }
             subscription.setSession(session);
             final boolean knowsSource = discoverer.filter(subscription.getUserId(), session.getContextId()).knowsSource(subscribeService.getSubscriptionSource().getId());
             if (!knowsSource) {
@@ -166,6 +169,9 @@ public class SubscriptionExecutionServiceImpl implements SubscriptionExecutionSe
         if (folderUpdater instanceof FolderUpdaterServiceV2) {
             ((FolderUpdaterServiceV2) folderUpdater).save(data, subscription, optErrors);
         } else {
+            if(folderUpdater == null) {
+                throw SubscriptionErrorMessage.UNEXPECTED_ERROR.create("Missing FolderUpdateService.");
+            }
             folderUpdater.save(data, subscription);
         }
     }

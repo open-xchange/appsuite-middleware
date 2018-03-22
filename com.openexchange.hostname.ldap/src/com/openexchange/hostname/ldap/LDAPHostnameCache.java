@@ -51,6 +51,7 @@ package com.openexchange.hostname.ldap;
 
 import static com.openexchange.java.Autoboxing.I;
 import com.openexchange.caching.Cache;
+import com.openexchange.caching.CacheExceptionCode;
 import com.openexchange.caching.CacheService;
 import com.openexchange.caching.ElementAttributes;
 import com.openexchange.exception.OXException;
@@ -134,6 +135,9 @@ public class LDAPHostnameCache {
      */
     public void outputSettings() throws OXException {
         Cache cache = optCache();
+        if (cache == null) {
+            throw CacheExceptionCode.MISSING_CACHE_REGION.create(REGION_NAME);
+        }
         final ElementAttributes defaultElementAttributes = cache.getDefaultElementAttributes();
         final StringBuilder sb = new StringBuilder(128).append('\n');
         sb.append("Cache setting for hostname ldap bundle:\n");

@@ -146,7 +146,7 @@ public class HTMLServiceActivator extends HousekeepingActivator {
             /*
              * Close trackers
              */
-            cleanUp();
+            super.stopBundle();
             /*
              * Restore
              */

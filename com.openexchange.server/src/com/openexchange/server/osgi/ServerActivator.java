@@ -905,6 +905,7 @@ public final class ServerActivator extends HousekeepingActivator {
             }
             LoginServlet.setRampUpServices(null);
             UploadUtility.shutDown();
+            super.stopBundle();
         } finally {
             started.set(false);
             CONTEXT = null;

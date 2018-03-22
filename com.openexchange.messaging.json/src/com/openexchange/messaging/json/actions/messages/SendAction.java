@@ -54,6 +54,7 @@ import org.json.JSONException;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.caching.Cache;
 import com.openexchange.exception.OXException;
+import com.openexchange.messaging.MessagingAccountTransport;
 import com.openexchange.messaging.MessagingExceptionCodes;
 import com.openexchange.messaging.MessagingMessage;
 import com.openexchange.messaging.json.MessagingMessageParser;
@@ -85,7 +86,11 @@ public class SendAction extends AbstractMessagingAction {
         if(message == null) {
             throw MessagingExceptionCodes.MISSING_PARAMETER.create("body");
         }
-        req.getTransport(session.getUserId(), session.getContextId()).transport(message, req.getRecipients());
+        MessagingAccountTransport transport = req.getTransport(session.getUserId(), session.getContextId());
+        if (transport == null) {
+            throw MessagingExceptionCodes.OPERATION_NOT_SUPPORTED.create(req.getMessagingServiceId());
+        }
+        transport.transport(message, req.getRecipients());
         return new AJAXRequestResult(1);
     }
 

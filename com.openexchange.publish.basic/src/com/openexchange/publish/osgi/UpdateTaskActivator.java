@@ -59,6 +59,9 @@ import com.openexchange.osgi.HousekeepingActivator;
  */
 public final class UpdateTaskActivator extends HousekeepingActivator {
 
+    /**
+     * Initializes a new {@link UpdateTaskActivator}.
+     */
     public UpdateTaskActivator() {
         super();
     }
@@ -70,13 +73,7 @@ public final class UpdateTaskActivator extends HousekeepingActivator {
     }
 
     @Override
-    public void stopBundle() throws Exception {
-        closeTrackers();
-    }
-
-    @Override
     protected Class<?>[] getNeededServices() {
-        // Nothing to do
-        return null;
+        return EMPTY_CLASSES;
     }
 }

@@ -53,13 +53,14 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicReference;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.java.Strings;
 import com.openexchange.net.HostList;
 import com.openexchange.rss.osgi.Services;
 
 /**
- * 
+ *
  * {@link RssProperties}
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
@@ -78,13 +79,13 @@ public class RssProperties {
 
     public static final String HOST_BLACKLIST_DEFAULT = "127.0.0.1-127.255.255.255,localhost";
 
-    private static volatile HostList blacklistedHosts;
+    private static final AtomicReference<HostList> blacklistedHosts = new AtomicReference<HostList>(null);
 
     private static HostList blacklistedHosts() {
-        HostList tmp = blacklistedHosts;
+        HostList tmp = blacklistedHosts.get();
         if (null == tmp) {
             synchronized (RssProperties.class) {
-                tmp = blacklistedHosts;
+                tmp = blacklistedHosts.get();
                 if (null == tmp) {
                     ConfigurationService service = Services.optService(ConfigurationService.class);
                     if (null == service) {
@@ -96,7 +97,7 @@ public class RssProperties {
                         prop = prop.trim();
                     }
                     tmp = HostList.valueOf(prop);
-                    blacklistedHosts = tmp;
+                    blacklistedHosts.set(tmp);
                 }
             }
         }

@@ -228,6 +228,9 @@ public class PlaceholderCollection<T> extends FolderCollection<T> {
     @Override
     protected SyncStatus<WebdavResource> getSyncStatus(Date since) throws OXException {
         SyncStatus<WebdavResource> multistatus = new SyncStatus<WebdavResource>();
+        if (since == null) {
+            since = new Date(0l);
+        }
         multistatus.setToken(Long.toString(since.getTime()));
         return multistatus;
     }

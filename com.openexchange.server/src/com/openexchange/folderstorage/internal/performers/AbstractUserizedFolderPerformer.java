@@ -376,6 +376,9 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
                  * Prepare
                  */
                 final FolderStorage curStorage = folderStorageDiscoverer.getFolderStorage(treeId, f.getID());
+                if (curStorage == null) {
+                    throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(treeId, f.getID());
+                }
                 boolean alreadyOpened = false;
                 final Iterator<FolderStorage> it = openedStorages.iterator();
                 for (int j = 0; !alreadyOpened && j < openedStorages.size(); j++) {

@@ -50,6 +50,7 @@
 package com.openexchange.net.ssl.exception;
 
 import java.util.Map;
+import java.util.Map.Entry;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.DisplayableOXExceptionCode;
 import com.openexchange.exception.OXException;
@@ -111,6 +112,8 @@ public enum SSLExceptionCode implements DisplayableOXExceptionCode {
      */
     CERTIFICATE_REVOKED("The certificate with fingerprint '%1$s' for domain '%2$s' was revoked.", CATEGORY_ERROR, 9, SSLExceptionMessages.CERTIFICATE_REVOKED),
     ;
+
+    private static final String EMPTY_STRING = "";
 
     public static final String PREFIX = "SSL";
 
@@ -210,8 +213,8 @@ public enum SSLExceptionCode implements DisplayableOXExceptionCode {
      */
     public OXException create(Map<String, Object> arguments, final Object... args) {
         OXException oxe = create(args);
-        for (String key : arguments.keySet()) {
-            oxe.setArgument(key, arguments.get(key));
+        for (Entry<String, Object> entry : arguments.entrySet()) {
+            oxe.setArgument(entry.getKey(), entry.getValue());
         }
         return oxe;
     }
@@ -225,8 +228,8 @@ public enum SSLExceptionCode implements DisplayableOXExceptionCode {
      */
     public OXException create(final Throwable cause, Map<String, Object> arguments, final Object... args) {
         OXException oxe = OXExceptionFactory.getInstance().create(this, cause, args);
-        for (String key : arguments.keySet()) {
-            oxe.setArgument(key, arguments.get(key));
+        for (Entry<String, Object> entry : arguments.entrySet()) {
+            oxe.setArgument(entry.getKey(), entry.getValue());
         }
         return oxe;
     }
@@ -249,6 +252,6 @@ public enum SSLExceptionCode implements DisplayableOXExceptionCode {
             }
             cause = cause.getCause();
         }
-        return new String();
+        return EMPTY_STRING;
     }
 }

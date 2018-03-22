@@ -51,6 +51,7 @@ package com.openexchange.sessiond.impl;
 
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -90,8 +91,8 @@ public class SessionScopedContainerImpl<T> implements SessionScopedContainer<T> 
 
     @Override
     public void clear() {
-        for (Session key : keySet()) {
-            remove(key);
+        for (Iterator<Session> iterator = keySet().iterator(); iterator.hasNext();) {
+            remove(iterator.next());
         }
     }
 

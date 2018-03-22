@@ -84,7 +84,6 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.java.Strings;
-import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 
 /**
@@ -97,17 +96,6 @@ import com.openexchange.session.Session;
 public class BasicICalCalendarProvider extends BasicCachingCalendarProvider {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(BasicICalCalendarProvider.class);
-    private ServiceLookup services;
-
-    /**
-     * Initialises a new {@link BasicICalCalendarProvider}.
-     * 
-     * @param services The {@link ServiceLookup} instance
-     */
-    public BasicICalCalendarProvider(ServiceLookup services) {
-        super();
-        this.services = services;
-    }
 
     @Override
     public String getId() {
@@ -126,7 +114,7 @@ public class BasicICalCalendarProvider extends BasicCachingCalendarProvider {
 
     @Override
     public BasicCalendarAccess connect(Session session, CalendarAccount account, CalendarParameters parameters) throws OXException {
-        return new BasicICalCalendarAccess(services, session, account, parameters);
+        return new BasicICalCalendarAccess(session, account, parameters);
     }
 
     @Override

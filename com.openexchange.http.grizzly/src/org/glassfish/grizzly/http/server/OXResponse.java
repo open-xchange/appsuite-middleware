@@ -201,6 +201,11 @@ public class OXResponse extends Response {
                         encodedURI = urlEncoder.encodeURL(relativePath);
                     }
 
+                    //unable to encode the request URI
+                    if (encodedURI == null) {
+                        return null;
+                    }
+                    
                     cc.append(encodedURI, 0, encodedURI.length());
                     cc.append('/');
                 }

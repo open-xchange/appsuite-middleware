@@ -58,6 +58,7 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.google.common.collect.Lists;
@@ -85,11 +86,11 @@ public class RdbPasswordChangeRecorder implements PasswordChangeRecorder {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RdbPasswordChangeRecorder.class);
 
-    private static final String GET_DATA       = "SELECT created, source, ip FROM user_password_history WHERE cid=? AND uid=? ORDER BY ";
+    private static final String GET_DATA = "SELECT created, source, ip FROM user_password_history WHERE cid=? AND uid=? ORDER BY ";
     private static final String GET_HISTORY_ID = "SELECT id FROM user_password_history WHERE cid=? AND uid=?";
 
     private static final String CLEAR_FOR_ID_IN = "DELETE FROM user_password_history WHERE id IN (";
-    private static final String CLEAR_FOR_USER  = "DELETE FROM user_password_history WHERE cid=? AND uid=?";
+    private static final String CLEAR_FOR_USER = "DELETE FROM user_password_history WHERE cid=? AND uid=?";
 
     private static final String INSERT_DATA = "INSERT INTO user_password_history (cid, uid, source, ip, created) VALUES (?,?,?,?,?)";
 
@@ -126,10 +127,10 @@ public class RdbPasswordChangeRecorder implements PasswordChangeRecorder {
                 builder.append(SortOrder.DESC);
             } else {
                 // User send fields
-                for (SortField field : fieldNames.keySet()) {
-                    builder.append(fieldToTable(field));
+                for (Entry<SortField, SortOrder> field : fieldNames.entrySet()) {
+                    builder.append(fieldToTable(field.getKey()));
                     builder.append(' ');
-                    builder.append(fieldNames.get(field));
+                    builder.append(field.getValue());
                     builder.append(',');
                 }
                 // Remove last ','

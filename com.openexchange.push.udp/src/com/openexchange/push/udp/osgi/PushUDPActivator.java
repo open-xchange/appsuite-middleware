@@ -138,7 +138,7 @@ public class PushUDPActivator extends HousekeepingActivator {
             /*
              * Close service trackers
              */
-            cleanUp();
+            super.stopBundle();
             /*
              * Shut-down
              */

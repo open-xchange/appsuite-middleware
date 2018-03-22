@@ -55,7 +55,6 @@ import com.openexchange.chronos.provider.CalendarAccount;
 import com.openexchange.chronos.provider.basic.CalendarSettings;
 import com.openexchange.chronos.provider.caching.ExternalCalendarResult;
 import com.openexchange.chronos.provider.caching.basic.BasicCachingCalendarAccess;
-import com.openexchange.chronos.provider.caching.internal.Services;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.exception.OXException;
 import com.openexchange.session.Session;
@@ -71,7 +70,18 @@ public class TestCachingCalendarAccessImpl extends BasicCachingCalendarAccess {
     private boolean configSaved = false;
 
     public TestCachingCalendarAccessImpl(Session session, CalendarAccount account, CalendarParameters parameters) throws OXException {
-        super(Services.getServiceLookup(), session, account, parameters);
+        super(session, account, parameters);
+    }
+
+    boolean cacheUpdated = false;
+
+    @Override
+    protected void update() throws OXException {
+        cacheUpdated = true;
+    }
+
+    public boolean getCacheUpdated() {
+        return cacheUpdated;
     }
 
     /*
@@ -130,7 +140,7 @@ public class TestCachingCalendarAccessImpl extends BasicCachingCalendarAccess {
         // TODO Auto-generated method stub
         return null;
     }
-    
+
     @Override
     protected boolean acquireUpdateLock() throws OXException {
         return true;

@@ -381,7 +381,8 @@ public final class AJAXUtility {
                 return s;
             }
             final String cs = isEmpty(charset) ? ServerConfig.getProperty(ServerConfig.Property.DefaultEncoding) : charset;
-            return getUrlCodec(cs).decode(s, cs);
+            URLCodec codec = getUrlCodec(cs);
+            return null == codec ? s : codec.decode(s, cs);
         } catch (final DecoderException e) {
             return s;
         } catch (final UnsupportedEncodingException e) {

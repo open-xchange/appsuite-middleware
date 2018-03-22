@@ -361,7 +361,11 @@ public final class HtmlWhitelistFilter {
     }
 
     private static boolean isValidLITag(final Tag tag) {
-        final Element parentElement = tag.getElement().getParentElement();
+        Element element = tag.getElement();
+        if (element == null) {
+            return false;
+        }
+        final Element parentElement = element.getParentElement();
         if (parentElement == null) {
             return false; // ignore LI elements without a parent
         }

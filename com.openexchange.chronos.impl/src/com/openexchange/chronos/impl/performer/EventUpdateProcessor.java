@@ -296,11 +296,6 @@ public class EventUpdateProcessor implements EventUpdate {
             updatedEvent.setSeriesId(originalEvent.getId());
         }
         /*
-         * apply & take over attendee updates in changed event
-         */
-        List<Attendee> updatedAttendees = AttendeeHelper.onUpdatedEvent(session, folder, originalEvent.getAttendees(), updatedEvent.getAttendees()).previewChanges();
-        updatedEvent.setAttendees(AttendeeMapper.getInstance().copy(updatedAttendees, (AttendeeField[]) null));
-        /*
          * adjust attendee-dependent fields (ignore for change exceptions)
          */
         if (isSeriesException(originalEvent)) {
@@ -334,9 +329,9 @@ public class EventUpdateProcessor implements EventUpdate {
                 /*
                  * check validity
                  */
-                Check.classificationIsValid(updatedEvent.getClassification(), folder);
+                Check.classificationIsValid(updatedEvent.getClassification(), folder, updatedEvent.getAttendees());
                 /*
-                 * deny update for change exceptions (but ignore if effectively same classification) 
+                 * deny update for change exceptions (but ignore if effectively same classification)
                  */
                 //TODO: implement correct propagation of classification change to master and change exceptions;
                 //      requires to pass series information in event update processor of change exceptions
@@ -347,7 +342,13 @@ public class EventUpdateProcessor implements EventUpdate {
                         throw CalendarExceptionCodes.UNSUPPORTED_CLASSIFICATION_FOR_OCCURRENCE.create(
                             String.valueOf(updatedEvent.getClassification()), originalEvent.getSeriesId(), String.valueOf(originalEvent.getRecurrenceId()));
                     }
-                }                
+                }
+                break;
+            case ATTENDEES:
+                /*
+                 * (re-)check classification validity
+                 */
+                Check.classificationIsValid(updatedEvent.getClassification(), folder, updatedEvent.getAttendees());
                 break;
             case START_DATE:
             case END_DATE:
@@ -417,7 +418,15 @@ public class EventUpdateProcessor implements EventUpdate {
          */
         EventField[] changedFields = updatedFields.toArray(new EventField[updatedFields.size()]);
         Event changedEvent = EventMapper.getInstance().copy(originalEvent, null, (EventField[]) null);
-        return EventMapper.getInstance().copy(updatedEvent, changedEvent, changedFields);
+        changedEvent = EventMapper.getInstance().copy(updatedEvent, changedEvent, changedFields);
+        /*
+         * (virtually) apply & take over attendee updates in changed event
+         */
+        if (updatedFields.contains(EventField.ATTENDEES)) {
+            List<Attendee> updatedAttendees = AttendeeHelper.onUpdatedEvent(session, folder, originalEvent.getAttendees(), updatedEvent.getAttendees()).previewChanges();
+            changedEvent.setAttendees(AttendeeMapper.getInstance().copy(updatedAttendees, (AttendeeField[]) null));
+        }
+        return changedEvent;
     }
 
     /**
