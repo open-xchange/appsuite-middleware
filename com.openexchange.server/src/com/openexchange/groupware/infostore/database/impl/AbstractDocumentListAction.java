@@ -102,7 +102,12 @@ public abstract class AbstractDocumentListAction extends AbstractInfostoreAction
 
                 @Override
                 public void fillStatement() throws SQLException {
-                    fillStmt(stmt, fields, doc, getAdditionals(doc));
+                    Object[] additionals = getAdditionals(doc);
+                    if (additionals != null) {
+                        fillStmt(stmt, fields, doc, additionals);
+                    } else {
+                        fillStmt(stmt, fields, doc);
+                    }
                 }
 
             };
