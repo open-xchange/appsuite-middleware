@@ -51,10 +51,6 @@ package com.openexchange.chronos.provider.caching.basic;
 
 import static org.junit.Assert.assertEquals;
 import java.sql.Connection;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.concurrent.TimeUnit;
-import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
@@ -68,9 +64,7 @@ import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import com.openexchange.chronos.provider.CalendarAccount;
 import com.openexchange.chronos.provider.caching.impl.TestCachingCalendarAccessImpl;
-import com.openexchange.chronos.provider.caching.internal.CachingCalendarAccessConstants;
 import com.openexchange.chronos.provider.caching.internal.Services;
-import com.openexchange.chronos.provider.caching.internal.handler.ProcessingType;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.storage.CalendarStorageFactory;
 import com.openexchange.database.DatabaseService;
@@ -113,8 +107,6 @@ public class BasicCachingCalendarAccessTest {
     @Mock
     private Connection connection;
 
-    private final Map<String, Object> cachingConfigMap = new HashMap<>();
-
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
@@ -130,61 +122,6 @@ public class BasicCachingCalendarAccessTest {
         cachingCalendarAccess = new TestCachingCalendarAccessImpl(session, account, parameters);
 
         Mockito.when(account.getInternalConfiguration()).thenReturn(new JSONObject());
-    }
-
-    @Test
-    public void testGetLatestUpdateStates_emptyConfiguration_noCachingState() throws OXException {
-        ProcessingType latestUpdateStates = cachingCalendarAccess.getProcessingType();
-
-        assertEquals(ProcessingType.INITIAL_INSERT, latestUpdateStates);
-    }
-
-    @Test
-    public void testGetLatestUpdateStates_noCacheConfiguration_returnInitialInsert() throws OXException, JSONException {
-        JSONObject cachingConfig = new JSONObject();
-        cachingConfig.put(CachingCalendarAccessConstants.CACHING, cachingConfig);
-
-        ProcessingType latestUpdateStates = cachingCalendarAccess.getProcessingType();
-
-        assertEquals(ProcessingType.INITIAL_INSERT, latestUpdateStates);
-    }
-
-    @Test
-    public void testGetLatestUpdateStates_cchedButRequestedInReadTime_returnUpdateState() throws OXException, JSONException {
-        Map<String, Object> latestUpdate = new HashMap<>();
-        latestUpdate.put(CachingCalendarAccessConstants.LAST_UPDATE, System.currentTimeMillis());
-        JSONObject cachingConfig = new JSONObject();
-        cachingConfig.put(CachingCalendarAccessConstants.CACHING, latestUpdate);
-        Mockito.when(account.getInternalConfiguration()).thenReturn(cachingConfig);
-
-        ProcessingType latestUpdateStates = cachingCalendarAccess.getProcessingType();
-
-        assertEquals(ProcessingType.READ_DB, latestUpdateStates);
-    }
-
-    @Test
-    public void testGetLatestUpdateStates_cachedAndRefreshPeriodExceeded_returnUpdateState() throws OXException, JSONException {
-        Map<String, Object> latestUpdate = new HashMap<>();
-        latestUpdate.put(CachingCalendarAccessConstants.LAST_UPDATE, System.currentTimeMillis() - TimeUnit.DAYS.toMillis(14L));
-        JSONObject cachingConfig = new JSONObject();
-        cachingConfig.put(CachingCalendarAccessConstants.CACHING, latestUpdate);
-        Mockito.when(account.getInternalConfiguration()).thenReturn(cachingConfig);
-
-        ProcessingType latestUpdateStates = cachingCalendarAccess.getProcessingType();
-
-        assertEquals(ProcessingType.UPDATE, latestUpdateStates);
-    }
-
-    @Test
-    public void testGetLatestUpdateStates_knownWithoutLastUpdateTimestamp_shouldNotHappenButReturnInitialUpdate() throws OXException, JSONException {
-        Map<String, Object> latestUpdate = new HashMap<>();
-        JSONObject cachingConfig = new JSONObject();
-        cachingConfig.put(CachingCalendarAccessConstants.CACHING, latestUpdate);
-        Mockito.when(account.getInternalConfiguration()).thenReturn(cachingConfig);
-
-        ProcessingType latestUpdateStates = cachingCalendarAccess.getProcessingType();
-
-        assertEquals(ProcessingType.INITIAL_INSERT, latestUpdateStates);
     }
 
     @Test

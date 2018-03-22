@@ -101,8 +101,8 @@ public class BasicICalCalendarAccess extends BasicCachingCalendarAccess {
      * @param account The calendar account
      * @param parameters The calendar parameters
      */
-    public BasicICalCalendarAccess(ServiceLookup services, Session session, CalendarAccount account, CalendarParameters parameters) throws OXException {
-        super(services, session, account, parameters);
+    public BasicICalCalendarAccess(Session session, CalendarAccount account, CalendarParameters parameters) throws OXException {
+        super(session, account, parameters);
         JSONObject userConfiguration = new JSONObject(account.getUserConfiguration());
         this.iCalFeedConfig = new ICalCalendarFeedConfig.DecryptedBuilder(session, userConfiguration, getICalConfiguration()).build();
         this.feedClient = new ICalFeedClient(session, iCalFeedConfig);

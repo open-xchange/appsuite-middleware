@@ -74,7 +74,6 @@ import com.openexchange.chronos.schedjoules.api.auxiliary.SchedJoulesCalendar;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
-import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 
 /**
@@ -107,8 +106,8 @@ public class BasicSchedJoulesCalendarAccess extends BasicCachingCalendarAccess {
      * @param parameters The optional {@link CalendarParameters}
      * @throws OXException If the context cannot be resolved
      */
-    protected BasicSchedJoulesCalendarAccess(ServiceLookup services, Session session, CalendarAccount account, CalendarParameters parameters) throws OXException {
-        super(services, session, account, parameters);
+    protected BasicSchedJoulesCalendarAccess(Session session, CalendarAccount account, CalendarParameters parameters) throws OXException {
+        super(session, account, parameters);
     }
 
     @Override

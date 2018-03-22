@@ -92,7 +92,7 @@ public class SchedJoulesProviderActivator extends HousekeepingActivator {
     protected void startBundle() throws Exception {
         Services.setServiceLookup(this);
 
-        registerService(CalendarProvider.class, new BasicSchedJoulesCalendarProvider(this));
+        registerService(CalendarProvider.class, new BasicSchedJoulesCalendarProvider());
         registerService(UserServiceInterceptor.class, new SchedJoulesUserServiceInterceptor(this));
     }
 
