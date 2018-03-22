@@ -52,6 +52,7 @@ package com.openexchange.datamining;
 import java.math.BigInteger;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.Map.Entry;
 
 /**
  * {@link Questions}
@@ -467,9 +468,9 @@ public class Questions {
         try {
             LinkedHashMap<Integer, Integer> dms = Datamining.draftMailOverAllSchemata(new int[] { 5000, 10000, 500000 });
             int ll = 1;
-            for (final Integer key : dms.keySet()) {
-                Datamining.report("draftMailSizeBetween" + Tools.humanReadableBytes("" + ll) + "And" + Tools.humanReadableBytes("" + key), dms.get(key).toString());
-                ll = key;
+            for (final Entry<Integer, Integer> entry : dms.entrySet()) {
+                Datamining.report("draftMailSizeBetween" + Tools.humanReadableBytes("" + ll) + "And" + Tools.humanReadableBytes("" + entry.getKey()), Integer.toString(entry.getValue() == null ? 0 : entry.getValue()));
+                ll = entry.getKey();
             }
         } catch (Exception e) {
             handleError(e);
@@ -480,8 +481,8 @@ public class Questions {
         try {
             int MAXEXT = 5;
             HashMap<Integer, Integer> eaos = Datamining.externalAccountsOverAllSchemata(MAXEXT);
-            for (final Integer key : eaos.keySet()) {
-                Datamining.report("usersHaving" + (key < MAXEXT ? key : "MoreOrEqual" + key) + "ExternalAccounts", eaos.get(key).toString());
+            for (final Entry<Integer, Integer> entry : eaos.entrySet()) {
+                Datamining.report("usersHaving" + (entry.getKey() < MAXEXT ? entry.getKey() : "MoreOrEqual" + entry.getKey()) + "ExternalAccounts", Integer.toString(entry.getValue() == null ? 0 : entry.getValue()));
             }
         } catch (Exception e) {
             handleError(e);
