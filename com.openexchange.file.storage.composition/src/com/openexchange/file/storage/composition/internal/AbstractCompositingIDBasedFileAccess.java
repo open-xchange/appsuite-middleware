@@ -455,6 +455,9 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractCompo
                 result = ((FileStorageRangeFileAccess) fileAccess).getDocuments(folderID.getFolderId(), addIDColumns(columns), sort, order, range);
             } else {
                 result = fileAccess.getDocuments(folderID.getFolderId(), addIDColumns(columns), sort, order);
+                if (result == null) {
+                    return EMPTY_TIMED_RESULT;
+                }
                 result = slice(result, range);
             }
 
