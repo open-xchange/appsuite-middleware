@@ -105,14 +105,9 @@ public final class CSVDataRetentionActivator extends HousekeepingActivator {
 
     @Override
     protected void stopBundle() throws Exception {
-        try {
-            cleanUp();
-			CSVWriter.releaseInstance();
-			CSVDataRetentionConfig.releaseInstance();
-		} catch (final Exception e) {
-            LOG.error("", e);
-            throw e;
-        }
+		CSVWriter.releaseInstance();
+		CSVDataRetentionConfig.releaseInstance();
+		super.stopBundle();
     }
 
 }
