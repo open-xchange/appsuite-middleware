@@ -114,9 +114,6 @@ public class AllAction extends TaskAction {
             List<Task> taskList = new LinkedList<Task>();
             while (it.hasNext()) {
                 Task taskobject = it.next();
-                if (taskobject == null) {
-                    continue;
-                }
                 taskList.add(taskobject);
 
                 lastModified = taskobject.getLastModified();
