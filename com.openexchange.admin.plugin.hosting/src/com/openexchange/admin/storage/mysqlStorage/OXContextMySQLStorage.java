@@ -2467,14 +2467,16 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                 return new Quota[0];
             }
 
-            Quota[] retval = new Quota[length];
+            List<Quota> quotaList = new ArrayList<>();
             for (int i = length; i-- > 0;) {
                 String module = moduleIds[i];
                 Long qlimit = AmountQuotas.getQuotaFromDB(con, contextId, module);
-                retval[i] = new Quota(qlimit.longValue(), module);
+                if (qlimit != null) {
+                    quotaList.add(new Quota(qlimit.longValue(), module));
+                }
             }
 
-            return retval;
+            return quotaList.size() > 0 ? quotaList.toArray(new Quota[quotaList.size()]) : new Quota[0];
         } catch (PoolException e) {
             LOG.error("Pool Error", e);
             throw new StorageException(e);
