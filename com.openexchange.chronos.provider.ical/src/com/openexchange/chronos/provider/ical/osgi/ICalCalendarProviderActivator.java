@@ -91,7 +91,7 @@ public class ICalCalendarProviderActivator extends HousekeepingActivator {
 
             Services.setServiceLookup(this);
 
-            registerService(CalendarProvider.class, new BasicICalCalendarProvider(this));
+            registerService(CalendarProvider.class, new BasicICalCalendarProvider());
             registerService(Reloadable.class, new ICalCalendarProviderReloadable());
         } catch (Exception e) {
             getLogger(ICalCalendarProviderActivator.class).error("error starting {}", context.getBundle(), e);

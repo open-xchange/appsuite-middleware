@@ -429,14 +429,14 @@ public class FolderUserPropertyStorageImpl implements FolderUserPropertyStorage 
 
         PreparedStatement stmt = null;
         try {
-            for (String propertyName : properties.keySet()) {
+            for (Entry<String, String> propertyName : properties.entrySet()) {
                 // New entry
                 stmt = connection.prepareStatement(INSERT);
                 stmt.setInt(1, contextId);
                 stmt.setInt(2, folderId);
                 stmt.setInt(3, userId);
-                stmt.setString(4, propertyName);
-                stmt.setString(5, properties.get(propertyName));
+                stmt.setString(4, propertyName.getKey());
+                stmt.setString(5, propertyName.getValue());
 
                 // Execute & close
                 stmt.executeUpdate();
@@ -603,13 +603,13 @@ public class FolderUserPropertyStorageImpl implements FolderUserPropertyStorage 
         PreparedStatement stmt = null;
         try {
             stmt = connection.prepareStatement(UPDATE);
-            for (String propertyName : properties.keySet()) {
+            for (Entry<String, String> propertyName : properties.entrySet()) {
                 // Update entry
-                stmt.setString(1, properties.get(propertyName));
+                stmt.setString(1, propertyName.getValue());
                 stmt.setInt(2, contextId);
                 stmt.setInt(3, folderId);
                 stmt.setInt(4, userId);
-                stmt.setString(5, propertyName);
+                stmt.setString(5, propertyName.getKey());
 
                 // Execute
                 stmt.addBatch();

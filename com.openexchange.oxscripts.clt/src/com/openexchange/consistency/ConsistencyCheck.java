@@ -264,7 +264,7 @@ public class ConsistencyCheck extends AbstractMBeanCLI<Void> {
      * @return
      */
     private String getPolicyString() {
-        return (policy != null) ? policy.name() + ":" + policyAction.name() : new String();
+        return (policy != null) ? policy.name() + ":" + policyAction.name() : "";
     }
 
     /**

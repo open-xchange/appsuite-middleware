@@ -109,6 +109,9 @@ public final class Utility {
                 return s;
             }
             final URLCodec urlCodec = getUrlCodec(null == charset ? ServerConfig.getProperty(ServerConfig.Property.DefaultEncoding) : charset);
+            if (urlCodec == null) {
+                return s;
+            }
             return P_MINUS.matcher(P_DOT.matcher(urlCodec.encode(s)).replaceAll("%2E")).replaceAll("%2D");
         } catch (final EncoderException e) {
             return s;
@@ -126,7 +129,11 @@ public final class Utility {
                 return s;
             }
             final String cs = isEmpty(charset) ? ServerConfig.getProperty(ServerConfig.Property.DefaultEncoding) : charset;
-            return getUrlCodec(cs).decode(s, cs);
+            URLCodec urlCodec = getUrlCodec(cs);
+            if (urlCodec == null) {
+                return s;
+            }
+            return urlCodec.decode(s, cs);
         } catch (final DecoderException e) {
             return s;
         } catch (final UnsupportedEncodingException e) {

@@ -47,31 +47,70 @@
  *
  */
 
-package com.openexchange.chronos.provider.caching.internal.handler;
+package com.openexchange.chronos.provider.schedjoules.osgi;
 
-import com.openexchange.chronos.Event;
-import com.openexchange.chronos.provider.CalendarAccount;
+import java.util.concurrent.atomic.AtomicReference;
+import com.openexchange.server.ServiceLookup;
 
 /**
- * {@link ProcessingType} defines some types of processing that will be evaluated based on the calendars defined {@link CachingCalendarAccess#getRefreshInterval()}
+ *
+ * {@link Services}
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since v7.10.0
  */
-public enum ProcessingType {
+public final class Services {
 
     /**
-     * Indicates that it is the first processing for the given {@link CalendarAccount}.
+     * Initializes a new {@link Services}.
      */
-    INITIAL_INSERT,
+    private Services() {
+        super();
+    }
+
+    private static final AtomicReference<ServiceLookup> REF = new AtomicReference<ServiceLookup>();
 
     /**
-     * Indicates that there has already been an ({@link #INITIAL_INSERT}) but the consumed {@link Event}s have to be updated because the refresh interval is exceeded.
+     * Sets the service lookup.
+     *
+     * @param serviceLookup The service lookup or <code>null</code>
      */
-    UPDATE,
+    public static void setServiceLookup(ServiceLookup serviceLookup) {
+        REF.set(serviceLookup);
+    }
 
     /**
-     * Indicates that there has already been an ({@link #INITIAL_INSERT}) and the persisted data should be used because the refresh interval is not exceeded.
+     * Gets the service lookup.
+     *
+     * @return The service lookup or <code>null</code>
      */
-    READ_DB,
+    public static ServiceLookup getServiceLookup() {
+        return REF.get();
+    }
+
+    /**
+     * Gets the service of specified type
+     *
+     * @param clazz The service's class
+     * @return The service
+     * @throws IllegalStateException If an error occurs while returning the demanded service
+     */
+    public static <S extends Object> S getService(final Class<? extends S> clazz) {
+        final com.openexchange.server.ServiceLookup serviceLookup = REF.get();
+        if (null == serviceLookup) {
+            throw new IllegalStateException("Missing ServiceLookup instance.");
+        }
+        return serviceLookup.getService(clazz);
+    }
+
+    /**
+     * (Optionally) Gets the service of specified type
+     *
+     * @param clazz The service's class
+     * @return The service or <code>null</code> if absent
+     */
+    public static <S extends Object> S optService(final Class<? extends S> clazz) {
+        ServiceLookup serviceLookup = REF.get();
+        return null == serviceLookup ? null : serviceLookup.getOptionalService(clazz);
+    }
 }

@@ -72,6 +72,7 @@ import com.openexchange.chronos.provider.basic.BasicCalendarAccess;
 import com.openexchange.chronos.provider.basic.CalendarSettings;
 import com.openexchange.chronos.provider.caching.basic.BasicCachingCalendarProvider;
 import com.openexchange.chronos.provider.schedjoules.exception.SchedJoulesProviderExceptionCodes;
+import com.openexchange.chronos.provider.schedjoules.osgi.Services;
 import com.openexchange.chronos.schedjoules.SchedJoulesService;
 import com.openexchange.chronos.schedjoules.exception.SchedJoulesAPIExceptionCodes;
 import com.openexchange.chronos.service.CalendarParameters;
@@ -79,7 +80,6 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.java.Strings;
-import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
@@ -98,15 +98,6 @@ public class BasicSchedJoulesCalendarProvider extends BasicCachingCalendarProvid
      * The minumum value for the refreshInterval in minutes (1 day)
      */
     private static final int MINIMUM_REFRESH_INTERVAL = 1440;
-    private final ServiceLookup services;
-
-    /**
-     * Initialises a new {@link BasicSchedJoulesCalendarProvider}.
-     */
-    public BasicSchedJoulesCalendarProvider(ServiceLookup services) {
-        super();
-        this.services = services;
-    }
 
     @Override
     public EnumSet<CalendarCapability> getCapabilities() {
@@ -125,13 +116,13 @@ public class BasicSchedJoulesCalendarProvider extends BasicCachingCalendarProvid
 
     @Override
     public boolean isAvailable(Session session) {
-        SchedJoulesService schedJoulesService = services.getService(SchedJoulesService.class);
+        SchedJoulesService schedJoulesService = Services.getService(SchedJoulesService.class);
         return null != schedJoulesService && schedJoulesService.isAvailable(session.getContextId());
     }
 
     @Override
     public BasicCalendarAccess connect(Session session, CalendarAccount account, CalendarParameters parameters) throws OXException {
-        return new BasicSchedJoulesCalendarAccess(services, session, account, parameters);
+        return new BasicSchedJoulesCalendarAccess(session, account, parameters);
     }
 
     @Override
@@ -382,7 +373,7 @@ public class BasicSchedJoulesCalendarProvider extends BasicCachingCalendarProvid
      */
     private JSONObject fetchItem(int contextId, int itemId, String locale) throws OXException {
         try {
-            SchedJoulesService schedJoulesService = services.getService(SchedJoulesService.class);
+            SchedJoulesService schedJoulesService = Services.getService(SchedJoulesService.class);
             JSONValue jsonValue = schedJoulesService.getPage(contextId, itemId, locale, Collections.emptySet()).getData();
             if (!jsonValue.isObject()) {
                 throw SchedJoulesProviderExceptionCodes.PAGE_DOES_NOT_DENOTE_TO_JSON.create(itemId);

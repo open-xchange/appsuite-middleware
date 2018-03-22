@@ -207,7 +207,7 @@ public class GoogleCalendarProvider extends BasicCachingCalendarProvider {
 
     @Override
     public BasicCalendarAccess connect(Session session, CalendarAccount account, CalendarParameters parameters) throws OXException {
-        return new GoogleCalendarAccess(services, session, account, parameters, true);
+        return new GoogleCalendarAccess(session, account, parameters, true);
     }
 
     @Override

@@ -496,17 +496,17 @@ public class DefaultShareService implements ShareService {
             if (0 < entities.size()) {
                 UserService userService = requireService(UserService.class);
                 ModuleSupport moduleSupport = null;
-                for (Integer entity : entities.keySet()) {
+                for (Entry<Integer, Boolean> entry : entities.entrySet()) {
                     User user;
                     if (null != connectionHelper) {
-                        user = userService.getUser(connectionHelper.getConnection(), entity.intValue(), context);
+                        user = userService.getUser(connectionHelper.getConnection(), entry.getKey().intValue(), context);
                     } else {
-                        user = userService.getUser(entity.intValue(), context);
+                        user = userService.getUser(entry.getKey().intValue(), context);
                     }
                     if (ShareTool.isAnonymousGuest(user)) {
                         moduleSupport = requireService(ModuleSupport.class, moduleSupport);
                         ShareTarget dstTarget = moduleSupport.adjustTarget(proxy.getTarget(), session, user.getId());
-                        return new DefaultShareInfo(services, context.getContextId(), user, proxy.getTarget(), dstTarget, proxy.getTargetPath(), entities.get(entity));
+                        return new DefaultShareInfo(services, context.getContextId(), user, proxy.getTarget(), dstTarget, proxy.getTargetPath(), entry.getValue());
                     }
                 }
             }

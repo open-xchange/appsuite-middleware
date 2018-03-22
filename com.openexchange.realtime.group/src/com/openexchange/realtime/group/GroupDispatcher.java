@@ -626,7 +626,9 @@ public class GroupDispatcher implements ComponentHandle {
     @Override
     public boolean shouldBeDoneInGlobalThread(Stanza stanza) {
         PayloadElement payload = stanza.getPayload();
-
+        if (payload == null) {
+            return false;
+        }
         Object data = payload.getData();
         if (LeaveCommand.class.isInstance(data)) {
             return true;

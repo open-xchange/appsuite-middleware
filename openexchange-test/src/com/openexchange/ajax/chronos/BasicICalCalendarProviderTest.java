@@ -238,7 +238,7 @@ public class BasicICalCalendarProviderTest extends AbstractExternalProviderChron
         CalendarAccountProbeResponse probe = defaultUserApi.getChronosApi().probe(defaultUserApi.getSession(), data);
 
         assertNotNull(probe.getError());
-        assertEquals("CAL-4010", probe.getCode());
+        assertEquals("ICAL-PROV-4010", probe.getCode());
     }
 
     @Test

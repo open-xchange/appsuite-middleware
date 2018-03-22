@@ -28,8 +28,13 @@ public class TagDatabaseGenerator extends AbstractSqlGenerator<TagDatabaseStatem
         updateStatement.addNewColumnValue("TAG", statement.getTag());
         if (database instanceof MySQLDatabase) {
             try {
-                long version = Long.parseLong(database.getDatabaseProductVersion().substring(0, 1));
-
+                String databaseProductVersion = database.getDatabaseProductVersion();
+                long version = 5L; //assume it is version 5 for any case of failure during determination
+                
+                if (databaseProductVersion != null) {
+                    version = Long.parseLong(databaseProductVersion.substring(0, 1));
+                }
+                
                 if (version < 5) {
                     return new Sql[]{
                             new UnparsedSql("UPDATE "+database.escapeTableName(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogTableName())+" C LEFT JOIN (SELECT MAX(DATEEXECUTED) as MAXDATE FROM (SELECT DATEEXECUTED FROM `DATABASECHANGELOG`) AS X) D ON C.DATEEXECUTED = D.MAXDATE SET C.TAG = '" + statement.getTag() + "' WHERE D.MAXDATE IS NOT NULL")

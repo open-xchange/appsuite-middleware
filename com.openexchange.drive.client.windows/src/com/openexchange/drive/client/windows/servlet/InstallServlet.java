@@ -104,6 +104,12 @@ public class InstallServlet extends SessionServlet {
                 return;
             }
 
+            if (fileName == null) {
+                LOG.warn("No file found for brand {}. Please review your configuration.", branding);
+                resp.sendError(HttpServletResponse.SC_NOT_FOUND);
+                return;
+            }
+
             BrowserDetector detector = BrowserDetector.detectorFor(req.getHeader(Tools.HEADER_AGENT));
             resp.setStatus(HttpServletResponse.SC_OK);
             resp.setContentType("application/octet-stream");

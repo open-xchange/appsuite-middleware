@@ -68,6 +68,7 @@ import com.openexchange.chronos.provider.caching.ExternalCalendarResult;
 import com.openexchange.chronos.provider.caching.basic.BasicCachingCalendarAccess;
 import com.openexchange.chronos.provider.caching.basic.BasicCachingCalendarConstants;
 import com.openexchange.chronos.provider.ical.conn.ICalFeedClient;
+import com.openexchange.chronos.provider.ical.osgi.Services;
 import com.openexchange.chronos.provider.ical.properties.ICalCalendarProviderProperties;
 import com.openexchange.chronos.provider.ical.result.GetResponse;
 import com.openexchange.chronos.provider.ical.result.GetResponseState;
@@ -100,8 +101,8 @@ public class BasicICalCalendarAccess extends BasicCachingCalendarAccess {
      * @param account The calendar account
      * @param parameters The calendar parameters
      */
-    public BasicICalCalendarAccess(ServiceLookup services, Session session, CalendarAccount account, CalendarParameters parameters) throws OXException {
-        super(services, session, account, parameters);
+    public BasicICalCalendarAccess(Session session, CalendarAccount account, CalendarParameters parameters) throws OXException {
+        super(session, account, parameters);
         JSONObject userConfiguration = new JSONObject(account.getUserConfiguration());
         this.iCalFeedConfig = new ICalCalendarFeedConfig.DecryptedBuilder(session, userConfiguration, getICalConfiguration()).build();
         this.feedClient = new ICalFeedClient(session, iCalFeedConfig);
@@ -149,7 +150,7 @@ public class BasicICalCalendarAccess extends BasicCachingCalendarAccess {
                 return calendarProviderInterval.longValue();
             }
         }
-        return services.getService(LeanConfigurationService.class).getLongProperty(session.getUserId(), session.getContextId(), ICalCalendarProviderProperties.refreshInterval);
+        return Services.getService(LeanConfigurationService.class).getLongProperty(session.getUserId(), session.getContextId(), ICalCalendarProviderProperties.refreshInterval);
     }
 
     @Override
@@ -174,7 +175,7 @@ public class BasicICalCalendarAccess extends BasicCachingCalendarAccess {
         if (e == null || e.getExceptionCode() == null || CalendarExceptionCodes.AUTH_FAILED.equals(e)) {
             return BasicCachingCalendarConstants.MINIMUM_DEFAULT_RETRY_AFTER_ERROR_INTERVAL;
         }
-        return services.getService(LeanConfigurationService.class).getLongProperty(session.getUserId(), session.getContextId(), ICalCalendarProviderProperties.retryAfterErrorInterval);
+        return Services.getService(LeanConfigurationService.class).getLongProperty(session.getUserId(), session.getContextId(), ICalCalendarProviderProperties.retryAfterErrorInterval);
     }
 
     private void updateICalConfiguration(GetResponse importResult) {

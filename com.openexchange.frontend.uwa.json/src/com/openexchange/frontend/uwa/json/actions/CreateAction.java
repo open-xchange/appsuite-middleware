@@ -55,7 +55,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.frontend.uwa.UWAWidget;
 import com.openexchange.frontend.uwa.UWAWidgetService;
 import com.openexchange.frontend.uwa.UWAWidgetServiceFactory;
-
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
 /**
  * {@link CreateAction}
@@ -71,9 +71,11 @@ public class CreateAction extends AbstractUWAAction {
     @Override
     protected AJAXRequestResult perform(UWAWidgetRequest req, UWAWidgetService widgets) throws JSONException, OXException {
         UWAWidget widget = req.getBody();
+        if (widget == null) {
+            throw AjaxExceptionCodes.MISSING_REQUEST_BODY.create();
+        }
         widgets.create(widget);
         return result(widget);
     }
-
 
 }
