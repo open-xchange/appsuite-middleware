@@ -260,7 +260,7 @@ public final class ThreadPoolActivator extends HousekeepingActivator {
             REF_THREAD_POOL.set(null);
             REF_TIMER.set(null);
             REF_PROCESSOR.set(null);
-            cleanUp();
+            super.stopBundle();
             SessionThreadCounter.REFERENCE.set(null);
             /*
              * Stop processor service
