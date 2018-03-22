@@ -49,23 +49,17 @@
 
 package com.openexchange.mobile.configuration.json.action.sms.osgi;
 
-import static com.openexchange.mobile.configuration.json.action.sms.osgi.ActionServiceRegistry.getServiceRegistry;
 import java.util.Hashtable;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.mobile.configuration.json.action.ActionService;
 import com.openexchange.mobile.configuration.json.action.ActionTypes;
 import com.openexchange.mobile.configuration.json.action.sms.impl.ActionSMS;
 import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.osgi.ServiceRegistry;
 
 /**
  * @author Benjamin Otterbach
  */
 public class ActionActivator extends HousekeepingActivator {
-
-	private static transient final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ActionActivator.class);
-
-	private static final Class<?>[] NEEDED_SERVICES = { ConfigurationService.class } ;
 
 	public ActionActivator() {
 		super();
@@ -73,61 +67,21 @@ public class ActionActivator extends HousekeepingActivator {
 
 	@Override
 	protected Class<?>[] getNeededServices() {
-		return NEEDED_SERVICES;
-	}
-
-	@Override
-	protected void handleAvailability(final Class<?> clazz) {
-		LOG.warn("Absent service: {}", clazz.getName());
-		getServiceRegistry().addService(clazz, getService(clazz));
-	}
-
-	@Override
-	protected void handleUnavailability(final Class<?> clazz) {
-		LOG.info("Re-available service: {}", clazz.getName());
-		getServiceRegistry().removeService(clazz);
+		return new Class<?>[] { ConfigurationService.class };
 	}
 
 	@Override
 	protected void startBundle() throws Exception {
+	    org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ActionActivator.class);
 		try {
-            /*
-             * (Re-)Initialize service registry with available services
-             */
-			{
-				final ServiceRegistry registry = getServiceRegistry();
-				registry.clearRegistry();
-				final Class<?>[] classes = getNeededServices();
-				for (int i = 0; i < classes.length; i++) {
-					final Object service = getService(classes[i]);
-					if (null != service) {
-						registry.addService(classes[i], service);
-					}
-				}
-			}
-
 	        final Hashtable<String, ActionTypes> ht = new Hashtable<String, ActionTypes>();
 	        ht.put("action", ActionTypes.TELEPHONE);
-	        registerService(ActionService.class, new ActionSMS(), ht);
+	        registerService(ActionService.class, new ActionSMS(this), ht);
 		} catch (final Throwable t) {
 			LOG.error("", t);
 			throw t instanceof Exception ? (Exception) t : new Exception(t);
 		}
 
-	}
-
-	@Override
-	protected void stopBundle() throws Exception {
-		try {
-		    cleanUp();
-            /*
-             * Clear service registry
-             */
-			getServiceRegistry().clearRegistry();
-		} catch (final Throwable t) {
-			LOG.error("", t);
-			throw t instanceof Exception ? (Exception) t : new Exception(t);
-		}
 	}
 
 }
