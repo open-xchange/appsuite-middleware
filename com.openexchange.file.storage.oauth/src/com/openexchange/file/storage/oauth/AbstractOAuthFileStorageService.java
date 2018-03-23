@@ -245,7 +245,7 @@ public abstract class AbstractOAuthFileStorageService implements AccountAware, O
         Session session = getUserSession(userId, contextId);
         OAuthAccount account;
         try {
-            account = storage.getAccount(session, accountId, con);
+            account = storage.getAccount(session, accountId);
         } catch (OXException e) {
             if (OAuthExceptionCodes.ACCOUNT_NOT_FOUND.equals(e)) {
                 LOG.debug("The OAuth file storage account with id '{}' for the user '{}' in context '{}' does not exist anymore", accountId, userId, contextId);
@@ -265,7 +265,7 @@ public abstract class AbstractOAuthFileStorageService implements AccountAware, O
         }
         eventProps.put(OAuthConstants.ARGUMENT_SCOPES, scopes);
         // Update the account
-        storage.updateAccount(userId, contextId, accountId, eventProps, con);
+        storage.updateAccount(userId, contextId, accountId, eventProps);
     }
 
     /**

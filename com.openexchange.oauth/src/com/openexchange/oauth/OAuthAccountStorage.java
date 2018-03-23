@@ -81,8 +81,6 @@ public interface OAuthAccountStorage {
      * @throws OXException If account does not exist, or if any other error is occurred
      */
     OAuthAccount getAccount(Session session, int accountId) throws OXException;
-    
-    OAuthAccount getAccount(Session session, int accountId, Connection connection) throws OXException;
 
     /**
      * Deletes the specified account.
@@ -122,17 +120,6 @@ public interface OAuthAccountStorage {
      */
     void updateAccount(int userId, int contextId, int accountId, Map<String, Object> arguments) throws OXException;
     
-    /**
-     * 
-     * @param userId
-     * @param contextId
-     * @param accountId
-     * @param arguments
-     * @param connection
-     * @throws OXException
-     */
-    void updateAccount(int userId, int contextId, int accountId, Map<String, Object> arguments, Connection connection) throws OXException;
-
     /**
      * Searches for an {@link OAuthAccount} with the specified user identity for the specified provider
      * 
