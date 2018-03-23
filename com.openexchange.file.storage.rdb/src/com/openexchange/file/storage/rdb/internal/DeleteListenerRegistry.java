@@ -55,6 +55,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageAccountDeleteListener;
+import com.openexchange.session.Session;
 
 /**
  * {@link DeleteListenerRegistry} - Registry for file storage account delete listeners.
@@ -123,19 +124,21 @@ public final class DeleteListenerRegistry {
 
     /**
      * Triggers the {@link FileStorageAccountDeleteListener#onBeforeFileStorageAccountDeletion()} event for registered listeners.
+     * @param session TODO
      */
-    public void triggerOnBeforeDeletion(final int id, final Map<String, Object> properties, final int user, final int cid, final Connection con) throws OXException {
+    public void triggerOnBeforeDeletion(Session session, final int id, final Map<String, Object> properties, final Connection con) throws OXException {
         for (final FileStorageAccountDeleteListener listener : registry.values()) {
-            listener.onBeforeFileStorageAccountDeletion(id, properties, user, cid, con);
+            listener.onBeforeFileStorageAccountDeletion(session, id, properties, con);
         }
     }
 
     /**
      * Triggers the {@link FileStorageAccountDeleteListener#onAfterFileStorageAccountDeletion()} event for registered listeners.
+     * @param session TODO
      */
-    public void triggerOnAfterDeletion(final int id, final Map<String, Object> properties, final int user, final int cid, final Connection con) throws OXException {
+    public void triggerOnAfterDeletion(Session session, final int id, final Map<String, Object> properties, final Connection con) throws OXException {
         for (final FileStorageAccountDeleteListener listener : registry.values()) {
-            listener.onAfterFileStorageAccountDeletion(id, properties, user, cid, con);
+            listener.onAfterFileStorageAccountDeletion(session, id, properties, con);
         }
     }
 }

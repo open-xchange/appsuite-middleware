@@ -52,6 +52,7 @@ package com.openexchange.file.storage;
 import java.sql.Connection;
 import java.util.Map;
 import com.openexchange.exception.OXException;
+import com.openexchange.session.Session;
 
 /**
  * {@link FileStorageAccountDeleteListener} - Listener interface for file storage account deletion.
@@ -62,25 +63,23 @@ public interface FileStorageAccountDeleteListener {
 
     /**
      * Handles the event <i>before</i> the denoted file storage account is deleted.
-     *
+     * @param session TODO
      * @param id The file storage account identfier
      * @param eventProps Optional properties for delete event
-     * @param userId The user idenifier
-     * @param contextId The context identifier
      * @param connection The used connection <i>in transactional state</i>
+     *
      * @throws OXException If a critical error occurs which should abort file storage account deletion
      */
-    public void onBeforeFileStorageAccountDeletion(int id, Map<String, Object> eventProps, int userId, int contextId, Connection connection) throws OXException;
+    public void onBeforeFileStorageAccountDeletion(Session session, int id, Map<String, Object> eventProps, Connection connection) throws OXException;
 
     /**
      * Handles the event <i>after</i> the denoted OAuth account is deleted.
-     *
+     * @param session TODO
      * @param id The file storage account identifier
      * @param eventProps Optional properties for delete event
-     * @param userId The user identifier
-     * @param contextId The context identifier
      * @param connection The used connection <i>in transactional state</i>
+     *
      * @throws OXException If a critical error occurs which should abort OAuth account deletion
      */
-    public void onAfterFileStorageAccountDeletion(int id, Map<String, Object> eventProps, int userId, int contextId, Connection connection) throws OXException;
+    public void onAfterFileStorageAccountDeletion(Session session, int id, Map<String, Object> eventProps, Connection connection) throws OXException;
 }

@@ -199,6 +199,7 @@ public abstract class AbstractOAuthFileStorageService implements AccountAware, O
             OAuthAccessRegistryService registryService = services.getService(OAuthAccessRegistryService.class);
             OAuthAccessRegistry registry = registryService.get(api.getServiceId());
 
+            session.setParameter("__file.storage.delete.updateScopes", eventProps.get("__file.storage.delete.eventProps"));
             session.setParameter("__file.storage.delete.connection", con);
             try {
                 for (FileStorageAccount deleteMe : toDelete) {
@@ -211,6 +212,7 @@ public abstract class AbstractOAuthFileStorageService implements AccountAware, O
                 }
             } finally {
                 session.setParameter("__file.storage.delete.connection", null);
+                session.setParameter("__file.storage.delete.updateScopes", null);
             }
 
         } catch (Exception e) {
@@ -229,7 +231,7 @@ public abstract class AbstractOAuthFileStorageService implements AccountAware, O
      * @see com.openexchange.file.storage.FileStorageAccountDeleteListener#onBeforeFileStorageAccountDeletion(int, java.util.Map, int, int, java.sql.Connection)
      */
     @Override
-    public void onBeforeFileStorageAccountDeletion(int id, Map<String, Object> eventProps, int user, int cid, Connection con) throws OXException {
+    public void onBeforeFileStorageAccountDeletion(Session session, int id, Map<String, Object> eventProps, Connection con) throws OXException {
         // nothing to do
 
     }
@@ -240,21 +242,28 @@ public abstract class AbstractOAuthFileStorageService implements AccountAware, O
      * @see com.openexchange.file.storage.FileStorageAccountDeleteListener#onAfterFileStorageAccountDeletion(int, java.util.Map, int, int, java.sql.Connection)
      */
     @Override
-    public void onAfterFileStorageAccountDeletion(int id, Map<String, Object> eventProps, int userId, int contextId, Connection con) throws OXException {
+    public void onAfterFileStorageAccountDeletion(Session session, int id, Map<String, Object> eventProps, Connection con) throws OXException {
+        Object updateScopesValue = session.getParameter("__oauth.storage.delete.updateScopes");
+        boolean updateScopes = updateScopesValue == null ? true : Boolean.parseBoolean((String) updateScopesValue);
+
+        // Do not update the scopes; a delete OAuth account was triggered.
+        if (!updateScopes) {
+            return;
+        }
         OAuthAccountStorage storage = services.getService(OAuthAccountStorage.class);
+        // Retrieve the OAuth account id that is linked with the file storage account that was deleted.
         Object value = eventProps.get("account");
         if (value == null) {
             LOG.debug("Not OAuth account information was found");
             return;
         }
         int accountId = Integer.parseInt((String) value);
-        Session session = getUserSession(userId, contextId);
         OAuthAccount account;
         try {
             account = storage.getAccount(session, accountId);
         } catch (OXException e) {
             if (OAuthExceptionCodes.ACCOUNT_NOT_FOUND.equals(e)) {
-                LOG.debug("The OAuth file storage account with id '{}' for the user '{}' in context '{}' does not exist anymore", accountId, userId, contextId);
+                LOG.debug("The OAuth file storage account with id '{}' for the user '{}' in context '{}' does not exist anymore", accountId, session.getUserId(), session.getContextId());
                 return;
             }
             throw e;
