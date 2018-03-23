@@ -345,7 +345,7 @@ public final class LoginTools {
             int guestId = guest.getGuestID();
             result = new String[] { String.valueOf(contextId), String.valueOf(guestId) };
         }
-        LOG.warn("No guest could be determined for share token: %1$s", token);
+        LOG.warn("No guest could be determined for share token: {}", token);
         return result;
     }
 

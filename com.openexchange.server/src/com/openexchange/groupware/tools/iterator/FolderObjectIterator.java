@@ -427,11 +427,17 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
     }
 
     private final ElementAttributes getEternalAttributes() throws OXException {
+        ElementAttributes attribs = this.attribs;
         if (attribs == null) {
             attribs = cache.getDefaultFolderObjectAttributes();
+            if (null == attribs) {
+                return null;
+            }
+
             attribs.setIdleTime(-1); // eternal
             attribs.setMaxLifeSeconds(-1); // eternal
             attribs.setIsEternal(true);
+            this.attribs = attribs;
         }
         return attribs.copy();
     }
