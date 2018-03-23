@@ -204,9 +204,9 @@ public abstract class MultipleAdapterServletNew extends PermissionServlet {
             }
         }
         try {
-            if (isFileUpload || (req.getParameter("respondWithHTML") != null && req.getParameter("respondWithHTML").equalsIgnoreCase("true")) ) {
+            String callback = req.getParameter("callback");
+            if ((isFileUpload || (req.getParameter("respondWithHTML") != null && req.getParameter("respondWithHTML").equalsIgnoreCase("true"))) && (action != null || callback != null)) {
                 resp.setContentType(AJAXServlet.CONTENTTYPE_HTML);
-                String callback = req.getParameter("callback");
                 if(callback == null) {
                     callback = action;
                 }
