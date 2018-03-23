@@ -225,6 +225,8 @@ public class OAuthAccountStorageSQLImpl implements OAuthAccountStorage, SecretEn
 
             final DeleteListenerRegistry deleteListenerRegistry = DeleteListenerRegistry.getInstance();
             final Map<String, Object> properties = new HashMap<>(2);
+            // Hint to not update the scopes since it's an oauth account deletion
+            // This hint has to be passed via the delete listener
             properties.put("__oauth.storage.delete.updateScopes", false);
 
             deleteListenerRegistry.triggerOnBeforeDeletion(accountId, properties, userId, contextId, con);

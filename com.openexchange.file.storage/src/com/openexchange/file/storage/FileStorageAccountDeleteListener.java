@@ -63,7 +63,8 @@ public interface FileStorageAccountDeleteListener {
 
     /**
      * Handles the event <i>before</i> the denoted file storage account is deleted.
-     * @param session TODO
+     * 
+     * @param session The session
      * @param id The file storage account identfier
      * @param eventProps Optional properties for delete event
      * @param connection The used connection <i>in transactional state</i>
@@ -74,7 +75,8 @@ public interface FileStorageAccountDeleteListener {
 
     /**
      * Handles the event <i>after</i> the denoted OAuth account is deleted.
-     * @param session TODO
+     * 
+     * @param session The session
      * @param id The file storage account identifier
      * @param eventProps Optional properties for delete event
      * @param connection The used connection <i>in transactional state</i>

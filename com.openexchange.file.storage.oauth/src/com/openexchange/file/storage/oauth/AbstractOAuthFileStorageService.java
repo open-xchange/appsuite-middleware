@@ -199,7 +199,9 @@ public abstract class AbstractOAuthFileStorageService implements AccountAware, O
             OAuthAccessRegistryService registryService = services.getService(OAuthAccessRegistryService.class);
             OAuthAccessRegistry registry = registryService.get(api.getServiceId());
 
-            session.setParameter("__file.storage.delete.updateScopes", eventProps.get("__file.storage.delete.eventProps"));
+            // Pass the connection and the hint about the scopes to the FileStorageAccountManager
+            // as a session parameter.
+            session.setParameter("__file.storage.delete.updateScopes", eventProps.get("__file.storage.delete.updateScopes"));
             session.setParameter("__file.storage.delete.connection", con);
             try {
                 for (FileStorageAccount deleteMe : toDelete) {
@@ -245,7 +247,6 @@ public abstract class AbstractOAuthFileStorageService implements AccountAware, O
     public void onAfterFileStorageAccountDeletion(Session session, int id, Map<String, Object> eventProps, Connection con) throws OXException {
         Object updateScopesValue = session.getParameter("__oauth.storage.delete.updateScopes");
         boolean updateScopes = updateScopesValue == null ? true : Boolean.parseBoolean((String) updateScopesValue);
-
         // Do not update the scopes; a delete OAuth account was triggered.
         if (!updateScopes) {
             return;
