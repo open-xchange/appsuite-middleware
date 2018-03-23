@@ -647,6 +647,11 @@ final class SessionData {
         }
 
         final SessionControl sessionControl = getSession(sessionId);
+        if (null == sessionControl) {
+            LOG.error("Unable to get session fo sessionId: %1$s.", sessionId);
+            SessionHandler.clearSession(sessionId, true);
+            return null;
+        }
         final SessionImpl session = sessionControl.getSession();
         if (!randomToken.equals(session.getRandomToken())) {
             final OXException e = SessionExceptionCodes.WRONG_BY_RANDOM.create(session.getSessionID(), session.getRandomToken(), randomToken, sessionId);
