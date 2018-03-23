@@ -245,10 +245,7 @@ public abstract class AbstractOAuthFileStorageService implements AccountAware, O
      */
     @Override
     public void onAfterFileStorageAccountDeletion(Session session, int id, Map<String, Object> eventProps, Connection con) throws OXException {
-        Object updateScopesValue = session.getParameter(OAuthConstants.SESSION_PARAM_UPDATE_SCOPES);
-        boolean updateScopes = updateScopesValue == null ? true : Boolean.parseBoolean((String) updateScopesValue);
-        // Do not update the scopes; a delete OAuth account was triggered.
-        if (!updateScopes) {
+        if (!updateScopes(session)) {
             return;
         }
         OAuthAccountStorage storage = services.getService(OAuthAccountStorage.class);
@@ -282,6 +279,26 @@ public abstract class AbstractOAuthFileStorageService implements AccountAware, O
         eventProps.put(OAuthConstants.ARGUMENT_SCOPES, scopes);
         // Update the account
         storage.updateAccount(session, accountId, eventProps);
+    }
+
+    /**
+     * Fetches the optional updateScopes session parameter and evaluates it's value
+     * 
+     * @param session the session
+     * @return The value of the optional 'updateScopes' session parameter. Returns <code>true</code> as fall-back.
+     */
+    private boolean updateScopes(Session session) {
+        Object updateScopesValue = session.getParameter(OAuthConstants.SESSION_PARAM_UPDATE_SCOPES);
+        if (updateScopesValue == null) {
+            return true;
+        }
+        if (updateScopesValue instanceof Boolean) {
+            return (boolean) updateScopesValue;
+        }
+        if (updateScopesValue instanceof String) {
+            return Boolean.valueOf((String) updateScopesValue);
+        }
+        return true;
     }
 
     /**
