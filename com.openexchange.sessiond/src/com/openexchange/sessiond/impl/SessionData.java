@@ -648,7 +648,7 @@ final class SessionData {
 
         final SessionControl sessionControl = getSession(sessionId);
         if (null == sessionControl) {
-            LOG.error("Unable to get session fo sessionId: %1$s.", sessionId);
+            LOG.error("Unable to get session for sessionId: {}.", sessionId);
             SessionHandler.clearSession(sessionId, true);
             return null;
         }
