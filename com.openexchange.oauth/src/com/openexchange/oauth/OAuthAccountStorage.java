@@ -60,7 +60,7 @@ import com.openexchange.session.Session;
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 public interface OAuthAccountStorage {
-
+    
     /**
      * Stores the specified {@link OAuthAccount} in the storage
      * 

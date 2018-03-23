@@ -323,6 +323,11 @@ public final class OAuthConstants {
      */
     public static final String SESSION_PARAM_UUID = "uuid";
 
+    /**
+     * The session parameter providing a hint about updating the scopes upon deletion
+     */
+    public static final String SESSION_PARAM_UPDATE_SCOPES = "__oauth.storage.delete.updateScopes";
+
     /*-
      * ------------------- ID type identifier for accounts -------------------
      */

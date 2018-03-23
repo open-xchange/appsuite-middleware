@@ -201,7 +201,7 @@ public abstract class AbstractOAuthFileStorageService implements AccountAware, O
 
             // Pass the connection and the hint about the scopes to the FileStorageAccountManager
             // as a session parameter.
-            session.setParameter("__file.storage.delete.updateScopes", eventProps.get("__file.storage.delete.updateScopes"));
+            session.setParameter(OAuthConstants.SESSION_PARAM_UPDATE_SCOPES, eventProps.get(OAuthConstants.SESSION_PARAM_UPDATE_SCOPES));
             session.setParameter("__file.storage.delete.connection", con);
             try {
                 for (FileStorageAccount deleteMe : toDelete) {
@@ -214,7 +214,7 @@ public abstract class AbstractOAuthFileStorageService implements AccountAware, O
                 }
             } finally {
                 session.setParameter("__file.storage.delete.connection", null);
-                session.setParameter("__file.storage.delete.updateScopes", null);
+                session.setParameter(OAuthConstants.SESSION_PARAM_UPDATE_SCOPES, null);
             }
 
         } catch (Exception e) {
@@ -245,7 +245,7 @@ public abstract class AbstractOAuthFileStorageService implements AccountAware, O
      */
     @Override
     public void onAfterFileStorageAccountDeletion(Session session, int id, Map<String, Object> eventProps, Connection con) throws OXException {
-        Object updateScopesValue = session.getParameter("__oauth.storage.delete.updateScopes");
+        Object updateScopesValue = session.getParameter(OAuthConstants.SESSION_PARAM_UPDATE_SCOPES);
         boolean updateScopes = updateScopesValue == null ? true : Boolean.parseBoolean((String) updateScopesValue);
         // Do not update the scopes; a delete OAuth account was triggered.
         if (!updateScopes) {
