@@ -577,6 +577,9 @@ public class DocumentMetadataResource extends AbstractResource implements OXWebd
             return;
         }
         loadedMetadata = true;
+        if (metadata == null) {
+            metadata = new DocumentMetadataImpl();
+        }
         final Set<Metadata> toLoad = new HashSet<Metadata>(Metadata.VALUES);
         toLoad.removeAll(setMetadata);
         final ServerSession session = getSession();
