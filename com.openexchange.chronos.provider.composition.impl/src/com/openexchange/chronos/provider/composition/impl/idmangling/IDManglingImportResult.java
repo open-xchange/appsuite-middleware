@@ -49,10 +49,8 @@
 
 package com.openexchange.chronos.provider.composition.impl.idmangling;
 
-import java.util.List;
 import com.openexchange.chronos.service.EventID;
 import com.openexchange.chronos.service.ImportResult;
-import com.openexchange.exception.OXException;
 
 /**
  * {@link IDManglingImportResult}
@@ -60,11 +58,9 @@ import com.openexchange.exception.OXException;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public class IDManglingImportResult extends IDManglingCalendarResult implements ImportResult {
+public class IDManglingImportResult extends IDManglingErrorAwareCalendarResult implements ImportResult {
 
     private final ImportResult delegate;
-    private final OXException newError;
-    private final List<OXException> newWarnings;
 
     /**
      * Initializes a new {@link IDManglingImportResult}.
@@ -75,23 +71,11 @@ public class IDManglingImportResult extends IDManglingCalendarResult implements 
     public IDManglingImportResult(ImportResult delegate, int accountId) {
         super(delegate, accountId);
         this.delegate = delegate;
-        this.newError = IDMangling.withUniqueIDs(delegate.getError(), accountId);
-        this.newWarnings = IDMangling.withUniqueID(delegate.getWarnings(), accountId);
     }
 
     @Override
     public int getIndex() {
         return delegate.getIndex();
-    }
-
-    @Override
-    public OXException getError() {
-        return newError;
-    }
-
-    @Override
-    public List<OXException> getWarnings() {
-        return newWarnings;
     }
 
     @Override

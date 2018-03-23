@@ -50,7 +50,7 @@
 package com.openexchange.chronos.impl;
 
 import java.util.List;
-import com.openexchange.chronos.common.DefaultCalendarResult;
+import com.openexchange.chronos.common.DefaultErrorAwareCalendarResult;
 import com.openexchange.chronos.service.CalendarResult;
 import com.openexchange.chronos.service.EventID;
 import com.openexchange.chronos.service.ImportResult;
@@ -62,30 +62,15 @@ import com.openexchange.exception.OXException;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public class DefaultImportResult extends DefaultCalendarResult implements ImportResult {
+public class DefaultImportResult extends DefaultErrorAwareCalendarResult implements ImportResult {
 
     private final EventID eventID;
     private final int index;
-    private final OXException error;
-    private final List<OXException> warnings;
 
     public DefaultImportResult(CalendarResult result, EventID eventID, int index, List<OXException> warnings, OXException error) {
-        super(result.getSession(), result.getCalendarUser(), result.getFolderID(), result.getCreations(), result.getUpdates(), result.getDeletions());
+        super(result, warnings, error);
         this.index = index;
-        this.warnings = warnings;
-        this.error = error;
         this.eventID = eventID;
-    }
-
-    @Override
-    public OXException getError() {
-        return error;
-    }
-
-
-    @Override
-    public List<OXException> getWarnings() {
-        return warnings;
     }
 
     @Override

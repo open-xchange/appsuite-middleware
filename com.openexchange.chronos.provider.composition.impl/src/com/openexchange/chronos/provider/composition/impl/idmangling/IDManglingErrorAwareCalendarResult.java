@@ -49,15 +49,9 @@
 
 package com.openexchange.chronos.provider.composition.impl.idmangling;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
-import com.openexchange.chronos.service.CreateResult;
-import com.openexchange.chronos.service.DeleteResult;
 import com.openexchange.chronos.service.ErrorAwareCalendarResult;
-import com.openexchange.chronos.service.UpdateResult;
 import com.openexchange.exception.OXException;
-import com.openexchange.session.Session;
 
 /**
  * {@link IDManglingErrorAwareCalendarResult}
@@ -65,10 +59,7 @@ import com.openexchange.session.Session;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public class IDManglingErrorAwareCalendarResult implements ErrorAwareCalendarResult {
-
-    protected final ErrorAwareCalendarResult delegate;
-    protected final int accountId;
+public class IDManglingErrorAwareCalendarResult extends IDManglingCalendarResult implements ErrorAwareCalendarResult {
 
     private final OXException newError;
     private final List<OXException> newWarnings;
@@ -80,70 +71,9 @@ public class IDManglingErrorAwareCalendarResult implements ErrorAwareCalendarRes
      * @param accountId The identifier of the calendar account the result originates in
      */
     public IDManglingErrorAwareCalendarResult(ErrorAwareCalendarResult delegate, int accountId) {
-        super();
-        this.delegate = delegate;
-        this.accountId = accountId;
+        super(delegate, accountId);
         this.newError = IDMangling.withUniqueIDs(delegate.getError(), accountId);
         this.newWarnings = IDMangling.withUniqueID(delegate.getWarnings(), accountId);
-    }
-
-    @Override
-    public Session getSession() {
-        return delegate.getSession();
-    }
-
-    @Override
-    public int getCalendarUser() {
-        return delegate.getCalendarUser();
-    }
-
-    @Override
-    public long getTimestamp() {
-        return delegate.getTimestamp();
-    }
-
-    @Override
-    public String getFolderID() {
-        return IDMangling.getUniqueFolderId(accountId, delegate.getFolderID());
-    }
-
-    @Override
-    public List<DeleteResult> getDeletions() {
-        List<DeleteResult> deletions = delegate.getDeletions();
-        if (null == deletions) {
-            return Collections.emptyList();
-        }
-        List<DeleteResult> idManglingDeletions = new ArrayList<DeleteResult>(deletions.size());
-        for (DeleteResult deletion : deletions) {
-            idManglingDeletions.add(new IDManglingDeleteResult(deletion, accountId));
-        }
-        return idManglingDeletions;
-    }
-
-    @Override
-    public List<UpdateResult> getUpdates() {
-        List<UpdateResult> updates = delegate.getUpdates();
-        if (null == updates) {
-            return Collections.emptyList();
-        }
-        List<UpdateResult> idManglingUpdates = new ArrayList<UpdateResult>(updates.size());
-        for (UpdateResult update : updates) {
-            idManglingUpdates.add(new IDManglingUpdateResult(update, accountId));
-        }
-        return idManglingUpdates;
-    }
-
-    @Override
-    public List<CreateResult> getCreations() {
-        List<CreateResult> creations = delegate.getCreations();
-        if (null == creations) {
-            return Collections.emptyList();
-        }
-        List<CreateResult> idManglingCreations = new ArrayList<CreateResult>(creations.size());
-        for (CreateResult creation : creations) {
-            idManglingCreations.add(new IDManglingCreateResult(creation, accountId));
-        }
-        return idManglingCreations;
     }
 
     @Override
