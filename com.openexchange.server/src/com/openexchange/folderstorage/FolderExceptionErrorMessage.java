@@ -336,9 +336,11 @@ public enum FolderExceptionErrorMessage implements DisplayableOXExceptionCode {
     }
 
     private OXException specials(final OXException exc) {
-        switch(this) {
-        case NOT_FOUND:
-            exc.setGeneric(Generic.NOT_FOUND);
+        switch (this) {
+            case NOT_FOUND:
+                exc.setGeneric(Generic.NOT_FOUND);
+            default:
+                break;
         }
 
         if (exc.getCategories().contains(Category.CATEGORY_CONFLICT)) {
