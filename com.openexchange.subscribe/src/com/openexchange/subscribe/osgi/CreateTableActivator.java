@@ -66,11 +66,6 @@ public class CreateTableActivator extends HousekeepingActivator {
     }
 
     @Override
-    public void stopBundle() throws Exception {
-        unregisterServices();
-    }
-
-    @Override
     protected Class<?>[] getNeededServices() {
         return EMPTY_CLASSES;
     }

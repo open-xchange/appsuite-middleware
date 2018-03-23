@@ -130,27 +130,25 @@ final class SessionData {
 
         randoms = new ConcurrentHashMap<String, String>(1024, 0.75f, 1);
 
-        sessionList = new RotatableCopyOnWriteArrayList<SessionContainer>();
+        SessionContainer[] shortTermInit = new SessionContainer[containerCount];
         for (int i = containerCount; i-- > 0;) {
-            sessionList.add(new SessionContainer());
+            shortTermInit[i] = new SessionContainer();
         }
+        sessionList = new RotatableCopyOnWriteArrayList<SessionContainer>(shortTermInit);
 
-        longTermList = new RotatableCopyOnWriteArrayList<SessionMap>();
+        SessionMap[] longTermInit = new SessionMap[longTermContainerCount];
         for (int i = longTermContainerCount; i-- > 0;) {
-            longTermList.add(new SessionMap(256));
+            longTermInit[i] = new SessionMap(256);
         }
+        longTermList = new RotatableCopyOnWriteArrayList<SessionMap>(longTermInit);
     }
 
     void clear() {
-        synchronized (sessionList) {
-            sessionList.clear();
-        }
+        sessionList.clear();
         randoms.clear();
 
         longTermUserGuardian.clear();
-        synchronized (longTermList) {
-            longTermList.clear();
-        }
+        longTermList.clear();
     }
 
     /**

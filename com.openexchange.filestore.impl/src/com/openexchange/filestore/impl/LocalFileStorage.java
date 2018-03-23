@@ -219,6 +219,9 @@ public class LocalFileStorage extends DefaultFileStorage {
 
             // Convert next Entry to decimals as Array fields
             final String previousEntry = getPreviousEntry(state.getNextEntry());
+            if (previousEntry == null) {
+                return false;
+            }
             final String[] tokens = previousEntry.split("/");
             final int[] parts = new int[tokens.length];
 

@@ -201,7 +201,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
             }
             return dropboxFile;
         } catch (GetMetadataErrorException e) {
-            throw DropboxExceptionHandler.handleGetMetadataErrorException(e, folderId, id);
+            throw DropboxExceptionHandler.handleGetMetadataErrorException(e, folderId == null ? "" : folderId, id);
         } catch (DbxException e) {
             throw DropboxExceptionHandler.handle(e, session, dropboxOAuthAccess.getOAuthAccount());
         }
@@ -874,7 +874,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
 
     /**
      * Uploads the specified file chunk-wise
-     * 
+     *
      * @param file The {@link File} to upload
      * @param stream The {@link InputStream} containing the actual data
      * @param length The length of the data

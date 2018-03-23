@@ -95,7 +95,7 @@ public class FileBackedMimeMessage extends MimeMessage implements MimeCleanUp {
     // ------------------------------------------------------------------------------------------------------------------------
 
     /** The backing file */
-    private File tempFile;
+    private final File tempFile;
 
     /** The received date */
     private final Date receivedDate;
@@ -156,20 +156,19 @@ public class FileBackedMimeMessage extends MimeMessage implements MimeCleanUp {
     }
 
     /**
-     * Gets the temp. file
+     * Gets the temporary file holding the MIME message.
      *
-     * @return The temp. file
+     * @return The temporary file
      */
     public File getTempFile() {
         return tempFile;
     }
 
     @Override
-    public final synchronized void cleanUp() {
+    public final void cleanUp() {
         File tempFile = this.tempFile;
         if (null != tempFile) {
             tempFile.delete();
-            this.tempFile = null;
         }
     }
 

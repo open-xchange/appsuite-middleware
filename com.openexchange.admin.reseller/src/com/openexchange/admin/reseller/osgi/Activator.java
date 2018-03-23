@@ -117,12 +117,6 @@ public class Activator extends HousekeepingActivator {
         }
     }
 
-    @Override
-    public void stopBundle() {
-        closeTrackers();
-        unregisterServices();
-    }
-
     private void initCache(final ConfigurationService service) throws OXGenericException {
         final AdminCacheExtended cache = new AdminCacheExtended();
         cache.initCache(service);

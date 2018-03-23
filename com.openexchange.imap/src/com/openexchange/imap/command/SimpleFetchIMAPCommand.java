@@ -71,6 +71,7 @@ import javax.mail.internet.InternetHeaders;
 import javax.mail.internet.MailDateFormat;
 import com.google.common.collect.ImmutableMap;
 import com.openexchange.exception.OXException;
+import com.openexchange.imap.IMAPException;
 import com.openexchange.imap.IMAPServerInfo;
 import com.openexchange.mail.FullnameArgument;
 import com.openexchange.mail.dataobjects.IDMailMessage;
@@ -274,7 +275,12 @@ public final class SimpleFetchIMAPCommand extends AbstractIMAPCommand<TLongObjec
         final int seqNum = fetchResponse.getNumber();
         final long id;
         if (uid) {
-            id = getItemOf(UID.class, fetchResponse).uid;
+            UID item = getItemOf(UID.class, fetchResponse);
+            if (item == null) {
+                LOG.warn("Message #{} discarded", seqNum, IMAPException.IMAPCode.UNEXPECTED_ERROR.create("Unable to retrieve UID from response."));
+                return true;
+            }
+            id = item.uid;
         } else {
             id = seqNum;
         }

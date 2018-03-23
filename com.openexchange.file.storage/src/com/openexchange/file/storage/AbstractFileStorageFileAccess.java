@@ -52,12 +52,10 @@ package com.openexchange.file.storage;
 import java.io.InputStream;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File.Field;
 import com.openexchange.groupware.results.Delta;
 import com.openexchange.groupware.results.TimedResult;
-import com.openexchange.tools.iterator.SearchIterator;
 
 
 /**
@@ -65,7 +63,7 @@ import com.openexchange.tools.iterator.SearchIterator;
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class AbstractFileStorageFileAccess implements FileStorageFileAccess {
+public abstract class AbstractFileStorageFileAccess implements FileStorageFileAccess {
 
     static final String CAPABILITY_SEQUENCE_NUMBERS = "com.openexchange.file.storage.sequenceNumbers";
     static final String CAPABILITY_ETAGS = "com.openexchange.file.storage.eTags";
@@ -77,96 +75,9 @@ public class AbstractFileStorageFileAccess implements FileStorageFileAccess {
      */
     static final List<File.Field> ALL_FIELDS = Arrays.asList(File.Field.values());
 
-
-    public Map<String, Object> getCapabilities() {
-
-        return null;
-    }
-
-
-
-
-    @Override
-    public void startTransaction() throws OXException {
-        // TODO Auto-generated method stub
-
-    }
-
-    @Override
-    public void commit() throws OXException {
-        // TODO Auto-generated method stub
-
-    }
-
-    @Override
-    public void rollback() throws OXException {
-        // TODO Auto-generated method stub
-
-    }
-
-    @Override
-    public void finish() throws OXException {
-        // TODO Auto-generated method stub
-
-    }
-
-    @Override
-    public void setTransactional(boolean transactional) {
-        // TODO Auto-generated method stub
-
-    }
-
-    @Override
-    public void setRequestTransactional(boolean transactional) {
-        // TODO Auto-generated method stub
-
-    }
-
-    @Override
-    public void setCommitsTransaction(boolean commits) {
-        // TODO Auto-generated method stub
-
-    }
-
-    @Override
-    public boolean exists(String folderId, String id, String version) throws OXException {
-        // TODO Auto-generated method stub
-        return false;
-    }
-
-    @Override
-    public File getFileMetadata(String folderId, String id, String version) throws OXException {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
     @Override
     public IDTuple saveFileMetadata(File file, long sequenceNumber) throws OXException {
         return saveFileMetadata(file, sequenceNumber, Arrays.asList(File.Field.values()));
-    }
-
-    @Override
-    public IDTuple saveFileMetadata(File file, long sequenceNumber, List<Field> modifiedFields) throws OXException {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public IDTuple copy(IDTuple source, String version, String destFolder, File update, InputStream newFile, List<Field> modifiedFields) throws OXException {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public IDTuple move(IDTuple source, String destFolder, long sequenceNumber, File update, List<Field> modifiedFields) throws OXException {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public InputStream getDocument(String folderId, String id, String version) throws OXException {
-        // TODO Auto-generated method stub
-        return null;
     }
 
     @Override
@@ -175,32 +86,8 @@ public class AbstractFileStorageFileAccess implements FileStorageFileAccess {
     }
 
     @Override
-    public IDTuple saveDocument(File file, InputStream data, long sequenceNumber, List<Field> modifiedFields) throws OXException {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public void removeDocument(String folderId, long sequenceNumber) throws OXException {
-        // TODO Auto-generated method stub
-
-    }
-
-    @Override
     public List<IDTuple> removeDocument(List<IDTuple> ids, long sequenceNumber) throws OXException {
         return removeDocument(ids, sequenceNumber, false);
-    }
-
-    @Override
-    public List<IDTuple> removeDocument(List<IDTuple> ids, long sequenceNumber, boolean hardDelete) throws OXException {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public void touch(String folderId, String id) throws OXException {
-        // TODO Auto-generated method stub
-
     }
 
     @Override
@@ -214,44 +101,8 @@ public class AbstractFileStorageFileAccess implements FileStorageFileAccess {
     }
 
     @Override
-    public TimedResult<File> getDocuments(String folderId, List<Field> fields, Field sort, SortDirection order) throws OXException {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public TimedResult<File> getDocuments(List<IDTuple> ids, List<Field> fields) throws OXException {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
     public Delta<File> getDelta(String folderId, long updateSince, List<Field> fields, boolean ignoreDeleted) throws OXException {
         return getDelta(folderId, updateSince, fields, null, SortDirection.DEFAULT, ignoreDeleted);
-    }
-
-    @Override
-    public Delta<File> getDelta(String folderId, long updateSince, List<Field> fields, Field sort, SortDirection order, boolean ignoreDeleted) throws OXException {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public SearchIterator<File> search(String pattern, List<Field> fields, String folderId, Field sort, SortDirection order, int start, int end) throws OXException {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public SearchIterator<File> search(String pattern, List<Field> fields, String folderId, boolean includeSubfolders, Field sort, SortDirection order, int start, int end) throws OXException {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public FileStorageAccountAccess getAccountAccess() {
-        // TODO Auto-generated method stub
-        return null;
     }
 
 }
