@@ -159,49 +159,23 @@ public class OAuthAccountStorageSQLImpl implements OAuthAccountStorage, SecretEn
      */
     @Override
     public OAuthAccount getAccount(Session session, int accountId) throws OXException {
-        final SecretEncryptionService<PWUpdate> encryptionService = Services.getService(SecretEncryptionFactoryService.class).createService(this);
-        final OAuthScopeRegistry scopeRegistry = Services.getService(OAuthScopeRegistry.class);
-        int contextId = session.getContextId();
-        int userId = session.getUserId();
-        final Context context = getContext(contextId);
-        Connection connection = getConnection(true, context);
-        PreparedStatement stmt = null;
-        ResultSet rs = null;
+        Connection connection = (Connection) session.getParameter("__file.storage.delete.connection");
         try {
-            stmt = connection.prepareStatement("SELECT displayName, accessToken, accessSecret, serviceId, scope, identity FROM oauthAccounts WHERE cid = ? AND user = ? and id = ?");
-            stmt.setInt(1, contextId);
-            stmt.setInt(2, userId);
-            stmt.setInt(3, accountId);
-            rs = stmt.executeQuery();
-            if (!rs.next()) {
-                throw OAuthExceptionCodes.ACCOUNT_NOT_FOUND.create(Integer.valueOf(accountId), Integer.valueOf(userId), Integer.valueOf(contextId));
+            if (connection != null && Databases.isInTransaction(connection)) {
+                // Given connection is already in transaction. Invoke & return immediately.
+                return getAccount(session, accountId, connection);
             }
+        } catch (SQLException e) {
+            throw OAuthExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+        }
 
-            DefaultOAuthAccount account = new DefaultOAuthAccount();
-            account.setId(accountId);
-            String displayName = rs.getString(1);
-            account.setDisplayName(displayName);
-            try {
-                account.setToken(encryptionService.decrypt(session, rs.getString(2), new PWUpdate("accessToken", contextId, accountId)));
-                account.setSecret(encryptionService.decrypt(session, rs.getString(3), new PWUpdate("accessSecret", contextId, accountId)));
-            } catch (OXException e) {
-                if (false == CryptoErrorMessage.BadPassword.equals(e)) {
-                    throw e;
-                }
-
-                throw OAuthExceptionCodes.INVALID_ACCOUNT_EXTENDED.create(e.getCause(), displayName, accountId);
-            }
-
-            account.setMetaData(registry.getService(rs.getString(4), userId, contextId));
-            String scopes = rs.getString(5);
-            Set<OAuthScope> enabledScopes = scopeRegistry.getAvailableScopes(account.getMetaData().getAPI(), OXScope.valuesOf(scopes));
-            account.setEnabledScopes(enabledScopes);
-            account.setUserIdentity(rs.getString(6));
-            return account;
+        final Context context = getContext(session.getContextId());
+        connection = getConnection(true, context);
+        try {
+            return getAccount(session, accountId, connection);
         } catch (final SQLException e) {
             throw OAuthExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
-            closeSQLStuff(rs, stmt);
             provider.releaseReadConnection(context, connection);
         }
     }
@@ -337,35 +311,23 @@ public class OAuthAccountStorageSQLImpl implements OAuthAccountStorage, SecretEn
         if (list.isEmpty()) {
             return;
         }
-        int contextId = session.getContextId();
-        int userId = session.getUserId();
-        final Context context = getContext(contextId);
-        Connection connection = getConnection(false, context);
-        PreparedStatement stmt = null;
+        Connection connection = (Connection) session.getParameter("__file.storage.delete.connection");
         try {
-            final StringBuilder stmtBuilder = new StringBuilder(128).append("UPDATE oauthAccounts SET ");
-            final int size = list.size();
-            list.get(0).appendTo(stmtBuilder);
-            for (int i = 1; i < size; i++) {
-                stmtBuilder.append(", ");
-                list.get(i).appendTo(stmtBuilder);
+            if (connection != null && Databases.isInTransaction(connection)) {
+                // Given connection is already in transaction. Invoke & return immediately.
+                updateAccount(session, accountId, list, connection);
+                return;
             }
-            stmt = connection.prepareStatement(stmtBuilder.append(" WHERE cid = ? AND user = ? and id = ?").toString());
-            int pos = 1;
-            for (final Setter setter : list) {
-                pos = setter.set(pos, stmt);
-            }
-            stmt.setInt(pos++, contextId);
-            stmt.setInt(pos++, userId);
-            stmt.setInt(pos, accountId);
-            final int rows = stmt.executeUpdate();
-            if (rows <= 0) {
-                throw OAuthExceptionCodes.ACCOUNT_NOT_FOUND.create(accountId, userId, contextId);
-            }
+        } catch (SQLException e) {
+            throw OAuthExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+        }
+        final Context context = getContext(session.getContextId());
+        connection = getConnection(false, context);
+        try {
+            updateAccount(session, accountId, list, connection);
         } catch (final SQLException e) {
             throw OAuthExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
-            closeSQLStuff(stmt);
             provider.releaseReadConnection(context, connection);
         }
     }
@@ -826,6 +788,96 @@ public class OAuthAccountStorageSQLImpl implements OAuthAccountStorage, SecretEn
     }
 
     ////////////////////////////////////// HELPERS //////////////////////////////////////////
+
+    /**
+     * 
+     * @param session
+     * @param accountId
+     * @param list
+     * @param connection
+     * @throws SQLException
+     * @throws OXException
+     */
+    private void updateAccount(Session session, int accountId, List<Setter> list, Connection connection) throws SQLException, OXException {
+        final StringBuilder stmtBuilder = new StringBuilder(128).append("UPDATE oauthAccounts SET ");
+        final int size = list.size();
+        list.get(0).appendTo(stmtBuilder);
+        for (int i = 1; i < size; i++) {
+            stmtBuilder.append(", ");
+            list.get(i).appendTo(stmtBuilder);
+        }
+        PreparedStatement stmt = null;
+        try {
+            stmt = connection.prepareStatement(stmtBuilder.append(" WHERE cid = ? AND user = ? and id = ?").toString());
+            int pos = 1;
+            for (final Setter setter : list) {
+                pos = setter.set(pos, stmt);
+            }
+            int contextId = session.getContextId();
+            int userId = session.getUserId();
+            stmt.setInt(pos++, contextId);
+            stmt.setInt(pos++, userId);
+            stmt.setInt(pos, accountId);
+            final int rows = stmt.executeUpdate();
+            if (rows <= 0) {
+                throw OAuthExceptionCodes.ACCOUNT_NOT_FOUND.create(accountId, userId, contextId);
+            }
+        } finally {
+            closeSQLStuff(stmt);
+        }
+    }
+
+    /**
+     * 
+     * @param session
+     * @param accountId
+     * @param connection
+     * @return
+     * @throws SQLException
+     * @throws OXException
+     */
+    private OAuthAccount getAccount(Session session, int accountId, Connection connection) throws SQLException, OXException {
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            stmt = connection.prepareStatement("SELECT displayName, accessToken, accessSecret, serviceId, scope, identity FROM oauthAccounts WHERE cid = ? AND user = ? and id = ?");
+            int contextId = session.getContextId();
+            int userId = session.getUserId();
+            stmt.setInt(1, contextId);
+            stmt.setInt(2, userId);
+            stmt.setInt(3, accountId);
+            rs = stmt.executeQuery();
+            if (!rs.next()) {
+                throw OAuthExceptionCodes.ACCOUNT_NOT_FOUND.create(Integer.valueOf(accountId), Integer.valueOf(userId), Integer.valueOf(contextId));
+            }
+
+            DefaultOAuthAccount account = new DefaultOAuthAccount();
+            account.setId(accountId);
+            String displayName = rs.getString(1);
+            account.setDisplayName(displayName);
+            try {
+                SecretEncryptionService<PWUpdate> encryptionService = Services.getService(SecretEncryptionFactoryService.class).createService(this);
+                account.setToken(encryptionService.decrypt(session, rs.getString(2), new PWUpdate("accessToken", contextId, accountId)));
+                account.setSecret(encryptionService.decrypt(session, rs.getString(3), new PWUpdate("accessSecret", contextId, accountId)));
+            } catch (OXException e) {
+                if (false == CryptoErrorMessage.BadPassword.equals(e)) {
+                    throw e;
+                }
+
+                throw OAuthExceptionCodes.INVALID_ACCOUNT_EXTENDED.create(e.getCause(), displayName, accountId);
+            }
+
+            account.setMetaData(registry.getService(rs.getString(4), userId, contextId));
+            String scopes = rs.getString(5);
+            OAuthScopeRegistry scopeRegistry = Services.getService(OAuthScopeRegistry.class);
+            Set<OAuthScope> enabledScopes = scopeRegistry.getAvailableScopes(account.getMetaData().getAPI(), OXScope.valuesOf(scopes));
+            account.setEnabledScopes(enabledScopes);
+            account.setUserIdentity(rs.getString(6));
+            return account;
+        } finally {
+            closeSQLStuff(rs, stmt);
+        }
+    }
 
     /**
      * 

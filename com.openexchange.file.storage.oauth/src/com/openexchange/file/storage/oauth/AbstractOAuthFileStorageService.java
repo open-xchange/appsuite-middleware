@@ -216,7 +216,6 @@ public abstract class AbstractOAuthFileStorageService implements AccountAware, O
                 session.setParameter("__file.storage.delete.connection", null);
                 session.setParameter(OAuthConstants.SESSION_PARAM_UPDATE_SCOPES, null);
             }
-
         } catch (Exception e) {
             LOG.warn("Could not delete possibly existing {} accounts associated with deleted OAuth account {} for user {} in context {}", api.getName(), id, user, cid, e);
         }
@@ -248,37 +247,51 @@ public abstract class AbstractOAuthFileStorageService implements AccountAware, O
         if (!updateScopes(session)) {
             return;
         }
-        OAuthAccountStorage storage = services.getService(OAuthAccountStorage.class);
+
         // Retrieve the OAuth account id that is linked with the file storage account that was deleted.
         Object value = eventProps.get("account");
         if (value == null) {
             LOG.debug("Not OAuth account information was found");
             return;
         }
-        int accountId = Integer.parseInt((String) value);
-        OAuthAccount account;
+
+        int accountId;
         try {
-            account = storage.getAccount(session, accountId);
-        } catch (OXException e) {
-            if (OAuthExceptionCodes.ACCOUNT_NOT_FOUND.equals(e)) {
-                LOG.debug("The OAuth file storage account with id '{}' for the user '{}' in context '{}' does not exist anymore", accountId, session.getUserId(), session.getContextId());
-                return;
-            }
-            throw e;
-        }
-        // Get the enabled scopes...
-        Set<OAuthScope> scopes = new HashSet<>();
-        for (OAuthScope scope : account.getEnabledScopes()) {
-            scopes.add(scope);
-        }
-        // ...and remove the 'drive' scope.
-        scopes.remove(getScope());
-        if (scopes.size() == 0) {
+            accountId = Integer.parseInt((String) value);
+        } catch (NumberFormatException e) {
+            LOG.debug("Not OAuth account information was found");
             return;
         }
-        eventProps.put(OAuthConstants.ARGUMENT_SCOPES, scopes);
-        // Update the account
-        storage.updateAccount(session, accountId, eventProps);
+        
+        session.setParameter("__file.storage.delete.connection", con);
+        try {
+            OAuthAccountStorage storage = services.getService(OAuthAccountStorage.class);
+            OAuthAccount account;
+            try {
+                account = storage.getAccount(session, accountId);
+            } catch (OXException e) {
+                if (OAuthExceptionCodes.ACCOUNT_NOT_FOUND.equals(e)) {
+                    LOG.debug("The OAuth file storage account with id '{}' for the user '{}' in context '{}' does not exist anymore", accountId, session.getUserId(), session.getContextId());
+                    return;
+                }
+                throw e;
+            }
+            // Get the enabled scopes...
+            Set<OAuthScope> scopes = new HashSet<>();
+            for (OAuthScope scope : account.getEnabledScopes()) {
+                scopes.add(scope);
+            }
+            // ...and remove the 'drive' scope.
+            scopes.remove(getScope());
+            if (scopes.size() == 0) {
+                return;
+            }
+            eventProps.put(OAuthConstants.ARGUMENT_SCOPES, scopes);
+            // Update the account
+            storage.updateAccount(session, accountId, eventProps);
+        } finally {
+            session.setParameter("__file.storage.delete.connection", null);
+        }
     }
 
     /**
