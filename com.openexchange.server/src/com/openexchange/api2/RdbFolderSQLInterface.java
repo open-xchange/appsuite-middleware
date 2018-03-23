@@ -386,6 +386,9 @@ public class RdbFolderSQLInterface implements FolderSQLInterface {
             loadNonTreeVisibleFoldersIntoQueryCache(session, ctx, userPermissionBits);
             result = FolderQueryCacheManager.getInstance().getFolderQuery(FolderQuery.NON_TREE_VISIBLE_CALENDAR.queryNum, session);
         }
+        if (result == null) {
+            result = new LinkedList<>();
+        }
         return new FolderObjectIterator(int2folder(result, oxfolderAccess), false);
     }
 
@@ -398,6 +401,9 @@ public class RdbFolderSQLInterface implements FolderSQLInterface {
         if ((result = FolderQueryCacheManager.getInstance().getFolderQuery(FolderQuery.NON_TREE_VISIBLE_TASK.queryNum, session)) == null) {
             loadNonTreeVisibleFoldersIntoQueryCache(session, ctx, userPermissionBits);
             result = FolderQueryCacheManager.getInstance().getFolderQuery(FolderQuery.NON_TREE_VISIBLE_TASK.queryNum, session);
+        }
+        if (result == null) {
+            result = new LinkedList<>();
         }
         return new FolderObjectIterator(int2folder(result, oxfolderAccess), false);
     }
@@ -412,6 +418,9 @@ public class RdbFolderSQLInterface implements FolderSQLInterface {
             loadNonTreeVisibleFoldersIntoQueryCache(session, ctx, userPermissionBits);
             result = FolderQueryCacheManager.getInstance().getFolderQuery(FolderQuery.NON_TREE_VISIBLE_CONTACT.queryNum, session);
         }
+        if (result == null) {
+            result = new LinkedList<>();
+        }
         return new FolderObjectIterator(int2folder(result, oxfolderAccess), false);
     }
 
@@ -424,6 +433,9 @@ public class RdbFolderSQLInterface implements FolderSQLInterface {
         if ((result = FolderQueryCacheManager.getInstance().getFolderQuery(FolderQuery.NON_TREE_VISIBLE_INFOSTORE.queryNum, session)) == null) {
             loadNonTreeVisibleFoldersIntoQueryCache(session, ctx, userPermissionBits);
             result = FolderQueryCacheManager.getInstance().getFolderQuery(FolderQuery.NON_TREE_VISIBLE_INFOSTORE.queryNum, session);
+        }
+        if (result == null) {
+            result = new LinkedList<>();
         }
         return new FolderObjectIterator(int2folder(result, oxfolderAccess), false);
     }
