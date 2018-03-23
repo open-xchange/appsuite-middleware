@@ -49,8 +49,10 @@
 
 package com.openexchange.chronos.provider.composition.impl;
 
+import static com.openexchange.chronos.provider.composition.impl.idmangling.IDMangling.getRelativeEventIdsPerAccountId;
 import static com.openexchange.chronos.provider.composition.impl.idmangling.IDMangling.getRelativeFolderIdsPerAccountId;
 import static com.openexchange.chronos.provider.composition.impl.idmangling.IDMangling.getUniqueFolderId;
+import static com.openexchange.chronos.provider.composition.impl.idmangling.IDMangling.getUniqueId;
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.I2i;
 import static com.openexchange.java.Autoboxing.i;
@@ -69,6 +71,8 @@ import java.util.concurrent.ConcurrentMap;
 import org.json.JSONObject;
 import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.capabilities.CapabilitySet;
+import com.openexchange.chronos.common.DefaultCalendarResult;
+import com.openexchange.chronos.common.DefaultErrorAwareCalendarResult;
 import com.openexchange.chronos.common.DefaultEventsResult;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.provider.AutoProvisioningCalendarProvider;
@@ -84,6 +88,8 @@ import com.openexchange.chronos.provider.composition.impl.idmangling.IDMangling;
 import com.openexchange.chronos.provider.extensions.WarningsAware;
 import com.openexchange.chronos.provider.groupware.GroupwareCalendarAccess;
 import com.openexchange.chronos.service.CalendarParameters;
+import com.openexchange.chronos.service.ErrorAwareCalendarResult;
+import com.openexchange.chronos.service.EventID;
 import com.openexchange.chronos.service.EventsResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.CallerRunsCompletionService;
@@ -430,6 +436,47 @@ public abstract class AbstractCompositingIDBasedCalendarAccess implements Transa
     }
 
     /**
+     * Gets the relative representation of a list of unique composite event identifiers, mapped to their associated calendar account.
+     * <p/>
+     * Event IDs whose folder denotes one of the {@link IDMangling#ROOT_FOLDER_IDS} are passed as-is implicitly, mapped to the default account.
+     *
+     * @param eventIds The event ids with unique composite folder identifiers, e.g. <code>cal://4/35</code>
+     * @param errorsPerEventId A map to track possible errors that occurred while retrieving the accounts
+     * @return Event identifiers with relative folder identifiers, mapped to their associated calendar account
+     */
+    protected Map<CalendarAccount, List<EventID>> getRelativeEventIdsPerAccount(List<EventID> eventIds, Map<EventID, OXException> errorsPerEventId) {
+        Map<Integer, List<EventID>> eventIdsPerAccountId = getRelativeEventIdsPerAccountId(eventIds, errorsPerEventId);
+        if (null == eventIdsPerAccountId || eventIdsPerAccountId.isEmpty()) {
+            return Collections.emptyMap();
+        }
+        Map<CalendarAccount, List<EventID>> eventIdsPerAccount = new HashMap<CalendarAccount, List<EventID>>(eventIdsPerAccountId.size());
+        try {
+            /*
+             * attempt to batch-load all referenced accounts
+             */
+            List<CalendarAccount> accounts = getAccounts(I2i(eventIdsPerAccountId.keySet()));
+            for (Entry<Integer, List<EventID>> entry : eventIdsPerAccountId.entrySet()) {
+                CalendarAccount account = accounts.stream().filter(a -> i(entry.getKey()) == a.getAccountId()).findFirst().orElse(null);
+                eventIdsPerAccount.put(account, entry.getValue());
+            }
+        } catch (OXException e) {
+            /*
+             * load each account separately as fallback & track errors
+             */
+            for (Entry<Integer, List<EventID>> entry : eventIdsPerAccountId.entrySet()) {
+                try {
+                    eventIdsPerAccount.put(getAccount(i(entry.getKey())), entry.getValue());
+                } catch (OXException x) {
+                    for (EventID eventId : entry.getValue()) {
+                        errorsPerEventId.put(getUniqueId(i(entry.getKey()), eventId), x);
+                    }
+                }
+            }
+        }
+        return eventIdsPerAccount;
+    }
+
+    /**
      * Builds a map of error events results for the supplied collection of exceptions, mapped to the corresponding folder identifier.
      *
      * @param errorsPerFolderId A map of errors associated with the corresponding folder identifier
@@ -442,6 +489,25 @@ public abstract class AbstractCompositingIDBasedCalendarAccess implements Transa
                 eventsResults.put(entry.getKey(), new DefaultEventsResult(entry.getValue()));
             }
             return eventsResults;
+        }
+        return Collections.emptyMap();
+    }
+
+    /**
+     * Builds a map of error results for the supplied collection of exceptions, mapped to the corresponding event identifier.
+     *
+     * @param errorsPerEventId A map of errors associated with the corresponding event identifier
+     * @return A corresponding map of error results, or an empty map if there were no errors
+     */
+    protected Map<EventID, ErrorAwareCalendarResult> getErrorCalendarResults(Map<EventID, OXException> errorsPerEventId) {
+        if (null != errorsPerEventId && 0 < errorsPerEventId.size()) {
+            Map<EventID, ErrorAwareCalendarResult> results = new HashMap<EventID, ErrorAwareCalendarResult>(errorsPerEventId.size());
+            for (Entry<EventID, OXException> entry : errorsPerEventId.entrySet()) {
+                EventID eventID = entry.getKey();
+                DefaultCalendarResult calendarResult = new DefaultCalendarResult(session, session.getUserId(), eventID.getFolderID(), null, null, null);
+                results.put(eventID, new DefaultErrorAwareCalendarResult(calendarResult, Collections.emptyList(), entry.getValue()));
+            }
+            return results;
         }
         return Collections.emptyMap();
     }
