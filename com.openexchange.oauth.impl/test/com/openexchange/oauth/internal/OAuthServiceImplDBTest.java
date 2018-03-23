@@ -192,18 +192,6 @@ public class OAuthServiceImplDBTest extends SQLTestCase {
                 // TODO Auto-generated method stub
 
             }
-
-            @Override
-            public OAuthAccount getAccount(Session session, int accountId, Connection connection) throws OXException {
-                // TODO Auto-generated method stub
-                return null;
-            }
-
-            @Override
-            public void updateAccount(int userId, int contextId, int accountId, Map<String, Object> arguments, Connection connection) throws OXException {
-                // TODO Auto-generated method stub
-
-            }
         };
         oauth = new OAuthServiceImpl(registry, oauthAccountStorage, null) {
 
