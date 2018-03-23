@@ -271,7 +271,7 @@ public abstract class AbstractOAuthFileStorageService implements AccountAware, O
         }
         eventProps.put(OAuthConstants.ARGUMENT_SCOPES, scopes);
         // Update the account
-        storage.updateAccount(userId, contextId, accountId, eventProps);
+        storage.updateAccount(session, accountId, eventProps);
     }
 
     /**

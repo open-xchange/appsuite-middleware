@@ -113,7 +113,7 @@ public class CallbackAction extends AbstractOAuthTokenAction {
             service = registry.getService(serviceId, session.getUserId(), session.getContextId());
         }
         final Map<String, Object> arguments = processOAuthArguments(requestData, session, service);
-        OAuthAccount oauthAccount = oAuthService.upsertAccount(serviceId, OAuthInteractionType.CALLBACK, arguments, session.getUserId(), session.getContextId(), getAccountId(requestData), scopes);
+        OAuthAccount oauthAccount = oAuthService.upsertAccount(session, serviceId, getAccountId(requestData), OAuthInteractionType.CALLBACK, arguments, scopes);
         
         // Trigger a reauthorize task if a reauthorize was requested
         String actionHint = (String) arguments.get(OAuthConstants.URLPARAM_ACTION_HINT);

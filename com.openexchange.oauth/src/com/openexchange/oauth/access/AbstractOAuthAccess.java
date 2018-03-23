@@ -134,7 +134,7 @@ public abstract class AbstractOAuthAccess implements OAuthAccess {
         if (Strings.isEmpty(account.getUserIdentity())) {
             String userIdentity = account.getMetaData().getUserIdentity(session, account.getToken(), account.getSecret());
             ((DefaultOAuthAccount) account).setUserIdentity(userIdentity);
-            oauthService.updateAccount(account.getId(), Collections.singletonMap(OAuthConstants.ARGUMENT_IDENTITY, userIdentity), session.getUserId(), session.getContextId());
+            oauthService.updateAccount(session, account.getId(), Collections.singletonMap(OAuthConstants.ARGUMENT_IDENTITY, userIdentity));
         }
 
         // Other checks?

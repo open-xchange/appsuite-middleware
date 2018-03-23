@@ -84,13 +84,12 @@ public interface OAuthAccountStorage {
 
     /**
      * Deletes the specified account.
-     *
-     * @param userId The user identifier
-     * @param contextId The context identifier
+     * @param session The session
      * @param accountId The account identifier
+     *
      * @throws OXException If deletion fails
      */
-    void deleteAccount(int userId, int contextId, int accountId) throws OXException;
+    void deleteAccount(Session session, int accountId) throws OXException;
 
     /**
      * Updates the specified account
@@ -111,14 +110,13 @@ public interface OAuthAccountStorage {
      * <li>enabled scopes; {@link OAuthConstants#ARGUMENT_SCOPES}</li>
      * <li>user password is <b>mandatory</b> if request token shall be updated; {@link OAuthConstants#ARGUMENT_PASSWORD}</li>
      * </ul>
-     *
-     * @param userId The user identifier
-     * @param contextId The context identifier
+     * @param session The session
      * @param accountId The account identifier
      * @param arguments The arguments to update
+     *
      * @throws OXException If update fails
      */
-    void updateAccount(int userId, int contextId, int accountId, Map<String, Object> arguments) throws OXException;
+    void updateAccount(Session session, int accountId, Map<String, Object> arguments) throws OXException;
     
     /**
      * Searches for an {@link OAuthAccount} with the specified user identity for the specified provider

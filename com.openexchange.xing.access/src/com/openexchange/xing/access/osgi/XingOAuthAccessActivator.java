@@ -126,7 +126,7 @@ public final class XingOAuthAccessActivator extends HousekeepingActivator {
             @Override
             public XingOAuthAccess accessFor(final int oauthAccountId, final Session session) throws OXException {
                 final OAuthService oAuthService = getService(OAuthService.class);
-                final OAuthAccount oAuthAccount = oAuthService.getAccount(oauthAccountId, session, session.getUserId(), session.getContextId());
+                final OAuthAccount oAuthAccount = oAuthService.getAccount(session, oauthAccountId);
 
                 OAuthAccessRegistryService registryService = Services.getService(OAuthAccessRegistryService.class);
                 OAuthAccessRegistry registry = registryService.get(KnownApi.XING.getFullName());

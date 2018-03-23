@@ -382,7 +382,7 @@ public abstract class AbstractOAuthTokenAction extends AbstractOAuthAJAXActionSe
         @Override
         public Void perform() throws OXException {
             OAuthService oauthService = getOAuthService();
-            OAuthAccount dbOAuthAccount = oauthService.getAccount(Integer.parseInt(accountId), session, session.getUserId(), session.getContextId());
+            OAuthAccount dbOAuthAccount = oauthService.getAccount(session, Integer.parseInt(accountId));
 
             OAuthAccessRegistryService registryService = Services.getService(OAuthAccessRegistryService.class);
             OAuthAccessRegistry oAuthAccessRegistry = registryService.get(serviceId);
@@ -392,7 +392,7 @@ public abstract class AbstractOAuthTokenAction extends AbstractOAuthAJAXActionSe
                 performReauthorize(oauthService);
             } else {
                 // If the OAuth access is not initialised yet reload from DB, as it may have been changed from another node
-                OAuthAccount cachedOAuthAccount = (access.getOAuthAccount() == null) ? oauthService.getAccount(Integer.parseInt(accountId), session, session.getUserId(), session.getContextId()) : access.getOAuthAccount();
+                OAuthAccount cachedOAuthAccount = (access.getOAuthAccount() == null) ? oauthService.getAccount(session, Integer.parseInt(accountId)) : access.getOAuthAccount();
                 if (dbOAuthAccount.getToken().equals(cachedOAuthAccount.getToken()) && dbOAuthAccount.getSecret().equals(cachedOAuthAccount.getSecret())) {
                     performReauthorize(oauthService);
                     access.initialize();
@@ -410,7 +410,7 @@ public abstract class AbstractOAuthTokenAction extends AbstractOAuthAJAXActionSe
             // Get the scopes
             Set<OAuthScope> scopes = getScopes(request, serviceId);
             // By now it doesn't matter which interaction type is passed
-            oauthService.updateAccount(Integer.parseInt(accountId), serviceId, OAuthInteractionType.CALLBACK, arguments, session.getUserId(), session.getContextId(), scopes);
+            oauthService.updateAccount(session, Integer.parseInt(accountId), serviceId, OAuthInteractionType.CALLBACK, arguments, scopes);
         }
 
         /*

@@ -211,7 +211,9 @@ public class OAuthAccountStorageSQLImpl implements OAuthAccountStorage, SecretEn
      * @see com.openexchange.oauth.OAuthStorage#deleteAccount(com.openexchange.session.Session, int)
      */
     @Override
-    public void deleteAccount(int userId, int contextId, int accountId) throws OXException {
+    public void deleteAccount(Session session, int accountId) throws OXException {
+        int userId = session.getUserId();
+        int contextId = session.getContextId();
         final Context context = getContext(contextId);
         final Connection con = getConnection(false, context);
         boolean rollback = false;
@@ -222,6 +224,7 @@ public class OAuthAccountStorageSQLImpl implements OAuthAccountStorage, SecretEn
 
             final DeleteListenerRegistry deleteListenerRegistry = DeleteListenerRegistry.getInstance();
             final Map<String, Object> properties = Collections.<String, Object> emptyMap();
+
             deleteListenerRegistry.triggerOnBeforeDeletion(accountId, properties, userId, contextId, con);
             stmt = con.prepareStatement("DELETE FROM oauthAccounts WHERE cid = ? AND user = ? and id = ?");
             stmt.setInt(1, contextId);
@@ -325,11 +328,13 @@ public class OAuthAccountStorageSQLImpl implements OAuthAccountStorage, SecretEn
      * @see com.openexchange.oauth.OAuthAccountStorage#updateAccount(com.openexchange.session.Session, int, java.util.Map)
      */
     @Override
-    public void updateAccount(int userId, int contextId, int accountId, Map<String, Object> arguments) throws OXException {
+    public void updateAccount(Session session, int accountId, Map<String, Object> arguments) throws OXException {
         final List<Setter> list = setterFrom(arguments);
         if (list.isEmpty()) {
             return;
         }
+        int contextId = session.getContextId();
+        int userId = session.getUserId();
         final Context context = getContext(contextId);
         Connection connection = getConnection(false, context);
         PreparedStatement stmt = null;
@@ -351,7 +356,7 @@ public class OAuthAccountStorageSQLImpl implements OAuthAccountStorage, SecretEn
             stmt.setInt(pos, accountId);
             final int rows = stmt.executeUpdate();
             if (rows <= 0) {
-                throw OAuthExceptionCodes.ACCOUNT_NOT_FOUND.create(Integer.valueOf(accountId), Integer.valueOf(userId), Integer.valueOf(contextId));
+                throw OAuthExceptionCodes.ACCOUNT_NOT_FOUND.create(accountId, userId, contextId);
             }
         } catch (final SQLException e) {
             throw OAuthExceptionCodes.SQL_ERROR.create(e, e.getMessage());

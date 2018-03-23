@@ -142,10 +142,10 @@ public class OAuthServiceImpl implements OAuthService {
     /*
      * (non-Javadoc)
      * 
-     * @see com.openexchange.oauth.OAuthService#getAccounts(com.openexchange.session.Session, int, int)
+     * @see com.openexchange.oauth.OAuthService#getAccounts(com.openexchange.session.Session)
      */
     @Override
-    public List<OAuthAccount> getAccounts(final Session session, final int user, final int contextId) throws OXException {
+    public List<OAuthAccount> getAccounts(final Session session) throws OXException {
         return oauthAccountStorage.getAccounts(session);
     }
 
@@ -155,7 +155,7 @@ public class OAuthServiceImpl implements OAuthService {
      * @see com.openexchange.oauth.OAuthService#getAccounts(java.lang.String, com.openexchange.session.Session, int, int)
      */
     @Override
-    public List<OAuthAccount> getAccounts(final String serviceMetaData, final Session session, final int user, final int contextId) throws OXException {
+    public List<OAuthAccount> getAccounts(Session session, String serviceMetaData) throws OXException {
         return oauthAccountStorage.getAccounts(session, serviceMetaData);
     }
 
@@ -165,7 +165,7 @@ public class OAuthServiceImpl implements OAuthService {
      * @see com.openexchange.oauth.OAuthService#initOAuth(java.lang.String, java.lang.String, com.openexchange.oauth.HostInfo, com.openexchange.session.Session, java.util.Set)
      */
     @Override
-    public OAuthInteraction initOAuth(final String serviceMetaData, final String callbackUrl, final HostInfo currentHost, final Session session, Set<OAuthScope> scopes) throws OXException {
+    public OAuthInteraction initOAuth(final Session session, final String serviceMetaData, final String callbackUrl, final HostInfo currentHost, Set<OAuthScope> scopes) throws OXException {
         try {
             final int contextId = session.getContextId();
             final int userId = session.getUserId();
@@ -272,12 +272,12 @@ public class OAuthServiceImpl implements OAuthService {
      * @see com.openexchange.oauth.OAuthService#createAccount(java.lang.String, java.util.Map, int, int, java.util.Set)
      */
     @Override
-    public OAuthAccount createAccount(final String serviceMetaData, final Map<String, Object> arguments, final int user, final int contextId, Set<OAuthScope> scopes) throws OXException {
+    public OAuthAccount createAccount(Session session, final String serviceMetaData, Set<OAuthScope> scopes, final Map<String, Object> arguments) throws OXException {
         isNull(arguments, OAuthConstants.ARGUMENT_DISPLAY_NAME, OAuthConstants.ARGUMENT_SESSION, OAuthConstants.ARGUMENT_TOKEN, OAuthConstants.ARGUMENT_SECRET);
         // Create appropriate OAuth account instance
         DefaultOAuthAccount account = new DefaultOAuthAccount();
         // Determine associated service's meta data
-        OAuthServiceMetaData service = registry.getService(serviceMetaData, user, contextId);
+        OAuthServiceMetaData service = registry.getService(serviceMetaData, session.getUserId(), session.getContextId());
         account.setMetaData(service);
         // Set display name & identifier
         String displayName = (String) arguments.get(OAuthConstants.ARGUMENT_DISPLAY_NAME);
@@ -287,7 +287,7 @@ public class OAuthServiceImpl implements OAuthService {
         account.setSecret((String) arguments.get(OAuthConstants.ARGUMENT_SECRET));
         account.setEnabledScopes(scopes);
         // Store the account
-        Session session = (Session) arguments.get(OAuthConstants.ARGUMENT_SESSION);
+        //Session session = (Session) arguments.get(OAuthConstants.ARGUMENT_SESSION);
         oauthAccountStorage.storeAccount(session, account);
         return account;
     }
@@ -298,9 +298,9 @@ public class OAuthServiceImpl implements OAuthService {
      * @see com.openexchange.oauth.OAuthService#upsertAccount(java.lang.String, java.util.Map, int, int, java.util.Set)
      */
     @Override
-    public OAuthAccount upsertAccount(String serviceMetaData, OAuthInteractionType type, Map<String, Object> arguments, int user, int contextId, int accountId, Set<OAuthScope> scopes) throws OXException {
+    public OAuthAccount upsertAccount(Session session, String serviceMetaData, int accountId, OAuthInteractionType type, Map<String, Object> arguments, Set<OAuthScope> scopes) throws OXException {
         DefaultOAuthAccount account = new DefaultOAuthAccount();
-        OAuthServiceMetaData service = registry.getService(serviceMetaData, user, contextId);
+        OAuthServiceMetaData service = registry.getService(serviceMetaData, session.getUserId(), session.getContextId());
         account.setMetaData(service);
 
         HttpsURLConnection.setDefaultSSLSocketFactory(Services.getService(SSLSocketFactoryProvider.class).getDefault());
@@ -312,7 +312,7 @@ public class OAuthServiceImpl implements OAuthService {
         account.setDisplayName(displayName);
         account.setEnabledScopes(scopes);
 
-        Session session = (Session) arguments.get(OAuthConstants.ARGUMENT_SESSION);
+        //Session session = (Session) arguments.get(OAuthConstants.ARGUMENT_SESSION);
         String userIdentity = service.getUserIdentity(session, account.getToken(), account.getSecret());
         account.setUserIdentity(userIdentity);
 
@@ -358,12 +358,12 @@ public class OAuthServiceImpl implements OAuthService {
      * @see com.openexchange.oauth.OAuthService#createAccount(java.lang.String, com.openexchange.oauth.OAuthInteractionType, java.util.Map, int, int, java.util.Set)
      */
     @Override
-    public OAuthAccount createAccount(final String serviceMetaData, final OAuthInteractionType type, final Map<String, Object> arguments, final int user, final int contextId, Set<OAuthScope> scopes) throws OXException {
+    public OAuthAccount createAccount(Session session, final String serviceMetaData, Set<OAuthScope> scopes, final OAuthInteractionType type, final Map<String, Object> arguments) throws OXException {
         isNull(arguments, OAuthConstants.ARGUMENT_DISPLAY_NAME, OAuthConstants.ARGUMENT_SESSION);
         try {
             DefaultOAuthAccount account = new DefaultOAuthAccount();
 
-            OAuthServiceMetaData service = registry.getService(serviceMetaData, user, contextId);
+            OAuthServiceMetaData service = registry.getService(serviceMetaData, session.getUserId(), session.getContextId());
             account.setMetaData(service);
 
             String displayName = (String) arguments.get(OAuthConstants.ARGUMENT_DISPLAY_NAME);
@@ -372,7 +372,7 @@ public class OAuthServiceImpl implements OAuthService {
             HttpsURLConnection.setDefaultSSLSocketFactory(Services.getService(SSLSocketFactoryProvider.class).getDefault());
             obtainToken(type, arguments, account, scopes);
 
-            Session session = (Session) arguments.get(OAuthConstants.ARGUMENT_SESSION);
+            //Session session = (Session) arguments.get(OAuthConstants.ARGUMENT_SESSION);
             account.setEnabledScopes(scopes);
 
             String userIdentity = service.getUserIdentity(session, account.getToken(), account.getSecret());
@@ -413,9 +413,9 @@ public class OAuthServiceImpl implements OAuthService {
      * @see com.openexchange.oauth.OAuthService#deleteAccount(int, int, int)
      */
     @Override
-    public void deleteAccount(final int accountId, final int user, final int contextId) throws OXException {
-        oauthAccountStorage.deleteAccount(user, contextId, accountId);
-        postOAuthDeleteEvent(accountId, user, contextId);
+    public void deleteAccount(Session session, final int accountId) throws OXException {
+        oauthAccountStorage.deleteAccount(session, accountId);
+        postOAuthDeleteEvent(accountId, session.getUserId(), session.getContextId());
     }
 
     /*
@@ -424,8 +424,8 @@ public class OAuthServiceImpl implements OAuthService {
      * @see com.openexchange.oauth.OAuthService#updateAccount(int, java.util.Map, int, int)
      */
     @Override
-    public void updateAccount(final int accountId, final Map<String, Object> arguments, final int user, final int contextId) throws OXException {
-        oauthAccountStorage.updateAccount(user, contextId, accountId, arguments);
+    public void updateAccount(Session session, final int accountId, final Map<String, Object> arguments) throws OXException {
+        oauthAccountStorage.updateAccount(session, accountId, arguments);
     }
 
     /*
@@ -434,7 +434,7 @@ public class OAuthServiceImpl implements OAuthService {
      * @see com.openexchange.oauth.OAuthService#getAccount(int, com.openexchange.session.Session, int, int)
      */
     @Override
-    public OAuthAccount getAccount(final int accountId, final Session session, final int user, final int contextId) throws OXException {
+    public OAuthAccount getAccount(final Session session, final int accountId) throws OXException {
         return oauthAccountStorage.getAccount(session, accountId);
     }
 
@@ -450,7 +450,7 @@ public class OAuthServiceImpl implements OAuthService {
         final List<OAuthServiceMetaData> allServices = registry.getAllServices(userId, contextId);
         for (final OAuthServiceMetaData metaData : allServices) {
             if (metaData.getAPI() == api) {
-                final List<OAuthAccount> accounts = getAccounts(metaData.getId(), session, userId, contextId);
+                final List<OAuthAccount> accounts = getAccounts(session, metaData.getId());
                 OAuthAccount likely = null;
                 for (final OAuthAccount acc : accounts) {
                     if (likely == null || acc.getId() < likely.getId()) {
@@ -471,11 +471,11 @@ public class OAuthServiceImpl implements OAuthService {
      * @see com.openexchange.oauth.OAuthService#updateAccount(int, java.lang.String, com.openexchange.oauth.OAuthInteractionType, java.util.Map, int, int, java.util.Set)
      */
     @Override
-    public OAuthAccount updateAccount(final int accountId, final String serviceMetaData, final OAuthInteractionType type, final Map<String, Object> arguments, final int user, final int contextId, Set<OAuthScope> scopes) throws OXException {
+    public OAuthAccount updateAccount(Session session, final int accountId, final String serviceMetaData, final OAuthInteractionType type, final Map<String, Object> arguments, Set<OAuthScope> scopes) throws OXException {
         isNull(arguments, OAuthConstants.ARGUMENT_SESSION);
         DefaultOAuthAccount account = new DefaultOAuthAccount();
 
-        OAuthServiceMetaData service = registry.getService(serviceMetaData, user, contextId);
+        OAuthServiceMetaData service = registry.getService(serviceMetaData, session.getUserId(), session.getContextId());
         account.setMetaData(service);
 
         String displayName = (String) arguments.get(OAuthConstants.ARGUMENT_DISPLAY_NAME);
@@ -483,7 +483,7 @@ public class OAuthServiceImpl implements OAuthService {
         account.setId(accountId);
         obtainToken(type, arguments, account, scopes);
 
-        Session session = (Session) arguments.get(OAuthConstants.ARGUMENT_SESSION);
+        //Session session = (Session) arguments.get(OAuthConstants.ARGUMENT_SESSION);
         account.setEnabledScopes(scopes);
         // Lazy identity update
         if (!oauthAccountStorage.hasUserIdentity(session, accountId, serviceMetaData)) {

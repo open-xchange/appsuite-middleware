@@ -187,7 +187,7 @@ public final class InitAction extends AbstractOAuthTokenAction {
          * Invoke
          */
         final HostInfo currentHost = determineHost(request, session);
-        final OAuthInteraction interaction = oauthService.initOAuth(serviceId, callbackUrl, currentHost, session, scopes);
+        final OAuthInteraction interaction = oauthService.initOAuth(session, serviceId, callbackUrl, currentHost, scopes);
         final OAuthToken requestToken = interaction.getRequestToken();
         /*
          * Create a container to set some state information: Request token's secret, call-back URL, whatever
