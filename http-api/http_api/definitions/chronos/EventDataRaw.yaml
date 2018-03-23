@@ -166,7 +166,3 @@ flags:
 relatedTo:
   type: string
   description: The relationship between this and other events.
-error:
-  type: object
-  properties:
-    $ref: ../common/CommonResponseData.yaml
