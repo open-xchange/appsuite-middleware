@@ -236,7 +236,12 @@ public abstract class AbstractPublicationService implements PublicationService {
 
     @Override
     public void update(final Publication publication) throws OXException {
-        checkPermission(Permission.UPDATE, publicationForPermissionCheck(publication));
+        Publication publicationForCheck = publicationForPermissionCheck(publication);
+        if (null == publicationForCheck) {
+            LOG.warn("Failure while trying to update a publication. Unable to load publication with id: %1$s", publication.getId());
+            return;
+        }
+        checkPermission(Permission.UPDATE, publicationForCheck);
         modifyIncoming(publication);
         beforeUpdate(publication);
         STORAGE.updatePublication(publication);
