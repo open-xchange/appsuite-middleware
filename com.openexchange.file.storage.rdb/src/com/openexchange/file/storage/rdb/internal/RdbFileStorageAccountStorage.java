@@ -478,10 +478,14 @@ public class RdbFileStorageAccountStorage implements FileStorageAccountStorage, 
         {
             Connection con = (Connection) session.getParameter("__file.storage.delete.connection");
             if (null != con) {
-                if (isInTransaction(con)) {
-                    // Given connection is already in transaction. Invoke & return immediately.
-                    deleteAccounts(serviceId, accounts, genericConfIds, session, con);
-                    return;
+                try {
+                    if (Databases.isInTransaction(con)) {
+                        // Given connection is already in transaction. Invoke & return immediately.
+                        deleteAccounts(serviceId, accounts, genericConfIds, session, con);
+                        return;
+                    }
+                } catch (SQLException e) {
+                    throw FileStorageExceptionCodes.SQL_ERROR.create(e, e.getMessage());
                 }
 
                 // Use given connection
@@ -517,14 +521,6 @@ public class RdbFileStorageAccountStorage implements FileStorageAccountStorage, 
                 Databases.autocommit(con);
             }
             connectionProvider.ungetConnection(con);
-        }
-    }
-
-    private static boolean isInTransaction(Connection con) throws OXException {
-        try {
-            return false == con.getAutoCommit();
-        } catch (SQLException e) {
-            throw FileStorageExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         }
     }
 
