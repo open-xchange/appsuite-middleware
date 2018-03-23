@@ -909,6 +909,10 @@ public final class UploadUtility {
                 // This is Java 6. Get patch level version.
                 // Assume JAVA_VERSION is 1.6.0_x
                 String javaVersion = getJavaVersionTrimmed();
+                if (javaVersion == null) {
+                    // Assume "yes"
+                    return true;
+                }
                 assert javaVersion.startsWith("1.6") : javaVersion;
                 String patchLevelStr = javaVersion.substring(javaVersion.indexOf('_') + 1);
                 return Integer.parseInt(patchLevelStr) > 20;
