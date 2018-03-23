@@ -47,45 +47,31 @@
  *
  */
 
-package com.openexchange.chronos.provider.composition.impl.idmangling;
+package com.openexchange.chronos.service;
 
-import com.openexchange.chronos.service.EventID;
-import com.openexchange.chronos.service.ImportResult;
+import java.util.List;
+import com.openexchange.exception.OXException;
 
 /**
- * {@link IDManglingImportResult}
+ * {@link ErrorAwareCalendarResult}
  *
- * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.10.0
  */
-public class IDManglingImportResult extends IDManglingErrorAwareCalendarResult implements ImportResult {
-
-    private final ImportResult delegate;
+public interface ErrorAwareCalendarResult extends CalendarResult {
 
     /**
-     * Initializes a new {@link IDManglingImportResult}.
+     * Gets the (fatal) error that prevented the operation from being completed successfully, or <code>null</code> if there is none
      *
-     * @param delegate The result delegate
-     * @param accountId The identifier of the calendar account the result originates in
+     * @return The (fatal) error that prevented the operation from being completed successfully, or <code>null</code> if there is none
      */
-    public IDManglingImportResult(ImportResult delegate, int accountId) {
-        super(delegate, accountId);
-        this.delegate = delegate;
-    }
+    OXException getError();
 
-    @Override
-    public int getIndex() {
-        return delegate.getIndex();
-    }
-
-    @Override
-    public EventID getId() {
-        return null != delegate.getId() ? IDMangling.getUniqueId(accountId, delegate.getId()) : null;
-    }
-
-    @Override
-    public String toString() {
-        return "IDManglingImportResult [accountId=" + accountId + ", delegate=" + delegate + "]";
-    }
+    /**
+     * Gets the list of (non-fatal) warnings that occurred during processing, or an empty list if there are none
+     *
+     * @return The list of (non-fatal) warnings that occurred during processing, or an empty list if there are none
+     */
+    List<OXException> getWarnings();
 
 }

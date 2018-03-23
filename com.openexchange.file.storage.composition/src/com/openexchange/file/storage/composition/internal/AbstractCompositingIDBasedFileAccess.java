@@ -723,7 +723,7 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractCompo
         } else if (1 == versions.length && FileStorageFileAccess.CURRENT_VERSION == versions[0]) {
             List<IDTuple> result = access.removeDocument(Collections.singletonList(
                 new IDTuple(fileID.getFolderId(), fileID.getFileId())), FileStorageFileAccess.DISTANT_FUTURE);
-            notRemoved = 0 < result.size() ? versions : new String[0];
+            notRemoved = null != result && 0 < result.size() ? versions : new String[0];
         } else {
             notRemoved = versions;
         }

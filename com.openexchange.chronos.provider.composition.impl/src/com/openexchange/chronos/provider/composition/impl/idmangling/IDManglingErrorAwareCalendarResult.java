@@ -49,43 +49,46 @@
 
 package com.openexchange.chronos.provider.composition.impl.idmangling;
 
-import com.openexchange.chronos.service.EventID;
-import com.openexchange.chronos.service.ImportResult;
+import java.util.List;
+import com.openexchange.chronos.service.ErrorAwareCalendarResult;
+import com.openexchange.exception.OXException;
 
 /**
- * {@link IDManglingImportResult}
+ * {@link IDManglingErrorAwareCalendarResult}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public class IDManglingImportResult extends IDManglingErrorAwareCalendarResult implements ImportResult {
+public class IDManglingErrorAwareCalendarResult extends IDManglingCalendarResult implements ErrorAwareCalendarResult {
 
-    private final ImportResult delegate;
+    private final OXException newError;
+    private final List<OXException> newWarnings;
 
     /**
-     * Initializes a new {@link IDManglingImportResult}.
+     * Initializes a new {@link IDManglingErrorAwareCalendarResult}.
      *
      * @param delegate The result delegate
      * @param accountId The identifier of the calendar account the result originates in
      */
-    public IDManglingImportResult(ImportResult delegate, int accountId) {
+    public IDManglingErrorAwareCalendarResult(ErrorAwareCalendarResult delegate, int accountId) {
         super(delegate, accountId);
-        this.delegate = delegate;
+        this.newError = IDMangling.withUniqueIDs(delegate.getError(), accountId);
+        this.newWarnings = IDMangling.withUniqueID(delegate.getWarnings(), accountId);
     }
 
     @Override
-    public int getIndex() {
-        return delegate.getIndex();
+    public OXException getError() {
+        return newError;
     }
 
     @Override
-    public EventID getId() {
-        return null != delegate.getId() ? IDMangling.getUniqueId(accountId, delegate.getId()) : null;
+    public List<OXException> getWarnings() {
+        return newWarnings;
     }
 
     @Override
     public String toString() {
-        return "IDManglingImportResult [accountId=" + accountId + ", delegate=" + delegate + "]";
+        return "IDManglingErrorAwareCalendarResult [accountId=" + accountId + ", delegate=" + delegate + "]";
     }
 
 }

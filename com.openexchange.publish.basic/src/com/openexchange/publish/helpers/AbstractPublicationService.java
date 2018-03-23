@@ -151,7 +151,7 @@ public abstract class AbstractPublicationService implements PublicationService {
                 modifyOutgoing(publication);
                 returnPublications.add(publication);
             } catch (OXException e) {
-                if (InfostoreExceptionCodes.NOT_EXIST.equals(e)){
+                if (InfostoreExceptionCodes.NOT_EXIST.equals(e)) {
                     LOG.debug("", e);
                 } else {
                     throw e;
@@ -172,7 +172,7 @@ public abstract class AbstractPublicationService implements PublicationService {
                 modifyOutgoing(publication);
                 returnPublications.add(publication);
             } catch (OXException e) {
-                if (InfostoreExceptionCodes.NOT_EXIST.equals(e)){
+                if (InfostoreExceptionCodes.NOT_EXIST.equals(e)) {
                     LOG.debug("", e);
                 } else {
                     throw e;
@@ -193,19 +193,18 @@ public abstract class AbstractPublicationService implements PublicationService {
             publications = STORAGE.getPublicationsOfUser(ctx, userId, module);
         }
 
-        for (final Publication publication : publications) {
-            /* as some publications are not working anymore, we should at least filter out the not working ones and write them to LOG */
-            try {
-                modifyOutgoing(publication);
-                String url = (String) publication.getConfiguration().get("url");
-                //if (url.contains(publication.getModule())) {
+        if (publications != null) {
+            for (final Publication publication : publications) {
+                /* as some publications are not working anymore, we should at least filter out the not working ones and write them to LOG */
+                try {
+                    modifyOutgoing(publication);
                     returnPublications.add(publication);
-                //}
-            } catch (OXException e) {
-                if (InfostoreExceptionCodes.NOT_EXIST.equals(e) || InfostoreExceptionCodes.DOCUMENT_NOT_EXIST.equals(e)) {
-                    LOG.debug("", e);
-                } else {
-                    throw e;
+                } catch (OXException e) {
+                    if (InfostoreExceptionCodes.NOT_EXIST.equals(e) || InfostoreExceptionCodes.DOCUMENT_NOT_EXIST.equals(e)) {
+                        LOG.debug("", e);
+                    } else {
+                        throw e;
+                    }
                 }
             }
         }
@@ -237,7 +236,12 @@ public abstract class AbstractPublicationService implements PublicationService {
 
     @Override
     public void update(final Publication publication) throws OXException {
-        checkPermission(Permission.UPDATE, publicationForPermissionCheck(publication));
+        Publication publicationForCheck = publicationForPermissionCheck(publication);
+        if (null == publicationForCheck) {
+            LOG.warn("Failure while trying to update a publication. Unable to load publication with id: %1$s", publication.getId());
+            return;
+        }
+        checkPermission(Permission.UPDATE, publicationForCheck);
         modifyIncoming(publication);
         beforeUpdate(publication);
         STORAGE.updatePublication(publication);
@@ -305,15 +309,15 @@ public abstract class AbstractPublicationService implements PublicationService {
         boolean allow = false;
         try {
             switch (permission) {
-            case CREATE:
-                allow = mayCreate(publication);
-                break;
-            case UPDATE:
-                allow = mayUpdate(publication);
-                break;
-            case DELETE:
-                allow = mayDelete(publication);
-                break;
+                case CREATE:
+                    allow = mayCreate(publication);
+                    break;
+                case UPDATE:
+                    allow = mayUpdate(publication);
+                    break;
+                case DELETE:
+                    allow = mayDelete(publication);
+                    break;
             }
         } catch (final OXException x) {
             throw x;

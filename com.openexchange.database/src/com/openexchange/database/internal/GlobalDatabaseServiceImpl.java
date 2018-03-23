@@ -58,6 +58,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import org.osgi.framework.Bundle;
 import org.osgi.framework.FrameworkUtil;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.cascade.ConfigViewFactory;
@@ -171,7 +172,11 @@ public class GlobalDatabaseServiceImpl implements GlobalDatabaseService {
         /*
          * use appropriate connection provider per global database & a local resource accessor for the changeset file
          */
-        BundleResourceAccessor localResourceAccessor = new BundleResourceAccessor(FrameworkUtil.getBundle(GlobalDbInit.class));
+        Bundle bundle = FrameworkUtil.getBundle(GlobalDbInit.class);
+        if (bundle == null) {
+            throw new OXException().setLogMessage("Class '" + GlobalDbInit.class.getName() + "' was loaded outside from OSGi!");
+        }
+        BundleResourceAccessor localResourceAccessor = new BundleResourceAccessor(bundle);
         Set<GlobalDbConfig> dbConfigs = new HashSet<GlobalDbConfig>(newGlobalDbConfigs.values());
         List<DBMigrationState> migrationStates = new ArrayList<DBMigrationState>(dbConfigs.size());
         for (GlobalDbConfig dbConfig : dbConfigs) {

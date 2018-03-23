@@ -187,8 +187,10 @@ public class FileHolder implements IFileHolder {
 
         if (is instanceof ByteArrayInputStream) {
             this.bytes = bytesFrom((ByteArrayInputStream) is);
-            isClosure = new ByteArrayInputStreamClosure(bytes);
-            this.length = bytes.length;
+            if (null != this.bytes) {
+                isClosure = new ByteArrayInputStreamClosure(bytes);
+                this.length = bytes.length;
+            }
         } else {
             this.bytes = null;
         }

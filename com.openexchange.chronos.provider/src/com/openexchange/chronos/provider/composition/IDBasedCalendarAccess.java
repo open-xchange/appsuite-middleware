@@ -74,6 +74,7 @@ import com.openexchange.chronos.provider.folder.FolderCalendarProvider;
 import com.openexchange.chronos.provider.groupware.GroupwareFolderType;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.CalendarResult;
+import com.openexchange.chronos.service.ErrorAwareCalendarResult;
 import com.openexchange.chronos.service.EventID;
 import com.openexchange.chronos.service.EventsResult;
 import com.openexchange.chronos.service.FreeBusyResult;
@@ -495,6 +496,15 @@ public interface IDBasedCalendarAccess extends TransactionAware, CalendarParamet
      * @return The delete result
      */
     CalendarResult deleteEvent(EventID eventID, long clientTimestamp) throws OXException;
+
+    /**
+     * Deletes multiple existing events.
+     *
+     * @param eventIDs The identifiers of the event to delete
+     * @param clientTimestamp The last timestamp / sequence number known by the client to catch concurrent updates
+     * @return The delete results per requested identifier
+     */
+    Map<EventID, ErrorAwareCalendarResult> deleteEvents(List<EventID> eventIDs, long clientTimestamp) throws OXException;
 
     /**
      * Splits an existing event series into two separate event series.

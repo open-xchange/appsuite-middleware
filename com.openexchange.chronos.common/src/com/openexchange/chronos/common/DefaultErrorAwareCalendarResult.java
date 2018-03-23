@@ -47,45 +47,46 @@
  *
  */
 
-package com.openexchange.chronos.provider.composition.impl.idmangling;
+package com.openexchange.chronos.common;
 
-import com.openexchange.chronos.service.EventID;
-import com.openexchange.chronos.service.ImportResult;
+import java.util.List;
+import com.openexchange.chronos.service.CalendarResult;
+import com.openexchange.chronos.service.ErrorAwareCalendarResult;
+import com.openexchange.exception.OXException;
 
 /**
- * {@link IDManglingImportResult}
+ * {@link DefaultErrorAwareCalendarResult}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public class IDManglingImportResult extends IDManglingErrorAwareCalendarResult implements ImportResult {
+public class DefaultErrorAwareCalendarResult extends DefaultCalendarResult implements ErrorAwareCalendarResult {
 
-    private final ImportResult delegate;
+    private final OXException error;
+    private final List<OXException> warnings;
 
     /**
-     * Initializes a new {@link IDManglingImportResult}.
+     * Initializes a new {@link DefaultErrorAwareCalendarResult}.
      *
-     * @param delegate The result delegate
-     * @param accountId The identifier of the calendar account the result originates in
+     * @param result The underlying calendar result
+     * @param warnings The list of (non-fatal) warnings that occurred during processing, or an empty list if there are none
+     * @param error The (fatal) error that prevented the operation from being completed successfully, or null if there is none
      */
-    public IDManglingImportResult(ImportResult delegate, int accountId) {
-        super(delegate, accountId);
-        this.delegate = delegate;
+    public DefaultErrorAwareCalendarResult(CalendarResult result, List<OXException> warnings, OXException error) {
+        super(result.getSession(), result.getCalendarUser(), result.getFolderID(), result.getCreations(), result.getUpdates(), result.getDeletions());
+        this.warnings = warnings;
+        this.error = error;
     }
 
     @Override
-    public int getIndex() {
-        return delegate.getIndex();
+    public OXException getError() {
+        return error;
     }
 
-    @Override
-    public EventID getId() {
-        return null != delegate.getId() ? IDMangling.getUniqueId(accountId, delegate.getId()) : null;
-    }
 
     @Override
-    public String toString() {
-        return "IDManglingImportResult [accountId=" + accountId + ", delegate=" + delegate + "]";
+    public List<OXException> getWarnings() {
+        return warnings;
     }
 
 }
