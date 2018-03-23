@@ -1,3 +1,9 @@
+open-xchange-halo (7.8.4-25) stable; urgency=medium
+
+  * Build for patch 2018-03-26 (4619)
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Fri, 23 Mar 2018 10:50:43 +0100
+
 open-xchange-halo (7.8.4-24) stable; urgency=medium
 
   * Build for patch 2018-03-12 (4602)
