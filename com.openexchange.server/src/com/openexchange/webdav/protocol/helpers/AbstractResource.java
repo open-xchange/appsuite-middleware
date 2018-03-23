@@ -138,7 +138,10 @@ public abstract class AbstractResource implements WebdavResource {
     public WebdavResource move(final WebdavPath dest, final boolean noroot, final boolean overwrite) throws WebdavProtocolException {
         final WebdavResource copy = copy(dest);
         delete();
-        ((AbstractResource) copy).setCreationDate(getCreationDate());
+        Date creationDate = getCreationDate();
+        if (null != creationDate) {
+            ((AbstractResource) copy).setCreationDate(creationDate);
+        }
         return copy;
     }
 
