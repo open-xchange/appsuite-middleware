@@ -823,6 +823,9 @@ public final class UploadUtility {
                 Class<?> clazz = Class.forName("java.io.DeleteOnExitHook");
                 Field[] declaredFields = clazz.getDeclaredFields();
                 Field filesField = getFieldFrom("files", declaredFields);
+                if (filesField == null) {
+                    throw new IllegalStateException("Can't initialize. Are you running an incompatible java version?");
+                }
                 filesField.setAccessible(true);
                 LinkedHashSet<String> files = (LinkedHashSet<String>) filesField.get(null);
                 if (null == files) {
