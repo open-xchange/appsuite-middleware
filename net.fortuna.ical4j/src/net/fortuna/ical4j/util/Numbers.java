@@ -46,7 +46,7 @@ public final class Numbers {
      */
     private Numbers() {
     }
-    
+
     /**
      * Wraps <code>java.lang.Integer.parseInt()</code> to accept values with
      * a PLUS character (i.e. "+2").
@@ -54,9 +54,12 @@ public final class Numbers {
      * @return a parsed integer value
      */
     public static int parseInt(final String value) {
-        if (value != null && value.charAt(0) == '+') {
-            return Integer.parseInt(value.substring(1));
+        if (null == value) {
+            throw new NumberFormatException("null");
         }
-        return Integer.parseInt(value);
+        if (value.length() <= 0) {
+            throw new NumberFormatException("empty string");
+        }
+        return value.charAt(0) == '+' ? Integer.parseInt(value.substring(1)) : Integer.parseInt(value);
     }
 }
