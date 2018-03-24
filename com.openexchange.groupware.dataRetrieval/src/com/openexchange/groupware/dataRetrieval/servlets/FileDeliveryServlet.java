@@ -104,6 +104,7 @@ public class FileDeliveryServlet extends HttpServlet {
         final String token = req.getParameter("token");
         if(token == null) {
             resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Missing parameter 'token");
+            return;
         }
         final Map<String, Object> parameters = PARAM_MAP.get(token);
         if(parameters == null) {

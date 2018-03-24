@@ -175,6 +175,8 @@ public abstract class AbstractOAuthFileStorageService implements AccountAware, O
 
     @Override
     public void onAfterOAuthAccountDeletion(int id, Map<String, Object> eventProps, int user, int cid, Connection con) throws OXException {
+        Integer iUserId = Integer.valueOf(user);
+        Integer iContextId = Integer.valueOf(cid);
         try {
             List<FileStorageAccount> toDelete = new LinkedList<FileStorageAccount>();
             FakeSession session = new FakeSession(null, user, cid);
@@ -189,17 +191,22 @@ public abstract class AbstractOAuthFileStorageService implements AccountAware, O
             FileStorageAccountManager accountManager = getAccountManager();
             OAuthAccessRegistryService registryService = services.getService(OAuthAccessRegistryService.class);
             OAuthAccessRegistry registry = registryService.get(api.getServiceId());
-            for (FileStorageAccount deleteMe : toDelete) {
-                accountManager.deleteAccount(deleteMe, session);
-                LOG.info("Deleted {} file storage account with id {} as OAuth account {} was deleted for user {} in context {}", deleteMe.getId(), api.getName(), deleteMe.getId(), user, cid);
-                boolean purged = registry.purgeUserAccess(session.getContextId(), session.getUserId());
-                if (purged) {
-                    LOG.info("Removed {} OAuth accesses from registry for the deleted OAuth account with id '{}' for user '{}' in context '{}'", api.getName(), deleteMe.getId(), user, cid);
+            session.setParameter("__file.storage.delete.connection", con);
+            try {
+                for (FileStorageAccount deleteMe : toDelete) {
+                    accountManager.deleteAccount(deleteMe, session);
+                    LOG.info("Deleted {} file storage account with id {} as OAuth account {} was deleted for user {} in context {}", deleteMe.getId(), api.getName(), deleteMe.getId(), iUserId, iContextId);
+                    boolean purged = registry.purgeUserAccess(session.getContextId(), session.getUserId());
+                    if (purged) {
+                        LOG.info("Removed {} OAuth accesses from registry for the deleted OAuth account with id '{}' for user '{}' in context '{}'", api.getName(), deleteMe.getId(), iUserId, iContextId);
+                    }
                 }
+            } finally {
+                session.setParameter("__file.storage.delete.connection", null);
             }
 
         } catch (Exception e) {
-            LOG.warn("Could not delete possibly existing {} accounts associated with deleted OAuth account {} for user {} in context {}", api.getName(), id, user, cid, e);
+            LOG.warn("Could not delete possibly existing {} accounts associated with deleted OAuth account {} for user {} in context {}", api.getName(), Integer.valueOf(id), iUserId, iContextId, e);
         }
     }
 

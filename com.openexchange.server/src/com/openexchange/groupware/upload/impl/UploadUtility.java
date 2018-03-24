@@ -823,6 +823,9 @@ public final class UploadUtility {
                 Class<?> clazz = Class.forName("java.io.DeleteOnExitHook");
                 Field[] declaredFields = clazz.getDeclaredFields();
                 Field filesField = getFieldFrom("files", declaredFields);
+                if (filesField == null) {
+                    throw new IllegalStateException("Can't initialize. Are you running an incompatible java version?");
+                }
                 filesField.setAccessible(true);
                 LinkedHashSet<String> files = (LinkedHashSet<String>) filesField.get(null);
                 if (null == files) {
@@ -909,6 +912,10 @@ public final class UploadUtility {
                 // This is Java 6. Get patch level version.
                 // Assume JAVA_VERSION is 1.6.0_x
                 String javaVersion = getJavaVersionTrimmed();
+                if (javaVersion == null) {
+                    // Assume "yes"
+                    return true;
+                }
                 assert javaVersion.startsWith("1.6") : javaVersion;
                 String patchLevelStr = javaVersion.substring(javaVersion.indexOf('_') + 1);
                 return Integer.parseInt(patchLevelStr) > 20;

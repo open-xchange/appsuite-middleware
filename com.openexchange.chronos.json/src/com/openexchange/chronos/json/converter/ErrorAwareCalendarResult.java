@@ -47,68 +47,103 @@
  *
  */
 
-package com.openexchange.chronos.json.fields;
+package com.openexchange.chronos.json.converter;
 
+import java.util.Collections;
+import java.util.List;
 import com.openexchange.chronos.service.CalendarResult;
-import com.openexchange.chronos.service.UpdatesResult;
+import com.openexchange.chronos.service.CreateResult;
+import com.openexchange.chronos.service.DeleteResult;
+import com.openexchange.chronos.service.EventID;
+import com.openexchange.chronos.service.UpdateResult;
+import com.openexchange.exception.OXException;
+import com.openexchange.session.Session;
 
 /**
- * {@link ChronosCalendarResultJsonFields} contains fields of the calendar results
+ * {@link ErrorAwareCalendarResult}
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.10.0
  */
-public class ChronosCalendarResultJsonFields {
+public class ErrorAwareCalendarResult implements CalendarResult {
 
+    private OXException error = null;
+    private final EventID id;
+    private final Session session;
+    private final int user;
+    private CalendarResult delegate;
 
-    public static final class Result {
-        /**
-         * The created events. See {@link CalendarResult#getCreations()}.
-         */
-        public static final String CREATED = "created";
-
-        /**
-         * The deleted events. See {@link CalendarResult#getDeletions()}.
-         */
-        public static final String DELETED = "deleted";
-
-        /**
-         * The updated events. See {@link CalendarResult#getUpdates()}.
-         */
-        public static final String UPDATED = "updated";
-
+    public ErrorAwareCalendarResult(OXException error, int calUser, EventID id, Session session) {
+        this.error = error;
+        this.id = id;
+        this.session = session;
+        user = calUser;
     }
 
-    public static final class Updates {
-        /**
-         * The new and modified events. See {@link UpdatesResult#getNewAndModifiedEvents()}.
-         */
-        public static final String NEW = "newAndModified";
-
-        /**
-         * The deleted events. See {@link UpdatesResult#getDeletedEvents())}.
-         */
-        public static final String DELETED = "deleted";
+    public ErrorAwareCalendarResult(CalendarResult delegate, int calUser, EventID id, Session session) {
+        this.id = id;
+        this.session = session;
+        user = calUser;
+        this.delegate = delegate;
     }
 
-    public static final class Error {
-        /**
-         * The id of the event. See {@link ErrorAwareCalendarResult#getId()}.
-         */
-        public static final String ID = "id";
-        /**
-         * The optional recurrence id of the event. See {@link ErrorAwareCalendarResult#getId()}.
-         */
-        public static final String RECURRENCE_ID = "recurrenceId";
-        /**
-         * The folder id. See {@link ErrorAwareCalendarResult#getFolderID()}.
-         */
-        public static final String FOLDER_ID = "folderId";
-        /**
-         * The error. See {@link ErrorAwareCalendarResult#getError()}.
-         */
-        public static final String ERROR = "error";
+    public boolean hasError() {
+        return error != null;
+    }
+
+    public OXException getError() {
+        return error;
+    }
+
+    public EventID getId() {
+        return id;
+    }
+
+    @Override
+    public long getTimestamp() {
+        if (delegate != null) {
+            return delegate.getTimestamp();
+        }
+        return 0l;
+    }
+
+    @Override
+    public Session getSession() {
+        return session;
+    }
+
+    @Override
+    public int getCalendarUser() {
+        return user;
+    }
+
+    @Override
+    public String getFolderID() {
+        return id.getFolderID();
+    }
+
+    @Override
+    public List<DeleteResult> getDeletions() {
+        if (delegate != null) {
+            return delegate.getDeletions();
+        }
+        return Collections.emptyList();
+    }
+
+    @Override
+    public List<UpdateResult> getUpdates() {
+        if (delegate != null) {
+            return delegate.getUpdates();
+        }
+        return Collections.emptyList();
+    }
+
+    @Override
+    public List<CreateResult> getCreations() {
+        if (delegate != null) {
+            return delegate.getCreations();
+        }
+        return Collections.emptyList();
     }
 
 }
-
