@@ -3,6 +3,8 @@ package liquibase.resource;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.security.AccessController;
+import java.security.PrivilegedAction;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Enumeration;
@@ -48,8 +50,9 @@ public class CompositeResourceAccessor implements ResourceAccessor {
     public InputStream getResourceAsStream(String file) throws IOException {
         for (ResourceAccessor o : openers) {
             InputStream is = o.getResourceAsStream(file);
-            if (is != null)
+            if (is != null) {
                 return is;
+            }
         }
         return null;
     }
@@ -67,8 +70,9 @@ public class CompositeResourceAccessor implements ResourceAccessor {
             while (e.hasMoreElements()) {
            		urls.add(e.nextElement());
             }
-            if (!urls.isEmpty())
-            	break;
+            if (!urls.isEmpty()) {
+                break;
+            }
         }
         return urls.elements();
     }
@@ -81,7 +85,7 @@ public class CompositeResourceAccessor implements ResourceAccessor {
            loaders[i++]=fo.toClassLoader();
         }
 
-        return new CompositeClassLoader(loaders);
+        return AccessController.doPrivileged((PrivilegedAction<CompositeClassLoader>) () -> new CompositeClassLoader(loaders));
     }
 
     //based on code from http://fisheye.codehaus.org/browse/xstream/trunk/xstream/src/java/com/thoughtworks/xstream/core/util/CompositeClassLoader.java?r=root
@@ -99,8 +103,9 @@ public class CompositeResourceAccessor implements ResourceAccessor {
                 ClassLoader classLoader = (ClassLoader) classLoader1;
                 try {
                     Class classe=classLoader.loadClass(name);
-                    if(resolve)
+                    if(resolve) {
                         resolveClass(classe);
+                    }
                     return classe;
                 } catch (ClassNotFoundException notFound) {
                     // ok.. try another one
@@ -113,8 +118,9 @@ public class CompositeResourceAccessor implements ResourceAccessor {
             ClassLoader contextClassLoader = Thread.currentThread().getContextClassLoader();
             if (contextClassLoader != null) {
                 Class classe=contextClassLoader.loadClass(name);
-                if(resolve)
+                if(resolve) {
                     resolveClass(classe);
+                }
                 return classe;
             } else {
                 throw new ClassNotFoundException(name);
@@ -123,7 +129,7 @@ public class CompositeResourceAccessor implements ResourceAccessor {
 
         }
 
-        
+
 
  	}
 

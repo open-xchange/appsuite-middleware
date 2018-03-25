@@ -77,18 +77,18 @@ public abstract class AbstractPublicationService implements PublicationService {
 
     private static org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AbstractPublicationService.class);
 
-    public static SecurityStrategy ALLOW_ALL = new AllowEverything();
+    public static final SecurityStrategy ALLOW_ALL = new AllowEverything();
 
-    public static SecurityStrategy FOLDER_ADMIN_ONLY = new AllowEverything(); // Must be overwritten by activator
+    public static final AtomicReference<SecurityStrategy> FOLDER_ADMIN_ONLY = new AtomicReference<SecurityStrategy>(new AllowEverything()); // Must be set by activator
 
-    private static PublicationStorage STORAGE = new DummyStorage(); // Must be overwritten by activator
+    private static final AtomicReference<PublicationStorage> STORAGE = new AtomicReference<PublicationStorage>(new DummyStorage()); // Must be set by activator
 
     public static void setDefaultStorage(final PublicationStorage storage) {
-        STORAGE = storage;
+        STORAGE.set(storage);
     }
 
     public static PublicationStorage getDefaultStorage() {
-        return STORAGE;
+        return STORAGE.get();
     }
 
     private static final AtomicReference<ConfigurationService> CONFIG_REFERENCE = new AtomicReference<ConfigurationService>();
@@ -113,7 +113,7 @@ public abstract class AbstractPublicationService implements PublicationService {
         checkPermission(Permission.CREATE, publication);
         modifyIncoming(publication);
         beforeCreate(publication);
-        STORAGE.rememberPublication(publication);
+        STORAGE.get().rememberPublication(publication);
         afterCreate(publication);
         modifyOutgoing(publication);
     }
@@ -137,13 +137,13 @@ public abstract class AbstractPublicationService implements PublicationService {
         }
         // Continue delete operation
         beforeDelete(publication);
-        STORAGE.forgetPublication(publication);
+        STORAGE.get().forgetPublication(publication);
         afterDelete(publication);
     }
 
     @Override
     public Collection<Publication> getAllPublications(final Context ctx) throws OXException {
-        final List<Publication> publications = STORAGE.getPublications(ctx, getTarget().getId());
+        final List<Publication> publications = STORAGE.get().getPublications(ctx, getTarget().getId());
         List<Publication> returnPublications = new ArrayList<Publication>();
         for (final Publication publication : publications) {
             /* as some publications are not working anymore, we should at least filter out the not working ones and write them to LOG */
@@ -164,7 +164,7 @@ public abstract class AbstractPublicationService implements PublicationService {
 
     @Override
     public Collection<Publication> getAllPublications(final Context ctx, final String entityId) throws OXException {
-        final List<Publication> publications = STORAGE.getPublications(ctx, getTarget().getModule(), entityId);
+        final List<Publication> publications = STORAGE.get().getPublications(ctx, getTarget().getModule(), entityId);
         List<Publication> returnPublications = new ArrayList<Publication>();
         for (final Publication publication : publications) {
             /* as some publications are not working anymore, we should at least filter out the not working ones and write them to LOG */
@@ -188,9 +188,9 @@ public abstract class AbstractPublicationService implements PublicationService {
         List<Publication> publications;
         List<Publication> returnPublications = new ArrayList<Publication>();
         if (module == null) {
-            publications = STORAGE.getPublicationsOfUser(ctx, userId);
+            publications = STORAGE.get().getPublicationsOfUser(ctx, userId);
         } else {
-            publications = STORAGE.getPublicationsOfUser(ctx, userId, module);
+            publications = STORAGE.get().getPublicationsOfUser(ctx, userId, module);
         }
 
         if (publications != null) {
@@ -227,7 +227,7 @@ public abstract class AbstractPublicationService implements PublicationService {
     }
 
     protected Publication loadInternally(final Context ctx, final int publicationId) throws OXException {
-        final Publication publication = STORAGE.getPublication(ctx, publicationId);
+        final Publication publication = STORAGE.get().getPublication(ctx, publicationId);
         if (null != publication && publication.getTarget() != null && publication.getTarget().getId().equals(getTarget().getId())) {
             return publication;
         }
@@ -244,7 +244,7 @@ public abstract class AbstractPublicationService implements PublicationService {
         checkPermission(Permission.UPDATE, publicationForCheck);
         modifyIncoming(publication);
         beforeUpdate(publication);
-        STORAGE.updatePublication(publication);
+        STORAGE.get().updatePublication(publication);
         afterUpdate(publication);
         modifyOutgoing(publication);
     }
@@ -261,7 +261,7 @@ public abstract class AbstractPublicationService implements PublicationService {
     }
 
     public PublicationStorage getStorage() {
-        return STORAGE;
+        return STORAGE.get();
     }
 
     // Callbacks for subclasses
