@@ -1,5 +1,5 @@
 type: object
 properties:
-  $ref: ./CommonResponsedata.yaml
+  $ref: ./CommonResponseData.yaml
   data:
     $ref: "#/definitions/DriveSharesData"
