@@ -166,6 +166,10 @@ Alarm:
   $ref: ./chronos/Alarm.yaml
 ChronosCalendarResultResponse:
   $ref: ./chronos/CalendarResultResponse.yaml
+ChronosMultipleCalendarResultResponse:
+  $ref: ./chronos/MultipleCalendarResultResponse.yaml
+ChronosErrorAwareCalendarResult:
+  $ref: ./chronos/ErrorAwareCalendarResult.yaml
 ChronosUpdatesResponse:
   $ref: ./chronos/UpdatesResponse.yaml
 ChronosAttachment:

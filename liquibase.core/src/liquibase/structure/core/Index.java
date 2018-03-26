@@ -45,7 +45,7 @@ public class Index extends AbstractDatabaseObject {
         if (getTable() == null) {
             return null;
         }
-        
+
         return getTable().getSchema();
     }
 
@@ -138,7 +138,7 @@ public class Index extends AbstractDatabaseObject {
 //    }
 
     @Override
-    public int compareTo(Object other) {
+    public int compareTo(DatabaseObject other) {
         Index o = (Index) other;
         int returnValue = this.getTable().getName().compareTo(o.getTable().getName());
 

@@ -149,8 +149,12 @@ public class ForeignKey extends AbstractDatabaseObject{
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
 
         ForeignKey that = (ForeignKey) o;
 
@@ -187,7 +191,7 @@ public class ForeignKey extends AbstractDatabaseObject{
 
 
     @Override
-    public int compareTo(Object other) {
+    public int compareTo(DatabaseObject other) {
         ForeignKey o = (ForeignKey) other;
         int returnValue = 0;
         if (this.getForeignKeyTable() != null && o.getForeignKeyTable() != null) {
@@ -206,10 +210,12 @@ public class ForeignKey extends AbstractDatabaseObject{
         if (returnValue == 0 && this.getPrimaryKeyColumns() != null && o.getPrimaryKeyColumns() != null) {
             returnValue = this.getPrimaryKeyColumns().compareToIgnoreCase(o.getPrimaryKeyColumns());
         }
-        if (returnValue == 0 && this.getUpdateRule() != null && o.getUpdateRule() != null)
+        if (returnValue == 0 && this.getUpdateRule() != null && o.getUpdateRule() != null) {
             returnValue = this.getUpdateRule().compareTo(o.getUpdateRule());
-        if (returnValue == 0 && this.getDeleteRule() != null && o.getDeleteRule() != null)
+        }
+        if (returnValue == 0 && this.getDeleteRule() != null && o.getDeleteRule() != null) {
             returnValue = this.getDeleteRule().compareTo(o.getDeleteRule());
+        }
         return returnValue;
     }
 

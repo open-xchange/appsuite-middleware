@@ -47,67 +47,103 @@
  *
  */
 
+package com.openexchange.chronos.json.converter;
 
-package com.openexchange.i18n.impl;
-
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.URLClassLoader;
-import java.security.AccessController;
-import java.security.PrivilegedActionException;
-import java.security.PrivilegedExceptionAction;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Locale;
-import java.util.ResourceBundle;
+import com.openexchange.chronos.service.CalendarResult;
+import com.openexchange.chronos.service.CreateResult;
+import com.openexchange.chronos.service.DeleteResult;
+import com.openexchange.chronos.service.EventID;
+import com.openexchange.chronos.service.UpdateResult;
+import com.openexchange.exception.OXException;
+import com.openexchange.session.Session;
 
-public class ResourceBundleDiscoverer extends FileDiscoverer {
+/**
+ * {@link ErrorAwareCalendarResult}
+ *
+ * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+ * @since v7.10.0
+ */
+public class ErrorAwareCalendarResult implements CalendarResult {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ResourceBundleDiscoverer.class);
+    private OXException error = null;
+    private final EventID id;
+    private final Session session;
+    private final int user;
+    private CalendarResult delegate;
 
-    public ResourceBundleDiscoverer(final File dir) throws FileNotFoundException {
-        super(dir);
+    public ErrorAwareCalendarResult(OXException error, int calUser, EventID id, Session session) {
+        this.error = error;
+        this.id = id;
+        this.session = session;
+        user = calUser;
     }
 
-    public List<ResourceBundle> getResourceBundles() throws java.util.MissingResourceException {
-        String[] files = getFilesFromLanguageFolder(".jar");
-        if (files.length == 0) {
-            return Collections.emptyList();
-        }
-
-        List<ResourceBundle> list = new ArrayList<ResourceBundle>(files.length);
-        for (String file : files) {
-            try {
-                Locale l = getLocale(file);
-
-                URLClassLoader ul = AccessController.doPrivileged(new PrivilegedExceptionAction<URLClassLoader>() {
-
-                    @Override
-                    public URLClassLoader run() throws MalformedURLException {
-                        return new URLClassLoader(new URL[] { new URL("file:" + getDirectory() + File.separator + file) });
-                    }
-                });
-                ResourceBundle rc = ResourceBundle.getBundle("com.openexchange.groupware.i18n.ServerMessages", l, ul);
-
-                list.add(rc);
-
-            } catch (PrivilegedActionException e) {
-                Exception exception = e.getException();
-                if (exception instanceof MalformedURLException) {
-                    LOG.error("Cannot load file: {}", file);
-                } else {
-                    LOG.error("Not permitted to access file: {}", file, exception);
-                }
-            } catch (java.util.MissingResourceException mr) {
-                LOG.error("Unable to init Language Bundle! This file seems to be broken: {}", file);
-                throw mr;
-            } catch (RuntimeException e) {
-                LOG.error("Runtime error while loading file: {}", file, e);
-            }
-        }
-        return list;
+    public ErrorAwareCalendarResult(CalendarResult delegate, int calUser, EventID id, Session session) {
+        this.id = id;
+        this.session = session;
+        user = calUser;
+        this.delegate = delegate;
     }
+
+    public boolean hasError() {
+        return error != null;
+    }
+
+    public OXException getError() {
+        return error;
+    }
+
+    public EventID getId() {
+        return id;
+    }
+
+    @Override
+    public long getTimestamp() {
+        if (delegate != null) {
+            return delegate.getTimestamp();
+        }
+        return 0l;
+    }
+
+    @Override
+    public Session getSession() {
+        return session;
+    }
+
+    @Override
+    public int getCalendarUser() {
+        return user;
+    }
+
+    @Override
+    public String getFolderID() {
+        return id.getFolderID();
+    }
+
+    @Override
+    public List<DeleteResult> getDeletions() {
+        if (delegate != null) {
+            return delegate.getDeletions();
+        }
+        return Collections.emptyList();
+    }
+
+    @Override
+    public List<UpdateResult> getUpdates() {
+        if (delegate != null) {
+            return delegate.getUpdates();
+        }
+        return Collections.emptyList();
+    }
+
+    @Override
+    public List<CreateResult> getCreations() {
+        if (delegate != null) {
+            return delegate.getCreations();
+        }
+        return Collections.emptyList();
+    }
+
 }

@@ -66,7 +66,7 @@ import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.json.converter.CalendarResultConverter;
-import com.openexchange.chronos.json.converter.MultipleCalendarResultConverter;
+import com.openexchange.chronos.json.converter.MergingCalendarResultConverter;
 import com.openexchange.chronos.json.converter.mapper.EventMapper;
 import com.openexchange.chronos.json.converter.mapper.ListItemMapping;
 import com.openexchange.chronos.json.exception.CalendarExceptionCodes;
@@ -173,7 +173,7 @@ public class UpdateAttendeeAction extends ChronosAction {
                 for (CalendarResult result : results) {
                     timestamp = Math.max(timestamp, result.getTimestamp());
                 }
-                return new AJAXRequestResult(results, new Date(timestamp), MultipleCalendarResultConverter.INPUT_FORMAT);
+                return new AJAXRequestResult(results, new Date(timestamp), MergingCalendarResultConverter.INPUT_FORMAT);
             } else {
                 AJAXRequestResult ajaxRequestResult = new AJAXRequestResult(updateAttendeeResult, new Date(updateAttendeeResult.getTimestamp()), CalendarResultConverter.INPUT_FORMAT);
                 if (warnings != null) {

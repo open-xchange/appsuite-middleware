@@ -317,7 +317,7 @@ public class OXMFPublicationService extends AbstractPublicationService {
 
     @Override
     protected SecurityStrategy getSecurityStrategy() {
-        return FOLDER_ADMIN_ONLY;
+        return FOLDER_ADMIN_ONLY.get();
     }
 
     private static final class OptionalTemplatingTarget extends PublicationTarget implements UserSpecificPublicationTarget {

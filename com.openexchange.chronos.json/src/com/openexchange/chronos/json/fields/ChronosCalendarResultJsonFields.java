@@ -49,7 +49,6 @@
 
 package com.openexchange.chronos.json.fields;
 
-import com.openexchange.chronos.json.action.DeleteAction.ErrorAwareCalendarResult;
 import com.openexchange.chronos.service.CalendarResult;
 import com.openexchange.chronos.service.UpdatesResult;
 
@@ -78,10 +77,6 @@ public class ChronosCalendarResultJsonFields {
          */
         public static final String UPDATED = "updated";
 
-        /**
-         * The failed events. See {@link ErrorAwareCalendarResult}.
-         */
-        public static final String FAILED = "failed";
     }
 
     public static final class Updates {
@@ -101,6 +96,10 @@ public class ChronosCalendarResultJsonFields {
          * The id of the event. See {@link ErrorAwareCalendarResult#getId()}.
          */
         public static final String ID = "id";
+        /**
+         * The optional recurrence id of the event. See {@link ErrorAwareCalendarResult#getId()}.
+         */
+        public static final String RECURRENCE_ID = "recurrenceId";
         /**
          * The folder id. See {@link ErrorAwareCalendarResult#getFolderID()}.
          */
