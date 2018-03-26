@@ -278,11 +278,6 @@ final class MBeanConsistency implements ConsistencyMBean {
         return null;
     }
 
-    private void exception(final OXException e) throws MBeanException {
-        final Exception wrapMe = new Exception(e.getMessage());
-        throw new MBeanException(wrapMe, e.getMessage());
-    }
-
     private void exception(final Exception e) throws MBeanException {
         final OXException oxe = ConsistencyExceptionCodes.COMMUNICATION_PROBLEM.create(e, e.getMessage());
         final Exception wrapMe = new Exception(oxe.getMessage());
