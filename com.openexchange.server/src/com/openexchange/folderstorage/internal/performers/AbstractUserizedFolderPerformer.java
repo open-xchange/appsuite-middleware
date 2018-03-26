@@ -61,6 +61,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.TimeZone;
+import java.util.concurrent.CompletionService;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import com.google.common.collect.ImmutableSet;
@@ -681,10 +682,10 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
     /**
      * Verifies that a permission change is valid in terms of anonymous and invited guest users. I.e.:
      * <ul>
-     *  <li>every folder can carry at most one anonymous guest permission</li>
-     *  <li>anonymous guest permissions must be read-only</li>
-     *  <li>existing anonymous guests must not be added as permission entities (only new ones are allowed)</li>
-     *  <li>invited guest permissions must be read-only depending on the folder module</li>
+     * <li>every folder can carry at most one anonymous guest permission</li>
+     * <li>anonymous guest permissions must be read-only</li>
+     * <li>existing anonymous guests must not be added as permission entities (only new ones are allowed)</li>
+     * <li>invited guest permissions must be read-only depending on the folder module</li>
      * </ul>
      *
      * @param comparedPermissions The compared permissions
@@ -747,7 +748,7 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
              * check for an already existing anonymous permission if a new one should be added
              */
             Permission invalidPermission = containsOriginalAnonymousPermission(comparedPermissions);
-            if (invalidPermission!=null ) {
+            if (invalidPermission != null) {
                 throw invalidPermissions(folder, invalidPermission);
             }
         }
@@ -791,7 +792,7 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
              */
             checkIsLinkPermission(folder, permission);
             // Only check not inherited permissions because inherited permissions are only applied internally and doesn't needed to be checked
-            if(permission.getType() != FolderPermissionType.INHERITED && isNotEqualsTarget(session, folder, guestInfo.getLinkTarget())) {
+            if (permission.getType() != FolderPermissionType.INHERITED && isNotEqualsTarget(session, folder, guestInfo.getLinkTarget())) {
                 throw invalidPermissions(folder, permission);
             }
         } else if (isReadOnlySharing(folder)) {
@@ -810,8 +811,7 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
      */
     private static boolean isReadOnlySharing(Folder folder) {
         ContentType contentType = folder.getContentType();
-        return CalendarContentType.getInstance().equals(contentType) || TaskContentType.getInstance().equals(contentType) ||
-            ContactContentType.getInstance().equals(contentType);
+        return CalendarContentType.getInstance().equals(contentType) || TaskContentType.getInstance().equals(contentType) || ContactContentType.getInstance().equals(contentType);
     }
 
     /**
@@ -822,8 +822,7 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
      * @return A suitable invalid permission exception
      */
     private static OXException invalidPermissions(Folder folder, Permission permission) {
-        return FolderExceptionErrorMessage.INVALID_PERMISSIONS.create(
-            Permissions.createPermissionBits(permission), permission.getEntity(), folder.getID() == null ? folder.getName() : folder.getID());
+        return FolderExceptionErrorMessage.INVALID_PERMISSIONS.create(Permissions.createPermissionBits(permission), permission.getEntity(), folder.getID() == null ? folder.getName() : folder.getID());
     }
 
     private static void checkReadOnly(Folder folder, Permission p) throws OXException {
@@ -836,8 +835,7 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
     }
 
     private static void checkIsLinkPermission(Folder folder, Permission p) throws OXException {
-        if (p.isAdmin() || p.isGroup() || p.getFolderPermission() != Permission.READ_FOLDER || p.getReadPermission() != Permission.READ_ALL_OBJECTS ||
-            p.getWritePermission() != Permission.NO_PERMISSIONS || p.getDeletePermission() != Permission.NO_PERMISSIONS) {
+        if (p.isAdmin() || p.isGroup() || p.getFolderPermission() != Permission.READ_FOLDER || p.getReadPermission() != Permission.READ_ALL_OBJECTS || p.getWritePermission() != Permission.NO_PERMISSIONS || p.getDeletePermission() != Permission.NO_PERMISSIONS) {
             throw invalidPermissions(folder, p);
         }
     }
@@ -989,22 +987,28 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
         }
     }
 
-    protected static final ThreadPools.ExpectedExceptionFactory<OXException> FACTORY =
-        new ThreadPools.ExpectedExceptionFactory<OXException>() {
+    protected static final ThreadPools.ExpectedExceptionFactory<OXException> FACTORY = new ThreadPools.ExpectedExceptionFactory<OXException>() {
 
-            @Override
-            public Class<OXException> getType() {
-                return OXException.class;
+        @Override
+        public Class<OXException> getType() {
+            return OXException.class;
+        }
+
+        @Override
+        public OXException newUnexpectedError(final Throwable t) {
+            if (InterruptedException.class.isInstance(t)) {
+                return FolderExceptionErrorMessage.INTERRUPT_ERROR.create();
             }
-
-            @Override
-            public OXException newUnexpectedError(final Throwable t) {
-                if (InterruptedException.class.isInstance(t)) {
-                    return FolderExceptionErrorMessage.INTERRUPT_ERROR.create();
-                }
+            if (t != null) {
                 return FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(t, t.getMessage());
             }
-        };
+            return FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(t);
+        }
+    };
+
+    protected void callAndWait(final CompletionService<Object> completionService, int taskCount) throws OXException {
+        ThreadPools.takeCompletionService(completionService, taskCount, FACTORY);
+    }
 
     /**
      * Creates a newly allocated array containing all elements of specified array in the same order except <code>null</code> values.

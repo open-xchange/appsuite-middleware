@@ -80,7 +80,6 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.threadpool.ThreadPoolCompletionService;
 import com.openexchange.threadpool.ThreadPoolService;
-import com.openexchange.threadpool.ThreadPools;
 import com.openexchange.tools.session.ServerSession;
 import gnu.trove.list.TIntList;
 import gnu.trove.list.array.TIntArrayList;
@@ -350,7 +349,7 @@ public final class VisibleFoldersPerformer extends AbstractUserizedFolderPerform
             /*
              * Wait for completion
              */
-            ThreadPools.takeCompletionService(completionService, taskCount, FACTORY);
+            callAndWait(completionService, taskCount);
             final UserizedFolder[] ret = trimArray(subfolders);
             /*
              * 2nd check for proper parent
