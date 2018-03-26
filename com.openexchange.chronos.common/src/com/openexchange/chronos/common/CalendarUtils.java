@@ -606,6 +606,22 @@ public class CalendarUtils {
     }
 
     /**
+     * Gets the maximum timestamp of a map containing multiple timestamped results.
+     *
+     * @param results The results to get the maximum timestamp from
+     * @return The maximum timestamp as {@link Date}, or <code>null</code> if all values in the supplied map were <code>null</code> or empty
+     */
+    public static <K, V extends TimestampedResult> Date getMaximumTimestamp(Map<K, V> results) {
+        long maximumTimestamp = Integer.MIN_VALUE;
+        if (null != results && 0 < results.size()) {
+            for (TimestampedResult result : results.values()) {
+                maximumTimestamp = Math.max(maximumTimestamp, result.getTimestamp());
+            }
+        }
+        return Integer.MIN_VALUE == maximumTimestamp ? null : new Date(maximumTimestamp);
+    }
+
+    /**
      * Gets the identifiers of the supplied events in an array.
      *
      * @param events The events to get the identifiers for

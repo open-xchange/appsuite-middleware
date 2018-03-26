@@ -66,12 +66,12 @@ import com.openexchange.chronos.json.action.ChronosActionFactory;
 import com.openexchange.chronos.json.action.account.ChronosAccountActionFactory;
 import com.openexchange.chronos.json.converter.AlarmTriggerConverter;
 import com.openexchange.chronos.json.converter.CalendarResultConverter;
+import com.openexchange.chronos.json.converter.CalendarResultsPerEventIdConverter;
 import com.openexchange.chronos.json.converter.EventConflictResultConverter;
 import com.openexchange.chronos.json.converter.EventResultConverter;
 import com.openexchange.chronos.json.converter.EventsPerFolderResultConverter;
 import com.openexchange.chronos.json.converter.FreeBusyConverter;
 import com.openexchange.chronos.json.converter.MergingCalendarResultConverter;
-import com.openexchange.chronos.json.converter.MultipleCalendarResultConverter;
 import com.openexchange.chronos.json.converter.handler.EventFieldDataHandler;
 import com.openexchange.chronos.json.converter.handler.Json2OXExceptionDataHandler;
 import com.openexchange.chronos.json.converter.handler.Json2ObjectDataHandler;
@@ -161,7 +161,7 @@ public class ChronosJsonActivator extends AJAXModuleActivator {
             registerService(ResultConverter.class, new EventConflictResultConverter());
             registerService(ResultConverter.class, new CalendarResultConverter(this));
             registerService(ResultConverter.class, new MergingCalendarResultConverter(this));
-            registerService(ResultConverter.class, new MultipleCalendarResultConverter(this));
+            registerService(ResultConverter.class, new CalendarResultsPerEventIdConverter(this));
             registerService(ResultConverter.class, new AlarmTriggerConverter());
             registerService(ResultConverter.class, new ITipAnalysisResultConverter());
             /*

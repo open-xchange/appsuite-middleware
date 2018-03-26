@@ -116,7 +116,7 @@ public class AllAction extends ChronosAction {
         JSONObject jsonObject = requestData.getData(JSONObject.class);
         if (null != jsonObject) {
             /*
-             * PUT with folder identifiers in body; results for each requested folder & return appropriate result
+             * PUT with folder identifiers in body; get results for each requested folder & return appropriate result
              */
             List<String> folderIds;
             try {
