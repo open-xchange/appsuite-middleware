@@ -103,6 +103,15 @@ public abstract class EnumeratedProperty {
     }
 
     /**
+     * Gets the property's default value, which should be assumed if not specified.
+     *
+     * @return The default value for this property, or <code>null</code> if there is none
+     */
+    public String getDefaultValue() {
+        return null;
+    }
+
+    /**
      * Gets a value indicating whether this property's value represents a known, standards-compliant value or not (which is the case for
      * custom <i>x-name</i> or unknown <i>iana-token</i> values).
      *
@@ -150,6 +159,28 @@ public abstract class EnumeratedProperty {
         } else if (!value.equalsIgnoreCase(other.value))
             return false;
         return true;
+    }
+
+    /**
+     * Gets a value indicating whether this property matches another one by comparing their values, ignoring case, and additionally,
+     * if there is one, also considering the property's default value, which is assumed if passed object is <code>null</code>.
+     *
+     * @param obj The reference object with which to compare
+     * @return <code>true</code> if the supplied object is matches this one, <code>false</code>, otherwise
+     */
+    public boolean matches(Object obj) {
+        if (equals(obj)) {
+            return true;
+        }
+        String defaultValue = getDefaultValue();
+        if (null == defaultValue) {
+            return false;
+        }
+        if (defaultValue.equals(value)) {
+            // this is the default value, so it matches 'null'
+            return null == obj;
+        }
+        return false;
     }
 
     @Override

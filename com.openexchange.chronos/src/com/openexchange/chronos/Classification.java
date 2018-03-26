@@ -83,6 +83,11 @@ public class Classification extends EnumeratedProperty {
     }
 
     @Override
+    public String getDefaultValue() {
+        return PUBLIC.getValue();
+    }
+
+    @Override
     protected String[] getStandardValues() {
         return getValues(PUBLIC, CONFIDENTIAL, PRIVATE);
     }

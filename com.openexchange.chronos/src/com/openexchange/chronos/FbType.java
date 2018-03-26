@@ -100,6 +100,11 @@ public class FbType extends EnumeratedProperty {
         this.order = order;
     }
 
+    @Override
+    public String getDefaultValue() {
+        return BUSY.getValue();
+    }
+
     /**
      * Compares this free/busy type with another one for ordering.
      * <p/>
