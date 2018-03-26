@@ -2602,12 +2602,19 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage,
                     if (null != lastParentPermissions) {
                         for (Permission p : lastParentPermissions) {
                             if (p.getEntity() != storageParameters.getUserId()) {
-                                toRestore.addPermission(newOCLPermissionFor(p));
+                                OCLPermission newOCLPermission = newOCLPermissionFor(p);
+                                if(newOCLPermission.getType().equals(FolderPermissionType.LEGATOR)) {
+                                    // Change LEGATOR permissions to inherited permissions
+                                    newOCLPermission.setType(FolderPermissionType.INHERITED);
+                                    newOCLPermission.setPermissionLegator(String.valueOf(folderId));
+                                }
+                                toRestore.addPermission(newOCLPermission);
                             }
                         }
                     }
                     String restoredFolderName = OXFolderSQL.getUnusedFolderName(toRestore.getFolderName(), folderId, storageParameters);
                     toRestore.setFolderName(restoredFolderName);
+                    storageParameters.getDecorator().put("permissions", "inherit");
                     updateFolder(new DatabaseFolder(toRestore), storageParameters);
                 } catch (OXException e) {
                     if ("FLD".equals(e.getPrefix()) && 6 == e.getCode()) {
