@@ -74,7 +74,7 @@ import com.openexchange.session.Session;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 
 /**
- * 
+ *
  * {@link CalendarITipIntegrationUtility}
  *
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
@@ -202,7 +202,7 @@ public class CalendarITipIntegrationUtility implements ITipIntegrationUtility {
         external.setComment(change.getNewMessage());
         external.setPartStat(change.getNewStatus());
 
-        session.getCalendarService().updateAttendee(session, new EventID(event.getFolderId(), event.getId()), external, event.getLastModified().getTime());
+        session.getCalendarService().updateAttendee(session, new EventID(event.getFolderId(), event.getId()), external, null, event.getLastModified().getTime());
     }
 
     @Override

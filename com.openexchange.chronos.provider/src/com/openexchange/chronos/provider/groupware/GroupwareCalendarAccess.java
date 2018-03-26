@@ -52,6 +52,7 @@ package com.openexchange.chronos.provider.groupware;
 import java.util.List;
 import org.dmfs.rfc5545.DateTime;
 import com.openexchange.ajax.fileholder.IFileHolder;
+import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.Attachment;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.Event;
@@ -206,10 +207,11 @@ public interface GroupwareCalendarAccess extends FolderCalendarAccess, Permissio
      *
      * @param eventID The identifier of the event to update
      * @param attendee The attendee to update
+     * @param alarms The alarms to update, or <code>null</code> to not change alarms, or an empty array to delete any existing alarms
      * @param clientTimestamp The last timestamp / sequence number known by the client to catch concurrent updates
      * @return The update result
      */
-    CalendarResult updateAttendee(EventID eventID, Attendee attendee, long clientTimestamp) throws OXException;
+    CalendarResult updateAttendee(EventID eventID, Attendee attendee, List<Alarm> alarms, long clientTimestamp) throws OXException;
 
     /**
      * Deletes an existing event.
