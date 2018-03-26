@@ -626,8 +626,9 @@ public class UnixCrypt {
      */
      public static final String crypt(String salt, String original) throws UnsupportedEncodingException
      {
-        while(salt.length() < 2) {
-            salt += "A";
+        StringBuilder saltBuilder = new StringBuilder();
+         while(salt.length() < 2) {
+            saltBuilder.append('A');
         }
 
         StringBuffer buffer = new StringBuffer("             ");
