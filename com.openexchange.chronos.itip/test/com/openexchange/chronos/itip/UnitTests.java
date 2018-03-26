@@ -52,6 +52,7 @@ package com.openexchange.chronos.itip;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
+import com.openexchange.chronos.itip.analyzers.ReplyITipAnalyzerTest;
 import com.openexchange.chronos.itip.analyzers.UpdateITipAnalyzerTest;
 import com.openexchange.chronos.itip.generators.DefaultNotificationParticipantResolverTest;
 
@@ -65,8 +66,8 @@ import com.openexchange.chronos.itip.generators.DefaultNotificationParticipantRe
 @RunWith(Suite.class)
 @SuiteClasses({
     DefaultNotificationParticipantResolverTest.class,
-    UpdateITipAnalyzerTest.class
-
+    UpdateITipAnalyzerTest.class,
+    ReplyITipAnalyzerTest.class
 })
 public class UnitTests {
 
