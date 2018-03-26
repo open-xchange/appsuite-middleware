@@ -1,9 +1,9 @@
+
 package liquibase.structure.core;
 
 public class View extends Relation {
 
-    public View() {
-    }
+    public View() {}
 
     @Override
     public Relation setSchema(Schema schema) {
@@ -20,8 +20,10 @@ public class View extends Relation {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
 
         View that = (View) o;
 
@@ -36,22 +38,18 @@ public class View extends Relation {
 
     @Override
     public String toString() {
-        String viewStr = getName() + " (";
+        StringBuilder viewBuilder = new StringBuilder(getName());
+        viewBuilder.append(" (");
         for (int i = 0; i < getColumns().size(); i++) {
-            if (i > 0) {
-                viewStr += "," + getColumns().get(i);
-            } else {
-                viewStr += getColumns().get(i);
-            }
+            viewBuilder.append(i > 0 ? "," : "").append(getColumns().get(i));
         }
-        viewStr += ")";
-        return viewStr;
+        viewBuilder.append(")");
+        return viewBuilder.toString();
     }
 
     @Override
     public View setName(String name) {
         return (View) super.setName(name);
     }
-
 
 }

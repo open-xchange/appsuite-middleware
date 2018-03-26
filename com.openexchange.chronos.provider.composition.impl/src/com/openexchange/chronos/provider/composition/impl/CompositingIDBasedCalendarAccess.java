@@ -511,11 +511,11 @@ public class CompositingIDBasedCalendarAccess extends AbstractCompositingIDBased
     }
 
     @Override
-    public CalendarResult updateAttendee(EventID eventID, Attendee attendee, long clientTimestamp) throws OXException {
+    public CalendarResult updateAttendee(EventID eventID, Attendee attendee, List<Alarm> alarms, long clientTimestamp) throws OXException {
         int accountId = getAccountId(eventID.getFolderID());
         try {
             GroupwareCalendarAccess calendarAccess = getGroupwareAccess(accountId);
-            CalendarResult result = calendarAccess.updateAttendee(getRelativeId(eventID), attendee, clientTimestamp);
+            CalendarResult result = calendarAccess.updateAttendee(getRelativeId(eventID), attendee, alarms, clientTimestamp);
             return new IDManglingCalendarResult(result, accountId);
         } catch (OXException e) {
             throw withUniqueIDs(e, accountId);
@@ -546,6 +546,7 @@ public class CompositingIDBasedCalendarAccess extends AbstractCompositingIDBased
         return result;
     }
 
+    @Override
     public Map<EventID, ErrorAwareCalendarResult> deleteEvents(List<EventID> eventIDs, long clientTimestamp) {
         Map<EventID, ErrorAwareCalendarResult> results = new HashMap<EventID, ErrorAwareCalendarResult>(eventIDs.size());
         /*

@@ -389,7 +389,7 @@ public class CalendarServiceImpl implements CalendarService {
     }
 
     @Override
-    public CalendarResult updateAttendee(CalendarSession session, final EventID eventID, final Attendee attendee, final long clientTimestamp) throws OXException {
+    public CalendarResult updateAttendee(CalendarSession session, EventID eventID, Attendee attendee, List<Alarm> alarms, long clientTimestamp) throws OXException {
         /*
          * update attendee
          */
@@ -398,7 +398,7 @@ public class CalendarServiceImpl implements CalendarService {
             @Override
             protected InternalCalendarResult execute(CalendarSession session, CalendarStorage storage) throws OXException {
                 return new UpdateAttendeePerformer(storage, session, getFolder(session, eventID.getFolderID(), false))
-                    .perform(eventID.getObjectID(), eventID.getRecurrenceID(), attendee, Long.valueOf(clientTimestamp));
+                    .perform(eventID.getObjectID(), eventID.getRecurrenceID(), attendee, alarms, L(clientTimestamp));
 
             }
         }.executeUpdate();
@@ -410,7 +410,7 @@ public class CalendarServiceImpl implements CalendarService {
     }
 
     @Override
-    public CalendarResult updateAlarms(CalendarSession session, final EventID eventID, final List<Alarm> alarms, final long clientTimestamp) throws OXException {
+    public CalendarResult updateAlarms(CalendarSession session, EventID eventID, List<Alarm> alarms, long clientTimestamp) throws OXException {
         /*
          * update attendee
          */
@@ -418,7 +418,8 @@ public class CalendarServiceImpl implements CalendarService {
 
             @Override
             protected InternalCalendarResult execute(CalendarSession session, CalendarStorage storage) throws OXException {
-                return new UpdateAlarmsPerformer(storage, session, getFolder(session, eventID.getFolderID())).perform(eventID.getObjectID(), eventID.getRecurrenceID(), alarms, Long.valueOf(clientTimestamp));
+                return new UpdateAlarmsPerformer(storage, session, getFolder(session, eventID.getFolderID()))
+                    .perform(eventID.getObjectID(), eventID.getRecurrenceID(), alarms, L(clientTimestamp));
 
             }
         }.executeUpdate();

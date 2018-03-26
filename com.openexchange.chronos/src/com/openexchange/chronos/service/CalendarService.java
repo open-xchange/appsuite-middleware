@@ -402,10 +402,11 @@ public interface CalendarService {
      * @param session The calendar session
      * @param eventID The identifier of the event to update
      * @param attendee The attendee to update
+     * @param alarms The alarms to update, or <code>null</code> to not change alarms, or an empty array to delete any existing alarms
      * @param clientTimestamp The last timestamp / sequence number known by the client to catch concurrent updates
      * @return The update result
      */
-    CalendarResult updateAttendee(CalendarSession session, EventID eventID, Attendee attendee, long clientTimestamp) throws OXException;
+    CalendarResult updateAttendee(CalendarSession session, EventID eventID, Attendee attendee, List<Alarm> alarms, long clientTimestamp) throws OXException;
 
     /**
      * Updates the user's personal alarms of a specific event, independently of the user's write access permissions for the corresponding

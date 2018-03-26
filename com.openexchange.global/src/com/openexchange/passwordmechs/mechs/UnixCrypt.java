@@ -421,9 +421,11 @@ public final class UnixCrypt {
      * @throws UnsupportedEncodingException
      */
     public static final String crypt(String salt, final String original) throws UnsupportedEncodingException {
+        StringBuilder saltBuilder = new StringBuilder(salt);
         while (salt.length() < 2) {
-            salt += "A";
+            saltBuilder.append('A');
         }
+        salt = saltBuilder.toString();
 
         final StringBuffer buffer = new StringBuffer("             ");
 

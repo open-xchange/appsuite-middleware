@@ -104,6 +104,43 @@ public abstract class AttendeesMapping<O> extends ListItemMapping<Attendee, O, J
 
     @Override
     public Attendee deserialize(JSONObject from, TimeZone timeZone) throws JSONException {
+        return deserializeAttendee(from);
+    }
+
+    @Override
+    public JSONObject serialize(Attendee from, TimeZone timeZone) throws JSONException {
+        JSONObject jsonObject = EventMapper.serializeCalendarUser(from);
+        if (null != from.getCuType()) {
+            jsonObject.put(ChronosJsonFields.Attendee.CU_TYPE, from.getCuType().getValue());
+        }
+        if (null != from.getRole()) {
+            jsonObject.put(ChronosJsonFields.Attendee.ROLE, from.getRole().getValue());
+        }
+        if (null != from.getPartStat()) {
+            jsonObject.put(ChronosJsonFields.Attendee.PARTICIPATION_STATUS, from.getPartStat().getValue());
+        }
+        if (null != from.getComment()) {
+            jsonObject.put(ChronosJsonFields.Attendee.COMMENT, from.getComment());
+        }
+        if (null != from.getRsvp()) {
+            jsonObject.put(ChronosJsonFields.Attendee.RSVP, from.getRsvp());
+        }
+        if (null != from.getFolderId()) {
+            jsonObject.put(ChronosJsonFields.Attendee.FOLDER, from.getFolderId());
+        }
+        if (null != from.getMember()) {
+            jsonObject.put(ChronosJsonFields.Attendee.MEMBER, from.getMember());
+        }
+        return jsonObject;
+    }
+
+    /**
+     * Deserializes an attendee from the supplied json object.
+     *
+     * @param jsonObject The json object to parse the attendee from
+     * @return The parsed attendee
+     */
+    public static Attendee deserializeAttendee(JSONObject from) throws JSONException {
         Attendee attendee = EventMapper.deserializeCalendarUser(from, Attendee.class);
         if (from.has(ChronosJsonFields.Attendee.CU_TYPE)) {
             attendee.setCuType(from.isNull(ChronosJsonFields.Attendee.CU_TYPE) ? null : new CalendarUserType(from.getString(ChronosJsonFields.Attendee.CU_TYPE)));
@@ -137,33 +174,6 @@ public abstract class AttendeesMapping<O> extends ListItemMapping<Attendee, O, J
         }
 
         return attendee;
-    }
-
-    @Override
-    public JSONObject serialize(Attendee from, TimeZone timeZone) throws JSONException {
-        JSONObject jsonObject = EventMapper.serializeCalendarUser(from);
-        if (null != from.getCuType()) {
-            jsonObject.put(ChronosJsonFields.Attendee.CU_TYPE, from.getCuType().getValue());
-        }
-        if (null != from.getRole()) {
-            jsonObject.put(ChronosJsonFields.Attendee.ROLE, from.getRole().getValue());
-        }
-        if (null != from.getPartStat()) {
-            jsonObject.put(ChronosJsonFields.Attendee.PARTICIPATION_STATUS, from.getPartStat().getValue());
-        }
-        if (null != from.getComment()) {
-            jsonObject.put(ChronosJsonFields.Attendee.COMMENT, from.getComment());
-        }
-        if (null != from.getRsvp()) {
-            jsonObject.put(ChronosJsonFields.Attendee.RSVP, from.getRsvp());
-        }
-        if (null != from.getFolderId()) {
-            jsonObject.put(ChronosJsonFields.Attendee.FOLDER, from.getFolderId());
-        }
-        if (null != from.getMember()) {
-            jsonObject.put(ChronosJsonFields.Attendee.MEMBER, from.getMember());
-        }
-        return jsonObject;
     }
 
 }

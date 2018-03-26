@@ -70,6 +70,8 @@ import java.util.concurrent.locks.ReentrantLock;
  */
 public class TimeAwareBlockingQueue<E> extends AbstractQueue<E> implements BlockingQueue<E>, java.io.Serializable {
 
+    private static final long serialVersionUID = -2226785138348092962L;
+
     /**
      * Linked list node class
      */

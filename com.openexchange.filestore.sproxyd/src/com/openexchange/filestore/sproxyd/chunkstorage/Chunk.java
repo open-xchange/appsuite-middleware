@@ -62,6 +62,7 @@ public class Chunk implements Comparable<Chunk> {
     private final UUID scalityId;
     private final long offset;
     private final long length;
+    private final int hashCode;
 
     /**
      * Initializes a new {@link Chunk}.
@@ -71,12 +72,20 @@ public class Chunk implements Comparable<Chunk> {
      * @param offset This chunk's offset in document
      * @param length This chunk's length
      */
-    public Chunk(UUID documentId, UUID scalityId, long offset, long length) {
+    public Chunk(final UUID documentId, final UUID scalityId, final long offset, final long length) {
         super();
         this.documentId = documentId;
         this.scalityId = scalityId;
         this.offset = offset;
         this.length = length;
+
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((documentId == null) ? 0 : documentId.hashCode());
+        result = prime * result + (int) (length ^ (length >>> 32));
+        result = prime * result + (int) (offset ^ (offset >>> 32));
+        result = prime * result + ((scalityId == null) ? 0 : scalityId.hashCode());
+        hashCode = result;
     }
 
     /**
@@ -116,9 +125,9 @@ public class Chunk implements Comparable<Chunk> {
     }
 
     @Override
-    public int compareTo(Chunk other) {
-        long thisOffset = this.offset;
-        long otherOffset = other.offset;
+    public int compareTo(final Chunk other) {
+        final long thisOffset = offset;
+        final long otherOffset = other.offset;
         return (thisOffset < otherOffset ? -1 : (thisOffset == otherOffset ? 0 : 1));
     }
 
@@ -127,4 +136,53 @@ public class Chunk implements Comparable<Chunk> {
         return "Chunk [documentId=" + documentId + ", scalityId=" + scalityId + ", offset=" + offset + ", length=" + length + "]";
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see java.lang.Object#hashCode()
+     */
+    @Override
+    public int hashCode() {
+        return hashCode;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see java.lang.Object#equals(java.lang.Object)
+     */
+    @Override
+    public boolean equals(final Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final Chunk other = (Chunk) obj;
+        if (documentId == null) {
+            if (other.documentId != null) {
+                return false;
+            }
+        } else if (!documentId.equals(other.documentId)) {
+            return false;
+        }
+        if (length != other.length) {
+            return false;
+        }
+        if (offset != other.offset) {
+            return false;
+        }
+        if (scalityId == null) {
+            if (other.scalityId != null) {
+                return false;
+            }
+        } else if (!scalityId.equals(other.scalityId)) {
+            return false;
+        }
+        return true;
+    }
 }

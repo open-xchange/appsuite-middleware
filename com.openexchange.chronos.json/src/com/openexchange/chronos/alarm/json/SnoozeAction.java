@@ -50,7 +50,9 @@
 package com.openexchange.chronos.alarm.json;
 
 import static com.openexchange.tools.arrays.Collections.unmodifiableSet;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -84,6 +86,7 @@ public class SnoozeAction extends AbstractChronosAlarmAction {
 
     /**
      * Initializes a new {@link SnoozeAction}.
+     *
      * @param services
      */
     protected SnoozeAction(ServiceLookup services) {
@@ -97,19 +100,21 @@ public class SnoozeAction extends AbstractChronosAlarmAction {
 
     @Override
     protected AJAXRequestResult perform(IDBasedCalendarAccess calendarAccess, AJAXRequestData requestData) throws OXException {
-
         Date now = new Date();
-        Integer alarmId = (Integer) parseAlarmParameter(requestData, AlarmParameters.PARAMETER_ALARM_ID, true);
+        int alarmId = ((Integer) parseAlarmParameter(requestData, AlarmParameters.PARAMETER_ALARM_ID, true)).intValue();
         Long snooze = (Long) parseAlarmParameter(requestData, AlarmParameters.PARAMETER_SNOOZE_DURATION, true);
         if (snooze.longValue() <= 0) {
             throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create(AlarmParameters.PARAMETER_SNOOZE_DURATION, "The snooze time must be greater than 0");
         }
+
         EventID eventID = parseIdParameter(requestData);
         Event event = calendarAccess.getEvent(eventID);
-        List<Alarm> alarms = event.getAlarms();
+        List<Alarm> alarms = new ArrayList<Alarm>(event.getAlarms());
+
         Alarm alarmToSnooze = null;
-        for(Alarm alarm: alarms){
-            if (alarm.getId() == alarmId.intValue()) {
+        for (Iterator<Alarm> it = alarms.iterator(); null == alarmToSnooze && it.hasNext();) {
+            Alarm alarm = it.next();
+            if (alarm.getId() == alarmId) {
                 alarmToSnooze = alarm;
                 alarmToSnooze.setAcknowledged(now);
             }
@@ -141,6 +146,5 @@ public class SnoozeAction extends AbstractChronosAlarmAction {
         CalendarResult updateAlarms = calendarAccess.updateAlarms(eventID, alarms, event.getTimestamp());
         return new AJAXRequestResult(updateAlarms, CalendarResultConverter.INPUT_FORMAT);
     }
-
 
 }
