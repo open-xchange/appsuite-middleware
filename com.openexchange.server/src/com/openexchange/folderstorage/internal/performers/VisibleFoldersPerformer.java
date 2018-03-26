@@ -378,6 +378,10 @@ public final class VisibleFoldersPerformer extends AbstractUserizedFolderPerform
             if (started) {
                 folderStorage.rollback(storageParameters);
             }
+            if (FolderExceptionErrorMessage.INTERRUPT_ERROR.equals(e)) {
+                Thread.currentThread().interrupt();
+                return new UserizedFolder[0];
+            }
             throw e;
         } catch (final RuntimeException e) {
             if (started) {

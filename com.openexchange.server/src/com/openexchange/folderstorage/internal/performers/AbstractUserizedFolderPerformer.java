@@ -999,6 +999,9 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
 
             @Override
             public OXException newUnexpectedError(final Throwable t) {
+                if (InterruptedException.class.isInstance(t)) {
+                    return FolderExceptionErrorMessage.INTERRUPT_ERROR.create();
+                }
                 return FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(t, t.getMessage());
             }
         };
