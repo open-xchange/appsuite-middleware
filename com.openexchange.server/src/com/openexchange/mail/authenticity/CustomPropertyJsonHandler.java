@@ -62,9 +62,9 @@ public interface CustomPropertyJsonHandler {
 
     /**
      * Parses the a map of custom properties to a {@link JSONObject}
+     * 
      * @param customProperties The map of custom properties
      * @return the {@link JSONObject}
      */
-    public JSONObject toJson(Map<String,?> customProperties);
-
+    JSONObject toJson(Map<String, Object> customProperties);
 }
