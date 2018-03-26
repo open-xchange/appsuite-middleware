@@ -82,9 +82,4 @@ public class PIMAttachmentDataRetrievalActivator extends HousekeepingActivator {
         registerService(DataProvider.class, new PIMAttachmentDataProvider(getService(AttachmentBase.class)), null);
     }
 
-    @Override
-    protected void stopBundle() throws Exception {
-        cleanUp();
-    }
-
 }
