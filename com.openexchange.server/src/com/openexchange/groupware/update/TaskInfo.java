@@ -64,12 +64,12 @@ public final class TaskInfo implements Comparable<TaskInfo> {
     /**
      * Initializes a new {@link TaskInfo}.
      */
-    public TaskInfo(final String taskName, final String schema) {
+    public TaskInfo(String taskName, String schema) {
         super();
         this.taskName = taskName;
         this.schema = schema;
 
-        final int prime = 31;
+        int prime = 31;
         int result = 1;
         result = prime * result + ((schema == null) ? 0 : schema.hashCode());
         result = prime * result + ((taskName == null) ? 0 : taskName.hashCode());
@@ -95,8 +95,8 @@ public final class TaskInfo implements Comparable<TaskInfo> {
     }
 
     @Override
-    public int compareTo(final TaskInfo o) {
-        final int res = schema.compareTo(o.schema);
+    public int compareTo(TaskInfo o) {
+        int res = schema.compareTo(o.schema);
         return 0 == res ? taskName.compareTo(o.taskName) : res;
     }
 
@@ -116,7 +116,7 @@ public final class TaskInfo implements Comparable<TaskInfo> {
      * @see java.lang.Object#equals(java.lang.Object)
      */
     @Override
-    public boolean equals(final Object obj) {
+    public boolean equals(Object obj) {
         if (this == obj) {
             return true;
         }
