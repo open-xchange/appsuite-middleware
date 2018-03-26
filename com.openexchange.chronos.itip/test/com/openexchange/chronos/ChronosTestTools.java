@@ -53,12 +53,25 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map.Entry;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import org.dmfs.rfc5545.DateTime;
 import com.openexchange.chronos.common.CalendarUtils;
+import com.openexchange.chronos.service.CalendarConfig;
+import com.openexchange.chronos.service.CalendarParameters;
+import com.openexchange.chronos.service.CalendarService;
+import com.openexchange.chronos.service.CalendarSession;
+import com.openexchange.chronos.service.CalendarUtilities;
+import com.openexchange.chronos.service.EntityResolver;
+import com.openexchange.chronos.service.FreeBusyService;
+import com.openexchange.chronos.service.RecurrenceService;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.MockUser;
+import com.openexchange.groupware.notify.hostname.HostData;
 import com.openexchange.java.Strings;
 import com.openexchange.resource.Resource;
+import com.openexchange.session.Session;
 
 /**
  * {@link ChronosTestTools}
@@ -297,6 +310,105 @@ public final class ChronosTestTools {
         r.setSimpleName("Resource No." + String.valueOf(resource.getEntity()));
 
         return r;
+    }
+
+    public static CalendarSession createSession(final int contextId, final int userId) {
+        return new CalendarSession() {
+
+            @Override
+            public <T> CalendarParameters set(String parameter, T value) {
+                return null;
+            }
+
+            @Override
+            public <T> T get(String parameter, Class<T> clazz, T defaultValue) {
+                return null;
+            }
+
+            @Override
+            public <T> T get(String parameter, Class<T> clazz) {
+                return null;
+            }
+
+            @Override
+            public Set<Entry<String, Object>> entrySet() {
+                return null;
+            }
+
+            @Override
+            public boolean contains(String parameter) {
+                return false;
+            }
+
+            @Override
+            public boolean isDebugEnabled() {
+                return false;
+            }
+
+            @Override
+            public List<OXException> getWarnings() {
+                return null;
+            }
+
+            @Override
+            public CalendarUtilities getUtilities() {
+                return null;
+            }
+
+            @Override
+            public int getUserId() {
+                return userId;
+            }
+
+            @Override
+            public Session getSession() {
+                return null;
+            }
+
+            @Override
+            public RecurrenceService getRecurrenceService() {
+                return null;
+            }
+
+            @Override
+            public HostData getHostData() {
+                return null;
+            }
+
+            @Override
+            public FreeBusyService getFreeBusyService() {
+                return null;
+            }
+
+            @Override
+            public EntityResolver getEntityResolver() {
+                return null;
+            }
+
+            @Override
+            public int getContextId() {
+                return contextId;
+            }
+
+            @Override
+            public CalendarConfig getConfig() {
+                return null;
+            }
+
+            @Override
+            public CalendarService getCalendarService() {
+                return null;
+            }
+
+            @Override
+            public void debug(String message, Exception e) {}
+
+            @Override
+            public void debug(String message) {}
+
+            @Override
+            public void addWarning(OXException warning) {}
+        };
     }
 
     /**
