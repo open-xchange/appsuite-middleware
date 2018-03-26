@@ -61,7 +61,7 @@ import com.openexchange.chronos.service.UpdatesResult;
 public class ChronosCalendarResultJsonFields {
 
 
-    public static final class Result {
+    public static class Result {
         /**
          * The created events. See {@link CalendarResult#getCreations()}.
          */
@@ -91,7 +91,7 @@ public class ChronosCalendarResultJsonFields {
         public static final String DELETED = "deleted";
     }
 
-    public static final class Error {
+    public static final class ErrorAwareResult extends Result {
         /**
          * The id of the event. See {@link ErrorAwareCalendarResult#getId()}.
          */

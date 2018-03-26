@@ -132,9 +132,9 @@ public class MergingCalendarResultConverter extends CalendarResultConverter {
                 }
             }
 
-            result.put(ChronosCalendarResultJsonFields.Result.CREATED, convertEvents(creates, timeZoneID, session, requestedFields, extendedEntities));
-            result.put(ChronosCalendarResultJsonFields.Result.UPDATED, convertEvents(updates, timeZoneID, session, requestedFields, extendedEntities));
-            result.put(ChronosCalendarResultJsonFields.Result.DELETED, convertEvents(deletes, timeZoneID, session, requestedFields, extendedEntities));
+            result.put(ChronosCalendarResultJsonFields.ErrorAwareResult.CREATED, convertEvents(creates, timeZoneID, session, requestedFields, extendedEntities));
+            result.put(ChronosCalendarResultJsonFields.ErrorAwareResult.UPDATED, convertEvents(updates, timeZoneID, session, requestedFields, extendedEntities));
+            result.put(ChronosCalendarResultJsonFields.ErrorAwareResult.DELETED, convertEvents(deletes, timeZoneID, session, requestedFields, extendedEntities));
         } catch (JSONException e) {
             throw OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e);
         }
@@ -144,14 +144,14 @@ public class MergingCalendarResultConverter extends CalendarResultConverter {
     public static JSONObject toJSON(ErrorAwareCalendarResult result, Locale locale) throws JSONException {
         JSONObject json = new JSONObject();
         OXException exception = result.getError();
-        json.put(ChronosCalendarResultJsonFields.Error.FOLDER_ID, result.getFolderID());
-        json.put(ChronosCalendarResultJsonFields.Error.ID, result.getId().getObjectID());
+        json.put(ChronosCalendarResultJsonFields.ErrorAwareResult.FOLDER_ID, result.getFolderID());
+        json.put(ChronosCalendarResultJsonFields.ErrorAwareResult.ID, result.getId().getObjectID());
         if (result.getId().getRecurrenceID() != null) {
-            json.put(ChronosCalendarResultJsonFields.Error.RECURRENCE_ID, result.getId().getRecurrenceID().getValue().toString());
+            json.put(ChronosCalendarResultJsonFields.ErrorAwareResult.RECURRENCE_ID, result.getId().getRecurrenceID().getValue().toString());
         }
         JSONObject jsonException = new JSONObject();
         ResponseWriter.addException(jsonException, exception, locale);
-        json.put(ChronosCalendarResultJsonFields.Error.ERROR, jsonException);
+        json.put(ChronosCalendarResultJsonFields.ErrorAwareResult.ERROR, jsonException);
 
         return json;
     }

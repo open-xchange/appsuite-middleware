@@ -95,6 +95,7 @@ public class CalendarResultsPerEventIdConverter extends CalendarResultConverter 
         return INPUT_FORMAT;
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public void convert(AJAXRequestData requestData, AJAXRequestResult result, ServerSession session, Converter converter) throws OXException {
         /*
@@ -130,18 +131,18 @@ public class CalendarResultsPerEventIdConverter extends CalendarResultConverter 
         }
         JSONObject jsonObject = new JSONObject(8);
         try {
-            jsonObject.put(ChronosCalendarResultJsonFields.Error.FOLDER_ID, eventID.getFolderID());
-            jsonObject.put(ChronosCalendarResultJsonFields.Error.ID, eventID.getObjectID());
-            jsonObject.putOpt(ChronosCalendarResultJsonFields.Error.RECURRENCE_ID, eventID.getRecurrenceID());
+            jsonObject.put(ChronosCalendarResultJsonFields.ErrorAwareResult.FOLDER_ID, eventID.getFolderID());
+            jsonObject.put(ChronosCalendarResultJsonFields.ErrorAwareResult.ID, eventID.getObjectID());
+            jsonObject.putOpt(ChronosCalendarResultJsonFields.ErrorAwareResult.RECURRENCE_ID, eventID.getRecurrenceID());
             jsonObject.put("timestamp", calendarResult.getTimestamp());
             if (ErrorAwareCalendarResult.class.isInstance(calendarResult) && null != ((ErrorAwareCalendarResult) calendarResult).getError()) {
                 JSONObject error = new JSONObject();
                 ResponseWriter.addException(error, ((ErrorAwareCalendarResult) calendarResult).getError());
-                jsonObject.put(ChronosCalendarResultJsonFields.Error.ERROR, error);
+                jsonObject.put(ChronosCalendarResultJsonFields.ErrorAwareResult.ERROR, error);
             } else {
-                jsonObject.put(ChronosCalendarResultJsonFields.Result.CREATED, convertCreateResults(calendarResult.getCreations(), timeZoneID, session, requestedFields, extendedEntities));
-                jsonObject.put(ChronosCalendarResultJsonFields.Result.UPDATED, convertUpdateResults(calendarResult.getUpdates(), timeZoneID, session, requestedFields, extendedEntities));
-                jsonObject.put(ChronosCalendarResultJsonFields.Result.DELETED, convertDeleteResults(calendarResult.getDeletions(), timeZoneID, session, requestedFields, extendedEntities));
+                jsonObject.put(ChronosCalendarResultJsonFields.ErrorAwareResult.CREATED, convertCreateResults(calendarResult.getCreations(), timeZoneID, session, requestedFields, extendedEntities));
+                jsonObject.put(ChronosCalendarResultJsonFields.ErrorAwareResult.UPDATED, convertUpdateResults(calendarResult.getUpdates(), timeZoneID, session, requestedFields, extendedEntities));
+                jsonObject.put(ChronosCalendarResultJsonFields.ErrorAwareResult.DELETED, convertDeleteResults(calendarResult.getDeletions(), timeZoneID, session, requestedFields, extendedEntities));
             }
         } catch (JSONException e) {
             throw OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e);

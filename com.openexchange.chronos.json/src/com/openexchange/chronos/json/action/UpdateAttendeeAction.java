@@ -115,76 +115,75 @@ public class UpdateAttendeeAction extends ChronosAction {
     protected AJAXRequestResult perform(IDBasedCalendarAccess calendarAccess, AJAXRequestData requestData) throws OXException {
         long clientTimestamp = parseClientTimestamp(requestData);
         Object data = requestData.getData();
-        if (data instanceof JSONObject) {
-            Attendee attendee = null;
-            try {
-                JSONObject attendeeJSON = ((JSONObject) data).getJSONObject(ATTENDEE);
-                ListItemMapping<Attendee, Event, JSONObject> mapping = (ListItemMapping<Attendee, Event, JSONObject>) ((ListMapping<Attendee, Event>) EventMapper.getInstance().opt(EventField.ATTENDEES));
-                Entry<String, ?> timezone = parseParameter(requestData, "timezone", false);
-                if (timezone != null && timezone.getValue() != null) {
-                    attendee = mapping.deserialize(attendeeJSON, TimeZone.getTimeZone((String) timezone.getValue()));
-                } else {
-                    attendee = mapping.deserialize(attendeeJSON, TimeZone.getTimeZone(requestData.getSession().getUser().getTimeZone()));
-                }
-                if (!attendee.containsUri() && !attendee.containsEntity()) {
-                    attendee.setEntity(requestData.getSession().getUserId());
-                }
-            } catch (JSONException e) {
-                throw OXJSONExceptionCodes.JSON_READ_ERROR.create(e, e.getMessage());
-            }
-
-            EventID eventID = parseIdParameter(requestData);
-            CalendarResult updateAttendeeResult;
-            try {
-                updateAttendeeResult = calendarAccess.updateAttendee(eventID, attendee, clientTimestamp);
-                clientTimestamp = updateAttendeeResult.getTimestamp() == 0l ? clientTimestamp : updateAttendeeResult.getTimestamp();
-            } catch (OXException e) {
-                return handleConflictException(e);
-            }
-
-            List<OXException> warnings = null;
-            List<CalendarResult> results = null;
-            if (((JSONObject) data).has(ALARMS_FIELD)) {
-                Event toUpdate = new Event();
-                Entry<String, ?> parseParameter = parseParameter(requestData, "timezone", false);
-                try {
-                    if (parseParameter == null) {
-                        EventMapper.getInstance().get(EventField.ALARMS).deserialize((JSONObject) data, toUpdate, TimeZone.getTimeZone(requestData.getSession().getUser().getTimeZone()));
-                    } else {
-                        TimeZone zone = (TimeZone) parseParameter.getValue();
-                        EventMapper.getInstance().get(EventField.ALARMS).deserialize((JSONObject) data, toUpdate, zone);
-                    }
-                    try {
-                        // Update calendar session with new timestamp
-                        CalendarResult updateAlarmResult = calendarAccess.updateAlarms(eventID, toUpdate.getAlarms(), clientTimestamp);
-                        results = new ArrayList<>(2);
-                        results.add(updateAttendeeResult);
-                        results.add(updateAlarmResult);
-                    } catch (OXException e) {
-                        warnings = Collections.singletonList(CalendarExceptionCodes.UNABLE_TO_ADD_ALARMS.create(e, e.getMessage()));
-                    }
-                } catch (JSONException e) {
-                    warnings = Collections.singletonList(CalendarExceptionCodes.UNABLE_TO_ADD_ALARMS.create(e, e.getMessage()));
-                }
-
-            }
-            if (results != null) {
-                long timestamp = 0L;
-                for (CalendarResult result : results) {
-                    timestamp = Math.max(timestamp, result.getTimestamp());
-                }
-                return new AJAXRequestResult(results, new Date(timestamp), MergingCalendarResultConverter.INPUT_FORMAT);
-            } else {
-                AJAXRequestResult ajaxRequestResult = new AJAXRequestResult(updateAttendeeResult, new Date(updateAttendeeResult.getTimestamp()), CalendarResultConverter.INPUT_FORMAT);
-                if (warnings != null) {
-                    ajaxRequestResult.addWarnings(warnings);
-                }
-                return ajaxRequestResult;
-            }
-
-        } else {
+        if (!(data instanceof JSONObject)) {
             throw AjaxExceptionCodes.ILLEGAL_REQUEST_BODY.create();
         }
+        Attendee attendee = null;
+        try {
+            JSONObject attendeeJSON = ((JSONObject) data).getJSONObject(ATTENDEE);
+            ListItemMapping<Attendee, Event, JSONObject> mapping = (ListItemMapping<Attendee, Event, JSONObject>) ((ListMapping<Attendee, Event>) EventMapper.getInstance().opt(EventField.ATTENDEES));
+            Entry<String, ?> timezone = parseParameter(requestData, "timezone", false);
+            if (timezone != null && timezone.getValue() != null) {
+                attendee = mapping.deserialize(attendeeJSON, TimeZone.getTimeZone((String) timezone.getValue()));
+            } else {
+                attendee = mapping.deserialize(attendeeJSON, TimeZone.getTimeZone(requestData.getSession().getUser().getTimeZone()));
+            }
+            if (!attendee.containsUri() && !attendee.containsEntity()) {
+                attendee.setEntity(requestData.getSession().getUserId());
+            }
+        } catch (JSONException e) {
+            throw OXJSONExceptionCodes.JSON_READ_ERROR.create(e, e.getMessage());
+        }
+
+        EventID eventID = parseIdParameter(requestData);
+        CalendarResult updateAttendeeResult;
+        try {
+            updateAttendeeResult = calendarAccess.updateAttendee(eventID, attendee, clientTimestamp);
+            clientTimestamp = updateAttendeeResult.getTimestamp() == 0l ? clientTimestamp : updateAttendeeResult.getTimestamp();
+        } catch (OXException e) {
+            return handleConflictException(e);
+        }
+
+        List<OXException> warnings = null;
+        List<CalendarResult> results = null;
+        if (((JSONObject) data).has(ALARMS_FIELD)) {
+            Event toUpdate = new Event();
+            Entry<String, ?> parseParameter = parseParameter(requestData, "timezone", false);
+            try {
+                if (parseParameter == null) {
+                    EventMapper.getInstance().get(EventField.ALARMS).deserialize((JSONObject) data, toUpdate, TimeZone.getTimeZone(requestData.getSession().getUser().getTimeZone()));
+                } else {
+                    TimeZone zone = (TimeZone) parseParameter.getValue();
+                    EventMapper.getInstance().get(EventField.ALARMS).deserialize((JSONObject) data, toUpdate, zone);
+                }
+                try {
+                    // Update calendar session with new timestamp
+                    CalendarResult updateAlarmResult = calendarAccess.updateAlarms(eventID, toUpdate.getAlarms(), clientTimestamp);
+                    results = new ArrayList<>(2);
+                    results.add(updateAttendeeResult);
+                    results.add(updateAlarmResult);
+                } catch (OXException e) {
+                    warnings = Collections.singletonList(CalendarExceptionCodes.UNABLE_TO_ADD_ALARMS.create(e, e.getMessage()));
+                }
+            } catch (JSONException e) {
+                warnings = Collections.singletonList(CalendarExceptionCodes.UNABLE_TO_ADD_ALARMS.create(e, e.getMessage()));
+            }
+
+        }
+        if (results != null) {
+            long timestamp = 0L;
+            for (CalendarResult result : results) {
+                timestamp = Math.max(timestamp, result.getTimestamp());
+            }
+            return new AJAXRequestResult(results, new Date(timestamp), MergingCalendarResultConverter.INPUT_FORMAT);
+        } else {
+            AJAXRequestResult ajaxRequestResult = new AJAXRequestResult(updateAttendeeResult, new Date(updateAttendeeResult.getTimestamp()), CalendarResultConverter.INPUT_FORMAT);
+            if (warnings != null) {
+                ajaxRequestResult.addWarnings(warnings);
+            }
+            return ajaxRequestResult;
+        }
+
     }
 
 }
