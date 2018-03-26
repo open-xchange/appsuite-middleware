@@ -630,6 +630,7 @@ public class UnixCrypt {
          while(salt.length() < 2) {
             saltBuilder.append('A');
         }
+        salt = saltBuilder.toString();
 
         StringBuffer buffer = new StringBuffer("             ");
 
