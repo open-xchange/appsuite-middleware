@@ -126,7 +126,7 @@ public class CreateSchema extends BasicCommandlineOptions {
             Database db = oxUtil.createSchema(creds, id);
 
             if (null == parser.getOptionValue(this.csvOutputOption)) {
-                System.out.printf("Created a new schema with name \"%s\" in database with id %s \n", db.getScheme(), db.getId());
+                System.out.printf("Created a new schema with name \"%s\" in database with id %s %n", db.getScheme(), db.getId());
                 return;
             }
 
