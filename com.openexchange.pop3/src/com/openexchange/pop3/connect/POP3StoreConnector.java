@@ -462,7 +462,7 @@ public final class POP3StoreConnector {
                         public Void call() throws Exception {
                             MailAccountStorageService mass = POP3ServiceRegistry.getServiceRegistry().getOptionalService(MailAccountStorageService.class);
                             if (null != mass) {
-                                mass.incrementFailedMailAuthCount(accountId, session.getUserId(), session.getContextId());
+                                mass.incrementFailedMailAuthCount(accountId, session.getUserId(), session.getContextId(), e);
                             }
                             return null;
                         }

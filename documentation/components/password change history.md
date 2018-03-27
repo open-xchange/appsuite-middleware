@@ -18,4 +18,4 @@ Neither the old nor the new password are saved by this feature.
 The Password Change History feature is included in ``open-xchange-core`` package. Thus no additional packages need to be installed.
 
 # Configuration
-The Password Change History features needs to be enabled to run (Default with 7.10.0). Additional properties for a custom handler and a limitation of entries are described in [configuration section](https://documentation.open-xchange.com/components/middleware/config/{{version}}/#mode=features&feature=PasswordChangeHistory).
+The Password Change History features needs to be enabled to run (Default with 7.10.0). Additional properties for a custom handler and a limitation of entries are described in [configuration section](https://documentation.open-xchange.com/components/middleware/config{{ site.baseurl }}/#mode=features&feature=PasswordChangeHistory).

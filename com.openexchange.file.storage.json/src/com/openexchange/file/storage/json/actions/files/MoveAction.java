@@ -55,8 +55,13 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.ajax.requesthandler.EnqueuableAJAXActionServices;
+import com.openexchange.ajax.requesthandler.jobqueue.JobKey;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.DefaultFile;
 import com.openexchange.file.storage.DefaultFileStorageFolder;
@@ -73,6 +78,8 @@ import com.openexchange.file.storage.composition.IDBasedFolderAccess;
 import com.openexchange.groupware.results.TimedResult;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIterators;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
+import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link MoveAction}
@@ -207,7 +214,7 @@ public class MoveAction extends AbstractWriteAction {
             if ((warnings != null) && (!warnings.isEmpty()) && (!ignoreWarnings)) {
                 result.setException(FileStorageExceptionCodes.FILE_MOVE_ABORTED.create());
             }
-            
+
             if (ignoreWarnings) {
                 for (String fid : oldFiles) {
                     moveFile(fid, destFolder, fileAccess);
@@ -252,6 +259,63 @@ public class MoveAction extends AbstractWriteAction {
             }
         }
         return name;
+    }
+
+    @Override
+    protected Result isEnqueueable(InfostoreRequest request) throws OXException {
+        ServerSession session = request.getSession();
+        List<IdVersionPair> pairs = request.optIdVersionPairs();
+        if (null != pairs) {
+            return isEnqueueable(request, pairs);
+        }
+
+        // A single file
+        request.require(Param.ID, Param.FOLDER_ID, Param.TIMESTAMP);
+        String id = request.getId();
+        String folderId = request.getFolderId();
+
+        JSONObject jKeyDesc = new JSONObject(4);
+        try {
+            jKeyDesc.put("module", "files");
+            jKeyDesc.put("action", "move");
+            jKeyDesc.put("id", id);
+            jKeyDesc.put("parent", folderId);
+        } catch (JSONException e) {
+            throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
+        }
+
+        return EnqueuableAJAXActionServices.resultFor(true, new JobKey(session.getUserId(), session.getContextId(), jKeyDesc.toString()));
+    }
+
+    private Result isEnqueueable(InfostoreRequest request, List<IdVersionPair> pairs) throws OXException {
+        ServerSession session = request.getSession();
+        request.require(Param.FOLDER_ID);
+        JSONArray folders = new JSONArray();
+        JSONArray files = new JSONArray();
+        for (IdVersionPair pair : pairs) {
+            if (pair.getIdentifier() == null) {
+                // Resource denotes a folder
+                folders.put(pair.getFolderId());
+            } else {
+                // Resource denotes a file
+                files.put(pair.getIdentifier());
+            }
+        }
+
+        String folderId = request.getFolderId();
+
+        JSONObject jKeyDesc = new JSONObject(4);
+        try {
+            jKeyDesc.put("module", "files");
+            jKeyDesc.put("action", "move");
+            jKeyDesc.put("files", files);
+            jKeyDesc.put("folders", folders);
+            jKeyDesc.put("parent", folderId);
+        } catch (JSONException e) {
+            throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
+        }
+
+        return EnqueuableAJAXActionServices.resultFor(true, new JobKey(session.getUserId(), session.getContextId(), jKeyDesc.toString()));
     }
 
 }

@@ -57,6 +57,8 @@ import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.ajax.requesthandler.EnqueuableAJAXActionService;
+import com.openexchange.ajax.requesthandler.EnqueuableAJAXActionServices;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.FileStorageUtility;
@@ -72,7 +74,7 @@ import com.openexchange.tools.session.ServerSession;
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public abstract class AbstractFileAction implements AJAXActionService {
+public abstract class AbstractFileAction implements AJAXActionService, EnqueuableAJAXActionService {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AbstractFileAction.class);
 
@@ -288,5 +290,21 @@ public abstract class AbstractFileAction implements AJAXActionService {
     public static int getZipDocumentsCompressionLevel() throws OXException {
         return FileStorageUtility.getZipDocumentsCompressionLevel();
     }
+
+    @Override
+    public Result isEnqueueable(AJAXRequestData request, ServerSession session) throws OXException {
+        AJAXInfostoreRequest req = new AJAXInfostoreRequest(request, session);
+        return isEnqueueable(req);
+    }
+
+    /**
+     * @param request The {@link InfostoreRequest}
+     * @throws OXException
+     */
+    protected Result isEnqueueable(InfostoreRequest request) throws OXException {
+        return EnqueuableAJAXActionServices.resultFor(false);
+    }
+
+
 
 }

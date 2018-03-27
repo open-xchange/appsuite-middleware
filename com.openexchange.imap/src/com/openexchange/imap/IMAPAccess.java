@@ -813,7 +813,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
                         public Void call() throws Exception {
                             MailAccountStorageService mass = Services.optService(MailAccountStorageService.class);
                             if (null != mass) {
-                                mass.incrementFailedMailAuthCount(accountId, session.getUserId(), session.getContextId());
+                                mass.incrementFailedMailAuthCount(accountId, session.getUserId(), session.getContextId(), null);
                             }
                             return null;
                         }
@@ -1378,6 +1378,13 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
                 if (useMultipleAddressesUserHash) {
                     int hash = getHashFor(userId, contextId);
                     imapProps.put("mail.imap.multiAddress.key", Integer.toString(hash));
+                }
+                /*
+                 * Pass max. wait timeout
+                 */
+                int maxRetries = IMAPProperties.getInstance().getMultipleAddressesMaxRetryAttempts(userId, contextId);
+                if (maxRetries >= 0) {
+                    imapProps.put("mail.imap.multiAddress.maxRetries", Integer.toString(maxRetries));
                 }
             }
         }

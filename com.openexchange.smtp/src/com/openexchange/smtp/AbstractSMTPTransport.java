@@ -765,7 +765,7 @@ abstract class AbstractSMTPTransport extends MailTransport implements MimeSuppor
     protected static void doConnectTransport(Transport transport, String host, int port, String user, String password, final SMTPConfig smtpConfig, final Session session) throws OXException, MessagingException {
         try {
             transport.connect(host, port, user, password);
-        } catch (javax.mail.AuthenticationFailedException e) {
+        } catch (final javax.mail.AuthenticationFailedException e) {
             if (null == smtpConfig || null == session) {
                 throw e;
             }
@@ -777,7 +777,7 @@ abstract class AbstractSMTPTransport extends MailTransport implements MimeSuppor
                     public Void call() throws Exception {
                         MailAccountStorageService mass = Services.optService(MailAccountStorageService.class);
                         if (null != mass) {
-                            mass.incrementFailedTransportAuthCount(smtpConfig.getAccountId(), session.getUserId(), session.getContextId());
+                            mass.incrementFailedTransportAuthCount(smtpConfig.getAccountId(), session.getUserId(), session.getContextId(), e);
                         }
                         return null;
                     }

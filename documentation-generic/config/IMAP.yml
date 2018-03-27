@@ -726,3 +726,38 @@ properties:
       file: imap.properties
       packageName: open-xchange-imap
       tags: ["Mail","IMAP"]
+    - key: com.openexchange.imap.useMultipleAddresses
+      description: |
+        Enables to support considering multiple IP addresses resolvable for a certain (IMAP) host. In case a connect attempt
+        against a certain IP addresses encounters a (connect) timeout, then a fail-over to the next IP address happens.
+        
+        Applies only to the primary mail account!
+        
+        Note:
+        See also setting "com.openexchange.imap.useMultipleAddressesMaxRetries" to control how many fail-overs are allowed.
+      defaultValue: false
+      version: 7.10.0
+      reloadable: true
+      configcascadeAware: true
+      related: com.openexchange.imap.useMultipleAddressesMaxRetries
+      file: imap.properties
+      packageName: open-xchange-imap
+      tags: ["Mail","IMAP"]
+    - key: com.openexchange.imap.useMultipleAddressesMaxRetries
+      description: |
+        Specifies the max. number of retry attempts when failing over to another IP address in case
+        "com.openexchange.imap.useMultipleAddresses" is set to "true". If set to a value less than or equal to 0 (zero), this
+        setting is ineffective.
+        
+        Applies only to the primary mail account!
+        
+        Note:
+        The option "com.openexchange.imap.useMultipleAddresses" is required to be set to "true"
+      defaultValue: 3
+      version: 7.10.0
+      reloadable: true
+      configcascadeAware: true
+      related: com.openexchange.imap.useMultipleAddresses
+      file: imap.properties
+      packageName: open-xchange-imap
+      tags: ["Mail","IMAP"]

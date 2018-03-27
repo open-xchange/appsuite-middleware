@@ -3746,7 +3746,7 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
         }
     }
 
-    private boolean incrementFailedAuthCount(boolean mailAccess, int accountId, int userId, int contextId, Connection con) throws OXException {
+    private boolean incrementFailedAuthCount(boolean mailAccess, int accountId, int userId, int contextId, Exception optReason, Connection con) throws OXException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
@@ -3774,7 +3774,11 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
                 // Exceeded...
                 boolean disabled = disableAccount(mailAccess, accountId, userId, contextId, con);
                 if (disabled) {
-                    LOG.info("Disabled {} account {} ({}) of user {} in context {} due to exceeded failed auth count", mailAccess ? "mail" : "transport", accountId, failedAuthInfo.url, userId, contextId);
+                    if (null == optReason) {                        
+                        LOG.info("Disabled {} account {} ({}) of user {} in context {} due to exceeded failed auth count", mailAccess ? "mail" : "transport", accountId, failedAuthInfo.url, userId, contextId);
+                    } else {
+                        LOG.info("Disabled {} account {} ({}) of user {} in context {} due to exceeded failed auth count", mailAccess ? "mail" : "transport", accountId, failedAuthInfo.url, userId, contextId, optReason);
+                    }
                 }
                 return disabled;
             }
@@ -3796,7 +3800,7 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
             }
 
             // Concurrent update...
-            return incrementFailedAuthCount(mailAccess, accountId, userId, contextId, con);
+            return incrementFailedAuthCount(mailAccess, accountId, userId, contextId, optReason, con);
         } catch (SQLException e) {
             throw MailAccountExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
@@ -3805,10 +3809,10 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
     }
 
     @Override
-    public boolean incrementFailedMailAuthCount(int accountId, int userId, int contextId) throws OXException {
+    public boolean incrementFailedMailAuthCount(int accountId, int userId, int contextId, Exception optReason) throws OXException {
         Connection con = Database.get(contextId, true);
         try {
-            return incrementFailedMailAuthCount(accountId, userId, contextId, con);
+            return incrementFailedMailAuthCount(accountId, userId, contextId, optReason, con);
         } finally {
             Database.back(contextId, true, con);
         }
@@ -3820,19 +3824,20 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
      * @param accountId The account identifier
      * @param userId The user identifier
      * @param contextId The context identifier
+     * @param optReason The optional reason for failed authentication or <code>null</code>
      * @param con The connection to use
      * @return <code>true</code> if mail access has been disabled due to this call; otherwise <code>false</code>
      * @throws OXException If incrementing the count fails
      */
-    public boolean incrementFailedMailAuthCount(int accountId, int userId, int contextId, Connection con) throws OXException {
-        return incrementFailedAuthCount(true, accountId, userId, contextId, con);
+    public boolean incrementFailedMailAuthCount(int accountId, int userId, int contextId, Exception optReason, Connection con) throws OXException {
+        return incrementFailedAuthCount(true, accountId, userId, contextId, optReason, con);
     }
 
     @Override
-    public boolean incrementFailedTransportAuthCount(int accountId, int userId, int contextId) throws OXException {
+    public boolean incrementFailedTransportAuthCount(int accountId, int userId, int contextId, Exception optReason) throws OXException {
         Connection con = Database.get(contextId, true);
         try {
-            return incrementFailedTransportAuthCount(accountId, userId, contextId, con);
+            return incrementFailedTransportAuthCount(accountId, userId, contextId, optReason, con);
         } finally {
             Database.back(contextId, true, con);
         }
@@ -3844,12 +3849,13 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
      * @param accountId The account identifier
      * @param userId The user identifier
      * @param contextId The context identifier
+     * @param optReason The optional reason for failed authentication or <code>null</code>
      * @param con The connection to use
      * @return <code>true</code> if mail transport has been disabled due to this call; otherwise <code>false</code>
      * @throws OXException If incrementing the count fails
      */
-    public boolean incrementFailedTransportAuthCount(int accountId, int userId, int contextId, Connection con) throws OXException {
-        return incrementFailedAuthCount(false, accountId, userId, contextId, con);
+    public boolean incrementFailedTransportAuthCount(int accountId, int userId, int contextId, Exception optReason, Connection con) throws OXException {
+        return incrementFailedAuthCount(false, accountId, userId, contextId, optReason, con);
     }
 
     // ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------

@@ -280,20 +280,20 @@ displayed after the report has been sent to activation.open-xchange.com.
 ## Report performance and storage
 With version 7.8.3 new properties are introduced.
 
-* [com.openexchange.report.appsuite.fileStorage](http://documentation.open-xchange.com/components/middleware/config/{{version}}/index.html#com.openexchange.report.appsuite.fileStorage)
+* [com.openexchange.report.appsuite.fileStorage](http://documentation.open-xchange.com/components/middleware/config{{ site.baseurl }}/index.html#com.openexchange.report.appsuite.fileStorage)
  
  Describes the storage path for all report relevant data. Saving a report will place a JSON-Version of the report in that folder.
 
-* [com.openexchange.report.appsuite.maxChunkSize](http://documentation.open-xchange.com/components/middleware/config/{{version}}/index.html#com.openexchange.report.appsuite.maxChunkSize=200)
+* [com.openexchange.report.appsuite.maxChunkSize](http://documentation.open-xchange.com/components/middleware/config{{ site.baseurl }}/index.html#com.openexchange.report.appsuite.maxChunkSize=200)
 	
  This property enables the client to store parts of the report on hard drive to keep memory usage small. A chunk is a CapabilitySet.
  The stored parts are combined into a single .report file and then deleted when the report is finished. The .report file is not deleted automatically.
 
-* [com.openexchange.report.appsuite.maxThreadPoolSize](http://documentation.open-xchange.com/components/middleware/config/{{version}}/index.html#com.openexchange.report.appsuite.maxThreadPoolSize)
+* [com.openexchange.report.appsuite.maxThreadPoolSize](http://documentation.open-xchange.com/components/middleware/config{{ site.baseurl }}/index.html#com.openexchange.report.appsuite.maxThreadPoolSize)
 	
  The report will use multithreading for faster processing. Therefore the user can edit the threadpoolsize by editing this property value. Each thread is processing the needed values from a schema. If the threadpool is smaller then the schemas in the database, the threads are queued.
 
-* [com.openexchange.report.appsuite.threadPriority](http://documentation.open-xchange.com/components/middleware/config/{{version}}/index.html#com.openexchange.report.appsuite.threadPriority)
+* [com.openexchange.report.appsuite.threadPriority](http://documentation.open-xchange.com/components/middleware/config{{ site.baseurl }}/index.html#com.openexchange.report.appsuite.threadPriority)
 	
  This property determines the used threads priotity. It can range from 1 (lowest) to 10 (highest).
 
