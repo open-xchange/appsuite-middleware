@@ -49,14 +49,7 @@
 
 package com.openexchange.mail.authenticity.impl.trusted.internal;
 
-import java.awt.image.BufferedImage;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.rmi.server.UID;
-import javax.imageio.ImageIO;
 import com.openexchange.mail.authenticity.impl.trusted.Icon;
 
 /**
@@ -69,44 +62,19 @@ public class ImageIcon implements Icon {
 
     private final byte[] byteArray;
     private static final String MIME_TYPE = "image/png";
-    private static final String FORMAT = "png";
     private final String UID;
     private static final String PREFIX = "trustedMail_";
 
     /**
      * Initializes a new {@link ImageIcon}.
      *
-     * @param url A url to a valid image
-     * @throws IOException
-     * @throws MalformedURLException
+     * @param byteArray the content of the image icon
      */
-    public ImageIcon(URL url) throws MalformedURLException, IOException {
+    public ImageIcon(byte[] byteArray) {
         super();
-        BufferedImage image = ImageIO.read(url);
-        if(image==null) {
-            throw new IOException("No image found");
-        }
-        ByteArrayOutputStream stream = new ByteArrayOutputStream();
-        ImageIO.write(image, FORMAT, stream);
-        byteArray = stream.toByteArray();
-        UID = PREFIX+new UID().toString();
+        this.byteArray = byteArray;
+        UID = PREFIX + new UID().toString();
 
-    }
-
-    /**
-     * Initializes a new {@link ImageIcon}.
-     *
-     * @param file An image file
-     * @throws IOException
-     * @throws MalformedURLException
-     */
-    public ImageIcon(File file) throws MalformedURLException, IOException {
-        super();
-        BufferedImage image = ImageIO.read(file);
-        ByteArrayOutputStream stream = new ByteArrayOutputStream();
-        ImageIO.write(image, FORMAT, stream);
-        byteArray = stream.toByteArray();
-        UID = PREFIX+new UID().toString();
     }
 
     @Override
@@ -123,5 +91,4 @@ public class ImageIcon implements Icon {
     public String getUID() {
         return UID;
     }
-
 }

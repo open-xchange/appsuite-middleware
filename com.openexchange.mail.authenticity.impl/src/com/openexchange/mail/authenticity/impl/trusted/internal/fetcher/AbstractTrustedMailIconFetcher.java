@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2016-2020 OX Software GmbH
+ *     Copyright (C) 2018-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,68 +47,43 @@
  *
  */
 
-package com.openexchange.mail.authenticity.impl.trusted.internal;
+package com.openexchange.mail.authenticity.impl.trusted.internal.fetcher;
 
-import java.util.regex.Pattern;
-import com.openexchange.java.Strings;
-import com.openexchange.mail.authenticity.impl.trusted.Icon;
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import javax.imageio.ImageIO;
 
 /**
- * {@link TrustedMail} specifies a trusted mail address or a group of trusted mail addresses via wild-cards.
+ * {@link AbstractTrustedMailIconFetcher}
  *
- * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
- * @since v7.10.0
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class TrustedMail {
+class AbstractTrustedMailIconFetcher {
 
-    private final String mail;
-    private final Pattern pattern;
-    private final Icon image;
+    private static final String FORMAT = "png";
 
     /**
-     *
-     * Initializes a new {@link TrustedMail}.
-     *
-     * @param mail The mail address. '*' and '?' wild-cards are allowed
-     * @param image The image
+     * Initialises a new {@link AbstractTrustedMailIconFetcher}.
      */
-    public TrustedMail(String mail, Icon image) {
+    public AbstractTrustedMailIconFetcher() {
         super();
-        this.mail = mail;
-        this.pattern = Pattern.compile(Strings.wildcardToRegex(mail));
-        this.image = image;
     }
 
     /**
-     * Gets the mail address
-     *
-     * @return The mail address
+     * Processes the specified {@link BufferedImage} as a PNG image and
+     * returns the byte array
+     * 
+     * @param image The {@link BufferedImage} to process
+     * @return The byte array
+     * @throws IOException if the {@link BufferedImage} is <code>null</code>
      */
-    public String getMail() {
-        return mail;
-    }
-
-    /**
-     * Gets the image
-     *
-     * @return The image or <code>null</code> if no image is specified
-     */
-    public Icon getImage() {
-        return image;
-    }
-
-    /**
-     * Checks whether this trusted mail matches the given mail address
-     *
-     * @param mailAddress
-     * @return <code>true</code> if the {@link TrustedMail} matches the given mail address, <code>false</code> otherwise
-     */
-    public boolean matches(String mailAddress) {
-        return pattern.matcher(mailAddress).matches();
-    }
-
-    @Override
-    public String toString() {
-        return new StringBuilder("TrustedDomain [").append("domain = ").append(mail).append(']').toString();
+    byte[] process(BufferedImage image) throws IOException {
+        if (image == null) {
+            throw new IOException("No image found");
+        }
+        ByteArrayOutputStream stream = new ByteArrayOutputStream();
+        ImageIO.write(image, FORMAT, stream);
+        return stream.toByteArray();
     }
 }

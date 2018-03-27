@@ -40,6 +40,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Pattern;
+import org.json.helpers.FileBackedJSON;
 import org.json.helpers.UnsynchronizedStringReader;
 import org.json.helpers.UnsynchronizedStringWriter;
 import com.fasterxml.jackson.core.JsonGenerator;
@@ -1501,6 +1502,13 @@ public class JSONObject extends AbstractJSONValue {
     }
 
     /**
+     * The default in-memory threshold of 256,000 characters.
+     * <p>
+     * A String object of that size occupies roughly 0.5 megabytes (see <a href="https://is.gd/jr5JB4">here</a>)
+     */
+    private static final int IN_MEMORY_TEXT_THRESHOLD = 256000;
+
+    /**
      * Parses specified JSON object from given parser.
      *
      * @param jParser The JSON parser with {@link JsonToken#START_OBJECT} already consumed
@@ -1545,23 +1553,44 @@ public class JSONObject extends AbstractJSONValue {
                 case VALUE_NUMBER_INT:
                     try {
                         jo.put(fieldName, jParser.getIntValue());
-                        } catch (final JsonParseException e) {
-                            // Outside of range of Java int
-                            try {
-                                jo.put(fieldName, jParser.getLongValue());
-                            } catch (final JsonParseException pe) {
-                                // Outside of range of Java long
-                                // Fallback: Treat number as double, so we don't lose
-                                // too much precision (#44850)
-                                jo.put(fieldName, jParser.getDoubleValue());
-                            }
+                    } catch (final JsonParseException e) {
+                        // Outside of range of Java int
+                        try {
+                            jo.put(fieldName, jParser.getLongValue());
+                        } catch (final JsonParseException pe) {
+                            // Outside of range of Java long
+                            // Fallback: Treat number as double, so we don't lose
+                            // too much precision (#44850)
+                            jo.put(fieldName, jParser.getDoubleValue());
                         }
+                    }
                     break;
                 case VALUE_TRUE:
                     jo.put(fieldName, true);
                     break;
                 case VALUE_STRING:
-                    jo.put(fieldName, jParser.getText());
+                    {
+                        int textLength = jParser.getTextLength();
+                        if (textLength > IN_MEMORY_TEXT_THRESHOLD) {
+                            FileBackedJSONStringProvider provider = FileBackedJSON.getFileBackedJSONStringProvider();
+                            if (null == provider) {
+                                jo.put(fieldName, jParser.getText());
+                            } else {
+                                // Avoid construction of a String object
+                                FileBackedJSONString jsonString = provider.createFileBackedJSONString();
+                                try {
+                                    char[] textCharacters = jParser.getTextCharacters();
+                                    int textOffset = jParser.getTextOffset();
+                                    jsonString.write(textCharacters, textOffset, textLength);
+                                    jsonString.flush();
+                                } finally {
+                                    jsonString.close();
+                                }
+                            }
+                        } else {
+                            jo.put(fieldName, jParser.getText());
+                        }
+                    }
                     break;
                 default:
                     // Ignore

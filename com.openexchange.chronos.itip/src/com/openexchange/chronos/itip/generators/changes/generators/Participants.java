@@ -149,28 +149,11 @@ public class Participants implements ChangeDescriptionGenerator {
         Map<Integer, ChangeType> resourceChange = new HashMap<>();
         Map<String, ChangeType> externalChange = new HashMap<>();
 
-        Set<String> external = new HashSet<>();
-        if (updated.getAttendees() != null) {
-            for (Attendee a : updated.getAttendees()) {
-                if (!CalendarUtils.isInternal(a)) {
-                    external.add(a.getEMail());
-                }
-            }
-        }
-
-        if (original.getAttendees() != null) {
-            for (Attendee a : original.getAttendees()) {
-                if (!CalendarUtils.isInternal(a)) {
-                    external.add(a.getEMail());
-                }
-            }
-        }
-
-        if (diff.getUpdatedFields().contains(EventField.ATTENDEES)) {
+        if (diff != null && diff.getUpdatedFields() != null && diff.getUpdatedFields().contains(EventField.ATTENDEES) && diff.getAttendeeUpdates() != null) {
             CollectionUpdate<Attendee, AttendeeField> attendeeUpdates = diff.getAttendeeUpdates();
             investigateSetOperation(attendeeUpdates, attendeeIds, groupAttendeeIds, resourceAttendeeIds, attendeeChange, resourceChange, groupChange, externalChange, ChangeType.ADD, attendeeUpdates.getAddedItems());
             investigateSetOperation(attendeeUpdates, attendeeIds, groupAttendeeIds, resourceAttendeeIds, attendeeChange, resourceChange, groupChange, externalChange, ChangeType.REMOVE, attendeeUpdates.getRemovedItems());
-            investigateChanges(attendeeUpdates, attendeeIds, attendeeChange, externalChange, external);
+            investigateChanges(attendeeUpdates, attendeeIds, attendeeChange, externalChange);
         }
 
         List<Sentence> changes = new ArrayList<Sentence>();
@@ -248,7 +231,7 @@ public class Participants implements ChangeDescriptionGenerator {
         }
     }
 
-    private void investigateChanges(CollectionUpdate<Attendee, AttendeeField> difference, Set<Integer> userIds, Map<Integer, ChangeType> userChange, Map<String, ChangeType> externalChange, Set<String> external) {
+    private void investigateChanges(CollectionUpdate<Attendee, AttendeeField> difference, Set<Integer> userIds, Map<Integer, ChangeType> userChange, Map<String, ChangeType> externalChange) {
 
         List<? extends ItemUpdate<Attendee, AttendeeField>> updatedItems = difference.getUpdatedItems();
         for (ItemUpdate<Attendee, AttendeeField> itemUpdate : updatedItems) {
@@ -270,7 +253,7 @@ public class Participants implements ChangeDescriptionGenerator {
 
         if (difference.getAddedItems() != null && !difference.getAddedItems().isEmpty()) {
             for (Attendee added : difference.getAddedItems()) {
-                if (added.getCuType().equals(CalendarUserType.INDIVIDUAL)) {
+                if (CalendarUserType.INDIVIDUAL.equals(added.getCuType())) {
                     if (CalendarUtils.isInternal(added)) {
                         userIds.add(I(added.getEntity()));
                         userChange.put(I(added.getEntity()), ChangeType.ADD);
@@ -283,7 +266,7 @@ public class Participants implements ChangeDescriptionGenerator {
 
         if (difference.getRemovedItems() != null && !difference.getRemovedItems().isEmpty()) {
             for (Attendee removed : difference.getRemovedItems()) {
-                if (removed.getCuType().equals(CalendarUserType.INDIVIDUAL)) {
+                if (CalendarUserType.INDIVIDUAL.equals(removed.getCuType())) {
                     if (CalendarUtils.isInternal(removed)) {
                         userIds.add(I(removed.getEntity()));
                         userChange.put(I(removed.getEntity()), ChangeType.REMOVE);
