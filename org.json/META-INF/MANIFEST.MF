@@ -16,5 +16,8 @@ Import-Package: com.fasterxml.jackson.core,
  com.fasterxml.jackson.core.util,
  com.google.common.base,
  com.google.common.collect,
- com.google.json
+ com.google.json,
+ org.osgi.framework,
+ org.osgi.util.tracker
 Bundle-ClassPath: .
+Bundle-Activator: org.json.osgi.JSONActivator
