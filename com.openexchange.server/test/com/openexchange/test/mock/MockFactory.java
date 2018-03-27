@@ -47,59 +47,57 @@
  *
  */
 
-package com.openexchange.chronos.json.action;
+package com.openexchange.test.mock;
 
-import static com.openexchange.chronos.common.CalendarUtils.getMaximumTimestamp;
-import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_FIELDS;
-import static com.openexchange.tools.arrays.Collections.unmodifiableSet;
-import java.util.Map;
-import java.util.Set;
-import org.json.JSONArray;
-import com.openexchange.ajax.requesthandler.AJAXRequestData;
-import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.chronos.json.converter.CalendarResultsPerEventIdConverter;
-import com.openexchange.chronos.json.oauth.ChronosOAuthScope;
-import com.openexchange.chronos.provider.composition.IDBasedCalendarAccess;
-import com.openexchange.chronos.service.ErrorAwareCalendarResult;
-import com.openexchange.chronos.service.EventID;
-import com.openexchange.exception.OXException;
-import com.openexchange.oauth.provider.resourceserver.annotations.OAuthAction;
-import com.openexchange.server.ServiceLookup;
-import com.openexchange.tools.servlet.AjaxExceptionCodes;
+import org.mockito.Mockito;
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.ldap.User;
+import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link DeleteAction}
+ * {@link MockFactory}
  *
- * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+ * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since v7.10.0
  */
-@OAuthAction(ChronosOAuthScope.OAUTH_WRITE_SCOPE)
-public class DeleteAction extends ChronosAction {
+public class MockFactory {
 
-    private static final Set<String> OPTIONAL_PARAMETERS = unmodifiableSet(PARAM_RANGE_START, PARAM_RANGE_END, PARAM_EXPAND, PARAMETER_FIELDS);
+    public static int USER_ID = 3;
 
-    @Override
-    protected Set<String> getOptionalParameters() {
-        return OPTIONAL_PARAMETERS;
+    public static int CONTEXT_ID = 7;
+
+    private static User user = getUser();
+    private static Context context = getContext();
+
+    public static ServerSession getServerSession() {
+        ServerSession serverSession = Mockito.mock(ServerSession.class);
+        Mockito.when(serverSession.getContext()).thenReturn(context);
+        Mockito.when(serverSession.getContextId()).thenReturn(getContextId());
+        
+        Mockito.when(serverSession.getUser()).thenReturn(user);
+        Mockito.when(serverSession.getUserId()).thenReturn(getUserId());
+        return serverSession;
     }
 
-    /**
-     * Initializes a new {@link DeleteAction}.
-     *
-     * @param services A service lookup reference
-     */
-    protected DeleteAction(ServiceLookup services) {
-        super(services);
+    public static Context getContext() {
+        Context lContext = Mockito.mock(Context.class);
+        Mockito.when(lContext.getContextId()).thenReturn(getContextId());
+        return lContext;
     }
 
-    @Override
-    protected AJAXRequestResult perform(IDBasedCalendarAccess calendarAccess, AJAXRequestData requestData) throws OXException {
-        Object data = requestData.getData();
-        if (data == null || !(data instanceof JSONArray)) {
-            throw AjaxExceptionCodes.ILLEGAL_REQUEST_BODY.create();
-        }
-        Map<EventID, ErrorAwareCalendarResult> results = calendarAccess.deleteEvents(parseEventIDs((JSONArray) data), parseClientTimestamp(requestData));
-        return new AJAXRequestResult(results, getMaximumTimestamp(results), CalendarResultsPerEventIdConverter.INPUT_FORMAT);
+    public static int getContextId() {
+        return CONTEXT_ID;
+    }
+
+    public static User getUser() {
+        User lUser = Mockito.mock(User.class);
+        Mockito.when(lUser.getId()).thenReturn(getUserId());
+
+        return lUser;
+    }
+
+    public static int getUserId() {
+        return USER_ID;
     }
 
 }

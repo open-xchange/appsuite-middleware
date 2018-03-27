@@ -84,6 +84,15 @@ public class UpdateAlarmsPerformer extends AbstractUpdatePerformer {
     }
 
     /**
+     * Initializes a new {@link UpdateAlarmsPerformer}, taking over the settings from another update performer.
+     *
+     * @param updatePerformer The update performer to take over the settings from
+     */
+    protected UpdateAlarmsPerformer(AbstractUpdatePerformer updatePerformer) throws OXException {
+        super(updatePerformer);
+    }
+
+    /**
      * Performs the alarm update in an event.
      *
      * @param objectId The identifier of the event to update the alarms for

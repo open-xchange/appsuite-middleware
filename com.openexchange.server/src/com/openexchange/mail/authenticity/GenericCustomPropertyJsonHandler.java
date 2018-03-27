@@ -50,6 +50,7 @@
 package com.openexchange.mail.authenticity;
 
 import java.util.Map;
+import java.util.Map.Entry;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.slf4j.Logger;
@@ -65,24 +66,28 @@ public class GenericCustomPropertyJsonHandler implements CustomPropertyJsonHandl
 
     private static final Logger LOG = LoggerFactory.getLogger(GenericCustomPropertyJsonHandler.class);
 
+    /**
+     * Initialises a new {@link GenericCustomPropertyJsonHandler}.
+     */
+    public GenericCustomPropertyJsonHandler() {
+        super();
+    }
+
     @Override
-    public JSONObject toJson(Map<String, ?> customProperties) {
-        if(customProperties == null) {
+    public JSONObject toJson(Map<String, Object> customProperties) {
+        if (customProperties == null) {
             return null;
         }
         JSONObject result = new JSONObject(customProperties.size());
-        for(String key: customProperties.keySet()) {
-            Object value = customProperties.get(key);
+        for (Entry<String, Object> entry : customProperties.entrySet()) {
+            Object value = entry.getValue();
             try {
-                result.put(key, value == null ? JSONObject.NULL : value.toString());
+                result.put(entry.getKey(), value == null ? JSONObject.NULL : value.toString());
             } catch (JSONException e) {
-                LOG.warn("Error while parsing custom property '%s1': $s2", key, value);
+                LOG.warn("Error while parsing custom property '%s1': $s2", entry, value);
                 // should never be thrown
             }
         }
         return result;
     }
-
-
-
 }

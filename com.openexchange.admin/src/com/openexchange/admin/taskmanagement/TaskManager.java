@@ -413,8 +413,8 @@ public class TaskManager {
         }
 
         StringBuffer buf = new StringBuffer(256);
-        String TFORMAT = "%-5s %-20s %-10s %-40s \n";
-        String VFORMAT = "%-5s %-20s %-10s %-40s \n";
+        String TFORMAT = "%-5s %-20s %-10s %-40s %n";
+        String VFORMAT = "%-5s %-20s %-10s %-40s %n";
         buf.append(String.format(TFORMAT, "ID", "Type of Job", "Status", "Further Information"));
 
         while (jids.hasNext()) {

@@ -51,6 +51,7 @@ package com.openexchange.chronos.impl.performer;
 
 import static com.openexchange.chronos.common.AlarmUtils.filterRelativeTriggers;
 import static com.openexchange.chronos.common.CalendarUtils.contains;
+import static com.openexchange.chronos.common.CalendarUtils.isInternal;
 import static com.openexchange.chronos.common.CalendarUtils.isSeriesException;
 import static com.openexchange.chronos.common.CalendarUtils.isSeriesMaster;
 import static com.openexchange.chronos.common.CalendarUtils.matches;
@@ -61,6 +62,7 @@ import static com.openexchange.folderstorage.Permission.DELETE_ALL_OBJECTS;
 import static com.openexchange.folderstorage.Permission.DELETE_OWN_OBJECTS;
 import static com.openexchange.folderstorage.Permission.NO_PERMISSIONS;
 import static com.openexchange.folderstorage.Permission.READ_FOLDER;
+import static com.openexchange.java.Autoboxing.L;
 import static com.openexchange.java.Autoboxing.i;
 import java.util.Collections;
 import java.util.List;
@@ -71,6 +73,7 @@ import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.AttendeeField;
 import com.openexchange.chronos.CalendarUser;
 import com.openexchange.chronos.Event;
+import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.ParticipationStatus;
 import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.common.mapping.AttendeeMapper;
@@ -109,10 +112,11 @@ public class UpdateAttendeePerformer extends AbstractUpdatePerformer {
      * @param eventId The identifier of the event to update the attendee in
      * @param recurrenceId The recurrence identifier of the occurrence to update, or <code>null</code> if no specific occurrence is targeted
      * @param attendee The attendee data to update
+     * @param alarms The alarms to update, or <code>null</code> to not change alarms, or an empty array to delete any existing alarms
      * @param clientTimestamp The client timestamp to catch concurrent modifications, or <code>null</code> to skip checks
      * @return The result
      */
-    public InternalCalendarResult perform(String eventId, RecurrenceId recurrenceId, Attendee attendee, Long clientTimestamp) throws OXException {
+    public InternalCalendarResult perform(String eventId, RecurrenceId recurrenceId, Attendee attendee, List<Alarm> alarms, Long clientTimestamp) throws OXException {
         /*
          * load original event data & check permissions
          */
@@ -136,12 +140,21 @@ public class UpdateAttendeePerformer extends AbstractUpdatePerformer {
             Check.noConflicts(storage, session, originalEvent, Collections.singletonList(resolvedAttendee));
         }
         /*
-         * perform update & return result
+         * perform update
          */
         if (null == recurrenceId) {
             updateAttendee(originalEvent, originalAttendee, attendee);
         } else {
             updateAttendee(originalEvent, originalAttendee, attendee, recurrenceId);
+        }
+        /*
+         * also update alarms as needed
+         */
+        if (null != alarms) {
+            if (false == isInternal(originalAttendee)) {
+                throw CalendarExceptionCodes.FORBIDDEN_ATTENDEE_CHANGE.create(eventId, originalAttendee, EventField.ALARMS);
+            }
+            new UpdateAlarmsPerformer(this).perform(eventId, recurrenceId, alarms.isEmpty() ? null : alarms, L(timestamp.getTime()));
         }
         return resultTracker.getResult();
     }

@@ -93,6 +93,11 @@ public class ParticipationStatus extends EnumeratedProperty {
     }
 
     @Override
+    public String getDefaultValue() {
+        return NEEDS_ACTION.getValue();
+    }
+
+    @Override
     protected String[] getStandardValues() {
         return getValues(NEEDS_ACTION, ACCEPTED, DECLINED, TENTATIVE, DELEGATED);
     }

@@ -93,6 +93,11 @@ public class CalendarUserType extends EnumeratedProperty {
     }
 
     @Override
+    public String getDefaultValue() {
+        return INDIVIDUAL.getValue();
+    }
+
+    @Override
     protected String[] getStandardValues() {
         return getValues(INDIVIDUAL, GROUP, RESOURCE, ROOM, UNKNOWN);
     }

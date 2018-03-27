@@ -2752,15 +2752,16 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
 
                         @Override
                         public String toString() {
-                            String out = "User: " + un;
-                            final Iterator<Entry<String, String>> i = guiPrefs.entrySet().iterator();
+                            StringBuilder stringBuilder = new StringBuilder("User: ");
+                            stringBuilder.append(un);
+                            Iterator<Entry<String, String>> i = guiPrefs.entrySet().iterator();
                             while (i.hasNext()) {
-                                final Entry<String, String> entry = i.next();
-                                final String key = entry.getKey();
-                                final String value = entry.getValue();
-                                out += "\t" + key + "=" + value + "\n";
+                                Entry<String, String> entry = i.next();
+                                String key = entry.getKey();
+                                String value = entry.getValue();
+                                stringBuilder.append('\t').append(key).append('=').append(value).append('\n');
                             }
-                            return out;
+                            return stringBuilder.toString();
                         }
                     });
                     newuser.setGuiPreferences(guiPrefs);

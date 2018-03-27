@@ -319,8 +319,8 @@ public class InternalCalendarAccess implements FolderCalendarAccess, SubscribeAw
     }
 
     @Override
-    public CalendarResult updateAttendee(EventID eventID, Attendee attendee, long clientTimestamp) throws OXException {
-        return getCalendarService().updateAttendee(session, eventID, attendee, clientTimestamp);
+    public CalendarResult updateAttendee(EventID eventID, Attendee attendee, List<Alarm> alarms, long clientTimestamp) throws OXException {
+        return getCalendarService().updateAttendee(session, eventID, attendee, alarms, clientTimestamp);
     }
 
     @Override

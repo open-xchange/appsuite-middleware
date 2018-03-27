@@ -87,6 +87,7 @@ import com.openexchange.groupware.impl.IDGenerator;
 import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.java.Strings;
 import com.openexchange.java.util.UUIDs;
+import com.openexchange.log.LogProperties;
 import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.passwordmechs.IPasswordMech;
 import com.openexchange.server.impl.DBPool;
@@ -168,24 +169,23 @@ public class RdbUserStorage extends UserStorage {
         }
         PreparedStatement stmt = null;
         ResultSet result = null;
-        int userId = -1;
         try {
             stmt = con.prepareStatement(SELECT_ID);
             stmt.setInt(1, context.getContextId());
             stmt.setString(2, uid);
             result = stmt.executeQuery();
-            if (result.next()) {
-                userId = result.getInt(1);
-            } else {
+            if (false == result.next()) {
                 throw LdapExceptionCode.USER_NOT_FOUND.create(uid, I(context.getContextId())).setPrefix("USR");
             }
+            int userId = result.getInt(1);
+            LogProperties.put(LogProperties.Name.LOGIN_RESOLVED_LOGIN, uid);
+            return userId;
         } catch (SQLException e) {
             throw LdapExceptionCode.SQL_ERROR.create(e, e.getMessage()).setPrefix("USR");
         } finally {
             closeSQLStuff(result, stmt);
             DBPool.closeReaderSilent(context, con);
         }
-        return userId;
     }
 
     @Override

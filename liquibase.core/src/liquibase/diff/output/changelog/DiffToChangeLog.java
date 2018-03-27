@@ -184,11 +184,12 @@ public class DiffToChangeLog {
         List<Class<? extends DatabaseObject>> types = graph.sort(comparisonDatabase, generatorType);
 
         if (!loggedOrderFor.contains(generatorType)) {
-            String log = generatorType.getSimpleName()+" type order: ";
+            StringBuilder logBuilder = new StringBuilder(generatorType.getSimpleName());
+            logBuilder.append(" type order: ");
             for (Class<? extends DatabaseObject> type : types) {
-                log += "    " + type.getName();
+                logBuilder.append("    ").append(type.getName());
             }
-            LogFactory.getLogger().debug(log);
+            LogFactory.getLogger().debug(logBuilder.toString());
             loggedOrderFor.add(generatorType);
         }
 
