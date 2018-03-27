@@ -59,6 +59,7 @@ import com.openexchange.ajax.response.IncludeStackTraceService;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.Category.EnumType;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Strings;
 import com.openexchange.log.LogProperties;
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
@@ -132,19 +133,39 @@ public class ExceptionCategoryFilter extends ExtendedTurboFilter {
                     try {
                         final int contextId = getUnsignedInteger(LogProperties.get(LogProperties.Name.SESSION_CONTEXT_ID));
                         final int userId = getUnsignedInteger(LogProperties.get(LogProperties.Name.SESSION_USER_ID));
-                        if (userId <= 0 || contextId <= 0 || !traceService.includeStackTraceOnError(userId, contextId)) {
-                            t.setStackTrace(new StackTraceElement[] {});
+                        if (userId <= 0 || contextId <= 0 || false == traceService.includeStackTraceOnError(userId, contextId)) {
+                            dropStackTraceFor(t);
                         }
                     } catch (final Exception e) {
-                        t.setStackTrace(new StackTraceElement[] {});
+                        dropStackTraceFor(t);
                     }
                 } else {
-                    t.setStackTrace(new StackTraceElement[] {});
+                    dropStackTraceFor(t);
                 }
             }
         }
 
         return FilterReply.NEUTRAL;
+    }
+
+    private static final StackTraceElement[] EMPTY_STACK_TRACE = new StackTraceElement[0];
+
+    private static void dropStackTraceFor(Throwable t) {
+        if (null != t) {
+            // Drop our stack trace
+            t.setStackTrace(EMPTY_STACK_TRACE);
+
+            // Drop stack traces for suppressed exceptions, if any
+            Throwable[] suppressedOnes = t.getSuppressed();
+            if (null != suppressedOnes && suppressedOnes.length > 0) {
+                for (Throwable suppressed : suppressedOnes) {
+                    dropStackTraceFor(suppressed);
+                }
+            }
+
+            // Drop stack traces for cause, if any
+            dropStackTraceFor(t.getCause());
+        }
     }
 
     public static void setCategories(Set<String> categories) {
@@ -160,7 +181,7 @@ public class ExceptionCategoryFilter extends ExtendedTurboFilter {
 
     public static void setCategories(String categories) {
         Set<String> c = new HashSet<String>();
-        for (String category : categories.split(" *, *")) {
+        for (String category : Strings.splitByComma(categories)) {
             c.add(category.trim());
         }
         setCategories(c);

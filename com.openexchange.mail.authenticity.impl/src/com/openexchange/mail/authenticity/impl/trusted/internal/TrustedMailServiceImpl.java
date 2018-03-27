@@ -52,13 +52,13 @@ package com.openexchange.mail.authenticity.impl.trusted.internal;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.google.common.collect.ImmutableMap;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.ForcedReloadable;
 import com.openexchange.config.Interests;
@@ -132,7 +132,7 @@ public class TrustedMailServiceImpl implements ForcedReloadable, TrustedMailServ
         https;
     }
 
-    private final Map<Protocol, TrustedMailIconFetcher> fetchers = new HashMap<>();
+    private final Map<Protocol, TrustedMailIconFetcher> fetchers;
 
     /**
      * Initializes a new {@link TrustedMailServiceImpl}.
@@ -144,14 +144,25 @@ public class TrustedMailServiceImpl implements ForcedReloadable, TrustedMailServ
         this.trustedMailAddressesPerTenant = new ConcurrentHashMap<>(4);
         this.fallbackTenant = new CopyOnWriteArrayList<>();
 
-        TrustedMailIconURLFetcher fetcher = new TrustedMailIconURLFetcher();
-        fetchers.put(Protocol.http, fetcher);
-        fetchers.put(Protocol.https, fetcher);
-        fetchers.put(Protocol.file, new TrustedMailIconFileFetcher());
+        fetchers = initialiseFetchers();
 
         ConfigurationService configurationService = services.getService(ConfigurationService.class);
         TimerService timerService = services.getService(TimerService.class);
         timerService.schedule(() -> init(configurationService), 0);
+    }
+
+    /**
+     * Initialises the fetchers
+     * 
+     * @return An {@link ImmutableMap} with the fetchers
+     */
+    private ImmutableMap<Protocol, TrustedMailIconFetcher> initialiseFetchers() {
+        ImmutableMap.Builder<Protocol, TrustedMailIconFetcher> builder = ImmutableMap.builder();
+        TrustedMailIconURLFetcher fetcher = new TrustedMailIconURLFetcher();
+        builder.put(Protocol.http, fetcher);
+        builder.put(Protocol.https, fetcher);
+        builder.put(Protocol.file, new TrustedMailIconFileFetcher());
+        return builder.build();
     }
 
     /**

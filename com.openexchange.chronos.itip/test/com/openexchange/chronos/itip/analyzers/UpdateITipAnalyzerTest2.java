@@ -50,15 +50,16 @@
 package com.openexchange.chronos.itip.analyzers;
 
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.not;
 import java.util.Collections;
-import java.util.Optional;
+import org.dmfs.rfc5545.Duration;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Matchers;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
@@ -73,11 +74,9 @@ import com.openexchange.chronos.ParticipationStatus;
 import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.common.mapping.AttendeeMapper;
 import com.openexchange.chronos.common.mapping.EventMapper;
-import com.openexchange.chronos.itip.ITipAction;
 import com.openexchange.chronos.itip.ITipAnalysis;
 import com.openexchange.chronos.itip.ITipMessage;
 import com.openexchange.chronos.itip.ITipMethod;
-import com.openexchange.chronos.itip.Messages;
 import com.openexchange.chronos.itip.generators.HTMLWrapper;
 import com.openexchange.chronos.itip.osgi.Services;
 import com.openexchange.chronos.service.CalendarSession;
@@ -86,21 +85,28 @@ import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.MockUser;
-import com.openexchange.junit.Assert;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.user.UserService;
 
 /**
- * {@link ReplyITipAnalyzerTest}
+ * {@link UpdateITipAnalyzerTest2} - Test the analyze call
  *
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  * @since v7.10.0
  */
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({ Services.class, CalendarUtils.class })
-public class ReplyITipAnalyzerTest {
+public class UpdateITipAnalyzerTest2 {
 
-    private final static int CONTEXT_ID = 42;
+    /**
+     * Shift date two hours in the future
+     */
+    private static final Duration DURATION = new Duration(1, 0, 2, 0, 0);
+
+    private final static int CONTEXT_ID = 1337;
+
+    @InjectMocks
+    private UpdateITipAnalyzer updateITipAnalyzer;
 
     private MockUser user;
 
@@ -113,9 +119,6 @@ public class ReplyITipAnalyzerTest {
     private HTMLWrapper wrapper;
 
     ITipMessage message;
-
-    @InjectMocks
-    private ReplyITipAnalyzer replyITipAnalyzer;
 
     @Mock
     private UserService userService;
@@ -133,9 +136,7 @@ public class ReplyITipAnalyzerTest {
         update = EventMapper.getInstance().copy(original, new Event(), (EventField[]) null);
         wrapper = new HTMLWrapper();
 
-        message = ITipMockFactory.mockITipMessage(ITipMethod.REPLY, update);
-
-        ITipMockFactory.injectUtil(replyITipAnalyzer, ITipMockFactory.mockUtil(original));
+        ITipMockFactory.injectUtil(updateITipAnalyzer, ITipMockFactory.mockUtil(original));
 
         user = ChronosTestTools.convertToUser(original.getCreatedBy());
         context = ITipMockFactory.getContext(CONTEXT_ID);
@@ -152,78 +153,138 @@ public class ReplyITipAnalyzerTest {
         // Mock settings
         PowerMockito.when(contextService.getContext(Matchers.anyInt())).thenReturn(context);
         PowerMockito.when(userService.getUser(Matchers.anyInt(), Matchers.any())).thenReturn(user);
+
     }
 
-    @Test(expected = OXException.class)
-    public void testAnalyze_ReplyWithMoreThanOneAttendee_ThrowsException() throws Exception {
-        // update contains 3 attendees, so error should be thrown
-        replyITipAnalyzer.analyze(message, null, wrapper, null, user, context, session);
-    }
-
-    @Test
-    public void testAnalyze_WrongMethodUsed_EmptyAnalysis() throws Exception {
-        Mockito.when(message.getMethod()).thenReturn(ITipMethod.COUNTER);
-        ITipAnalysis analyze = replyITipAnalyzer.analyze(message, null, wrapper, null, user, context, session);
-        Assert.assertThat("Should only be one", Integer.valueOf(analyze.getAnnotations().size()), is(Integer.valueOf(1)));
-        Assert.assertThat("Should be none", analyze.getAnnotations().get(0).getMessage(), is(Messages.NONE));
-    }
-
-    @Test
-    public void testAnalyze_PartyCrasherReply_AcceptPartyCrasher() throws Exception {
-        Attendee crasher = ChronosTestTools.createAttendee(CONTEXT_ID, null);
-        update.setAttendees(Collections.singletonList(crasher));
-        ITipAnalysis analyze = replyITipAnalyzer.analyze(message, null, wrapper, null, user, context, session);
-        Assert.assertThat("Party crasher should have been found", analyze.getActions().toArray()[0], is(ITipAction.ACCEPT_PARTY_CRASHER));
-        Assert.assertTrue("Party crasher should have been added", analyze.getChanges().get(0).getNewEvent().getAttendees().contains(crasher));
-    }
-
-    @Test
-    public void testAnalyze_ConformITipReply_AllGood() throws Exception {
-        Attendee copy = getAttendeeCopy();
-        copy.setPartStat(ParticipationStatus.DECLINED);
-        update.setAttendees(Collections.singletonList(copy));
-
-        ITipAnalysis analyze = replyITipAnalyzer.analyze(message, null, wrapper, null, user, context, session);
-        Assert.assertThat("Should have been UPDATE action", analyze.getActions().toArray()[0], is(ITipAction.UPDATE));
-        Event newEvent = analyze.getChanges().get(0).getNewEvent();
-        Optional<Attendee> processed = newEvent.getAttendees().stream().filter(a -> copy.getEntity() == a.getEntity()).findAny();
-        Assert.assertTrue("REPLY attendee is missing.", processed.isPresent());
-        Assert.assertThat("Status not changed", processed.get().getPartStat(), is(ParticipationStatus.DECLINED));
-    }
-
-    @Test
-    public void testAnalyze_NothingUpdated_NoAction() throws Exception {
-        Attendee a = getAttendee();
-        update.setAttendees(Collections.singletonList(a));
-
-        ITipAnalysis analyze = replyITipAnalyzer.analyze(message, null, wrapper, null, user, context, session);
-        Assert.assertTrue("Nothing was changed, so there should be no action.", analyze.getActions().isEmpty());
-    }
-
-    /**
-     * Test for bug 57733
-     * 
-     * @throws Exception If test fails
+    /*
+     * ------------------------------ REQUEST TESTS ------------------------------
      */
     @Test
-    public void testAnalyze_UpperCaseMailto_NoPartyCrasherAdded() throws Exception {
-        Attendee externalAttendee = ChronosTestTools.createExternalAttendee(CONTEXT_ID % 13, null);
-        original.getAttendees().add(externalAttendee);
+    public void testAnalyze_request_EventParsed() throws Exception {
 
-        Attendee copy = copy(externalAttendee);
-        String uri = externalAttendee.getUri();
-        //convert 'mailto:' to 'MAILTO:'
-        uri = uri.substring(7);
-        uri = "MAILTO:" + uri;
-        copy.setUri(uri);
-        copy.setPartStat(ParticipationStatus.TENTATIVE);
-        update.setAttendees(Collections.singletonList(copy));
+    }
 
-        ITipAnalysis analyze = replyITipAnalyzer.analyze(message, null, wrapper, null, user, context, session);
-        Assert.assertThat("Should have been UPDATE action", analyze.getActions().toArray()[0], is(ITipAction.UPDATE));
+    /*
+     * ------------------------------ COUNTER TESTS ------------------------------
+     */
+    // Microsoft counter tests
+
+    @Test
+    public void testAnalyze_Microsoft_ChangedStartDate() throws Exception {
+        prepareMicrosoftCounter();
+        update.setStartDate(update.getStartDate().addDuration(DURATION));
+        ITipAnalysis analyze = updateITipAnalyzer.analyze(message, null, wrapper, null, user, context, session);
+
         Event newEvent = analyze.getChanges().get(0).getNewEvent();
-        Assert.assertTrue("REPLY attendee is missing.", newEvent.getAttendees().stream().filter(a -> copy.getEntity() == a.getEntity()).findAny().isPresent());
-        Assert.assertThat("Status not changed", Integer.valueOf(newEvent.getAttendees().size()), is(Integer.valueOf(original.getAttendees().size())));
+        Assert.assertThat("End date was updated!", newEvent.getEndDate(), is(original.getEndDate()));
+        Assert.assertThat("Start date wasn't updated!", newEvent.getStartDate(), is(update.getStartDate()));
+        Assert.assertThat("Start date wasn't updated!", newEvent.getStartDate(), not(original.getStartDate()));
+    }
+
+    @Test
+    public void testAnalyze_Microsoft_ChangedEndtDate() throws Exception {
+        prepareMicrosoftCounter();
+
+        update.setEndDate(update.getEndDate().addDuration(DURATION));
+        ITipAnalysis analyze = updateITipAnalyzer.analyze(message, null, wrapper, null, user, context, session);
+
+        Event newEvent = analyze.getChanges().get(0).getNewEvent();
+        Assert.assertThat("Start date was updated!", newEvent.getStartDate(), is(original.getStartDate()));
+        Assert.assertThat("End date wasn't updated!", newEvent.getEndDate(), is(update.getEndDate()));
+        Assert.assertThat("End date wasn't updated!", newEvent.getEndDate(), not(original.getEndDate()));
+    }
+
+    @Test
+    public void testAnalyze_Microsoft_ChangedStartEndDate() throws Exception {
+        prepareMicrosoftCounter();
+        update.setStartDate(update.getStartDate().addDuration(DURATION));
+        update.setEndDate(update.getEndDate().addDuration(DURATION));
+        ITipAnalysis analyze = updateITipAnalyzer.analyze(message, null, wrapper, null, user, context, session);
+
+        Event newEvent = analyze.getChanges().get(0).getNewEvent();
+        Assert.assertThat("Start date wasn't updated!", newEvent.getStartDate(), is(update.getStartDate()));
+        Assert.assertThat("Start date wasn't updated!", newEvent.getStartDate(), not(original.getStartDate()));
+        Assert.assertThat("Start date wasn't updated!", newEvent.getEndDate(), is(update.getEndDate()));
+        Assert.assertThat("Start date wasn't updated!", newEvent.getEndDate(), not(original.getEndDate()));
+    }
+
+    @Test
+    public void testAnalyze_Microsoft_NotChangedLocation() throws Exception {
+        prepareMicrosoftCounter();
+        String location = "Germany/Olpe";
+        update.setLocation(location);
+        ITipAnalysis analyze = updateITipAnalyzer.analyze(message, null, wrapper, null, user, context, session);
+
+        Event newEvent = analyze.getChanges().get(0).getNewEvent();
+        Assert.assertThat("Location shouldn't have changed", newEvent.getLocation(), not(location));
+        Assert.assertThat("Location isn't the same location anymore.", newEvent.getLocation(), is(original.getLocation()));
+    }
+
+    @Test
+    public void testAnalyze_Microsoft_AttendeeAccepted() throws Exception {
+        testParticipantChange(ParticipationStatus.ACCEPTED);
+    }
+
+    @Test
+    public void testAnalyze_Microsoft_AttendeeTentatived() throws Exception {
+        testParticipantChange(ParticipationStatus.TENTATIVE);
+    }
+
+    @Test
+    public void testAnalyze_Microsoft_AttendeeDeclined() throws Exception {
+        testParticipantChange(ParticipationStatus.DECLINED);
+    }
+
+    private void testParticipantChange(ParticipationStatus status) throws Exception {
+        prepareMicrosoftCounter();
+
+        Attendee attendee = update.getAttendees().get(0);
+        attendee.setPartStat(status);
+        ITipAnalysis analyze = updateITipAnalyzer.analyze(message, null, wrapper, null, user, context, session);
+
+        Event newEvent = analyze.getChanges().get(0).getNewEvent();
+        Assert.assertThat("Participant status wasn't changed", newEvent.getAttendees().stream().filter(a -> attendee.getEntity() == a.getEntity()).findFirst().get().getPartStat(), is(status));
+    }
+
+    @Test
+    public void testAnalyze_Microsoft_MoreChanged() throws Exception {
+        /*
+         * Add more attendees to simulate a fixed Microsoft iTip implementation
+         * that can change ever field on a counter.
+         */
+        prepareMicrosoftCounter();
+
+        update.setAttendees(original.getAttendees());
+
+        String location = "Germany/Olpe";
+        update.setLocation(location);
+
+        String summary = "New summary";
+        update.setSummary(summary);
+
+        ITipAnalysis analyze = updateITipAnalyzer.analyze(message, null, wrapper, null, user, context, session);
+
+        Event newEvent = analyze.getChanges().get(0).getNewEvent();
+        Assert.assertThat("Location should have changed", newEvent.getLocation(), is(location));
+        Assert.assertThat("Location hasn't changed.", newEvent.getLocation(), not(original.getLocation()));
+
+        Assert.assertThat("Summary should have changed", newEvent.getSummary(), is(summary));
+        Assert.assertThat("Summary hasn't changed.", newEvent.getSummary(), not(original.getSummary()));
+    }
+
+    /*
+     * ------------------------------ PUBLISH TESTS ------------------------------
+     */
+    //    @Test
+    //    public void testAnalyze_Foo_Bar() throws Exception {
+    //        
+    //    }
+
+    private void prepareMicrosoftCounter() throws OXException {
+        Attendee attendee = getAttendee();
+        attendee.setPartStat(ParticipationStatus.NEEDS_ACTION);
+        update.setAttendees(Collections.singletonList(copy(attendee)));
+        message = ITipMockFactory.mockITipMessage(ITipMethod.COUNTER, update, true);
     }
 
     private Attendee getAttendee() {

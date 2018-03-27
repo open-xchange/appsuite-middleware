@@ -342,7 +342,7 @@ public final class TmpFileFileHolder implements IFileHolder {
      * machine.
      * </ol>
      *
-     * @param autoManaged <code>true</code> to signal automatic management for the created file (deleted after processing threads terminates); otherwise <code>false</code> to let the caller control file's life-cycle
+     * @param autoManaged <code>true</code> to signal automatic management for the created file (deleted after processing thread terminates); otherwise <code>false</code> to let the caller control file's life-cycle
      * @return An abstract pathname denoting a newly-created empty file
      * @throws OXException If a file could not be created
      */

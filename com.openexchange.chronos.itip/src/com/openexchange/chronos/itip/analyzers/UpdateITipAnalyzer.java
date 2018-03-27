@@ -137,8 +137,6 @@ public class UpdateITipAnalyzer extends AbstractITipAnalyzer {
         Event master = update;
         List<Event> exceptions = Collections.emptyList();
 
-        update = handleMicrosoft(message, analysis, original, update);
-
         boolean differ = true;
 
         if (original != null) {
@@ -181,6 +179,7 @@ public class UpdateITipAnalyzer extends AbstractITipAnalyzer {
 
         if (differ && message.getEvent() != null) {
             Event event = session.getUtilities().copyEvent(message.getEvent(), (EventField[]) null);
+            event = handleMicrosoft(message, analysis, original, event);
             ensureParticipant(original, event, session, owner);
             if (original != null) {
                 event.setFolderId(original.getFolderId());
@@ -205,6 +204,7 @@ public class UpdateITipAnalyzer extends AbstractITipAnalyzer {
             change.setException(true);
             change.setMaster(master);
 
+            exception = handleMicrosoft(message, analysis, matchingException, exception);
             exception.setSeriesId(update.getSeriesId());
 
             differ = true;
