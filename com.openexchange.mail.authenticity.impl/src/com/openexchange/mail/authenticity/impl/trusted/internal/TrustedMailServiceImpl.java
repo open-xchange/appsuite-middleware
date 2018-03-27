@@ -410,8 +410,11 @@ public class TrustedMailServiceImpl implements ForcedReloadable, TrustedMailServ
             URL u = new URL(resourceUrl);
             Protocol p = Protocol.valueOf(u.getProtocol().toLowerCase());
             return fetchers.get(p);
-        } catch (MalformedURLException | IllegalArgumentException e) {
-            LOG.error("{}", e.getMessage(), e);
+        } catch (MalformedURLException e) {
+            LOG.error("A malformed URL was detected for resource '{}'", resourceUrl, e);
+            return null;
+        } catch (IllegalArgumentException e) {
+            LOG.error("The protocol defined in the resource url '{}' is not supported.", resourceUrl);
             return null;
         }
     }
