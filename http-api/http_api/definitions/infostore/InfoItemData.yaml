@@ -1,6 +1,4 @@
 type: object
-required:
-  - folder_id
 properties:
   $ref: ../common/CommonObjectData.yaml
   object_permissions:
@@ -65,3 +63,5 @@ properties:
     type: object
     description: Contains additional metadata for items in the "maildrive" file storage.
     readOnly: true
+required:
+  - folder_id
