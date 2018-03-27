@@ -1,4 +1,6 @@
 type: object
+required:
+  - folder_id
 properties:
   $ref: ../common/CommonObjectData.yaml
   object_permissions:
