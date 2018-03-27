@@ -74,6 +74,7 @@ import com.openexchange.testing.httpclient.models.AlarmTriggerResponse;
 import com.openexchange.testing.httpclient.models.AttendeeAndAlarm;
 import com.openexchange.testing.httpclient.models.CalendarResult;
 import com.openexchange.testing.httpclient.models.ChronosCalendarResultResponse;
+import com.openexchange.testing.httpclient.models.ChronosMultipleCalendarResultResponse;
 import com.openexchange.testing.httpclient.models.ChronosUpdatesResponse;
 import com.openexchange.testing.httpclient.models.EventData;
 import com.openexchange.testing.httpclient.models.EventId;
@@ -440,7 +441,7 @@ public class EventManager extends AbstractManager {
      * @throws ChronosApiException if a Chronos API error is occurred
      */
     public void deleteEvent(EventId eventId) throws ApiException, ChronosApiException {
-        ChronosCalendarResultResponse deleteResponse = userApi.getChronosApi().deleteEvent(userApi.getSession(), System.currentTimeMillis(), Collections.singletonList(eventId), null, null, EXPAND_SERIES, false);
+        ChronosMultipleCalendarResultResponse deleteResponse = userApi.getChronosApi().deleteEvent(userApi.getSession(), System.currentTimeMillis(), Collections.singletonList(eventId), null, null, EXPAND_SERIES, false);
         assertNull(deleteResponse.getErrorDesc(), deleteResponse.getError());
         forgetEventId(eventId);
         lastTimeStamp = deleteResponse.getTimestamp();
@@ -453,7 +454,7 @@ public class EventManager extends AbstractManager {
      * @throws ApiException if an API error is occurred
      */
     public void deleteEvent(EventId eventId, long timestamp) throws ApiException {
-        ChronosCalendarResultResponse deleteResponse = userApi.getChronosApi().deleteEvent(userApi.getSession(), timestamp, Collections.singletonList(eventId), null, null, EXPAND_SERIES, false);
+        ChronosMultipleCalendarResultResponse deleteResponse = userApi.getChronosApi().deleteEvent(userApi.getSession(), timestamp, Collections.singletonList(eventId), null, null, EXPAND_SERIES, false);
         assertNull(deleteResponse.getErrorDesc(), deleteResponse.getError());
         forgetEventId(eventId);
         lastTimeStamp = deleteResponse.getTimestamp();
