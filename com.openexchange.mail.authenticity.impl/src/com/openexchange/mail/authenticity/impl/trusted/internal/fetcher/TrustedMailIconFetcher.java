@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2016-2020 OX Software GmbH
+ *     Copyright (C) 2018-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,68 +47,29 @@
  *
  */
 
-package com.openexchange.mail.authenticity.impl.trusted.internal;
-
-import java.util.regex.Pattern;
-import com.openexchange.java.Strings;
-import com.openexchange.mail.authenticity.impl.trusted.Icon;
+package com.openexchange.mail.authenticity.impl.trusted.internal.fetcher;
 
 /**
- * {@link TrustedMail} specifies a trusted mail address or a group of trusted mail addresses via wild-cards.
+ * {@link TrustedMailIconFetcher}
  *
- * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
- * @since v7.10.0
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class TrustedMail {
-
-    private final String mail;
-    private final Pattern pattern;
-    private final Icon image;
+public interface TrustedMailIconFetcher {
 
     /**
-     *
-     * Initializes a new {@link TrustedMail}.
-     *
-     * @param mail The mail address. '*' and '?' wild-cards are allowed
-     * @param image The image
+     * Determines whether the URL for the specified resource exists.
+     * 
+     * @param resourceUrl The resource URL
+     * @return <code>true</code> if the URL of the resource exists; <code>false</code>
+     *         otherwise
      */
-    public TrustedMail(String mail, Icon image) {
-        super();
-        this.mail = mail;
-        this.pattern = Pattern.compile(Strings.wildcardToRegex(mail));
-        this.image = image;
-    }
+    boolean exists(String resourceUrl);
 
     /**
-     * Gets the mail address
-     *
-     * @return The mail address
+     * Fetches the bytes from the specified resource URL for the specified tenant
+     * 
+     * @param resourceUrl The resource URL
+     * @return The bytes for the resource or <code>null</code> if no resource is available
      */
-    public String getMail() {
-        return mail;
-    }
-
-    /**
-     * Gets the image
-     *
-     * @return The image or <code>null</code> if no image is specified
-     */
-    public Icon getImage() {
-        return image;
-    }
-
-    /**
-     * Checks whether this trusted mail matches the given mail address
-     *
-     * @param mailAddress
-     * @return <code>true</code> if the {@link TrustedMail} matches the given mail address, <code>false</code> otherwise
-     */
-    public boolean matches(String mailAddress) {
-        return pattern.matcher(mailAddress).matches();
-    }
-
-    @Override
-    public String toString() {
-        return new StringBuilder("TrustedDomain [").append("domain = ").append(mail).append(']').toString();
-    }
+    byte[] fetch(String resourceUrl);
 }
