@@ -106,7 +106,7 @@ public class CreateCalendarTables extends AbstractCreateTableImpl {
         + "INDEX (cid, timestampfield02),"
         + "INDEX `uidIndex` (cid, uid(255)),"
         + "INDEX `changingDateIndex` (cid, changing_date)"
-        + ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
+        + ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;";
 
     /**
      * Table name of prg_date_rights table
@@ -124,7 +124,7 @@ public class CreateCalendarTables extends AbstractCreateTableImpl {
         + "ma VARCHAR(286),"
         + "dn VARCHAR(320),"
         + "PRIMARY KEY (cid, object_id, id, type)"
-        + ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
+        + ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;";
 
     /**
      * Table name of del_date_rights table
@@ -142,7 +142,7 @@ public class CreateCalendarTables extends AbstractCreateTableImpl {
         + "ma VARCHAR(286),"
         + "dn VARCHAR(320),"
         + "PRIMARY KEY (cid, object_id, id, type)"
-        + ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
+        + ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;";
 
     /**
      * Table name of del_dates table
@@ -191,7 +191,7 @@ public class CreateCalendarTables extends AbstractCreateTableImpl {
         + "INDEX (cid, timestampfield02),"
         + "INDEX `uidIndex` (cid, uid(255)),"
         + "INDEX `changingDateIndex` (cid, changing_date)"
-        + ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
+        + ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;";
 
     /**
      * Table name of del_dates_members table
@@ -212,7 +212,7 @@ public class CreateCalendarTables extends AbstractCreateTableImpl {
         + "PRIMARY KEY (cid, object_id, member_uid, pfid),"
         + "UNIQUE INDEX member (cid, member_uid, object_id),"
         + "INDEX `givenname` (cid, pfid)"
-        + ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
+        + ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;";
 
     /**
      * Table name of prg_dates_members table
@@ -233,7 +233,7 @@ public class CreateCalendarTables extends AbstractCreateTableImpl {
         + "PRIMARY KEY (cid, object_id, member_uid, pfid),"
         + "UNIQUE INDEX member (cid, member_uid, object_id),"
         + "INDEX `givenname` (cid, pfid)"
-        + ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
+        + ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;";
 
     /**
      * Table name of dateExternal table

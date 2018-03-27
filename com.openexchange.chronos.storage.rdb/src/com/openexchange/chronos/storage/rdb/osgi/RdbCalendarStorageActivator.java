@@ -59,6 +59,7 @@ import com.openexchange.chronos.storage.rdb.groupware.ChronosCreateTableService;
 import com.openexchange.chronos.storage.rdb.groupware.ChronosCreateTableTask;
 import com.openexchange.chronos.storage.rdb.groupware.DeleteAndChangeExceptionConsistencyTask;
 import com.openexchange.chronos.storage.rdb.groupware.ExceptionSeriesPatternConsistencyTask;
+import com.openexchange.chronos.storage.rdb.groupware.LegacyCalendarTablesUtf8Mb4UpdateTask;
 import com.openexchange.chronos.storage.rdb.migration.ChronosStorageMigrationTask;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.context.ContextService;
@@ -113,6 +114,7 @@ public class RdbCalendarStorageActivator extends HousekeepingActivator {
             /*
              * register services for infrastructure
              */
+            registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(new LegacyCalendarTablesUtf8Mb4UpdateTask()));
             registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(new DeleteAndChangeExceptionConsistencyTask()));
             registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(new ExceptionSeriesPatternConsistencyTask()));
             registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(new ChronosCreateTableTask(), new ChronosStorageMigrationTask(this)));
