@@ -68,25 +68,26 @@ import com.openexchange.chronos.AttendeeField;
 import com.openexchange.chronos.ChronosTestTools;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
+import com.openexchange.chronos.ITipMockFactory;
 import com.openexchange.chronos.ParticipationStatus;
-import com.openexchange.chronos.ResourceId;
 import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.common.mapping.AttendeeMapper;
 import com.openexchange.chronos.common.mapping.EventMapper;
 import com.openexchange.chronos.itip.ITipAction;
 import com.openexchange.chronos.itip.ITipAnalysis;
-import com.openexchange.chronos.itip.ITipIntegrationUtility;
 import com.openexchange.chronos.itip.ITipMessage;
 import com.openexchange.chronos.itip.ITipMethod;
 import com.openexchange.chronos.itip.Messages;
 import com.openexchange.chronos.itip.generators.HTMLWrapper;
 import com.openexchange.chronos.itip.osgi.Services;
 import com.openexchange.chronos.service.CalendarSession;
+import com.openexchange.chronos.service.CalendarUtilities;
 import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.contexts.impl.ContextImpl;
+import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.MockUser;
 import com.openexchange.junit.Assert;
+import com.openexchange.tools.session.ServerSession;
 import com.openexchange.user.UserService;
 
 /**
@@ -103,7 +104,7 @@ public class ReplyITipAnalyzerTest {
 
     private MockUser user;
 
-    private ContextImpl context;
+    private Context context;
 
     private Event original;
 
@@ -111,14 +112,10 @@ public class ReplyITipAnalyzerTest {
 
     private HTMLWrapper wrapper;
 
+    ITipMessage message;
+
     @InjectMocks
     private ReplyITipAnalyzer replyITipAnalyzer;
-
-    @Mock
-    ITipMessage message = new ITipMessage();
-
-    @Mock
-    ITipIntegrationUtility util;
 
     @Mock
     private UserService userService;
@@ -130,22 +127,22 @@ public class ReplyITipAnalyzerTest {
 
     @Before
     public void setUp() throws Exception {
+        MockitoAnnotations.initMocks(this);
+
         original = ChronosTestTools.createEvent(CONTEXT_ID, null);
         update = EventMapper.getInstance().copy(original, new Event(), (EventField[]) null);
         wrapper = new HTMLWrapper();
 
-        MockitoAnnotations.initMocks(this);
+        message = ITipMockFactory.mockITipMessage(ITipMethod.REPLY, update);
 
-        Mockito.when(message.getMethod()).thenReturn(ITipMethod.REPLY);
-        Mockito.when(message.getEvent()).thenReturn(update);
-        Mockito.when(message.exceptions()).thenReturn(Collections.emptyList());
-
-        Mockito.when(util.resolveUid(Matchers.any(), Matchers.any())).thenReturn(original);
+        ITipMockFactory.injectUtil(replyITipAnalyzer, ITipMockFactory.mockUtil(original));
 
         user = ChronosTestTools.convertToUser(original.getCreatedBy());
-        context = new ContextImpl(CONTEXT_ID);
+        context = ITipMockFactory.getContext(CONTEXT_ID);
 
-        session = ChronosTestTools.createSession(CONTEXT_ID, user.getId());
+        ServerSession serverSession = ITipMockFactory.getServerSession(context, CONTEXT_ID, user, user.getId());
+        CalendarUtilities u = ITipMockFactory.mockUtilities();
+        session = ITipMockFactory.mockCalendarSession(CONTEXT_ID, user.getId(), serverSession, u);
 
         // Mock used service classes
         PowerMockito.mockStatic(Services.class);
@@ -155,7 +152,6 @@ public class ReplyITipAnalyzerTest {
         // Mock settings
         PowerMockito.when(contextService.getContext(Matchers.anyInt())).thenReturn(context);
         PowerMockito.when(userService.getUser(Matchers.anyInt(), Matchers.any())).thenReturn(user);
-
     }
 
     @Test(expected = OXException.class)
