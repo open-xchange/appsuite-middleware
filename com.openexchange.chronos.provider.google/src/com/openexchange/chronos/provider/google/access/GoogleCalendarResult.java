@@ -64,7 +64,7 @@ import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.EventStatus;
 import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.common.mapping.EventMapper;
-import com.openexchange.chronos.common.mapping.EventUpdateImpl;
+import com.openexchange.chronos.common.mapping.DefaultEventUpdate;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.provider.caching.DiffAwareExternalCalendarResult;
 import com.openexchange.chronos.provider.caching.ExternalCalendarResult;
@@ -155,7 +155,7 @@ public class GoogleCalendarResult extends ExternalCalendarResult implements Diff
                 // add to updated
                 update.setId(foundEvent.getId());
                 update.setSeriesId(foundEvent.getSeriesId());
-                updated.add(new EventUpdateImpl(foundEvent, update, true));
+                updated.add(new DefaultEventUpdate(foundEvent, update, true));
                 continue;
             }
 
@@ -323,7 +323,7 @@ public class GoogleCalendarResult extends ExternalCalendarResult implements Diff
                 Event newUpdate = new Event();
                 EventMapper.getInstance().copyIfNotSet(existing, newUpdate, EventField.values());
                 addRecurrenceIdToDeleteException(newUpdate, recurrenceId, false);
-                updated.add(new EventUpdateImpl(existing, newUpdate, true));
+                updated.add(new DefaultEventUpdate(existing, newUpdate, true));
                 return;
             }
         }

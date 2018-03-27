@@ -60,7 +60,7 @@ import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.AttendeeField;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
-import com.openexchange.chronos.common.mapping.EventUpdateImpl;
+import com.openexchange.chronos.common.mapping.DefaultEventUpdate;
 import com.openexchange.chronos.service.CollectionUpdate;
 import com.openexchange.chronos.service.EventUpdate;
 import com.openexchange.chronos.service.ItemUpdate;
@@ -88,15 +88,15 @@ public class ITipEventUpdate implements EventUpdate {
     public ITipEventUpdate(Event originalEvent, Event updatedEvent, boolean considerUnset, EventField... ignoredFields) throws OXException {
         // Make sure EventField.EXTENDED_PROPERTIES is contained in ignordeFields.
         if (ignoredFields == null || ignoredFields.length == 0) {
-            this.delegate = new EventUpdateImpl(originalEvent, updatedEvent, considerUnset, IGNOREES, EventField.EXTENDED_PROPERTIES);
+            this.delegate = new DefaultEventUpdate(originalEvent, updatedEvent, considerUnset, IGNOREES, EventField.EXTENDED_PROPERTIES);
         } else {
             if (Arrays.stream(ignoredFields).anyMatch(x -> x == EventField.EXTENDED_PROPERTIES)) {
-                this.delegate = new EventUpdateImpl(originalEvent, updatedEvent, considerUnset, IGNOREES, ignoredFields);
+                this.delegate = new DefaultEventUpdate(originalEvent, updatedEvent, considerUnset, IGNOREES, ignoredFields);
             } else {
                 EventField[] fields = new EventField[ignoredFields.length + 1];
                 System.arraycopy(ignoredFields, 0, fields, 0, ignoredFields.length);
                 fields[fields.length - 1] = EventField.EXTENDED_PROPERTIES;
-                this.delegate = new EventUpdateImpl(originalEvent, updatedEvent, considerUnset, IGNOREES, fields);
+                this.delegate = new DefaultEventUpdate(originalEvent, updatedEvent, considerUnset, IGNOREES, fields);
             }
         }
     }

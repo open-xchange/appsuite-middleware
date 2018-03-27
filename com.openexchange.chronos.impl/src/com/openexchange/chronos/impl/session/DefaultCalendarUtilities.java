@@ -56,7 +56,7 @@ import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.common.mapping.EventMapper;
-import com.openexchange.chronos.common.mapping.EventUpdateImpl;
+import com.openexchange.chronos.common.mapping.DefaultEventUpdate;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.CalendarUtilities;
 import com.openexchange.chronos.service.EntityResolver;
@@ -102,7 +102,7 @@ public class DefaultCalendarUtilities implements CalendarUtilities {
 
     @Override
     public EventUpdate compare(Event original, Event update, boolean considerUnset, EventField... ignoredFields) throws OXException {
-        return new EventUpdateImpl(original, update, considerUnset, ignoredFields);
+        return new DefaultEventUpdate(original, update, considerUnset, ignoredFields);
     }
 
     @Override
