@@ -1,4 +1,6 @@
-# Access Login Counter data with Jolokia
+---
+title: Access Login Counter data with Jolokia
+---
 
 This article describes how to access information exposed through JMX by Open-Xchange with the Jolokia JMX-to-HTTP bridge, using "Login Counter" as an example.
 
