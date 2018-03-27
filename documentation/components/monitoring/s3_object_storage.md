@@ -1,4 +1,6 @@
-# S3 Storage Monitoring Metrics
+---
+title: S3 Storage Monitoring Metrics
+---
 
 With version 7.10.0 the OX middleware exposes monitoring metrics for the S3 object storage via JMX.
 
