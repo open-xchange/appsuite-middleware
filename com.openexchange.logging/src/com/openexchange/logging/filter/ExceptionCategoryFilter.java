@@ -59,6 +59,7 @@ import com.openexchange.ajax.response.IncludeStackTraceService;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.Category.EnumType;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Strings;
 import com.openexchange.log.LogProperties;
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
@@ -180,7 +181,7 @@ public class ExceptionCategoryFilter extends ExtendedTurboFilter {
 
     public static void setCategories(String categories) {
         Set<String> c = new HashSet<String>();
-        for (String category : categories.split(" *, *")) {
+        for (String category : Strings.splitByComma(categories)) {
             c.add(category.trim());
         }
         setCategories(c);
