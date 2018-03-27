@@ -61,7 +61,7 @@ import java.util.Map.Entry;
 import java.util.UUID;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
-import com.openexchange.chronos.common.mapping.EventUpdateImpl;
+import com.openexchange.chronos.common.mapping.DefaultEventUpdate;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.ical.ImportedComponent;
 import com.openexchange.chronos.impl.CalendarFolder;
@@ -186,7 +186,7 @@ public class ImportPerformer extends AbstractUpdatePerformer {
                 String eventId = session.getCalendarService().getUtilities().resolveByUID(session, masterEvent.getUid());
                 Event loadEvent = storage.getEventStorage().loadEvent(eventId, null);
                 loadEvent = storage.getUtilities().loadAdditionalEventData(session.getUserId(), loadEvent, null);
-                if (new EventUpdateImpl(loadEvent, masterEvent, false, EventField.LAST_MODIFIED, EventField.TIMESTAMP).getUpdatedFields().isEmpty()) {
+                if (new DefaultEventUpdate(loadEvent, masterEvent, false, EventField.LAST_MODIFIED, EventField.TIMESTAMP).getUpdatedFields().isEmpty()) {
                     // Nothing to update
                     return null;
                 }

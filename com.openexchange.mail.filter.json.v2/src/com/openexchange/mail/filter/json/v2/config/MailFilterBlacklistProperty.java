@@ -96,9 +96,9 @@ public class MailFilterBlacklistProperty implements Property {
          */
         parts;
 
-        public static Field getFieldByName(String name){
-            for(Field ele: Field.values()){
-                if(ele.name().equals(name.toLowerCase())){
+        public static Field getFieldByName(String name) {
+            for (Field ele : Field.values()) {
+                if (ele.name().equals(name.toLowerCase())) {
                     return ele;
                 }
             }
@@ -113,6 +113,7 @@ public class MailFilterBlacklistProperty implements Property {
     private final BasicGroup base;
     private final String sub;
     private final Field field;
+    private final int hashCode;
 
     /**
      *
@@ -125,6 +126,7 @@ public class MailFilterBlacklistProperty implements Property {
         this.base = group;
         this.sub = null;
         this.field = null;
+        hashCode = generateHashCode();
     }
 
     /**
@@ -141,13 +143,29 @@ public class MailFilterBlacklistProperty implements Property {
         this.base = group;
         this.sub = subGroup;
         this.field = field;
+        hashCode = generateHashCode();
+    }
+
+    /**
+     * Generates the hash code
+     * 
+     * @return The generated hash code
+     */
+    private int generateHashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((base == null) ? 0 : base.hashCode());
+        result = prime * result + ((field == null) ? 0 : field.hashCode());
+        result = prime * result + ((fqn == null) ? 0 : fqn.hashCode());
+        result = prime * result + ((sub == null) ? 0 : sub.hashCode());
+        return result;
     }
 
     @Override
     public String getFQPropertyName() {
         return fqn;
     }
-    
+
     @Override
     public Object getDefaultValue() {
         return null;
@@ -158,10 +176,20 @@ public class MailFilterBlacklistProperty implements Property {
         return null;
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see java.lang.Object#hashCode()
+     */
+    @Override
+    public int hashCode() {
+        return hashCode;
+    }
+
     @Override
     public boolean equals(Object obj) {
-        if(obj instanceof MailFilterBlacklistProperty){
-            return  this.fqn.equals(((MailFilterBlacklistProperty) obj).getFQPropertyName());
+        if (obj instanceof MailFilterBlacklistProperty) {
+            return this.fqn.equals(((MailFilterBlacklistProperty) obj).getFQPropertyName());
         }
         return false;
     }
@@ -176,7 +204,6 @@ public class MailFilterBlacklistProperty implements Property {
         return base;
     }
 
-
     /**
      * Gets the sub. E.g. "address"
      *
@@ -185,7 +212,6 @@ public class MailFilterBlacklistProperty implements Property {
     public String getSub() {
         return sub;
     }
-
 
     /**
      * Gets the name. See {@link Field}

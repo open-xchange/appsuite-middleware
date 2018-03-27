@@ -1409,10 +1409,13 @@ public class Event {
     public String toString() {
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append("Event [id=").append(getId());
-        stringBuilder.append(", seriedId=").append(getSeriesId());
+        stringBuilder.append(", seriesId=").append(getSeriesId());
         stringBuilder.append(", recurrenceId=").append(getRecurrenceId());
         stringBuilder.append(", folderId=").append(getFolderId());
-        stringBuilder.append(", calendarUser=").append(getCalendarUser());
+        CalendarUser calendarUser = getCalendarUser();
+        if (null != calendarUser) {
+            stringBuilder.append(", calendarUser=").append(calendarUser.getEntity());
+        }
         DateTime startDate = getStartDate();
         stringBuilder.append(", startDate=").append(startDate);
         if (null != startDate && null != startDate.getTimeZone()) {

@@ -371,33 +371,38 @@ public class Utils {
      * @return <code>-1</code> if the first candidate was selected, <code>1</code> for the second one
      */
     private static int selectResolution(Dimension resolution1, Dimension resolution2, Dimension requiredResolution, long maxResolution) {
+        long resolutionWidth1 = resolution1.width;
+        long resolutionHeight1 = resolution1.height;
+        long resolutionWidth2 = resolution2.width;
+        long resolutionHeight2 = resolution2.height;
+
         if (0 < maxResolution) {
-            if (resolution1.width * resolution1.height <= maxResolution) {
-                if (resolution2.width * resolution2.height > maxResolution) {
+            if (resolutionWidth1 * resolutionHeight1 <= maxResolution) {
+                if (resolutionWidth2 * resolutionHeight2 > maxResolution) {
                     /*
                      * only first resolution fulfills max. resolution constraint
                      */
                     return -1;
                 }
-            } else if (resolution2.width * resolution2.height <= maxResolution) {
+            } else if (resolutionWidth2 * resolutionHeight2 <= maxResolution) {
                 /*
                  * only second resolution fulfills max. resolution constraint
                  */
                 return 1;
             }
         }
-        if (resolution1.width >= requiredResolution.width && resolution1.height >= requiredResolution.height) {
-            if (resolution2.width >= requiredResolution.width && resolution2.height >= requiredResolution.height) {
+        if (resolutionWidth1 >= requiredResolution.width && resolutionHeight1 >= requiredResolution.height) {
+            if (resolutionWidth2 >= requiredResolution.width && resolutionHeight2 >= requiredResolution.height) {
                 /*
                  * both resolutions fulfill required resolution, choose closest one
                  */
-                return resolution1.width * resolution1.height > resolution2.width * resolution2.height ? 1 : -1;
+                return resolutionWidth1 * resolutionHeight1 > resolutionWidth2 * resolutionHeight2 ? 1 : -1;
             }
             /*
              * only first resolution fulfills required resolution
              */
             return -1;
-        } else if (resolution2.width >= requiredResolution.width && resolution2.height >= requiredResolution.height) {
+        } else if (resolutionWidth2 >= requiredResolution.width && resolutionHeight2 >= requiredResolution.height) {
             /*
              * only second resolution fulfills required resolution
              */
@@ -406,7 +411,7 @@ public class Utils {
             /*
              * no resolution fulfills required resolution, choose closest one
              */
-            return resolution1.width * resolution1.height >= resolution2.width * resolution2.height ? -1 : 1;
+            return resolutionWidth1 * resolutionHeight1 >= resolutionWidth2 * resolutionHeight2 ? -1 : 1;
         }
     }
 

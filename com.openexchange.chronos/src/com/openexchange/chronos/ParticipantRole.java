@@ -88,6 +88,11 @@ public class ParticipantRole extends EnumeratedProperty {
     }
 
     @Override
+    public String getDefaultValue() {
+        return REQ_PARTICIPANT.getValue();
+    }
+
+    @Override
     protected String[] getStandardValues() {
         return getValues(CHAIR, REQ_PARTICIPANT, OPT_PARTICIPANT, NONE_PARTICIPANT);
     }

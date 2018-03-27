@@ -118,9 +118,6 @@ public class DefaultITipAnalyzerService implements ITipAnalyzerService {
             if (mailHeader.containsKey("X-Mailer") && mailHeader.get("X-Mailer").toLowerCase().contains("outlook")) {
                 message.addFeature(ITipSpecialHandling.MICROSOFT);
             }
-            if (method == ITipMethod.COUNTER && message.hasFeature(ITipSpecialHandling.MICROSOFT)) {
-                method = ITipMethod.REPLY;
-            }
 
             ITipAnalyzer analyzer;
             if (mailHeader.containsKey("X-Open-Xchange-Object")) {

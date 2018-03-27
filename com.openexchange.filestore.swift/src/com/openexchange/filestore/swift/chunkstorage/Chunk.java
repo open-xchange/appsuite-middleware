@@ -62,6 +62,7 @@ public class Chunk implements Comparable<Chunk> {
     private final UUID swiftId;
     private final long offset;
     private final long length;
+    private final int hashCode;
 
     /**
      * Initializes a new {@link Chunk}.
@@ -77,6 +78,14 @@ public class Chunk implements Comparable<Chunk> {
         this.swiftId = swiftId;
         this.offset = offset;
         this.length = length;
+
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((documentId == null) ? 0 : documentId.hashCode());
+        result = prime * result + (int) (length ^ (length >>> 32));
+        result = prime * result + (int) (offset ^ (offset >>> 32));
+        result = prime * result + ((swiftId == null) ? 0 : swiftId.hashCode());
+        hashCode = result;
     }
 
     /**
@@ -117,7 +126,7 @@ public class Chunk implements Comparable<Chunk> {
 
     @Override
     public int compareTo(Chunk other) {
-        long thisOffset = this.offset;
+        long thisOffset = offset;
         long otherOffset = other.offset;
         return (thisOffset < otherOffset ? -1 : (thisOffset == otherOffset ? 0 : 1));
     }
@@ -127,4 +136,53 @@ public class Chunk implements Comparable<Chunk> {
         return "Chunk [documentId=" + documentId + ", swiftId=" + swiftId + ", offset=" + offset + ", length=" + length + "]";
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see java.lang.Object#hashCode()
+     */
+    @Override
+    public int hashCode() {
+        return hashCode;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see java.lang.Object#equals(java.lang.Object)
+     */
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        Chunk other = (Chunk) obj;
+        if (documentId == null) {
+            if (other.documentId != null) {
+                return false;
+            }
+        } else if (!documentId.equals(other.documentId)) {
+            return false;
+        }
+        if (length != other.length) {
+            return false;
+        }
+        if (offset != other.offset) {
+            return false;
+        }
+        if (swiftId == null) {
+            if (other.swiftId != null) {
+                return false;
+            }
+        } else if (!swiftId.equals(other.swiftId)) {
+            return false;
+        }
+        return true;
+    }
 }

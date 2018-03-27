@@ -51,7 +51,7 @@ package com.openexchange.chronos.common;
 
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
-import com.openexchange.chronos.common.mapping.EventUpdateImpl;
+import com.openexchange.chronos.common.mapping.DefaultEventUpdate;
 import com.openexchange.chronos.service.UpdateResult;
 import com.openexchange.exception.OXException;
 
@@ -61,7 +61,7 @@ import com.openexchange.exception.OXException;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public class UpdateResultImpl extends EventUpdateImpl implements UpdateResult {
+public class UpdateResultImpl extends DefaultEventUpdate implements UpdateResult {
 
     /**
      * Initializes a new {@link UpdateResultImpl}.

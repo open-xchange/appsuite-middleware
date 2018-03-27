@@ -49,10 +49,9 @@
 
 package com.openexchange.ajax.requesthandler.converters;
 
-import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
+import com.google.common.collect.ImmutableList;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
@@ -71,12 +70,12 @@ public final class BasicTypeAPIResultConverter implements ResultConverter {
     /**
      * The basic converters.
      */
-    public static final List<ResultConverter> CONVERTERS = Collections.<ResultConverter> unmodifiableList(Arrays.<ResultConverter> asList(
+    public static final List<ResultConverter> CONVERTERS = ImmutableList.of(
         new BasicTypeAPIResultConverter("string"),
         new BasicTypeAPIResultConverter("int"),
         new BasicTypeAPIResultConverter("float"),
         new BasicTypeAPIResultConverter("boolean"),
-        new BasicTypeAPIResultConverter("json")));
+        new BasicTypeAPIResultConverter("json"));
 
     private final String inputFormat;
 

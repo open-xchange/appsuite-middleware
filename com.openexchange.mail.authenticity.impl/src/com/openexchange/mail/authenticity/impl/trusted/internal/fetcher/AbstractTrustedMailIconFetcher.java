@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2016-2020 OX Software GmbH
+ *     Copyright (C) 2018-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,39 +47,43 @@
  *
  */
 
-package com.openexchange.groupware.dataRetrieval.attachments.osgi;
+package com.openexchange.mail.authenticity.impl.trusted.internal.fetcher;
 
-import com.openexchange.groupware.attach.AttachmentBase;
-import com.openexchange.groupware.dataRetrieval.DataProvider;
-import com.openexchange.groupware.dataRetrieval.attachments.PIMAttachmentDataProvider;
-import com.openexchange.osgi.HousekeepingActivator;
-
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import javax.imageio.ImageIO;
 
 /**
- * {@link PIMAttachmentDataRetrievalActivator}
+ * {@link AbstractTrustedMailIconFetcher}
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class PIMAttachmentDataRetrievalActivator extends HousekeepingActivator {
+class AbstractTrustedMailIconFetcher {
 
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[]{AttachmentBase.class};
+    private static final String FORMAT = "png";
+
+    /**
+     * Initialises a new {@link AbstractTrustedMailIconFetcher}.
+     */
+    public AbstractTrustedMailIconFetcher() {
+        super();
     }
 
-    @Override
-    protected void handleAvailability(final Class<?> clazz) {
-        // Nope
+    /**
+     * Processes the specified {@link BufferedImage} as a PNG image and
+     * returns the byte array
+     * 
+     * @param image The {@link BufferedImage} to process
+     * @return The byte array
+     * @throws IOException if the {@link BufferedImage} is <code>null</code>
+     */
+    byte[] process(BufferedImage image) throws IOException {
+        if (image == null) {
+            throw new IOException("No image found");
+        }
+        ByteArrayOutputStream stream = new ByteArrayOutputStream();
+        ImageIO.write(image, FORMAT, stream);
+        return stream.toByteArray();
     }
-
-    @Override
-    protected void handleUnavailability(final Class<?> clazz) {
-        // Nope
-    }
-
-    @Override
-    protected void startBundle() throws Exception {
-        registerService(DataProvider.class, new PIMAttachmentDataProvider(getService(AttachmentBase.class)), null);
-    }
-
 }

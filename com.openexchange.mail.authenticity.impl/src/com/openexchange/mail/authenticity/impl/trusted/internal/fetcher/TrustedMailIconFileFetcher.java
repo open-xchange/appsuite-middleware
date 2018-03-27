@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2016-2020 OX Software GmbH
+ *     Copyright (C) 2018-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,39 +47,58 @@
  *
  */
 
-package com.openexchange.groupware.dataRetrieval.attachments.osgi;
+package com.openexchange.mail.authenticity.impl.trusted.internal.fetcher;
 
-import com.openexchange.groupware.attach.AttachmentBase;
-import com.openexchange.groupware.dataRetrieval.DataProvider;
-import com.openexchange.groupware.dataRetrieval.attachments.PIMAttachmentDataProvider;
-import com.openexchange.osgi.HousekeepingActivator;
-
+import java.io.File;
+import java.io.IOException;
+import javax.imageio.ImageIO;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
- * {@link PIMAttachmentDataRetrievalActivator}
+ * {@link TrustedMailIconFileFetcher}
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class PIMAttachmentDataRetrievalActivator extends HousekeepingActivator {
+public class TrustedMailIconFileFetcher extends AbstractTrustedMailIconFetcher implements TrustedMailIconFetcher {
 
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[]{AttachmentBase.class};
+    private static final Logger LOG = LoggerFactory.getLogger(TrustedMailIconFileFetcher.class);
+
+    /**
+     * Initialises a new {@link TrustedMailIconFileFetcher}.
+     */
+    public TrustedMailIconFileFetcher() {
+        super();
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.mail.authenticity.impl.trusted.internal.fetcher.TrustedMailIconFetcher#exists(java.lang.String)
+     */
     @Override
-    protected void handleAvailability(final Class<?> clazz) {
-        // Nope
+    public boolean exists(String resourceUrl) {
+        try {
+            File f = new File(resourceUrl);
+            return f.exists() && !f.isDirectory();
+        } catch (SecurityException e) {
+            LOG.error("No permission to read the resource URL '{}': {}", resourceUrl, e.getMessage(), e);
+        }
+        return false;
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.mail.authenticity.impl.trusted.internal.fetcher.TrustedMailIconFetcher#fetch(java.lang.String, java.lang.String)
+     */
     @Override
-    protected void handleUnavailability(final Class<?> clazz) {
-        // Nope
+    public byte[] fetch(String url) {
+        try {
+            return process(ImageIO.read(new File(url)));
+        } catch (IOException e) {
+            LOG.error("An I/O error occurred while reading the resource URL '{}': {}", url, e.getMessage(), e);
+        }
+        return null;
     }
-
-    @Override
-    protected void startBundle() throws Exception {
-        registerService(DataProvider.class, new PIMAttachmentDataProvider(getService(AttachmentBase.class)), null);
-    }
-
 }

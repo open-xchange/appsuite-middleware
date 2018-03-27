@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2016-2020 OX Software GmbH
+ *     Copyright (C) 2018-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,39 +47,29 @@
  *
  */
 
-package com.openexchange.groupware.dataRetrieval.attachments.osgi;
-
-import com.openexchange.groupware.attach.AttachmentBase;
-import com.openexchange.groupware.dataRetrieval.DataProvider;
-import com.openexchange.groupware.dataRetrieval.attachments.PIMAttachmentDataProvider;
-import com.openexchange.osgi.HousekeepingActivator;
-
+package com.openexchange.mail.authenticity.impl.trusted.internal.fetcher;
 
 /**
- * {@link PIMAttachmentDataRetrievalActivator}
+ * {@link TrustedMailIconFetcher}
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class PIMAttachmentDataRetrievalActivator extends HousekeepingActivator {
+public interface TrustedMailIconFetcher {
 
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[]{AttachmentBase.class};
-    }
+    /**
+     * Determines whether the URL for the specified resource exists.
+     * 
+     * @param resourceUrl The resource URL
+     * @return <code>true</code> if the URL of the resource exists; <code>false</code>
+     *         otherwise
+     */
+    boolean exists(String resourceUrl);
 
-    @Override
-    protected void handleAvailability(final Class<?> clazz) {
-        // Nope
-    }
-
-    @Override
-    protected void handleUnavailability(final Class<?> clazz) {
-        // Nope
-    }
-
-    @Override
-    protected void startBundle() throws Exception {
-        registerService(DataProvider.class, new PIMAttachmentDataProvider(getService(AttachmentBase.class)), null);
-    }
-
+    /**
+     * Fetches the bytes from the specified resource URL for the specified tenant
+     * 
+     * @param resourceUrl The resource URL
+     * @return The bytes for the resource or <code>null</code> if no resource is available
+     */
+    byte[] fetch(String resourceUrl);
 }

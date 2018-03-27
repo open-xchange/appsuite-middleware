@@ -47,39 +47,57 @@
  *
  */
 
-package com.openexchange.groupware.dataRetrieval.attachments.osgi;
+package com.openexchange.test.mock;
 
-import com.openexchange.groupware.attach.AttachmentBase;
-import com.openexchange.groupware.dataRetrieval.DataProvider;
-import com.openexchange.groupware.dataRetrieval.attachments.PIMAttachmentDataProvider;
-import com.openexchange.osgi.HousekeepingActivator;
-
+import org.mockito.Mockito;
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.ldap.User;
+import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link PIMAttachmentDataRetrievalActivator}
+ * {@link MockFactory}
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
+ * @since v7.10.0
  */
-public class PIMAttachmentDataRetrievalActivator extends HousekeepingActivator {
+public class MockFactory {
 
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[]{AttachmentBase.class};
+    public static int USER_ID = 3;
+
+    public static int CONTEXT_ID = 7;
+
+    private static User user = getUser();
+    private static Context context = getContext();
+
+    public static ServerSession getServerSession() {
+        ServerSession serverSession = Mockito.mock(ServerSession.class);
+        Mockito.when(serverSession.getContext()).thenReturn(context);
+        Mockito.when(serverSession.getContextId()).thenReturn(getContextId());
+        
+        Mockito.when(serverSession.getUser()).thenReturn(user);
+        Mockito.when(serverSession.getUserId()).thenReturn(getUserId());
+        return serverSession;
     }
 
-    @Override
-    protected void handleAvailability(final Class<?> clazz) {
-        // Nope
+    public static Context getContext() {
+        Context lContext = Mockito.mock(Context.class);
+        Mockito.when(lContext.getContextId()).thenReturn(getContextId());
+        return lContext;
     }
 
-    @Override
-    protected void handleUnavailability(final Class<?> clazz) {
-        // Nope
+    public static int getContextId() {
+        return CONTEXT_ID;
     }
 
-    @Override
-    protected void startBundle() throws Exception {
-        registerService(DataProvider.class, new PIMAttachmentDataProvider(getService(AttachmentBase.class)), null);
+    public static User getUser() {
+        User lUser = Mockito.mock(User.class);
+        Mockito.when(lUser.getId()).thenReturn(getUserId());
+
+        return lUser;
+    }
+
+    public static int getUserId() {
+        return USER_ID;
     }
 
 }

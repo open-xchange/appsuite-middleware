@@ -91,7 +91,7 @@ public class TrustedMail {
     /**
      * Gets the image
      *
-     * @return The image
+     * @return The image or <code>null</code> if no image is specified
      */
     public Icon getImage() {
         return image;
@@ -103,7 +103,7 @@ public class TrustedMail {
      * @param mailAddress
      * @return <code>true</code> if the {@link TrustedMail} matches the given mail address, <code>false</code> otherwise
      */
-    public boolean matches(String mailAddress){
+    public boolean matches(String mailAddress) {
         return pattern.matcher(mailAddress).matches();
     }
 
