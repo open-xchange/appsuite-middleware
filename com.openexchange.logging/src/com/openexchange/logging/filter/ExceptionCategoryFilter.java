@@ -132,19 +132,39 @@ public class ExceptionCategoryFilter extends ExtendedTurboFilter {
                     try {
                         final int contextId = getUnsignedInteger(LogProperties.get(LogProperties.Name.SESSION_CONTEXT_ID));
                         final int userId = getUnsignedInteger(LogProperties.get(LogProperties.Name.SESSION_USER_ID));
-                        if (userId <= 0 || contextId <= 0 || !traceService.includeStackTraceOnError(userId, contextId)) {
-                            t.setStackTrace(new StackTraceElement[] {});
+                        if (userId <= 0 || contextId <= 0 || false == traceService.includeStackTraceOnError(userId, contextId)) {
+                            dropStackTraceFor(t);
                         }
                     } catch (final Exception e) {
-                        t.setStackTrace(new StackTraceElement[] {});
+                        dropStackTraceFor(t);
                     }
                 } else {
-                    t.setStackTrace(new StackTraceElement[] {});
+                    dropStackTraceFor(t);
                 }
             }
         }
 
         return FilterReply.NEUTRAL;
+    }
+
+    private static final StackTraceElement[] EMPTY_STACK_TRACE = new StackTraceElement[0];
+
+    private static void dropStackTraceFor(Throwable t) {
+        if (null != t) {
+            // Drop our stack trace
+            t.setStackTrace(EMPTY_STACK_TRACE);
+
+            // Drop stack traces for suppressed exceptions, if any
+            Throwable[] suppressedOnes = t.getSuppressed();
+            if (null != suppressedOnes && suppressedOnes.length > 0) {
+                for (Throwable suppressed : suppressedOnes) {
+                    dropStackTraceFor(suppressed);
+                }
+            }
+
+            // Drop stack traces for cause, if any
+            dropStackTraceFor(t.getCause());
+        }
     }
 
     public static void setCategories(Set<String> categories) {
