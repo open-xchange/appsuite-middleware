@@ -82,8 +82,7 @@ public class CancelITipAnalyzer extends AbstractITipAnalyzer {
     /**
      * Initializes a new {@link CancelITipAnalyzer}.
      * 
-     * @param util
-     * @param services TODO
+     * @param util The {@link ITipIntegrationUtility}
      */
     public CancelITipAnalyzer(final ITipIntegrationUtility util) {
         super(util);
@@ -119,6 +118,7 @@ public class CancelITipAnalyzer extends AbstractITipAnalyzer {
             analysis.recommendAction(ITipAction.IGNORE);
             return analysis;
         }
+        session.getUtilities().adjustTimeZones(session.getUserId(), toDelete, event);
         change.setCurrentEvent(toDelete);
         if (event.containsRecurrenceId()) {
             List<Event> exceptions = util.getExceptions(toDelete, session);
