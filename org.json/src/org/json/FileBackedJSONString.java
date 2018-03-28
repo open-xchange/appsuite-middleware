@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,68 +47,69 @@
  *
  */
 
-package com.openexchange.mail.authenticity.impl.trusted.internal;
+package org.json;
 
-import java.util.regex.Pattern;
-import com.openexchange.java.Strings;
-import com.openexchange.mail.authenticity.impl.trusted.Icon;
+import java.io.Closeable;
+import java.io.File;
+import java.io.IOException;
 
 /**
- * {@link TrustedMail} specifies a trusted mail address or a group of trusted mail addresses via wild-cards.
+ * {@link FileBackedJSONString} - A JSON string backed by a file.
  *
- * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.10.0
  */
-public class TrustedMail {
-
-    private final String mail;
-    private final Pattern pattern;
-    private final Icon image;
+public interface FileBackedJSONString extends JSONString, Closeable, CharSequence {
 
     /**
+     * Gets the optional temporary file.
+     * <p>
+     * If {@link #isInMemory()} signals <code>true</code>, then this method will return <code>null</code>, and the content should rather be obtained by {@link #getBuffer()}.
      *
-     * Initializes a new {@link TrustedMail}.
-     *
-     * @param mail The mail address. '*' and '?' wild-cards are allowed
-     * @param image The image
+     * @return The temporary file or <code>null</code>
+     * @see #isInMemory()
      */
-    public TrustedMail(String mail, Icon image) {
-        super();
-        this.mail = mail;
-        this.pattern = Pattern.compile(Strings.wildcardToRegex(mail));
-        this.image = image;
-    }
+    File getTempFile();
 
     /**
-     * Gets the mail address
+     * Writes a single character.
      *
-     * @return The mail address
+     * @param c The character to be written
+     * @throws IOException If an I/O error occurs
      */
-    public String getMail() {
-        return mail;
-    }
+    void write(int c) throws IOException;
 
     /**
-     * Gets the image
+     * Writes an array of characters.
      *
-     * @return The image or <code>null</code> if no image is specified
+     * @param cbuf The characters to be written
+     * @throws IOException If an I/O error occurs
      */
-    public Icon getImage() {
-        return image;
-    }
+    void write(char cbuf[]) throws IOException;
 
     /**
-     * Checks whether this trusted mail matches the given mail address
+     * Writes a portion of an array of characters.
      *
-     * @param mailAddress
-     * @return <code>true</code> if the {@link TrustedMail} matches the given mail address, <code>false</code> otherwise
+     * @param cbuf The array of characters
+     * @param off The offset from which to start writing characters
+     * @param len The number of characters to write
+     * @throws IOException If an I/O error occurs
      */
-    public boolean matches(String mailAddress) {
-        return pattern.matcher(mailAddress).matches();
-    }
+    void write(char cbuf[], int off, int len) throws IOException;
 
-    @Override
-    public String toString() {
-        return new StringBuilder("TrustedDomain [").append("domain = ").append(mail).append(']').toString();
-    }
+    /**
+     * Writes a string.
+     *
+     * @param str The string to be written
+     * @throws IOException If an I/O error occurs
+     */
+    void write(String str) throws IOException;
+
+    /**
+     * Flushes this instance.
+     *
+     * @exception IOException If an I/O error occurs
+     */
+    void flush() throws IOException;
+
 }

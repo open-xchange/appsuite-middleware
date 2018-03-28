@@ -241,7 +241,8 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
         /*
          * check if folder view on event is allowed as needed
          */
-        if (false == assumeExternalOrganizerUpdate(originalEvent, eventData)) {
+        boolean assumeExternalOrganizerUpdate = assumeExternalOrganizerUpdate(originalEvent, eventData);
+        if (false == assumeExternalOrganizerUpdate) {
             Check.eventIsInFolder(originalEvent, folder);
         }
         /*
@@ -265,9 +266,9 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
         /*
          * check permissions & update event data in storage, checking permissions as required
          */
-        storeEventUpdate(originalEvent, eventUpdate.getDelta(), eventUpdate.getUpdatedFields());
-        storeAttendeeUpdates(originalEvent, eventUpdate.getAttendeeUpdates());
-        storeAttachmentUpdates(originalEvent, eventUpdate.getAttachmentUpdates());
+        storeEventUpdate(originalEvent, eventUpdate.getDelta(), eventUpdate.getUpdatedFields(), assumeExternalOrganizerUpdate);
+        storeAttendeeUpdates(originalEvent, eventUpdate.getAttendeeUpdates(), assumeExternalOrganizerUpdate);
+        storeAttachmentUpdates(originalEvent, eventUpdate.getAttachmentUpdates(), assumeExternalOrganizerUpdate);
         /*
          * update passed alarms for calendar user, apply default alarms for newly added internal user attendees
          */
@@ -327,7 +328,7 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
      *
      * @param originalEvent The original event
      * @param updatedEvent The updated event
-     * @return <code>true</code> if the check should be performed, <code>false</code>, otherwise
+     * @return <code>true</code> if an external organizer update can be assumed, <code>false</code>, otherwise
      * @see <a href="https://bugs.open-xchange.com/show_bug.cgi?id=29566#c12">Bug 29566</a>,
      *      <a href="https://bugs.open-xchange.com/show_bug.cgi?id=23181"/>Bug 23181</a>
      */
@@ -428,9 +429,10 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
      * @param originalEvent The event being updated
      * @param deltaEvent The delta event providing the updated event data
      * @param updatedFields The actually updated fields
+     * @param assumeExternalOrganizerUpdate <code>true</code> if an external organizer update can be assumed, <code>false</code>, otherwise
      * @return <code>true</code> if there were changes, <code>false</code>, otherwise
      */
-    private boolean storeEventUpdate(Event originalEvent, Event deltaEvent, Set<EventField> updatedFields) throws OXException {
+    private boolean storeEventUpdate(Event originalEvent, Event deltaEvent, Set<EventField> updatedFields, boolean assumeExternalOrganizerUpdate) throws OXException {
         HashSet<EventField> updatedEventFields = new HashSet<EventField>(updatedFields);
         updatedEventFields.removeAll(java.util.Arrays.asList(EventField.ATTACHMENTS, EventField.ALARMS, EventField.ATTENDEES));
         if (updatedEventFields.isEmpty()) {
@@ -445,9 +447,9 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
             break;
         }
         if (realChange) {
-            requireWritePermissions(originalEvent);
+            requireWritePermissions(originalEvent, assumeExternalOrganizerUpdate);
         } else {
-            requireWritePermissions(originalEvent, session.getEntityResolver().prepareUserAttendee(calendarUserId));
+            requireWritePermissions(originalEvent, session.getEntityResolver().prepareUserAttendee(calendarUserId), assumeExternalOrganizerUpdate);
         }
         storage.getEventStorage().updateEvent(deltaEvent);
         return true;
@@ -459,9 +461,10 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
      *
      * @param originalEvent The event the attendees are updated for
      * @param attachmentUpdates The attendee updates to persist
+     * @param assumeExternalOrganizerUpdate <code>true</code> if an external organizer update can be assumed, <code>false</code>, otherwise
      * @return <code>true</code> if there were changes, <code>false</code>, otherwise
      */
-    private boolean storeAttendeeUpdates(Event originalEvent, CollectionUpdate<Attendee, AttendeeField> attendeeUpdates) throws OXException {
+    private boolean storeAttendeeUpdates(Event originalEvent, CollectionUpdate<Attendee, AttendeeField> attendeeUpdates, boolean assumeExternalOrganizerUpdate) throws OXException {
         if (attendeeUpdates.isEmpty()) {
             return false;
         }
@@ -470,7 +473,7 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
          */
         List<Attendee> removedItems = attendeeUpdates.getRemovedItems();
         if (0 < removedItems.size()) {
-            requireWritePermissions(originalEvent, removedItems);
+            requireWritePermissions(originalEvent, removedItems, assumeExternalOrganizerUpdate);
             storage.getEventStorage().insertEventTombstone(storage.getUtilities().getTombstone(originalEvent, timestamp, calendarUser));
             storage.getAttendeeStorage().insertAttendeeTombstones(originalEvent.getId(), storage.getUtilities().getTombstones(removedItems));
             storage.getAttendeeStorage().deleteAttendees(originalEvent.getId(), removedItems);
@@ -488,14 +491,14 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
                 AttendeeMapper.getInstance().copy(attendeeToUpdate.getUpdate(), newAttendee, AttendeeField.RSVP, AttendeeField.COMMENT, AttendeeField.PARTSTAT, AttendeeField.ROLE, AttendeeField.EXTENDED_PARAMETERS);
                 attendeesToUpdate.add(newAttendee);
             }
-            requireWritePermissions(originalEvent, attendeesToUpdate);
+            requireWritePermissions(originalEvent, attendeesToUpdate, assumeExternalOrganizerUpdate);
             storage.getAttendeeStorage().updateAttendees(originalEvent.getId(), attendeesToUpdate);
         }
         /*
          * perform attendee inserts
          */
         if (0 < attendeeUpdates.getAddedItems().size()) {
-            requireWritePermissions(originalEvent);
+            requireWritePermissions(originalEvent, assumeExternalOrganizerUpdate);
             storage.getAttendeeStorage().insertAttendees(originalEvent.getId(), attendeeUpdates.getAddedItems());
         }
         return true;
@@ -507,13 +510,14 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
      *
      * @param originalEvent The event the attachments are updated for
      * @param attachmentUpdates The attachment updates to persist
+     * @param assumeExternalOrganizerUpdate <code>true</code> if an external organizer update can be assumed, <code>false</code>, otherwise
      * @return <code>true</code> if there were changes, <code>false</code>, otherwise
      */
-    private boolean storeAttachmentUpdates(Event originalEvent, SimpleCollectionUpdate<Attachment> attachmentUpdates) throws OXException {
+    private boolean storeAttachmentUpdates(Event originalEvent, SimpleCollectionUpdate<Attachment> attachmentUpdates, boolean assumeExternalOrganizerUpdate) throws OXException {
         if (attachmentUpdates.isEmpty()) {
             return false;
         }
-        requireWritePermissions(originalEvent);
+        requireWritePermissions(originalEvent, assumeExternalOrganizerUpdate);
         if (0 < attachmentUpdates.getRemovedItems().size()) {
             storage.getAttachmentStorage().deleteAttachments(session.getSession(), folder.getId(), originalEvent.getId(), attachmentUpdates.getRemovedItems());
         }

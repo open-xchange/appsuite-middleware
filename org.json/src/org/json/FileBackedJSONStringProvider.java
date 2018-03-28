@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,68 +47,21 @@
  *
  */
 
-package com.openexchange.mail.authenticity.impl.trusted.internal;
+package org.json;
 
-import java.util.regex.Pattern;
-import com.openexchange.java.Strings;
-import com.openexchange.mail.authenticity.impl.trusted.Icon;
 
 /**
- * {@link TrustedMail} specifies a trusted mail address or a group of trusted mail addresses via wild-cards.
+ * {@link FileBackedJSONStringProvider} - Provider for new instances of <code>FileBackedJSONString</code>.
  *
- * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.10.0
  */
-public class TrustedMail {
-
-    private final String mail;
-    private final Pattern pattern;
-    private final Icon image;
+public interface FileBackedJSONStringProvider {
 
     /**
+     * Creates a new <code>FileBackedJSONString</code> instance.
      *
-     * Initializes a new {@link TrustedMail}.
-     *
-     * @param mail The mail address. '*' and '?' wild-cards are allowed
-     * @param image The image
+     * @return The new <code>FileBackedJSONString</code> instance
      */
-    public TrustedMail(String mail, Icon image) {
-        super();
-        this.mail = mail;
-        this.pattern = Pattern.compile(Strings.wildcardToRegex(mail));
-        this.image = image;
-    }
-
-    /**
-     * Gets the mail address
-     *
-     * @return The mail address
-     */
-    public String getMail() {
-        return mail;
-    }
-
-    /**
-     * Gets the image
-     *
-     * @return The image or <code>null</code> if no image is specified
-     */
-    public Icon getImage() {
-        return image;
-    }
-
-    /**
-     * Checks whether this trusted mail matches the given mail address
-     *
-     * @param mailAddress
-     * @return <code>true</code> if the {@link TrustedMail} matches the given mail address, <code>false</code> otherwise
-     */
-    public boolean matches(String mailAddress) {
-        return pattern.matcher(mailAddress).matches();
-    }
-
-    @Override
-    public String toString() {
-        return new StringBuilder("TrustedDomain [").append("domain = ").append(mail).append(']').toString();
-    }
+    FileBackedJSONString createFileBackedJSONString();
 }

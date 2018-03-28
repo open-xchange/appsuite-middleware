@@ -77,6 +77,7 @@ import com.openexchange.mail.authenticity.impl.trusted.internal.TrustedMailServi
 import com.openexchange.mailaccount.UnifiedInboxManagement;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.threadpool.ThreadPoolService;
+import com.openexchange.timer.TimerService;
 
 /**
  * {@link MailAuthenticityActivator}
@@ -100,7 +101,7 @@ public class MailAuthenticityActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { LeanConfigurationService.class, ConfigurationService.class, UnifiedInboxManagement.class, ThreadPoolService.class };
+        return new Class<?>[] { LeanConfigurationService.class, ConfigurationService.class, UnifiedInboxManagement.class, ThreadPoolService.class, TimerService.class };
     }
 
     @Override
@@ -119,8 +120,7 @@ public class MailAuthenticityActivator extends HousekeepingActivator {
         track(MailAuthenticityHandler.class, registry);
         openTrackers();
 
-        ConfigurationService configurationService = getService(ConfigurationService.class);
-        TrustedMailServiceImpl authenticationHandler = new TrustedMailServiceImpl(configurationService);
+        TrustedMailServiceImpl authenticationHandler = new TrustedMailServiceImpl(this);
         registerService(ForcedReloadable.class, authenticationHandler);
         CustomRuleChecker ruleChecker = new CustomRuleChecker(leanConfigService);
         registerService(Reloadable.class, ruleChecker);

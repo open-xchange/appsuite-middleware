@@ -52,7 +52,6 @@ package com.openexchange.chronos.common.mapping;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Set;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.service.EventUpdate;
@@ -88,9 +87,9 @@ public abstract class AbstractEventUpdates extends AbstractSimpleCollectionUpdat
             for (Event newItem : newItems) {
                 Event originalItem = find(originalItems, newItem);
                 if (null != originalItem) {
-                    Set<EventField> differentFields = EventMapper.getInstance().getDifferentFields(originalItem, newItem, considerUnset, ignoredFields);
-                    if (0 < differentFields.size()) {
-                        updatedItems.add(new EventUpdateImpl(originalItem, newItem, differentFields, null));
+                    EventUpdate eventUpdate = new DefaultEventUpdate(originalItem, newItem, considerUnset, ignoredFields);
+                    if (0 < eventUpdate.getUpdatedFields().size()) {
+                        updatedItems.add(eventUpdate);
                     }
                 }
             }

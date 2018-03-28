@@ -300,20 +300,18 @@ public abstract class BasicCachingCalendarAccess implements BasicCalendarAccess,
     private void executeUpdate() throws OXException {
         try {
             ExternalCalendarResult externalCalendarResult = this.getAllEvents();
-            if (false == externalCalendarResult.isUpdated()) {
-                return;
+            if (externalCalendarResult.isUpdated()) {
+                CalendarParameters lParameters = new DefaultCalendarParameters(getParameters()).set(CalendarParameters.PARAMETER_AUTO_HANDLE_DATA_TRUNCATIONS, Boolean.TRUE).set(CalendarParameters.PARAMETER_AUTO_HANDLE_INCORRECT_STRINGS, Boolean.TRUE);
+                new OSGiCalendarStorageOperation<Void>(Services.getServiceLookup(), session.getContextId(), account.getAccountId(), lParameters) {
+    
+                    @Override
+                    protected Void call(CalendarStorage storage) throws OXException {
+                        updateCache(storage, externalCalendarResult);
+                        addWarnings(collectWarnings(storage));
+                        return null;
+                    }
+                }.executeUpdate();
             }
-            CalendarParameters lParameters = new DefaultCalendarParameters(getParameters()).set(CalendarParameters.PARAMETER_AUTO_HANDLE_DATA_TRUNCATIONS, Boolean.TRUE).set(CalendarParameters.PARAMETER_AUTO_HANDLE_INCORRECT_STRINGS, Boolean.TRUE);
-            new OSGiCalendarStorageOperation<Void>(Services.getServiceLookup(), session.getContextId(), account.getAccountId(), lParameters) {
-
-                @Override
-                protected Void call(CalendarStorage storage) throws OXException {
-                    updateCache(storage, externalCalendarResult);
-                    addWarnings(collectWarnings(storage));
-                    return null;
-                }
-            }.executeUpdate();
-
             this.updateLastUpdated(System.currentTimeMillis() + TimeUnit.MINUTES.toMillis(1));
             account.getInternalConfiguration().remove("lastError");
         } catch (OXException e) {

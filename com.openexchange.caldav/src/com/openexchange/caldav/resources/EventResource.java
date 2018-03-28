@@ -623,7 +623,8 @@ public class EventResource extends DAVObjectResource<Event> {
                     return access.updateEvent(eventID, caldavImport.getEvent(), clientTimestamp);
                 }
             }.execute(factory.getSession());
-            if (0 < result.getUpdates().size()) {
+            if (0 < result.getCreations().size()) {
+                // event is "created" afterwards from user's point of view
                 return Boolean.FALSE;
             }
         }
