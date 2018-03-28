@@ -65,7 +65,7 @@ import com.openexchange.tools.update.Column;
 
 /**
  * {@link ConvertUtf8ToUtf8mb4Task}
- * 
+ *
  * Automaticaly changes table and column character sets and collations from utf8 to utf8mb4.
  * This is only possible for "non problematic" table structures. E.g. if a key is too long and or a table width is too large, additional actions need to be performed.
  * Either by implementing {@link ConvertUtf8ToUtf8mb4Task#before} and/or {@link ConvertUtf8ToUtf8mb4Task#after} or changing the table manually.
@@ -85,24 +85,26 @@ public abstract class ConvertUtf8ToUtf8mb4Task extends UpdateTaskAdapter {
     @Override
     public void perform(PerformParameters params) throws OXException {
         Connection con = params.getConnection();
-        boolean rollback = false;
+        int rollback = 0;
         try {
             con.setAutoCommit(false);
-            rollback = true;
+            rollback = 1;
 
             before(params, con);
             innerPerform(con, params.getSchema().getSchema());
             after(params, con);
 
             con.commit();
-            rollback = false;
+            rollback = 2;
         } catch (SQLException e) {
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } finally {
-            if (rollback) {
-                Databases.rollback(con);
+            if (rollback > 0) {
+                if (rollback == 1) {
+                    Databases.rollback(con);
+                }
+                Databases.autocommit(con);
             }
-            Databases.autocommit(con);
         }
     }
 
@@ -271,7 +273,7 @@ public abstract class ConvertUtf8ToUtf8mb4Task extends UpdateTaskAdapter {
     /**
      * Method beeing executed after the conversion of the tables has finisehd.
      * Use provided connection to perform statements in the same transaction.
-     * 
+     *
      * @param params
      * @param connection
      * @throws SQLException
