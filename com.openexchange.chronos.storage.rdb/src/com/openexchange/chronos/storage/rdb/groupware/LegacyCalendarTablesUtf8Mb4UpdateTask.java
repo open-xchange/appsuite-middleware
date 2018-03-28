@@ -50,16 +50,13 @@
 package com.openexchange.chronos.storage.rdb.groupware;
 
 import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
-import com.openexchange.database.Databases;
+import java.util.Map;
 import com.openexchange.groupware.update.AbstractConvertUtf8ToUtf8mb4Task;
 import com.openexchange.groupware.update.PerformParameters;
-import com.openexchange.java.Strings;
-import com.openexchange.tools.update.Column;
 
 /**
  * {@link LegacyCalendarTablesUtf8Mb4UpdateTask}
@@ -85,28 +82,8 @@ public class LegacyCalendarTablesUtf8Mb4UpdateTask extends AbstractConvertUtf8To
     @Override
     protected void after(PerformParameters params, Connection connection) throws SQLException {
         // Manually change dateExternal and delDateExternal
-        changeExternalTable(connection, params.getSchema().getSchema(), "dateExternal");
-        changeExternalTable(connection, params.getSchema().getSchema(), "delDateExternal");
+        Map<String, Integer> varcharColumns = Collections.singletonMap("mailAddress", 255);
+        changeExternalTable(connection, params.getSchema().getSchema(), "dateExternal", varcharColumns);
+        changeExternalTable(connection, params.getSchema().getSchema(), "delDateExternal", varcharColumns);
     }
-
-    private void changeExternalTable(Connection connection, String schema, String table) throws SQLException {
-        PreparedStatement alterStmt = null;
-        try {
-            List<Column> columnsToModify = getColumsToModify(connection, schema, table);
-            columnsToModify = columnsToModify.stream().map(this::changeMailColumn).collect(Collectors.toList());
-            String alterTable = alterTable(table, columnsToModify, UTF8MB4_CHARSET, UTF8MB4_COLLATION);
-
-            if (!Strings.isEmpty(alterTable)) {
-                alterStmt = connection.prepareStatement(alterTable);
-                alterStmt.execute();
-            }
-        } finally {
-            Databases.closeSQLStuff(alterStmt);
-        }
-    }
-
-    private Column changeMailColumn(Column column) {
-        return shrinkVarcharColumn("mailAddress", 255, column);
-    }
-
 }
