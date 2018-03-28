@@ -98,7 +98,7 @@ public class DocumentMetadataResource extends AbstractResource implements OXWebd
 
     private int id;
 
-    private DocumentMetadata metadata = new DocumentMetadataImpl();
+    DocumentMetadata metadata = new DocumentMetadataImpl();
 
     // State
     private final Set<Metadata> setMetadata = new HashSet<Metadata>();
@@ -569,7 +569,7 @@ public class DocumentMetadataResource extends AbstractResource implements OXWebd
         }
     }
 
-    private void loadMetadata() throws WebdavProtocolException {
+    void loadMetadata() throws WebdavProtocolException {
         if (!exists) {
             return;
         }
@@ -585,7 +585,8 @@ public class DocumentMetadataResource extends AbstractResource implements OXWebd
         final ServerSession session = getSession();
 
         try {
-            final DocumentMetadata metadata = database.getDocumentMetadata(id, InfostoreFacade.CURRENT_VERSION, session);
+
+            final DocumentMetadata metadata = database.getDocumentMetadata(-1, id, InfostoreFacade.CURRENT_VERSION, session);
             final SetSwitch set = new SetSwitch(this.metadata);
             final GetSwitch get = new GetSwitch(metadata);
 
@@ -609,11 +610,11 @@ public class DocumentMetadataResource extends AbstractResource implements OXWebd
         }
     }
 
-    private void markSet(final Metadata metadata) {
+    void markSet(final Metadata metadata) {
         setMetadata.add(metadata);
     }
 
-    private void markChanged() {
+    void markChanged() {
         metadataChanged = true;
     }
 
@@ -785,7 +786,7 @@ public class DocumentMetadataResource extends AbstractResource implements OXWebd
         final ServerSession session = getSession();
         database.startTransaction();
         try {
-            DocumentMetadata document = database.getDocumentMetadata(id, InfostoreFacade.CURRENT_VERSION, session);
+            DocumentMetadata document = database.getDocumentMetadata(-1, id, InfostoreFacade.CURRENT_VERSION, session);
 			List<IDTuple> nd = database.removeDocument(
 			    Collections.<IDTuple>singletonList(
 			        new IDTuple(
