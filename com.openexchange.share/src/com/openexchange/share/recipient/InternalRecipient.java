@@ -56,6 +56,8 @@ package com.openexchange.share.recipient;
  */
 public class InternalRecipient extends ShareRecipient {
 
+    private static final long serialVersionUID = 3519275765950627880L;
+
     private boolean group;
     private int entity;
 
