@@ -166,7 +166,7 @@ public class ProxyAuthenticatorActivator extends HousekeepingActivator {
     }
 
     @Override
-    public synchronized void stopBundle() throws Exception {
+    protected synchronized void stopBundle() throws Exception {
         org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(ProxyAuthenticatorActivator.class);
         logger.info("Stopping bundle {}", this.context.getBundle().getSymbolicName());
 
@@ -179,6 +179,8 @@ public class ProxyAuthenticatorActivator extends HousekeepingActivator {
             this.previousAuthenticator = null;
             Authenticator.setDefault(previousAuthenticator);
         }
+
+        super.stopBundle();
 
         logger.info("Bundle {} successfully stopped", context.getBundle().getSymbolicName());
     }
