@@ -47,67 +47,22 @@
  *
  */
 
-package com.openexchange.ajax.requesthandler.converters.preview.cache.groupware;
+package com.openexchange.groupware.update.tasks;
 
-import com.openexchange.database.AbstractCreateTableImpl;
-
+import java.util.Collections;
+import com.openexchange.groupware.update.SimpleConvertUtf8ToUtf8mb4UpdateTask;
 
 /**
- * {@link PreviewCacheCreateTableService}
+ * {@link PreviewTableUtf8Mb4UpdateTask}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public final class PreviewCacheCreateTableService extends AbstractCreateTableImpl {
+public class PreviewTableUtf8Mb4UpdateTask extends SimpleConvertUtf8ToUtf8mb4UpdateTask {
 
     /**
-     * Gets the table names.
-     *
-     * @return The table names.
+     * Initialises a new {@link PreviewTableUtf8Mb4UpdateTask}.
      */
-    public static String[] getTablesToCreate() {
-        return new String[] { "preview" };
+    public PreviewTableUtf8Mb4UpdateTask() {
+        super(Collections.singletonList("preview"), "com.openexchange.ajax.requesthandler.converters.preview.cache.groupware.ChangeFileNameAndTypeLength");
     }
-
-    /**
-     * Gets the CREATE-TABLE statements.
-     *
-     * @return The CREATE statements
-     */
-    public static String[] getCreateStmts() {
-        return new String[] { "CREATE TABLE "+"preview"+" (" +
-            " cid INT4 unsigned NOT NULL," +
-            " user INT4 unsigned NOT NULL," +
-            " id VARCHAR(128) CHARACTER SET latin1 NOT NULL," +
-            " size BIGINT(64) NOT NULL," +
-            " createdAt BIGINT(64) NOT NULL," +
-            " fileName VARCHAR(767) COLLATE utf8mb4_unicode_ci DEFAULT NULL," +
-            " fileType VARCHAR(255) CHARACTER SET latin1 DEFAULT NULL," +
-            " refId VARCHAR(255) CHARACTER SET latin1 DEFAULT NULL," +
-            " PRIMARY KEY (cid, user, id)," +
-            " INDEX `globaldocument` (cid, id)" +
-            ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci" };
-    }
-
-    /**
-     * Initializes a new {@link PreviewCacheCreateTableService}.
-     */
-    public PreviewCacheCreateTableService() {
-        super();
-    }
-
-    @Override
-    public String[] requiredTables() {
-        return NO_TABLES;
-    }
-
-    @Override
-    public String[] tablesToCreate() {
-        return getTablesToCreate();
-    }
-
-    @Override
-    protected String[] getCreateStatements() {
-        return getCreateStmts();
-    }
-
 }

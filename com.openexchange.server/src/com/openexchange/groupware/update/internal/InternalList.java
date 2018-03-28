@@ -654,7 +654,6 @@ public final class InternalList {
         list.add(new AddSharedParentFolderToFolderPermissionTableUpdateTask());
 
         // Drops rather needless foreign key from "object_use_count" table
-
         list.add(new com.openexchange.groupware.update.tasks.DropForeignKeyFromObjectUseCountTable());
 
         // Add origin column to "del_infostore" table to be able to restore deleted files to origin
@@ -677,6 +676,9 @@ public final class InternalList {
         
         // Converts the jsonStorage table to utf8mb4
         list.add(new com.openexchange.groupware.update.tasks.JsonStorageTableUtf8Mb4UpdateTask());
+        
+        // Converts the preview table to utf8mb4
+        list.add(new com.openexchange.groupware.update.tasks.PreviewTableUtf8Mb4UpdateTask());
 
         return list.toArray(new UpdateTaskV2[list.size()]);
     }
