@@ -167,9 +167,7 @@ public final class MessagingFolderWriter {
             @Override
             public void writeField(final JSONValuePutter jsonContainer, final String serviceId, final int accountId, final MessagingFolder folder, final String name, final int hasSubfolders, final String id, final int module, final boolean all) throws OXException {
                 try {
-                    jsonContainer.put(
-                        DataFields.ID,
-                        null == id ? MessagingFolderIdentifier.getFQN(serviceId, accountId, folder.getId()) : id);
+                    jsonContainer.put(DataFields.ID, null == id ? MessagingFolderIdentifier.getFQN(serviceId, accountId, folder.getId()) : id);
                 } catch (final JSONException e) {
                     throw MessagingExceptionCodes.JSON_ERROR.create(e, e.getMessage());
                 }
@@ -299,18 +297,27 @@ public final class MessagingFolderWriter {
                         final MessagingPermission rootPermission = folder.getOwnPermission();
                         if (rootPermission == null) {
                             mp = DefaultMessagingPermission.newInstance();
-                            mp.setAllPermissions(
-                                OCLPermission.CREATE_SUB_FOLDERS,
-                                OCLPermission.NO_PERMISSIONS,
-                                OCLPermission.NO_PERMISSIONS,
-                                OCLPermission.NO_PERMISSIONS);
+                            mp.setAllPermissions(OCLPermission.CREATE_SUB_FOLDERS,
+                                                 OCLPermission.NO_PERMISSIONS,
+                                                 OCLPermission.NO_PERMISSIONS,
+                                                 OCLPermission.NO_PERMISSIONS);
                             mp.setAdmin(false);
                         } else {
                             mp = rootPermission;
                         }
                     } else {
-                        mp = folder.getOwnPermission();
+                        if (folder.getOwnPermission() != null) {
+                            mp = folder.getOwnPermission();
+                        } else {
+                            mp = DefaultMessagingPermission.newInstance();
+                            mp.setAllPermissions(OCLPermission.NO_PERMISSIONS,
+                                                 OCLPermission.NO_PERMISSIONS,
+                                                 OCLPermission.NO_PERMISSIONS,
+                                                 OCLPermission.NO_PERMISSIONS);
+                            mp.setAdmin(false);
+                        }
                     }
+
                     if (!folder.isHoldsFolders() && (mp.getFolderPermission() >= MessagingPermission.CREATE_SUB_FOLDERS)) {
                         // Cannot contain subfolders; therefore deny subfolder creation
                         mp.setFolderPermission(OCLPermission.CREATE_OBJECTS_IN_FOLDER);
@@ -319,6 +326,7 @@ public final class MessagingFolderWriter {
                         // Cannot contain messages; therefore deny read access. Folder is not selectable.
                         mp.setReadPermission(OCLPermission.NO_PERMISSIONS);
                     }
+
                     int permissionBits = createPermissionBits(mp);
                     if (folder.getCapabilities().contains(MessagingFolder.CAPABILITY_USER_FLAGS)) {
                         permissionBits |= BIT_USER_FLAG;
@@ -363,9 +371,7 @@ public final class MessagingFolderWriter {
                     /*
                      * Put value
                      */
-                    final String value =
-                        folder.isRootFolder() ? "" : new StringBuilder(16).append('(').append(folder.getMessageCount()).append('/').append(
-                            folder.getUnreadMessageCount()).append(')').toString();
+                    final String value = folder.isRootFolder() ? "" : new StringBuilder(16).append('(').append(folder.getMessageCount()).append('/').append(folder.getUnreadMessageCount()).append(')').toString();
                     jsonContainer.put(FolderFields.SUMMARY, value);
                 } catch (final JSONException e) {
                     throw MessagingExceptionCodes.JSON_ERROR.create(e, e.getMessage());
@@ -380,9 +386,7 @@ public final class MessagingFolderWriter {
                     /*
                      * Put value
                      */
-                    jsonContainer.put(
-                        FolderFields.STANDARD_FOLDER,
-                        Boolean.valueOf(folder.containsDefaultFolderType() ? folder.isDefaultFolder() : false));
+                    jsonContainer.put(FolderFields.STANDARD_FOLDER, Boolean.valueOf(folder.containsDefaultFolderType() ? folder.isDefaultFolder() : false));
                 } catch (final JSONException e) {
                     throw MessagingExceptionCodes.JSON_ERROR.create(e, e.getMessage());
                 }
