@@ -74,7 +74,7 @@ public class Protocol {
 		private final String name;
 		private final String namespace;
 
-		private Property(final int id, final String namespace, final String name) {
+		Property(final int id, final String namespace, final String name) {
 			this.id = id;
 			this.name = name;
 			this.namespace = namespace;
