@@ -2058,7 +2058,6 @@ public class Spamc {
 
         private int argumentIndex = -1;
         private int charIndex = -1;
-        private final String message = "";
 
         protected ArgumentUsageException() {
             super();
@@ -2076,7 +2075,7 @@ public class Spamc {
 
         @Override
         public String getMessage() {
-            return getMessagePrefix() + message;
+            return getMessagePrefix();
         }
 
     }
