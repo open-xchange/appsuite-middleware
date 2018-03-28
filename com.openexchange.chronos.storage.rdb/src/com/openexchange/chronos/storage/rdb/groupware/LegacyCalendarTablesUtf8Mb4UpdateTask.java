@@ -106,11 +106,7 @@ public class LegacyCalendarTablesUtf8Mb4UpdateTask extends AbstractConvertUtf8To
     }
 
     private Column changeMailColumn(Column column) {
-        if (column.getName().equals("mailAddress")) {
-            return new Column(column.getName(), column.getDefinition().replace("varchar(255)", "varchar(191)"));
-        } else {
-            return column;
-        }
+        return shrinkVarcharColumn("mailAddress", 255, column);
     }
 
 }
