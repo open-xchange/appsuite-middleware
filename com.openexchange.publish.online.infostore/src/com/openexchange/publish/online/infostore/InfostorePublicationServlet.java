@@ -139,7 +139,7 @@ public class InfostorePublicationServlet extends HttpServlet {
 
     private final Pattern SPLIT = Pattern.compile("/");
 
-    private void handle(final HttpServletRequest req, final HttpServletResponse resp) throws IOException {
+    private void handle(final HttpServletRequest req, final HttpServletResponse resp) {
         try {
             String[] path = SPLIT.split(req.getRequestURI(), 0);
             Context ctx = getContext(path);
@@ -153,6 +153,9 @@ public class InfostorePublicationServlet extends HttpServlet {
 
             // Existing and enabled as well
             DocumentMetadata document = InfostorePublicationUtils.loadDocumentMetadata(publication, this.fileAccessFactory);
+            if(document == null) {
+                throw new Exception("Unable to load document metadata");
+            }
             InputStream is = loadContent(publication);
             configureHeaders(document, req, resp);
             write(is, resp);
