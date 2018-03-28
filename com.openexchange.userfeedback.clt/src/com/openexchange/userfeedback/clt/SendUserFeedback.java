@@ -54,7 +54,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Iterator;
@@ -246,7 +245,7 @@ public class SendUserFeedback extends AbstractUserFeedback {
                 JSONObject json = getAddressJSON(address, displayName);
                 if (null != pgp && Strings.isNotEmpty(pgp)) {
                     try {
-                        pgp = new String(Files.readAllBytes(Paths.get(pgp)), StandardCharsets.UTF_8);
+                        pgp = new String(Files.readAllBytes(Paths.get(pgp)));
                         json.put("pgp_key", pgp);
                     } catch (IOException e) {
                         exitWithError("Could not load PGP key " + pgp);
