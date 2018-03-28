@@ -182,7 +182,7 @@ public abstract class AbstractConvertUtf8ToUtf8mb4Task extends UpdateTaskAdapter
     }
 
     private Column newColumn(String columnName, String createTable) {
-        Pattern pattern = Pattern.compile("[`'´\"]" + Pattern.quote(columnName) + "[`'´\"](.*),");
+        Pattern pattern = Pattern.compile("[`'´\"]" + Pattern.quote(columnName) + "[`'´\"]([^,]*),");
         Matcher matcher = pattern.matcher(createTable);
         if (!matcher.find()) {
             return null;
