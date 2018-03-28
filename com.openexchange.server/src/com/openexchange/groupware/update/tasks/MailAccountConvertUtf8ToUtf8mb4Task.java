@@ -79,7 +79,7 @@ public class MailAccountConvertUtf8ToUtf8mb4Task extends AbstractConvertUtf8ToUt
 
     @Override
     protected List<String> tablesToConvert() {
-        return ImmutableList.of("user_mail_account", "user_mail_account_properties", "user_transport_account", "user_transport_account_properties");
+        return ImmutableList.of("user_mail_account", "user_mail_account_properties", "user_transport_account", "user_transport_account_properties", "sequence_mail_service", "pop3_storage_ids", "pop3_storage_deleted");
     }
 
     @Override
