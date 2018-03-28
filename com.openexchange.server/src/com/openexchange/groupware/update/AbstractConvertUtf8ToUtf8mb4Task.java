@@ -273,21 +273,23 @@ public abstract class AbstractConvertUtf8ToUtf8mb4Task extends UpdateTaskAdapter
      * unaltered.
      * 
      * @param columnName The column name
+     * @param charLength The character length of the existing column
      * @param column The {@link Column} to shrink
      * @return The shrinked {@link Column} if the names match; otherwise the unaltered column
      */
-    protected Column shrinkVarcharColumn(String columnName, Column column) {
-        return column.getName().equals(columnName) ? shrinkVarcharColumn(column) : column;
+    protected Column shrinkVarcharColumn(String columnName, int charLength, Column column) {
+        return column.getName().equals(columnName) ? shrinkVarcharColumn(column, charLength) : column;
     }
 
     /**
      * Shrinks the specified {@link Column} from varchar(255) to varchar(191)
      * 
      * @param column The {@link Column} to shrink
+     * @param charLength The character length of the existing column
      * @return the shirnked {@link Column}
      */
-    private Column shrinkVarcharColumn(Column column) {
-        return new Column(column.getName(), column.getDefinition().replace("varchar(255)", "varchar(191)"));
+    private Column shrinkVarcharColumn(Column column, int charLength) {
+        return new Column(column.getName(), column.getDefinition().replace("varchar(" + charLength + ")", "varchar(191)"));
     }
 
     /**
