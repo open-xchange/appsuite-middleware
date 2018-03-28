@@ -56,6 +56,8 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -268,6 +270,35 @@ public abstract class AbstractConvertUtf8ToUtf8mb4Task extends UpdateTaskAdapter
             return collation.replace("utf8", "utf8mb4");
         } else {
             return collation;
+        }
+    }
+
+    /**
+     * Changes the charset and collation of the specified table and (optionally) shrinks the specified
+     * varchar columns
+     * 
+     * @param connection The {@link Connection}
+     * @param schema The schema name
+     * @param table The table name
+     * @param varcharColumns The optional varchar columns with their respective varchar sizes
+     *            (use only if the column is part of the PK or is a KEY and it's size surpasses the limit of 767 chars in total, i.e. varchar length >= 192)
+     * @throws SQLException
+     */
+    protected void changeExternalTable(Connection connection, String schema, String table, Map<String, Integer> varcharColumns) throws SQLException {
+        PreparedStatement alterStmt = null;
+        try {
+            List<Column> columnsToModify = getColumsToModify(connection, schema, table);
+            for (Entry<String, Integer> varcharColumn : varcharColumns.entrySet()) {
+                columnsToModify = columnsToModify.stream().map((column) -> shrinkVarcharColumn(varcharColumn.getKey(), varcharColumn.getValue(), column)).collect(Collectors.toList());
+            }
+            String alterTable = alterTable(table, columnsToModify, UTF8MB4_CHARSET, UTF8MB4_COLLATION);
+
+            if (!Strings.isEmpty(alterTable)) {
+                alterStmt = connection.prepareStatement(alterTable);
+                alterStmt.execute();
+            }
+        } finally {
+            Databases.closeSQLStuff(alterStmt);
         }
     }
 
