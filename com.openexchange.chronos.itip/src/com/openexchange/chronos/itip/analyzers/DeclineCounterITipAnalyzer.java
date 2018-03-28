@@ -98,7 +98,9 @@ public class DeclineCounterITipAnalyzer extends AbstractITipAnalyzer {
             }
         }
         if (null == event) {
-            throw new OXException(new IllegalArgumentException("No appointment instance given"));
+            analysis.addAnnotation(new ITipAnnotation(Messages.DECLINED_FOR_UNKNOWN, locale));
+            analysis.recommendActions(ITipAction.IGNORE, ITipAction.REFRESH);
+            return analysis;
         }
         analysis.setUid(event.getUid());
 
