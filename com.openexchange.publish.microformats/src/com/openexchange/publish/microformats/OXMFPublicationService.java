@@ -299,7 +299,7 @@ public class OXMFPublicationService extends AbstractPublicationService {
         query.put(SITE_NAME, site);
 
         final Collection<Publication> result = getStorage().search(ctx, getTarget().getId(), query);
-        if (result.isEmpty()) {
+        if (null == result || result.isEmpty()) {
             return null;
         }
 
