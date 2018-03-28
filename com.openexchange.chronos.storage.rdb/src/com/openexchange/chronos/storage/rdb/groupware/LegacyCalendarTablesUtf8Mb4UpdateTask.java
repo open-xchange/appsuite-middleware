@@ -56,7 +56,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 import com.openexchange.database.Databases;
-import com.openexchange.groupware.update.ConvertUtf8ToUtf8mb4Task;
+import com.openexchange.groupware.update.AbstractConvertUtf8ToUtf8mb4Task;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.java.Strings;
 import com.openexchange.tools.update.Column;
@@ -67,7 +67,7 @@ import com.openexchange.tools.update.Column;
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  * @since v7.10.0
  */
-public class LegacyCalendarTablesUtf8Mb4UpdateTask extends ConvertUtf8ToUtf8mb4Task {
+public class LegacyCalendarTablesUtf8Mb4UpdateTask extends AbstractConvertUtf8ToUtf8mb4Task {
 
     @Override
     public String[] getDependencies() {

@@ -54,6 +54,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -64,23 +65,23 @@ import com.openexchange.java.Strings;
 import com.openexchange.tools.update.Column;
 
 /**
- * {@link ConvertUtf8ToUtf8mb4Task}
+ * {@link AbstractConvertUtf8ToUtf8mb4Task}
  *
  * Automaticaly changes table and column character sets and collations from utf8 to utf8mb4.
  * This is only possible for "non problematic" table structures. E.g. if a key is too long and or a table width is too large, additional actions need to be performed.
- * Either by implementing {@link ConvertUtf8ToUtf8mb4Task#before} and/or {@link ConvertUtf8ToUtf8mb4Task#after} or changing the table manually.
+ * Either by implementing {@link AbstractConvertUtf8ToUtf8mb4Task#before} and/or {@link AbstractConvertUtf8ToUtf8mb4Task#after} or changing the table manually.
  * Note: Even if everything is performed in one transaction, MySQL can not rollback DDL statements (ALTER TABLE)!
  *
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  * @since v7.10.0
  */
-public abstract class ConvertUtf8ToUtf8mb4Task extends UpdateTaskAdapter {
+public abstract class AbstractConvertUtf8ToUtf8mb4Task extends UpdateTaskAdapter {
 
-    private static final String TABLE_INFORMATION = "SELECT t.TABLE_COLLATION, ccsa.CHARACTER_SET_NAME FROM information_schema.tables t, information_schema.COLLATION_CHARACTER_SET_APPLICABILITY ccsa WHERE t.table_schema = ? AND ccsa.collation_name = t.table_collation AND ccsa.CHARACTER_SET_NAME = 'utf8' AND t.TABLE_NAME = ?;";
+    private static final String TABLE_INFORMATION = "SELECT t.TABLE_COLLATION, ccsa.CHARACTER_SET_NAME FROM information_schema.tables t, information_schema.COLLATION_CHARACTER_SET_APPLICABILITY ccsa WHERE t.table_schema = ? AND ccsa.collation_name = t.table_collation AND ccsa.CHARACTER_SET_NAME = 'utf8' AND t.TABLE_NAME = ?";
 
     private static String SHOW_CREATE_TABLE = "SHOW CREATE TABLE ";
 
-    private static final String COLUMN_INFORMATION = "SELECT COLUMN_NAME FROM information_schema.COLUMNS WHERE table_schema = ? AND CHARACTER_SET_NAME = 'utf8' AND TABLE_NAME = ?;";
+    private static final String COLUMN_INFORMATION = "SELECT COLUMN_NAME FROM information_schema.COLUMNS WHERE table_schema = ? AND CHARACTER_SET_NAME = 'utf8' AND TABLE_NAME = ?";
 
     @Override
     public void perform(PerformParameters params) throws OXException {
@@ -133,6 +134,9 @@ public abstract class ConvertUtf8ToUtf8mb4Task extends UpdateTaskAdapter {
                 tableCollation = mb4Collation(tableCharsetRs.getString("TABLE_COLLATION"));
                 tableCharset = mb4Charset(tableCharsetRs.getString("CHARACTER_SET_NAME"));
             }
+            Databases.closeSQLStuff(tableCharsetRs, tableCharsetStmt);
+            tableCharsetRs = null;
+            tableCharsetStmt = null;
 
             List<Column> newColumns = getColumsToModify(con, schema, table);
 
@@ -159,15 +163,18 @@ public abstract class ConvertUtf8ToUtf8mb4Task extends UpdateTaskAdapter {
             columnStmt.setString(1, schema);
             columnStmt.setString(2, table);
             columnRs = columnStmt.executeQuery();
+            if (false == columnRs.next()) {
+                return Collections.emptyList();
+            }
+
             List<Column> newColumns = new ArrayList<>();
-            while (columnRs.next()) {
+            do {
                 String columnName = columnRs.getString("COLUMN_NAME");
                 Column column = newColumn(columnName, createTable);
                 if (column != null) {
                     newColumns.add(column);
                 }
-            }
-
+            } while (columnRs.next());
             return newColumns;
         } finally {
             Databases.closeSQLStuff(columnRs, columnStmt);
@@ -254,7 +261,7 @@ public abstract class ConvertUtf8ToUtf8mb4Task extends UpdateTaskAdapter {
     /**
      * The tables to convert. Checks for explicit table and column charsets and (in case of utf8) converts them to utf8mb4.
      * Converts collations accordingly.
-     * No further adjustments are done. For more complex tables and additional changes (e.g. key adjustments) perform this manually or use {@link ConvertUtf8ToUtf8mb4Task#before} and {@link ConvertUtf8ToUtf8mb4Task#after}.
+     * No further adjustments are done. For more complex tables and additional changes (e.g. key adjustments) perform this manually or use {@link AbstractConvertUtf8ToUtf8mb4Task#before} and {@link AbstractConvertUtf8ToUtf8mb4Task#after}.
      *
      * @return A List of tables to be converted.
      */
