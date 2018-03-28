@@ -218,11 +218,14 @@ public final class TokenSessionContainer {
         if (useHazelcast.get()) {
             IMap<String, PortableTokenSessionControl> serverTokenHzMap = hzMap(serverTokenMapName);
 
-            // Generate a portable session from token's session...
-            PortableSession portableSession = new PortableSession(SessionHandler.getObfuscator().wrap(control.getSession()));
-
-            // ... and put into HZ map
-            serverTokenHzMap.put(serverToken, new PortableTokenSessionControl(portableSession, control.getClientToken(), control.getServerToken(), control.getCreationStamp()));
+            if (serverTokenHzMap != null) {
+                // Generate a portable session from token's session...
+                PortableSession portableSession = new PortableSession(SessionHandler.getObfuscator().wrap(control.getSession()));
+                // ... and put into HZ map
+                serverTokenHzMap.put(serverToken, new PortableTokenSessionControl(portableSession, control.getClientToken(), control.getServerToken(), control.getCreationStamp()));
+            } else {
+                LOG.error("Unable to put session into hazelcast map! Map not found.");
+            }
         } else {
             localServerTokenMap.put(serverToken, control);
         }
