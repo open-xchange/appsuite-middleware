@@ -65,7 +65,6 @@ import com.openexchange.chronos.common.DefaultCalendarResult;
 import com.openexchange.chronos.common.DeleteResultImpl;
 import com.openexchange.chronos.common.UpdateResultImpl;
 import com.openexchange.chronos.service.CalendarEvent;
-import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.CalendarResult;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.CreateResult;
@@ -106,6 +105,18 @@ public class InternalCalendarResult {
         this.calendarUserId = calendarUserId;
         this.folder = folder;
         this.affectedFolderIds = new HashSet<String>();
+    }
+
+    public CalendarSession getSession() {
+        return session;
+    }
+
+    public int getCalendarUserId() {
+        return calendarUserId;
+    }
+
+    public CalendarFolder getFolder() {
+        return folder;
     }
 
     /**
@@ -300,11 +311,10 @@ public class InternalCalendarResult {
     /**
      * Gets the calendar event representing the system-wide view on the performed calendar changes.
      *
-     * @param parameters Additional calendar parameters, or <code>null</code> if not available
      * @return The calendar event
      */
-    public CalendarEvent getCalendarEvent(CalendarParameters parameters) {
-        return new DefaultCalendarEvent(session.getContextId(), Utils.ACCOUNT_ID, calendarUserId, session.getSession(), getAffectedFoldersPerUser(), creations, updates, deletions, parameters);
+    public CalendarEvent getCalendarEvent() {
+        return new DefaultCalendarEvent(session.getContextId(), Utils.ACCOUNT_ID, calendarUserId, session.getSession(), getAffectedFoldersPerUser(), creations, updates, deletions, session);
     }
 
     /**
