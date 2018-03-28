@@ -197,10 +197,13 @@ public class AddressbookQueryReport extends PROPFINDAction {
             }
             term = compositeTerm;
         }
-        if (null != textMatchElement.getAttribute("negate-condition") && "yes".equals(textMatchElement.getAttribute("negate-condition").getValue())) {
-            CompositeSearchTerm notTerm = new CompositeSearchTerm(CompositeOperation.NOT);
-            notTerm.addSearchTerm(term);
-            term = notTerm;
+        if (null != textMatchElement) {
+            Attribute attribute = textMatchElement.getAttribute("negate-condition");
+            if (null != attribute && "yes".equals(attribute.getValue())) {
+                CompositeSearchTerm notTerm = new CompositeSearchTerm(CompositeOperation.NOT);
+                notTerm.addSearchTerm(term);
+                term = notTerm;
+            }
         }
         return term;
     }
