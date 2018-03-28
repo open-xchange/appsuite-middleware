@@ -107,7 +107,7 @@ import com.openexchange.userconf.UserPermissionService;
  */
 public final class Tools {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Tools.class);
+    static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Tools.class);
 
     private static final FolderObject GUEST_CONTACTS = new FolderObject();
     static {
@@ -162,8 +162,16 @@ public final class Tools {
         /*
          * sort using the mapping's comparator with collation
          */
-        final Comparator<Object> collationComparator = null == sortOptions.getCollation() ? null :
-            Collators.getDefaultInstance(SuperCollator.get(sortOptions.getCollation()).getJavaLocale());
+	    Comparator<Object> comp = null;
+	    if(null != sortOptions.getCollation()) {
+	        SuperCollator superCollator = SuperCollator.get(sortOptions.getCollation());
+	        if(superCollator != null) {
+	            comp = Collators.getDefaultInstance(superCollator.getJavaLocale());
+	        } else {
+	            LOG.warn("The collation {} is unknown. Falling back to default collation.", sortOptions.getCollation());
+	        }
+	    }
+        final Comparator<Object> collationComparator = comp;
         return new Comparator<Contact>() {
             @Override
             public int compare(Contact o1, Contact o2) {
