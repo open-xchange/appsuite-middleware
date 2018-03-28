@@ -264,10 +264,10 @@ public abstract class AbstractConvertUtf8ToUtf8mb4Task extends UpdateTaskAdapter
     protected String mb4Collation(String collation) {
         if (Strings.isEmpty(collation)) {
             return "utf8mb4";
-        } else if (collation.contains("utf8mb4")) {
+        } else if (collation.contains(UTF8MB4_CHARSET)) {
             return collation;
         } else if (collation.contains("utf8")) {
-            return collation.replace("utf8", "utf8mb4");
+            return collation.replace("utf8", UTF8MB4_CHARSET);
         } else {
             return collation;
         }
