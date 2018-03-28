@@ -62,14 +62,22 @@ import com.openexchange.session.Session;
  */
 public class USMEASClientInfoProvider implements ClientInfoProvider {
 
-    private final String USMEAS_CLIENT_ID = "USM-EAS";
+    private static final String USMEAS_CLIENT_ID = "USM-EAS";
+
+    /**
+     * Initializes a new {@link USMEASClientInfoProvider}.
+     */
+    public USMEASClientInfoProvider() {
+        super();
+    }
 
     @Override
     public ClientInfo getClientInfo(Session session) {
         if (null != session) {
             String client = session.getClient();
-            if (Strings.isNotEmpty(client) && USMEAS_CLIENT_ID.equals(client))
+            if (Strings.isNotEmpty(client) && USMEAS_CLIENT_ID.equals(client)) {
                 return new USMEASClientInfo();
+            }
         }
         return null;
     }
