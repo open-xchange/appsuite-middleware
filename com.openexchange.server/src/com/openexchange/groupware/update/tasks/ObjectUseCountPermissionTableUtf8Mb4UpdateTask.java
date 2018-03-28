@@ -87,7 +87,7 @@ public class ObjectUseCountPermissionTableUtf8Mb4UpdateTask extends AbstractConv
      */
     @Override
     protected List<String> tablesToConvert() {
-        return Arrays.asList("object_use_count", "object_permission");
+        return Arrays.asList("object_use_count", "object_permission", "del_object_permission");
     }
 
     /*

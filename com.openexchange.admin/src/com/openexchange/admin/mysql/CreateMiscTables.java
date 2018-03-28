@@ -95,7 +95,7 @@ public class CreateMiscTables extends AbstractCreateTableImpl {
         + "INDEX (cid,userid,alarm),"
         + "INDEX (cid,userid,last_modified),"
         + "CONSTRAINT reminder_unique UNIQUE (cid,target_id,module,userid)"
-      + ") ENGINE = InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
+      + ") ENGINE = InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;";
 
     private static final String createFilestoreUsageTable = "CREATE TABLE filestore_usage ("
         + "cid INT4 UNSIGNED NOT NULL,"

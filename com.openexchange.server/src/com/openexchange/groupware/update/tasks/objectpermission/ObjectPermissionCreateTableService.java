@@ -81,7 +81,7 @@ public final class ObjectPermissionCreateTableService extends AbstractCreateTabl
             + "INDEX `created_by_index` (`cid`, `created_by`),"
             + "INDEX `shared_by_index` (`cid`, `shared_by`),"
             + "INDEX `last_modified_index` (`cid`, `permission_id`, `module`, `last_modified`)"
-            + ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci"),
+            + ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci"),
 
             ("CREATE TABLE `del_object_permission` ("
             + "`cid` INT4 UNSIGNED NOT NULL,"
@@ -98,7 +98,7 @@ public final class ObjectPermissionCreateTableService extends AbstractCreateTabl
             + "INDEX `created_by_index` (`cid`, `created_by`),"
             + "INDEX `shared_by_index` (`cid`, `shared_by`),"
             + "INDEX `last_modified_index` (`cid`, `permission_id`, `module`, `last_modified`)"
-            + ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci")
+            + ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci")
         };
     }
 
