@@ -269,38 +269,47 @@ public abstract class AbstractPublicationService implements PublicationService {
     @Override
     public abstract PublicationTarget getTarget() throws OXException;
 
+    @SuppressWarnings("unused")
     public void modifyIncoming(final Publication publication) throws OXException {
         // Empty method
     }
 
+    @SuppressWarnings("unused")
     public void modifyOutgoing(final Publication publication) throws OXException {
         // Empty method
     }
 
+    @SuppressWarnings("unused")
     public void beforeCreate(final Publication publication) throws OXException {
         // Empty method
     }
 
+    @SuppressWarnings("unused")
     public void afterCreate(final Publication publication) throws OXException {
         // Empty method
     }
 
+    @SuppressWarnings("unused")
     public void beforeUpdate(final Publication publication) throws OXException {
         // Empty method
     }
 
+    @SuppressWarnings("unused")
     public void afterUpdate(final Publication publication) throws OXException {
         // Empty method
     }
 
+    @SuppressWarnings("unused")
     public void beforeDelete(final Publication publication) throws OXException {
         // Empty method
     }
 
+    @SuppressWarnings("unused")
     public void afterDelete(final Publication publication) throws OXException {
         // Empty method
     }
 
+    @SuppressWarnings("unused")
     public void afterLoad(final Collection<Publication> publications) throws OXException {
         // Empty method
     }
