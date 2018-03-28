@@ -49,6 +49,7 @@
 
 package com.openexchange.share.recipient;
 
+import java.io.Serializable;
 
 /**
  * Describes a guest user to which a item or folder shall be shared.
@@ -56,7 +57,9 @@ package com.openexchange.share.recipient;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.8.0
  */
-public abstract class ShareRecipient {
+public abstract class ShareRecipient implements Serializable {
+
+    private static final long serialVersionUID = 1870155415515524040L;
 
     private int bits;
 
