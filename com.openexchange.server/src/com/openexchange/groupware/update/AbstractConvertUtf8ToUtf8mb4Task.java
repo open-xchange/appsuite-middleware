@@ -77,6 +77,8 @@ import com.openexchange.tools.update.Column;
  */
 public abstract class AbstractConvertUtf8ToUtf8mb4Task extends UpdateTaskAdapter {
 
+    private static final org.slf4j.Logger LOGGER = org.slf4j.LoggerFactory.getLogger(AbstractConvertUtf8ToUtf8mb4Task.class);
+
     private static final String TABLE_INFORMATION = "SELECT t.TABLE_COLLATION, ccsa.CHARACTER_SET_NAME FROM information_schema.tables t, information_schema.COLLATION_CHARACTER_SET_APPLICABILITY ccsa WHERE t.table_schema = ? AND ccsa.collation_name = t.table_collation AND ccsa.CHARACTER_SET_NAME = 'utf8' AND t.TABLE_NAME = ?";
 
     private static String SHOW_CREATE_TABLE = "SHOW CREATE TABLE ";
@@ -111,7 +113,12 @@ public abstract class AbstractConvertUtf8ToUtf8mb4Task extends UpdateTaskAdapter
 
     private void innerPerform(Connection con, String schema) throws SQLException {
         for (String table : tablesToConvert()) {
-            innerPerform(con, schema, table);
+            try {
+                innerPerform(con, schema, table);
+            } catch (SQLException e) {
+                LOGGER.error("Failed to convert table {} from utf8 to utf8mb4. Reason: {}", table, e.getMessage());
+                throw e;
+            }
         }
     }
 
