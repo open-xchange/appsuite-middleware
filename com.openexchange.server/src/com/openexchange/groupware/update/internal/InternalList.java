@@ -671,6 +671,9 @@ public final class InternalList {
 
         // Converts attachment tables to utf8mb4
         list.add(new com.openexchange.groupware.update.tasks.AttachmentConvertUtf8ToUtf8mb4Task());
+        
+        // Converts the reminder table to utf8mb4
+        list.add(new com.openexchange.groupware.update.tasks.ReminderTableUtf8Mb4UpdateTask());
 
         return list.toArray(new UpdateTaskV2[list.size()]);
     }

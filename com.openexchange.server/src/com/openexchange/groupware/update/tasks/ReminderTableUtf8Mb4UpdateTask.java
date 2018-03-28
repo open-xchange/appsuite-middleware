@@ -53,6 +53,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import com.openexchange.groupware.update.AbstractConvertUtf8ToUtf8mb4Task;
 import com.openexchange.groupware.update.PerformParameters;
 
@@ -97,7 +98,7 @@ public class ReminderTableUtf8Mb4UpdateTask extends AbstractConvertUtf8ToUtf8mb4
      */
     @Override
     protected void before(PerformParameters params, Connection connection) throws SQLException {
-        // TODO Auto-generated method stub
+        // no-op
 
     }
 
@@ -108,8 +109,7 @@ public class ReminderTableUtf8Mb4UpdateTask extends AbstractConvertUtf8ToUtf8mb4
      */
     @Override
     protected void after(PerformParameters params, Connection connection) throws SQLException {
-        // TODO Auto-generated method stub
-
+        Map<String, Integer> varcharColumns = Collections.singletonMap("target_id", 255);
+        changeExternalTable(connection, params.getSchema().getSchema(), "reminder", varcharColumns);
     }
-
 }
