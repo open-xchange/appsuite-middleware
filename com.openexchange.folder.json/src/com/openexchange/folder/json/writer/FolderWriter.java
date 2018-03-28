@@ -448,11 +448,11 @@ public final class FolderWriter {
 
     protected static final FolderFieldWriter UNKNOWN_FIELD_FFW = new FolderFieldWriter() {
 
-        private final String name = "unknown_field";
+        private static final String NAME = "unknown_field";
 
         @Override
         public void writeField(final JSONValuePutter jsonValue, final UserizedFolder folder, Map<String, Object> state, ServerSession session) throws JSONException {
-            jsonValue.put(jsonValue.withKey() ? name : null, JSONObject.NULL);
+            jsonValue.put(jsonValue.withKey() ? NAME : null, JSONObject.NULL);
         }
     };
 
@@ -922,13 +922,13 @@ public final class FolderWriter {
             super();
             this.field = field;
             final String name = field.getName();
-            this.name = null == name ? Integer.toString(field.getField()) : name;
+            this.NAME = null == name ? Integer.toString(field.getField()) : name;
         }
 
         @Override
         public void writeField(final JSONValuePutter jsonPutter, final UserizedFolder folder, Map<String, Object> state, ServerSession session) throws JSONException {
             final FolderProperty property = folder.getProperties().get(field);
-            jsonPutter.put(jsonPutter.withKey() ? name : null, field.write(property));
+            jsonPutter.put(jsonPutter.withKey() ? NAME : null, field.write(property));
         }
 
     }
