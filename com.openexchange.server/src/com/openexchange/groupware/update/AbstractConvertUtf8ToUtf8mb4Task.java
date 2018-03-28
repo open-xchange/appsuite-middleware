@@ -79,6 +79,10 @@ public abstract class AbstractConvertUtf8ToUtf8mb4Task extends UpdateTaskAdapter
 
     private static final org.slf4j.Logger LOGGER = org.slf4j.LoggerFactory.getLogger(AbstractConvertUtf8ToUtf8mb4Task.class);
 
+    protected static final String UTF8MB4_CHARSET = "utf8mb4";
+
+    protected static final String UTF8MB4_COLLATION = "utf8mb4_unicode_ci";
+
     private static final String TABLE_INFORMATION = "SELECT t.TABLE_COLLATION, ccsa.CHARACTER_SET_NAME FROM information_schema.tables t, information_schema.COLLATION_CHARACTER_SET_APPLICABILITY ccsa WHERE t.table_schema = ? AND ccsa.collation_name = t.table_collation AND ccsa.CHARACTER_SET_NAME = 'utf8' AND t.TABLE_NAME = ?";
 
     private static String SHOW_CREATE_TABLE = "SHOW CREATE TABLE ";
@@ -269,7 +273,7 @@ public abstract class AbstractConvertUtf8ToUtf8mb4Task extends UpdateTaskAdapter
 
     /**
      * Checks if the specified {@link Column}'s name matches the specified column name and if it does
-     * shrinks it from varchar(255) to varchar(191), otherwise the {@link Column} is returned.
+     * shrinks it from varchar(charLength) to varchar(191), otherwise the {@link Column} is returned.
      * unaltered.
      * 
      * @param columnName The column name
@@ -282,7 +286,7 @@ public abstract class AbstractConvertUtf8ToUtf8mb4Task extends UpdateTaskAdapter
     }
 
     /**
-     * Shrinks the specified {@link Column} from varchar(255) to varchar(191)
+     * Shrinks the specified {@link Column} from varchar(charLength) to varchar(191)
      * 
      * @param column The {@link Column} to shrink
      * @param charLength The character length of the existing column
