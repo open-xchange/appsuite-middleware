@@ -674,6 +674,9 @@ public final class InternalList {
         
         // Converts the reminder table to utf8mb4
         list.add(new com.openexchange.groupware.update.tasks.ReminderTableUtf8Mb4UpdateTask());
+        
+        // Converts the jsonStorage table to utf8mb4
+        list.add(new com.openexchange.groupware.update.tasks.JsonStorageTableUtf8Mb4UpdateTask());
 
         return list.toArray(new UpdateTaskV2[list.size()]);
     }
