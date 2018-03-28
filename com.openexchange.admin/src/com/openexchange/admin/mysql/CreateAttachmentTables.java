@@ -58,10 +58,10 @@ import com.openexchange.database.AbstractCreateTableImpl;
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */
 public class CreateAttachmentTables extends AbstractCreateTableImpl {
-    
+
     private static final String prgAttachmentTableName = "prg_attachment";
     private static final String delAttachmentTableName = "del_attachment";
-    
+
     private static final String createPrgAttachmentTable = "CREATE TABLE `prg_attachment` ("
       + "`cid` INT4 UNSIGNED NOT NULL,"
       + "`id` INT4 UNSIGNED NOT NULL,"
@@ -77,8 +77,8 @@ public class CreateAttachmentTables extends AbstractCreateTableImpl {
       + "`file_id` varchar(255) NOT NULL,"
       + "PRIMARY KEY  (`cid`,`id`),"
       + "KEY `cid` (`cid`,`attached`,`module`)"
-    + ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
-    
+    + ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;";
+
     private static final String createDelAttachmentTable = "CREATE TABLE `del_attachment` ("
       + "`cid` INT4 UNSIGNED NOT NULL,"
       + "`id` INT4 UNSIGNED NOT NULL,"
@@ -87,7 +87,7 @@ public class CreateAttachmentTables extends AbstractCreateTableImpl {
       + "`del_date` INT8 NOT NULL,"
       + "PRIMARY KEY  (`cid`,`id`),"
       + "KEY `cid` (`cid`,`attached`,`module`)"
-    + ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
+    + ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;";
 
     /**
      * Initializes a new {@link CreateAttachmentTables}.
