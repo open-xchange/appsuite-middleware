@@ -234,6 +234,9 @@ public final class TokenSessionContainer {
         }
 
         IMap<String, PortableTokenSessionControl> serverTokenHzMap = hzMap(serverTokenMapName);
+        if(serverTokenHzMap == null) {
+            return null;
+        }
         PortableTokenSessionControl removed = serverTokenHzMap.remove(serverToken);
         if (null == removed) {
             return null;
