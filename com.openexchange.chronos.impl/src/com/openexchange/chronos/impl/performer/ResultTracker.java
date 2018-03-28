@@ -61,6 +61,7 @@ import static com.openexchange.chronos.impl.Utils.isResolveOccurrences;
 import static com.openexchange.chronos.impl.Utils.mapEventOccurrences;
 import java.sql.Connection;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.EnumSet;
 import java.util.HashSet;
@@ -84,9 +85,7 @@ import com.openexchange.chronos.impl.Utils;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.exception.OXException;
-import com.openexchange.folderstorage.type.PrivateType;
 import com.openexchange.folderstorage.type.PublicType;
-import com.openexchange.folderstorage.type.SharedType;
 
 /**
  * {@link ResultTracker}
@@ -322,15 +321,7 @@ public class ResultTracker {
         if (PublicType.getInstance().equals(folder.getType()) || false == CalendarUtils.isGroupScheduled(event)) {
             return Collections.singletonList(folder);
         }
-        List<CalendarFolder> visibleFolders = Utils.getVisibleFolders(session, PrivateType.getInstance(), SharedType.getInstance());
-        List<CalendarFolder> folderViews = new ArrayList<CalendarFolder>();
-        for (String folderId : getPersonalFolderIds(event.getAttendees())) {
-            CalendarFolder matchingFolder = visibleFolders.stream().filter(folder -> folderId.equals(folder.getId())).findAny().orElse(null);
-            if (null != matchingFolder) {
-                folderViews.add(matchingFolder);
-            }
-        }
-        return folderViews;
+        return getVisibleFolderViews(getPersonalFolderIds(event.getAttendees()));
     }
 
     /**
@@ -352,17 +343,15 @@ public class ResultTracker {
         } else {
             affectedFolderIds.addAll(getPersonalFolderIds(updatedEvent.getAttendees()));
         }
-        if (1 == affectedFolderIds.size() && affectedFolderIds.iterator().next().equals(folder.getId())) {
-            return Collections.singletonList(folder);
-        }
-        List<CalendarFolder> visibleFolders = Utils.getVisibleFolders(session);
+        return getVisibleFolderViews(affectedFolderIds);
+    }
+
+    private List<CalendarFolder> getVisibleFolderViews(Collection<String> affectedFolderIds) throws OXException {
         List<CalendarFolder> folderViews = new ArrayList<CalendarFolder>();
-        for (String folderId : affectedFolderIds) {
-            CalendarFolder matchingFolder = visibleFolders.stream().filter(folder -> folderId.equals(folder.getId())).findAny().orElse(null);
-            if (null != matchingFolder) {
-                folderViews.add(matchingFolder);
-            }
+        if (affectedFolderIds.remove(folder.getId())) {
+            folderViews.add(folder);
         }
+        folderViews.addAll(Utils.getVisibleFolders(session, affectedFolderIds));
         return folderViews;
     }
 

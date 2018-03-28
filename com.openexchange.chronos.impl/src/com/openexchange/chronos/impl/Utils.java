@@ -126,6 +126,7 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.modules.Module;
+import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.java.Strings;
 import com.openexchange.quota.Quota;
@@ -136,6 +137,7 @@ import com.openexchange.search.CompositeSearchTerm.CompositeOperation;
 import com.openexchange.search.SearchTerm;
 import com.openexchange.search.SingleSearchTerm.SingleOperation;
 import com.openexchange.search.internal.operands.ColumnFieldOperand;
+import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.session.Session;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
@@ -742,6 +744,37 @@ public class Utils {
     }
 
     /**
+     * Gets the folders that are actually visible for the current session's user from a list of possible folder identifiers.
+     *
+     * @param session The calendar session
+     * @param folderIds The possible identifiers of the folders to get
+     * @return The visible folders, or an empty list if none are visible
+     */
+    public static List<CalendarFolder> getVisibleFolders(CalendarSession session, Collection<String> folderIds) throws OXException {
+        if (null == folderIds || 0 == folderIds.size()) {
+            return Collections.emptyList();
+        }
+        List<Integer> ids = new ArrayList<Integer>(folderIds.size());
+        for (String folderId : folderIds) {
+            try {
+                ids.add(Integer.valueOf(folderId));
+            } catch (NumberFormatException e) {
+                LOG.warn("Error parsing numerical folder identifier from {}.", folderId, e);
+            }
+        }
+        List<CalendarFolder> folders = new ArrayList<CalendarFolder>();
+        OXFolderAccess folderAccess = initFolderAccess(session);
+        UserPermissionBits permissionBits = ServerSessionAdapter.valueOf(session.getSession()).getUserPermissionBits();
+        for (FolderObject folderObject : folderAccess.getFolderObjects(ids)) {
+            EffectivePermission permission = folderObject.getEffectiveUserPermission(session.getUserId(), permissionBits);
+            if (permission.isFolderVisible()) {
+                folders.add(new CalendarFolder(session.getSession(), folderObject, permission));
+            }
+        }
+        return folders;
+    }
+
+    /**
      * Gets a <i>userized</i> folder by its identifier.
      *
      * @param folderService A reference to the folder service
@@ -1203,6 +1236,11 @@ public class Utils {
         decorator.setLocale(session.getEntityResolver().getLocale(session.getUserId()));
         decorator.setTimeZone(Utils.getTimeZone(session));
         return decorator;
+    }
+
+    private static OXFolderAccess initFolderAccess(CalendarSession session) throws OXException {
+        Context context = ServerSessionAdapter.valueOf(session.getSession()).getContext();
+        return new OXFolderAccess(optConnection(session), context);
     }
 
     /**
