@@ -922,13 +922,13 @@ public final class FolderWriter {
             super();
             this.field = field;
             final String name = field.getName();
-            this.NAME = null == name ? Integer.toString(field.getField()) : name;
+            this.name = null == name ? Integer.toString(field.getField()) : name;
         }
 
         @Override
         public void writeField(final JSONValuePutter jsonPutter, final UserizedFolder folder, Map<String, Object> state, ServerSession session) throws JSONException {
             final FolderProperty property = folder.getProperties().get(field);
-            jsonPutter.put(jsonPutter.withKey() ? NAME : null, field.write(property));
+            jsonPutter.put(jsonPutter.withKey() ? name : null, field.write(property));
         }
 
     }
