@@ -49,65 +49,20 @@
 
 package com.openexchange.groupware.update.tasks;
 
-import java.sql.Connection;
-import java.sql.SQLException;
 import java.util.Arrays;
-import java.util.List;
-import com.openexchange.groupware.update.AbstractConvertUtf8ToUtf8mb4Task;
-import com.openexchange.groupware.update.PerformParameters;
+import com.openexchange.groupware.update.SimpleConvertUtf8ToUtf8mb4UpdateTask;
 
 /**
  * {@link ObjectUseCountPermissionTableUtf8Mb4UpdateTask}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class ObjectUseCountPermissionTableUtf8Mb4UpdateTask extends AbstractConvertUtf8ToUtf8mb4Task {
+public class ObjectUseCountPermissionTableUtf8Mb4UpdateTask extends SimpleConvertUtf8ToUtf8mb4UpdateTask {
 
     /**
      * Initialises a new {@link ObjectUseCountPermissionTableUtf8Mb4UpdateTask}.
      */
     public ObjectUseCountPermissionTableUtf8Mb4UpdateTask() {
-        super();
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.groupware.update.UpdateTaskV2#getDependencies()
-     */
-    @Override
-    public String[] getDependencies() {
-        return NO_DEPENDENCIES;
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.groupware.update.ConvertUtf8ToUtf8mb4Task#tablesToConvert()
-     */
-    @Override
-    protected List<String> tablesToConvert() {
-        return Arrays.asList("object_use_count", "object_permission", "del_object_permission");
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.groupware.update.ConvertUtf8ToUtf8mb4Task#before(com.openexchange.groupware.update.PerformParameters, java.sql.Connection)
-     */
-    @Override
-    protected void before(PerformParameters params, Connection connection) throws SQLException {
-        // no-op
-
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.groupware.update.ConvertUtf8ToUtf8mb4Task#after(com.openexchange.groupware.update.PerformParameters, java.sql.Connection)
-     */
-    @Override
-    protected void after(PerformParameters params, Connection connection) throws SQLException {
-        // no-op
+        super(Arrays.asList("object_use_count", "object_permission", "del_object_permission"));
     }
 }

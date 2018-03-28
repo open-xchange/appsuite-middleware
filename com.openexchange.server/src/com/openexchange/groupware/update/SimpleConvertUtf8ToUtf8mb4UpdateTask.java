@@ -47,27 +47,59 @@
  *
  */
 
-package com.openexchange.groupware.update.tasks;
+package com.openexchange.groupware.update;
 
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.Collections;
-import java.util.Map;
-import com.openexchange.groupware.update.PerformParameters;
-import com.openexchange.groupware.update.SimpleConvertUtf8ToUtf8mb4UpdateTask;
+import java.util.List;
 
 /**
- * {@link ReminderTableUtf8Mb4UpdateTask}
+ * {@link SimpleConvertUtf8ToUtf8mb4UpdateTask}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class ReminderTableUtf8Mb4UpdateTask extends SimpleConvertUtf8ToUtf8mb4UpdateTask {
+public class SimpleConvertUtf8ToUtf8mb4UpdateTask extends AbstractConvertUtf8ToUtf8mb4Task {
+
+    private List<String> tableNames;
+    private String[] dependencies;
 
     /**
-     * Initialises a new {@link ReminderTableUtf8Mb4UpdateTask}.
+     * Initialises a new {@link SimpleConvertUtf8ToUtf8mb4UpdateTask}.
      */
-    public ReminderTableUtf8Mb4UpdateTask() {
-        super(Collections.singletonList("reminder"));
+    public SimpleConvertUtf8ToUtf8mb4UpdateTask(List<String> tableNames, String... dependencies) {
+        super();
+        this.tableNames = tableNames;
+        this.dependencies = dependencies == null ? NO_DEPENDENCIES : dependencies;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.groupware.update.UpdateTaskV2#getDependencies()
+     */
+    @Override
+    public String[] getDependencies() {
+        return dependencies;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.groupware.update.AbstractConvertUtf8ToUtf8mb4Task#tablesToConvert()
+     */
+    @Override
+    protected List<String> tablesToConvert() {
+        return tableNames;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.groupware.update.AbstractConvertUtf8ToUtf8mb4Task#before(com.openexchange.groupware.update.PerformParameters, java.sql.Connection)
+     */
+    @Override
+    protected void before(PerformParameters params, Connection connection) throws SQLException {
+        // no-op, override to implement
     }
 
     /*
@@ -77,7 +109,6 @@ public class ReminderTableUtf8Mb4UpdateTask extends SimpleConvertUtf8ToUtf8mb4Up
      */
     @Override
     protected void after(PerformParameters params, Connection connection) throws SQLException {
-        Map<String, Integer> varcharColumns = Collections.singletonMap("target_id", 255);
-        changeExternalTable(connection, params.getSchema().getSchema(), "reminder", varcharColumns);
+        // no-op, override to implement
     }
 }
