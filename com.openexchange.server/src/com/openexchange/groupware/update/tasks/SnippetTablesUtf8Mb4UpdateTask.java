@@ -47,55 +47,22 @@
  *
  */
 
-package com.openexchange.snippet.db;
+package com.openexchange.groupware.update.tasks;
 
+import java.util.Arrays;
+import com.openexchange.groupware.update.SimpleConvertUtf8ToUtf8mb4UpdateTask;
 
 /**
- * {@link Tables} - Provides table specifications.
+ * {@link SnippetTablesUtf8Mb4UpdateTask}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public final class Tables {
+public class SnippetTablesUtf8Mb4UpdateTask extends SimpleConvertUtf8ToUtf8mb4UpdateTask {
 
     /**
-     * Initializes a new {@link Tables}.
+     * Initialises a new {@link SnippetTablesUtf8Mb4UpdateTask}.
      */
-    private Tables() {
-        super();
+    public SnippetTablesUtf8Mb4UpdateTask() {
+        super(Arrays.asList("snippet", "snippetContent", "snippetAttachment", "snippetMisc", "snippetAttachmentBinary"), "com.openexchange.snippet.rdb.groupware.RdbSnippetAddAttachmentMimeTypeAndDisposition");
     }
-
-    /**
-     * Gets the name of the snippet table.
-     *
-     * @return The table name
-     */
-    public static String getSnippetName() {
-        return "snippet";
-    }
-
-    /**
-     * Gets the SQL's <code>CREATE</code> statement for the snippet table
-     *
-     * @return The SQL's <code>CREATE</code> statement
-     */
-    public static String getSnippetTable() {
-        return "CREATE TABLE "+getSnippetName()+" (" +
-               " cid INT4 unsigned NOT NULL," +
-               " user INT4 unsigned NOT NULL," +
-               " id VARCHAR(64) CHARACTER SET latin1 NOT NULL," +
-               " accountId INT4 unsigned DEFAULT NULL," +
-               " displayName VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL," +
-               " module VARCHAR(255) CHARACTER SET latin1 NOT NULL," +
-               " type VARCHAR(255) CHARACTER SET latin1 NOT NULL," +
-               " shared TINYINT unsigned DEFAULT NULL," +
-               " refType TINYINT unsigned NOT NULL," +
-               " refId VARCHAR(255) CHARACTER SET latin1 NOT NULL," +
-               " lastModified BIGINT(64) NOT NULL," +
-               " size INT4 unsigned DEFAULT NULL," +
-               " PRIMARY KEY (cid, user, id)," +
-               " INDEX `indexShared` (cid, shared)," +
-               " INDEX `indexRefType` (cid, user, id, refType)" +
-               ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci";
-    }
-
 }
