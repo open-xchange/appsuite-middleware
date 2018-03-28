@@ -94,7 +94,7 @@ public class LegacyCalendarTablesUtf8Mb4UpdateTask extends AbstractConvertUtf8To
         try {
             List<Column> columnsToModify = getColumsToModify(connection, schema, table);
             columnsToModify = columnsToModify.stream().map(this::changeMailColumn).collect(Collectors.toList());
-            String alterTable = alterTable(table, columnsToModify, "utf8mb4", "utf8mb4_unicode_ci");
+            String alterTable = alterTable(table, columnsToModify, UTF8MB4_CHARSET, UTF8MB4_COLLATION);
 
             if (!Strings.isEmpty(alterTable)) {
                 alterStmt = connection.prepareStatement(alterTable);
