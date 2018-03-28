@@ -127,7 +127,7 @@ public abstract class AbstractOIDCExceptionHandler implements OIDCExceptionHandl
         response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
         response.setCharacterEncoding(Charsets.UTF_8_NAME);
         response.setContentType("text/html");
-        response.setContentLength(content.getBytes().length);
+        response.setContentLength(content.getBytes(Charsets.UTF_8).length);
         response.getWriter().write(content);
     }
 }
