@@ -662,6 +662,9 @@ public final class InternalList {
 
         // Converts mail account tables to utf8mb4
         list.add(new com.openexchange.groupware.update.tasks.MailAccountConvertUtf8ToUtf8mb4Task());
+        
+        // Converts object_use_count and object_permission to utf8mb4 
+        list.add(new com.openexchange.groupware.update.tasks.ObjectUseCountPermissionTableUtf8Mb4UpdateTask());
 
         return list.toArray(new UpdateTaskV2[list.size()]);
     }

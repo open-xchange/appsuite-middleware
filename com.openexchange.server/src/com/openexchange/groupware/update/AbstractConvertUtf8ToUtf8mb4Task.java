@@ -85,6 +85,8 @@ public abstract class AbstractConvertUtf8ToUtf8mb4Task extends UpdateTaskAdapter
 
     private static final String COLUMN_INFORMATION = "SELECT COLUMN_NAME FROM information_schema.COLUMNS WHERE table_schema = ? AND CHARACTER_SET_NAME = 'utf8' AND TABLE_NAME = ?";
 
+    protected static final String[] NO_DEPENDENCIES = new String[] {};
+
     @Override
     public void perform(PerformParameters params) throws OXException {
         Connection con = params.getConnection();
