@@ -3401,6 +3401,10 @@ public class Mail extends PermissionServlet {
                  * Transport mail
                  */
                 final String id = mailInterface.sendMessage(composedMail, ComposeType.NEW, accountId);
+                if (null == id) {
+                    // should never occur
+                    throw MailExceptionCode.INVALID_MAIL_IDENTIFIER.create(id);
+                }
                 final int pos = id.lastIndexOf(MailPath.SEPERATOR);
                 if (-1 == pos) {
                     throw MailExceptionCode.INVALID_MAIL_IDENTIFIER.create(id);
