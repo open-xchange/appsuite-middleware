@@ -679,6 +679,9 @@ public final class InternalList {
         
         // Converts the preview table to utf8mb4
         list.add(new com.openexchange.groupware.update.tasks.PreviewTableUtf8Mb4UpdateTask());
+        
+        // Converts the publications, publication_users and sequence_publications tables to utf8mb4
+        list.add(new com.openexchange.groupware.update.tasks.PublicationsTablesUtf8Mb4UpdateTask());
 
         return list.toArray(new UpdateTaskV2[list.size()]);
     }

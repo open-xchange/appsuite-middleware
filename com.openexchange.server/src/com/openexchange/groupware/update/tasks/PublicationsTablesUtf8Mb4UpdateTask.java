@@ -47,65 +47,37 @@
  *
  */
 
-package com.openexchange.publish.database;
+package com.openexchange.groupware.update.tasks;
 
-import com.openexchange.database.AbstractCreateTableImpl;
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.util.Arrays;
+import java.util.Collections;
+import com.openexchange.groupware.update.PerformParameters;
+import com.openexchange.groupware.update.SimpleConvertUtf8ToUtf8mb4UpdateTask;
 
 /**
- * Creates tables necessary to run the publish part of PubSub.
+ * {@link PublicationsTablesUtf8Mb4UpdateTask}
  *
- * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class CreatePublicationTables extends AbstractCreateTableImpl {
+public class PublicationsTablesUtf8Mb4UpdateTask extends SimpleConvertUtf8ToUtf8mb4UpdateTask {
 
-    public static final String CREATE_USER_AND_PASSWORD_CREATE_STATEMENT =
-        "CREATE TABLE publication_users (" +
-            "cid INT4 UNSIGNED NOT NULL," +
-            "id INT4 UNSIGNED NOT NULL," +
-            "name VARCHAR(255) NOT NULL," +
-        	"password VARCHAR(255) NOT NULL," +
-        	"created INT8 NOT NULL DEFAULT 0," +
-        	"lastModified INT8 NOT NULL DEFAULT 0," +
-        	"PRIMARY KEY (cid,id,name)," +
-        	"FOREIGN KEY (cid,id) REFERENCES publications(cid,id)" +
-        ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci";
-
-    @Override
-    public String[] getCreateStatements() {
-        return new String[] {
-            "CREATE TABLE publications ("
-            + "cid INT4 UNSIGNED NOT NULL,"
-            + "id INT4 UNSIGNED NOT NULL,"
-            + "user_id INT4 UNSIGNED NOT NULL,"
-            + "entity INT4 UNSIGNED NOT NULL,"
-            + "module VARCHAR(255) NOT NULL,"
-            + "configuration_id INT4 UNSIGNED NOT NULL,"
-            + "target_id VARCHAR(255) NOT NULL,"
-            + "enabled BOOLEAN DEFAULT true NOT NULL,"
-            + "created INT8 NOT NULL DEFAULT 0,"
-            + "lastModified INT8 NOT NULL DEFAULT 0,"
-            + "PRIMARY KEY (cid,id),"
-            + "FOREIGN KEY(cid,user_id) REFERENCES user(cid,id),"
-            + "KEY (cid,module,entity)"
-            + ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci",
-
-            "CREATE TABLE sequence_publications ("
-            + "cid INT4 UNSIGNED NOT NULL,"
-            + "id INT4 UNSIGNED NOT NULL,"
-            + "PRIMARY KEY (cid)"
-            + ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci",
-
-            CREATE_USER_AND_PASSWORD_CREATE_STATEMENT
-        };
+    /**
+     * Initialises a new {@link PublicationsTablesUtf8Mb4UpdateTask}.
+     */
+    public PublicationsTablesUtf8Mb4UpdateTask() {
+        super(Arrays.asList("publications", "sequence_publications", "publication_users"), "com.openexchange.publish.database.FixPublicationTablePrimaryKey");
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.groupware.update.AbstractConvertUtf8ToUtf8mb4Task#after(com.openexchange.groupware.update.PerformParameters, java.sql.Connection)
+     */
     @Override
-    public String[] requiredTables() {
-        return new String[] { "user" };
-    }
-
-    @Override
-    public String[] tablesToCreate() {
-        return new String[] { "publications", "sequence_publications", "publication_users" };
+    protected void after(PerformParameters params, Connection connection) throws SQLException {
+        changeExternalTable(connection, params.getSchema().getSchema(), "publication_users", Collections.singletonMap("name", 255));
+        changeExternalTable(connection, params.getSchema().getSchema(), "publications", Collections.singletonMap("module", 255));
     }
 }
