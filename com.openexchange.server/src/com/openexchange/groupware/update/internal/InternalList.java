@@ -686,6 +686,9 @@ public final class InternalList {
         // Converts the snippet, snippetContent, snippetAttachment, snippetMisc, snippetAttachmentBinary tables to utf8mb4
         list.add(new com.openexchange.groupware.update.tasks.SnippetTablesUtf8Mb4UpdateTask());
 
+        // Converts the oauthAccounts table to utf8mb4
+        list.add(new com.openexchange.groupware.update.tasks.OAuthAccountsTableUtf8Mb4UpdateTask());
+        
         return list.toArray(new UpdateTaskV2[list.size()]);
     }
 
