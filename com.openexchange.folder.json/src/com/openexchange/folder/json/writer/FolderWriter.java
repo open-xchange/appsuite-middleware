@@ -379,11 +379,6 @@ public final class FolderWriter {
             return false;
         }
 
-        public JSONArrayPutter(final JSONArray jsonArray, final Map<String, Object> parameters) {
-            this(parameters);
-            this.jsonArray = jsonArray;
-        }
-
         public void setJSONArray(final JSONArray jsonArray) {
             this.jsonArray = jsonArray;
         }
@@ -413,10 +408,6 @@ public final class FolderWriter {
 
         public JSONObjectPutter(final JSONObject jsonObject, final Map<String, Object> parameters) {
             this(parameters);
-            this.jsonObject = jsonObject;
-        }
-
-        public void setJSONObject(final JSONObject jsonObject) {
             this.jsonObject = jsonObject;
         }
 
