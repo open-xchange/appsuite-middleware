@@ -79,9 +79,6 @@ import gnu.trove.list.array.TIntArrayList;
  */
 public final class IMAPSearch {
 
-    private static final org.slf4j.Logger LOG =
-        org.slf4j.LoggerFactory.getLogger(IMAPSearch.class);
-
     /**
      * No instantiation
      */
