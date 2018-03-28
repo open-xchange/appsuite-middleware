@@ -198,7 +198,7 @@ public abstract class AbstractConvertUtf8ToUtf8mb4Task extends UpdateTaskAdapter
             changed = true;
         }
 
-        return changed ? new Column(columnName, definition) : null;
+        return changed ? new Column(columnName, definition.trim()) : null;
     }
 
     private String getCreateTable(Connection con, String table) throws SQLException {
