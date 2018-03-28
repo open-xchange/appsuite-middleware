@@ -2450,20 +2450,6 @@ msgstr ""
 msgid "in subject"
 msgstr ""
 
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.webdav/src/com/openexchange/file/storage/webdav/FormStrings.java:61
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.subscribe.crawler/src/com/openexchange/subscribe/crawler/internal/FormStrings.java:61
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.subscribe.dav/src/com/openexchange/subscribe/dav/FormStrings.java:61
-msgid "Login"
-msgstr ""
-
-#. label of username input field
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.webdav/src/com/openexchange/file/storage/webdav/FormStrings.java:63
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.oauth.provider.impl/src/com/openexchange/oauth/provider/impl/servlets/OAuthProviderStrings.java:87
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.subscribe.crawler/src/com/openexchange/subscribe/crawler/internal/FormStrings.java:63
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.subscribe.dav/src/com/openexchange/subscribe/dav/FormStrings.java:63
-msgid "Password"
-msgstr ""
-
 #. The folder you requested does not exist.
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:65
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/folderstorage/FolderExceptionMessages.java:77
@@ -4405,6 +4391,13 @@ msgstr ""
 #. label of allow button
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.oauth.provider.impl/src/com/openexchange/oauth/provider/impl/servlets/OAuthProviderStrings.java:84
 msgid "Allow"
+msgstr ""
+
+#. label of username input field
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.oauth.provider.impl/src/com/openexchange/oauth/provider/impl/servlets/OAuthProviderStrings.java:87
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.subscribe.crawler/src/com/openexchange/subscribe/crawler/internal/FormStrings.java:63
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.subscribe.dav/src/com/openexchange/subscribe/dav/FormStrings.java:63
+msgid "Password"
 msgstr ""
 
 #. label of password input field
@@ -10090,6 +10083,11 @@ msgstr ""
 #. Thrown if a user must not modify a snippet/signature. Neither shared nor owned by that user.
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.snippet/src/com/openexchange/snippet/SnippetStrings.java:80
 msgid "You are not allowed to modify the signature"
+msgstr ""
+
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.subscribe.crawler/src/com/openexchange/subscribe/crawler/internal/FormStrings.java:61
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.subscribe.dav/src/com/openexchange/subscribe/dav/FormStrings.java:61
+msgid "Login"
 msgstr ""
 
 #. The message displayed if the requested subscription cannot be found from the server.
