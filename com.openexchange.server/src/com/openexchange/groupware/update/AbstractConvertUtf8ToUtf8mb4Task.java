@@ -268,6 +268,29 @@ public abstract class AbstractConvertUtf8ToUtf8mb4Task extends UpdateTaskAdapter
     }
 
     /**
+     * Checks if the specified {@link Column}'s name matches the specified column name and if it does
+     * shrinks it from varchar(255) to varchar(191), otherwise the {@link Column} is returned.
+     * unaltered.
+     * 
+     * @param columnName The column name
+     * @param column The {@link Column} to shrink
+     * @return The shrinked {@link Column} if the names match; otherwise the unaltered column
+     */
+    protected Column shrinkVarcharColumn(String columnName, Column column) {
+        return column.getName().equals(columnName) ? shrinkVarcharColumn(column) : column;
+    }
+
+    /**
+     * Shrinks the specified {@link Column} from varchar(255) to varchar(191)
+     * 
+     * @param column The {@link Column} to shrink
+     * @return the shirnked {@link Column}
+     */
+    private Column shrinkVarcharColumn(Column column) {
+        return new Column(column.getName(), column.getDefinition().replace("varchar(255)", "varchar(191)"));
+    }
+
+    /**
      * The tables to convert. Checks for explicit table and column charsets and (in case of utf8) converts them to utf8mb4.
      * Converts collations accordingly.
      * No further adjustments are done. For more complex tables and additional changes (e.g. key adjustments) perform this manually or use {@link AbstractConvertUtf8ToUtf8mb4Task#before} and {@link AbstractConvertUtf8ToUtf8mb4Task#after}.
