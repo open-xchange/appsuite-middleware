@@ -2350,13 +2350,23 @@ public class Mail extends PermissionServlet {
     }
 
     public void actionPutGet(final ServerSession session, final JSONWriter writer, final JSONObject jsonObj, final MailServletInterface mi) throws JSONException {
-        ResponseWriter.write(actionPutGet(session, jsonObj.getString(ResponseFields.DATA), ParamContainer.getInstance(jsonObj), mi), writer, localeFrom(session));
+        Response response = actionPutGet(session, jsonObj.getString(ResponseFields.DATA), ParamContainer.getInstance(jsonObj), mi);
+        if (response == null) {
+            response = new Response(session);
+            response.setException(MailExceptionCode.UNEXPECTED_ERROR.create("Unable to get response."));
+        }
+        ResponseWriter.write(response, writer, localeFrom(session));
     }
 
     private final void actionPutGet(final HttpServletRequest req, final HttpServletResponse resp) throws IOException {
         final ServerSession session = getSessionObject(req);
         try {
-            ResponseWriter.write(actionPutGet(session, getBody(req), ParamContainer.getInstance(req, resp), null), resp.getWriter(), localeFrom(session));
+            Response response = actionPutGet(session, getBody(req), ParamContainer.getInstance(req, resp), null);
+            if (response == null) {
+                response = new Response(session);
+                response.setException(MailExceptionCode.UNEXPECTED_ERROR.create("Unable to get response."));
+            }
+            ResponseWriter.write(response, resp.getWriter(), localeFrom(session));
         } catch (final JSONException e) {
             final OXException oxe = OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e, new Object[0]);
             LOG.error("", oxe);
