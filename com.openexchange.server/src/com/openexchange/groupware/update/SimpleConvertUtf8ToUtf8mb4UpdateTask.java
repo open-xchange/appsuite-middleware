@@ -65,9 +65,17 @@ public class SimpleConvertUtf8ToUtf8mb4UpdateTask extends AbstractConvertUtf8ToU
 
     /**
      * Initialises a new {@link SimpleConvertUtf8ToUtf8mb4UpdateTask}.
+     * 
+     * @param tableNames A {@link List} with table names to convert
+     * @param dependencies An optional array of dependency update tasks
+     * @param throws {@link IllegalArgumentException} if the tableNames
+     *            {@link List} is either <code>null</code> or empty.
      */
     public SimpleConvertUtf8ToUtf8mb4UpdateTask(List<String> tableNames, String... dependencies) {
         super();
+        if (tableNames == null || tableNames.isEmpty()) {
+            throw new IllegalArgumentException("The tableNames can neither be 'null' nor empty");
+        }
         this.tableNames = tableNames;
         this.dependencies = dependencies == null ? NO_DEPENDENCIES : dependencies;
     }
