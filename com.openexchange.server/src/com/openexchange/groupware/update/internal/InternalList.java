@@ -666,6 +666,9 @@ public final class InternalList {
         // Converts object_use_count and object_permission to utf8mb4 
         list.add(new com.openexchange.groupware.update.tasks.ObjectUseCountPermissionTableUtf8Mb4UpdateTask());
 
+        // Converts task tables to utf8mb4
+        list.add(new com.openexchange.groupware.update.tasks.TaskConvertUtf8ToUtf8mb4Task());
+
         return list.toArray(new UpdateTaskV2[list.size()]);
     }
 
