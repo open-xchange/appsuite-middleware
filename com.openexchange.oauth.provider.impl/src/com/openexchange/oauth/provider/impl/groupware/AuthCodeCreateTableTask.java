@@ -60,7 +60,6 @@ import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
 import com.openexchange.oauth.provider.exceptions.OAuthProviderExceptionCodes;
-import com.openexchange.server.ServiceLookup;
 
 /**
  * {@link AuthCodeCreateTableTask}
@@ -69,16 +68,11 @@ import com.openexchange.server.ServiceLookup;
  */
 public class AuthCodeCreateTableTask extends UpdateTaskAdapter {
 
-    private final ServiceLookup services;
-
     /**
      * Initializes a new {@link AuthCodeCreateTableTask}.
-     *
-     * @param dbService
      */
-    public AuthCodeCreateTableTask(ServiceLookup services) {
+    public AuthCodeCreateTableTask() {
         super();
-        this.services = services;
     }
 
     @Override

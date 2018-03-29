@@ -73,7 +73,7 @@ public final class CreateOAuthGrantTableService extends AbstractCreateTableImpl 
         " PRIMARY KEY (`refresh_token`)," +
         " UNIQUE KEY `access_token` (`access_token`)," +
         " KEY `client` (`client`)" +
-        ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci";
+        ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci";
 
     /**
      * Initializes a new {@link CreateOAuthGrantTableService}.

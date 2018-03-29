@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -49,78 +49,52 @@
 
 package com.openexchange.oauth.provider.impl.groupware;
 
-import static com.openexchange.tools.update.Tools.tableExists;
 import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import com.openexchange.database.Databases;
-import com.openexchange.exception.OXException;
+import java.util.List;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
+import com.openexchange.groupware.update.AbstractConvertUtf8ToUtf8mb4Task;
 import com.openexchange.groupware.update.PerformParameters;
-import com.openexchange.groupware.update.UpdateExceptionCodes;
-import com.openexchange.groupware.update.UpdateTaskAdapter;
+
 
 /**
- * {@link CreateOAuthGrantTableTask}
+ * {@link OAuthGrantConvertUtf8ToUtf8mb4Task}
  *
- * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
- * @since v7.8.0
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.10.0
  */
-public class CreateOAuthGrantTableTask extends UpdateTaskAdapter {
+public class OAuthGrantConvertUtf8ToUtf8mb4Task extends AbstractConvertUtf8ToUtf8mb4Task {
 
     /**
-     * Initializes a new {@link CreateOAuthGrantTableTask}.
+     * Initializes a new {@link OAuthGrantConvertUtf8ToUtf8mb4Task}.
      */
-    public CreateOAuthGrantTableTask() {
+    public OAuthGrantConvertUtf8ToUtf8mb4Task() {
         super();
     }
 
     @Override
-    public void perform(PerformParameters params) throws OXException {
-        Connection con = params.getConnection();
-        boolean rollback = false;
-        try {
-            Databases.startTransaction(con); // BEGIN
-            rollback = true;
-
-            perform(con);
-
-            con.commit(); // COMMIT
-            rollback = false;
-        } catch (SQLException e) {
-            throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
-        } finally {
-            if (rollback) {
-                Databases.rollback(con);
-            }
-            Databases.autocommit(con);
-        }
-    }
-
-    private void perform(Connection con) throws OXException {
-        PreparedStatement stmt = null;
-        try {
-            String[] tableNames = CreateOAuthGrantTableService.getTablesToCreate();
-            String[] createStmts = CreateOAuthGrantTableService.getCreateStmts();
-            for (int i = 0; i < tableNames.length; i++) {
-                if (!tableExists(con, tableNames[i])) {
-                    stmt = con.prepareStatement(createStmts[i]);
-                    stmt.executeUpdate();
-                    Databases.closeSQLStuff(stmt);
-                    stmt = null;
-                }
-            }
-        } catch (SQLException e) {
-            throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
-        } catch (RuntimeException e) {
-            throw UpdateExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
-        } finally {
-            Databases.closeSQLStuff(stmt);
-        }
+    public String[] getDependencies() {
+        return new String[] { CreateOAuthGrantTableTask.class.getName() };
     }
 
     @Override
-    public String[] getDependencies() {
-        return new String[] {};
+    protected List<String> tablesToConvert() {
+        return ImmutableList.of();
+    }
+
+    @Override
+    protected void before(PerformParameters params, Connection connection) throws SQLException {
+        // Nothing
+    }
+
+    @Override
+    protected void after(PerformParameters params, Connection connection) throws SQLException {
+        ImmutableMap.Builder<String, Integer> mapBuilder = ImmutableMap.builder();
+        mapBuilder.put("refresh_token", 191);
+        mapBuilder.put("access_token", 191);
+        mapBuilder.put("client", 191);
+        changeTable(connection, params.getSchema().getSchema(), "oauth_grant", mapBuilder.build());
     }
 
 }
