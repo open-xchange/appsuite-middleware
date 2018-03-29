@@ -142,7 +142,7 @@ public abstract class AbstractConvertUtf8ToUtf8mb4Task extends UpdateTaskAdapter
      * @param schema The name of the schema
      * @throws SQLException If an SQL error is occurred
      */
-    private void innerPerform(Connection con, String schema) throws SQLException {
+    protected void innerPerform(Connection con, String schema) throws SQLException {
         for (String table : tablesToConvert()) {
             try {
                 innerPerform(con, schema, table);
@@ -411,7 +411,7 @@ public abstract class AbstractConvertUtf8ToUtf8mb4Task extends UpdateTaskAdapter
      * @param schema The schema name
      * @param table The table name
      * @param varcharColumns The optional VARCHAR columns with their respective VARCHAR sizes
-     *            (use only if the column is part of the PRIMARY KEY or is a (UNIQUE) KEY and it's size surpasses the limit of 767 characters in total, i.e. VARCHAR length is greater than 191)
+     *            (use only if the column is part of the PRIMARY KEY or is a (UNIQUE) KEY and it's size surpasses the limit of 767 bytes in total, i.e. VARCHAR length is greater than 191)
      * @throws SQLException If changing the table fails
      */
     protected void changeTable(Connection connection, String schema, String table, Map<String, Integer> varcharColumns) throws SQLException {
