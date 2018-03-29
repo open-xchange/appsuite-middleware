@@ -82,9 +82,15 @@ public abstract class AbstractConvertUtf8ToUtf8mb4Task extends UpdateTaskAdapter
 
     private static final org.slf4j.Logger LOGGER = org.slf4j.LoggerFactory.getLogger(AbstractConvertUtf8ToUtf8mb4Task.class);
 
-    protected static final String UTF8MB4_CHARSET = "utf8mb4";
+    public enum UTF8MB4Collation {
+        utf8mb4_bin,
+        utf8mb4_unicode_ci,
+        utf8mb4_general_ci
+    }
 
-    protected static final String UTF8MB4_COLLATION = "utf8mb4_unicode_ci";
+    protected static final String UTF8MB4_CHARSET = "utf8mb4";
+    protected static final String UTF8MB4_UNICODE_COLLATION = "utf8mb4_unicode_ci";
+    protected static final String UTF8MB4_BIN_COLLATION = "utf8mb4_bin";
 
     private static final String TABLE_INFORMATION = "SELECT t.TABLE_COLLATION, ccsa.CHARACTER_SET_NAME FROM information_schema.tables t, information_schema.COLLATION_CHARACTER_SET_APPLICABILITY ccsa WHERE t.table_schema = ? AND ccsa.collation_name = t.table_collation AND ccsa.CHARACTER_SET_NAME = 'utf8' AND t.TABLE_NAME = ?";
 
@@ -93,6 +99,13 @@ public abstract class AbstractConvertUtf8ToUtf8mb4Task extends UpdateTaskAdapter
     private static final String COLUMN_INFORMATION = "SELECT COLUMN_NAME FROM information_schema.COLUMNS WHERE table_schema = ? AND CHARACTER_SET_NAME = 'utf8' AND TABLE_NAME = ?";
 
     protected static final String[] NO_DEPENDENCIES = new String[] {};
+
+    /**
+     * Initialises a new {@link AbstractConvertUtf8ToUtf8mb4Task}.
+     */
+    public AbstractConvertUtf8ToUtf8mb4Task() {
+        super();
+    }
 
     @Override
     public void perform(PerformParameters params) throws OXException {
@@ -120,6 +133,13 @@ public abstract class AbstractConvertUtf8ToUtf8mb4Task extends UpdateTaskAdapter
         }
     }
 
+    /**
+     * Converts all tables in to the specified schema
+     * 
+     * @param con The {@link Connection} to use
+     * @param schema The name of the schema
+     * @throws SQLException If an SQL error is occurred
+     */
     private void innerPerform(Connection con, String schema) throws SQLException {
         for (String table : tablesToConvert()) {
             try {
@@ -131,6 +151,14 @@ public abstract class AbstractConvertUtf8ToUtf8mb4Task extends UpdateTaskAdapter
         }
     }
 
+    /**
+     * Converts the charset and collation of the specified table in the specified schema
+     * 
+     * @param con The {@link Connection}
+     * @param schema The schema's name
+     * @param table The table's name
+     * @throws SQLException if an SQL error is occurred
+     */
     private void innerPerform(Connection con, String schema, String table) throws SQLException {
         String createTable = getCreateTable(con, table);
         if (createTable == null) {
@@ -168,10 +196,21 @@ public abstract class AbstractConvertUtf8ToUtf8mb4Task extends UpdateTaskAdapter
         }
     }
 
+    /**
+     * Queries the <code>information_schema</code> and retrieves a {@link List}
+     * with {@link Column}s of the specified table in the specified schema that
+     * need to be converted.
+     * 
+     * @param con The {@link Connection}
+     * @param schema The schema's name
+     * @param table The table's name
+     * @return A {@link List} with all {@link Column}s that need conversion, or an empty {@link List}
+     * @throws SQLException if an SQL error is occurred
+     */
     protected List<Column> getColumsToModify(Connection con, String schema, String table) throws SQLException {
         String createTable = getCreateTable(con, table);
         if (createTable == null) {
-            return null;
+            return Collections.emptyList();
         }
         PreparedStatement columnStmt = null;
         ResultSet columnRs = null;
@@ -198,6 +237,14 @@ public abstract class AbstractConvertUtf8ToUtf8mb4Task extends UpdateTaskAdapter
         }
     }
 
+    /**
+     * Returns a new {@link Column} definition with its character set and collation set to the utf8mb4 derivative.
+     * 
+     * @param columnName The {@link Column}'s name
+     * @param createTable The create table statement
+     * @return The new {@link Column} definition or <code>null</code> if the requested column is not part of the specified
+     *         create table statement
+     */
     private Column newColumn(String columnName, String createTable) {
         Pattern pattern = Pattern.compile("[`'´\"]" + Pattern.quote(columnName) + "[`'´\"]([^,]*),");
         Matcher matcher = pattern.matcher(createTable);
@@ -218,6 +265,15 @@ public abstract class AbstractConvertUtf8ToUtf8mb4Task extends UpdateTaskAdapter
         return changed ? new Column(columnName, definition.trim()) : null;
     }
 
+    /**
+     * Retrieves the <code>CREATE TABLE</code> statement for the specified table
+     * 
+     * @param con The {@link Connection}
+     * @param table Tje table's name
+     * @return the <code>CREATE TABLE</code> statement for the specified table or <code>null</code>
+     *         if the specified table does not exist
+     * @throws SQLException if an SQL error is occurred
+     */
     private String getCreateTable(Connection con, String table) throws SQLException {
         if (false == Tools.tableExists(con, table)) {
             return null;
@@ -238,6 +294,16 @@ public abstract class AbstractConvertUtf8ToUtf8mb4Task extends UpdateTaskAdapter
         return null;
     }
 
+    /**
+     * Creates and returns the <code>ALTER TABLE</code> statement for the specified table with the specified {@link List}
+     * of {@link Column} and the specified table character set and collation
+     * 
+     * @param table The table's name
+     * @param columns The {@link List} of {@link Column}s
+     * @param tableCharset The table's character set
+     * @param tableCollation The table's collation
+     * @return the <code>ALTER TABLE</code> statement
+     */
     protected String alterTable(String table, List<Column> columns, String tableCharset, String tableCollation) {
         if ((columns == null || columns.isEmpty()) && Strings.isEmpty(tableCollation) && Strings.isEmpty(tableCharset)) {
             return null;
@@ -259,6 +325,12 @@ public abstract class AbstractConvertUtf8ToUtf8mb4Task extends UpdateTaskAdapter
         return sb.toString();
     }
 
+    /**
+     * Returns the utf8mb4 derivative of the specified character set
+     * 
+     * @param charset The utf8 character set
+     * @return The utf8mb4 derivative
+     */
     protected String mb4Charset(String charset) {
         if (Strings.isEmpty(charset) || charset.contains("utf8")) {
             return "utf8mb4";
@@ -267,7 +339,14 @@ public abstract class AbstractConvertUtf8ToUtf8mb4Task extends UpdateTaskAdapter
         }
     }
 
+    /**
+     * Returns the utf8mb4 derivative of the specified collation
+     * 
+     * @param collation The utf8 collation
+     * @return The utf8mb4 derivative
+     */
     protected String mb4Collation(String collation) {
+        //FIXME: support bin and general derivatives as well
         if (Strings.isEmpty(collation)) {
             return "utf8mb4";
         } else if (collation.contains(UTF8MB4_CHARSET)) {
@@ -297,7 +376,7 @@ public abstract class AbstractConvertUtf8ToUtf8mb4Task extends UpdateTaskAdapter
             for (Entry<String, Integer> varcharColumn : varcharColumns.entrySet()) {
                 columnsToModify = columnsToModify.stream().map((column) -> shrinkVarcharColumn(varcharColumn.getKey(), varcharColumn.getValue(), column)).collect(Collectors.toList());
             }
-            String alterTable = alterTable(table, columnsToModify, UTF8MB4_CHARSET, UTF8MB4_COLLATION);
+            String alterTable = alterTable(table, columnsToModify, UTF8MB4_CHARSET, UTF8MB4_UNICODE_COLLATION);
 
             if (!Strings.isEmpty(alterTable)) {
                 alterStmt = connection.prepareStatement(alterTable);
