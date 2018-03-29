@@ -78,7 +78,7 @@ public class CreateMiscTables extends AbstractCreateTableImpl {
         + "INDEX (firstid),"
         + "INDEX (secondid),"
         + "INDEX (cid)"
-      + ") ENGINE = InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
+      + ") ENGINE = InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;";
 
     private static final String createReminderTable = "CREATE TABLE reminder ("
         + "cid INT4 UNSIGNED NOT NULL,"
@@ -102,7 +102,7 @@ public class CreateMiscTables extends AbstractCreateTableImpl {
         + "user INT4 UNSIGNED NOT NULL DEFAULT 0,"
         + "used INT8 NOT NULL,"
         + "PRIMARY KEY(cid, user)"
-      + ") ENGINE = InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
+      + ") ENGINE = InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;";
 
     /**
      * Initializes a new {@link CreateMiscTables}.
