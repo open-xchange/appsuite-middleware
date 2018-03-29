@@ -52,6 +52,7 @@ package com.openexchange.groupware.update;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
+import com.google.common.collect.ImmutableList;
 
 /**
  * {@link SimpleConvertUtf8ToUtf8mb4UpdateTask}
@@ -60,12 +61,12 @@ import java.util.List;
  */
 public class SimpleConvertUtf8ToUtf8mb4UpdateTask extends AbstractConvertUtf8ToUtf8mb4Task {
 
-    private List<String> tableNames;
-    private String[] dependencies;
+    private final List<String> tableNames;
+    private final String[] dependencies;
 
     /**
-     * Initialises a new {@link SimpleConvertUtf8ToUtf8mb4UpdateTask}.
-     * 
+     * Initializes a new {@link SimpleConvertUtf8ToUtf8mb4UpdateTask}.
+     *
      * @param tableNames A {@link List} with table names to convert
      * @param dependencies An optional array of dependency update tasks
      * @param throws {@link IllegalArgumentException} if the tableNames
@@ -73,50 +74,31 @@ public class SimpleConvertUtf8ToUtf8mb4UpdateTask extends AbstractConvertUtf8ToU
      */
     public SimpleConvertUtf8ToUtf8mb4UpdateTask(List<String> tableNames, String... dependencies) {
         super();
-        if (tableNames == null || tableNames.isEmpty()) {
-            throw new IllegalArgumentException("The tableNames can neither be 'null' nor empty");
+        if (tableNames == null) {
+            throw new IllegalArgumentException("The table names must not be null");
         }
-        this.tableNames = tableNames;
+        this.tableNames = tableNames instanceof ImmutableList ? tableNames : ImmutableList.copyOf(tableNames);
         this.dependencies = dependencies == null ? NO_DEPENDENCIES : dependencies;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.groupware.update.UpdateTaskV2#getDependencies()
-     */
     @Override
     public String[] getDependencies() {
         return dependencies;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.groupware.update.AbstractConvertUtf8ToUtf8mb4Task#tablesToConvert()
-     */
     @Override
     protected List<String> tablesToConvert() {
         return tableNames;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.groupware.update.AbstractConvertUtf8ToUtf8mb4Task#before(com.openexchange.groupware.update.PerformParameters, java.sql.Connection)
-     */
     @Override
     protected void before(PerformParameters params, Connection connection) throws SQLException {
         // no-op, override to implement
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.groupware.update.AbstractConvertUtf8ToUtf8mb4Task#after(com.openexchange.groupware.update.PerformParameters, java.sql.Connection)
-     */
     @Override
     protected void after(PerformParameters params, Connection connection) throws SQLException {
         // no-op, override to implement
     }
+
 }
