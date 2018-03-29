@@ -725,6 +725,9 @@ public final class InternalList {
         // Convert the resource and del_resource to utf8mb4
         list.add(new com.openexchange.groupware.update.tasks.ResourceTablesUtf8Mb4UpdateTask());
 
+        // Converts OAuth accessor tables to utf8mb4
+        list.add(new com.openexchange.groupware.update.tasks.OAuthAccessorConvertToUtf8mb4());
+
         return list.toArray(new UpdateTaskV2[list.size()]);
     }
 
