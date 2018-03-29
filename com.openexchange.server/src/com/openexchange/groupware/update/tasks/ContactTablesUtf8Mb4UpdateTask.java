@@ -56,6 +56,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableMap.Builder;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.SimpleConvertUtf8ToUtf8mb4UpdateTask;
+import com.openexchange.tools.update.Column;
 
 /**
  * {@link ContactTablesUtf8Mb4UpdateTask}
@@ -74,6 +75,18 @@ public class ContactTablesUtf8Mb4UpdateTask extends SimpleConvertUtf8ToUtf8mb4Up
             "com.openexchange.contact.storage.rdb.sql.AddFilenameColumnTask",
             "com.openexchange.contact.storage.rdb.sql.CorrectNumberOfImagesTask");
         //@formatter:on
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.groupware.update.SimpleConvertUtf8ToUtf8mb4UpdateTask#before(com.openexchange.groupware.update.PerformParameters, java.sql.Connection)
+     */
+    @Override
+    protected void before(PerformParameters params, Connection connection) throws SQLException {
+        Column column = new Column("field17", "TEXT COLLATE utf8mb4_unicode_ci NULL");
+        modifyVarChar("prg_contacts", "field17", 1024, column, connection);
+        modifyVarChar("del_contacts", "field17", 1024, column, connection);
     }
 
     /*

@@ -357,6 +357,23 @@ public abstract class AbstractConvertUtf8ToUtf8mb4Task extends UpdateTaskAdapter
     }
 
     /**
+     * Modifies the specified varchar column to a text if it exceeds the specified size
+     * 
+     * @param tableName The table's name
+     * @param columnName The column's name
+     * @param size The size
+     * @param column the new {@link Column} definition
+     * @param connection The {@link Connection}
+     * @throws SQLException if an SQL error is occurred
+     */
+    protected void modifyVarChar(String tableName, String columnName, int size, Column column, Connection connection) throws SQLException {
+        int columnSize = getVarcharColumnSize(tableName, columnName, connection);
+        if (columnSize >= size) {
+            Tools.modifyColumns(connection, tableName, true, column);
+        }
+    }
+
+    /**
      * Retrieves the size of the specified varchar column
      * 
      * @param colName The column's name
