@@ -78,6 +78,6 @@ public class ReminderTableUtf8Mb4UpdateTask extends SimpleConvertUtf8ToUtf8mb4Up
     @Override
     protected void after(PerformParameters params, Connection connection) throws SQLException {
         Map<String, Integer> varcharColumns = Collections.singletonMap("target_id", 255);
-        changeExternalTable(connection, params.getSchema().getSchema(), "reminder", varcharColumns);
+        changeTable(connection, params.getSchema().getSchema(), "reminder", varcharColumns);
     }
 }

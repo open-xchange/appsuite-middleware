@@ -83,7 +83,7 @@ public class LegacyCalendarTablesUtf8Mb4UpdateTask extends AbstractConvertUtf8To
     protected void after(PerformParameters params, Connection connection) throws SQLException {
         // Manually change dateExternal and delDateExternal
         Map<String, Integer> varcharColumns = Collections.singletonMap("mailAddress", 255);
-        changeExternalTable(connection, params.getSchema().getSchema(), "dateExternal", varcharColumns);
-        changeExternalTable(connection, params.getSchema().getSchema(), "delDateExternal", varcharColumns);
+        changeTable(connection, params.getSchema().getSchema(), "dateExternal", varcharColumns);
+        changeTable(connection, params.getSchema().getSchema(), "delDateExternal", varcharColumns);
     }
 }

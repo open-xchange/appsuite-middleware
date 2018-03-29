@@ -133,6 +133,7 @@ public abstract class AbstractConvertUtf8ToUtf8mb4Task extends UpdateTaskAdapter
     private void innerPerform(Connection con, String schema, String table) throws SQLException {
         String createTable = getCreateTable(con, table);
         if (createTable == null) {
+            LOGGER.info("Table {} not found. Skipping.", table);
             return;
         }
         PreparedStatement tableCharsetStmt = null;
@@ -284,7 +285,7 @@ public abstract class AbstractConvertUtf8ToUtf8mb4Task extends UpdateTaskAdapter
      *            (use only if the column is part of the PK or is a KEY and it's size surpasses the limit of 767 chars in total, i.e. varchar length >= 192)
      * @throws SQLException
      */
-    protected void changeExternalTable(Connection connection, String schema, String table, Map<String, Integer> varcharColumns) throws SQLException {
+    protected void changeTable(Connection connection, String schema, String table, Map<String, Integer> varcharColumns) throws SQLException {
         PreparedStatement alterStmt = null;
         try {
             List<Column> columnsToModify = getColumsToModify(connection, schema, table);
