@@ -62,11 +62,11 @@ public class CreatePublicationTables extends AbstractCreateTableImpl {
         "CREATE TABLE publication_users (" +
             "cid INT4 UNSIGNED NOT NULL," +
             "id INT4 UNSIGNED NOT NULL," +
-            "name VARCHAR(255) NOT NULL," +
+            "name VARCHAR(191) NOT NULL," +
         	"password VARCHAR(255) NOT NULL," +
         	"created INT8 NOT NULL DEFAULT 0," +
         	"lastModified INT8 NOT NULL DEFAULT 0," +
-        	"PRIMARY KEY (cid,id,name(191))," +
+        	"PRIMARY KEY (cid,id,name)," +
         	"FOREIGN KEY (cid,id) REFERENCES publications(cid,id)" +
         ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci";
 
@@ -78,7 +78,7 @@ public class CreatePublicationTables extends AbstractCreateTableImpl {
             + "id INT4 UNSIGNED NOT NULL,"
             + "user_id INT4 UNSIGNED NOT NULL,"
             + "entity INT4 UNSIGNED NOT NULL,"
-            + "module VARCHAR(255) NOT NULL,"
+            + "module VARCHAR(191) NOT NULL,"
             + "configuration_id INT4 UNSIGNED NOT NULL,"
             + "target_id VARCHAR(255) NOT NULL,"
             + "enabled BOOLEAN DEFAULT true NOT NULL,"
