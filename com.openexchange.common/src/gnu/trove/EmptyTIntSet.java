@@ -49,6 +49,7 @@
 
 package gnu.trove;
 
+import java.io.Serializable;
 import java.util.Collection;
 import java.util.NoSuchElementException;
 import gnu.trove.iterator.TIntIterator;
@@ -60,7 +61,9 @@ import gnu.trove.set.TIntSet;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class EmptyTIntSet implements TIntSet {
+public final class EmptyTIntSet implements TIntSet, Serializable {
+
+    private static final long serialVersionUID = 912737656030728279L;
 
     private static final EmptyTIntSet INSTANCE = new EmptyTIntSet();
 
