@@ -86,7 +86,7 @@ public class FolderConvertUtf8ToUtf8mb4Task extends AbstractConvertUtf8ToUtf8mb4
 
     @Override
     protected List<String> tablesToConvert() {
-        return ImmutableList.of("oxfolder_tree", "oxfolder_permissions", "oxfolder_specialfolders", "oxfolders_userfolders", "oxfolder_userfolders_standardfolders", "del_oxfolder_tree", "del_oxfolder_permissions", "oxfolder_lock", "oxfolder_property");
+        return ImmutableList.of("oxfolder_tree", "oxfolder_permissions", "oxfolder_specialfolders", "oxfolder_userfolders", "oxfolder_userfolders_standardfolders", "del_oxfolder_tree", "del_oxfolder_permissions", "oxfolder_lock", "oxfolder_property");
     }
 
     @Override

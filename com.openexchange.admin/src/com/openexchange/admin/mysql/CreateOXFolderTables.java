@@ -62,7 +62,7 @@ public class CreateOXFolderTables extends AbstractCreateTableImpl {
     private static final String oxfolderTreeTableName = "oxfolder_tree";
     private static final String oxfolderPermissionsTableName = "oxfolder_permissions";
     private static final String oxfolderSpecialfoldersTableName = "oxfolder_specialfolders";
-    private static final String oxfolderUserfoldersTableName = "oxfolders_userfolders";
+    private static final String oxfolderUserfoldersTableName = "oxfolder_userfolders";
     private static final String oxfolderUserfoldersStandardfoldersTableName = "oxfolder_userfolders_standardfolders";
     private static final String delOxfolderTreeTableName = "del_oxfolder_tree";
     private static final String delOxfolderPermissionsTableName = "del_oxfolder_permissions";
