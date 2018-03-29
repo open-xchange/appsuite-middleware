@@ -82,20 +82,26 @@ public abstract class AbstractConvertUtf8ToUtf8mb4Task extends UpdateTaskAdapter
 
     private static final org.slf4j.Logger LOGGER = org.slf4j.LoggerFactory.getLogger(AbstractConvertUtf8ToUtf8mb4Task.class);
 
+    /** The constant for <code>"utf8mb4"</code> character set */
     protected static final String UTF8MB4_CHARSET = "utf8mb4";
-    protected static final String UTF8MB4_UNICODE_COLLATION = "utf8mb4_unicode_ci";
+
+    /** The constant for <code>"utf8mb4_bin"</code> collation for case-sensitive comparisons */
     protected static final String UTF8MB4_BIN_COLLATION = "utf8mb4_bin";
+
+    /** The constant for <code>"utf8mb4_unicode_ci"</code> collation for case-insensitive comparisons */
+    protected static final String UTF8MB4_UNICODE_COLLATION = "utf8mb4_unicode_ci";
+
+    /** The constant for specifying no dependencies to other update tasks */
+    protected static final String[] NO_DEPENDENCIES = new String[0];
 
     private static final String TABLE_INFORMATION = "SELECT t.TABLE_COLLATION, ccsa.CHARACTER_SET_NAME FROM information_schema.tables t, information_schema.COLLATION_CHARACTER_SET_APPLICABILITY ccsa WHERE t.table_schema = ? AND ccsa.collation_name = t.table_collation AND ccsa.CHARACTER_SET_NAME = 'utf8' AND t.TABLE_NAME = ?";
 
-    private static String SHOW_CREATE_TABLE = "SHOW CREATE TABLE ";
+    private static final String SHOW_CREATE_TABLE = "SHOW CREATE TABLE ";
 
     private static final String COLUMN_INFORMATION = "SELECT COLUMN_NAME FROM information_schema.COLUMNS WHERE table_schema = ? AND CHARACTER_SET_NAME = 'utf8' AND TABLE_NAME = ?";
 
-    protected static final String[] NO_DEPENDENCIES = new String[] {};
-
     /**
-     * Initialises a new {@link AbstractConvertUtf8ToUtf8mb4Task}.
+     * Initializes a new {@link AbstractConvertUtf8ToUtf8mb4Task}.
      */
     public AbstractConvertUtf8ToUtf8mb4Task() {
         super();
@@ -129,7 +135,7 @@ public abstract class AbstractConvertUtf8ToUtf8mb4Task extends UpdateTaskAdapter
 
     /**
      * Converts all tables in to the specified schema
-     * 
+     *
      * @param con The {@link Connection} to use
      * @param schema The name of the schema
      * @throws SQLException If an SQL error is occurred
@@ -147,7 +153,7 @@ public abstract class AbstractConvertUtf8ToUtf8mb4Task extends UpdateTaskAdapter
 
     /**
      * Converts the charset and collation of the specified table in the specified schema
-     * 
+     *
      * @param con The {@link Connection}
      * @param schema The schema's name
      * @param table The table's name
@@ -191,15 +197,25 @@ public abstract class AbstractConvertUtf8ToUtf8mb4Task extends UpdateTaskAdapter
     }
 
     /**
+<<<<<<< HEAD
      * Queries the <code>information_schema</code> and retrieves a {@link List}
      * with {@link Column}s of the specified table in the specified schema that
      * need to be converted.
-     * 
+     *
      * @param con The {@link Connection}
      * @param schema The schema's name
      * @param table The table's name
      * @return A {@link List} with all {@link Column}s that need conversion, or an empty {@link List}
      * @throws SQLException if an SQL error is occurred
+=======
+     * Determines the text columns, which need to be converted since they use <code>"utf8"</code> charset and/or <code>"utf8_unicode_ci"</code> collation.
+     *
+     * @param con The connection to use
+     * @param schema The schema name
+     * @param table The name of the table to inspect
+     * @return The columns that need to be altered
+     * @throws SQLException If columns cannot be returned
+>>>>>>> JavaDoc
      */
     protected List<Column> getColumsToModify(Connection con, String schema, String table) throws SQLException {
         String createTable = getCreateTable(con, table);
@@ -233,7 +249,7 @@ public abstract class AbstractConvertUtf8ToUtf8mb4Task extends UpdateTaskAdapter
 
     /**
      * Returns a new {@link Column} definition with its character set and collation set to the utf8mb4 derivative.
-     * 
+     *
      * @param columnName The {@link Column}'s name
      * @param createTable The create table statement
      * @return The new {@link Column} definition or <code>null</code> if the requested column is not part of the specified
@@ -261,7 +277,7 @@ public abstract class AbstractConvertUtf8ToUtf8mb4Task extends UpdateTaskAdapter
 
     /**
      * Retrieves the <code>CREATE TABLE</code> statement for the specified table
-     * 
+     *
      * @param con The {@link Connection}
      * @param table Tje table's name
      * @return the <code>CREATE TABLE</code> statement for the specified table or <code>null</code>
@@ -289,19 +305,19 @@ public abstract class AbstractConvertUtf8ToUtf8mb4Task extends UpdateTaskAdapter
     }
 
     /**
-     * Creates and returns the <code>ALTER TABLE</code> statement for the specified table with the specified {@link List}
-     * of {@link Column} and the specified table character set and collation
-     * 
-     * @param table The table's name
-     * @param columns The {@link List} of {@link Column}s
-     * @param tableCharset The table's character set
-     * @param tableCollation The table's collation
-     * @return the <code>ALTER TABLE</code> statement
+     * Generates the <code>"ALTER TABLE..."</code> statement to use to convert the table to utf8mb4.
+     *
+     * @param table The table to process
+     * @param columns The columns to modify
+     * @param tableCharset The default charset for the table to set
+     * @param tableCollation The default collation for the table to set
+     * @return The <code>"ALTER TABLE..."</code> statement or <code>null</code> if nothing needs to be changed
      */
     protected String alterTable(String table, List<Column> columns, String tableCharset, String tableCollation) {
         if ((columns == null || columns.isEmpty()) && Strings.isEmpty(tableCollation) && Strings.isEmpty(tableCharset)) {
             return null;
         }
+
         StringBuilder sb = new StringBuilder();
         sb.append("ALTER TABLE ");
         sb.append(table);
@@ -320,47 +336,44 @@ public abstract class AbstractConvertUtf8ToUtf8mb4Task extends UpdateTaskAdapter
     }
 
     /**
-     * Returns the utf8mb4 derivative of the specified character set
-     * 
-     * @param charset The utf8 character set
-     * @return The utf8mb4 derivative
+     * Determines the "mb4" derivative for specified charset.
+     *
+     * @param charset The charset to examine
+     * @return The appropriate "mb4" derivative
      */
     protected String mb4Charset(String charset) {
-        if (Strings.isEmpty(charset) || charset.contains("utf8")) {
-            return "utf8mb4";
-        } else {
-            return charset;
-        }
+        String cs = Strings.asciiLowerCase(charset);
+        return Strings.isEmpty(cs) || (cs.contains("utf8") && !cs.contains("utf8mb4")) ? UTF8MB4_CHARSET : cs;
     }
 
     /**
      * Returns the utf8mb4 derivative of the specified collation
-     * 
+     *
      * @param collation The utf8 collation
      * @return The utf8mb4 derivative
      */
     protected String mb4Collation(String collation) {
-        if (Strings.isEmpty(collation)) {
-            return "utf8mb4";
-        } else if (collation.contains(UTF8MB4_CHARSET)) {
-            return collation;
-        } else if (collation.contains("utf8")) {
-            return collation.replace("utf8", UTF8MB4_CHARSET);
+        String col = Strings.asciiLowerCase(collation);
+        if (Strings.isEmpty(col)) {
+            return UTF8MB4_CHARSET;
+        } else if (col.contains(UTF8MB4_CHARSET)) {
+            return col;
+        } else if (col.contains("utf8")) {
+            return col.replace("utf8", UTF8MB4_CHARSET);
         } else {
-            return collation;
+            return col;
         }
     }
 
     /**
-     * Changes the charset and collation of the specified table and (optionally) shrinks the specified
-     * varchar columns
+     * Changes the charset/collation of the specified table and (optionally) shrinks the specified VARCHAR columns.
      *
-     * @param connection The {@link Connection}
+     * @param connection The connection to use
      * @param schema The schema name
      * @param table The table name
-     * @param varcharColumns The optional varchar columns with their respective varchar sizes
-     *            (use only if the column is part of the PK or is a KEY and it's size surpasses the limit of 767 chars in total, i.e. varchar length >= 192)
-     * @throws SQLException
+     * @param varcharColumns The optional VARCHAR columns with their respective VARCHAR sizes
+     *            (use only if the column is part of the PRIMARY KEY or is a (UNIQUE) KEY and it's size surpasses the limit of 767 characters in total, i.e. VARCHAR length is greater than 191)
+     * @throws SQLException If changing the table fails
      */
     protected void changeTable(Connection connection, String schema, String table, Map<String, Integer> varcharColumns) throws SQLException {
         PreparedStatement alterStmt = null;
