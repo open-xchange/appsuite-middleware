@@ -50,19 +50,14 @@
 package com.openexchange.groupware.update.tasks;
 
 import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
+import java.util.Collections;
+import java.util.Map;
 import com.google.common.collect.ImmutableList;
-import com.openexchange.database.Databases;
-import com.openexchange.groupware.update.AbstractConvertUtf8ToUtf8mb4Task;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableMap.Builder;
 import com.openexchange.groupware.update.PerformParameters;
-import com.openexchange.java.Strings;
-import com.openexchange.tools.update.Column;
+import com.openexchange.groupware.update.SimpleConvertUtf8ToUtf8mb4UpdateTask;
 
 /**
  * {@link FolderConvertUtf8ToUtf8mb4Task} - Converts folder tables to utf8mb4.
@@ -70,62 +65,34 @@ import com.openexchange.tools.update.Column;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.10.0
  */
-public class FolderConvertUtf8ToUtf8mb4Task extends AbstractConvertUtf8ToUtf8mb4Task {
+public class FolderConvertUtf8ToUtf8mb4Task extends SimpleConvertUtf8ToUtf8mb4UpdateTask {
 
     /**
      * Initializes a new {@link FolderConvertUtf8ToUtf8mb4Task}.
      */
     public FolderConvertUtf8ToUtf8mb4Task() {
-        super();
-    }
-
-    @Override
-    public String[] getDependencies() {
-        return new String[] { AddTypeToFolderPermissionTableUpdateTask.class.getName() };
-    }
-
-    @Override
-    protected List<String> tablesToConvert() {
-        return ImmutableList.of("oxfolder_tree", "oxfolder_permissions", "oxfolder_specialfolders", "oxfolder_userfolders", "oxfolder_userfolders_standardfolders", "del_oxfolder_tree", "del_oxfolder_permissions", "oxfolder_lock", "oxfolder_property");
-    }
-
-    @Override
-    protected void before(PerformParameters params, Connection connection) throws SQLException {
-        // Nothing
+        super(ImmutableList.of("oxfolder_tree", "oxfolder_permissions", "oxfolder_specialfolders", "oxfolder_userfolders", 
+            "oxfolder_userfolders_standardfolders", "del_oxfolder_tree", "del_oxfolder_permissions", "oxfolder_lock", "oxfolder_property"),
+            AddTypeToFolderPermissionTableUpdateTask.class.getName());
     }
 
     @Override
     protected void after(PerformParameters params, Connection connection) throws SQLException {
+        Map<String, Integer> folderIdVarcharColumn = Collections.singletonMap("folderId", 192);
+
+        Builder<String, Integer> builder = ImmutableMap.builder();
+        builder.put("folderId", 192);
+        builder.put("parentId", 192);
+        builder.put("shadow", 192);
+        ImmutableMap<String, Integer> virtualTreeColumns = builder.build();
+        
         String schema = params.getSchema().getSchema();
-        changeTable(connection, schema, "virtualTree", "folderId", "parentId", "shadow");
-        changeTable(connection, schema, "virtualPermission", "folderId");
-        changeTable(connection, schema, "virtualSubscription", "folderId");
+        changeTable(connection, schema, "virtualTree", virtualTreeColumns);
+        changeTable(connection, schema, "virtualPermission", folderIdVarcharColumn);
+        changeTable(connection, schema, "virtualSubscription", folderIdVarcharColumn);
 
-        changeTable(connection, schema, "virtualBackupTree", "folderId", "parentId", "shadow");
-        changeTable(connection, schema, "virtualBackupPermission", "folderId");
-        changeTable(connection, schema, "virtualBackupSubscription", "folderId");
+        changeTable(connection, schema, "virtualBackupTree", virtualTreeColumns);
+        changeTable(connection, schema, "virtualBackupPermission", folderIdVarcharColumn);
+        changeTable(connection, schema, "virtualBackupSubscription", folderIdVarcharColumn);
     }
-
-    private void changeTable(Connection connection, String schema, String table, String... columns) throws SQLException {
-        PreparedStatement alterStmt = null;
-        try {
-            List<Column> columnsToModify = getColumsToModify(connection, schema, table);
-            Set<String> columnsToChange = new HashSet<String>(Arrays.asList(columns));
-            columnsToModify = columnsToModify.stream().map(c -> changeMailColumn(c, columnsToChange)).collect(Collectors.toList());
-
-            String alterTable = alterTable(table, columnsToModify, UTF8MB4_CHARSET, UTF8MB4_UNICODE_COLLATION);
-
-            if (!Strings.isEmpty(alterTable)) {
-                alterStmt = connection.prepareStatement(alterTable);
-                alterStmt.execute();
-            }
-        } finally {
-            Databases.closeSQLStuff(alterStmt);
-        }
-    }
-
-    private Column changeMailColumn(Column column, Set<String> columnsToChange) {
-        return columnsToChange.contains(column.name) ? shrinkVarcharColumn(column.name, 192, column) : column;
-    }
-
 }
