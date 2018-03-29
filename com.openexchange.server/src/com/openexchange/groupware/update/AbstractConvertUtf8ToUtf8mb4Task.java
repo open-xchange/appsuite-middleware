@@ -82,12 +82,6 @@ public abstract class AbstractConvertUtf8ToUtf8mb4Task extends UpdateTaskAdapter
 
     private static final org.slf4j.Logger LOGGER = org.slf4j.LoggerFactory.getLogger(AbstractConvertUtf8ToUtf8mb4Task.class);
 
-    public enum UTF8MB4Collation {
-        utf8mb4_bin,
-        utf8mb4_unicode_ci,
-        utf8mb4_general_ci
-    }
-
     protected static final String UTF8MB4_CHARSET = "utf8mb4";
     protected static final String UTF8MB4_UNICODE_COLLATION = "utf8mb4_unicode_ci";
     protected static final String UTF8MB4_BIN_COLLATION = "utf8mb4_bin";
@@ -346,7 +340,6 @@ public abstract class AbstractConvertUtf8ToUtf8mb4Task extends UpdateTaskAdapter
      * @return The utf8mb4 derivative
      */
     protected String mb4Collation(String collation) {
-        //FIXME: support bin and general derivatives as well
         if (Strings.isEmpty(collation)) {
             return "utf8mb4";
         } else if (collation.contains(UTF8MB4_CHARSET)) {
