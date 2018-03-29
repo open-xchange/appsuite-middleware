@@ -65,6 +65,7 @@ import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.tools.update.Column;
+import com.openexchange.tools.update.Tools;
 
 /**
  * {@link AbstractConvertUtf8ToUtf8mb4Task}
@@ -218,6 +219,10 @@ public abstract class AbstractConvertUtf8ToUtf8mb4Task extends UpdateTaskAdapter
     }
 
     private String getCreateTable(Connection con, String table) throws SQLException {
+        if (false == Tools.tableExists(con, table)) {
+            return null;
+        }
+
         PreparedStatement createTableStmt = null;
         ResultSet createTableRs = null;
         try {
@@ -277,7 +282,7 @@ public abstract class AbstractConvertUtf8ToUtf8mb4Task extends UpdateTaskAdapter
     /**
      * Changes the charset and collation of the specified table and (optionally) shrinks the specified
      * varchar columns
-     * 
+     *
      * @param connection The {@link Connection}
      * @param schema The schema name
      * @param table The table name
@@ -307,7 +312,7 @@ public abstract class AbstractConvertUtf8ToUtf8mb4Task extends UpdateTaskAdapter
      * Checks if the specified {@link Column}'s name matches the specified column name and if it does
      * shrinks it from varchar(charLength) to varchar(191), otherwise the {@link Column} is returned.
      * unaltered.
-     * 
+     *
      * @param columnName The column name
      * @param charLength The character length of the existing column
      * @param column The {@link Column} to shrink
@@ -319,7 +324,7 @@ public abstract class AbstractConvertUtf8ToUtf8mb4Task extends UpdateTaskAdapter
 
     /**
      * Shrinks the specified {@link Column} from varchar(charLength) to varchar(191)
-     * 
+     *
      * @param column The {@link Column} to shrink
      * @param charLength The character length of the existing column
      * @return the shirnked {@link Column}
