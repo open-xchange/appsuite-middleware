@@ -140,7 +140,7 @@ public class CreateTaskTables extends AbstractCreateTableImpl {
        + "task INT4 UNSIGNED NOT NULL,"
        + "mail VARCHAR(255) NOT NULL,"
        + "display_name VARCHAR(255),"
-       + "PRIMARY KEY (cid,task,mail),"
+       + "PRIMARY KEY (cid,task,mail(191)),"
        + "FOREIGN KEY (cid,task) REFERENCES task (cid,id)"
        + ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;";
 
@@ -227,7 +227,7 @@ public class CreateTaskTables extends AbstractCreateTableImpl {
        + "task INT4 UNSIGNED NOT NULL,"
        + "mail VARCHAR(255) NOT NULL,"
        + "display_name VARCHAR(255),"
-       + "PRIMARY KEY (cid,task,mail),"
+       + "PRIMARY KEY (cid,task,mail(191)),"
        + "FOREIGN KEY (cid, task) REFERENCES del_task (cid, id)"
        + ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;";
 
