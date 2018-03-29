@@ -107,6 +107,7 @@ public class GenericSubscribeService extends AbstractSubscribeService {
         this.module = module;
     }
 
+    @SuppressWarnings("unused")
     protected void addExtraFields(final DynamicFormDescription form) {
         // May be overridden to include extra fields
     }
@@ -122,7 +123,7 @@ public class GenericSubscribeService extends AbstractSubscribeService {
     }
 
     @Override
-    public Collection getContent(final Subscription subscription) throws OXException {
+    public Collection<?> getContent(final Subscription subscription) throws OXException {
 
         final Workflow workflow = getWorkflow();
         workflow.setSubscription(subscription);
@@ -130,7 +131,7 @@ public class GenericSubscribeService extends AbstractSubscribeService {
         final Map<String, Object> configuration = subscription.getConfiguration();
         // All contacts should get a UUID for aggregation
         if (this.module == FolderObject.CONTACT){
-            final List list =  Arrays.asList(workflow.execute((String) configuration.get("login"), (String) configuration.get("password")));
+            final List<?> list =  Arrays.asList(workflow.execute((String) configuration.get("login"), (String) configuration.get("password")));
             final List<Contact> contacts = new ArrayList<Contact>();
             for (final Object object : list){
                 final Contact contact = (Contact) object;
@@ -146,6 +147,7 @@ public class GenericSubscribeService extends AbstractSubscribeService {
         try {
             workflow = WorkflowFactory.createWorkflowByString(workflowString);
         } catch (final OXException e) {
+            // ignore
         }
 
         if (null == workflow) {
