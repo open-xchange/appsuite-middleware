@@ -162,10 +162,10 @@ public class CreateLdap2SqlTables extends AbstractCreateTableImpl {
     private static final String createLogin2UserTable = "CREATE TABLE login2user ("
        + "cid INT4 UNSIGNED NOT NULL,"
        + "id INT4 UNSIGNED NOT NULL,"
-       + "uid VARCHAR(128) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,"
+       + "uid VARCHAR(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,"
        + "PRIMARY KEY (cid, uid),"
        + "FOREIGN KEY (cid, id) REFERENCES user(cid, id)"
-     + ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
+     + ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;";
 
     private static final String createUserAttributeTablePrimaryKey = "CREATE TABLE user_attribute ("
         + "cid INT4 UNSIGNED NOT NULL,"

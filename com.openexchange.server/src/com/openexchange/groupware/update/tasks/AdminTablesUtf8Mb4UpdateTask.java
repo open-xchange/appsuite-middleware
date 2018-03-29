@@ -47,48 +47,36 @@
  *
  */
 
-package com.openexchange.groupware.update.internal;
+package com.openexchange.groupware.update.tasks;
 
-import com.openexchange.database.AbstractCreateTableImpl;
-import com.openexchange.database.CreateTableService;
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.util.Arrays;
+import java.util.Collections;
+import com.openexchange.groupware.update.PerformParameters;
+import com.openexchange.groupware.update.SimpleConvertUtf8ToUtf8mb4UpdateTask;
 
 /**
- * Implements the {@link CreateTableService} for creating the updateTask table.
+ * {@link AdminTablesUtf8Mb4UpdateTask}
  *
- * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public final class CreateUpdateTaskTable extends AbstractCreateTableImpl {
+public class AdminTablesUtf8Mb4UpdateTask extends SimpleConvertUtf8ToUtf8mb4UpdateTask {
 
-    private static final String[] CREATED_TABLES = { "updateTask" };
-
-    static final String[] CREATES_PRIMARY_KEY = {
-         "CREATE TABLE updateTask " +
-         "(cid INT4 UNSIGNED NOT NULL," +
-         "taskName VARCHAR(1024) NOT NULL," +
-         "successful BOOLEAN NOT NULL," +
-         "lastModified INT8 NOT NULL," +
-         "uuid BINARY(16) NOT NULL," +
-         "PRIMARY KEY (cid, uuid)," +
-         "INDEX full (cid,taskName(255))) " +
-         "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci"
-    };
-
-    public CreateUpdateTaskTable() {
-        super();
+    /**
+     * Initialises a new {@link AdminTablesUtf8Mb4UpdateTask}.
+     */
+    public AdminTablesUtf8Mb4UpdateTask() {
+        super(Arrays.asList("login2user", "updateTask", "replicationMonitor", "quota_context"), "");
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.groupware.update.SimpleConvertUtf8ToUtf8mb4UpdateTask#after(com.openexchange.groupware.update.PerformParameters, java.sql.Connection)
+     */
     @Override
-    protected String[] getCreateStatements() {
-        return CREATES_PRIMARY_KEY;
-    }
-
-    @Override
-    public String[] requiredTables() {
-        return NO_TABLES;
-    }
-
-    @Override
-    public String[] tablesToCreate() {
-        return CREATED_TABLES.clone();
+    protected void after(PerformParameters params, Connection connection) throws SQLException {
+        changeTable(connection, params.getSchema().getSchema(), "updateTask", Collections.singletonMap("taskName", 1024));
     }
 }
