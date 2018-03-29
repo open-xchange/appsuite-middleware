@@ -64,7 +64,6 @@ import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.java.Strings;
 import com.openexchange.tools.update.Column;
 
-
 /**
  * {@link FolderConvertUtf8ToUtf8mb4Task} - Converts folder tables to utf8mb4.
  *
@@ -87,8 +86,7 @@ public class FolderConvertUtf8ToUtf8mb4Task extends AbstractConvertUtf8ToUtf8mb4
 
     @Override
     protected List<String> tablesToConvert() {
-        return ImmutableList.of("oxfolder_tree", "oxfolder_permissions", "oxfolder_specialfolders", "oxfolders_userfolders", "oxfolder_userfolders_standardfolders",
-            "del_oxfolder_tree", "del_oxfolder_permissions", "oxfolder_lock", "oxfolder_property");
+        return ImmutableList.of("oxfolder_tree", "oxfolder_permissions", "oxfolder_specialfolders", "oxfolders_userfolders", "oxfolder_userfolders_standardfolders", "del_oxfolder_tree", "del_oxfolder_permissions", "oxfolder_lock", "oxfolder_property");
     }
 
     @Override
@@ -115,8 +113,7 @@ public class FolderConvertUtf8ToUtf8mb4Task extends AbstractConvertUtf8ToUtf8mb4
             Set<String> columnsToChange = new HashSet<String>(Arrays.asList(columns));
             columnsToModify = columnsToModify.stream().map(c -> changeMailColumn(c, columnsToChange)).collect(Collectors.toList());
 
-
-            String alterTable = alterTable(table, columnsToModify, UTF8MB4_CHARSET, UTF8MB4_COLLATION);
+            String alterTable = alterTable(table, columnsToModify, UTF8MB4_CHARSET, UTF8MB4_UNICODE_COLLATION);
 
             if (!Strings.isEmpty(alterTable)) {
                 alterStmt = connection.prepareStatement(alterTable);
