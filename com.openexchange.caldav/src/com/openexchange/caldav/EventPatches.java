@@ -66,6 +66,7 @@ import java.util.SortedSet;
 import java.util.TimeZone;
 import java.util.UUID;
 import org.dmfs.rfc5545.DateTime;
+import com.openexchange.ajax.fileholder.IFileHolder;
 import com.openexchange.caldav.resources.CalendarAccessOperation;
 import com.openexchange.caldav.resources.EventResource;
 import com.openexchange.chronos.Alarm;
@@ -85,8 +86,11 @@ import com.openexchange.chronos.ResourceId;
 import com.openexchange.chronos.Trigger;
 import com.openexchange.chronos.common.AlarmUtils;
 import com.openexchange.chronos.common.CalendarUtils;
+import com.openexchange.chronos.common.mapping.DefaultEventUpdate;
 import com.openexchange.chronos.ical.CalendarExport;
 import com.openexchange.chronos.ical.ICalParameters;
+import com.openexchange.chronos.ical.ICalService;
+import com.openexchange.chronos.ical.ImportedCalendar;
 import com.openexchange.chronos.provider.composition.IDBasedCalendarAccess;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.CalendarUtilities;
@@ -99,6 +103,7 @@ import com.openexchange.dav.DAVUserAgent;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.type.PublicType;
 import com.openexchange.groupware.attach.AttachmentMetadata;
+import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
 
 /**
@@ -378,11 +383,14 @@ public class EventPatches {
                     if (null != originalOccurrence) {
                         if (null != originalOccurrence.getAlarms() && 1 == originalOccurrence.getAlarms().size() && snoozedAlarm.getTrigger().equals(originalOccurrence.getAlarms().get(0).getTrigger())) {
                             Alarm originalAlarm = originalOccurrence.getAlarms().get(0);
-                            CalendarUtilities calendarUtilities = factory.requireService(CalendarUtilities.class);
-                            originalOccurrence = calendarUtilities.copyEvent(originalOccurrence, (EventField[]) null);
-                            originalOccurrence = EventPatches.Outgoing(factory).applyAll(resource, originalOccurrence);
-                            EventUpdate eventUpdate = calendarUtilities.compare(
-                                originalOccurrence, newChangeException, true, EventField.TIMESTAMP, EventField.LAST_MODIFIED, EventField.RECURRENCE_RULE, EventField.CREATED, EventField.ALARMS, EventField.EXTENDED_PROPERTIES);
+                            originalOccurrence = exportAndImport(resource, originalOccurrence);
+                            EventUpdate eventUpdate = DefaultEventUpdate.builder()
+                                .originalEvent(originalOccurrence)
+                                .updatedEvent(newChangeException)
+                                .ignoredEventFields(EventField.TIMESTAMP, EventField.LAST_MODIFIED, EventField.RECURRENCE_RULE, EventField.CREATED, EventField.ALARMS, EventField.EXTENDED_PROPERTIES)
+                                .considerUnset(true)
+                                .ignoreDefaults(true)
+                            .build();
                             if (eventUpdate.getUpdatedFields().isEmpty() && eventUpdate.getAttendeeUpdates().isEmpty() && false == eventUpdate.getAlarmUpdates().isEmpty()) {
                                 List<Alarm> patchedAlarms = new ArrayList<Alarm>(2);
                                 snoozedAlarm.setUid(originalAlarm.getUid());
@@ -402,6 +410,32 @@ public class EventPatches {
                 } catch (OXException e) {
                     LOG.warn("Error adjusting snooze exceptions", e);
                 }
+            }
+        }
+
+        private Event exportAndImport(EventResource resource, Event event) throws OXException {
+            /*
+             * prepare exported event
+             */
+            CalendarUtilities calendarUtilities = factory.requireService(CalendarUtilities.class);
+            event = calendarUtilities.copyEvent(event, (EventField[]) null);
+            EventPatches.Outgoing(factory).applyAll(resource, event);
+            /*
+             * export to ical & re-import the event
+             */
+            ICalService iCalService = factory.requireService(ICalService.class);
+            CalendarExport calendarExport = iCalService.exportICal(null);
+            calendarExport.add(event);
+            IFileHolder fileHolder = null;
+            try {
+                fileHolder = calendarExport.getVCalendar();
+                ImportedCalendar calendar = iCalService.importICal(fileHolder.getStream(), null);
+                if (null != calendar.getEvents() && 0 < calendar.getEvents().size()) {
+                    return calendar.getEvents().get(0);
+                }
+                throw OXException.notFound("export");
+            } finally {
+                Streams.close(fileHolder);
             }
         }
 
