@@ -333,7 +333,7 @@ public abstract class AbstractConvertUtf8ToUtf8mb4Task extends UpdateTaskAdapter
      */
     protected String mb4Charset(String charset) {
         String cs = Strings.asciiLowerCase(charset);
-        return Strings.isEmpty(cs) || (cs.contains("utf8") && !cs.contains("utf8mb4")) ? UTF8MB4_CHARSET : cs;
+        return Strings.isEmpty(cs) || (cs.contains("utf8") && !cs.contains(UTF8MB4_CHARSET)) ? UTF8MB4_CHARSET : cs;
     }
 
     /**
