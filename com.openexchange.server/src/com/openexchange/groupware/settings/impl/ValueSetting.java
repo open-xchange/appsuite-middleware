@@ -198,7 +198,10 @@ public class ValueSetting extends AbstractSetting<ValueSetting> {
             return false;
         }
         ArrayList<Object> multiValue = this.multiValue;
-        if (multiValue != null && !multiValue.equals(Arrays.asList(other.getMultiValue()))) {
+        if((multiValue!= null && other.getMultiValue()==null) || (multiValue==null && other.getMultiValue()!=null)) {
+            return false;
+        }
+        if (multiValue != null && other.getMultiValue() != null && !multiValue.equals(Arrays.asList(other.getMultiValue()))) {
             return false;
         }
         return true;
