@@ -230,6 +230,7 @@ properties:
       related:
       file: mailfilter.properties
       packageName: open-xchange-mailfilter
+      tags: ["Mail Filter", "Mail", "Sieve"]
     - key: com.openexchange.mail.filter.options.allowNestedTests
       description: |
         A flag announced to clients via the config action to indicate if they should allow nested tests.
