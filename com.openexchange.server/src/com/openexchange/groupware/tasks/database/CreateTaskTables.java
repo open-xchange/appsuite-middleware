@@ -138,9 +138,9 @@ public class CreateTaskTables extends AbstractCreateTableImpl {
     private static final String createTaskEParticipantTable = "CREATE TABLE task_eparticipant ("
        + "cid INT4 UNSIGNED NOT NULL,"
        + "task INT4 UNSIGNED NOT NULL,"
-       + "mail VARCHAR(255) NOT NULL,"
+       + "mail VARCHAR(191) NOT NULL,"
        + "display_name VARCHAR(255),"
-       + "PRIMARY KEY (cid,task,mail(191)),"
+       + "PRIMARY KEY (cid,task,mail),"
        + "FOREIGN KEY (cid,task) REFERENCES task (cid,id)"
        + ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;";
 
@@ -225,9 +225,9 @@ public class CreateTaskTables extends AbstractCreateTableImpl {
     private static final String createDelTaskEParticipantTable = "CREATE TABLE del_task_eparticipant ("
        + "cid INT4 UNSIGNED NOT NULL,"
        + "task INT4 UNSIGNED NOT NULL,"
-       + "mail VARCHAR(255) NOT NULL,"
+       + "mail VARCHAR(191) NOT NULL,"
        + "display_name VARCHAR(255),"
-       + "PRIMARY KEY (cid,task,mail(191)),"
+       + "PRIMARY KEY (cid,task,mail),"
        + "FOREIGN KEY (cid, task) REFERENCES del_task (cid, id)"
        + ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;";
 
