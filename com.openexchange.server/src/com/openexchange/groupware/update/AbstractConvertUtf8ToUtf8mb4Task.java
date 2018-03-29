@@ -187,7 +187,7 @@ public abstract class AbstractConvertUtf8ToUtf8mb4Task extends UpdateTaskAdapter
             List<Column> newColumns = getColumsToModify(con, schema, table);
 
             String alterTable = alterTable(table, newColumns, tableCharset, tableCollation);
-            if (!Strings.isEmpty(alterTable)) {
+            if (Strings.isNotEmpty(alterTable)) {
                 alterStmt = con.prepareStatement(alterTable);
                 alterStmt.execute();
             }
@@ -314,11 +314,11 @@ public abstract class AbstractConvertUtf8ToUtf8mb4Task extends UpdateTaskAdapter
         if (columns != null && !columns.isEmpty()) {
             sb.append(columns.stream().map(c -> c.getName() + " " + c.getDefinition()).collect(Collectors.joining(", MODIFY COLUMN ", " MODIFY COLUMN ", ",")));
         }
-        if (!Strings.isEmpty(tableCharset)) {
+        if (Strings.isNotEmpty(tableCharset)) {
             sb.append(" DEFAULT CHARACTER SET=");
             sb.append(tableCharset);
         }
-        if (!Strings.isEmpty(tableCollation)) {
+        if (Strings.isNotEmpty(tableCollation)) {
             sb.append(" COLLATE=");
             sb.append(tableCollation);
         }
@@ -374,7 +374,7 @@ public abstract class AbstractConvertUtf8ToUtf8mb4Task extends UpdateTaskAdapter
             }
             String alterTable = alterTable(table, columnsToModify, UTF8MB4_CHARSET, UTF8MB4_UNICODE_COLLATION);
 
-            if (!Strings.isEmpty(alterTable)) {
+            if (Strings.isNotEmpty(alterTable)) {
                 alterStmt = connection.prepareStatement(alterTable);
                 alterStmt.execute();
             }
