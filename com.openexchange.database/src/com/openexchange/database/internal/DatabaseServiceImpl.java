@@ -218,6 +218,11 @@ public final class DatabaseServiceImpl implements DatabaseService {
     }
 
     @Override
+    public String getSchemaName() {
+        return configDatabaseService.getSchemaName();
+    }
+
+    @Override
     public SchemaInfo getSchemaInfo(int contextId) throws OXException {
         return configDatabaseService.getSchemaInfo(contextId);
     }

@@ -234,6 +234,12 @@ public final class ConfigDatabaseServiceImpl implements ConfigDatabaseService {
     }
 
     @Override
+    public String getSchemaName() {
+        AssignmentImpl assignment = assignmentService.getConfigDBAssignment();
+        return assignment.getSchema() != null ? assignment.getSchema() : "configdb";
+    }
+
+    @Override
     public SchemaInfo getSchemaInfo(int contextId) throws OXException {
         Assignment assign = contextAssignment.getAssignment(contextId);
         return SchemaInfo.valueOf(assign.getWritePoolId(), assign.getSchema());

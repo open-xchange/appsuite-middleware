@@ -165,6 +165,14 @@ public interface ConfigDatabaseService {
     String getSchemaName(int contextId) throws OXException;
 
     /**
+     * Gets the schema name for the config database.
+     *
+     * @return The configdb schema name
+     * @throws OXException If an error occurs trying to determine the schema name
+     */
+    String getSchemaName();
+
+    /**
      * Gets the schema information (pool identifier and schema name) for specified context.
      *
      * @param contextId The identifier of the context for which to return the schema information
