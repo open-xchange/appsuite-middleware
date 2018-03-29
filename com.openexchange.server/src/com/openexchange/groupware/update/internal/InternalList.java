@@ -670,25 +670,28 @@ public final class InternalList {
 
         // Converts attachment tables to utf8mb4
         list.add(new com.openexchange.groupware.update.tasks.AttachmentConvertUtf8ToUtf8mb4Task());
-        
+
         // Converts the reminder table to utf8mb4
         list.add(new com.openexchange.groupware.update.tasks.ReminderTableUtf8Mb4UpdateTask());
-        
+
         // Converts the jsonStorage table to utf8mb4
         list.add(new com.openexchange.groupware.update.tasks.JsonStorageTableUtf8Mb4UpdateTask());
-        
+
         // Converts the preview table to utf8mb4
         list.add(new com.openexchange.groupware.update.tasks.PreviewTableUtf8Mb4UpdateTask());
-        
+
         // Converts the publications, publication_users and sequence_publications tables to utf8mb4
         list.add(new com.openexchange.groupware.update.tasks.PublicationsTablesUtf8Mb4UpdateTask());
-        
+
         // Converts the snippet, snippetContent, snippetAttachment, snippetMisc, snippetAttachmentBinary tables to utf8mb4
         list.add(new com.openexchange.groupware.update.tasks.SnippetTablesUtf8Mb4UpdateTask());
 
         // Converts the oauthAccounts table to utf8mb4
         list.add(new com.openexchange.groupware.update.tasks.OAuthAccountsTableUtf8Mb4UpdateTask());
-        
+
+        // Converts folder tables to utf8mb4
+        list.add(new com.openexchange.groupware.update.tasks.FolderConvertUtf8ToUtf8mb4Task());
+
         return list.toArray(new UpdateTaskV2[list.size()]);
     }
 
