@@ -91,9 +91,9 @@ public class OAuthGrantConvertUtf8ToUtf8mb4Task extends AbstractConvertUtf8ToUtf
     @Override
     protected void after(PerformParameters params, Connection connection) throws SQLException {
         ImmutableMap.Builder<String, Integer> mapBuilder = ImmutableMap.builder();
-        mapBuilder.put("refresh_token", 191);
-        mapBuilder.put("access_token", 191);
-        mapBuilder.put("client", 191);
+        mapBuilder.put("refresh_token", 255);
+        mapBuilder.put("access_token", 255);
+        mapBuilder.put("client", 255);
         changeTable(connection, params.getSchema().getSchema(), "oauth_grant", mapBuilder.build());
     }
 
