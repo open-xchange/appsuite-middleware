@@ -110,6 +110,9 @@ public final class GetMultipleAttachmentAction extends AbstractMailAction {
             final String folderPath = req.checkParameter(AJAXServlet.PARAMETER_FOLDERID);
             final String uid = req.checkParameter(AJAXServlet.PARAMETER_ID);
             String[] sequenceIds = req.optStringArray(Mail.PARAMETER_MAILATTCHMENT);
+            if (null == sequenceIds) {
+                throw AjaxExceptionCodes.MISSING_REQUEST_BODY.create();
+            }
 
             /*
              * Remove duplicate attachment ids
