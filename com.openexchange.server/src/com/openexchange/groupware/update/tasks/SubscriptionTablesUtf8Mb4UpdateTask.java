@@ -47,52 +47,44 @@
  *
  */
 
-package com.openexchange.subscribe.database;
+package com.openexchange.groupware.update.tasks;
 
-import com.openexchange.database.AbstractCreateTableImpl;
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.util.Arrays;
+import java.util.Collections;
+import com.openexchange.groupware.update.PerformParameters;
+import com.openexchange.groupware.update.SimpleConvertUtf8ToUtf8mb4UpdateTask;
 
 /**
- * Creates the tables needed for the subscription part of PubSub
+ * {@link SubscriptionTablesUtf8Mb4UpdateTask}
  *
- * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class CreateSubscriptionTables extends AbstractCreateTableImpl {
+public class SubscriptionTablesUtf8Mb4UpdateTask extends SimpleConvertUtf8ToUtf8mb4UpdateTask {
 
-    @Override
-    public String[] getCreateStatements() {
-        return new String[] {
-            "CREATE TABLE subscriptions (" +
-            "cid INT4 UNSIGNED NOT NULL," +
-            "id INT4 UNSIGNED NOT NULL," +
-            "user_id INT4 UNSIGNED NOT NULL," +
-            "configuration_id INT4 UNSIGNED NOT NULL," +
-            "source_id VARCHAR(255) NOT NULL," +
-            "folder_id VARCHAR(255) NOT NULL," +
-            "last_update INT8 UNSIGNED NOT NULL," +
-            "enabled BOOLEAN DEFAULT true NOT NULL," +
-            "created INT8 NOT NULL DEFAULT 0," +
-            "lastModified INT8 NOT NULL DEFAULT 0," +
-            "PRIMARY KEY (cid,id)," +
-            "INDEX `folderIndex` (`cid`, `folder_id`)," +
-            "FOREIGN KEY(cid,user_id) REFERENCES user(cid,id)" +
-            ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;",
-
-            "CREATE TABLE sequence_subscriptions (" +
-            "cid INT4 UNSIGNED NOT NULL," +
-            "id INT4 UNSIGNED NOT NULL," +
-            "PRIMARY KEY (cid)" +
-            ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;"
-        };
+    /**
+     * Initialises a new {@link SubscriptionTablesUtf8Mb4UpdateTask}.
+     */
+    public SubscriptionTablesUtf8Mb4UpdateTask() {
+        //@formatter:off
+        super(Arrays.asList("subscriptions", "sequence_subscriptions", "pns_subscription", 
+            "pns_subscription_topic_wildcard","pns_subscription_topic_exact"), 
+            "com.openexchange.subscribe.database.FixSubscriptionTablePrimaryKey",
+            "com.openexchange.subscribe.database.SubscriptionsCreatedAndLastModifiedColumn");
+        //@formatter:on
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.groupware.update.SimpleConvertUtf8ToUtf8mb4UpdateTask#after(com.openexchange.groupware.update.PerformParameters, java.sql.Connection)
+     */
     @Override
-    public String[] requiredTables() {
-        return new String[]{"user"};
+    protected void after(PerformParameters params, Connection connection) throws SQLException {
+        changeTable(connection, params.getSchema().getSchema(), "subscriptions", Collections.singletonMap("folder_id", 255));
+        changeTable(connection, params.getSchema().getSchema(), "pns_subscription", Collections.singletonMap("token", 255));
+        changeTable(connection, params.getSchema().getSchema(), "pns_subscription_topic_wildcard", Collections.singletonMap("topic", 255));
+        changeTable(connection, params.getSchema().getSchema(), "pns_subscription_topic_exact", Collections.singletonMap("topic", 255));
     }
-
-    @Override
-    public String[] tablesToCreate() {
-        return new String[]{"subscriptions","sequence_subscriptions"};
-    }
-
 }
