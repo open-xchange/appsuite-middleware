@@ -61,6 +61,7 @@ import static com.openexchange.chronos.common.CalendarUtils.isSeriesMaster;
 import static com.openexchange.chronos.common.CalendarUtils.matches;
 import static com.openexchange.chronos.common.CalendarUtils.optTimeZone;
 import static com.openexchange.chronos.common.SearchUtils.getSearchTerm;
+import static com.openexchange.chronos.compat.Event2Appointment.asInt;
 import static com.openexchange.chronos.impl.AbstractStorageOperation.PARAM_CONNECTION;
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.b;
@@ -98,10 +99,10 @@ import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.common.DefaultRecurrenceData;
 import com.openexchange.chronos.common.mapping.EventMapper;
-import com.openexchange.chronos.compat.Event2Appointment;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.impl.osgi.Services;
 import com.openexchange.chronos.impl.performer.AttendeeUsageTracker;
+import com.openexchange.chronos.impl.session.DefaultEntityResolver;
 import com.openexchange.chronos.provider.CalendarAccount;
 import com.openexchange.chronos.service.CalendarEvent;
 import com.openexchange.chronos.service.CalendarParameters;
@@ -754,21 +755,19 @@ public class Utils {
         if (null == folderIds || 0 == folderIds.size()) {
             return Collections.emptyList();
         }
-        List<Integer> ids = new ArrayList<Integer>(folderIds.size());
+        List<CalendarFolder> folders = new ArrayList<CalendarFolder>();
+        DefaultEntityResolver entityResolver = getEntityResolver(session);
+        UserPermissionBits permissionBits = ServerSessionAdapter.valueOf(session.getSession()).getUserPermissionBits();
         for (String folderId : folderIds) {
             try {
-                ids.add(Integer.valueOf(folderId));
-            } catch (NumberFormatException e) {
-                LOG.warn("Error parsing numerical folder identifier from {}.", folderId, e);
-            }
-        }
-        List<CalendarFolder> folders = new ArrayList<CalendarFolder>();
-        OXFolderAccess folderAccess = initFolderAccess(session);
-        UserPermissionBits permissionBits = ServerSessionAdapter.valueOf(session.getSession()).getUserPermissionBits();
-        for (FolderObject folderObject : folderAccess.getFolderObjects(ids)) {
-            EffectivePermission permission = folderObject.getEffectiveUserPermission(session.getUserId(), permissionBits);
-            if (permission.isFolderVisible()) {
-                folders.add(new CalendarFolder(session.getSession(), folderObject, permission));
+                FolderObject folder = entityResolver.getFolder(asInt(folderId));
+                EffectivePermission permission = folder.getEffectiveUserPermission(session.getUserId(), permissionBits);
+                if (permission.isFolderVisible()) {
+                    folders.add(new CalendarFolder(session.getSession(), folder, permission));
+                }
+            } catch (OXException | NumberFormatException e) {
+                LOG.warn("Error evaluating if folder {} is visible, skipping.", folderId, e);
+                continue;
             }
         }
         return folders;
@@ -1005,21 +1004,13 @@ public class Utils {
      * @param folderIds The identifiers of all folders to determine the users with access for
      * @return The identifiers of the affected folders for each user
      */
-    public static Map<Integer, List<String>> getAffectedFoldersPerUser(CalendarSession session, Set<String> folderIds) {
+    public static Map<Integer, List<String>> getAffectedFoldersPerUser(CalendarSession session, Collection<String> folderIds) throws OXException {
         Map<Integer, List<String>> affectedFoldersPerUser = new HashMap<Integer, List<String>>();
-        OXFolderAccess folderAccess;
-        try {
-            Context context = ServerSessionAdapter.valueOf(session.getSession()).getContext();
-            Connection connection = optConnection(session);
-            folderAccess = null != connection ? new OXFolderAccess(connection, context) : new OXFolderAccess(context);
-        } catch (OXException e) {
-            LOG.warn("Error collecting affected folders", e);
-            return affectedFoldersPerUser;
-        }
+        DefaultEntityResolver entityResolver = getEntityResolver(session);
         for (String folderId : folderIds) {
             try {
-                FolderObject folder = folderAccess.getFolderObject(Event2Appointment.asInt(folderId));
-                for (Integer userId : getAffectedUsers(folder, session.getEntityResolver())) {
+                FolderObject folder = entityResolver.getFolder(asInt(folderId));
+                for (Integer userId : getAffectedUsers(folder, entityResolver)) {
                     com.openexchange.tools.arrays.Collections.put(affectedFoldersPerUser, userId, folderId);
                 }
             } catch (Exception e) {
@@ -1238,11 +1229,6 @@ public class Utils {
         return decorator;
     }
 
-    private static OXFolderAccess initFolderAccess(CalendarSession session) throws OXException {
-        Context context = ServerSessionAdapter.valueOf(session.getSession()).getContext();
-        return new OXFolderAccess(optConnection(session), context);
-    }
-
     /**
      * Optionally gets a database connection set in a specific calendar session.
      *
@@ -1270,6 +1256,13 @@ public class Utils {
             LOG.warn("Error getting folder object {}.", folderId, e);
             return null;
         }
+    }
+
+    private static DefaultEntityResolver getEntityResolver(CalendarSession session) throws OXException {
+        if (DefaultEntityResolver.class.isInstance(session.getEntityResolver())) {
+            return (DefaultEntityResolver) session.getEntityResolver();
+        }
+        return new DefaultEntityResolver(ServerSessionAdapter.valueOf(session.getSession()), Services.getServiceLookup());
     }
 
 }
