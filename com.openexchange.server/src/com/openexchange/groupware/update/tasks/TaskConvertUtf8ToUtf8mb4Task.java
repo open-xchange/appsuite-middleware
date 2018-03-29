@@ -50,16 +50,11 @@
 package com.openexchange.groupware.update.tasks;
 
 import java.sql.Connection;
-import java.sql.DatabaseMetaData;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import com.google.common.collect.ImmutableList;
-import com.openexchange.database.Databases;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.SimpleConvertUtf8ToUtf8mb4UpdateTask;
 import com.openexchange.tools.update.Column;
-import com.openexchange.tools.update.Tools;
-
 
 /**
  * {@link TaskConvertUtf8ToUtf8mb4Task} - Converts task tables to utf8mb4.
@@ -81,15 +76,7 @@ public class TaskConvertUtf8ToUtf8mb4Task extends SimpleConvertUtf8ToUtf8mb4Upda
     @Override
     protected void before(PerformParameters params, Connection connection) throws SQLException {
         Column column = new Column("mail", "varchar(190) COLLATE utf8_unicode_ci NOT NULL");
-
-        int varcharColumnSize = getVarcharColumnSize("mail", "task_eparticipant", connection);
-        if (varcharColumnSize == 255) {
-            Tools.modifyColumns(connection, "task_eparticipant", true, column);
-        }
-
-        varcharColumnSize = getVarcharColumnSize("mail", "del_task_eparticipant", connection);
-        if (varcharColumnSize == 255) {
-            Tools.modifyColumns(connection, "del_task_eparticipant", true, column);
-        }
+        modifyVarChar("mail", "task_eparticipant", 255, column, connection);
+        modifyVarChar("mail", "del_task_eparticipant", 255, column, connection);
     }
 }
