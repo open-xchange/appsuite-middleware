@@ -71,7 +71,7 @@ public final class JsonCacheCreateTableService extends AbstractCreateTableImpl {
         "  took bigint(64) DEFAULT 0,\n" +
         "  size bigint(64) DEFAULT 0,\n" +
         "  PRIMARY KEY (cid,user,id)\n" +
-        ") ENGINE=InnoDB DEFAULT CHARSET=latin1";
+        ") ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_general_ci";
 
     /**
      * Gets the table names.

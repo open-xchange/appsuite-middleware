@@ -49,59 +49,68 @@
 
 package com.openexchange.json.cache.impl.osgi;
 
-import com.openexchange.database.CreateTableService;
-import com.openexchange.groupware.delete.DeleteListener;
-import com.openexchange.groupware.update.DefaultUpdateTaskProviderService;
-import com.openexchange.groupware.update.UpdateTaskProviderService;
-import com.openexchange.json.cache.JsonCacheService;
-import com.openexchange.json.cache.JsonCaches;
-import com.openexchange.json.cache.impl.JsonCacheServiceImpl;
-import com.openexchange.osgi.HousekeepingActivator;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import com.openexchange.database.Databases;
+import com.openexchange.exception.OXException;
+import com.openexchange.groupware.update.PerformParameters;
+import com.openexchange.groupware.update.UpdateExceptionCodes;
+import com.openexchange.groupware.update.UpdateTaskAdapter;
 
 /**
- * {@link JsonCacheActivator}
+ * {@link JsonCacheEnsureLatin1AsDefault} - <code>MEDIUM TEXT</code> to JSON cache table.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class JsonCacheActivator extends HousekeepingActivator {
+public final class JsonCacheEnsureLatin1AsDefault extends UpdateTaskAdapter {
 
     /**
-     * Initializes a new {@link JsonCacheActivator}.
+     * Initializes a new {@link JsonCacheEnsureLatin1AsDefault}.
      */
-    public JsonCacheActivator() {
+    public JsonCacheEnsureLatin1AsDefault() {
         super();
     }
 
     @Override
-    protected Class<?>[] getNeededServices() {
-        return EMPTY_CLASSES;
+    public String[] getDependencies() {
+        return new String[] { JsonCacheAddOtherFieldsTask.class.getName() };
     }
 
     @Override
-    protected void startBundle() throws Exception {
-        /*
-         * Register services for table creation
-         */
-        registerService(CreateTableService.class, new JsonCacheCreateTableService());
-        registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(
-            new JsonCacheCreateTableTask(),
-            new JsonCacheAddInProgressFieldTask(),
-            new JsonCacheMediumTextTask(),
-            new JsonCacheAddOtherFieldsTask(),
-            new JsonCacheEnsureLatin1AsDefault()));
-        registerService(DeleteListener.class, new JsonCacheDeleteListener());
-        /*
-         * Register cache service
-         */
-        final JsonCacheServiceImpl serviceImpl = new JsonCacheServiceImpl(this);
-        registerService(JsonCacheService.class, serviceImpl);
-        JsonCaches.CACHE_REFERENCE.set(serviceImpl);
+    public void perform(final PerformParameters params) throws OXException {
+        Connection con = params.getConnection();
+        boolean rollback = false;
+        try {
+            con.setAutoCommit(false);
+            rollback = true;
+
+            doPerform(con);
+
+            con.commit();
+            rollback = false;
+        } catch (SQLException e) {
+            throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
+        } catch (RuntimeException e) {
+            throw UpdateExceptionCodes.OTHER_PROBLEM.create(e, e.getMessage());
+        } finally {
+            if (rollback) {
+                Databases.rollback(con);
+            }
+            Databases.autocommit(con);
+        }
     }
 
-    @Override
-    protected void stopBundle() throws Exception {
-        JsonCaches.CACHE_REFERENCE.set(null);
-        super.stopBundle();
+    private void doPerform(Connection con) throws OXException {
+        PreparedStatement stmt = null;
+        try {
+            stmt = con.prepareStatement("ALTER TABLE jsonCache DEFAULT CHARACTER SET=latin1 COLLATE=latin1_general_ci");
+            stmt.execute();
+        } catch (SQLException e) {
+            throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
+        } finally {
+            Databases.closeSQLStuff(stmt);
+        }
     }
 
 }
