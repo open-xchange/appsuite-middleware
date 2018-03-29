@@ -77,7 +77,7 @@ public final class CreatePnsSubscriptionTable extends AbstractCreateTableImpl {
             "PRIMARY KEY (cid, user, token, client)," +
             "UNIQUE KEY `subscription_id` (`id`)" +
             // "INDEX `affiliationIndex` (cid, user, affiliation)" +
-            ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci";
+            ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci";
     }
 
     /**
@@ -91,7 +91,7 @@ public final class CreatePnsSubscriptionTable extends AbstractCreateTableImpl {
             "cid INT4 UNSIGNED NOT NULL," +
             "topic VARCHAR(255) CHARACTER SET latin1 NOT NULL," +
             "PRIMARY KEY (id, topic)" +
-            ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci";
+            ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci";
     }
 
     /**
@@ -105,7 +105,7 @@ public final class CreatePnsSubscriptionTable extends AbstractCreateTableImpl {
             "cid INT4 UNSIGNED NOT NULL," +
             "topic VARCHAR(255) CHARACTER SET latin1 NOT NULL," +
             "PRIMARY KEY (id, topic)" +
-            ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci";
+            ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci";
     }
 
     // ----------------------------------------------------------------------------------------------------------------
