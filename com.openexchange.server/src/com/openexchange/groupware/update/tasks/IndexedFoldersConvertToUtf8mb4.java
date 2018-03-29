@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,44 +47,24 @@
  *
  */
 
-package com.openexchange.datatypes.genericonf.storage.impl;
+package com.openexchange.groupware.update.tasks;
 
-import com.openexchange.database.AbstractCreateTableImpl;
+import com.openexchange.groupware.update.SimpleConvertUtf8ToUtf8mb4UpdateTask;
+
 
 /**
- * Creates the tables for the generic conf storage if a new schema is created.
+ * {@link IndexedFoldersConvertToUtf8mb4} - Converts OAuth accessor tables to utf8mb4.
  *
- * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.10.0
  */
-public final class CreateGenConfTables extends AbstractCreateTableImpl {
+public class IndexedFoldersConvertToUtf8mb4 extends SimpleConvertUtf8ToUtf8mb4UpdateTask {
 
     /**
-     * Default constructor.
+     * Initializes a new {@link IndexedFoldersConvertToUtf8mb4}.
      */
-    public CreateGenConfTables() {
-        super();
+    public IndexedFoldersConvertToUtf8mb4() {
+        super(DropRendundantIndicesUpdateTask.class, "indexedFolders");
     }
-
-    @Override
-    public String[] requiredTables() {
-        return new String[0];
-    }
-
-    @Override
-    public String[] tablesToCreate() {
-        return createdTables;
-    }
-
-    @Override
-    public String[] getCreateStatements() {
-        return createsPrimaryKey;
-    }
-
-    private static final String[] createdTables = { "genconf_attributes_strings", "genconf_attributes_bools", "sequence_genconf" };
-
-    private static final String[] createsPrimaryKey = {
-        "CREATE TABLE genconf_attributes_strings (cid INT4 UNSIGNED NOT NULL,id INT4 UNSIGNED NOT NULL,name VARCHAR(100) DEFAULT NULL,value VARCHAR(256) DEFAULT NULL,uuid BINARY(16) NOT NULL,PRIMARY KEY (cid, id, uuid),KEY (cid,id,name)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci",
-        "CREATE TABLE genconf_attributes_bools (cid INT4 UNSIGNED NOT NULL,id INT4 UNSIGNED NOT NULL,name VARCHAR(100) DEFAULT NULL,value BOOL DEFAULT NULL,uuid BINARY(16) NOT NULL,PRIMARY KEY (cid, id, uuid),KEY (cid,id,name)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci",
-        "CREATE TABLE sequence_genconf (cid INT4 UNSIGNED NOT NULL,id INT4 UNSIGNED NOT NULL,PRIMARY KEY (cid)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci" };
 
 }
