@@ -54,6 +54,7 @@ import static com.openexchange.subscribe.crawler.internal.FormStrings.FORM_LABEL
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import com.openexchange.datatypes.genericonf.DynamicFormDescription;
@@ -139,7 +140,8 @@ public class GenericSubscribeService extends AbstractSubscribeService {
             }
             return contacts;
         }
-        return Arrays.asList(workflow.execute((String) configuration.get("login"), (String) configuration.get("password")));
+        Object[] execute = workflow.execute((String) configuration.get("login"), (String) configuration.get("password"));
+        return execute != null ? Arrays.asList(execute) : Collections.EMPTY_LIST;
     }
 
     public Workflow getWorkflow() {
