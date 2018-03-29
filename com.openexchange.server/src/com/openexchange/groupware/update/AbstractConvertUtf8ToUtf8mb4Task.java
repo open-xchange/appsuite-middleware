@@ -70,10 +70,11 @@ import com.openexchange.tools.update.Tools;
 /**
  * {@link AbstractConvertUtf8ToUtf8mb4Task}
  *
- * Automaticaly changes table and column character sets and collations from utf8 to utf8mb4.
+ * <p>Automaticaly changes table and column character sets and collations from utf8 to utf8mb4.
  * This is only possible for "non problematic" table structures. E.g. if a key is too long and or a table width is too large, additional actions need to be performed.
  * Either by implementing {@link AbstractConvertUtf8ToUtf8mb4Task#before} and/or {@link AbstractConvertUtf8ToUtf8mb4Task#after} or changing the table manually.
- * Note: Even if everything is performed in one transaction, MySQL can not rollback DDL statements (ALTER TABLE)!
+ * </p>
+ * <span style="color:red;">Note</span>: Even if everything is performed in one transaction, MySQL can not rollback DDL statements (ALTER TABLE)!
  *
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  * @since v7.10.0
@@ -197,25 +198,14 @@ public abstract class AbstractConvertUtf8ToUtf8mb4Task extends UpdateTaskAdapter
     }
 
     /**
-<<<<<<< HEAD
-     * Queries the <code>information_schema</code> and retrieves a {@link List}
-     * with {@link Column}s of the specified table in the specified schema that
-     * need to be converted.
-     *
-     * @param con The {@link Connection}
-     * @param schema The schema's name
-     * @param table The table's name
-     * @return A {@link List} with all {@link Column}s that need conversion, or an empty {@link List}
-     * @throws SQLException if an SQL error is occurred
-=======
-     * Determines the text columns, which need to be converted since they use <code>"utf8"</code> charset and/or <code>"utf8_unicode_ci"</code> collation.
+     * Determines the text columns, which need to be converted since they use
+     * <code>"utf8"</code> charset and/or <code>"utf8_unicode_ci"</code> collation.
      *
      * @param con The connection to use
      * @param schema The schema name
      * @param table The name of the table to inspect
      * @return The columns that need to be altered
      * @throws SQLException If columns cannot be returned
->>>>>>> JavaDoc
      */
     protected List<Column> getColumsToModify(Connection con, String schema, String table) throws SQLException {
         String createTable = getCreateTable(con, table);
