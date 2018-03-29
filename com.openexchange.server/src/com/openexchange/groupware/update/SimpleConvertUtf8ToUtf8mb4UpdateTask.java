@@ -81,6 +81,21 @@ public class SimpleConvertUtf8ToUtf8mb4UpdateTask extends AbstractConvertUtf8ToU
         this.dependencies = dependencies == null ? NO_DEPENDENCIES : dependencies;
     }
 
+    /**
+     * Initializes a new {@link SimpleConvertUtf8ToUtf8mb4UpdateTask}.
+     *
+     * @param dependentUpdateTask The update task, which this conversion task depends on
+     * @param tables The tables to consider
+     */
+    public SimpleConvertUtf8ToUtf8mb4UpdateTask(Class<? extends UpdateTaskV2> dependentUpdateTaskClass, String... tables) {
+        super();
+        if (null == tables) {
+            throw new IllegalArgumentException("The table names must not be null");
+        }
+        this.tableNames = ImmutableList.copyOf(tables);
+        this.dependencies = new String[] { dependentUpdateTaskClass.getName() };
+    }
+
     @Override
     public String[] getDependencies() {
         return dependencies;
