@@ -711,7 +711,7 @@ public final class InternalList {
         list.add(new com.openexchange.groupware.update.tasks.ContextAttributeConvertUtf8ToUtf8mb4Task());
 
         // Converts prg_dlist, del_dlist, prg_contacts_linkage, prg_contacts_image, del_contacts_image, del_contacts, prg_contacts tables to utf8mb4
-        list.add(new com.openexchange.groupware.update.tasks.ContactTablesUtf8Mb4UpdateTask());
+        //list.add(new com.openexchange.groupware.update.tasks.ContactTablesUtf8Mb4UpdateTask());
 
         // Converts infostore tables to utf8mb4.
         list.add(new com.openexchange.groupware.update.tasks.InfostoreConvertUtf8ToUtf8mb4Task());
