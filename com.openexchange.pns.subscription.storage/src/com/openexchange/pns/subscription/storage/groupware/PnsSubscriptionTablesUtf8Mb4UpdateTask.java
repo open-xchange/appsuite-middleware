@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.groupware.update.tasks;
+package com.openexchange.pns.subscription.storage.groupware;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -57,24 +57,22 @@ import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.SimpleConvertUtf8ToUtf8mb4UpdateTask;
 
 /**
- * {@link SubscriptionTablesUtf8Mb4UpdateTask}
+ * {@link PnsSubscriptionTablesUtf8Mb4UpdateTask}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class SubscriptionTablesUtf8Mb4UpdateTask extends SimpleConvertUtf8ToUtf8mb4UpdateTask {
+public class PnsSubscriptionTablesUtf8Mb4UpdateTask extends SimpleConvertUtf8ToUtf8mb4UpdateTask {
 
     /**
-     * Initialises a new {@link SubscriptionTablesUtf8Mb4UpdateTask}.
+     * Initialises a new {@link PnsSubscriptionTablesUtf8Mb4UpdateTask}.
      */
-    public SubscriptionTablesUtf8Mb4UpdateTask() {
+    public PnsSubscriptionTablesUtf8Mb4UpdateTask() {
         //@formatter:off
-        super(Arrays.asList("subscriptions", "sequence_subscriptions", "pns_subscription", 
-            "pns_subscription_topic_wildcard","pns_subscription_topic_exact"), 
-            "com.openexchange.subscribe.database.FixSubscriptionTablePrimaryKey",
-            "com.openexchange.subscribe.database.SubscriptionsCreatedAndLastModifiedColumn");
+        super(Arrays.asList("pns_subscription", "pns_subscription_topic_wildcard","pns_subscription_topic_exact"), 
+            "com.openexchange.pns.subscription.storage.groupware.PnsSubscriptionsAddIndexTask"
+            );
         //@formatter:on
     }
-
     /*
      * (non-Javadoc)
      * 
@@ -82,7 +80,6 @@ public class SubscriptionTablesUtf8Mb4UpdateTask extends SimpleConvertUtf8ToUtf8
      */
     @Override
     protected void after(PerformParameters params, Connection connection) throws SQLException {
-        changeTable(connection, params.getSchema().getSchema(), "subscriptions", Collections.singletonMap("folder_id", 255));
         changeTable(connection, params.getSchema().getSchema(), "pns_subscription", Collections.singletonMap("token", 255));
         changeTable(connection, params.getSchema().getSchema(), "pns_subscription_topic_wildcard", Collections.singletonMap("topic", 255));
         changeTable(connection, params.getSchema().getSchema(), "pns_subscription_topic_exact", Collections.singletonMap("topic", 255));

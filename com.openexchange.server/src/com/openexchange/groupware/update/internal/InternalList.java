@@ -716,9 +716,6 @@ public final class InternalList {
         // Converts infostore tables to utf8mb4.
         list.add(new com.openexchange.groupware.update.tasks.InfostoreConvertUtf8ToUtf8mb4Task());
         
-        // Converts the subscriptions, sequence_subscriptions, pns_subscription, pns_subscription_topic_wildcard, pns_subscription_topic_exact tables to utf8mb4
-        list.add(new com.openexchange.groupware.update.tasks.SubscriptionTablesUtf8Mb4UpdateTask());
-
         return list.toArray(new UpdateTaskV2[list.size()]);
     }
 

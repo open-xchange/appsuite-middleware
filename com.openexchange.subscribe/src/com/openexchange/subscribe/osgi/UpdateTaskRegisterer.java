@@ -62,6 +62,7 @@ import com.openexchange.subscribe.database.AddFolderIndex;
 import com.openexchange.subscribe.database.EnabledColumn;
 import com.openexchange.subscribe.database.FixSubscriptionTablePrimaryKey;
 import com.openexchange.subscribe.database.SubscriptionsCreatedAndLastModifiedColumn;
+import com.openexchange.subscribe.database.SubscriptionsTablesUtf8Mb4UpdateTask;
 
 /**
  * {@link UpdateTaskRegisterer}
@@ -90,7 +91,8 @@ public final class UpdateTaskRegisterer implements ServiceTrackerCustomizer<Data
                     (UpdateTaskV2) new EnabledColumn(),
                     new SubscriptionsCreatedAndLastModifiedColumn(),
                     new FixSubscriptionTablePrimaryKey(),
-                    new AddFolderIndex());
+                    new AddFolderIndex(), 
+                    new SubscriptionsTablesUtf8Mb4UpdateTask());
             }
         }, null);
         return service;
