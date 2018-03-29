@@ -70,11 +70,11 @@ import com.openexchange.tools.update.Tools;
 /**
  * {@link AbstractConvertUtf8ToUtf8mb4Task}
  *
- * <p>Automaticaly changes table and column character sets and collations from utf8 to utf8mb4.
+ * <p>Automatically changes table and column character sets and collations from utf8 to utf8mb4.
  * This is only possible for "non problematic" table structures. E.g. if a key is too long and or a table width is too large, additional actions need to be performed.
  * Either by implementing {@link AbstractConvertUtf8ToUtf8mb4Task#before} and/or {@link AbstractConvertUtf8ToUtf8mb4Task#after} or changing the table manually.
  * </p>
- * <span style="color:red;">Note</span>: Even if everything is performed in one transaction, MySQL can not rollback DDL statements (ALTER TABLE)!
+ * <span style="color:red;">Note</span>: Even if everything is performed in one transaction, MySQL can not roll-back DDL statements (ALTER TABLE)!
  *
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  * @since v7.10.0
