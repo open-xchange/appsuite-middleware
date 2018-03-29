@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,39 +47,49 @@
  *
  */
 
-package com.openexchange.groupware.contexts.impl.sql;
+package com.openexchange.groupware.update.tasks;
 
-import com.openexchange.database.AbstractCreateTableImpl;
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.util.List;
+import com.google.common.collect.ImmutableList;
+import com.openexchange.groupware.update.AbstractConvertUtf8ToUtf8mb4Task;
+import com.openexchange.groupware.update.PerformParameters;
+
 
 /**
- * {@link ContextAttributeCreateTable}
+ * {@link ContextAttributeConvertUtf8ToUtf8mb4Task}
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.10.0
  */
-public class ContextAttributeCreateTable extends AbstractCreateTableImpl {
+public class ContextAttributeConvertUtf8ToUtf8mb4Task extends AbstractConvertUtf8ToUtf8mb4Task {
 
-    private static final String[] TABLE = new String[]{"contextAttribute"};
-
-    private static final String[] CREATE_TABLE = new String[] { "CREATE TABLE `contextAttribute` ("
-        + " `cid` INT4 unsigned NOT NULL,"
-        + " `name` varchar(128) collate utf8mb4_unicode_ci NOT NULL,"
-        + " `value` TEXT collate utf8mb4_unicode_ci NOT NULL,"
-        + " PRIMARY KEY `cid` (`cid`,`name`,`value`(20))"
-        + ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci" };
-
-    @Override
-    protected String[] getCreateStatements() {
-        return CREATE_TABLE;
+    /**
+     * Initializes a new {@link ContextAttributeConvertUtf8ToUtf8mb4Task}.
+     */
+    public ContextAttributeConvertUtf8ToUtf8mb4Task() {
+        super();
     }
 
     @Override
-    public String[] requiredTables() {
-        return NO_TABLES;
+    public String[] getDependencies() {
+        return new String[] { com.openexchange.groupware.update.tasks.CreateIndexOnContextAttributesTask.class.getName() };
     }
 
     @Override
-    public String[] tablesToCreate() {
-        return TABLE;
+    protected List<String> tablesToConvert() {
+        return ImmutableList.of("contextAttribute");
+    }
+
+    @Override
+    protected void before(PerformParameters params, Connection connection) throws SQLException {
+        // Nothing
+    }
+
+    @Override
+    protected void after(PerformParameters params, Connection connection) throws SQLException {
+        // Nothing
     }
 
 }

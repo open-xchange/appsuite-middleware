@@ -707,6 +707,9 @@ public final class InternalList {
         // Converts misc. tables (prg_links, filestore_usage, etc.) to utf8mb4.
         list.add(new com.openexchange.groupware.update.tasks.MiscConvertUtf8ToUtf8mb4Task());
 
+        // Converts "contextAttribute" to utf8mb4
+        list.add(new com.openexchange.groupware.update.tasks.ContextAttributeConvertUtf8ToUtf8mb4Task());
+
         return list.toArray(new UpdateTaskV2[list.size()]);
     }
 
