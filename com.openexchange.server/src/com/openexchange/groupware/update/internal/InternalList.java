@@ -715,7 +715,10 @@ public final class InternalList {
 
         // Converts infostore tables to utf8mb4.
         list.add(new com.openexchange.groupware.update.tasks.InfostoreConvertUtf8ToUtf8mb4Task());
-        
+
+        // Converts aggregated contacts
+        list.add(new com.openexchange.groupware.update.tasks.AggregatingContactsConvertUtf8ToUtf8mb4Task());
+
         return list.toArray(new UpdateTaskV2[list.size()]);
     }
 
