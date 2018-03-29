@@ -213,7 +213,7 @@ public class OXSessionManager implements SessionManager {
 
             String requestedSessionId;
             do {
-                requestedSessionId = createSessionID(request);
+                requestedSessionId = createSessionID();
                 session.setIdInternal(requestedSessionId);
             } while (sessions.putIfAbsent(requestedSessionId, session) != null);
             sessionsCount++;
@@ -297,7 +297,7 @@ public class OXSessionManager implements SessionManager {
      *
      * @return A new JSessionId value as String
      */
-    private String createSessionID(Request request) {
+    private String createSessionID() {
         String backendRoute = grizzlyConfig.getBackendRoute();
         StringBuilder idBuilder = new StringBuilder(String.valueOf(generateRandomLong()));
         idBuilder.append('.').append(backendRoute);
