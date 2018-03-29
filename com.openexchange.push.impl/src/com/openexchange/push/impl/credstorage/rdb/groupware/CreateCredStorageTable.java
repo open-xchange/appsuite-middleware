@@ -62,7 +62,7 @@ public final class CreateCredStorageTable extends AbstractCreateTableImpl {
         return ("CREATE TABLE credentials (" +
         "cid INT4 UNSIGNED NOT NULL," +
         "user INT4 UNSIGNED NOT NULL," +
-        "password VARCHAR(64) CHARACTER SET smb4 COLLATE utf8mb4_unicode_ci NOT NULL," +
+        "password VARCHAR(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL," +
         "login VARCHAR(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL," +
         "PRIMARY KEY (cid, user)" +
         ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");

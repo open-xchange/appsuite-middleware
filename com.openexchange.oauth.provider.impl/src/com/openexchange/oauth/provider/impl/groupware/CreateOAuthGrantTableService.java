@@ -70,9 +70,9 @@ public final class CreateOAuthGrantTableService extends AbstractCreateTableImpl 
         " `scopes` VARCHAR(767) NOT NULL," +
         " `creation_date` BIGINT(64) NOT NULL," +
         " `last_modified` BIGINT(64) NOT NULL," +
-        " PRIMARY KEY (`refresh_token`)," +
-        " UNIQUE KEY `access_token` (`access_token`)," +
-        " KEY `client` (`client`)" +
+        " PRIMARY KEY (refresh_token(191))," +
+        " UNIQUE KEY `access_token` (access_token(191))," +
+        " KEY `client` (client(191))" +
         ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci";
 
     /**
