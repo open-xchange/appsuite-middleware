@@ -49,13 +49,14 @@
 
 package com.openexchange.mail.search;
 
+import java.io.Serializable;
 
 /**
  * {@link ComparablePattern}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface ComparablePattern<P> {
+public interface ComparablePattern<P> extends Serializable {
 
     /**
      * Gets the comparison type.

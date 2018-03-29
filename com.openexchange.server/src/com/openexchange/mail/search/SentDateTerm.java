@@ -76,6 +76,8 @@ public final class SentDateTerm extends SearchTerm<ComparablePattern<java.util.D
         super();
         pattern = new ComparablePattern<java.util.Date>() {
 
+            private static final long serialVersionUID = -8289583335080081522L;
+
             @Override
             public ComparisonType getComparisonType() {
                 return comparisonType;
