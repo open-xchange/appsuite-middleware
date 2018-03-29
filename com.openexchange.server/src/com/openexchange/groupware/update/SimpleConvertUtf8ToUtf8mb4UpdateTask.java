@@ -70,7 +70,7 @@ public class SimpleConvertUtf8ToUtf8mb4UpdateTask extends AbstractConvertUtf8ToU
      * @param tableNames A {@link List} with table names to convert
      * @param dependencies An optional array of dependency update tasks
      * @param throws {@link IllegalArgumentException} if the tableNames
-     *            {@link List} is either <code>null</code> or empty.
+     *            {@link List} is <code>null</code>.
      */
     public SimpleConvertUtf8ToUtf8mb4UpdateTask(List<String> tableNames, String... dependencies) {
         super();
