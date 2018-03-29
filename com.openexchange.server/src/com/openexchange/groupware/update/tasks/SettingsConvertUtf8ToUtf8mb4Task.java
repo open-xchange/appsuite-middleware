@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,73 +47,50 @@
  *
  */
 
-package com.openexchange.capabilities.groupware;
+package com.openexchange.groupware.update.tasks;
 
-import com.openexchange.database.AbstractCreateTableImpl;
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.util.List;
+import com.google.common.collect.ImmutableList;
+import com.openexchange.groupware.update.AbstractConvertUtf8ToUtf8mb4Task;
+import com.openexchange.groupware.update.PerformParameters;
 
 
 /**
- * {@link CapabilityCreateTableService}
+ * {@link SettingsConvertUtf8ToUtf8mb4Task} - Converts settings tables (user_configuration, user_setting_mail, etc.) to utf8mb4.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.10.0
  */
-public final class CapabilityCreateTableService extends AbstractCreateTableImpl {
-
-    private static final String TABLE_CAP_CONTEXT = "capability_context";
-
-    private static final String CREATE_CAP_CONTEXT = "CREATE TABLE "+TABLE_CAP_CONTEXT+" (" +
-        " cid INT4 unsigned NOT NULL," +
-        " cap VARCHAR(64) CHARACTER SET latin1 NOT NULL DEFAULT ''," +
-        " PRIMARY KEY (cid, cap)" +
-        ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci";
-
-    private static final String TABLE_CAP_USER = "capability_user";
-
-    private static final String CREATE_CAP_USER = "CREATE TABLE "+TABLE_CAP_USER+" (" +
-        " cid INT4 unsigned NOT NULL," +
-        " user INT4 unsigned NOT NULL," +
-        " cap VARCHAR(64) CHARACTER SET latin1 NOT NULL DEFAULT ''," +
-        " PRIMARY KEY (cid, user, cap)" +
-        ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci";
+public class SettingsConvertUtf8ToUtf8mb4Task extends AbstractConvertUtf8ToUtf8mb4Task {
 
     /**
-     * Gets the table names.
-     *
-     * @return The table names.
+     * Initializes a new {@link SettingsConvertUtf8ToUtf8mb4Task}.
      */
-    public static String[] getTablesToCreate() {
-        return new String[] { TABLE_CAP_CONTEXT, TABLE_CAP_USER };
-    }
-
-    /**
-     * Gets the CREATE-TABLE statements.
-     *
-     * @return The CREATE statements
-     */
-    public static String[] getCreateStmts() {
-        return new String[] { CREATE_CAP_CONTEXT, CREATE_CAP_USER };
-    }
-
-    /**
-     * Initializes a new {@link CapabilityCreateTableService}.
-     */
-    public CapabilityCreateTableService() {
+    public SettingsConvertUtf8ToUtf8mb4Task() {
         super();
     }
 
     @Override
-    public String[] requiredTables() {
-        return NO_TABLES;
+    public String[] getDependencies() {
+        return new String[] { ChangePrimaryKeyForUserAttribute.class.getName() };
     }
 
     @Override
-    public String[] tablesToCreate() {
-        return getTablesToCreate();
+    protected List<String> tablesToConvert() {
+        return ImmutableList.of("user_configuration", "user_setting_mail", "user_setting_mail_signature", "user_setting_spellcheck",
+            "user_setting_admin", "user_setting", "user_setting_server");
     }
 
     @Override
-    protected String[] getCreateStatements() {
-        return getCreateStmts();
+    protected void before(PerformParameters params, Connection connection) throws SQLException {
+        // Nothing
+    }
+
+    @Override
+    protected void after(PerformParameters params, Connection connection) throws SQLException {
+        // Nothing
     }
 
 }

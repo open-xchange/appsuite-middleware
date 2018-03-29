@@ -61,6 +61,7 @@ import org.osgi.service.event.EventHandler;
 import com.openexchange.caching.CacheService;
 import com.openexchange.capabilities.Capability;
 import com.openexchange.capabilities.CapabilityService;
+import com.openexchange.capabilities.groupware.CapabilityConvertUtf8ToUtf8mb4Task;
 import com.openexchange.capabilities.groupware.CapabilityCreateTableService;
 import com.openexchange.capabilities.groupware.CapabilityCreateTableTask;
 import com.openexchange.capabilities.groupware.CapabilityDeleteListener;
@@ -199,7 +200,7 @@ public class CapabilitiesActivator extends HousekeepingActivator {
          * Register update task, create table job and delete listener
          */
         registerService(CreateTableService.class, new CapabilityCreateTableService());
-        registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(new CapabilityCreateTableTask(), new MakeNotNullUpdateTask()));
+        registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(new CapabilityCreateTableTask(), new MakeNotNullUpdateTask(), new CapabilityConvertUtf8ToUtf8mb4Task()));
         registerService(DeleteListener.class, new CapabilityDeleteListener());
 
         openTrackers();

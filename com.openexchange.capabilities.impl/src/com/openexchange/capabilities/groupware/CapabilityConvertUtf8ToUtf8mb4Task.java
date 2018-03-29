@@ -47,48 +47,39 @@
  *
  */
 
-package com.openexchange.groupware.update.tasks;
+package com.openexchange.capabilities.groupware;
 
 import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.util.Arrays;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
 import com.google.common.collect.ImmutableList;
-import com.openexchange.database.Databases;
 import com.openexchange.groupware.update.AbstractConvertUtf8ToUtf8mb4Task;
 import com.openexchange.groupware.update.PerformParameters;
-import com.openexchange.java.Strings;
-import com.openexchange.tools.update.Column;
 
 
 /**
- * {@link LdapConvertUtf8ToUtf8mb4Task2} - Converts LDAP tables (user, group, etc.) to utf8mb4.
+ * {@link CapabilityConvertUtf8ToUtf8mb4Task} - Converts capability tables to utf8mb4.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.10.0
  */
-public class LdapConvertUtf8ToUtf8mb4Task2 extends AbstractConvertUtf8ToUtf8mb4Task {
+public class CapabilityConvertUtf8ToUtf8mb4Task extends AbstractConvertUtf8ToUtf8mb4Task {
 
     /**
-     * Initializes a new {@link LdapConvertUtf8ToUtf8mb4Task2}.
+     * Initializes a new {@link CapabilityConvertUtf8ToUtf8mb4Task}.
      */
-    public LdapConvertUtf8ToUtf8mb4Task2() {
+    public CapabilityConvertUtf8ToUtf8mb4Task() {
         super();
     }
 
     @Override
     public String[] getDependencies() {
-        return new String[] { ChangePrimaryKeyForUserAttribute.class.getName() };
+        return new String[] { MakeNotNullUpdateTask.class.getName() };
     }
 
     @Override
     protected List<String> tablesToConvert() {
-        return ImmutableList.of("groups", "del_groups", "user", "del_user", "groups_member",
-            "login2user", "user_attribute", "resource", "del_resource");
+        return ImmutableList.of("capability_context", "capability_user");
     }
 
     @Override
@@ -98,32 +89,7 @@ public class LdapConvertUtf8ToUtf8mb4Task2 extends AbstractConvertUtf8ToUtf8mb4T
 
     @Override
     protected void after(PerformParameters params, Connection connection) throws SQLException {
-        String schema = params.getSchema().getSchema();
-        changeTable(connection, schema, "user_alias", "alias");
-
-    }
-
-    private void changeTable(Connection connection, String schema, String table, String... columns) throws SQLException {
-        PreparedStatement alterStmt = null;
-        try {
-            List<Column> columnsToModify = getColumsToModify(connection, schema, table);
-            Set<String> columnsToChange = new HashSet<String>(Arrays.asList(columns));
-            columnsToModify = columnsToModify.stream().map(c -> changeMailColumn(c, columnsToChange)).collect(Collectors.toList());
-
-
-            String alterTable = alterTable(table, columnsToModify, UTF8MB4_CHARSET, UTF8MB4_UNICODE_COLLATION);
-
-            if (!Strings.isEmpty(alterTable)) {
-                alterStmt = connection.prepareStatement(alterTable);
-                alterStmt.execute();
-            }
-        } finally {
-            Databases.closeSQLStuff(alterStmt);
-        }
-    }
-
-    private Column changeMailColumn(Column column, Set<String> columnsToChange) {
-        return columnsToChange.contains(column.name) ? shrinkVarcharColumn(column.name, 255, column) : column;
+        // Nothing
     }
 
 }

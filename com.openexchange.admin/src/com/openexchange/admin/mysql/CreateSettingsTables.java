@@ -73,7 +73,7 @@ public class CreateSettingsTables extends AbstractCreateTableImpl {
        + "permissions INT4 UNSIGNED NOT NULL,"
        + "PRIMARY KEY (cid, user),"
        + "FOREIGN KEY (cid, user) REFERENCES user (cid, id)"
-     + ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
+     + ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;";
 
     private static final String createUserSettingMailTable = "CREATE TABLE user_setting_mail ("
        + "cid INT4 UNSIGNED NOT NULL,"
@@ -94,7 +94,7 @@ public class CreateSettingsTables extends AbstractCreateTableImpl {
        + "upload_quota_per_file INT4 DEFAULT -1,"
        + "PRIMARY KEY (cid, user),"
        + "FOREIGN KEY (cid, user) REFERENCES user (cid, id)"
-     + ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
+     + ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;";
 
     private static final String createUserSettingMailSignatureTable = "CREATE TABLE user_setting_mail_signature ("
        + "cid INT4 UNSIGNED NOT NULL,"
@@ -103,7 +103,7 @@ public class CreateSettingsTables extends AbstractCreateTableImpl {
        + "signature VARCHAR(1024) NOT NULL,"
        + "PRIMARY KEY (cid, user, id),"
        + "FOREIGN KEY (cid, user) REFERENCES user_setting_mail (cid, user)"
-     + ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
+     + ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;";
 
     private static final String createUserSettingSpellcheckTable = "CREATE TABLE user_setting_spellcheck ("
        + "cid INT4 UNSIGNED NOT NULL,"
@@ -111,14 +111,14 @@ public class CreateSettingsTables extends AbstractCreateTableImpl {
        + "user_dic TEXT,"
        + "PRIMARY KEY (cid, user),"
        + "FOREIGN KEY (cid, user) REFERENCES user (cid, id)"
-     + ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
+     + ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;";
 
     private static final String createUserSettingAdminTable = "CREATE TABLE user_setting_admin ("
        + "cid INT4 UNSIGNED NOT NULL,"
        + "user INT4 UNSIGNED NOT NULL,"
        + "PRIMARY KEY (cid, user),"
        + "FOREIGN KEY (cid, user) REFERENCES user (cid, id)"
-     + ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
+     + ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;";
 
     private static final String createUserSettingTable = "CREATE TABLE user_setting ("
        + "cid INT4 UNSIGNED NOT NULL,"
@@ -126,7 +126,7 @@ public class CreateSettingsTables extends AbstractCreateTableImpl {
        + "path_id INT4 UNSIGNED NOT NULL,"
        + "value MEDIUMTEXT,"
        + "PRIMARY KEY (cid, user_id, path_id)"
-     + ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
+     + ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;";
 
     private static final String createUserSettingServerTablePrimaryKey = "CREATE TABLE user_setting_server ("
         + "cid INT4 UNSIGNED NOT NULL,"
@@ -141,7 +141,7 @@ public class CreateSettingsTables extends AbstractCreateTableImpl {
         + "uuid BINARY(16) NOT NULL,"
         + "PRIMARY KEY (cid, user, uuid),"
         + "FOREIGN KEY(cid, user) REFERENCES user(cid, id)"
-      + ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
+      + ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;";
 
     /**
      * Initializes a new {@link CreateSettingsTables}.

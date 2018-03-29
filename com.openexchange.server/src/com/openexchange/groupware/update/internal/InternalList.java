@@ -699,7 +699,10 @@ public final class InternalList {
         list.add(new com.openexchange.groupware.update.tasks.SequenceTablesUtf8Mb4UpdateTask());
 
         // Converts LDAP tables to uf8mb4
-        list.add(new com.openexchange.groupware.update.tasks.LdapConvertUtf8ToUtf8mb4Task2());
+        list.add(new com.openexchange.groupware.update.tasks.LdapConvertUtf8ToUtf8mb4Task());
+
+        // Converts settings tables to uf8mb4
+        list.add(new com.openexchange.groupware.update.tasks.SettingsConvertUtf8ToUtf8mb4Task());
 
         return list.toArray(new UpdateTaskV2[list.size()]);
     }
