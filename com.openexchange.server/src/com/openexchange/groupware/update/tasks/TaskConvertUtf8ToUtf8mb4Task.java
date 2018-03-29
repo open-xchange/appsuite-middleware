@@ -92,26 +92,4 @@ public class TaskConvertUtf8ToUtf8mb4Task extends SimpleConvertUtf8ToUtf8mb4Upda
             Tools.modifyColumns(connection, "del_task_eparticipant", true, column);
         }
     }
-
-    private int getVarcharColumnSize(String colName, String tableName, Connection con) throws SQLException {
-        ResultSet rsColumns = null;
-        try {
-            DatabaseMetaData meta = con.getMetaData();
-            rsColumns = meta.getColumns(null, null, tableName, null);
-            while (rsColumns.next()) {
-                String columnName = rsColumns.getString("COLUMN_NAME");
-                if (colName.equals(columnName)) {
-                    int dataType = rsColumns.getInt("DATA_TYPE");
-                    if (java.sql.Types.VARCHAR == dataType) {
-                        return rsColumns.getInt("COLUMN_SIZE");
-                    }
-                }
-            }
-
-            // No such VARCHAR column
-            return -1;
-        } finally {
-            Databases.closeSQLStuff(rsColumns);
-        }
-    }
 }

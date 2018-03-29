@@ -50,6 +50,7 @@
 package com.openexchange.groupware.update;
 
 import java.sql.Connection;
+import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -352,6 +353,37 @@ public abstract class AbstractConvertUtf8ToUtf8mb4Task extends UpdateTaskAdapter
             return col.replace("utf8", UTF8MB4_CHARSET);
         } else {
             return col;
+        }
+    }
+
+    /**
+     * Retrieves the size of the specified varchar column
+     * 
+     * @param colName The column's name
+     * @param tableName The table's name
+     * @param con The {@link Connection}
+     * @return The size
+     * @throws SQLException if an SQL error is occurred
+     */
+    protected int getVarcharColumnSize(String colName, String tableName, Connection con) throws SQLException {
+        ResultSet rsColumns = null;
+        try {
+            DatabaseMetaData meta = con.getMetaData();
+            rsColumns = meta.getColumns(null, null, tableName, null);
+            while (rsColumns.next()) {
+                String columnName = rsColumns.getString("COLUMN_NAME");
+                if (colName.equals(columnName)) {
+                    int dataType = rsColumns.getInt("DATA_TYPE");
+                    if (java.sql.Types.VARCHAR == dataType) {
+                        return rsColumns.getInt("COLUMN_SIZE");
+                    }
+                }
+            }
+
+            // No such VARCHAR column
+            return -1;
+        } finally {
+            Databases.closeSQLStuff(rsColumns);
         }
     }
 
