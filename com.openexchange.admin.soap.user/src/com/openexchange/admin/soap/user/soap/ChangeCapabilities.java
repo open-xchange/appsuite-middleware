@@ -180,7 +180,7 @@ public final class ChangeCapabilities {
     }
 
     public String getCapsToDrop() {
-        return capsToRemove;
+        return capsToDrop;
     }
 
     public void setCapsToDrop(String capsToDrop) {
