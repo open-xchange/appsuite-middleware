@@ -63,16 +63,16 @@ public final class CreateOAuthGrantTableService extends AbstractCreateTableImpl 
     private static final String CREATE_GRANT_TABLE = "CREATE TABLE `oauth_grant` (" +
         " `cid` INT4 unsigned NOT NULL," +
         " `user` INT4 unsigned NOT NULL," +
-        " `refresh_token` VARCHAR(255) NOT NULL," +
-        " `access_token` VARCHAR(255) NOT NULL," +
-        " `client` VARCHAR(255) NOT NULL," +
+        " `refresh_token` VARCHAR(191) NOT NULL," +
+        " `access_token` VARCHAR(191) NOT NULL," +
+        " `client` VARCHAR(191) NOT NULL," +
         " `expiration_date` BIGINT(64) NOT NULL," +
         " `scopes` VARCHAR(767) NOT NULL," +
         " `creation_date` BIGINT(64) NOT NULL," +
         " `last_modified` BIGINT(64) NOT NULL," +
-        " PRIMARY KEY (refresh_token(191))," +
-        " UNIQUE KEY `access_token` (access_token(191))," +
-        " KEY `client` (client(191))" +
+        " PRIMARY KEY (refresh_token)," +
+        " UNIQUE KEY `access_token` (access_token)," +
+        " KEY `client` (client)" +
         ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci";
 
     /**
