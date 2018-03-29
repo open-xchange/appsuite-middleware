@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -49,42 +49,47 @@
 
 package com.openexchange.push.impl.credstorage.rdb.groupware;
 
-import com.openexchange.database.AbstractCreateTableImpl;
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.util.List;
+import com.google.common.collect.ImmutableList;
+import com.openexchange.groupware.update.AbstractConvertUtf8ToUtf8mb4Task;
+import com.openexchange.groupware.update.PerformParameters;
+
 
 /**
- * {@link CreateCredStorageTable}
+ * {@link CredConvertUtf8ToUtf8mb4Task}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.10.0
  */
-public final class CreateCredStorageTable extends AbstractCreateTableImpl {
+public class CredConvertUtf8ToUtf8mb4Task extends AbstractConvertUtf8ToUtf8mb4Task {
 
-    public static final String getCreateTableStatement() {
-        return ("CREATE TABLE credentials (" +
-        "cid INT4 UNSIGNED NOT NULL," +
-        "user INT4 UNSIGNED NOT NULL," +
-        "password VARCHAR(64) CHARACTER SET smb4 COLLATE utf8mb4_unicode_ci NOT NULL," +
-        "login VARCHAR(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL," +
-        "PRIMARY KEY (cid, user)" +
-        ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
-    }
-
-    public CreateCredStorageTable() {
+    /**
+     * Initializes a new {@link CredConvertUtf8ToUtf8mb4Task}.
+     */
+    public CredConvertUtf8ToUtf8mb4Task() {
         super();
     }
 
     @Override
-    public String[] getCreateStatements() {
-        return new String[] { getCreateTableStatement() };
+    public String[] getDependencies() {
+        return new String[] { CredStorageCreateTableTask.class.getName() };
     }
 
     @Override
-    public String[] requiredTables() {
-        return new String[] { "user" };
+    protected List<String> tablesToConvert() {
+        return ImmutableList.of("credentials");
     }
 
     @Override
-    public String[] tablesToCreate() {
-        return new String[] { "credentials" };
+    protected void before(PerformParameters params, Connection connection) throws SQLException {
+        // Nothing
+    }
+
+    @Override
+    protected void after(PerformParameters params, Connection connection) throws SQLException {
+        // Nothing
     }
 
 }
