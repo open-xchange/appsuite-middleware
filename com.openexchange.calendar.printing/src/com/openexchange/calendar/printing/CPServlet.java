@@ -114,14 +114,14 @@ public class CPServlet extends PermissionServlet {
     private static final String DOCUMENT_TITLE = "documentTitle";
 
     private static final String DATE_FORMATTER = "dateFormatter";
-    
-    private final ServiceLookup services;
-    
+
+    private final transient ServiceLookup services;
+
     // --------------------------------------------------------------------------------------- //
 
     /**
      * Initializes a new {@link CPServlet}.
-     * 
+     *
      * @param services The {@link ServiceLookup}
      */
     public CPServlet(ServiceLookup services) {
@@ -164,14 +164,14 @@ public class CPServlet extends PermissionServlet {
                 tool.calculateNewStartAndEnd(params);
             }
 
-            TemplateService templateService = services.getServiceSafe(TemplateService.class);            
+            TemplateService templateService = services.getServiceSafe(TemplateService.class);
             OXTemplate template;
             if(params.hasUserTemplate()) {
                 template = templateService.loadTemplate(params.getUserTemplate(), params.getTemplate(), session);
             } else {
                 template = templateService.loadTemplate(params.getTemplate());
             }
-            
+
             // Get calendar session & set parameters for event search
             CalendarService calendarService = services.getServiceSafe(CalendarService.class);
             CalendarSession calendarSession = calendarService.init(session);
@@ -190,7 +190,7 @@ public class CPServlet extends PermissionServlet {
             final Locale locale = user.getLocale();
             final CPCalendar cal = CPCalendar.getCalendar(zone, locale);
             modifyCalendar(cal, params);
-            
+
             final Partitioner partitioner = new Partitioner(params, cal, session.getContext());
             final List<Day> perDayList = partitioner.partition(services, events, session.getUserId());
 

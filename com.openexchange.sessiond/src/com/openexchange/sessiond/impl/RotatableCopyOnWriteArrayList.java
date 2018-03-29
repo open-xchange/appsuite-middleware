@@ -68,8 +68,8 @@ public class RotatableCopyOnWriteArrayList<E> extends CopyOnWriteArrayList<E> {
     /** The lock protecting all mutators */
     private final transient ReentrantLock superLock;
 
-    private final Method getArrayMethod;
-    private final Method setArrayMethod;
+    private final transient Method getArrayMethod;
+    private final transient Method setArrayMethod;
 
     /**
      * Initializes a new {@link RotatableCopyOnWriteArrayList}, which is initially empty.

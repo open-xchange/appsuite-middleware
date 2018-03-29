@@ -113,10 +113,4 @@ public class MailSecretRecoveryActivator extends HousekeepingActivator {
 
         });
     }
-
-    @Override
-    protected void stopBundle() throws Exception {
-        cleanUp();
-    }
-
 }

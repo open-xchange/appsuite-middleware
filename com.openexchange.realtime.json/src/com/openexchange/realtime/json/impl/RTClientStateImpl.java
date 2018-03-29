@@ -209,27 +209,6 @@ public class RTClientStateImpl implements RTClientState {
     @Override
     public void lock() {
         lock.lock();
-
-//        boolean lockAcquired = false;
-//        long waitedSeconds = 0L;
-//        while (!lockAcquired) {
-//            try {
-//                lockAcquired = lock.tryLock(5, TimeUnit.SECONDS);
-//            } catch (InterruptedException x) {
-//                Thread.currentThread().interrupt();
-//                return;
-//            }
-//
-//            if (!lockAcquired) {
-//                Thread owner = lock.getOwner();
-//                if (null != owner) {
-//                    waitedSeconds += 5;
-//                    FastThrowable t = new FastThrowable("Trace from thread " + owner.getName());
-//                    t.setStackTrace(owner.getStackTrace());
-//                    LOG.warn("Thread {} failed to get lock for client state {} after {}sec. Lock still acquired by thread {}:", Thread.currentThread().getName(), id, waitedSeconds, owner.getName(), t);
-//                }
-//            }
-//        }
     }
 
     @Override

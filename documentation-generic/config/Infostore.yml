@@ -16,25 +16,6 @@ properties:
       packageName: open-xchange-core
       tags: ["Infostore"]
 
-    - key: com.openexchange.infostore.zipDocumentsCompressionLevel
-      description: |
-        Configures the used compression level that is applied to .zip containers
-        when downloading multiple documents at once.  
-        Possible values are:
-        <ul>
-          <li><code>-1</code> - for the built-in default level</li>
-          <li><code>0</code> - for no compression</li>
-          <li>Any number between <code>1</code> (best speed) and <code>9</code> (best compression)</li>
-        </ul>
-      defaultValue: -1
-      version: 
-      reloadable: false
-      configcascadeAware: false
-      related: 
-      file: infostore.properties
-      packageName: open-xchange-core
-      tags: ["Infostore"]
-
     - key: com.openexchange.infostore.trash.retentionDays
       description: |
         Specifies how many days items are kept in the trash folder until they are

@@ -86,15 +86,15 @@ import com.sun.syndication.io.SyndFeedInput;
 import com.sun.syndication.io.XmlReader;
 
 /**
- * {@link TimoutHttpURLFeedFetcher} - timeout-capable {@link HttpURLFeedFetcher}.
+ * {@link TimeoutHttpURLFeedFetcher} - timeout-capable {@link HttpURLFeedFetcher}.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @since 7.4.1
  */
-public class TimoutHttpURLFeedFetcher extends AbstractFeedFetcher implements Reloadable {
+public class TimeoutHttpURLFeedFetcher extends AbstractFeedFetcher implements Reloadable {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(TimoutHttpURLFeedFetcher.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(TimeoutHttpURLFeedFetcher.class);
 
     private static final String MAX_FEED_SIZE_PROPERTY_NAME = "com.openexchange.messaging.rss.feed.size";
 
@@ -112,12 +112,12 @@ public class TimoutHttpURLFeedFetcher extends AbstractFeedFetcher implements Rel
     private FeedFetcherCache feedInfoCache;
 
     /**
-     * Initializes a new {@link TimoutHttpURLFeedFetcher}.
+     * Initializes a new {@link TimeoutHttpURLFeedFetcher}.
      *
      * @param connectTimout The timeout value, in milliseconds, to be used when opening a communications link to the resource
      * @param readTimout The read timeout to a specified timeout, in milliseconds
      */
-    public TimoutHttpURLFeedFetcher(int connectTimout, int readTimout) {
+    public TimeoutHttpURLFeedFetcher(int connectTimout, int readTimout) {
         super();
         this.connectTimout = connectTimout;
         this.readTimout = readTimout;
@@ -125,13 +125,13 @@ public class TimoutHttpURLFeedFetcher extends AbstractFeedFetcher implements Rel
     }
 
     /**
-     * Initializes a new {@link TimoutHttpURLFeedFetcher}.
+     * Initializes a new {@link TimeoutHttpURLFeedFetcher}.
      *
      * @param connectTimout The timeout value, in milliseconds, to be used when opening a communications link to the resource
      * @param readTimout The read timeout to a specified timeout, in milliseconds
      * @param feedInfoCache The feed cache
      */
-    public TimoutHttpURLFeedFetcher(int connectTimout, int readTimout, FeedFetcherCache feedInfoCache) {
+    public TimeoutHttpURLFeedFetcher(int connectTimout, int readTimout, FeedFetcherCache feedInfoCache) {
         this.connectTimout = connectTimout;
         this.readTimout = readTimout;
         setFeedInfoCache(feedInfoCache);

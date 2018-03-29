@@ -100,9 +100,10 @@ public class RefreshITipAnalyzer extends AbstractITipAnalyzer {
         }
 
         if (null == event) {
-            throw new OXException(new IllegalArgumentException("No appointment instance given"));
+            analysis.addAnnotation(new ITipAnnotation(Messages.REFRESH_FOR_UNKNOWN, locale));
+            analysis.recommendAction(ITipAction.IGNORE);
+            return analysis;
         }
-
         analysis.setUid(event.getUid());
 
         refreshed = util.resolveUid(event.getUid(), session);

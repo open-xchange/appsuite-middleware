@@ -51,6 +51,7 @@ package com.openexchange.publish.helpers;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 import com.openexchange.config.ConfigurationService;
@@ -144,6 +145,10 @@ public abstract class AbstractPublicationService implements PublicationService {
     @Override
     public Collection<Publication> getAllPublications(final Context ctx) throws OXException {
         final List<Publication> publications = STORAGE.get().getPublications(ctx, getTarget().getId());
+        if(publications== null) {
+            afterLoad(Collections.emptyList());
+            return Collections.emptyList();
+        }
         List<Publication> returnPublications = new ArrayList<Publication>();
         for (final Publication publication : publications) {
             /* as some publications are not working anymore, we should at least filter out the not working ones and write them to LOG */
@@ -269,38 +274,47 @@ public abstract class AbstractPublicationService implements PublicationService {
     @Override
     public abstract PublicationTarget getTarget() throws OXException;
 
+    @SuppressWarnings("unused")
     public void modifyIncoming(final Publication publication) throws OXException {
         // Empty method
     }
 
+    @SuppressWarnings("unused")
     public void modifyOutgoing(final Publication publication) throws OXException {
         // Empty method
     }
 
+    @SuppressWarnings("unused")
     public void beforeCreate(final Publication publication) throws OXException {
         // Empty method
     }
 
+    @SuppressWarnings("unused")
     public void afterCreate(final Publication publication) throws OXException {
         // Empty method
     }
 
+    @SuppressWarnings("unused")
     public void beforeUpdate(final Publication publication) throws OXException {
         // Empty method
     }
 
+    @SuppressWarnings("unused")
     public void afterUpdate(final Publication publication) throws OXException {
         // Empty method
     }
 
+    @SuppressWarnings("unused")
     public void beforeDelete(final Publication publication) throws OXException {
         // Empty method
     }
 
+    @SuppressWarnings("unused")
     public void afterDelete(final Publication publication) throws OXException {
         // Empty method
     }
 
+    @SuppressWarnings("unused")
     public void afterLoad(final Collection<Publication> publications) throws OXException {
         // Empty method
     }

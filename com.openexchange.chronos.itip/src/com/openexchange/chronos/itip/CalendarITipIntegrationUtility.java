@@ -125,7 +125,6 @@ public class CalendarITipIntegrationUtility implements ITipIntegrationUtility {
     }
 
     private void applyEventData(final CalendarSession session, CalendarStorage storage, Event event) throws OXException {
-        event.setFlags(CalendarUtils.getFlags(event, session.getUserId()));
         event.setAttendees(storage.getAttendeeStorage().loadAttendees(event.getId()));
         for (Attendee attendee : event.getAttendees()) {
             if (attendee.getEntity() == session.getUserId()) {
@@ -139,6 +138,7 @@ public class CalendarITipIntegrationUtility implements ITipIntegrationUtility {
         if (null != attachments && false == attachments.isEmpty()) {
             event.setAttachments(attachments);
         }
+        event.setFlags(CalendarUtils.getFlags(event, session.getUserId()));
     }
 
     @Override

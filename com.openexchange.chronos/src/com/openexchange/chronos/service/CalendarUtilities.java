@@ -146,4 +146,25 @@ public interface CalendarUtilities {
      */
     Comparator<Event> getComparator(SortOrder[] sortOrders, TimeZone timeZone);
 
+    /**
+     * Selects a well-known and valid timezone based on a client-supplied timezone, using different fallbacks if no exactly matching
+     * timezone is available.
+     *
+     * @param calendarUserId The identifier of the calendar user
+     * @param timeZone The timezone as supplied by the client
+     * @param originalTimeZone The original timezone in case of updates, or <code>null</code> if not available
+     * @return The selected timezone, or <code>null</code> if passed timezone reference was <code>null</code>
+     */
+    TimeZone selectTimeZone(int calendarUserId, TimeZone timeZone, TimeZone originalTimeZone) throws OXException;
+
+    /**
+     * Checks and adjusts the timezones of the event's start- and end-time (in case they are <i>set</i>) to match well-known & valid
+     * timezones, using different fallbacks if no exactly matching timezone is available.
+     *
+     * @param calendarUserId The identifier of the user to get the fallback timezone from
+     * @param event The event to set the timezones in
+     * @param originalEvent The original event, or <code>null</code> if not applicable
+     */
+    void adjustTimeZones(int calendarUserId, Event event, Event originalEvent) throws OXException;
+
 }
