@@ -58,6 +58,7 @@ import com.openexchange.database.CreateTableService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.filestore.FileStorageProvider;
 import com.openexchange.filestore.sproxyd.SproxydFileStorageFactory;
+import com.openexchange.filestore.sproxyd.groupware.SproxydConvertToUtf8mb4;
 import com.openexchange.filestore.sproxyd.groupware.SproxydCreateTableService;
 import com.openexchange.filestore.sproxyd.groupware.SproxydCreateTableTask;
 import com.openexchange.filestore.sproxyd.groupware.SproxydDeleteListener;
@@ -100,7 +101,7 @@ public class SproxydActivator extends HousekeepingActivator {
 
         // Register update task, create table job and delete listener
         registerService(CreateTableService.class, new SproxydCreateTableService());
-        registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(new SproxydCreateTableTask(this)));
+        registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(new SproxydCreateTableTask(), new SproxydConvertToUtf8mb4()));
         registerService(DeleteListener.class, new SproxydDeleteListener());
 
         // Register factory

@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -49,69 +49,22 @@
 
 package com.openexchange.filestore.sproxyd.groupware;
 
-import com.openexchange.database.AbstractCreateTableImpl;
-import com.openexchange.database.CreateTableService;
+import com.openexchange.groupware.update.SimpleConvertUtf8ToUtf8mb4UpdateTask;
 
 
 /**
- * {@link SproxydCreateTableService} - The Sproxyd {@link CreateTableService}.
+ * {@link SproxydConvertToUtf8mb4}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.10.0
  */
-public class SproxydCreateTableService extends AbstractCreateTableImpl {
-
-    private static final String TABLE_SCALITY_FILESTORE = "scality_filestore";
-
-    private static final String CREATE_SCALITY_FILESTORE = "CREATE TABLE "+TABLE_SCALITY_FILESTORE+" (" +
-        " cid INT4 unsigned NOT NULL," +
-        " user INT4 unsigned NOT NULL," +
-        " document_id BINARY(16) NOT NULL," +
-        " scality_id BINARY(16) NOT NULL," +
-        " offset BIGINT(64) NOT NULL," +
-        " length BIGINT(64) NOT NULL," +
-        " PRIMARY KEY (cid, user, document_id, scality_id)," +
-        " UNIQUE KEY `scality_key` (`scality_id`)," +
-        " INDEX `scality_index` (`cid`, `scality_id`)" +
-        ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci";
+public class SproxydConvertToUtf8mb4 extends SimpleConvertUtf8ToUtf8mb4UpdateTask {
 
     /**
-     * Gets the table names.
-     *
-     * @return The table names.
+     * Initializes a new {@link SproxydConvertToUtf8mb4}.
      */
-    public static String[] getTablesToCreate() {
-        return new String[] { TABLE_SCALITY_FILESTORE };
-    }
-
-    /**
-     * Gets the CREATE-TABLE statements.
-     *
-     * @return The CREATE statements
-     */
-    public static String[] getCreateStmts() {
-        return new String[] { CREATE_SCALITY_FILESTORE };
-    }
-
-    /**
-     * Initializes a new {@link CapabilityCreateTableService}.
-     */
-    public SproxydCreateTableService() {
-        super();
-    }
-
-    @Override
-    public String[] requiredTables() {
-        return new String[] { "user", "infostore_document" };
-    }
-
-    @Override
-    public String[] tablesToCreate() {
-        return getTablesToCreate();
-    }
-
-    @Override
-    protected String[] getCreateStatements() {
-        return getCreateStmts();
+    public SproxydConvertToUtf8mb4() {
+        super(SproxydCreateTableTask.class, "scality_filestore");
     }
 
 }

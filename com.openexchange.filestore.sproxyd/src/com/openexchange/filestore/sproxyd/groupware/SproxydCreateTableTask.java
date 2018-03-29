@@ -52,14 +52,11 @@ package com.openexchange.filestore.sproxyd.groupware;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import com.openexchange.database.DatabaseService;
 import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
-import com.openexchange.server.ServiceExceptionCode;
-import com.openexchange.server.ServiceLookup;
 
 
 /**
@@ -69,23 +66,15 @@ import com.openexchange.server.ServiceLookup;
  */
 public class SproxydCreateTableTask extends UpdateTaskAdapter {
 
-    private final ServiceLookup services;
-
     /**
      * Initializes a new {@link CapabilityCreateTableTask}.
      */
-    public SproxydCreateTableTask(ServiceLookup services) {
+    public SproxydCreateTableTask() {
         super();
-        this.services = services;
     }
 
     @Override
     public void perform(final PerformParameters params) throws OXException {
-        final DatabaseService dbService = services.getService(DatabaseService.class);
-        if (dbService == null) {
-            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(DatabaseService.class.getName());
-        }
-
         Connection writeCon = params.getConnection();
         boolean rollback = false;
         boolean restoreAutoCommit = false;
@@ -113,11 +102,6 @@ public class SproxydCreateTableTask extends UpdateTaskAdapter {
     }
 
     private void perform(Connection writeCon) throws OXException {
-        final DatabaseService dbService = services.getService(DatabaseService.class);
-        if (dbService == null) {
-            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(DatabaseService.class.getName());
-        }
-
         PreparedStatement stmt = null;
         try {
             String[] tableNames = SproxydCreateTableService.getTablesToCreate();
