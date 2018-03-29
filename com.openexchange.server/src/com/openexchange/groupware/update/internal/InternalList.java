@@ -692,6 +692,9 @@ public final class InternalList {
         // Converts folder tables to utf8mb4
         list.add(new com.openexchange.groupware.update.tasks.FolderConvertUtf8ToUtf8mb4Task());
 
+        // Converts login2user, updateTask, replicationMonitor, quota_context tables to utf8mb4
+        list.add(new com.openexchange.groupware.update.tasks.AdminTablesUtf8Mb4UpdateTask());
+
         return list.toArray(new UpdateTaskV2[list.size()]);
     }
 

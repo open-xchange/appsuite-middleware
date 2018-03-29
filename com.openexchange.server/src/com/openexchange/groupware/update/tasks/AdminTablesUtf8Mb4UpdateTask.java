@@ -67,7 +67,7 @@ public class AdminTablesUtf8Mb4UpdateTask extends SimpleConvertUtf8ToUtf8mb4Upda
      * Initialises a new {@link AdminTablesUtf8Mb4UpdateTask}.
      */
     public AdminTablesUtf8Mb4UpdateTask() {
-        super(Arrays.asList("login2user", "updateTask", "replicationMonitor", "quota_context"), "");
+        super(Arrays.asList("login2user", "updateTask", "replicationMonitor", "quota_context"));
     }
 
     /*
