@@ -72,7 +72,7 @@ public class ContactTablesUtf8Mb4UpdateTask extends SimpleConvertUtf8ToUtf8mb4Up
         super(Arrays.asList("prg_dlist", "del_dlist", "prg_contacts_linkage", "prg_contacts_image",
             "del_contacts_image", "del_contacts", "prg_contacts"), 
             "com.openexchange.contact.storage.rdb.sql.AddFilenameColumnTask",
-            "com.openexchange.contact.storage.rdb.sql.,CorrectNumberOfImagesTask",
+            "com.openexchange.contact.storage.rdb.sql.CorrectNumberOfImagesTask",
             "com.openexchange.contact.storage.rdb.groupware.AddFulltextIndexTask");
         //@formatter:on
     }
