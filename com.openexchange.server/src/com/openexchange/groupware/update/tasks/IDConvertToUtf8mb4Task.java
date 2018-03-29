@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,47 +47,48 @@
  *
  */
 
-package com.openexchange.groupware.impl.id;
+package com.openexchange.groupware.update.tasks;
 
-import com.openexchange.database.AbstractCreateTableImpl;
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.util.List;
+import com.google.common.collect.ImmutableList;
+import com.openexchange.groupware.update.AbstractConvertUtf8ToUtf8mb4Task;
+import com.openexchange.groupware.update.PerformParameters;
 
 /**
- * {@link CreateIDSequenceTable}
+ * {@link IDConvertToUtf8mb4Task}
  *
- * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.10.0
  */
-public final class CreateIDSequenceTable extends AbstractCreateTableImpl {
+public class IDConvertToUtf8mb4Task extends AbstractConvertUtf8ToUtf8mb4Task {
 
-    public CreateIDSequenceTable() {
+    /**
+     * Initializes a new {@link IDConvertToUtf8mb4Task}.
+     */
+    public IDConvertToUtf8mb4Task() {
         super();
     }
 
     @Override
-    public String[] getCreateStatements() {
-        return createStatements;
+    public String[] getDependencies() {
+        return new String[] { IDCreateTableTask.class.getName() };
     }
 
     @Override
-    public String[] requiredTables() {
-        return requiredTables;
+    protected List<String> tablesToConvert() {
+        return ImmutableList.of("sequenceIds");
     }
 
     @Override
-    public String[] tablesToCreate() {
-        return createdTables;
+    protected void before(PerformParameters params, Connection connection) throws SQLException {
+        // Noop
     }
 
-    private static final String[] requiredTables = { };
-
-    private static final String[] createdTables = { "sequenceIds" };
-
-    private static final String[] createStatements = {
-        "CREATE TABLE sequenceIds ("
-        + "cid INT4 UNSIGNED NOT NULL,"
-        + "type VARCHAR(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,"
-        + "id INT4 UNSIGNED NOT NULL,"
-        + "PRIMARY KEY (cid, type)"
-        + ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci"
-    };
+    @Override
+    protected void after(PerformParameters params, Connection connection) throws SQLException {
+        // Noop
+    }
 
 }

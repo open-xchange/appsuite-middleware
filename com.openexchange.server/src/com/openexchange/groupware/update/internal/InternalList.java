@@ -719,6 +719,9 @@ public final class InternalList {
         // Converts aggregated contacts
         list.add(new com.openexchange.groupware.update.tasks.AggregatingContactsConvertUtf8ToUtf8mb4Task());
 
+        // Convert ID sequence table to utf8mb4
+        list.add(new com.openexchange.groupware.update.tasks.IDConvertToUtf8mb4Task());
+
         return list.toArray(new UpdateTaskV2[list.size()]);
     }
 
