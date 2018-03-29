@@ -722,6 +722,9 @@ public final class InternalList {
         // Convert ID sequence table to utf8mb4
         list.add(new com.openexchange.groupware.update.tasks.IDConvertToUtf8mb4Task());
 
+        // Convert the resource and del_resource to utf8mb4
+        list.add(new com.openexchange.groupware.update.tasks.ResourceTablesUtf8Mb4UpdateTask());
+
         return list.toArray(new UpdateTaskV2[list.size()]);
     }
 
