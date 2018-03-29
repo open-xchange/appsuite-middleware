@@ -960,7 +960,7 @@ public class SocketFetcher {
     os.print("Host: " + host + ":" + port + "\r\n\r\n");
 	os.flush();
 	BufferedReader r = new BufferedReader(new InputStreamReader(
-						socket.getInputStream()));
+						socket.getInputStream(), StandardCharsets.UTF_8));
 	String line;
 	boolean first = true;
 	while ((line = r.readLine()) != null) {

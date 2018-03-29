@@ -132,6 +132,7 @@ public class ReplyITipAnalyzer extends AbstractITipAnalyzer {
         }
 
         if (update != null) {
+            session.getUtilities().adjustTimeZones(message.getOwner() > 0 ? message.getOwner() : session.getUserId(), update, original);
             final ITipChange change = new ITipChange();
             change.setCurrentEvent(original);
             change.setNewEvent(ensureAttendees(original, update));
@@ -148,6 +149,7 @@ public class ReplyITipAnalyzer extends AbstractITipAnalyzer {
             change.setException(true);
             change.setMaster(original);
             if (matchingException != null) {
+                session.getUtilities().adjustTimeZones(message.getOwner() > 0 ? message.getOwner() : session.getUserId(), exception, matchingException);
                 change = new ITipChange();
                 change.setNewEvent(ensureAttendees(matchingException, exception));
                 change.setCurrentEvent(matchingException);
@@ -157,6 +159,7 @@ public class ReplyITipAnalyzer extends AbstractITipAnalyzer {
 
                 analysis.addChange(change);
             } else {
+                session.getUtilities().adjustTimeZones(message.getOwner() > 0 ? message.getOwner() : session.getUserId(), exception, original);
                 change.setCurrentEvent(original);
                 change.setNewEvent(ensureAttendees(original, exception));
                 change.setType(Type.CREATE);

@@ -207,7 +207,7 @@ public class ScheduleInboxCollection extends DAVCollection implements FilteringR
     /**
      * Imports the calendar availability from the supplied WebDAV property.
      *
-     * @param property The WebDAV property to import the calendar availabilty from, or <code>null</code> to delete the user's previously defined availability
+     * @param property The WebDAV property to import the calendar availability from, or <code>null</code> to delete the user's previously defined availability
      */
     private void importCalendarAvailability(WebdavProperty property) throws OXException {
         Availability calendarAvailability;
@@ -216,7 +216,7 @@ public class ScheduleInboxCollection extends DAVCollection implements FilteringR
         } else {
             InputStream inputStream = null;
             try {
-                inputStream = Streams.newByteArrayInputStream(property.getValue().getBytes());
+                inputStream = Streams.newByteArrayInputStream(property.getValue().getBytes(Charsets.UTF_8));
                 calendarAvailability = getFactory().getService(ICalService.class).importICal(inputStream, null).getAvailability();
             } finally {
                 Streams.close(inputStream);

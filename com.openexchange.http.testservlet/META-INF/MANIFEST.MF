@@ -6,7 +6,10 @@ Bundle-Version: 7.10.0
 Bundle-Activator: osgi.TestServletActivator
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
-Import-Package: com.openexchange.config,
+Import-Package: com.google.common.annotations,
+ com.google.common.base,
+ com.google.common.collect,
+ com.openexchange.config,
  com.openexchange.configuration,
  com.openexchange.diagnostics,
  com.openexchange.exception,
@@ -19,7 +22,7 @@ Import-Package: com.openexchange.config,
  javax.net.ssl,
  javax.servlet,
  javax.servlet.http,
- org.apache.commons.lang3;version="3.4.0",
- org.apache.commons.text;version="1.2.0",
+ org.apache.commons.lang3,
+ org.apache.commons.text,
  org.osgi.framework,
  org.osgi.service.http

@@ -75,6 +75,7 @@ import com.openexchange.multiple.MultipleHandler;
 import com.openexchange.secret.SecretService;
 import com.openexchange.subscribe.SubscribeService;
 import com.openexchange.subscribe.Subscription;
+import com.openexchange.subscribe.SubscriptionErrorMessage;
 import com.openexchange.subscribe.SubscriptionExecutionService;
 import com.openexchange.subscribe.SubscriptionSource;
 import com.openexchange.subscribe.SubscriptionSourceDiscoveryService;
@@ -336,6 +337,9 @@ public class SubscriptionMultipleHandler implements MultipleHandler {
         final int id = request.getInt("id");
         final String source = request.optString("source");
         final Subscription subscription = loadSubscription(id, session, source, secretService.getSecret(session));
+        if(subscription == null) {
+            throw SubscriptionErrorMessage.SubscriptionNotFound.create();
+        }
         String sTimeZone = request.optString("timezone");
         TimeZone tz;
         if (sTimeZone != null) {
