@@ -727,6 +727,7 @@ public final class InternalList {
 
         // Converts OAuth accessor tables to utf8mb4
         list.add(new com.openexchange.groupware.update.tasks.OAuthAccessorConvertToUtf8mb4());
+        list.add(new com.openexchange.groupware.update.tasks.IndexedFoldersConvertToUtf8mb4());
 
         return list.toArray(new UpdateTaskV2[list.size()]);
     }
