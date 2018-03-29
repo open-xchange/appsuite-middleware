@@ -304,12 +304,17 @@ public final class LdapUtility {
      * @return the properties for the customization of the ldap interface.
      */
     private static Properties getCustomization() {
-        synchronized (mutex) {
-            if (null == customization) {
-                customization = DirectoryService.getCustomization();
+        Properties customs = customization;
+        if (null == customs) {
+            synchronized (mutex) {
+                customs = customization;
+                if (null == customs) {
+                    customs = DirectoryService.getCustomization();
+                    customization = customs;
+                }
             }
         }
-        return customization;
+        return customs;
     }
 
     /**
