@@ -49,12 +49,8 @@
 
 package com.openexchange.groupware.update.tasks;
 
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.util.List;
 import com.google.common.collect.ImmutableList;
-import com.openexchange.groupware.update.AbstractConvertUtf8ToUtf8mb4Task;
-import com.openexchange.groupware.update.PerformParameters;
+import com.openexchange.groupware.update.SimpleConvertUtf8ToUtf8mb4UpdateTask;
 
 
 /**
@@ -63,33 +59,14 @@ import com.openexchange.groupware.update.PerformParameters;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.10.0
  */
-public class MailAccountConvertUtf8ToUtf8mb4Task extends AbstractConvertUtf8ToUtf8mb4Task {
+public class MailAccountConvertUtf8ToUtf8mb4Task extends SimpleConvertUtf8ToUtf8mb4UpdateTask {
 
     /**
      * Initializes a new {@link MailAccountConvertUtf8ToUtf8mb4Task}.
      */
     public MailAccountConvertUtf8ToUtf8mb4Task() {
-        super();
+        super(ImmutableList.of("user_mail_account", "user_mail_account_properties", "user_transport_account", 
+            "user_transport_account_properties", "sequence_mail_service", "pop3_storage_ids", "pop3_storage_deleted"),
+            AddFailedAuthColumnsToMailAccountTablesTask.class.getName());
     }
-
-    @Override
-    public String[] getDependencies() {
-        return new String[] { AddFailedAuthColumnsToMailAccountTablesTask.class.getName() };
-    }
-
-    @Override
-    protected List<String> tablesToConvert() {
-        return ImmutableList.of("user_mail_account", "user_mail_account_properties", "user_transport_account", "user_transport_account_properties", "sequence_mail_service", "pop3_storage_ids", "pop3_storage_deleted");
-    }
-
-    @Override
-    protected void before(PerformParameters params, Connection connection) throws SQLException {
-        // Nothing
-    }
-
-    @Override
-    protected void after(PerformParameters params, Connection connection) throws SQLException {
-        // Nothing
-    }
-
 }

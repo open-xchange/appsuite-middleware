@@ -49,13 +49,8 @@
 
 package com.openexchange.groupware.update.tasks;
 
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.util.List;
 import com.google.common.collect.ImmutableList;
-import com.openexchange.groupware.update.AbstractConvertUtf8ToUtf8mb4Task;
-import com.openexchange.groupware.update.PerformParameters;
-
+import com.openexchange.groupware.update.SimpleConvertUtf8ToUtf8mb4UpdateTask;
 
 /**
  * {@link ContextAttributeConvertUtf8ToUtf8mb4Task}
@@ -63,33 +58,12 @@ import com.openexchange.groupware.update.PerformParameters;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.10.0
  */
-public class ContextAttributeConvertUtf8ToUtf8mb4Task extends AbstractConvertUtf8ToUtf8mb4Task {
+public class ContextAttributeConvertUtf8ToUtf8mb4Task extends SimpleConvertUtf8ToUtf8mb4UpdateTask {
 
     /**
      * Initializes a new {@link ContextAttributeConvertUtf8ToUtf8mb4Task}.
      */
     public ContextAttributeConvertUtf8ToUtf8mb4Task() {
-        super();
+        super(ImmutableList.of("contextAttribute"), com.openexchange.groupware.update.tasks.CreateIndexOnContextAttributesTask.class.getName());
     }
-
-    @Override
-    public String[] getDependencies() {
-        return new String[] { com.openexchange.groupware.update.tasks.CreateIndexOnContextAttributesTask.class.getName() };
-    }
-
-    @Override
-    protected List<String> tablesToConvert() {
-        return ImmutableList.of("contextAttribute");
-    }
-
-    @Override
-    protected void before(PerformParameters params, Connection connection) throws SQLException {
-        // Nothing
-    }
-
-    @Override
-    protected void after(PerformParameters params, Connection connection) throws SQLException {
-        // Nothing
-    }
-
 }

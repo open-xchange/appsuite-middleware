@@ -49,13 +49,8 @@
 
 package com.openexchange.groupware.update.tasks;
 
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.util.List;
 import com.google.common.collect.ImmutableList;
-import com.openexchange.groupware.update.AbstractConvertUtf8ToUtf8mb4Task;
-import com.openexchange.groupware.update.PerformParameters;
-
+import com.openexchange.groupware.update.SimpleConvertUtf8ToUtf8mb4UpdateTask;
 
 /**
  * {@link MiscConvertUtf8ToUtf8mb4Task} - Converts misc. tables (prg_links, filestore_usage, etc.) to utf8mb4.
@@ -63,33 +58,12 @@ import com.openexchange.groupware.update.PerformParameters;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.10.0
  */
-public class MiscConvertUtf8ToUtf8mb4Task extends AbstractConvertUtf8ToUtf8mb4Task {
+public class MiscConvertUtf8ToUtf8mb4Task extends SimpleConvertUtf8ToUtf8mb4UpdateTask {
 
     /**
      * Initializes a new {@link MiscConvertUtf8ToUtf8mb4Task}.
      */
     public MiscConvertUtf8ToUtf8mb4Task() {
-        super();
+        super(ImmutableList.of("prg_links", "filestore_usage"), AddInitialFilestoreUsage.class.getName());
     }
-
-    @Override
-    public String[] getDependencies() {
-        return new String[] { AddInitialFilestoreUsage.class.getName() };
-    }
-
-    @Override
-    protected List<String> tablesToConvert() {
-        return ImmutableList.of("prg_links", "filestore_usage");
-    }
-
-    @Override
-    protected void before(PerformParameters params, Connection connection) throws SQLException {
-        // Nothing
-    }
-
-    @Override
-    protected void after(PerformParameters params, Connection connection) throws SQLException {
-        // nothing
-    }
-
 }

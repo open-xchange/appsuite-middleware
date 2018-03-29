@@ -49,13 +49,8 @@
 
 package com.openexchange.groupware.update.tasks;
 
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.util.List;
 import com.google.common.collect.ImmutableList;
-import com.openexchange.groupware.update.AbstractConvertUtf8ToUtf8mb4Task;
-import com.openexchange.groupware.update.PerformParameters;
-
+import com.openexchange.groupware.update.SimpleConvertUtf8ToUtf8mb4UpdateTask;
 
 /**
  * {@link SettingsConvertUtf8ToUtf8mb4Task} - Converts settings tables (user_configuration, user_setting_mail, etc.) to utf8mb4.
@@ -63,34 +58,13 @@ import com.openexchange.groupware.update.PerformParameters;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.10.0
  */
-public class SettingsConvertUtf8ToUtf8mb4Task extends AbstractConvertUtf8ToUtf8mb4Task {
+public class SettingsConvertUtf8ToUtf8mb4Task extends SimpleConvertUtf8ToUtf8mb4UpdateTask {
 
     /**
      * Initializes a new {@link SettingsConvertUtf8ToUtf8mb4Task}.
      */
     public SettingsConvertUtf8ToUtf8mb4Task() {
-        super();
+        super(ImmutableList.of("user_configuration", "user_setting_mail", "user_setting_mail_signature", "user_setting_spellcheck",
+            "user_setting_admin", "user_setting", "user_setting_server"), ChangePrimaryKeyForUserAttribute.class.getName());
     }
-
-    @Override
-    public String[] getDependencies() {
-        return new String[] { ChangePrimaryKeyForUserAttribute.class.getName() };
-    }
-
-    @Override
-    protected List<String> tablesToConvert() {
-        return ImmutableList.of("user_configuration", "user_setting_mail", "user_setting_mail_signature", "user_setting_spellcheck",
-            "user_setting_admin", "user_setting", "user_setting_server");
-    }
-
-    @Override
-    protected void before(PerformParameters params, Connection connection) throws SQLException {
-        // Nothing
-    }
-
-    @Override
-    protected void after(PerformParameters params, Connection connection) throws SQLException {
-        // Nothing
-    }
-
 }

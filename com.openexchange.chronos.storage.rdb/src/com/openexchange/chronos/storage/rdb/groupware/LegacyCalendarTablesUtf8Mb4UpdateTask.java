@@ -53,10 +53,9 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.List;
 import java.util.Map;
-import com.openexchange.groupware.update.AbstractConvertUtf8ToUtf8mb4Task;
 import com.openexchange.groupware.update.PerformParameters;
+import com.openexchange.groupware.update.SimpleConvertUtf8ToUtf8mb4UpdateTask;
 
 /**
  * {@link LegacyCalendarTablesUtf8Mb4UpdateTask}
@@ -64,20 +63,15 @@ import com.openexchange.groupware.update.PerformParameters;
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  * @since v7.10.0
  */
-public class LegacyCalendarTablesUtf8Mb4UpdateTask extends AbstractConvertUtf8ToUtf8mb4Task {
+public class LegacyCalendarTablesUtf8Mb4UpdateTask extends SimpleConvertUtf8ToUtf8mb4UpdateTask {
 
-    @Override
-    public String[] getDependencies() {
-        return new String[] { "com.openexchange.groupware.update.tasks.CalendarAddIndex2DatesMembersV2" };
+    /**
+     * Initialises a new {@link LegacyCalendarTablesUtf8Mb4UpdateTask}.
+     */
+    public LegacyCalendarTablesUtf8Mb4UpdateTask() {
+        super(Arrays.asList("prg_dates", "del_dates", "prg_date_rights", "prg_dates_members", "del_date_rights", "del_dates_members"), 
+            "com.openexchange.groupware.update.tasks.CalendarAddIndex2DatesMembersV2");
     }
-
-    @Override
-    protected List<String> tablesToConvert() {
-        return Arrays.asList("prg_dates", "del_dates", "prg_date_rights", "prg_dates_members", "del_date_rights", "del_dates_members");
-    }
-
-    @Override
-    protected void before(PerformParameters params, Connection connection) {}
 
     @Override
     protected void after(PerformParameters params, Connection connection) throws SQLException {

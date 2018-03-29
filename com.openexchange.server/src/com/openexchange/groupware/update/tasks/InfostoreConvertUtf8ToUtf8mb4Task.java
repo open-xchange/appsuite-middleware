@@ -49,13 +49,8 @@
 
 package com.openexchange.groupware.update.tasks;
 
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.util.List;
 import com.google.common.collect.ImmutableList;
-import com.openexchange.groupware.update.AbstractConvertUtf8ToUtf8mb4Task;
-import com.openexchange.groupware.update.PerformParameters;
-
+import com.openexchange.groupware.update.SimpleConvertUtf8ToUtf8mb4UpdateTask;
 
 /**
  * {@link InfostoreConvertUtf8ToUtf8mb4Task} - Converts infostore tables to utf8mb4.
@@ -63,34 +58,17 @@ import com.openexchange.groupware.update.PerformParameters;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.10.0
  */
-public class InfostoreConvertUtf8ToUtf8mb4Task extends AbstractConvertUtf8ToUtf8mb4Task {
+public class InfostoreConvertUtf8ToUtf8mb4Task extends SimpleConvertUtf8ToUtf8mb4UpdateTask {
 
     /**
      * Initializes a new {@link InfostoreConvertUtf8ToUtf8mb4Task}.
      */
     public InfostoreConvertUtf8ToUtf8mb4Task() {
-        super();
+        //@formatter:off
+        super(ImmutableList.of("infostore", "infostore_document", "del_infostore",
+            "del_infostore_document", "infostore_property",
+            "infostore_lock", "lock_null", "lock_null_lock"), 
+            com.openexchange.groupware.update.tasks.AddMD5SumIndexForInfostoreDocumentTable.class.getName());
+        //@formatter:on
     }
-
-    @Override
-    public String[] getDependencies() {
-        return new String[] { com.openexchange.groupware.update.tasks.AddMD5SumIndexForInfostoreDocumentTable.class.getName() };
-    }
-
-    @Override
-    protected List<String> tablesToConvert() {
-        return ImmutableList.of("infostore", "infostore_document", "del_infostore", "del_infostore_document", "infostore_property",
-            "infostore_lock", "lock_null", "lock_null_lock");
-    }
-
-    @Override
-    protected void before(PerformParameters params, Connection connection) throws SQLException {
-        // Nothing
-    }
-
-    @Override
-    protected void after(PerformParameters params, Connection connection) throws SQLException {
-        // nothing
-    }
-
 }

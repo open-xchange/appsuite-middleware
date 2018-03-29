@@ -53,11 +53,10 @@ import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.List;
 import com.google.common.collect.ImmutableList;
 import com.openexchange.database.Databases;
-import com.openexchange.groupware.update.AbstractConvertUtf8ToUtf8mb4Task;
 import com.openexchange.groupware.update.PerformParameters;
+import com.openexchange.groupware.update.SimpleConvertUtf8ToUtf8mb4UpdateTask;
 import com.openexchange.tools.update.Column;
 import com.openexchange.tools.update.Tools;
 
@@ -68,24 +67,15 @@ import com.openexchange.tools.update.Tools;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.10.0
  */
-public class TaskConvertUtf8ToUtf8mb4Task extends AbstractConvertUtf8ToUtf8mb4Task {
+public class TaskConvertUtf8ToUtf8mb4Task extends SimpleConvertUtf8ToUtf8mb4UpdateTask {
 
     /**
      * Initializes a new {@link TaskConvertUtf8ToUtf8mb4Task}.
      */
     public TaskConvertUtf8ToUtf8mb4Task() {
-        super();
-    }
-
-    @Override
-    public String[] getDependencies() {
-        return new String[] { TasksAddFulltimeColumnTask.class.getName() };
-    }
-
-    @Override
-    protected List<String> tablesToConvert() {
-        return ImmutableList.of("task", "task_participant", "task_eparticipant", "task_removedparticipant", "task_folder",
-            "del_task", "del_task_participant", "del_task_eparticipant", "del_task_folder");
+        super(ImmutableList.of("task", "task_participant", "task_eparticipant", "task_removedparticipant", "task_folder",
+            "del_task", "del_task_participant", "del_task_eparticipant", "del_task_folder"),
+            TasksAddFulltimeColumnTask.class.getName());
     }
 
     @Override
@@ -103,12 +93,7 @@ public class TaskConvertUtf8ToUtf8mb4Task extends AbstractConvertUtf8ToUtf8mb4Ta
         }
     }
 
-    @Override
-    protected void after(PerformParameters params, Connection connection) throws SQLException {
-        // Nothing
-    }
-
-    private static int getVarcharColumnSize(String colName, String tableName, Connection con) throws SQLException {
+    private int getVarcharColumnSize(String colName, String tableName, Connection con) throws SQLException {
         ResultSet rsColumns = null;
         try {
             DatabaseMetaData meta = con.getMetaData();
@@ -129,5 +114,4 @@ public class TaskConvertUtf8ToUtf8mb4Task extends AbstractConvertUtf8ToUtf8mb4Ta
             Databases.closeSQLStuff(rsColumns);
         }
     }
-
 }
