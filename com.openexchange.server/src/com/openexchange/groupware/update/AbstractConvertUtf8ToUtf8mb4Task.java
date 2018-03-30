@@ -356,14 +356,14 @@ public abstract class AbstractConvertUtf8ToUtf8mb4Task extends UpdateTaskAdapter
     }
 
     /**
-     * Modifies the specified varchar column to a text if it exceeds the specified size
+     * Modifies the specified <code>VARCHAR</code> column to a <code>TEXT</code> if it exceeds the specified size
      * 
      * @param tableName The table's name
      * @param columnName The column's name
      * @param size The size
      * @param column the new {@link Column} definition
      * @param connection The {@link Connection}
-     * @param schema TODO
+     * @param schema The schema's name
      * @throws SQLException if an SQL error is occurred
      */
     protected void modifyVarChar(String tableName, String columnName, int size, Column column, Connection connection, String schema) throws SQLException {
@@ -379,10 +379,10 @@ public abstract class AbstractConvertUtf8ToUtf8mb4Task extends UpdateTaskAdapter
      * @param tableName The table's name
      * @param colName The column's name
      * @param con The {@link Connection}
-     * @return The size
+     * @param schema The schema's name
      * @throws SQLException if an SQL error is occurred
      */
-    protected int getVarcharColumnSize(String tableName, String colName, Connection con, String schema) throws SQLException {
+    private int getVarcharColumnSize(String tableName, String colName, Connection con, String schema) throws SQLException {
         ResultSet rs = null;
         PreparedStatement stmt = null;
         try {
