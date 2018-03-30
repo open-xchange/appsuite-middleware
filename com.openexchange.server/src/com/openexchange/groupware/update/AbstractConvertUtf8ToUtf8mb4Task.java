@@ -401,7 +401,7 @@ public abstract class AbstractConvertUtf8ToUtf8mb4Task extends UpdateTaskAdapter
             // No such VARCHAR column
             return -1;
         } finally {
-            Databases.closeSQLStuff(rs);
+            Databases.closeSQLStuff(rs, stmt);
         }
     }
 
