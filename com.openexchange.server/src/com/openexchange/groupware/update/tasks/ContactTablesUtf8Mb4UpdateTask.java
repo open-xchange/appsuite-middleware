@@ -87,22 +87,13 @@ public class ContactTablesUtf8Mb4UpdateTask extends SimpleConvertUtf8ToUtf8mb4Up
         String schema = params.getSchema().getSchema();
         modifyVarChar("prg_contacts", "field17", 1024, column, connection, schema);
         modifyVarChar("del_contacts", "field17", 1024, column, connection, schema);
-    }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.groupware.update.SimpleConvertUtf8ToUtf8mb4UpdateTask#after(com.openexchange.groupware.update.PerformParameters, java.sql.Connection)
-     */
-    @Override
-    protected void after(PerformParameters params, Connection connection) throws SQLException {
         Builder<String, Integer> mapBuilder = ImmutableMap.builder();
         mapBuilder.put("field01", 320);
         mapBuilder.put("field65", 256);
         mapBuilder.put("field66", 256);
         mapBuilder.put("field67", 256);
         ImmutableMap<String, Integer> map = mapBuilder.build();
-        String schema = params.getSchema().getSchema();
         changeTable(connection, schema, "del_contacts", map);
         changeTable(connection, schema, "prg_contacts", map);
     }

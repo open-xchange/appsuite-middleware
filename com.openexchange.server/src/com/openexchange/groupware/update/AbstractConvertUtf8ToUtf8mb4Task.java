@@ -376,13 +376,13 @@ public abstract class AbstractConvertUtf8ToUtf8mb4Task extends UpdateTaskAdapter
     /**
      * Retrieves the size of the specified varchar column
      * 
-     * @param colName The column's name
      * @param tableName The table's name
+     * @param colName The column's name
      * @param con The {@link Connection}
      * @return The size
      * @throws SQLException if an SQL error is occurred
      */
-    protected int getVarcharColumnSize(String colName, String tableName, Connection con, String schema) throws SQLException {
+    protected int getVarcharColumnSize(String tableName, String colName, Connection con, String schema) throws SQLException {
         ResultSet rs = null;
         PreparedStatement stmt = null;
         try {

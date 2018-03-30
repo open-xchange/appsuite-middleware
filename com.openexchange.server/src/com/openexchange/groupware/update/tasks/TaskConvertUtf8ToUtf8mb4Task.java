@@ -77,7 +77,7 @@ public class TaskConvertUtf8ToUtf8mb4Task extends SimpleConvertUtf8ToUtf8mb4Upda
     protected void before(PerformParameters params, Connection connection) throws SQLException {
         Column column = new Column("mail", "varchar(191) COLLATE utf8_unicode_ci NOT NULL");
         String schema = params.getSchema().getSchema();
-        modifyVarChar("task_participant", "mail", 255, column, connection, schema);
+        modifyVarChar("task_eparticipant", "mail", 255, column, connection, schema);
         modifyVarChar("del_task_eparticipant", "mail", 255, column, connection, schema);
     }
 }

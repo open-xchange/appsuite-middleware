@@ -76,7 +76,7 @@ public class PublicationsTablesUtf8Mb4UpdateTask extends SimpleConvertUtf8ToUtf8
      * @see com.openexchange.groupware.update.AbstractConvertUtf8ToUtf8mb4Task#after(com.openexchange.groupware.update.PerformParameters, java.sql.Connection)
      */
     @Override
-    protected void after(PerformParameters params, Connection connection) throws SQLException {
+    protected void before(PerformParameters params, Connection connection) throws SQLException {
         changeTable(connection, params.getSchema().getSchema(), "publication_users", Collections.singletonMap("name", 255));
         changeTable(connection, params.getSchema().getSchema(), "publications", Collections.singletonMap("module", 255));
     }
