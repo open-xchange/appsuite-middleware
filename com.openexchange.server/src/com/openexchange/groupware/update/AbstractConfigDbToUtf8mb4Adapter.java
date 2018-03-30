@@ -79,7 +79,7 @@ public abstract class AbstractConfigDbToUtf8mb4Adapter extends AbstractConvertUt
 
         Connection configDbCon = ((JdbcConnection) databaseConnection).getUnderlyingConnection();
         try {
-            String schemaName = database.getDefaultCatalogName() != null ? database.getDefaultCatalogName() : "configdb";
+            String schemaName = configDbCon.getCatalog() != null ? configDbCon.getCatalog() : (database.getDefaultCatalogName() != null ? database.getDefaultCatalogName() : "configdb");
 
             before(configDbCon, schemaName);
             innerPerform(configDbCon, schemaName);
