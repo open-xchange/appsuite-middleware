@@ -84,8 +84,9 @@ public class ContactTablesUtf8Mb4UpdateTask extends SimpleConvertUtf8ToUtf8mb4Up
     @Override
     protected void before(PerformParameters params, Connection connection) throws SQLException {
         Column column = new Column("field17", "TEXT COLLATE utf8mb4_unicode_ci NULL");
-        modifyVarChar("prg_contacts", "field17", 1024, column, connection, params.getSchema().getSchema());
-        modifyVarChar("del_contacts", "field17", 1024, column, connection, params.getSchema().getSchema());
+        String schema = params.getSchema().getSchema();
+        modifyVarChar("prg_contacts", "field17", 1024, column, connection, schema);
+        modifyVarChar("del_contacts", "field17", 1024, column, connection, schema);
     }
 
     /*
@@ -101,7 +102,8 @@ public class ContactTablesUtf8Mb4UpdateTask extends SimpleConvertUtf8ToUtf8mb4Up
         mapBuilder.put("field66", 256);
         mapBuilder.put("field67", 256);
         ImmutableMap<String, Integer> map = mapBuilder.build();
-        changeTable(connection, params.getSchema().getSchema(), "del_contacts", map);
-        changeTable(connection, params.getSchema().getSchema(), "prg_contacts", map);
+        String schema = params.getSchema().getSchema();
+        changeTable(connection, schema, "del_contacts", map);
+        changeTable(connection, schema, "prg_contacts", map);
     }
 }
