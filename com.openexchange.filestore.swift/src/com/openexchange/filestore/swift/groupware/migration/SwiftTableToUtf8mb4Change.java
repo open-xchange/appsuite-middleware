@@ -53,7 +53,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
 import com.google.common.collect.ImmutableList;
-import com.openexchange.groupware.update.AbstractConvertUtf8ToUtf8mb4TaskLiquibaseAdapter;
+import com.openexchange.groupware.update.AbstractConfigDbToUtf8mb4Adapter;
 
 /**
  * 
@@ -62,7 +62,7 @@ import com.openexchange.groupware.update.AbstractConvertUtf8ToUtf8mb4TaskLiquiba
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since v7.10.0
  */
-public class SwiftTableToUtf8mb4Change extends AbstractConvertUtf8ToUtf8mb4TaskLiquibaseAdapter {
+public class SwiftTableToUtf8mb4Change extends AbstractConfigDbToUtf8mb4Adapter {
 
     @Override
     public String getConfirmationMessage() {

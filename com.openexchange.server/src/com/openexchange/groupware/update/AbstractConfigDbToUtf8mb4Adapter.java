@@ -51,8 +51,6 @@ package com.openexchange.groupware.update;
 
 import java.sql.Connection;
 import java.sql.SQLException;
-import com.openexchange.database.DatabaseService;
-import com.openexchange.server.services.ServerServiceRegistry;
 import liquibase.change.custom.CustomTaskChange;
 import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
@@ -63,12 +61,12 @@ import liquibase.exception.ValidationErrors;
 import liquibase.resource.ResourceAccessor;
 
 /**
- * {@link AbstractConvertUtf8ToUtf8mb4TaskLiquibaseAdapter}
+ * {@link AbstractConfigDbToUtf8mb4Adapter}
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since v7.10.0
  */
-public abstract class AbstractConvertUtf8ToUtf8mb4TaskLiquibaseAdapter extends AbstractConvertUtf8ToUtf8mb4Task implements CustomTaskChange {
+public abstract class AbstractConfigDbToUtf8mb4Adapter extends AbstractConvertUtf8ToUtf8mb4Task implements CustomTaskChange {
 
     @Override
     public final void execute(Database database) throws CustomChangeException {
@@ -77,11 +75,11 @@ public abstract class AbstractConvertUtf8ToUtf8mb4TaskLiquibaseAdapter extends A
             throw new CustomChangeException("Cannot get underlying connection because database connection is not of type " + JdbcConnection.class.getName() + ", but of type: " + databaseConnection.getClass().getName());
         }
 
-        org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(AbstractConvertUtf8ToUtf8mb4TaskLiquibaseAdapter.class);
+        org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(AbstractConfigDbToUtf8mb4Adapter.class);
 
         Connection configDbCon = ((JdbcConnection) databaseConnection).getUnderlyingConnection();
         try {
-            String schemaName = ServerServiceRegistry.getInstance().getService(DatabaseService.class).getSchemaName();
+            String schemaName = database.getDefaultCatalogName() != null ? database.getDefaultCatalogName() : "configdb";
 
             before(configDbCon, schemaName);
             innerPerform(configDbCon, schemaName);

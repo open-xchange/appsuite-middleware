@@ -75,7 +75,6 @@ public class DBMigrationImplActivator extends HousekeepingActivator {
     @Override
     protected void startBundle() throws Exception {
         org.slf4j.LoggerFactory.getLogger(DBMigrationImplActivator.class).info("Starting bundle: {}", context.getBundle().getSymbolicName());
-        Services.setServiceLookup(this);
 
         track(DBMigrationExecutorService.class, new DBMigrationServiceTracker(this, context));
 
@@ -89,7 +88,6 @@ public class DBMigrationImplActivator extends HousekeepingActivator {
     protected void stopBundle() throws Exception {
         org.slf4j.LoggerFactory.getLogger(DBMigrationImplActivator.class).info("Stopping bundle: {}", this.context.getBundle().getSymbolicName());
 
-        Services.setServiceLookup(null);
         super.stopBundle();
     }
 }

@@ -103,8 +103,6 @@ public class SwiftActivator extends HousekeepingActivator {
     protected void startBundle() throws Exception {
         LOG.info("Starting bundle: {}", context.getBundle().getSymbolicName());
 
-        Services.setServiceLookup(this);
-
         // Trackers
         trackService(ContextService.class);
         track(DBMigrationExecutorService.class, new SwiftDBMigrationServiceTracker(this, context));
@@ -130,8 +128,6 @@ public class SwiftActivator extends HousekeepingActivator {
     @Override
     protected void stopBundle() throws Exception {
         LOG.info("Stopping bundle: {}", context.getBundle().getSymbolicName());
-
-        Services.setServiceLookup(null);
 
         super.stopBundle();
     }
