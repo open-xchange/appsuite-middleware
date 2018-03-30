@@ -72,7 +72,6 @@ public class ContactTablesUtf8Mb4UpdateTask extends SimpleConvertUtf8ToUtf8mb4Up
         //@formatter:off
         super(Arrays.asList("prg_dlist", "del_dlist", "prg_contacts_linkage", "prg_contacts_image",
             "del_contacts_image", "del_contacts", "prg_contacts"), 
-            "com.openexchange.contact.storage.rdb.sql.AddFilenameColumnTask",
             "com.openexchange.contact.storage.rdb.sql.CorrectNumberOfImagesTask");
         //@formatter:on
     }
@@ -85,8 +84,8 @@ public class ContactTablesUtf8Mb4UpdateTask extends SimpleConvertUtf8ToUtf8mb4Up
     @Override
     protected void before(PerformParameters params, Connection connection) throws SQLException {
         Column column = new Column("field17", "TEXT COLLATE utf8mb4_unicode_ci NULL");
-        modifyVarChar("prg_contacts", "field17", 1024, column, connection);
-        modifyVarChar("del_contacts", "field17", 1024, column, connection);
+        modifyVarChar("prg_contacts", "field17", 1024, column, connection, params.getSchema().getSchema());
+        modifyVarChar("del_contacts", "field17", 1024, column, connection, params.getSchema().getSchema());
     }
 
     /*

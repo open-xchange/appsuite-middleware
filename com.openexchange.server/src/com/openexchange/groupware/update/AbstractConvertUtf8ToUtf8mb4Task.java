@@ -363,10 +363,11 @@ public abstract class AbstractConvertUtf8ToUtf8mb4Task extends UpdateTaskAdapter
      * @param size The size
      * @param column the new {@link Column} definition
      * @param connection The {@link Connection}
+     * @param schema TODO
      * @throws SQLException if an SQL error is occurred
      */
-    protected void modifyVarChar(String tableName, String columnName, int size, Column column, Connection connection) throws SQLException {
-        int columnSize = getVarcharColumnSize(tableName, columnName, connection);
+    protected void modifyVarChar(String tableName, String columnName, int size, Column column, Connection connection, String schema) throws SQLException {
+        int columnSize = getVarcharColumnSize(tableName, columnName, connection, schema);
         if (columnSize >= size) {
             Tools.modifyColumns(connection, tableName, true, column);
         }
@@ -381,12 +382,12 @@ public abstract class AbstractConvertUtf8ToUtf8mb4Task extends UpdateTaskAdapter
      * @return The size
      * @throws SQLException if an SQL error is occurred
      */
-    protected int getVarcharColumnSize(String colName, String tableName, Connection con) throws SQLException {
+    protected int getVarcharColumnSize(String colName, String tableName, Connection con, String schema) throws SQLException {
         ResultSet rs = null;
         PreparedStatement stmt = null;
         try {
             stmt = con.prepareStatement("SELECT CHARACTER_MAXIMUM_LENGTH,DATA_TYPE FROM information_schema.COLUMNS WHERE table_schema = ? AND TABLE_NAME = ? AND COLUMN_NAME = ?;");
-            stmt.setString(1, con.getSchema());
+            stmt.setString(1, schema);
             stmt.setString(2, tableName);
             stmt.setString(3, colName);
             rs = stmt.executeQuery();
