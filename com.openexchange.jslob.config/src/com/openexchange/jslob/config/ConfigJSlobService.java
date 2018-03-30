@@ -1248,7 +1248,7 @@ public final class ConfigJSlobService implements JSlobService {
             // Lastly, let's add configurability.
             final String finalScope = preferenceItem.get("final");
             final String isProtected = preferenceItem.get(METADATA_PROTECTED);
-            final boolean writable = (finalScope == null || finalScope.equals("user")) && (isProtected == null || !preferenceItem.get(METADATA_PROTECTED, boolean.class).booleanValue());
+            final boolean writable = (finalScope == null || finalScope.equals("user")) && (isProtected == null || !Boolean.parseBoolean(isProtected));
             if (!writable) {
                 jMetaData.put("configurable", Boolean.valueOf(writable));
             }

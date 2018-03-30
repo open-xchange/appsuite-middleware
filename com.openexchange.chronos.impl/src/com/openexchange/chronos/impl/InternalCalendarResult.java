@@ -337,7 +337,12 @@ public class InternalCalendarResult {
             }
             return affectedFoldersPerUser;
         }
-        return Utils.getAffectedFoldersPerUser(session, affectedFolderIds);
+        try {
+            return Utils.getAffectedFoldersPerUser(session, affectedFolderIds);
+        } catch (OXException e) {
+            org.slf4j.LoggerFactory.getLogger(InternalCalendarResult.class).warn("Error getting affected users", e);
+            return Collections.emptyMap();
+        }
     }
 
     private static CreateResult findCreation(List<CreateResult> creations, String folderId, String id, RecurrenceId recurrenceId) {

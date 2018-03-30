@@ -243,7 +243,7 @@ properties:
       file: grizzly.properties
       packageName: open-xchange-grizzly
       tags: ["Grizzly"]
-     - key: com.openexchange.http.grizzly.accesslog.statusThreshold
+    - key: com.openexchange.http.grizzly.accesslog.statusThreshold
       description: |
         Specifies the minimum HTTP status code that will trigger an entry in the access log. If not specified, then all status codes are valid.
       defaultValue:
@@ -253,7 +253,7 @@ properties:
       file: grizzly.properties
       packageName: open-xchange-grizzly
       tags: ["Grizzly"]
-     - key: com.openexchange.http.grizzly.accesslog.timezone
+    - key: com.openexchange.http.grizzly.accesslog.timezone
       description: |
         The time zone for the timestamped log records. If not specified, it will default to the timezone of the system running the server.
       defaultValue: UTC

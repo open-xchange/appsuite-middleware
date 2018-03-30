@@ -47,28 +47,80 @@
  *
  */
 
-package com.openexchange.mail.search;
+package com.openxchange.documentation.tools.internal;
 
-import java.io.Serializable;
+import java.io.File;
+import java.io.FileFilter;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import org.yaml.snakeyaml.TypeDescription;
+import org.yaml.snakeyaml.Yaml;
+import org.yaml.snakeyaml.constructor.Constructor;
 
 /**
- * {@link ComparablePattern}
+ * {@link ConfigDocu}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+ * @since v7.10.0
  */
-public interface ComparablePattern<P> extends Serializable {
+public class ConfigDocu {
+
+    private ArrayList<YamlFile> data;
 
     /**
-     * Gets the comparison type.
+     * Initializes a new {@link ConfigDocu}.
      *
-     * @return The comparison type
+     * @throws FileNotFoundException
      */
-    ComparisonType getComparisonType();
+    public ConfigDocu(File yamlFolder) throws FileNotFoundException {
+        Constructor constructor = new Constructor(YamlFile.class);
+        TypeDescription propertyDescription = new TypeDescription(YamlFile.class);
+        propertyDescription.putListPropertyType("data", Property.class);
+        constructor.addTypeDescription(propertyDescription);
+        Yaml yaml = new Yaml(constructor);
+        data = new ArrayList<>();
+        FileFilter filter = new FileFilter() {
+
+            @Override
+            public boolean accept(File file) {
+                return !file.isDirectory() && file.getName().endsWith(".yml") && !file.getName().equals("template.yml");
+            }
+        };
+        File[] files = yamlFolder.listFiles(filter);
+        Arrays.sort(files);
+        for (File file : files) {
+            YamlFile tmpData = (YamlFile) yaml.load(new FileInputStream(file));
+            data.add(tmpData);
+        }
+    }
+
+    public List<Property> getProperties(){
+        List<Property> result = new ArrayList<>(data.size() * 5);
+        for(YamlFile file: data) {
+            result.addAll(file.getProperties());
+        }
+        return result;
+    }
 
     /**
-     * Gets the pattern.
-     *
-     * @return The pattern
+     * Returns all properties with the given tag
+     * @param tag The tag
+     * @return A list of properties
      */
-    P getPattern();
+    public List<Property> getProperties(String tag){
+        List<Property> result = new ArrayList<>(20);
+        for(YamlFile file: data) {
+            for(Property prop: file.getProperties()) {
+                if(prop.getTags().contains(tag)) {
+                    result.add(prop);
+                }
+            }
+        }
+        return result;
+    }
+
+
 }

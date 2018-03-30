@@ -50,7 +50,6 @@
 package com.openexchange.drive.events.internal;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import com.openexchange.drive.DriveSession;
@@ -58,6 +57,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.composition.IDBasedFolderAccess;
 import com.openexchange.file.storage.composition.IDBasedFolderAccessFactory;
+import com.openexchange.java.ConcurrentHashSet;
 import com.openexchange.java.Strings;
 import com.openexchange.session.Session;
 
@@ -76,8 +76,8 @@ public class FolderBuffer {
     private final int defaultDelayTime;
     private final int contextID;
 
-    private Set<String> folderIDs;
-    private String pushToken;
+    private volatile Set<String> folderIDs;
+    private volatile String pushToken;
     private long lastEventTime;
     private long firstEventTime;
 
@@ -135,6 +135,7 @@ public class FolderBuffer {
      * @return The client push token, or <code>null</code> if not unique
      */
     public String getPushToken() {
+        String pushToken = this.pushToken;
         return UNDEFINED_PUSH_TOKEN.equals(pushToken) ? null : pushToken;
     }
 
@@ -146,9 +147,11 @@ public class FolderBuffer {
          * prepare access
          */
         lastEventTime = System.currentTimeMillis();
+        Set<String> folderIDs = this.folderIDs;
         if (null == folderIDs) {
             firstEventTime = lastEventTime;
-            folderIDs = new HashSet<String>();
+            folderIDs = new ConcurrentHashSet<String>();
+            this.folderIDs = folderIDs;
         }
         /*
          * add folder and all parent folders, resolve to root if not already known

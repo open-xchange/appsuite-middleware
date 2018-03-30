@@ -79,18 +79,18 @@ class XMLChangeLogSAXHandler extends DefaultHandler {
 
     protected Logger log;
 
-	private DatabaseChangeLog databaseChangeLog;
+	private final DatabaseChangeLog databaseChangeLog;
 	private Change change;
-	private Stack changeSubObjects = new Stack();
+	private final Stack changeSubObjects = new Stack();
 	private StringBuffer text;
 	private PreconditionContainer rootPrecondition;
-	private Stack<PreconditionLogic> preconditionLogicStack = new Stack<PreconditionLogic>();
+	private final Stack<PreconditionLogic> preconditionLogicStack = new Stack<PreconditionLogic>();
 	private ChangeSet changeSet;
 	private String paramName;
-	private ResourceAccessor resourceAccessor;
+	private final ResourceAccessor resourceAccessor;
 	private Precondition currentPrecondition;
 
-	private ChangeLogParameters changeLogParameters;
+	private final ChangeLogParameters changeLogParameters;
 	private boolean inRollback = false;
 
 	private boolean inModifySql = false;
@@ -244,15 +244,18 @@ class XMLChangeLogSAXHandler extends DefaultHandler {
 					}
 					if (file.isDirectory()) {
 						log.debug(file.getCanonicalPath() + " is a directory");
-						for (File childFile : new TreeSet<File>(Arrays.asList(file.listFiles()))) {
-                            String path = pathName+ childFile.getName();
-                            if (!seenPaths.add(path)) {
-                                log.debug("already included "+path);
-                                continue;
-                            }
+						File[] filesInDirectory = file.listFiles();
+						if (null != filesInDirectory) {
+                            for (File childFile : new TreeSet<File>(Arrays.asList(filesInDirectory))) {
+                                String path = pathName+ childFile.getName();
+                                if (!seenPaths.add(path)) {
+                                    log.debug("already included "+path);
+                                    continue;
+                                }
 
-                            includedChangeLogs.add(path);
-						}
+                                includedChangeLogs.add(path);
+                            }
+                        }
 					} else {
                         String path = pathName + file.getName();
                         if (!seenPaths.add(path)) {
@@ -482,7 +485,7 @@ class XMLChangeLogSAXHandler extends DefaultHandler {
 						log.info("Could not open properties file "
 								+ atts.getValue("file"));
 					} else {
-					    try {					        
+					    try {
 					        props.load(propertiesStream);
 					    } finally {
 					        propertiesStream.close();
@@ -697,7 +700,7 @@ class XMLChangeLogSAXHandler extends DefaultHandler {
 						// escaping, we cannot re-expand; the now-literal variables in the text would get
 						// incorrectly expanded. If we haven't enabled escaping, then retain the current behavior.
 						String expandedExpression = textString;
-						
+
 						if (false == ChangeLogParameters.EnableEscaping) {
 							expandedExpression = changeLogParameters.expandExpressions(textString);
 						}
@@ -761,7 +764,7 @@ class XMLChangeLogSAXHandler extends DefaultHandler {
 	 * Wrapper for Attributes that expands the value as needed
 	 */
 	private class ExpandingAttributes implements Attributes {
-		private Attributes attributes;
+		private final Attributes attributes;
 
 		private ExpandingAttributes(Attributes attributes) {
 			this.attributes = attributes;
