@@ -50,7 +50,6 @@
 package com.openexchange.groupware.update;
 
 import java.sql.Connection;
-import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -383,24 +382,25 @@ public abstract class AbstractConvertUtf8ToUtf8mb4Task extends UpdateTaskAdapter
      * @throws SQLException if an SQL error is occurred
      */
     protected int getVarcharColumnSize(String colName, String tableName, Connection con) throws SQLException {
-        ResultSet rsColumns = null;
+        ResultSet rs = null;
+        PreparedStatement stmt = null;
         try {
-            DatabaseMetaData meta = con.getMetaData();
-            rsColumns = meta.getColumns(null, null, tableName, null);
-            while (rsColumns.next()) {
-                String columnName = rsColumns.getString("COLUMN_NAME");
-                if (colName.equals(columnName)) {
-                    int dataType = rsColumns.getInt("DATA_TYPE");
-                    if (java.sql.Types.VARCHAR == dataType) {
-                        return rsColumns.getInt("COLUMN_SIZE");
-                    }
+            stmt = con.prepareStatement("SELECT CHARACTER_MAXIMUM_LENGTH,DATA_TYPE FROM information_schema.COLUMNS WHERE table_schema = ? AND TABLE_NAME = ? AND COLUMN_NAME = ?;");
+            stmt.setString(1, con.getSchema());
+            stmt.setString(2, tableName);
+            stmt.setString(3, colName);
+            rs = stmt.executeQuery();
+            while (rs.next()) {
+                String dataType = rs.getString("DATA_TYPE");
+                if ("varchar".equalsIgnoreCase(dataType)) {
+                    return rs.getInt("CHARACTER_MAXIMUM_LENGTH");
                 }
             }
 
             // No such VARCHAR column
             return -1;
         } finally {
-            Databases.closeSQLStuff(rsColumns);
+            Databases.closeSQLStuff(rs);
         }
     }
 
