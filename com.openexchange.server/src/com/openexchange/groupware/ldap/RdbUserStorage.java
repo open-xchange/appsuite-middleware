@@ -1114,6 +1114,9 @@ public class RdbUserStorage extends UserStorage {
                 }
             }
         } catch (SQLException e) {
+            if (Databases.isPrimaryKeyConflictInMySQL(e)) {
+                throw UserExceptionCode.CONCURRENT_ATTRIBUTES_UPDATE.create(I(contextId), I(userId));
+            }
             throw UserExceptionCode.SQL_ERROR.create(e, e.getMessage());
         } catch (RuntimeException e) {
             throw OXExceptions.general(OXExceptionStrings.MESSAGE, e);
