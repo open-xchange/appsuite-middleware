@@ -1275,17 +1275,23 @@ public final class ConfigJSlobService implements JSlobService {
             addValueByPath(path, value, jsonJSlob.getJsonObject());
 
             // Add the metadata as well as a separate JSON object
-            JSONObject jMetaData = new JSONObject();
-            Map<String, Object> metadata = jSlobEntry.metadata(session);
-            if (null != metadata && !metadata.isEmpty()) {
-                for (Entry<String, Object> metadataEntry : metadata.entrySet()) {
-                    String metadataName = metadataEntry.getKey();
-                    if (SKIP_META.contains(metadataName)) {
-                        continue;
+            JSONObject jMetaData;
+            {
+                Map<String, Object> metadata = jSlobEntry.metadata(session);
+                int size;
+                if (null != metadata && (size = metadata.size()) > 0) {
+                    jMetaData = new JSONObject(size + 2);
+                    for (Map.Entry<String, Object> metadataEntry : metadata.entrySet()) {
+                        String metadataName = metadataEntry.getKey();
+                        if (SKIP_META.contains(metadataName)) {
+                            continue;
+                        }
+                        // Metadata value
+                        value = metadataEntry.getValue();
+                        jMetaData.put(metadataName, value);
                     }
-                    // Metadata value
-                    value = metadataEntry.getValue();
-                    jMetaData.put(metadataName, value);
+                } else {
+                    jMetaData = new JSONObject(2);
                 }
             }
             // Lastly, let's add configurability.
