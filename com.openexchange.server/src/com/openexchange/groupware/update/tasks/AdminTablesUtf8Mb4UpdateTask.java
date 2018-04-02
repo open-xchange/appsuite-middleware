@@ -67,16 +67,12 @@ public class AdminTablesUtf8Mb4UpdateTask extends SimpleConvertUtf8ToUtf8mb4Upda
      * Initialises a new {@link AdminTablesUtf8Mb4UpdateTask}.
      */
     public AdminTablesUtf8Mb4UpdateTask() {
-        super(Arrays.asList("login2user", "updateTask", "replicationMonitor", "quota_context"));
+        super(Arrays.asList("replicationMonitor", "quota_context"));
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.groupware.update.SimpleConvertUtf8ToUtf8mb4UpdateTask#after(com.openexchange.groupware.update.PerformParameters, java.sql.Connection)
-     */
     @Override
     protected void after(PerformParameters params, Connection connection) throws SQLException {
         changeTable(connection, params.getSchema().getSchema(), "updateTask", Collections.singletonMap("taskName", 1024));
     }
+
 }

@@ -55,9 +55,9 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -144,7 +144,7 @@ public abstract class AbstractConvertUtf8ToUtf8mb4Task extends UpdateTaskAdapter
     protected void innerPerform(Connection con, String schema) throws SQLException {
         for (String table : tablesToConvert()) {
             try {
-                innerPerform(con, schema, table);
+                changeTable(con, schema, table, null);
             } catch (SQLException e) {
                 LOGGER.error("Failed to convert table {} from utf8 to utf8mb4. Reason: {}", table, e.getMessage());
                 throw e;
@@ -153,48 +153,31 @@ public abstract class AbstractConvertUtf8ToUtf8mb4Task extends UpdateTaskAdapter
     }
 
     /**
-     * Converts the charset and collation of the specified table in the specified schema
+     * Determines the text columns, which need to be converted since they use
+     * <code>"utf8"</code> charset and/or <code>"utf8_unicode_ci"</code> collation.
      *
-     * @param con The {@link Connection}
-     * @param schema The schema's name
-     * @param table The table's name
-     * @throws SQLException if an SQL error is occurred
+     * @param con The connection to use
+     * @param schema The schema name
+     * @param table The name of the table to inspect
+     * @return The map view of the columns that need to be altered
+     * @throws SQLException If columns cannot be returned
      */
-    private void innerPerform(Connection con, String schema, String table) throws SQLException {
-        String createTable = getCreateTable(con, table);
-        if (createTable == null) {
-            LOGGER.info("Table {} not found. Skipping.", table);
-            return;
+    protected Map<String, Column> getColumsToModifyAsMap(Connection con, String schema, String table) throws SQLException {
+        List<Column> columsToModify = getColumsToModify(con, schema, table);
+        if (null == columsToModify) {
+            return null;
         }
-        PreparedStatement tableCharsetStmt = null;
-        ResultSet tableCharsetRs = null;
-        PreparedStatement alterStmt = null;
-        try {
-            tableCharsetStmt = con.prepareStatement(TABLE_INFORMATION);
-            tableCharsetStmt.setString(1, schema);
-            tableCharsetStmt.setString(2, table);
-            tableCharsetRs = tableCharsetStmt.executeQuery();
-            String tableCollation = null;
-            String tableCharset = null;
-            if (tableCharsetRs.next()) {
-                tableCollation = mb4Collation(tableCharsetRs.getString("TABLE_COLLATION"));
-                tableCharset = mb4Charset(tableCharsetRs.getString("CHARACTER_SET_NAME"));
-            }
-            Databases.closeSQLStuff(tableCharsetRs, tableCharsetStmt);
-            tableCharsetRs = null;
-            tableCharsetStmt = null;
 
-            List<Column> newColumns = getColumsToModify(con, schema, table);
-
-            String alterTable = alterTable(table, newColumns, tableCharset, tableCollation);
-            if (Strings.isNotEmpty(alterTable)) {
-                alterStmt = con.prepareStatement(alterTable);
-                alterStmt.execute();
-            }
-        } finally {
-            Databases.closeSQLStuff(tableCharsetRs, tableCharsetStmt);
-            Databases.closeSQLStuff(alterStmt);
+        int size = columsToModify.size();
+        if (size <= 0) {
+            return Collections.emptyMap();
         }
+
+        Map<String, Column> m = new LinkedHashMap<>(size);
+        for (Column column : columsToModify) {
+            m.put(column.name, column);
+        }
+        return m;
     }
 
     /**
@@ -357,7 +340,7 @@ public abstract class AbstractConvertUtf8ToUtf8mb4Task extends UpdateTaskAdapter
 
     /**
      * Modifies the specified <code>VARCHAR</code> column to a <code>TEXT</code> if it exceeds the specified size
-     * 
+     *
      * @param tableName The table's name
      * @param columnName The column's name
      * @param size The size
@@ -375,7 +358,7 @@ public abstract class AbstractConvertUtf8ToUtf8mb4Task extends UpdateTaskAdapter
 
     /**
      * Retrieves the size of the specified varchar column
-     * 
+     *
      * @param tableName The table's name
      * @param colName The column's name
      * @param con The {@link Connection}
@@ -411,20 +394,57 @@ public abstract class AbstractConvertUtf8ToUtf8mb4Task extends UpdateTaskAdapter
      * @param connection The connection to use
      * @param schema The schema name
      * @param table The table name
-     * @param varcharColumns The optional VARCHAR columns with their respective VARCHAR sizes
+     * @param optVarcharColumns The optional VARCHAR columns with their respective VARCHAR sizes
      *            (use only if the column is part of the PRIMARY KEY or is a (UNIQUE) KEY and it's size surpasses the limit of 767 bytes in total, i.e. VARCHAR length is greater than 191)
      * @throws SQLException If changing the table fails
      */
-    protected void changeTable(Connection connection, String schema, String table, Map<String, Integer> varcharColumns) throws SQLException {
+    protected void changeTable(Connection connection, String schema, String table, Map<String, Integer> optVarcharColumns) throws SQLException {
+        String createTable = getCreateTable(connection, table);
+        if (createTable == null) {
+            LOGGER.info("Table {} not found. Skipping.", table);
+            return;
+        }
+
+        // Check table information to see if table's default charset/collation needs to be changed
+        String tableCollation = null;
+        String tableCharset = null;
+        {
+            PreparedStatement tableCharsetStmt = null;
+            ResultSet tableCharsetRs = null;
+            try {
+                // Check table information to see if tables default charset/collation needs to be changed
+                tableCharsetStmt = connection.prepareStatement(TABLE_INFORMATION);
+                tableCharsetStmt.setString(1, schema);
+                tableCharsetStmt.setString(2, table);
+                tableCharsetRs = tableCharsetStmt.executeQuery();
+                if (tableCharsetRs.next()) {
+                    tableCollation = mb4Collation(tableCharsetRs.getString("TABLE_COLLATION"));
+                    tableCharset = mb4Charset(tableCharsetRs.getString("CHARACTER_SET_NAME"));
+                }
+            } finally {
+                Databases.closeSQLStuff(tableCharsetRs, tableCharsetStmt);
+            }
+        }
+
+        // Next, determine the 'utf8' columns, which need to be converted to 'utf8mb4'
         PreparedStatement alterStmt = null;
         try {
-            List<Column> columnsToModify = getColumsToModify(connection, schema, table);
-            for (Entry<String, Integer> varcharColumn : varcharColumns.entrySet()) {
-                columnsToModify = columnsToModify.stream().map((column) -> shrinkVarcharColumn(varcharColumn.getKey(), varcharColumn.getValue(), column)).collect(Collectors.toList());
+            Map<String, Column> columnsToModify = getColumsToModifyAsMap(connection, schema, table);
+            if (false == columnsToModify.isEmpty() && null != optVarcharColumns) {
+                for (Map.Entry<String, Integer> varcharColumn : optVarcharColumns.entrySet()) {
+                    String columnName = varcharColumn.getKey();
+                    Column column = columnsToModify.get(columnName);
+                    if (null != column) {
+                        int expectedSize = varcharColumn.getValue().intValue();
+                        columnsToModify.put(columnName, shrinkVarcharColumn(column, expectedSize));
+                    }
+                }
             }
-            String alterTable = alterTable(table, columnsToModify, UTF8MB4_CHARSET, UTF8MB4_UNICODE_COLLATION);
 
+            // Compile the "ALTER TABLE..." statement
+            String alterTable = alterTable(table, new ArrayList<>(columnsToModify.values()), tableCharset, tableCollation);
             if (Strings.isNotEmpty(alterTable)) {
+                // Execute the "ALTER TABLE..." statement
                 alterStmt = connection.prepareStatement(alterTable);
                 alterStmt.execute();
             }
@@ -435,55 +455,65 @@ public abstract class AbstractConvertUtf8ToUtf8mb4Task extends UpdateTaskAdapter
 
     /**
      * Checks if the specified {@link Column}'s name matches the specified column name and if it does
-     * shrinks it from varchar(charLength) to varchar(191), otherwise the {@link Column} is returned.
-     * unaltered.
+     * shrinks it from VARCHAR(charLength) to VARCHAR(191), otherwise the column} is returned as-is.
      *
      * @param columnName The column name
-     * @param charLength The character length of the existing column
+     * @param expectedSize The character length of the existing column
      * @param column The {@link Column} to shrink
-     * @return The shrinked {@link Column} if the names match; otherwise the unaltered column
+     * @return The shrinked column if the names match; otherwise the unaltered column
      */
-    protected Column shrinkVarcharColumn(String columnName, int charLength, Column column) {
-        return column.getName().equals(columnName) ? shrinkVarcharColumn(column, charLength) : column;
+    protected Column shrinkVarcharColumn(String columnName, int expectedSize, Column column) {
+        return column.getName().equals(columnName) ? shrinkVarcharColumn(column, expectedSize) : column;
     }
 
     /**
-     * Shrinks the specified {@link Column} from varchar(charLength) to varchar(191)
+     * Shrinks the specified column from VARCHAR(charLength) to VARCHAR(191)
      *
-     * @param column The {@link Column} to shrink
-     * @param charLength The character length of the existing column
-     * @return the shirnked {@link Column}
+     * @param column The column to shrink
+     * @param expectedSize The character length of the existing column
+     * @return the shrinked column
      */
-    private Column shrinkVarcharColumn(Column column, int charLength) {
-        return new Column(column.getName(), column.getDefinition().replace("varchar(" + charLength + ")", "varchar(191)"));
+    private Column shrinkVarcharColumn(Column column, int expectedSize) {
+        String columnDefinition = Strings.asciiLowerCase(column.getDefinition());
+        String expected = new StringBuilder("varchar(").append(expectedSize).append(')').toString();
+        if (columnDefinition.indexOf(expected) < 0) {
+            // No such VARCHAR in definition
+            return column;
+        }
+
+        return new Column(column.getName(), Strings.asciiLowerCase(column.getDefinition()).replace(expected, "varchar(191)"));
     }
 
     /**
-     * The tables to convert. Checks for explicit table and column charsets and (in case of utf8) converts them to utf8mb4.
-     * Converts collations accordingly.
-     * No further adjustments are done. For more complex tables and additional changes (e.g. key adjustments) perform this manually or use {@link AbstractConvertUtf8ToUtf8mb4Task#before} and {@link AbstractConvertUtf8ToUtf8mb4Task#after}.
+     * Gets the tables to convert.
+     * <p
+     * Checks for explicit table and column charsets and (in case of utf8) converts them to utf8mb4. Converts collations accordingly.
+     * <p>
+     * No further adjustments are done. For more complex tables and additional changes (e.g. key adjustments) perform this manually or use {@link AbstractConvertUtf8ToUtf8mb4Task#before} and/or {@link AbstractConvertUtf8ToUtf8mb4Task#after}.
      *
      * @return A List of tables to be converted.
      */
     protected abstract List<String> tablesToConvert();
 
     /**
-     * Method beeing executed before the conversion of the tables will start (same transaction).
+     * Method being executed before the conversion of the tables will start (same transaction).
+     * <p>
      * Use provided connection to perform statements in the same transaction.
      *
-     * @param params
-     * @param connection
-     * @throws SQLException
+     * @param params The update task parameters
+     * @param connection The connection to use
+     * @throws SQLException If an SQL error occurs
      */
     protected abstract void before(PerformParameters params, Connection connection) throws SQLException;
 
     /**
-     * Method beeing executed after the conversion of the tables has finisehd.
+     * Method being executed after the conversion of the tables has finished.
+     * <p>
      * Use provided connection to perform statements in the same transaction.
      *
-     * @param params
-     * @param connection
-     * @throws SQLException
+     * @param params The update task parameters
+     * @param connection The connection to use
+     * @throws SQLException If an SQL error occurs
      */
     protected abstract void after(PerformParameters params, Connection connection) throws SQLException;
 
