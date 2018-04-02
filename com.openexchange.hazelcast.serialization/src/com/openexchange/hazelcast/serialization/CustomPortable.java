@@ -60,7 +60,7 @@ import com.hazelcast.nio.serialization.Portable;
 public interface CustomPortable extends Portable {
 
     /**
-     * The identifier of the dynamic portable factory.<p/>
+     * The identifier (<code>873</code>) of the dynamic portable factory.<p/>
      *
      * Make sure to supply this identifier in the {@link #getFactoryId()} method.
      */
