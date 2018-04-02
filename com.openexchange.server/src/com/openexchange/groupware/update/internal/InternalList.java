@@ -729,6 +729,9 @@ public final class InternalList {
         list.add(new com.openexchange.groupware.update.tasks.OAuthAccessorConvertToUtf8mb4());
         list.add(new com.openexchange.groupware.update.tasks.IndexedFoldersConvertToUtf8mb4());
 
+        // Convert iCal/vCard tables to utf8mb4
+        list.add(new com.openexchange.groupware.update.tasks.IcalVcardConvertToUtf8mb4());
+
         return list.toArray(new UpdateTaskV2[list.size()]);
     }
 

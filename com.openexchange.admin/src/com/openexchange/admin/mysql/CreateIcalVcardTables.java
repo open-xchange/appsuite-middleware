@@ -53,25 +53,25 @@ import com.openexchange.database.AbstractCreateTableImpl;
 
 /**
  * {@link CreateIcalVcardTables}
- * 
+ *
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */
 public class CreateIcalVcardTables extends AbstractCreateTableImpl {
-    
+
     private static final String icalPrincipalTableName = "ical_principal";
     private static final String icalIdsTableName = "ical_ids";
     private static final String vcardPrincipalTableName = "vcard_principal";
     private static final String vcardIdsTableName = "vcard_ids";
 
-    private static final String createIcalPrincipalTable = "CREATE TABLE ical_principal (" 
-        + "object_id INT4 UNSIGNED NOT NULL," 
-        + "cid INT4 UNSIGNED NOT NULL," 
-        + "principal text NOT NULL," 
-        + "calendarfolder INT4 UNSIGNED NOT NULL," 
+    private static final String createIcalPrincipalTable = "CREATE TABLE ical_principal ("
+        + "object_id INT4 UNSIGNED NOT NULL,"
+        + "cid INT4 UNSIGNED NOT NULL,"
+        + "principal text NOT NULL,"
+        + "calendarfolder INT4 UNSIGNED NOT NULL,"
         + "taskfolder INT4 UNSIGNED NOT NULL,"
         + "PRIMARY KEY (cid, object_id)"
-      + ") ENGINE = InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
-    
+      + ") ENGINE = InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;";
+
     private static final String createIcalIdsTable = "CREATE TABLE ical_ids ("
         + "object_id INT4 UNSIGNED NOT NULL,"
         + "cid INT4 UNSIGNED NOT NULL,"
@@ -80,16 +80,16 @@ public class CreateIcalVcardTables extends AbstractCreateTableImpl {
         + "target_object_id int,"
         + "module int,"
         + "PRIMARY KEY (cid, object_id)"
-      + ") ENGINE = InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
-    
+      + ") ENGINE = InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;";
+
     private static final String createVcardPrincipalTable = "CREATE TABLE vcard_principal ("
         + "object_id int NOT NULL,"
         + "cid INT4 UNSIGNED NOT NULL,"
         + "principal text,"
         + "contactfolder int,"
         + "PRIMARY KEY (cid, object_id)"
-      + ") ENGINE = InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
-    
+      + ") ENGINE = InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;";
+
     private static final String createVcardIdsTable = "CREATE TABLE vcard_ids ("
         + "object_id int NOT NULL,"
         + "cid INT4 UNSIGNED NOT NULL,"
@@ -97,8 +97,8 @@ public class CreateIcalVcardTables extends AbstractCreateTableImpl {
         + "client_id text,"
         + "target_object_id int,"
         + "PRIMARY KEY (cid, object_id)"
-      + ") ENGINE = InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
-    
+      + ") ENGINE = InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;";
+
     /**
      * Initializes a new {@link CreateIcalVcardTables}.
      */
