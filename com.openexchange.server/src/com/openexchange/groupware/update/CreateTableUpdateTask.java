@@ -61,12 +61,12 @@ import com.openexchange.exception.OXException;
  * {@link CreateTableUpdateTask} - Wraps an existing {@link CreateTableService} instance as an update task.
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class CreateTableUpdateTask implements UpdateTaskV2 {
 
     private final CreateTableService create;
     private final String[] dependencies;
-    private final DatabaseService databaseService;
 
     /**
      * Initializes a new {@link CreateTableUpdateTask} from specified arguments.
@@ -76,7 +76,7 @@ public class CreateTableUpdateTask implements UpdateTaskV2 {
      * @param create The create-table service
      * @param dependencies The dependencies to preceding update tasks
      * @param version The version number; no more used
-     * @param databaseService The database service
+     * @param databaseService The database service; no more used
      */
     public CreateTableUpdateTask(CreateTableService create, String[] dependencies, int version, DatabaseService databaseService) {
         this(create, dependencies, databaseService);
@@ -84,16 +84,27 @@ public class CreateTableUpdateTask implements UpdateTaskV2 {
 
     /**
      * Initializes a new {@link CreateTableUpdateTask} from specified arguments.
+     * <p>
+     * This is the legacy constructor for maintaining the former constructor declaration.
      *
      * @param create The create-table service
      * @param dependencies The dependencies to preceding update tasks
-     * @param databaseService The database service
+     * @param databaseService The database service; no more used
      */
     public CreateTableUpdateTask(CreateTableService create, String[] dependencies, DatabaseService databaseService) {
+        this(create, dependencies);
+    }
+
+    /**
+     * Initializes a new {@link CreateTableUpdateTask} from specified arguments.
+     *
+     * @param create The create-table service
+     * @param dependencies The dependencies to preceding update tasks
+     */
+    public CreateTableUpdateTask(CreateTableService create, String[] dependencies) {
         super();
         this.create = create;
         this.dependencies = dependencies;
-        this.databaseService = databaseService;
     }
 
     @Override
@@ -109,7 +120,7 @@ public class CreateTableUpdateTask implements UpdateTaskV2 {
     }
 
     @Override
-    public void perform(final PerformParameters params) throws OXException {
+    public void perform(PerformParameters params) throws OXException {
         Connection con = params.getConnection();
         boolean rollback = false;
         try {

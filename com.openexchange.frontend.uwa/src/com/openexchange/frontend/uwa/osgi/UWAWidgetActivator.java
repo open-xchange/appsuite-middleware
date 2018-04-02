@@ -61,11 +61,11 @@ import com.openexchange.frontend.uwa.internal.groupware.CreatePositionsTable;
 import com.openexchange.frontend.uwa.internal.groupware.CreatePositionsTableTask;
 import com.openexchange.frontend.uwa.internal.groupware.CreateWidgetTable;
 import com.openexchange.frontend.uwa.internal.groupware.CreateWidgetTableTask;
+import com.openexchange.frontend.uwa.internal.groupware.WidgetConvertToUtf8mb4;
 import com.openexchange.groupware.update.UpdateTaskProviderService;
 import com.openexchange.groupware.update.UpdateTaskV2;
 import com.openexchange.id.IDGeneratorService;
 import com.openexchange.osgi.HousekeepingActivator;
-
 
 /**
  * {@link UWAWidgetActivator}
@@ -74,11 +74,16 @@ import com.openexchange.osgi.HousekeepingActivator;
  */
 public class UWAWidgetActivator extends HousekeepingActivator {
 
-    private static final Class[] NEEDED = new Class[]{DatabaseService.class, IDGeneratorService.class, ConfigurationService.class, ConfigViewFactory.class};
+    /**
+     * Initializes a new {@link UWAWidgetActivator}.
+     */
+    public UWAWidgetActivator() {
+        super();
+    }
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return NEEDED;
+        return new Class[] { DatabaseService.class, IDGeneratorService.class, ConfigurationService.class, ConfigViewFactory.class };
     }
 
     @Override
@@ -92,7 +97,6 @@ public class UWAWidgetActivator extends HousekeepingActivator {
 
         registerService(UWAWidgetServiceFactory.class, factory);
 
-
         // Database
 
         CreatePositionsTable positionsTable = new CreatePositionsTable();
@@ -101,18 +105,14 @@ public class UWAWidgetActivator extends HousekeepingActivator {
         CreateWidgetTable widgetTable = new CreateWidgetTable();
         registerService(CreateTableService.class, widgetTable);
 
-        final CreatePositionsTableTask updateTask1 = new CreatePositionsTableTask(dbService);
-        final CreateWidgetTableTask updateTask2 = new CreateWidgetTableTask(dbService);
-
         registerService(UpdateTaskProviderService.class, new UpdateTaskProviderService() {
 
             @Override
             public Collection<? extends UpdateTaskV2> getUpdateTasks() {
-                return Arrays.asList(updateTask1, updateTask2);
+                return Arrays.asList(new CreatePositionsTableTask(), new CreateWidgetTableTask(), new WidgetConvertToUtf8mb4());
             }
 
         });
-
     }
 
 }

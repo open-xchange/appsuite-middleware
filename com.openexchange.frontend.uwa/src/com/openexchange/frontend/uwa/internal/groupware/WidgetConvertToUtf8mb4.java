@@ -49,18 +49,21 @@
 
 package com.openexchange.frontend.uwa.internal.groupware;
 
-import com.openexchange.groupware.update.CreateTableUpdateTask;
-
+import com.openexchange.groupware.update.SimpleConvertUtf8ToUtf8mb4UpdateTask;
 
 /**
- * {@link CreatePositionsTableTask}
+ * {@link WidgetConvertToUtf8mb4} - Converts widget tables to utf8mb4.
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.10.0
  */
-public class CreatePositionsTableTask extends CreateTableUpdateTask {
+public class WidgetConvertToUtf8mb4 extends SimpleConvertUtf8ToUtf8mb4UpdateTask {
 
-    public CreatePositionsTableTask() {
-        super(new CreatePositionsTable(), new String[0]);
+    /**
+     * Initializes a new {@link WidgetConvertToUtf8mb4}.
+     */
+    public WidgetConvertToUtf8mb4() {
+        super(CreatePositionsTableTask.class, "uwaWidget", "uwaWidgetPosition");
     }
 
 }
