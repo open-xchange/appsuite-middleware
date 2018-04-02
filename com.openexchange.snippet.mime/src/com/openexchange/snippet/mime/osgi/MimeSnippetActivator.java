@@ -74,6 +74,7 @@ import com.openexchange.snippet.mime.Services;
 import com.openexchange.snippet.mime.groupware.MimeSnippetCreateTableTask;
 import com.openexchange.snippet.mime.groupware.MimeSnippetDeleteListener;
 import com.openexchange.snippet.mime.groupware.MimeSnippetQuotaProvider;
+import com.openexchange.snippet.mime.groupware.MimeSnippetTablesUtf8Mb4UpdateTask;
 import com.openexchange.snippet.mime.groupware.SnippetSizeColumnUpdateTask;
 
 /**
@@ -123,9 +124,8 @@ public class MimeSnippetActivator extends HousekeepingActivator {
             /*
              * Register groupware stuff
              */
-            final MimeSnippetCreateTableTask createTableTask = new MimeSnippetCreateTableTask();
-            registerService(UpdateTaskProviderService.class.getName(), new DefaultUpdateTaskProviderService(createTableTask));
-            registerService(UpdateTaskProviderService.class.getName(), new DefaultUpdateTaskProviderService(new SnippetSizeColumnUpdateTask()));
+            MimeSnippetCreateTableTask createTableTask = new MimeSnippetCreateTableTask();
+            registerService(UpdateTaskProviderService.class.getName(), new DefaultUpdateTaskProviderService(createTableTask, new SnippetSizeColumnUpdateTask(), new MimeSnippetTablesUtf8Mb4UpdateTask()));
             registerService(CreateTableService.class, createTableTask);
             registerService(DeleteListener.class, new MimeSnippetDeleteListener());
             /*
