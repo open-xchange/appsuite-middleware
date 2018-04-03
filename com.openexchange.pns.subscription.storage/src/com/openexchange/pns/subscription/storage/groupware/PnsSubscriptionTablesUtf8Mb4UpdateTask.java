@@ -69,10 +69,10 @@ public class PnsSubscriptionTablesUtf8Mb4UpdateTask extends SimpleConvertUtf8ToU
     public PnsSubscriptionTablesUtf8Mb4UpdateTask() {
         //@formatter:off
         super(Arrays.asList("pns_subscription", "pns_subscription_topic_wildcard","pns_subscription_topic_exact"), 
-            "com.openexchange.pns.subscription.storage.groupware.PnsSubscriptionsAddIndexTask"
-            );
+            PnsSubscriptionsAddIndexTask.class.getName());
         //@formatter:on
     }
+
     /*
      * (non-Javadoc)
      * 
