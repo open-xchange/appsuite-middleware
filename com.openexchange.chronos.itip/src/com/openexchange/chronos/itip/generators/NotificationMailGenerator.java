@@ -1027,7 +1027,7 @@ public class NotificationMailGenerator implements ITipMailGenerator {
                     identifier = onBehalfOf.getIdentifier();
                 }
                 for (ItemUpdate<Attendee, AttendeeField> updatedItem : updatedItems) {
-                    if (updatedItem.getUpdate().getEntity() == identifier && updatedItem.getUpdatedFields().contains(AttendeeField.PARTSTAT)) {
+                    if (updatedItem.getUpdate().getEntity() == identifier && (updatedItem.getUpdatedFields().contains(AttendeeField.PARTSTAT) || updatedItem.getUpdatedFields().contains(AttendeeField.COMMENT))) {
                         confirmStatus = updatedItem.getUpdate().getPartStat();
                         return (stateChanged = Boolean.TRUE).booleanValue();
                     }
