@@ -62,8 +62,6 @@ import com.openexchange.control.internal.BundleNotFoundException;
  */
 public final class ListServices extends AbstractConsoleHandler {
 
-    protected String bundleName;
-
     /**
      * Initializes a new {@link ListServices} with specified arguments and performs {@link #listServices() list services}.
      *
@@ -98,7 +96,7 @@ public final class ListServices extends AbstractConsoleHandler {
     public void listServices() throws Exception {
         final ObjectName objectName = getObjectName();
         final MBeanServerConnection mBeanServerConnection = getMBeanServerConnection();
-        final List<Map<String, Object>> serviceList = (List<Map<String, Object>>) mBeanServerConnection.invoke(
+        @SuppressWarnings("unchecked") final List<Map<String, Object>> serviceList = (List<Map<String, Object>>) mBeanServerConnection.invoke(
             objectName,
             "services",
             new Object[] {},
@@ -107,7 +105,7 @@ public final class ListServices extends AbstractConsoleHandler {
             final Map<String, Object> data = serviceList.get(a);
             System.out.println("service: " + data.get("service") + " registered by: " + data.get("registered_by"));
             if (data.containsKey("bundles")) {
-                final List<String> usedByBundles = (List<String>) data.get("bundles");
+                @SuppressWarnings("unchecked") final List<String> usedByBundles = (List<String>) data.get("bundles");
                 if (usedByBundles.size() > 0) {
                     System.out.println("used by bundles: ");
                     for (int b = 0; b < usedByBundles.size(); b++) {
@@ -118,6 +116,7 @@ public final class ListServices extends AbstractConsoleHandler {
         }
     }
 
+    @SuppressWarnings("unused")
     public static void main(final String args[]) {
         new ListServices(args);
     }
