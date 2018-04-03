@@ -71,19 +71,19 @@ public class CreateVirtualFolderTables extends AbstractCreateTableImpl {
         + "cid INT4 unsigned NOT NULL,"
         + "tree INT4 unsigned NOT NULL,"
         + "user INT4 unsigned NOT NULL,"
-        + "folderId VARCHAR(192) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,"
-        + "parentId VARCHAR(192) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,"
-        + "name VARCHAR(767) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,"
+        + "folderId VARCHAR(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,"
+        + "parentId VARCHAR(192) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,"
+        + "name VARCHAR(767) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,"
         + "lastModified BIGINT(64) DEFAULT NULL,"
         + "modifiedBy INT4 unsigned DEFAULT NULL,"
-        + "shadow VARCHAR(192) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,"
+        + "shadow VARCHAR(192) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,"
         + "sortNum INT4 unsigned DEFAULT NULL,"
         + "PRIMARY KEY (cid, tree, user, folderId),"
         + "INDEX (cid, tree, user, parentId),"
         + "INDEX (cid, tree, user, shadow),"
         + "INDEX (cid, user),"
         + "INDEX (cid, modifiedBy)"
-        + ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
+        + ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;";
 
     /**
      * Table name of virtualPermission table
@@ -97,7 +97,7 @@ public class CreateVirtualFolderTables extends AbstractCreateTableImpl {
         + "cid INT4 unsigned NOT NULL,"
         + "tree INT4 unsigned NOT NULL,"
         + "user INT4 unsigned NOT NULL,"
-        + "folderId VARCHAR(192) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,"
+        + "folderId VARCHAR(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,"
         + "entity INT4 unsigned NOT NULL,"
         + "fp tinyint(3) unsigned NOT NULL,"
         + "orp tinyint(3) unsigned NOT NULL,"
@@ -109,7 +109,7 @@ public class CreateVirtualFolderTables extends AbstractCreateTableImpl {
         + "`type` INT4 UNSIGNED NOT NULL default '0',"
         + "`sharedParentFolder` INT4 UNSIGNED,"
         + "PRIMARY KEY (cid, tree, user, folderId, entity)"
-        + ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
+        + ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;";
 
     /**
      * Table name of virtualSubscription table
@@ -123,10 +123,10 @@ public class CreateVirtualFolderTables extends AbstractCreateTableImpl {
         + "cid INT4 unsigned NOT NULL,"
         + "tree INT4 unsigned NOT NULL,"
         + "user INT4 unsigned NOT NULL,"
-        + "folderId VARCHAR(192) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,"
+        + "folderId VARCHAR(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,"
         + "subscribed tinyint(3) unsigned NOT NULL,"
         + "PRIMARY KEY (cid, tree, user, folderId)"
-        + ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
+        + ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;";
 
     /**
      * Table name of virtualBackupTree table
@@ -140,19 +140,19 @@ public class CreateVirtualFolderTables extends AbstractCreateTableImpl {
         + "cid INT4 unsigned NOT NULL,"
         + "tree INT4 unsigned NOT NULL,"
         + "user INT4 unsigned NOT NULL,"
-        + "folderId VARCHAR(192) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,"
-        + "parentId VARCHAR(192) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,"
-        + "name VARCHAR(256) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL DEFAULT '',"
+        + "folderId VARCHAR(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,"
+        + "parentId VARCHAR(192) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,"
+        + "name VARCHAR(256) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '',"
         + "lastModified BIGINT(64) DEFAULT NULL,"
         + "modifiedBy INT4 unsigned DEFAULT NULL,"
-        + "shadow VARCHAR(192) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,"
+        + "shadow VARCHAR(192) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,"
         + "sortNum INT4 unsigned DEFAULT NULL,"
         + "PRIMARY KEY (cid, tree, user, folderId),"
         + "INDEX (cid, tree, user, parentId),"
         + "INDEX (cid, tree, user, shadow),"
         + "INDEX (cid, user),"
         + "INDEX (cid, modifiedBy)"
-        + ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
+        + ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;";
 
     /**
      * Table name of virtualBackupPermission table
@@ -166,7 +166,7 @@ public class CreateVirtualFolderTables extends AbstractCreateTableImpl {
         + "cid INT4 unsigned NOT NULL,"
         + "tree INT4 unsigned NOT NULL,"
         + "user INT4 unsigned NOT NULL,"
-        + "folderId VARCHAR(192) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,"
+        + "folderId VARCHAR(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,"
         + "entity INT4 unsigned NOT NULL,"
         + "fp tinyint(3) unsigned NOT NULL,"
         + "orp tinyint(3) unsigned NOT NULL,"
@@ -178,7 +178,7 @@ public class CreateVirtualFolderTables extends AbstractCreateTableImpl {
         + "`type` INT4 UNSIGNED NOT NULL default '0',"
         + "`sharedParentFolder` INT4 UNSIGNED,"
         + "PRIMARY KEY (cid, tree, user, folderId, entity)"
-        + ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
+        + ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;";
 
     /**
      * Table name of virtualBackupSubscription table
@@ -192,10 +192,10 @@ public class CreateVirtualFolderTables extends AbstractCreateTableImpl {
         + "cid INT4 unsigned NOT NULL,"
         + "tree INT4 unsigned NOT NULL,"
         + "user INT4 unsigned NOT NULL,"
-        + "folderId VARCHAR(192) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,"
+        + "folderId VARCHAR(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,"
         + "subscribed tinyint(3) unsigned NOT NULL,"
         + "PRIMARY KEY (cid, tree, user, folderId)"
-        + ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
+        + ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;";
 
     /**
      * Initializes a new {@link CreateVirtualFolderTables}.
