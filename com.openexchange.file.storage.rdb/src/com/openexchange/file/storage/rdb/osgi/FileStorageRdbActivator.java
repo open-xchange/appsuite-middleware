@@ -177,7 +177,7 @@ public class FileStorageRdbActivator extends HousekeepingActivator {
     @Override
     protected void stopBundle() throws Exception {
         try {
-            cleanUp();
+            super.stopBundle();
             /*
              * Clear service registry
              */
