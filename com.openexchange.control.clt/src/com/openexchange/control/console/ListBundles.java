@@ -62,8 +62,6 @@ import com.openexchange.control.internal.BundleNotFoundException;
  */
 public final class ListBundles extends AbstractConsoleHandler {
 
-    protected String bundleName;
-
     /**
      * Initializes a new {@link ListBundles} with specified arguments and performs {@link #listBundles() list bundles}.
      *
@@ -98,7 +96,7 @@ public final class ListBundles extends AbstractConsoleHandler {
     public void listBundles() throws Exception {
         final ObjectName objectName = getObjectName();
         final MBeanServerConnection mBeanServerConnection = getMBeanServerConnection();
-        final List<Map<String, String>> bundleList = (List<Map<String, String>>) mBeanServerConnection.invoke(
+        @SuppressWarnings("unchecked") final List<Map<String, String>> bundleList = (List<Map<String, String>>) mBeanServerConnection.invoke(
             objectName,
             "list",
             new Object[] {},
@@ -109,6 +107,7 @@ public final class ListBundles extends AbstractConsoleHandler {
         }
     }
 
+    @SuppressWarnings("unused")
     public static void main(final String args[]) {
         new ListBundles(args);
     }
