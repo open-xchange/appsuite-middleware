@@ -517,10 +517,12 @@ public abstract class AbstractConvertUtf8ToUtf8mb4Task extends UpdateTaskAdapter
 
     /**
      * Gets the tables to convert.
-     * <p
+     * <p>
      * Checks for explicit table and column charsets and (in case of utf8) converts them to utf8mb4. Converts collations accordingly.
+     * </p>
      * <p>
      * No further adjustments are done. For more complex tables and additional changes (e.g. key adjustments) perform this manually or use {@link AbstractConvertUtf8ToUtf8mb4Task#before} and/or {@link AbstractConvertUtf8ToUtf8mb4Task#after}.
+     * </p>
      *
      * @return A List of tables to be converted.
      */
