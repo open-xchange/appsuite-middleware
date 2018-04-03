@@ -717,6 +717,9 @@ public final class InternalList {
         // Convert iCal/vCard tables to utf8mb4
         list.add(new com.openexchange.groupware.update.tasks.IcalVcardConvertToUtf8mb4());
 
+        // Convert legacy calendar tables to utf8mb4
+        list.add(new com.openexchange.groupware.update.tasks.LegacyCalendarTablesUtf8Mb4UpdateTask());
+
         return list.toArray(new UpdateTaskV2[list.size()]);
     }
 

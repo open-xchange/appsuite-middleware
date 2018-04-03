@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.chronos.storage.rdb.groupware;
+package com.openexchange.groupware.update.tasks;
 
 import java.sql.Connection;
 import java.sql.SQLException;
