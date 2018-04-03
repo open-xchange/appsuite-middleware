@@ -490,11 +490,6 @@ public class QuotaFileStorageTest {
         public SchemaInfo getSchemaInfo(int contextId) throws OXException {
             return null;
         }
-
-        @Override
-        public String getSchemaName() {
-            return null;
-        }
     }
 
     private static void rmdir(final File tempFile) {
