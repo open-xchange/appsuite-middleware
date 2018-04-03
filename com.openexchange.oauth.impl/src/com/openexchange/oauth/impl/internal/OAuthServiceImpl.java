@@ -1052,7 +1052,7 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
         /*
          * Scopes
          */
-        final Set<OAuthScope> scopes = (Set<OAuthScope>) arguments.get(OAuthConstants.ARGUMENT_SCOPES);
+        @SuppressWarnings("unchecked") final Set<OAuthScope> scopes = (Set<OAuthScope>) arguments.get(OAuthConstants.ARGUMENT_SCOPES);
         if (null != scopes) {
             ret.add(new Setter() {
 
