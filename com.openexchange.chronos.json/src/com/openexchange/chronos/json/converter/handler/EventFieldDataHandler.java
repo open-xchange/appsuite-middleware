@@ -74,16 +74,16 @@ public class EventFieldDataHandler implements DataHandler {
 
     @Override
     public Class<?>[] getTypes() {
-        return new Class[]{String[].class};
+        return new Class[] { String[].class };
     }
 
     @Override
     public ConversionResult processData(Data<? extends Object> data, DataArguments dataArguments, Session session) throws OXException {
-        if(!(data.getData() instanceof String[])) {
+        if (!(data.getData() instanceof String[])) {
             return null;
         }
         String[] fieldNames = (String[]) data.getData();
-        if(fieldNames == null || fieldNames.length == 0) {
+        if (fieldNames == null || fieldNames.length == 0) {
             return null;
         }
         Set<EventField> parseFields = EventMapper.getInstance().parseFields(fieldNames);
