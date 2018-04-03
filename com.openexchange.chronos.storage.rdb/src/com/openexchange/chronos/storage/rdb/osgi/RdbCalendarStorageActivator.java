@@ -114,7 +114,7 @@ public class RdbCalendarStorageActivator extends HousekeepingActivator {
             /*
              * register services for infrastructure
              */
-            //registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(new LegacyCalendarTablesUtf8Mb4UpdateTask()));
+            registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(new LegacyCalendarTablesUtf8Mb4UpdateTask()));
             registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(new DeleteAndChangeExceptionConsistencyTask()));
             registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(new ExceptionSeriesPatternConsistencyTask()));
             registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(new ChronosCreateTableTask(), new ChronosStorageMigrationTask(this)));
