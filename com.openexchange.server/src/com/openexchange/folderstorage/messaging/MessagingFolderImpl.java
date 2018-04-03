@@ -211,22 +211,26 @@ public final class MessagingFolderImpl extends AbstractFolder {
             messagingFolderType = MessagingFolderType.ROOT;
         } else if (null != fullname) {
             try {
-                if (fullname.equals(fullnameProvider.getDraftsFolder())) {
-                    localizedName = StringHelper.valueOf(user.getLocale()).getString(MailStrings.DRAFTS);
-                    messagingFolderType = MessagingFolderType.DRAFTS;
-                } else if (fullname.equals(fullnameProvider.getINBOXFolder())) {
-                    messagingFolderType = MessagingFolderType.INBOX;
-                } else if (fullname.equals(fullnameProvider.getSentFolder())) {
-                    localizedName = StringHelper.valueOf(user.getLocale()).getString(MailStrings.SENT);
-                    messagingFolderType = MessagingFolderType.SENT;
-                } else if (fullname.equals(fullnameProvider.getSpamFolder())) {
-                    localizedName = StringHelper.valueOf(user.getLocale()).getString(MailStrings.SPAM);
-                    messagingFolderType = MessagingFolderType.SPAM;
-                } else if (fullname.equals(fullnameProvider.getTrashFolder())) {
-                    localizedName = StringHelper.valueOf(user.getLocale()).getString(MailStrings.TRASH);
-                    messagingFolderType = MessagingFolderType.TRASH;
-                } else {
+                if (fullnameProvider == null) {
                     messagingFolderType = MessagingFolderType.NONE;
+                } else {
+                    if (fullname.equals(fullnameProvider.getDraftsFolder())) {
+                        localizedName = StringHelper.valueOf(user.getLocale()).getString(MailStrings.DRAFTS);
+                        messagingFolderType = MessagingFolderType.DRAFTS;
+                    } else if (fullname.equals(fullnameProvider.getINBOXFolder())) {
+                        messagingFolderType = MessagingFolderType.INBOX;
+                    } else if (fullname.equals(fullnameProvider.getSentFolder())) {
+                        localizedName = StringHelper.valueOf(user.getLocale()).getString(MailStrings.SENT);
+                        messagingFolderType = MessagingFolderType.SENT;
+                    } else if (fullname.equals(fullnameProvider.getSpamFolder())) {
+                        localizedName = StringHelper.valueOf(user.getLocale()).getString(MailStrings.SPAM);
+                        messagingFolderType = MessagingFolderType.SPAM;
+                    } else if (fullname.equals(fullnameProvider.getTrashFolder())) {
+                        localizedName = StringHelper.valueOf(user.getLocale()).getString(MailStrings.TRASH);
+                        messagingFolderType = MessagingFolderType.TRASH;
+                    } else {
+                        messagingFolderType = MessagingFolderType.NONE;
+                    }
                 }
             } catch (final OXException e) {
                 org.slf4j.LoggerFactory.getLogger(MessagingFolderImpl.class).error("", e);
