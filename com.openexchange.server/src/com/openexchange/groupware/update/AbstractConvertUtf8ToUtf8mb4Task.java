@@ -352,7 +352,7 @@ public abstract class AbstractConvertUtf8ToUtf8mb4Task extends UpdateTaskAdapter
     protected void modifyVarChar(String tableName, String columnName, int size, Column column, Connection connection, String schema) throws SQLException {
         int columnSize = getVarcharColumnSize(tableName, columnName, connection, schema);
         if (columnSize >= size) {
-            Tools.modifyColumns(connection, tableName, true, column);
+            Tools.modifyColumns(connection, tableName, false, column);
         }
     }
 
