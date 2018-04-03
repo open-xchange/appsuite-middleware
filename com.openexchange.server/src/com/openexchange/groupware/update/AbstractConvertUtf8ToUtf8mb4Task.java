@@ -439,7 +439,7 @@ public abstract class AbstractConvertUtf8ToUtf8mb4Task extends UpdateTaskAdapter
                     Column column = columnsToModify.get(columnName);
                     if (null != column) {
                         int expectedSize = varcharColumn.getValue().intValue();
-                        if (possibleDataTrunaction(connection, varcharColumn.getKey(), table, UNIQUE_VARCHAR_SIZE)) {
+                        if (possibleDataTruncation(connection, varcharColumn.getKey(), table, UNIQUE_VARCHAR_SIZE)) {
                             throw new SQLException("The update task '" + this.getClass().getName() + "' will result in data truncation for column '" + varcharColumn.getKey() + "' in table '" + table + "'. Aborting execution.");
                         }
                         columnsToModify.put(columnName, shrinkVarcharColumn(column, expectedSize));
@@ -469,7 +469,7 @@ public abstract class AbstractConvertUtf8ToUtf8mb4Task extends UpdateTaskAdapter
      * @return <code>true</code> if data truncation will occur; <code>false</code> otherwise
      * @throws SQLException if an SQL error is occurred
      */
-    private boolean possibleDataTrunaction(Connection connection, String column, String table, int maxColumnSize) throws SQLException {
+    private boolean possibleDataTruncation(Connection connection, String column, String table, int maxColumnSize) throws SQLException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
