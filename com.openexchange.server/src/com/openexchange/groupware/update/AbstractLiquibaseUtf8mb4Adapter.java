@@ -51,6 +51,7 @@ package com.openexchange.groupware.update;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import com.openexchange.java.Strings;
 import liquibase.change.custom.CustomTaskChange;
 import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
@@ -77,13 +78,13 @@ public abstract class AbstractLiquibaseUtf8mb4Adapter extends AbstractConvertUtf
 
         org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(AbstractLiquibaseUtf8mb4Adapter.class);
 
-        Connection configDbCon = ((JdbcConnection) databaseConnection).getUnderlyingConnection();
+        Connection con = ((JdbcConnection) databaseConnection).getUnderlyingConnection();
         try {
-            String schemaName = configDbCon.getCatalog() != null ? configDbCon.getCatalog() : (database.getDefaultCatalogName() != null ? database.getDefaultCatalogName() : getDefaultSchemaName());
+            String schemaName = con.getCatalog() != null && Strings.isNotEmpty(con.getCatalog()) ? con.getCatalog() : (database.getDefaultCatalogName() != null && Strings.isNotEmpty(database.getDefaultCatalogName()) ? database.getDefaultCatalogName() : getDefaultSchemaName());
 
-            before(configDbCon, schemaName);
-            innerPerform(configDbCon, schemaName);
-            after(configDbCon, schemaName);
+            before(con, schemaName);
+            innerPerform(con, schemaName);
+            after(con, schemaName);
         } catch (SQLException e) {
             logger.error("Failed to convert ConfigDB tables to utf8mb4", e);
             throw new CustomChangeException("SQL error", e);
