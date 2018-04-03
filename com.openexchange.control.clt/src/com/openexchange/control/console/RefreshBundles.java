@@ -60,8 +60,6 @@ import com.openexchange.control.internal.BundleNotFoundException;
  */
 public final class RefreshBundles extends AbstractConsoleHandler {
 
-    protected String bundleName;
-
     /**
      * Initializes a new {@link RefreshBundles} with specified arguments and performs {@link #refresh() refresh}.
      *
@@ -109,6 +107,7 @@ public final class RefreshBundles extends AbstractConsoleHandler {
         mBeanServerConnection.invoke(objectName, "refresh", new Object[] {}, new String[] {});
     }
 
+    @SuppressWarnings("unused")
     public static void main(final String args[]) {
         new RefreshBundles(args);
     }
