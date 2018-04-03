@@ -62,7 +62,6 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.Map;
 import com.openexchange.admin.contextrestore.rmi.exceptions.OXContextRestoreException;
 import com.openexchange.admin.contextrestore.rmi.exceptions.OXContextRestoreException.Code;
@@ -70,6 +69,7 @@ import com.openexchange.admin.contextrestore.rmi.impl.OXContextRestore.Parser.Po
 import com.openexchange.admin.contextrestore.storage.sqlStorage.OXContextRestoreSQLStorage;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.exceptions.StorageException;
+import com.openexchange.database.Databases;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 
@@ -163,7 +163,7 @@ public final class OXContextRestoreMySQLStorage extends OXContextRestoreSQLStora
             if (doRollback) {
                 dorollback(connection, connection2);
             }
-            closeSQLStuff(prepareStatement, prepareStatement2, prepareStatement3);
+            Databases.closeSQLStuff(prepareStatement, prepareStatement2, prepareStatement3);
             if (null != connection) {
                 autocommit(connection);
                 Database.back(poolId, connection);
@@ -180,60 +180,8 @@ public final class OXContextRestoreMySQLStorage extends OXContextRestoreSQLStora
 
     private static void dorollback(final Connection... connections) {
         for (final Connection con : connections) {
-            if (null != con) {
-                try {
-                    con.rollback();
-                } catch (final Exception e) {
-                    // Ignore
-                }
-            }
+            Databases.rollback(con);
         }
-    }
-
-    /**
-     * Closes the ResultSet.
-     *
-     * @param result <code>null</code> or a ResultSet to close.
-     */
-    private static void closeSQLStuff(final ResultSet result) {
-        if (result != null) {
-            try {
-                result.close();
-            } catch (final SQLException e) {
-                LOG.error("", e);
-            }
-        }
-    }
-
-    /**
-     * Closes the {@link Statement}.
-     *
-     * @param stmt <code>null</code> or a {@link Statement} to close.
-     */
-    private static void closeSQLStuff(final Statement... stmts) {
-        if (null == stmts || stmts.length <= 0) {
-            return;
-        }
-        for (final Statement stmt : stmts) {
-            if (null != stmt) {
-                try {
-                    stmt.close();
-                } catch (final SQLException e) {
-                    LOG.error("", e);
-                }
-            }
-        }
-    }
-
-    /**
-     * Closes the ResultSet and the Statement.
-     *
-     * @param result <code>null</code> or a ResultSet to close.
-     * @param stmt <code>null</code> or a Statement to close.
-     */
-    private static void closeSQLStuff(final ResultSet result, final Statement stmt) {
-        closeSQLStuff(result);
-        closeSQLStuff(stmt);
     }
 
     /**
