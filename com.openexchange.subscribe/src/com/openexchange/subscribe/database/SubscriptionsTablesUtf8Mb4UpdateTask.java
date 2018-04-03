@@ -49,11 +49,7 @@
 
 package com.openexchange.subscribe.database;
 
-import java.sql.Connection;
-import java.sql.SQLException;
 import java.util.Arrays;
-import java.util.Collections;
-import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.SimpleConvertUtf8ToUtf8mb4UpdateTask;
 
 /**
@@ -67,20 +63,6 @@ public class SubscriptionsTablesUtf8Mb4UpdateTask extends SimpleConvertUtf8ToUtf
      * Initialises a new {@link SubscriptionsTablesUtf8Mb4UpdateTask}.
      */
     public SubscriptionsTablesUtf8Mb4UpdateTask() {
-        //@formatter:off
-        super(Arrays.asList("subscriptions", "sequence_subscriptions"), 
-            "com.openexchange.subscribe.database.AddFolderIndex"
-            );
-        //@formatter:on
-    }
-    //, 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.groupware.update.SimpleConvertUtf8ToUtf8mb4UpdateTask#after(com.openexchange.groupware.update.PerformParameters, java.sql.Connection)
-     */
-    @Override
-    protected void after(PerformParameters params, Connection connection) throws SQLException {
-        changeTable(connection, params.getSchema().getSchema(), "subscriptions", Collections.singletonMap("folder_id", 255));
+        super(Arrays.asList("subscriptions", "sequence_subscriptions"), AddFolderIndex.class.getName());
     }
 }
