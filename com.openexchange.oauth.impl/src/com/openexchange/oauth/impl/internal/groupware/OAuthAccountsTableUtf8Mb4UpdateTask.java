@@ -47,9 +47,8 @@
  *
  */
 
-package com.openexchange.groupware.update.tasks;
+package com.openexchange.oauth.impl.internal.groupware;
 
-import java.util.Arrays;
 import com.openexchange.groupware.update.SimpleConvertUtf8ToUtf8mb4UpdateTask;
 
 /**
@@ -63,6 +62,6 @@ public class OAuthAccountsTableUtf8Mb4UpdateTask extends SimpleConvertUtf8ToUtf8
      * Initialises a new {@link OAuthAccountsTableUtf8Mb4UpdateTask}.
      */
     public OAuthAccountsTableUtf8Mb4UpdateTask() {
-        super(Arrays.asList("oauthAccounts"), "com.openexchange.oauth.impl.internal.groupware.RenameMigrateLinkedInServiceIdUpdateTask");
+        super(DropForeignKeyFromOAuthAccountTask.class, "oauthAccounts");
     }
 }
