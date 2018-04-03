@@ -50,6 +50,7 @@
 package com.openexchange.chronos.itip.handler;
 
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -221,7 +222,7 @@ public class ITipHandler implements CalendarHandler {
                         update = masterUpdate;
                         exceptions = eventGroup;
                     } else {
-                        Set<EventField> fields = masterUpdate.getUpdatedFields();
+                        Set<EventField> fields = new HashSet<>(masterUpdate.getUpdatedFields());
                         fields.remove(EventField.TIMESTAMP);
                         fields.remove(EventField.LAST_MODIFIED);
                         if (fields.isEmpty()) {
