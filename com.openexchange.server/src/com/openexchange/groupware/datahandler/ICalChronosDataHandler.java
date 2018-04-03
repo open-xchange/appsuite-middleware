@@ -104,7 +104,7 @@ public final class ICalChronosDataHandler extends ICalDataHandler {
 
     /**
      * Initializes a new {@link ICalChronosDataHandler}
-     * 
+     *
      * @param services The {@link ServiceLookup}
      */
     public ICalChronosDataHandler(ServiceLookup services) {
@@ -118,6 +118,10 @@ public final class ICalChronosDataHandler extends ICalDataHandler {
 
     @Override
     public ConversionResult processData(final Data<? extends Object> data, final DataArguments dataArguments, final Session session) throws OXException {
+        if (null == session) {
+            throw DataExceptionCodes.MISSING_ARGUMENT.create("session");
+        }
+
         /*
          * Parse parameters
          */

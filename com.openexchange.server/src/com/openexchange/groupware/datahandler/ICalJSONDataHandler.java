@@ -101,7 +101,7 @@ public final class ICalJSONDataHandler extends ICalDataHandler {
 
     /**
      * Initializes a new {@link ICalJSONDataHandler}
-     * 
+     *
      * @param services The {@link ServiceLookup}
      */
     public ICalJSONDataHandler(ServiceLookup services) {
@@ -120,6 +120,10 @@ public final class ICalJSONDataHandler extends ICalDataHandler {
 
     @Override
     public ConversionResult processData(final Data<? extends Object> data, final DataArguments dataArguments, final Session session) throws OXException {
+        if (null == session) {
+            throw DataExceptionCodes.MISSING_ARGUMENT.create("session");
+        }
+
         final Context ctx = ContextStorage.getStorageContext(session);
         final ICalParser iCalParser = services.getServiceSafe(ICalParser.class);
         final List<Event> events;
