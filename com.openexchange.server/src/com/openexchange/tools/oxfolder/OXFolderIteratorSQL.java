@@ -73,7 +73,6 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.i18n.Groups;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.tools.iterator.FolderObjectIterator;
-import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.server.impl.DBPool;
@@ -164,99 +163,6 @@ public final class OXFolderIteratorSQL {
     private static final String SQL_IN_STR_STANDARD_MODULES_ALL = FolderObject.SQL_IN_STR_STANDARD_MODULES_ALL;
 
     private static final String SQL_IN_STR_STANDARD_MODULES = FolderObject.SQL_IN_STR_STANDARD_MODULES;
-
-    public static final class Parameter {
-
-        private final int user;
-
-        private final int[] groups;
-
-        private final UserConfiguration userConfig;
-
-        private final Context ctx;
-
-        private Date since;
-
-        private Connection con;
-
-        private int folderId;
-
-        private int module;
-
-        private int type;
-
-        /**
-         * Initializes a new {@link Parameter}.
-         *
-         * @param user The user ID
-         * @param groups The user's group IDs
-         * @param userConfig The user configuration
-         * @param ctx The context
-         */
-        public Parameter(final int user, final int[] groups, final UserConfiguration userConfig, final Context ctx) {
-            super();
-            this.user = user;
-            this.groups = groups;
-            this.userConfig = userConfig;
-            this.ctx = ctx;
-        }
-
-        /**
-         * Sets the since time stamp.
-         *
-         * @param since The since time stamp
-         * @return This parameter object with since time stamp applied
-         */
-        public Parameter since(final Date since) {
-            this.since = since;
-            return this;
-        }
-
-        /**
-         * Sets the connection.
-         *
-         * @param con The connection
-         * @return This parameter object with connection applied
-         */
-        public Parameter connection(final Connection con) {
-            this.con = con;
-            return this;
-        }
-
-        /**
-         * Sets the folder ID.
-         *
-         * @param folderId The folder ID
-         * @return This parameter object with folder ID applied
-         */
-        public Parameter folderId(final int folderId) {
-            this.folderId = folderId;
-            return this;
-        }
-
-        /**
-         * Sets the module.
-         *
-         * @param module The module
-         * @return This parameter object with module applied
-         */
-        public Parameter module(final int module) {
-            this.module = module;
-            return this;
-        }
-
-        /**
-         * Sets the type.
-         *
-         * @param type The type
-         * @return This parameter object with type applied
-         */
-        public Parameter type(final int type) {
-            this.type = type;
-            return this;
-        }
-
-    }
 
     private OXFolderIteratorSQL() {
         super();
