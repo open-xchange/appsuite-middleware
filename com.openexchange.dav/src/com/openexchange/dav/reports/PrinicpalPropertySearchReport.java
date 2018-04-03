@@ -231,29 +231,31 @@ public class PrinicpalPropertySearchReport extends PROPFINDAction {
                 }
                 String pattern = getPattern(matchElement);
                 Element prop = propertySearch.getChild("prop", DAV_NS);
-                for (Element element : prop.getChildren()) {
-                    /*
-                     * search by displayname only
-                     */
-                    if ("displayname".equals(element.getName()) && DAV_NS.equals(element.getNamespace())) {
-                        try {
-                            Group[] foundGroups = GroupStorage.getInstance().searchGroups(pattern, false, factory.getContext());
-                            if (null != foundGroups) {
-                                groups.addAll(Arrays.asList(foundGroups));
-                            }
-                        } catch (OXException e) {
-                            LOG.warn("error searching groups", e);
-                        }
-                    } else if ("calendar-user-address-set".equals(element.getName()) && DAVProtocol.CAL_NS.equals(element.getNamespace())) {
-                        int groupID = extractPrincipalID(pattern, CalendarUserType.GROUP);
-                        if (-1 != groupID) {
+                if (null != prop) {
+                    for (Element element : prop.getChildren()) {
+                        /*
+                         * search by displayname only
+                         */
+                        if ("displayname".equals(element.getName()) && DAV_NS.equals(element.getNamespace())) {
                             try {
-                                Group group = GroupStorage.getInstance().getGroup(groupID, factory.getContext());
-                                if (null != group) {
-                                    groups.add(group);
+                                Group[] foundGroups = GroupStorage.getInstance().searchGroups(pattern, false, factory.getContext());
+                                if (null != foundGroups) {
+                                    groups.addAll(Arrays.asList(foundGroups));
                                 }
                             } catch (OXException e) {
                                 LOG.warn("error searching groups", e);
+                            }
+                        } else if ("calendar-user-address-set".equals(element.getName()) && DAVProtocol.CAL_NS.equals(element.getNamespace())) {
+                            int groupID = extractPrincipalID(pattern, CalendarUserType.GROUP);
+                            if (-1 != groupID) {
+                                try {
+                                    Group group = GroupStorage.getInstance().getGroup(groupID, factory.getContext());
+                                    if (null != group) {
+                                        groups.add(group);
+                                    }
+                                } catch (OXException e) {
+                                    LOG.warn("error searching groups", e);
+                                }
                             }
                         }
                     }
