@@ -68,7 +68,7 @@ public class ChunkingUtilities {
             }
             // Load and parse the existing data first into an Own JSONObject
             String content = sc.useDelimiter("\\Z").next();
-            Map<String, Object> storedData = (HashMap<String, Object>) JSONCoercion.parseAndCoerceToNative(content);
+            @SuppressWarnings("unchecked") Map<String, Object> storedData = (HashMap<String, Object>) JSONCoercion.parseAndCoerceToNative(content);
             // Merge the data of the two files into dataToStore
             mergeNewValuesWithStoredValues(storedData, data);
         } catch (FileNotFoundException e) {
@@ -93,6 +93,7 @@ public class ChunkingUtilities {
         return fileLock;
     }
 
+    @SuppressWarnings("unchecked")
     private static void mergeNewValuesWithStoredValues(Map<String, Object> storedCounts, Map<String, Object> additionalCounts) {
         if (storedCounts.get(Report.CONTEXTS) != null && additionalCounts.get(Report.CONTEXTS) != null) {
             long additionalContexts = Long.parseLong(String.valueOf(storedCounts.get(Report.CONTEXTS)));
