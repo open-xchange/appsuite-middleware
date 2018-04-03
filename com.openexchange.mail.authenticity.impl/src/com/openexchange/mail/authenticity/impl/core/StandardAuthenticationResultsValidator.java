@@ -488,7 +488,9 @@ public class StandardAuthenticationResultsValidator implements AuthenticationRes
             default:
                 overallResult.setStatus(bestOfDKIM.getResult().convert());
         }
-        overallResult.addAttribute(MailAuthenticityResultKey.FROM_DOMAIN, bestOfDKIM.getDomain());
+        if (Strings.isNotEmpty(bestOfDKIM.getDomain())) {
+            overallResult.addAttribute(MailAuthenticityResultKey.FROM_DOMAIN, bestOfDKIM.getDomain());
+        }
         return dkimFailed;
     }
 
@@ -548,7 +550,9 @@ public class StandardAuthenticationResultsValidator implements AuthenticationRes
                 // Override
                 overallResult.setStatus(bestOfSPF.getResult().convert());
         }
-        overallResult.addAttribute(MailAuthenticityResultKey.FROM_DOMAIN, bestOfSPF.getDomain());
+        if (Strings.isNotEmpty(bestOfSPF.getDomain())) {
+            overallResult.addAttribute(MailAuthenticityResultKey.FROM_DOMAIN, bestOfSPF.getDomain());
+        }
     }
 
     /**
