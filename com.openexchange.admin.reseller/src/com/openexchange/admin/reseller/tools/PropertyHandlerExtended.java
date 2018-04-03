@@ -61,8 +61,11 @@ public class PropertyHandlerExtended extends PropertyHandler {
     // The following lines define the property values for the database implementations
     public static final String RESELLER_STORAGE = "RESELLER_STORAGE";
 
+    /**
+     * Should never be invoked.
+     */
     private PropertyHandlerExtended() {
-        super(null);
+        super(new Properties());
     }
 
     public PropertyHandlerExtended(final Properties sysprops) {
