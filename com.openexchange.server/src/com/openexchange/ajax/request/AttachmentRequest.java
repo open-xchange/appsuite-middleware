@@ -147,6 +147,9 @@ public class AttachmentRequest extends CommonRequest {
         try {
             if (AJAXServlet.ACTION_ATTACH.equals(action)) {
                 final JSONObject object = (JSONObject) req.getBody();
+                if (null == object) {
+                    throw AjaxExceptionCodes.MISSING_REQUEST_BODY.create();
+                }
 
                 for (final AttachmentField required : Attachment.REQUIRED) {
                     if (!object.has(required.getName())) {
