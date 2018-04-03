@@ -153,7 +153,7 @@ public interface InfostoreFacade extends TransactionAware {
      * @return The meta data
      * @throws OXException If operation fails
      * @see #CURRENT_VERSION
-     * @deprecated use {@link InfostoreFacade#getDocument(int, int, long, long, ServerSession)} instead
+     * @deprecated use {@link InfostoreFacade#getDocumentMetadata(long, int, int, ServerSession)} instead
      */
     @Deprecated
     DocumentMetadata getDocumentMetadata(int id, int version, ServerSession session) throws OXException;
