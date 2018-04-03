@@ -54,8 +54,6 @@ import java.sql.SQLException;
 import java.util.Collections;
 import java.util.Map;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableMap.Builder;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.SimpleConvertUtf8ToUtf8mb4UpdateTask;
 
@@ -71,26 +69,23 @@ public class FolderConvertUtf8ToUtf8mb4Task extends SimpleConvertUtf8ToUtf8mb4Up
      * Initializes a new {@link FolderConvertUtf8ToUtf8mb4Task}.
      */
     public FolderConvertUtf8ToUtf8mb4Task() {
+        //@formatter:off
         super(ImmutableList.of("oxfolder_tree", "oxfolder_permissions", "oxfolder_specialfolders", "oxfolder_userfolders", 
             "oxfolder_userfolders_standardfolders", "del_oxfolder_tree", "del_oxfolder_permissions", "oxfolder_lock", "oxfolder_property"),
             AddTypeToFolderPermissionTableUpdateTask.class.getName());
+        //@formatter:on
     }
 
     @Override
     protected void after(PerformParameters params, Connection connection) throws SQLException {
         Map<String, Integer> folderIdVarcharColumn = Collections.singletonMap("folderId", 192);
 
-        Builder<String, Integer> builder = ImmutableMap.builder();
-        builder.put("folderId", 192);
-        builder.put("shadow", 192);
-        ImmutableMap<String, Integer> virtualTreeColumns = builder.build();
-        
         String schema = params.getSchema().getSchema();
-        changeTable(connection, schema, "virtualTree", virtualTreeColumns);
+        changeTable(connection, schema, "virtualTree", folderIdVarcharColumn);
         changeTable(connection, schema, "virtualPermission", folderIdVarcharColumn);
         changeTable(connection, schema, "virtualSubscription", folderIdVarcharColumn);
 
-        changeTable(connection, schema, "virtualBackupTree", virtualTreeColumns);
+        changeTable(connection, schema, "virtualBackupTree", folderIdVarcharColumn);
         changeTable(connection, schema, "virtualBackupPermission", folderIdVarcharColumn);
         changeTable(connection, schema, "virtualBackupSubscription", folderIdVarcharColumn);
     }
