@@ -64,7 +64,7 @@ class CollectionDataSource<I> implements DataSource<I> {
 
     private final ThreadPoolService threadPool;
     private final Iterator<I> iter;
-    private final int blockSize = 100;
+    private static final int blockSize = 100;
 
     public CollectionDataSource(ThreadPoolService threadPool, Collection<I> source) {
         super();
