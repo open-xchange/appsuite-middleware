@@ -49,11 +49,7 @@
 
 package com.openexchange.pns.subscription.storage.groupware;
 
-import java.sql.Connection;
-import java.sql.SQLException;
 import java.util.Arrays;
-import java.util.Collections;
-import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.SimpleConvertUtf8ToUtf8mb4UpdateTask;
 
 /**
@@ -71,17 +67,5 @@ public class PnsSubscriptionTablesUtf8Mb4UpdateTask extends SimpleConvertUtf8ToU
         super(Arrays.asList("pns_subscription", "pns_subscription_topic_wildcard","pns_subscription_topic_exact"), 
             PnsSubscriptionsAddIndexTask.class.getName());
         //@formatter:on
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.groupware.update.SimpleConvertUtf8ToUtf8mb4UpdateTask#after(com.openexchange.groupware.update.PerformParameters, java.sql.Connection)
-     */
-    @Override
-    protected void after(PerformParameters params, Connection connection) throws SQLException {
-        changeTable(connection, params.getSchema().getSchema(), "pns_subscription", Collections.singletonMap("token", 255));
-        changeTable(connection, params.getSchema().getSchema(), "pns_subscription_topic_wildcard", Collections.singletonMap("topic", 255));
-        changeTable(connection, params.getSchema().getSchema(), "pns_subscription_topic_exact", Collections.singletonMap("topic", 255));
     }
 }
