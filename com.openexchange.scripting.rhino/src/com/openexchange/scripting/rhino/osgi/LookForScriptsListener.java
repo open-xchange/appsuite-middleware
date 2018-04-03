@@ -65,6 +65,12 @@ import com.openexchange.osgi.ExceptionUtils;
 import com.openexchange.scripting.rhino.libs.Console;
 import com.openexchange.scripting.rhino.require.RequireSupport;
 
+/**
+ *
+ * {@link LookForScriptsListener}
+ *
+ * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ */
 public class LookForScriptsListener implements BundleListener {
 
     private static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(LookForScriptsListener.class);
