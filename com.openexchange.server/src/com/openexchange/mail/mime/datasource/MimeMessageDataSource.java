@@ -456,20 +456,23 @@ public final class MimeMessageDataSource implements DataSource, CleanUp {
             }
             final StorageProvider tempStore = this.tempStore;
             if (null != tempStore) {
-                try {
-                    @SuppressWarnings("unchecked") final Set<File> filesToDelete = (Set<File>) filesToDelete().get(null);
-                    if (null != filesToDelete) {
-                        synchronized (filesToDelete) {
-                            for (final Iterator<File> iterator = filesToDelete.iterator(); iterator.hasNext();) {
-                                final File file = iterator.next();
-                                if (file.delete()) {
-                                    iterator.remove();
+                Field filesToDeleteField = filesToDelete();
+                if (null != filesToDeleteField) {
+                    try {
+                        @SuppressWarnings("unchecked") final Set<File> filesToDelete = (Set<File>) filesToDeleteField.get(null);
+                        if (null != filesToDelete) {
+                            synchronized (filesToDelete) {
+                                for (final Iterator<File> iterator = filesToDelete.iterator(); iterator.hasNext();) {
+                                    final File file = iterator.next();
+                                    if (file.delete()) {
+                                        iterator.remove();
+                                    }
                                 }
                             }
                         }
+                    } catch (final Exception e) {
+                        // Ignore
                     }
-                } catch (final Exception e) {
-                    // Ignore
                 }
             }
         }
