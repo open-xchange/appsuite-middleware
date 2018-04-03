@@ -76,6 +76,7 @@ import com.openexchange.ajax.requesthandler.converters.preview.cache.groupware.P
 import com.openexchange.ajax.requesthandler.converters.preview.cache.groupware.PreviewCacheCreateTableService;
 import com.openexchange.ajax.requesthandler.converters.preview.cache.groupware.PreviewCacheCreateTableTask;
 import com.openexchange.ajax.requesthandler.converters.preview.cache.groupware.PreviewCacheDeleteListener;
+import com.openexchange.ajax.requesthandler.converters.preview.cache.groupware.PreviewTableUtf8Mb4UpdateTask;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Reloadable;
 import com.openexchange.database.CreateTableService;
@@ -193,7 +194,8 @@ public final class ResourceCacheActivator extends HousekeepingActivator {
             new PreviewCacheCreateDataTableTask(),
             new DropDataFromPreviewCacheTable(),
             new ChangeFileNameAndTypeLength(),
-            new ChangeDataToLongblob()));
+            new ChangeDataToLongblob(),
+            new PreviewTableUtf8Mb4UpdateTask()));
         registerService(DeleteListener.class, new PreviewCacheDeleteListener());
     }
 
