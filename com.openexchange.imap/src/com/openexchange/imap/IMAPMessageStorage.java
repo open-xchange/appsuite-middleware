@@ -927,6 +927,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
         return map;
     }
 
+    @SuppressWarnings("unused")
     @Override
     public MailMessage[] getMessagesByMessageID(final String... messageIDs) throws OXException {
         try {

@@ -82,8 +82,6 @@ import org.glassfish.grizzly.websockets.WebSocketListener;
 import org.slf4j.Logger;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
-import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.UnmodifiableIterator;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.cascade.ComposedConfigProperty;
 import com.openexchange.config.cascade.ConfigView;
@@ -218,8 +216,11 @@ public abstract class AbstractGrizzlyWebSocketApplication<S extends SessionBound
             }
             i.remove();
         }
-        for (UnmodifiableIterator<WebSocket> it = ImmutableSet.<WebSocket> copyOf(getWebSockets()).iterator(); it.hasNext();) {
-            WebSocket socket = it.next();
+        List<WebSocket> webSocketsToRemove = new LinkedList<>();
+        for (Iterator<WebSocket> it = getWebSockets().iterator(); it.hasNext();) {
+            webSocketsToRemove.add(it.next());
+        }
+        for (WebSocket socket : webSocketsToRemove) {
             remove(socket);
             socket.close();
         }

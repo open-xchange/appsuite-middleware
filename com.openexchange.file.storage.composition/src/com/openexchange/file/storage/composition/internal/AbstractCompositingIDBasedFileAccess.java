@@ -836,6 +836,7 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractCompo
             return idTuple;
         }
 
+        @SuppressWarnings("unused")
         public List<FileStorageObjectPermission> getAddedPermissions() {
             return addedPermissions;
         }

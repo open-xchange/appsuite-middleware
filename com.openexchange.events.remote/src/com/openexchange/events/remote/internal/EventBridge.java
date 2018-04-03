@@ -136,8 +136,10 @@ public class EventBridge implements MessageListener<Map<String, Object>>, EventH
                  * publish locally
                  */
                 Event event = toLocal(remoteEvent);
-                LOG.trace("Publishing locally: {}", event);
-                eventAdmin.postEvent(event);
+                if (event != null) {
+                    LOG.trace("Publishing locally: {}", event);
+                    eventAdmin.postEvent(event);
+                }
             }
         }
     }
@@ -192,6 +194,10 @@ public class EventBridge implements MessageListener<Map<String, Object>>, EventH
         }
         // Mark that event as remotely received
         properties.put(CommonEvent.REMOTE_MARKER, null);
+        if (topic == null) {
+            LOG.warn("Unable to deserialize the event. Missing the event topic.");
+            return null;
+        }
         return new Event(topic, properties);
     }
 

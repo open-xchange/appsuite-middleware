@@ -125,7 +125,7 @@ public class ExtendedFolderPermissionsField implements AdditionalFolderField {
     @Override
     public Object renderJSON(AJAXRequestData requestData, Object value) {
         // The method returns a non null value if the value is non-null and can be cast to java.util.List
-        if (false == List.class.isInstance(value)) {
+        if (null == requestData || false == List.class.isInstance(value)) {
             return JSONObject.NULL;
         }
 

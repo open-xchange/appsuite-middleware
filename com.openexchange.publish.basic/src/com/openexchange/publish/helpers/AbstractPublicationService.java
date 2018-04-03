@@ -169,8 +169,12 @@ public abstract class AbstractPublicationService implements PublicationService {
 
     @Override
     public Collection<Publication> getAllPublications(final Context ctx, final String entityId) throws OXException {
-        final List<Publication> publications = STORAGE.get().getPublications(ctx, getTarget().getModule(), entityId);
-        List<Publication> returnPublications = new ArrayList<Publication>();
+        List<Publication> publications = STORAGE.get().getPublications(ctx, getTarget().getModule(), entityId);
+        if (null == publications) {
+            return Collections.emptyList();
+        }
+
+        List<Publication> returnPublications = new ArrayList<Publication>(publications.size());
         for (final Publication publication : publications) {
             /* as some publications are not working anymore, we should at least filter out the not working ones and write them to LOG */
             try {

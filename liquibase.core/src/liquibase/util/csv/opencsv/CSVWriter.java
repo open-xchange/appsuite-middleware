@@ -39,18 +39,18 @@ import java.util.List;
  *
  */
 public class CSVWriter {
-    
-    private Writer rawWriter;
 
-    private PrintWriter pw;
+    private final Writer rawWriter;
 
-    private char separator;
+    private final PrintWriter pw;
 
-    private char quotechar;
-    
-    private char escapechar;
-    
-    private String lineEnd;
+    private final char separator;
+
+    private final char quotechar;
+
+    private final char escapechar;
+
+    private final String lineEnd;
 
     /** The character used for escaping quotes. */
     public static final char DEFAULT_ESCAPE_CHARACTER = '"';
@@ -63,24 +63,24 @@ public class CSVWriter {
      * constructor.
      */
     public static final char DEFAULT_QUOTE_CHARACTER = '"';
-    
+
     /** The quote constant to use when you wish to suppress all quoting. */
     public static final char NO_QUOTE_CHARACTER = '\u0000';
-    
+
     /** The escape constant to use when you wish to suppress all escaping. */
     public static final char NO_ESCAPE_CHARACTER = '\u0000';
-    
+
     /** Default line terminator uses platform encoding. */
     public static final String DEFAULT_LINE_END = "\n";
 
     private static final SimpleDateFormat
-    	TIMESTAMP_FORMATTER = 
+    	TIMESTAMP_FORMATTER =
     		new SimpleDateFormat("dd-MMM-yyyy HH:mm:ss");
 
     private static final SimpleDateFormat
-    	DATE_FORMATTER = 
+    	DATE_FORMATTER =
     		new SimpleDateFormat("dd-MMM-yyyy");
-    
+
     /**
      * Constructs CSVWriter using a comma for the separator.
      *
@@ -132,8 +132,8 @@ public class CSVWriter {
     public CSVWriter(Writer writer, char separator, char quotechar, char escapechar) {
         this(writer, separator, quotechar, escapechar, DEFAULT_LINE_END);
     }
-    
-    
+
+
     /**
      * Constructs CSVWriter with supplied separator and quote char.
      *
@@ -148,10 +148,10 @@ public class CSVWriter {
      */
     public CSVWriter(Writer writer, char separator, char quotechar, String lineEnd) {
         this(writer, separator, quotechar, DEFAULT_ESCAPE_CHARACTER, lineEnd);
-    }   
-    
-    
-    
+    }
+
+
+
     /**
      * Constructs CSVWriter with supplied separator, quote char, escape char and line ending.
      *
@@ -174,7 +174,7 @@ public class CSVWriter {
         this.escapechar = escapechar;
         this.lineEnd = lineEnd;
     }
-    
+
     /**
      * Writes the entire list to a CSV file. The list is assumed to be a
      * String[]
@@ -194,16 +194,16 @@ public class CSVWriter {
 
     protected void writeColumnNames(ResultSetMetaData metadata)
     	throws SQLException {
-    	
+
     	int columnCount =  metadata.getColumnCount();
-    	
+
     	String[] nextLine = new String[columnCount];
 		for (int i = 0; i < columnCount; i++) {
 			nextLine[i] = metadata.getColumnName(i + 1);
 		}
     	writeNext(nextLine);
     }
-    
+
     /**
      * Writes the entire ResultSet to a CSV file.
      *
@@ -214,33 +214,33 @@ public class CSVWriter {
      *
      */
     public void writeAll(java.sql.ResultSet rs, boolean includeColumnNames)  throws SQLException, IOException {
-    	
+
     	ResultSetMetaData metadata = rs.getMetaData();
-    	
-    	
+
+
     	if (includeColumnNames) {
 			writeColumnNames(metadata);
 		}
 
     	int columnCount =  metadata.getColumnCount();
-    	
+
     	while (rs.next())
     	{
         	String[] nextLine = new String[columnCount];
-        	
+
         	for (int i = 0; i < columnCount; i++) {
 				nextLine[i] = getColumnValue(rs, metadata.getColumnType(i + 1), i + 1);
 			}
-        	
+
     		writeNext(nextLine);
     	}
     }
-    
+
     private static String getColumnValue(ResultSet rs, int colType, int colIndex)
     		throws SQLException, IOException {
 
     	String value = "";
-    	
+
 		switch (colType)
 		{
 			case Types.BIT:
@@ -289,7 +289,9 @@ public class CSVWriter {
 			case Types.DATE:
 				java.sql.Date date = rs.getDate(colIndex);
 				if (date != null) {
-					value = DATE_FORMATTER.format(date);;
+					synchronized (DATE_FORMATTER) {
+                        value = DATE_FORMATTER.format(date);
+                    }
 				}
 			break;
 			case Types.TIME:
@@ -301,7 +303,7 @@ public class CSVWriter {
 			case Types.TIMESTAMP:
 				Timestamp tstamp = rs.getTimestamp(colIndex);
 				if (tstamp != null) {
-				    synchronized (TIMESTAMP_FORMATTER) {                        
+				    synchronized (TIMESTAMP_FORMATTER) {
 				        value = TIMESTAMP_FORMATTER.format(tstamp);
                     }
 				}
@@ -315,14 +317,14 @@ public class CSVWriter {
 				value = "";
 		}
 
-		
+
 		if (value == null)
 		{
 			value = "";
 		}
-		
+
 		return value;
-    	
+
     }
 
 	private static String read(Clob c) throws SQLException, IOException
@@ -338,7 +340,7 @@ public class CSVWriter {
 		}
 		return sb.toString();
 	}
-    
+
     /**
      * Writes the next line to the file.
      *
@@ -347,10 +349,11 @@ public class CSVWriter {
      *            entry.
      */
     public void writeNext(String[] nextLine) {
-    	
-    	if (nextLine == null)
-    		return;
-    	
+
+    	if (nextLine == null) {
+            return;
+        }
+
         StringBuffer sb = new StringBuffer();
         for (int i = 0; i < nextLine.length; i++) {
 
@@ -359,10 +362,12 @@ public class CSVWriter {
             }
 
             String nextElement = nextLine[i];
-            if (nextElement == null)
+            if (nextElement == null) {
                 continue;
-            if (quotechar !=  NO_QUOTE_CHARACTER)
-            	sb.append(quotechar);
+            }
+            if (quotechar !=  NO_QUOTE_CHARACTER) {
+                sb.append(quotechar);
+            }
             for (int j = 0; j < nextElement.length(); j++) {
                 char nextChar = nextElement.charAt(j);
                 if (escapechar != NO_ESCAPE_CHARACTER && nextChar == quotechar) {
@@ -373,10 +378,11 @@ public class CSVWriter {
                     sb.append(nextChar);
                 }
             }
-            if (quotechar != NO_QUOTE_CHARACTER)
-            	sb.append(quotechar);
+            if (quotechar != NO_QUOTE_CHARACTER) {
+                sb.append(quotechar);
+            }
         }
-        
+
         sb.append(lineEnd);
         pw.write(sb.toString());
 
@@ -384,14 +390,14 @@ public class CSVWriter {
 
     /**
      * Flush underlying stream to writer.
-     * 
+     *
      * @throws IOException if bad things happen
      */
     public void flush() throws IOException {
 
         pw.flush();
 
-    } 
+    }
 
     /**
      * Close the underlying stream writer flushing any buffered content.
