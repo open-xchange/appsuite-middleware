@@ -163,7 +163,7 @@ public class ITipHandler implements CalendarHandler {
             List<CreateResult> group = creations.stream().filter(c -> master.getUpdate().getId().equals(c.getCreatedEvent().getSeriesId())).collect(Collectors.toList());
             // Handle as update
             for (CreateResult c : group) {
-                handle(event, State.Type.MODIFIED, master.getOriginal(), c.getCreatedEvent(), null);
+                handle(event, State.Type.NEW, master.getOriginal(), c.getCreatedEvent(), null);
             }
             // Remove master to avoid additional mail
             updates.remove(master);
@@ -281,14 +281,14 @@ public class ITipHandler implements CalendarHandler {
             NotificationMail mail;
             switch (type) {
                 case NEW:
-                    mail = generator.generateCreateMailFor(notificationParticipant);
-                    break;
-                case MODIFIED:
                     if (CalendarUtils.isSeriesMaster(original) && CalendarUtils.isSeriesException(update)) {
                         mail = generator.generateCreateExceptionMailFor(notificationParticipant);
                     } else {
-                        mail = generator.generateUpdateMailFor(notificationParticipant);
+                        mail = generator.generateCreateMailFor(notificationParticipant);
                     }
+                    break;
+                case MODIFIED:
+                    mail = generator.generateUpdateMailFor(notificationParticipant);
                     break;
                 case DELETED:
                     mail = generator.generateDeleteMailFor(notificationParticipant);
