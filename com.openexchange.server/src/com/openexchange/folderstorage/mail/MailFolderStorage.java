@@ -2338,16 +2338,6 @@ public final class MailFolderStorage implements FolderStorageFolderModifier<Mail
 
     // ---------------------------------------------------------------------------------------------------------------------------------- //
 
-    private static void postEvent(final int accountId, final String fullname, final boolean contentRelated, final boolean immediateDelivery, final boolean async, final StorageParameters params) {
-        if (MailAccount.DEFAULT_ID != accountId) {
-            /*
-             * TODO: No event for non-primary account?
-             */
-            return;
-        }
-        EventPool.getInstance().put(new PooledEvent(params.getContextId(), params.getUserId(), accountId, prepareFullname(accountId, fullname), contentRelated, immediateDelivery, false, params.getSession()).setAsync(async));
-    }
-
     private static void postEventRemote(int accountId, String fullname, boolean contentRelated, boolean immediateDelivery, boolean async, String[] folderPath, StorageParameters params) {
         if (MailAccount.DEFAULT_ID != accountId) {
             /*
