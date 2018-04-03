@@ -218,4 +218,10 @@
 		<customChange class="com.openexchange.database.internal.change.custom.CountTablesCustomTaskChange" />
 	</changeSet>
 
+    <!-- ******************************************************* -->
+    <!-- ***************** NOTE: have a look at **************** -->
+    <!-- /c.o.database.migration.adapter/resource/liquibase/updateTaskAwareConfigdbChangeLog.xml -->
+    <!-- *** for additional update tasks starting with 7.10.0 ** -->
+    <!-- ******************************************************* -->
+
 </databaseChangeLog>

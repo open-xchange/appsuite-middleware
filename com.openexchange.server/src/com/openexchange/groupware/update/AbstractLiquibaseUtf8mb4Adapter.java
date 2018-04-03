@@ -61,12 +61,12 @@ import liquibase.exception.ValidationErrors;
 import liquibase.resource.ResourceAccessor;
 
 /**
- * {@link AbstractConfigDbToUtf8mb4Adapter}
+ * {@link AbstractLiquibaseUtf8mb4Adapter}
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since v7.10.0
  */
-public abstract class AbstractConfigDbToUtf8mb4Adapter extends AbstractConvertUtf8ToUtf8mb4Task implements CustomTaskChange {
+public abstract class AbstractLiquibaseUtf8mb4Adapter extends AbstractConvertUtf8ToUtf8mb4Task implements CustomTaskChange {
 
     @Override
     public final void execute(Database database) throws CustomChangeException {
@@ -75,11 +75,11 @@ public abstract class AbstractConfigDbToUtf8mb4Adapter extends AbstractConvertUt
             throw new CustomChangeException("Cannot get underlying connection because database connection is not of type " + JdbcConnection.class.getName() + ", but of type: " + databaseConnection.getClass().getName());
         }
 
-        org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(AbstractConfigDbToUtf8mb4Adapter.class);
+        org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(AbstractLiquibaseUtf8mb4Adapter.class);
 
         Connection configDbCon = ((JdbcConnection) databaseConnection).getUnderlyingConnection();
         try {
-            String schemaName = configDbCon.getCatalog() != null ? configDbCon.getCatalog() : (database.getDefaultCatalogName() != null ? database.getDefaultCatalogName() : "configdb");
+            String schemaName = configDbCon.getCatalog() != null ? configDbCon.getCatalog() : (database.getDefaultCatalogName() != null ? database.getDefaultCatalogName() : getDefaultSchemaName());
 
             before(configDbCon, schemaName);
             innerPerform(configDbCon, schemaName);
@@ -92,6 +92,8 @@ public abstract class AbstractConfigDbToUtf8mb4Adapter extends AbstractConvertUt
             throw new CustomChangeException("Runtime error", e);
         }
     }
+
+    protected abstract String getDefaultSchemaName();
 
     protected abstract void before(Connection configDbCon, String schemaName) throws SQLException;
 

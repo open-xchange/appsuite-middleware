@@ -53,7 +53,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
 import com.google.common.collect.ImmutableList;
-import com.openexchange.groupware.update.AbstractConfigDbToUtf8mb4Adapter;
+import com.openexchange.groupware.update.AbstractLiquibaseUtf8mb4Adapter;
 
 /**
  * 
@@ -62,7 +62,7 @@ import com.openexchange.groupware.update.AbstractConfigDbToUtf8mb4Adapter;
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since v7.10.0
  */
-public class ResellerToUtf8mb4Change extends AbstractConfigDbToUtf8mb4Adapter {
+public class ResellerToUtf8mb4Change extends AbstractLiquibaseUtf8mb4Adapter {
 
     @Override
     public String getConfirmationMessage() {
@@ -83,4 +83,10 @@ public class ResellerToUtf8mb4Change extends AbstractConfigDbToUtf8mb4Adapter {
     protected List<String> tablesToConvert() {
         return ImmutableList.of("restrictions", "context_restrictions", "context2subadmin", "subadmin", "subadmin_restrictions", "context_customfields");
     }
+
+    @Override
+    protected String getDefaultSchemaName() {
+        return "configdb";
+    }
+
 }
