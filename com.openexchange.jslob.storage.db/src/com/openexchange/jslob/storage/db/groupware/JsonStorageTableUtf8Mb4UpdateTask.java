@@ -47,9 +47,8 @@
  *
  */
 
-package com.openexchange.groupware.update.tasks;
+package com.openexchange.jslob.storage.db.groupware;
 
-import java.util.Collections;
 import com.openexchange.groupware.update.SimpleConvertUtf8ToUtf8mb4UpdateTask;
 
 /**
@@ -63,6 +62,6 @@ public class JsonStorageTableUtf8Mb4UpdateTask extends SimpleConvertUtf8ToUtf8mb
      * Initialises a new {@link JsonStorageTableUtf8Mb4UpdateTask}.
      */
     public JsonStorageTableUtf8Mb4UpdateTask() {
-        super(Collections.singletonList("jsonStorage"), "com.openexchange.jslob.storage.db.groupware.DBJSlobIncreaseBlobSizeTask");
+        super(DBJSlobIncreaseBlobSizeTask.class, "jsonStorage");
     }
 }
