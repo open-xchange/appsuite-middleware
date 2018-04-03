@@ -78,7 +78,7 @@ public class CreatePublicationTables extends AbstractCreateTableImpl {
             + "id INT4 UNSIGNED NOT NULL,"
             + "user_id INT4 UNSIGNED NOT NULL,"
             + "entity INT4 UNSIGNED NOT NULL,"
-            + "module VARCHAR(191) NOT NULL,"
+            + "module VARCHAR(255) NOT NULL,"
             + "configuration_id INT4 UNSIGNED NOT NULL,"
             + "target_id VARCHAR(255) NOT NULL,"
             + "enabled BOOLEAN DEFAULT true NOT NULL,"
