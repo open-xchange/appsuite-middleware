@@ -132,16 +132,21 @@ public class GenericSubscribeService extends AbstractSubscribeService {
         final Map<String, Object> configuration = subscription.getConfiguration();
         // All contacts should get a UUID for aggregation
         if (this.module == FolderObject.CONTACT){
-            final List<?> list =  Arrays.asList(workflow.execute((String) configuration.get("login"), (String) configuration.get("password")));
-            final List<Contact> contacts = new ArrayList<Contact>();
+            Object[] executed = workflow.execute((String) configuration.get("login"), (String) configuration.get("password"));
+            if (null == executed) {
+                return Collections.emptyList();
+            }
+
+            final List<?> list =  Arrays.asList(executed);
+            final List<Contact> contacts = new ArrayList<Contact>(list.size());
             for (final Object object : list){
                 final Contact contact = (Contact) object;
                 contacts.add(contact);
             }
             return contacts;
         }
-        Object[] execute = workflow.execute((String) configuration.get("login"), (String) configuration.get("password"));
-        return execute != null ? Arrays.asList(execute) : Collections.EMPTY_LIST;
+        Object[] executed = workflow.execute((String) configuration.get("login"), (String) configuration.get("password"));
+        return executed != null ? Arrays.asList(executed) : Collections.emptyList();
     }
 
     public Workflow getWorkflow() {
