@@ -51,6 +51,7 @@ package com.openexchange.ajax.requesthandler.responseRenderers;
 
 import java.io.IOException;
 import java.util.Collection;
+import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.json.JSONArray;
@@ -93,9 +94,15 @@ public class PreviewResponseRenderer implements ResponseRenderer {
                 return;
             }
 
-            final JSONArray jsonArray = new JSONArray();
-            for (final String previewPage : previewDocument.getContent()) {
-                jsonArray.put(previewPage);
+            JSONArray jsonArray;
+            List<String> content = previewDocument.getContent();
+            if (null != content) {
+                jsonArray = new JSONArray(content.size());
+                for (final String previewPage : content) {
+                    jsonArray.put(previewPage);
+                }
+            } else {
+                jsonArray = new JSONArray(0);
             }
 
             final JSONObject jsonObject = new JSONObject();
