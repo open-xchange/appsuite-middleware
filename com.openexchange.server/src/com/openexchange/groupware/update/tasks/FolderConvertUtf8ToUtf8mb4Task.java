@@ -82,7 +82,6 @@ public class FolderConvertUtf8ToUtf8mb4Task extends SimpleConvertUtf8ToUtf8mb4Up
 
         Builder<String, Integer> builder = ImmutableMap.builder();
         builder.put("folderId", 192);
-        builder.put("parentId", 192);
         builder.put("shadow", 192);
         ImmutableMap<String, Integer> virtualTreeColumns = builder.build();
         

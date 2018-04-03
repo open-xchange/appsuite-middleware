@@ -83,6 +83,9 @@ public abstract class AbstractConvertUtf8ToUtf8mb4Task extends UpdateTaskAdapter
 
     private static final org.slf4j.Logger LOGGER = org.slf4j.LoggerFactory.getLogger(AbstractConvertUtf8ToUtf8mb4Task.class);
 
+    /** The constant for the size of a VARCHAR column if it's part of a UNIQUE or PRIMARY KEY */
+    private static final int UNIQUE_VARCHAR_SIZE = 191;
+
     /** The constant for <code>"utf8mb4"</code> character set */
     protected static final String UTF8MB4_CHARSET = "utf8mb4";
 
@@ -436,6 +439,9 @@ public abstract class AbstractConvertUtf8ToUtf8mb4Task extends UpdateTaskAdapter
                     Column column = columnsToModify.get(columnName);
                     if (null != column) {
                         int expectedSize = varcharColumn.getValue().intValue();
+                        if (possibleDataTrunaction(connection, varcharColumn.getKey(), table, UNIQUE_VARCHAR_SIZE)) {
+                            throw new SQLException("The update task '" + this.getClass().getName() + "' will result in data truncation for column '" + varcharColumn.getKey() + "' in table '" + table + "'. Aborting execution.");
+                        }
                         columnsToModify.put(columnName, shrinkVarcharColumn(column, expectedSize));
                     }
                 }
@@ -450,6 +456,31 @@ public abstract class AbstractConvertUtf8ToUtf8mb4Task extends UpdateTaskAdapter
             }
         } finally {
             Databases.closeSQLStuff(alterStmt);
+        }
+    }
+
+    /**
+     * Checks whether data stored in the specified column in the specified table exceeds the maximum new column size
+     * 
+     * @param connection The connection
+     * @param column The column name
+     * @param table The table name
+     * @param maxColumnSize The new maximum column size
+     * @return <code>true</code> if data truncation will occur; <code>false</code> otherwise
+     * @throws SQLException if an SQL error is occurred
+     */
+    private boolean possibleDataTrunaction(Connection connection, String column, String table, int maxColumnSize) throws SQLException {
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            stmt = connection.prepareStatement("SELECT MAX(LENGTH(" + column + ")) FROM " + table);
+            rs = stmt.executeQuery();
+            if (!rs.next()) {
+                return false;
+            }
+            return rs.getInt(1) > maxColumnSize;
+        } finally {
+            Databases.closeSQLStuff(rs, stmt);
         }
     }
 
@@ -481,7 +512,7 @@ public abstract class AbstractConvertUtf8ToUtf8mb4Task extends UpdateTaskAdapter
             return column;
         }
 
-        return new Column(column.getName(), Strings.asciiLowerCase(column.getDefinition()).replace(expected, "varchar(191)"));
+        return new Column(column.getName(), Strings.asciiLowerCase(column.getDefinition()).replace(expected, "varchar(" + UNIQUE_VARCHAR_SIZE + ")"));
     }
 
     /**
