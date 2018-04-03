@@ -362,21 +362,6 @@ public final class JSONObjectConverter {
         }
     }
 
-    private void asAttachment(final JSONObject bodyObject, final JSONArray attachmentsArr) throws OXException {
-        try {
-            final JSONObject jsonObject = new JSONObject();
-            copyValue(MailListField.ID.getKey(), bodyObject, jsonObject);
-            copyValue(MailJSONField.CONTENT_TYPE.getKey(), bodyObject, jsonObject);
-            copyValue(MailJSONField.DISPOSITION.getKey(), bodyObject, jsonObject);
-            copyValue(MailJSONField.SIZE.getKey(), bodyObject, jsonObject);
-            copyValue(MailJSONField.ATTACHMENT_FILE_NAME.getKey(), bodyObject, jsonObject);
-            jsonObject.put(MailJSONField.CONTENT.getKey(), JSONObject.NULL);
-            attachmentsArr.put(jsonObject);
-        } catch (final JSONException e) {
-            throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
-        }
-    }
-
     private void asPlainText(final JSONObject textObject, final String content, final JSONArray attachmentsArr) throws OXException {
         try {
             final JSONObject jsonObject = new JSONObject();
@@ -408,20 +393,6 @@ public final class JSONObjectConverter {
                     true);
             jsonObject.put(MailJSONField.CONTENT.getKey(), content);
             jsonObject.put(MailJSONField.CONTENT_TYPE.getKey(), MimeTypes.MIME_TEXT_HTML);
-            jsonObject.put(MailJSONField.SIZE.getKey(), content.length());
-            jsonObject.put(MailJSONField.DISPOSITION.getKey(), Part.INLINE);
-            attachmentsArr.put(jsonObject);
-        } catch (final JSONException e) {
-            throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
-        }
-    }
-
-    private void asDisplayHtml(final JSONObject htmlObject, final String content, final JSONArray attachmentsArr) throws OXException {
-        try {
-            final JSONObject jsonObject = new JSONObject();
-            copyValue(MailListField.ID.getKey(), htmlObject, jsonObject);
-            jsonObject.put(MailJSONField.CONTENT.getKey(), content);
-            copyValue(MailJSONField.CONTENT_TYPE.getKey(), htmlObject, jsonObject);
             jsonObject.put(MailJSONField.SIZE.getKey(), content.length());
             jsonObject.put(MailJSONField.DISPOSITION.getKey(), Part.INLINE);
             attachmentsArr.put(jsonObject);
