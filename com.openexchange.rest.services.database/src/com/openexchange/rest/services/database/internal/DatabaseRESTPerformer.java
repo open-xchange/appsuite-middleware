@@ -111,7 +111,7 @@ public class DatabaseRESTPerformer {
     private boolean skipVersionNegotiation;
     private boolean success = false;
 
-    private MigrationMetadata migrationMetadata;
+    private String moduleInfo;
     private MonitoredMetadata monitoredMetadata;
 
     private BeforeHandler beforeHandler;
@@ -442,7 +442,7 @@ public class DatabaseRESTPerformer {
         try {
             finishMigrationWhenDone(ctxId);
             connection = dbService().getForUpdateTask(ctxId);
-            migrationMetadata = new MigrationMetadata(ctxId, fromVersion, toVersion, module);
+            moduleInfo = module;
             skipVersionNegotiation = true;
 
             boolean successfullyLocked = environment.getVersionChecker().lock(connection, module, System.currentTimeMillis(), System.currentTimeMillis() + TimeUnit.MILLISECONDS.convert(8, TimeUnit.HOURS));
@@ -480,7 +480,7 @@ public class DatabaseRESTPerformer {
         try {
             finishMigrationWhenDone(readId, writeId, schema, partitionId);
             connection = dbService().getWritableMonitoredForUpdateTask(readId, writeId, schema, partitionId);
-            migrationMetadata = new MigrationMetadata(fromVersion, toVersion, module);
+            moduleInfo = module;
             monitoredMetadata = new MonitoredMetadata(readId, writeId, schema, partitionId);
 
             skipVersionNegotiation = true;
@@ -687,8 +687,8 @@ public class DatabaseRESTPerformer {
                     tx = environment.getTransactionKeeper().newTransaction(connection);
                     tx.put("ctxId", ctxId);
                     tx.put("accessType", accessType);
-                    if (migrationMetadata != null) {
-                        tx.put("migration", migrationMetadata);
+                    if (moduleInfo != null) {
+                        tx.put("migration", moduleInfo);
                         tx.extendLifetimeForMigration();
                     }
                     if (monitoredMetadata != null) {
@@ -711,7 +711,7 @@ public class DatabaseRESTPerformer {
         if (tx != null) {
             tx.extendLifetime();
             skipVersionNegotiation = true;
-            migrationMetadata = (MigrationMetadata) tx.getParameter("migration");
+            moduleInfo = (String) tx.getParameter("migration");
             monitoredMetadata = (MonitoredMetadata) tx.getParameter("monitoredMetadata");
             if (tx.getParameter("ctxId") != null) {
                 ctxId = (Integer) tx.getParameter("ctxId");
@@ -898,7 +898,7 @@ public class DatabaseRESTPerformer {
                     con.commit();
                 }
                 con.setAutoCommit(true);
-                environment.getVersionChecker().unlock(con, migrationMetadata.module);
+                environment.getVersionChecker().unlock(con, moduleInfo);
                 dbService().backForUpdateTask(ctxId, con);
             }
         };
@@ -915,7 +915,7 @@ public class DatabaseRESTPerformer {
                     con.commit();
                 }
                 con.setAutoCommit(true);
-                environment.getVersionChecker().unlock(con, migrationMetadata.module);
+                environment.getVersionChecker().unlock(con, moduleInfo);
                 dbService().backWritableMonitoredForUpdateTask(readPoolId, writePoolId, schema, partitionId, con);
             }
         };
@@ -937,12 +937,12 @@ public class DatabaseRESTPerformer {
             DatabaseService db = dbService();
             Integer ctxId = (Integer) tx.getParameter("ctxId");
 
-            if (migrationMetadata != null) {
+            if (moduleInfo != null) {
                 if (success) {
                     con.commit();
                 }
                 con.setAutoCommit(true);
-                environment.getVersionChecker().unlock(con, migrationMetadata.module);
+                environment.getVersionChecker().unlock(con, moduleInfo);
             }
 
             if (monitoredMetadata != null) {
@@ -951,7 +951,7 @@ public class DatabaseRESTPerformer {
                         db.backReadOnlyMonitored(monitoredMetadata.readId, monitoredMetadata.writeId, monitoredMetadata.schema, monitoredMetadata.partitionId, con);
                         break;
                     case WRITE:
-                        if (migrationMetadata != null) {
+                        if (moduleInfo != null) {
                             db.backWritableMonitoredForUpdateTask(monitoredMetadata.readId, monitoredMetadata.writeId, monitoredMetadata.schema, monitoredMetadata.partitionId, con);
 
                         } else {
@@ -959,7 +959,7 @@ public class DatabaseRESTPerformer {
                         }
                         break;
                 }
-            } else if (migrationMetadata != null) {
+            } else if (moduleInfo != null) {
                 dbService().backForUpdateTask(ctxId, con);
             } else if (tx.getParameter("accessType") == DatabaseAccessType.READ) {
                 con.commit();
@@ -978,27 +978,6 @@ public class DatabaseRESTPerformer {
                     db.backWritable(ctxId, con);
                 }
             }
-        }
-    }
-
-    private static class MigrationMetadata {
-
-        public int ctxId;
-        public String fromVersion, toVersion, module;
-
-        public MigrationMetadata(String fromVersion, String toVersion, String module) {
-            super();
-            this.fromVersion = fromVersion;
-            this.toVersion = toVersion;
-            this.module = module;
-        }
-
-        public MigrationMetadata(int ctxId, String fromVersion, String toVersion, String module) {
-            super();
-            this.ctxId = ctxId;
-            this.fromVersion = fromVersion;
-            this.toVersion = toVersion;
-            this.module = module;
         }
     }
 
