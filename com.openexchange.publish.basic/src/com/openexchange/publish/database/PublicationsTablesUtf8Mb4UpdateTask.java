@@ -47,11 +47,10 @@
  *
  */
 
-package com.openexchange.groupware.update.tasks;
+package com.openexchange.publish.database;
 
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.Arrays;
 import java.util.Collections;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.SimpleConvertUtf8ToUtf8mb4UpdateTask;
@@ -67,12 +66,12 @@ public class PublicationsTablesUtf8Mb4UpdateTask extends SimpleConvertUtf8ToUtf8
      * Initialises a new {@link PublicationsTablesUtf8Mb4UpdateTask}.
      */
     public PublicationsTablesUtf8Mb4UpdateTask() {
-        super(Arrays.asList("publications", "sequence_publications", "publication_users"), "com.openexchange.publish.database.FixPublicationTablePrimaryKey");
+        super(PublicationsAddEntityIndex.class, "publications", "sequence_publications", "publication_users");
     }
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.groupware.update.AbstractConvertUtf8ToUtf8mb4Task#after(com.openexchange.groupware.update.PerformParameters, java.sql.Connection)
      */
     @Override
