@@ -59,6 +59,7 @@ import com.openexchange.net.ssl.management.SSLCertificateManagementService;
 import com.openexchange.net.ssl.management.internal.SSLCertificateManagementServiceImpl;
 import com.openexchange.net.ssl.management.storage.CreateSSLCertificateManagementTable;
 import com.openexchange.net.ssl.management.storage.CreateSSLCertificateManagementTableTask;
+import com.openexchange.net.ssl.management.storage.SSLCertificateManagementTableUtf8Mb4UpdateTask;
 import com.openexchange.osgi.HousekeepingActivator;
 
 /**
@@ -93,7 +94,7 @@ public class SSLCertificateManagementActivator extends HousekeepingActivator {
     @Override
     protected void startBundle() throws Exception {
         registerService(CreateTableService.class, new CreateSSLCertificateManagementTable());
-        registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(new CreateSSLCertificateManagementTableTask(getService(DatabaseService.class))));
+        registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(new CreateSSLCertificateManagementTableTask(getService(DatabaseService.class)), new SSLCertificateManagementTableUtf8Mb4UpdateTask()));
         registerService(SSLCertificateManagementService.class, new SSLCertificateManagementServiceImpl(this));
 
         Logger logger = LoggerFactory.getLogger(SSLCertificateManagementActivator.class);
