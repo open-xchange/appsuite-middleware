@@ -97,6 +97,8 @@ public class LdapCreateTableTask extends UpdateTaskAdapter {
                     stmt.executeUpdate();
                 } catch (SQLException e) {
                     throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
+                } finally {
+                    Databases.closeSQLStuff(stmt);
                 }
             }
 
@@ -117,7 +119,7 @@ public class LdapCreateTableTask extends UpdateTaskAdapter {
 
     @Override
     public String[] getDependencies() {
-        return new String[] { };
+        return new String[] {};
     }
 
 }
