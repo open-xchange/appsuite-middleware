@@ -541,6 +541,9 @@ exit 0
 %defattr(-,root,root)
 %dir /opt/open-xchange/bundles/
 /opt/open-xchange/bundles/*
+%dir /opt/open-xchange/documentation
+%dir /opt/open-xchange/documentation/etc
+/opt/open-xchange/documentation/etc/*.yml
 %dir /opt/open-xchange/etc
 %dir /opt/open-xchange/etc/contextSets
 %dir /opt/open-xchange/etc/meta
