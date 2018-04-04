@@ -73,6 +73,8 @@ public class CreateServiceSchemaVersionTable extends AbstractCreateTableImpl {
         return new String[] { "CREATE TABLE `serviceSchemaVersion` (" + 
             "  `version` varchar(128) NOT NULL DEFAULT ''," + 
             "  `module` varchar(128) NOT NULL DEFAULT ''," + 
-            "  PRIMARY KEY (`version`,`module`))" };
+            "  PRIMARY KEY (`version`,`module`)" +
+            ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;" 
+        };
     }
 }
