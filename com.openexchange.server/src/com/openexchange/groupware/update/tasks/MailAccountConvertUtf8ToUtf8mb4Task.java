@@ -52,7 +52,6 @@ package com.openexchange.groupware.update.tasks;
 import com.google.common.collect.ImmutableList;
 import com.openexchange.groupware.update.SimpleConvertUtf8ToUtf8mb4UpdateTask;
 
-
 /**
  * {@link MailAccountConvertUtf8ToUtf8mb4Task} - Converts mail account tables to utf8mb4.
  *
@@ -65,8 +64,10 @@ public class MailAccountConvertUtf8ToUtf8mb4Task extends SimpleConvertUtf8ToUtf8
      * Initializes a new {@link MailAccountConvertUtf8ToUtf8mb4Task}.
      */
     public MailAccountConvertUtf8ToUtf8mb4Task() {
+        //@formatter:off
         super(ImmutableList.of("user_mail_account", "user_mail_account_properties", "user_transport_account", 
             "user_transport_account_properties", "sequence_mail_service", "pop3_storage_ids", "pop3_storage_deleted"),
             AddFailedAuthColumnsToMailAccountTablesTask.class.getName());
+        //@formatter:on
     }
 }
