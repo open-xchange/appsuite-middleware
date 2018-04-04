@@ -1014,6 +1014,7 @@ public class OAuthAccountStorageSQLImpl implements OAuthAccountStorage, SecretEn
      * @return
      * @throws OXException
      */
+    @SuppressWarnings("unchecked")
     private List<Setter> setterFrom(final Map<String, Object> arguments) throws OXException {
         final List<Setter> ret = new ArrayList<Setter>(4);
         /*

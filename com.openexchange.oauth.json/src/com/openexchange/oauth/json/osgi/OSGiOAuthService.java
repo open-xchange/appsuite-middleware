@@ -137,7 +137,7 @@ public final class OSGiOAuthService extends AbstractOSGiDelegateService<OAuthSer
 
     @Override
     public OAuthAccount getDefaultAccount(API api, Session session) throws OXException {
-        return getService0().getDefaultAccount(api, null);
+        return getService0().getDefaultAccount(api, session);
     }
 
     /*

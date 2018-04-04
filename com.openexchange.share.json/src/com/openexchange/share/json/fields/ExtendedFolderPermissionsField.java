@@ -54,6 +54,7 @@ import java.util.Collections;
 import java.util.List;
 import org.json.JSONArray;
 import org.json.JSONException;
+import org.json.JSONObject;
 import com.openexchange.ajax.customizer.folder.AdditionalFolderField;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.exception.OXException;
@@ -123,9 +124,9 @@ public class ExtendedFolderPermissionsField implements AdditionalFolderField {
 
     @Override
     public Object renderJSON(AJAXRequestData requestData, Object value) {
-        // The method returns true if the value is non-null and can be cast to java.util.List
-        if (false == List.class.isInstance(value)) {
-            return null;
+        // The method returns a non null value if the value is non-null and can be cast to java.util.List
+        if (null == requestData || false == List.class.isInstance(value)) {
+            return JSONObject.NULL;
         }
 
         List<?> values = (List<?>) value;

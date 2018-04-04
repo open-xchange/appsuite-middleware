@@ -59,9 +59,6 @@ import com.openexchange.share.recipient.ShareRecipient;
  */
 public class BasicGuestPermission extends BasicPermission implements GuestPermission {
 
-    /**
-     * serialVersionUID
-     */
     private static final long serialVersionUID = -1806831555286164309L;
 
     private ShareRecipient recipient;

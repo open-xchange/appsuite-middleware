@@ -86,7 +86,6 @@ import com.openexchange.testing.httpclient.models.CalendarAccountProbeDataComOpe
 import com.openexchange.testing.httpclient.models.CalendarAccountProbeResponse;
 import com.openexchange.testing.httpclient.models.ChronosFolderBody;
 import com.openexchange.testing.httpclient.models.EventData;
-import com.openexchange.testing.httpclient.models.EventDataError;
 import com.openexchange.testing.httpclient.models.EventId;
 import com.openexchange.testing.httpclient.models.EventsResponse;
 import com.openexchange.testing.httpclient.models.FolderBody;
@@ -97,6 +96,7 @@ import com.openexchange.testing.httpclient.models.FolderDataComOpenexchangeCalen
 import com.openexchange.testing.httpclient.models.FolderDataComOpenexchangeCalendarExtendedPropertiesDescription;
 import com.openexchange.testing.httpclient.models.FolderPermission;
 import com.openexchange.testing.httpclient.models.FolderUpdateResponse;
+import com.openexchange.testing.httpclient.models.MultipleEventDataError;
 import com.openexchange.testing.httpclient.models.MultipleFolderEventsResponse;
 import com.openexchange.testing.httpclient.models.NewFolderBody;
 import com.openexchange.testing.httpclient.models.NewFolderBodyFolder;
@@ -873,8 +873,8 @@ public class BasicICalCalendarProviderTest extends AbstractExternalProviderChron
         // return from db
         MultipleFolderEventsResponse secondEventResponse = defaultUserApi.getChronosApi().getAllEventsForMultipleFolders(defaultUserApi.getSession(), DateTimeUtil.getZuluDateTime(new Date(dateToMillis("20000702T201500Z")).getTime()).getValue(), DateTimeUtil.getZuluDateTime(new Date(System.currentTimeMillis()).getTime()).getValue(), body, null, null, null, false, false);
 
-        EventDataError initialResponseError = initialAllEventResponse.getData().get(0).getError();
-        EventDataError secondResponseError = secondEventResponse.getData().get(0).getError();
+        MultipleEventDataError initialResponseError = initialAllEventResponse.getData().get(0).getError();
+        MultipleEventDataError secondResponseError = secondEventResponse.getData().get(0).getError();
         assertEquals(initialResponseError.getCode(), secondResponseError.getCode());
         assertEquals(initialResponseError.getErrorId(), secondResponseError.getErrorId());
         assertEquals(initialResponseError.getErrorDesc(), secondResponseError.getErrorDesc());
@@ -896,7 +896,7 @@ public class BasicICalCalendarProviderTest extends AbstractExternalProviderChron
 
         MultipleFolderEventsResponse initialAllEventResponse = defaultUserApi.getChronosApi().getAllEventsForMultipleFolders(defaultUserApi.getSession(), DateTimeUtil.getZuluDateTime(new Date(dateToMillis("20000702T201500Z")).getTime()).getValue(), DateTimeUtil.getZuluDateTime(new Date(System.currentTimeMillis()).getTime()).getValue(), body, null, null, null, false, true);
         clear(externalUri);
-        EventDataError initialResponseError = initialAllEventResponse.getData().get(0).getError();
+        MultipleEventDataError initialResponseError = initialAllEventResponse.getData().get(0).getError();
 
         assertNotNull(initialResponseError.getError());
         assertNotNull(initialResponseError.getCode());
@@ -914,7 +914,7 @@ public class BasicICalCalendarProviderTest extends AbstractExternalProviderChron
 
         MultipleFolderEventsResponse secondEventResponse = defaultUserApi.getChronosApi().getAllEventsForMultipleFolders(defaultUserApi.getSession(), DateTimeUtil.getZuluDateTime(new Date(dateToMillis("20000702T201500Z")).getTime()).getValue(), DateTimeUtil.getZuluDateTime(new Date(System.currentTimeMillis()).getTime()).getValue(), body, null, null, null, false, true);
 
-        EventDataError secondResponseError = secondEventResponse.getData().get(0).getError();
+        MultipleEventDataError secondResponseError = secondEventResponse.getData().get(0).getError();
 
         assertNull(secondResponseError);
         assertEquals(38, secondEventResponse.getData().get(0).getEvents().size());
@@ -932,7 +932,7 @@ public class BasicICalCalendarProviderTest extends AbstractExternalProviderChron
 
         MultipleFolderEventsResponse initialAllEventResponse = defaultUserApi.getChronosApi().getAllEventsForMultipleFolders(defaultUserApi.getSession(), DateTimeUtil.getZuluDateTime(new Date(dateToMillis("20000702T201500Z")).getTime()).getValue(), DateTimeUtil.getZuluDateTime(new Date(System.currentTimeMillis()).getTime()).getValue(), body, null, null, null, false, true);
         clear(externalUri);
-        EventDataError initialResponseError = initialAllEventResponse.getData().get(0).getError();
+        MultipleEventDataError initialResponseError = initialAllEventResponse.getData().get(0).getError();
 
         assertEquals(0, initialAllEventResponse.getData().get(0).getEvents().size());
         assertNotNull(initialResponseError.getError());
@@ -951,7 +951,7 @@ public class BasicICalCalendarProviderTest extends AbstractExternalProviderChron
         mock(externalUri, BasicICalCalendarProviderTestConstants.GENERIC_RESPONSE, HttpStatus.SC_NOT_FOUND);
 
         MultipleFolderEventsResponse secondEventResponse = defaultUserApi.getChronosApi().getAllEventsForMultipleFolders(defaultUserApi.getSession(), DateTimeUtil.getZuluDateTime(new Date(dateToMillis("20000702T201500Z")).getTime()).getValue(), DateTimeUtil.getZuluDateTime(new Date(System.currentTimeMillis()).getTime()).getValue(), body, null, null, null, false, true);
-        EventDataError secondResponseError = secondEventResponse.getData().get(0).getError();
+        MultipleEventDataError secondResponseError = secondEventResponse.getData().get(0).getError();
 
         assertEquals(0, secondEventResponse.getData().get(0).getEvents().size());
         assertEquals("ICAL-PROV-4043", secondResponseError.getCode());

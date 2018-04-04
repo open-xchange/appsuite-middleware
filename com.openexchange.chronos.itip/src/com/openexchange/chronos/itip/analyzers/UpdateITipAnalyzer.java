@@ -137,8 +137,6 @@ public class UpdateITipAnalyzer extends AbstractITipAnalyzer {
         Event master = update;
         List<Event> exceptions = Collections.emptyList();
 
-        update = handleMicrosoft(message, analysis, original, update);
-
         boolean differ = true;
 
         if (original != null) {
@@ -181,11 +179,12 @@ public class UpdateITipAnalyzer extends AbstractITipAnalyzer {
 
         if (differ && message.getEvent() != null) {
             Event event = session.getUtilities().copyEvent(message.getEvent(), (EventField[]) null);
+            event = handleMicrosoft(message, analysis, original, event);
             ensureParticipant(original, event, session, owner);
             if (original != null) {
                 event.setFolderId(original.getFolderId());
             }
-
+            session.getUtilities().adjustTimeZones(owner, event, original);
             change.setNewEvent(event);
 
             change.setConflicts(util.getConflicts(message.getEvent(), session));
@@ -205,16 +204,19 @@ public class UpdateITipAnalyzer extends AbstractITipAnalyzer {
             change.setException(true);
             change.setMaster(master);
 
+            exception = handleMicrosoft(message, analysis, matchingException, exception);
             exception.setSeriesId(update.getSeriesId());
 
             differ = true;
             if (matchingException != null) {
+                session.getUtilities().adjustTimeZones(owner, exception, matchingException);
                 change.setType(ITipChange.Type.UPDATE);
                 change.setCurrentEvent(matchingException);
                 ensureParticipant(matchingException, exception, session, owner);
                 differ = doAppointmentsDiffer(exception, matchingException);
             } else {
                 // Exception is not yet created
+                session.getUtilities().adjustTimeZones(owner, exception, master);
                 exception.removeUid();
                 ensureParticipant(original, exception, session, owner);
                 change.setType(ITipChange.Type.CREATE);
@@ -275,6 +277,7 @@ public class UpdateITipAnalyzer extends AbstractITipAnalyzer {
         if (analysis.getChanges().isEmpty() && analysis.getAnnotations().isEmpty()) {
             change = new ITipChange();
             if (null == original) {
+                session.getUtilities().adjustTimeZones(owner, update, null);
                 change.setNewEvent(update);
             } else {
                 change.setNewEvent(session.getUtilities().copyEvent(original, (EventField[]) null));

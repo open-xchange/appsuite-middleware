@@ -65,53 +65,53 @@ import com.openexchange.realtime.packet.Stanza;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class RTClientStateTest {
-    
+
     private RTClientStateImpl state;
-    
+
     @Before
     public void setup() {
         state = new RTClientStateImpl(new ID("dummyId@1"));
     }
-    
+
     /**
      * Tests for buffer handling
      */
-    
+
     @Test
     public void aStanzaWithoutSequenceShouldBeAddedToTheNonsequencedList() {
         Message message = new Message();
         state.enqueue(message);
-        
+
         assertEquals(1, state.getNonsequenceStanzas().size());
-        assertEquals(state.getNonsequenceStanzas().get(0), message);
+        assertEquals(state.getNonsequenceStanzas().peek(), message);
         assertEquals(0, state.getResendBuffer().size());
     }
-    
+
     @Test
     public void aStanzaWithSequenceShouldBeAddedToTheResendBufferWithTheSequenceRecastToTheCurrentSequenceNumber() {
         Message message = new Message();
         message.setSequenceNumber(23);
         state.enqueue(message);
-        
+
         assertEquals(1, state.getResendBuffer().size());
         EnqueuedStanza enqueuedStanza = state.getResendBuffer().get(0l);
         assertEquals(enqueuedStanza.stanza, message);
         assertEquals(enqueuedStanza.sequenceNumber, 0l);
         assertEquals(enqueuedStanza.stanza.getSequenceNumber(), 0l);
-        
+
         assertEquals(0, state.getNonsequenceStanzas().size());
 
         message = new Message();
         message.setSequenceNumber(24);
         state.enqueue(message);
-        
+
         enqueuedStanza = state.getResendBuffer().get(1l);
 
         assertEquals(enqueuedStanza.sequenceNumber, 1l);
         assertEquals(enqueuedStanza.stanza.getSequenceNumber(), 1l);
-        
+
     }
-    
+
     @Test
     public void theStanzasToSendConsistOfOutstandingNonsequencedStanzasAndTheResendBuffer() {
         Message unsequenced = new Message();
@@ -120,11 +120,11 @@ public class RTClientStateTest {
         Message sequenced = new Message();
         sequenced.setSequenceNumber(23);
         state.enqueue(sequenced);
-        
+
         assertTrue(state.getStanzasToSend().contains(unsequenced));
         assertTrue(state.getStanzasToSend().contains(sequenced));
     }
-    
+
     @Test
     public void theStanzasToSendShouldBeSortedByTheirSequenceNumbers() {
         Message unsequenced = new Message();
@@ -140,8 +140,8 @@ public class RTClientStateTest {
         sequenced2.setSequenceNumber(24);
         sequenced2.setTracer("second");
         state.enqueue(sequenced2);
-        
-        
+
+
         List<Stanza> stanzasToSend = state.getStanzasToSend();
         for (Stanza stanza : stanzasToSend) {
             System.out.println(stanza.getTracer());
@@ -149,66 +149,66 @@ public class RTClientStateTest {
         assertEquals(unsequenced, stanzasToSend.get(0));
         assertEquals("first", stanzasToSend.get(1).getTracer());
         assertEquals("second", stanzasToSend.get(2).getTracer());
-        
+
     }
-    
+
     @Test
     public void aPurgeRunShouldCleanOutAllNonsequencedStanzas() {
         Message unsequenced = new Message();
         state.enqueue(unsequenced);
 
         state.purge();
-        
+
         assertTrue(state.getNonsequenceStanzas().isEmpty());
     }
-    
+
 //    @Test
 //    public void aPurgeRunShouldCleanOutSequencedStanzasAfterOneHundredAttempts() {
 //        Message sequenced = new Message();
 //        sequenced.setSequenceNumber(0);
 //        state.enqueue(sequenced);
-//        
+//
 //        state.purge();
-//        
+//
 //        assertEquals(state.getResendBuffer().get(0l).stanza, sequenced);
-//        
+//
 //        for (int i = 0; i < 100; i++) {
 //            state.purge();
 //        }
-//        
+//
 //        assertTrue(state.getResendBuffer().isEmpty());
 //    }
-    
+
     @Test
     public void receivingAnAcknowledgementShouldRemoveTheStanzaFromTheResendBuffer() {
         Message sequenced = new Message();
         sequenced.setSequenceNumber(0);
         state.enqueue(sequenced);
-        
+
         state.acknowledgementReceived(0);
-        
+
         assertTrue(state.getResendBuffer().isEmpty());
     }
-    
+
     /**
      * Tests for timeouts
-     */    
+     */
     @Test
     public void touchShouldSetLastSeenToTheCurrentTime() {
         long now = System.currentTimeMillis();
         state.touch();
         assertTrue(now - state.getLastSeen() < 10);
     }
-    
+
     @Test
     public void theStateShouldExpireAfterThirtyMinutes() {
         state.touch();
         long now = state.getLastSeen();
-        
+
         assertFalse(state.isTimedOut(now + (30 * 60 * 1000) - 1));
         assertTrue(state.isTimedOut(now + (30 * 60 * 1000) + 1));
-        
+
     }
 
-    
+
 }

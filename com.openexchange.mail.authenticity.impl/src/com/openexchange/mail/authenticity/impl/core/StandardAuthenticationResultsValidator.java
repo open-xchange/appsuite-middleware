@@ -359,9 +359,9 @@ public class StandardAuthenticationResultsValidator implements AuthenticationRes
         }
 
         if (bestOfDMARC != null) {
+            overallResult.addAttribute(MailAuthenticityResultKey.FROM_DOMAIN, bestOfDMARC.getDomain());
             // If DMARC passes we set the overall status to PASS
             if (DMARCResult.PASS.equals(bestOfDMARC.getResult()) && bestOfDMARC.isDomainMatch()) {
-                overallResult.addAttribute(MailAuthenticityResultKey.FROM_DOMAIN, bestOfDMARC.getDomain());
                 overallResult.setStatus(MailAuthenticityStatus.PASS);
                 return;
             } else if (DMARCResult.FAIL.equals(bestOfDMARC.getResult())) {
@@ -479,7 +479,6 @@ public class StandardAuthenticationResultsValidator implements AuthenticationRes
                 break;
             case PASS:
                 if (bestOfDKIM.isDomainMatch()) {
-                    overallResult.addAttribute(MailAuthenticityResultKey.FROM_DOMAIN, bestOfDKIM.getDomain());
                     overallResult.setStatus(MailAuthenticityStatus.PASS);
                 } else {
                     overallResult.setStatus(MailAuthenticityStatus.NEUTRAL);
@@ -488,6 +487,9 @@ public class StandardAuthenticationResultsValidator implements AuthenticationRes
                 break;
             default:
                 overallResult.setStatus(bestOfDKIM.getResult().convert());
+        }
+        if (Strings.isNotEmpty(bestOfDKIM.getDomain())) {
+            overallResult.addAttribute(MailAuthenticityResultKey.FROM_DOMAIN, bestOfDKIM.getDomain());
         }
         return dkimFailed;
     }
@@ -533,7 +535,6 @@ public class StandardAuthenticationResultsValidator implements AuthenticationRes
                 } else if (MailAuthenticityStatus.PASS != overallResult.getStatus()) {
                     if (bestOfSPF.isDomainMatch()) {
                         overallResult.setStatus(MailAuthenticityStatus.PASS);
-                        overallResult.addAttribute(MailAuthenticityResultKey.FROM_DOMAIN, bestOfSPF.getDomain());
                     } else {
                         overallResult.setStatus(MailAuthenticityStatus.NEUTRAL);
                     }
@@ -548,6 +549,9 @@ public class StandardAuthenticationResultsValidator implements AuthenticationRes
             default:
                 // Override
                 overallResult.setStatus(bestOfSPF.getResult().convert());
+        }
+        if (Strings.isNotEmpty(bestOfSPF.getDomain())) {
+            overallResult.addAttribute(MailAuthenticityResultKey.FROM_DOMAIN, bestOfSPF.getDomain());
         }
     }
 

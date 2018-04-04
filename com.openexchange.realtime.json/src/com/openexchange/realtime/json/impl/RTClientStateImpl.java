@@ -53,9 +53,11 @@ import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Queue;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.TimeUnit;
 import com.openexchange.java.util.UUIDs;
 import com.openexchange.realtime.json.actions.SendAction;
@@ -64,7 +66,6 @@ import com.openexchange.realtime.packet.ID;
 import com.openexchange.realtime.packet.Stanza;
 import com.openexchange.realtime.util.Duration;
 import com.openexchange.realtime.util.OwnerAwareReentrantLock;
-
 
 /**
  * The {@link RTClientStateImpl} encapsulates the state of a connected client by keeping track of the sequenced and unsequenced Stanzas that
@@ -78,8 +79,8 @@ public class RTClientStateImpl implements RTClientState {
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(SendAction.class);
 
     private final ID id;
-    private final Map<Long, EnqueuedStanza> resendBuffer = new HashMap<Long, EnqueuedStanza>();
-    private final List<Stanza> nonsequenceStanzas = new ArrayList<Stanza>();
+    private final Map<Long, EnqueuedStanza> resendBuffer = new ConcurrentHashMap<Long, EnqueuedStanza>();
+    private final Queue<Stanza> nonsequenceStanzas = new ConcurrentLinkedQueue<Stanza>();
 
     private final OwnerAwareReentrantLock lock = new OwnerAwareReentrantLock();
     private long lastSeen;
@@ -94,7 +95,7 @@ public class RTClientStateImpl implements RTClientState {
     public void acknowledgementReceived(long sequenceNumber) {
         lock();
         try {
-            resendBuffer.remove(sequenceNumber);
+            resendBuffer.remove(Long.valueOf(sequenceNumber));
         } finally {
             unlock();
         }
@@ -103,20 +104,20 @@ public class RTClientStateImpl implements RTClientState {
     @Override
     public void enqueue(Stanza stanza) {
         if (stanza.getId() == null || stanza.getId().trim().equals("")) {
-        	stanza.setId(UUIDs.getUnformattedStringFromRandom());
+            stanza.setId(UUIDs.getUnformattedStringFromRandom());
         }
-    	stanza.trace("Using ID: " + stanza.getId());
+        stanza.trace("Using ID: " + stanza.getId());
         if (stanza.getSequenceNumber() != -1) {
             lock();
             try {
                 stanza.setSequenceNumber(sequenceNumber);
-                stanza.trace("RTClientState recasting stanza to sequence number "+ sequenceNumber + " for delivery");
+                stanza.trace("RTClientState recasting stanza to sequence number " + sequenceNumber + " for delivery");
                 sequenceNumber++;
             } finally {
                 unlock();
             }
             stanza.trace("add to resend buffer");
-            resendBuffer.put(stanza.getSequenceNumber(), new EnqueuedStanza(stanza));
+            resendBuffer.put(Long.valueOf(stanza.getSequenceNumber()), new EnqueuedStanza(stanza));
         } else {
             stanza.trace("add to nonsequenceStanza list");
             nonsequenceStanzas.add(stanza);
@@ -127,7 +128,7 @@ public class RTClientStateImpl implements RTClientState {
         return resendBuffer;
     }
 
-    public List<Stanza> getNonsequenceStanzas() {
+    public Queue<Stanza> getNonsequenceStanzas() {
         return nonsequenceStanzas;
     }
 
@@ -136,7 +137,7 @@ public class RTClientStateImpl implements RTClientState {
         lock();
         try {
             List<Stanza> list = new ArrayList<Stanza>(resendBuffer.size() + nonsequenceStanzas.size());
-            for(EnqueuedStanza es: resendBuffer.values()) {
+            for (EnqueuedStanza es : resendBuffer.values()) {
                 list.add(es.stanza);
             }
             list.addAll(nonsequenceStanzas);
@@ -165,9 +166,9 @@ public class RTClientStateImpl implements RTClientState {
             }
             nonsequenceStanzas.clear();
             List<Long> toRemove = new ArrayList<Long>(resendBuffer.size());
-            for(EnqueuedStanza es: resendBuffer.values()) {
+            for (EnqueuedStanza es : resendBuffer.values()) {
                 if (!es.incCounter()) {
-                    toRemove.add(es.sequenceNumber);
+                    toRemove.add(Long.valueOf(es.sequenceNumber));
                     es.stanza.trace("TTL reached, this stanza will be lost!");
                 }
             }
@@ -209,27 +210,6 @@ public class RTClientStateImpl implements RTClientState {
     @Override
     public void lock() {
         lock.lock();
-
-//        boolean lockAcquired = false;
-//        long waitedSeconds = 0L;
-//        while (!lockAcquired) {
-//            try {
-//                lockAcquired = lock.tryLock(5, TimeUnit.SECONDS);
-//            } catch (InterruptedException x) {
-//                Thread.currentThread().interrupt();
-//                return;
-//            }
-//
-//            if (!lockAcquired) {
-//                Thread owner = lock.getOwner();
-//                if (null != owner) {
-//                    waitedSeconds += 5;
-//                    FastThrowable t = new FastThrowable("Trace from thread " + owner.getName());
-//                    t.setStackTrace(owner.getStackTrace());
-//                    LOG.warn("Thread {} failed to get lock for client state {} after {}sec. Lock still acquired by thread {}:", Thread.currentThread().getName(), id, waitedSeconds, owner.getName(), t);
-//                }
-//            }
-//        }
     }
 
     @Override

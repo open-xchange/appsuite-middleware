@@ -300,20 +300,18 @@ public abstract class BasicCachingCalendarAccess implements BasicCalendarAccess,
     private void executeUpdate() throws OXException {
         try {
             ExternalCalendarResult externalCalendarResult = this.getAllEvents();
-            if (false == externalCalendarResult.isUpdated()) {
-                return;
+            if (externalCalendarResult.isUpdated()) {
+                CalendarParameters lParameters = new DefaultCalendarParameters(getParameters()).set(CalendarParameters.PARAMETER_AUTO_HANDLE_DATA_TRUNCATIONS, Boolean.TRUE).set(CalendarParameters.PARAMETER_AUTO_HANDLE_INCORRECT_STRINGS, Boolean.TRUE);
+                new OSGiCalendarStorageOperation<Void>(Services.getServiceLookup(), session.getContextId(), account.getAccountId(), lParameters) {
+
+                    @Override
+                    protected Void call(CalendarStorage storage) throws OXException {
+                        updateCache(storage, externalCalendarResult);
+                        addWarnings(collectWarnings(storage));
+                        return null;
+                    }
+                }.executeUpdate();
             }
-            CalendarParameters lParameters = new DefaultCalendarParameters(getParameters()).set(CalendarParameters.PARAMETER_AUTO_HANDLE_DATA_TRUNCATIONS, Boolean.TRUE).set(CalendarParameters.PARAMETER_AUTO_HANDLE_INCORRECT_STRINGS, Boolean.TRUE);
-            new OSGiCalendarStorageOperation<Void>(Services.getServiceLookup(), session.getContextId(), account.getAccountId(), lParameters) {
-
-                @Override
-                protected Void call(CalendarStorage storage) throws OXException {
-                    updateCache(storage, externalCalendarResult);
-                    addWarnings(collectWarnings(storage));
-                    return null;
-                }
-            }.executeUpdate();
-
             this.updateLastUpdated(System.currentTimeMillis() + TimeUnit.MINUTES.toMillis(1));
             account.getInternalConfiguration().remove("lastError");
         } catch (OXException e) {
@@ -646,7 +644,7 @@ public abstract class BasicCachingCalendarAccess implements BasicCalendarAccess,
                  * account updated in the meantime; keep old config to not have "lockedForUpdateUntil" set and reuse c
                  */
                 String actualLockedBy = caching.optString(CachingCalendarAccessConstants.LOCKED_FOR_UPDATE_BY, null);
-                LOG.debug("Concurrent modification while attempting to persist lock for account {}, aborting. Account is already locked until {} by {}", I(account.getAccountId()), L(lockedUntil), actualLockedBy, e);
+                LOG.debug("Concurrent modification while attempting to persist lock for account {}, aborting. Account is already locked until {} by {}", I(account.getAccountId()), L(lockedUntil), null == actualLockedBy ? "" : actualLockedBy, e);
                 account = Services.getService(CalendarAccountService.class).getAccount(session, account.getAccountId(), parameters);
                 return false;
             }

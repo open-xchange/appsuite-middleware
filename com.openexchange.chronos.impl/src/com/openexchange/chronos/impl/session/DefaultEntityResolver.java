@@ -78,6 +78,7 @@ import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.group.Group;
 import com.openexchange.group.GroupService;
+import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.tools.alias.UserAliasUtility;
@@ -87,6 +88,7 @@ import com.openexchange.resource.Resource;
 import com.openexchange.resource.ResourceService;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.arrays.Arrays;
+import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.user.UserService;
 
@@ -105,6 +107,7 @@ public class DefaultEntityResolver implements EntityResolver {
     private final Map<Integer, Group> knownGroups;
     private final Map<Integer, User> knownUsers;
     private final Map<Integer, Resource> knownResources;
+    private final Map<Integer, FolderObject> knownFolders;
 
     /**
      * Initializes a new {@link DefaultEntityResolver}.
@@ -140,6 +143,7 @@ public class DefaultEntityResolver implements EntityResolver {
         knownUsers = new HashMap<Integer, User>();
         knownGroups = new HashMap<Integer, Group>();
         knownResources = new HashMap<Integer, Resource>();
+        knownFolders = new HashMap<Integer, FolderObject>();
     }
 
     @Override
@@ -392,6 +396,7 @@ public class DefaultEntityResolver implements EntityResolver {
         knownGroups.clear();
         knownResources.clear();
         knownUsers.clear();
+        knownFolders.clear();
     }
 
     private Group getGroup(int entity) throws OXException {
@@ -473,6 +478,39 @@ public class DefaultEntityResolver implements EntityResolver {
             knownResources.put(id, resource);
         }
         return resource;
+    }
+
+    /**
+     * Gets a folder by its identifier.
+     *
+     * @param id The identifier of the folder to get
+     * @return The folder
+     */
+    public FolderObject getFolder(int id) throws OXException {
+        Integer iD = I(id);
+        FolderObject folder = knownFolders.get(iD);
+        if (null == folder) {
+            folder = loadFolder(iD);
+            knownFolders.put(iD, folder);
+        }
+        return folder;
+    }
+
+    /**
+     * Optionally gets a folder by its identifier, if it exists.
+     *
+     * @param id The identifier of the folder to get
+     * @return The folder, or <code>null</code> it doesn't exist
+     */
+    public FolderObject optFolder(int id) throws OXException {
+        try {
+            return getFolder(id);
+        } catch (OXException e) {
+            if (CalendarExceptionCodes.FOLDER_NOT_FOUND.equals(e)) {
+                return null;
+            }
+            throw e;
+        }
     }
 
     private Attendee applyEntityData(Attendee attendee, User user, AttendeeField... fields) throws OXException {
@@ -708,6 +746,17 @@ public class DefaultEntityResolver implements EntityResolver {
                 } else {
                     throw CalendarExceptionCodes.INVALID_CALENDAR_USER.create(e, java.util.Arrays.toString(entities), I(0), CalendarUserType.INDIVIDUAL);
                 }
+            }
+            throw e;
+        }
+    }
+
+    private FolderObject loadFolder(int id) throws OXException {
+        try {
+            return new OXFolderAccess(context).getFolderObject(id);
+        } catch (OXException e) {
+            if ("FLD-0008".equals(e.getErrorCode())) {
+                throw CalendarExceptionCodes.FOLDER_NOT_FOUND.create(e, String.valueOf(id));
             }
             throw e;
         }

@@ -101,7 +101,6 @@ public class AddITipAnalyzer extends AbstractITipAnalyzer {
             if (message.getOwner() > 0 && message.getOwner() != session.getUserId()) {
                 owner = message.getOwner();
             }
-
             ensureParticipant(master, exception, session, owner);
             ITipChange change = new ITipChange();
             change.setType(Type.CREATE);
@@ -119,6 +118,10 @@ public class AddITipAnalyzer extends AbstractITipAnalyzer {
                 change.setCurrentEvent(existingException);
                 analysis.recommendActions(ITipAction.IGNORE, ITipAction.ACCEPT_AND_REPLACE);
                 findActions = false;
+                session.getUtilities().adjustTimeZones(owner, exception, existingException);
+            } else {
+                session.getUtilities().adjustTimeZones(owner, exception, master);
+
             }
             change.setConflicts(util.getConflicts(exception, session));
             change.setNewEvent(exception);

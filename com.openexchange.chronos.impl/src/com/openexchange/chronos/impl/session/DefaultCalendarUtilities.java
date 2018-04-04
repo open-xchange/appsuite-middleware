@@ -55,8 +55,10 @@ import java.util.TimeZone;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
-import com.openexchange.chronos.common.mapping.EventMapper;
 import com.openexchange.chronos.common.mapping.DefaultEventUpdate;
+import com.openexchange.chronos.common.mapping.EventMapper;
+import com.openexchange.chronos.impl.Consistency;
+import com.openexchange.chronos.impl.Utils;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.CalendarUtilities;
 import com.openexchange.chronos.service.EntityResolver;
@@ -216,6 +218,16 @@ public class DefaultCalendarUtilities implements CalendarUtilities {
                 return comparison;
             }
         };
+    }
+
+    @Override
+    public TimeZone selectTimeZone(int calendarUserId, TimeZone timeZone, TimeZone originalTimeZone) throws OXException {
+        return Utils.selectTimeZone(session, calendarUserId, timeZone, originalTimeZone);
+    }
+
+    @Override
+    public void adjustTimeZones(int calendarUserId, Event event, Event originalEvent) throws OXException {
+        Consistency.adjustTimeZones(session, calendarUserId, event, originalEvent);
     }
 
 }

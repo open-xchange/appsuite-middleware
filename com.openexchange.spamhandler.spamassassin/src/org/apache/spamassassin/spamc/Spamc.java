@@ -1453,6 +1453,9 @@ public class Spamc {
             String tokens[];
             while (reader.ready()) {
                 line = reader.readLine();
+                if(line == null) {
+                    break;
+                }
                 if (line.length() > 0 && (line.charAt(0) == '#' || line.charAt(0) == '\r' || line.charAt(0) == '\n')) {
                     continue;
                 }
@@ -2058,7 +2061,6 @@ public class Spamc {
 
         private int argumentIndex = -1;
         private int charIndex = -1;
-        private final String message = "";
 
         protected ArgumentUsageException() {
             super();
@@ -2076,7 +2078,7 @@ public class Spamc {
 
         @Override
         public String getMessage() {
-            return getMessagePrefix() + message;
+            return getMessagePrefix();
         }
 
     }

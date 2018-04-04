@@ -61,6 +61,7 @@ import org.dmfs.rfc5545.recur.InvalidRecurrenceRuleException;
 import org.dmfs.rfc5545.recur.RecurrenceRule;
 import com.openexchange.chronos.Attachment;
 import com.openexchange.chronos.Attendee;
+import com.openexchange.chronos.AttendeeField;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.common.CalendarUtils;
@@ -69,6 +70,7 @@ import com.openexchange.chronos.itip.ITipMethod;
 import com.openexchange.chronos.itip.ITipRole;
 import com.openexchange.chronos.itip.osgi.Services;
 import com.openexchange.chronos.itip.tools.ITipEventUpdate;
+import com.openexchange.chronos.service.ItemUpdate;
 import com.openexchange.chronos.service.RecurrenceService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.notify.State.Type;
@@ -430,6 +432,13 @@ public class NotificationMail {
                             sb.append("R: ");
                             for (Attendee removed : getDiff().getAttendeeUpdates().getRemovedItems()) {
                                 sb.append(removed.getEMail() + "(" + removed.getEntity() + "), ");
+                            }
+                        }
+                        if (getDiff().getAttendeeUpdates().getUpdatedItems() != null && getDiff().getAttendeeUpdates().getUpdatedItems().size() > 0) {
+                            sb.append("U: ");
+                            for (ItemUpdate<Attendee, AttendeeField> updated : getDiff().getAttendeeUpdates().getUpdatedItems()) {
+                                sb.append(updated.getOriginal().getEMail() + "(" + updated.getOriginal().getEntity() + ") | ");
+                                sb.append(updated.getUpdatedFields().toString()).append(", ");
                             }
                         }
                     }

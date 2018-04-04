@@ -777,7 +777,8 @@ abstract class AbstractSMTPTransport extends MailTransport implements MimeSuppor
                 throw e;
             }
 
-            if (smtpConfig.getAccountId() != MailAccount.DEFAULT_ID) {
+            boolean isPrimaryAccount = smtpConfig.getAccountId() == MailAccount.DEFAULT_ID;
+            if (false == isPrimaryAccount) {
                 AbstractTask<Void> task = new AbstractTask<Void>() {
 
                     @Override
@@ -796,7 +797,7 @@ abstract class AbstractSMTPTransport extends MailTransport implements MimeSuppor
                 throw MailExceptionCode.AUTH_TYPE_NOT_SUPPORTED.create(smtpConfig.getAuthType().getName(), smtpConfig.getServer());
             }
 
-            if (smtpConfig.getAccountId() == MailAccount.DEFAULT_ID) {
+            if (isPrimaryAccount) {
                 AuthenticationFailedHandlerService handlerService = Services.getService(AuthenticationFailedHandlerService.class);
                 if (handlerService != null) {
                     OXException oxe = MimeMailExceptionCode.TRANSPORT_INVALID_CREDENTIALS.create(e, smtpConfig.getServer(), e.getMessage());
@@ -910,7 +911,7 @@ abstract class AbstractSMTPTransport extends MailTransport implements MimeSuppor
                 if (Account.DEFAULT_ID == accountId) {
                     addPrimaryAddressHeader(smtpMessage, smtpConfig.getSMTPProperties());
                 }
-                
+
                 // Check if security settings are given and if properly handled
                 if (securitySettings != null && securitySettings.anythingSet()) {
                     if (false == listenerChain.checkSettings(securitySettings, session)) {
@@ -1567,7 +1568,7 @@ abstract class AbstractSMTPTransport extends MailTransport implements MimeSuppor
 
     /**
      * Add the primary address header to outgoing mails if 'com.openexchange.smtp.setPrimaryAddressHeader' is set and valid.
-     * 
+     *
      * @param message The message to send
      * @param properties The {@link ISMTPProperties} to get the option from
      * @throws OXException If user can't be loaded

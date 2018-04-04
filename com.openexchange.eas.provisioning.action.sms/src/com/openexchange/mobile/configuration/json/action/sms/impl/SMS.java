@@ -69,8 +69,8 @@ public class SMS {
 	private String text = ""; // Please go to %u blalal
 	private String serverUrl = ""; // https://samurai.sipgate.net/RPC2
 
-	private final boolean replaceleadingzero = true;
-	private final boolean replaceleadingzerozero = true;
+    private static final boolean REPLACE_LEADING_ZERO = true;
+    private static final boolean REPLACE_LEADING_ZERO_ZERO = true;
 
 	public String getServerUrl() {
 		return serverUrl;
@@ -228,9 +228,9 @@ public class SMS {
 			to = to.substring(1);
 		} else {
 			// remove leading 0 or 00
-			if(replaceleadingzerozero && to.startsWith("00")){
+            if (REPLACE_LEADING_ZERO_ZERO && to.startsWith("00")) {
 				to = ""+to.substring(2);
-			} else if (replaceleadingzero && (to.length() > 0 && to.charAt(0) == '0')){
+            } else if (REPLACE_LEADING_ZERO && (to.length() > 0 && to.charAt(0) == '0')) {
 				to = ""+to.substring(1);
 			}
 		}

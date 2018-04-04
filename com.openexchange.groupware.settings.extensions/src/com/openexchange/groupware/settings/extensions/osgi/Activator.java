@@ -187,7 +187,7 @@ public class Activator extends HousekeepingActivator {
                         try {
                             final String finalScope = property.get("final");
                             final String isProtected = property.get("protected");
-                            return (finalScope == null || finalScope.equals("user")) && (isProtected == null || ! property.get("protected", boolean.class).booleanValue());
+                            return (finalScope == null || finalScope.equals("user")) && (isProtected == null || !Boolean.parseBoolean(isProtected));
                         } catch (final OXException x) {
                             LOG.error("", x);
                             return false;
@@ -313,7 +313,7 @@ public class Activator extends HousekeepingActivator {
                     public void getValue(final Session session, final Context ctx, final User user, final UserConfiguration userConfig, final Setting setting) throws OXException {
                         final String finalScope = property.get("final");
                         final String isProtected = property.get("protected");
-                        final boolean writable = (finalScope == null || finalScope.equals("user")) && (isProtected == null || ! property.get("protected", boolean.class).booleanValue());
+                        final boolean writable = (finalScope == null || finalScope.equals("user")) && (isProtected == null || !Boolean.parseBoolean(isProtected));
                         setting.setSingleValue(Boolean.valueOf(writable));
                     }
 

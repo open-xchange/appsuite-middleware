@@ -49,6 +49,7 @@
 
 package com.openexchange.groupware.container;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
@@ -62,7 +63,9 @@ import com.openexchange.java.Strings;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.10.0
  */
-public class FolderPathObject implements Iterable<String> {
+public class FolderPathObject implements Iterable<String>, Serializable {
+
+    private static final long serialVersionUID = 3412678911624214154L;
 
     /** The folder path type determines to what starting folder a path belongs */
     public static enum FolderPathType {
@@ -78,6 +81,8 @@ public class FolderPathObject implements Iterable<String> {
 
     /** The empty folder path */
     public static final FolderPathObject EMPTY_PATH = new FolderPathObject(ImmutableList.of()) {
+
+        private static final long serialVersionUID = -3516637436349673116L;
 
         @Override
         public String toString() {
@@ -188,7 +193,7 @@ public class FolderPathObject implements Iterable<String> {
         return type;
     }
 
-    private final List<String> names;
+    private final ImmutableList<String> names;
     private final int size;
     private final FolderPathType type;
 

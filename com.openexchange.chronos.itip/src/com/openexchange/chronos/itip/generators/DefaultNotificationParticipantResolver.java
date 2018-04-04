@@ -334,7 +334,7 @@ public class DefaultNotificationParticipantResolver implements NotificationParti
                 participant.setLocale(user.getLocale());
                 participant.setTimezone(TimeZone.getDefault());
                 participant.setResource(true);
-                participant.setConfiguration(defaultConfiguration);
+                participant.setConfiguration(defaultConfiguration.clone());
                 participant.setDisplayName(resource.getDisplayName());
                 retval.add(participant);
             }
@@ -370,7 +370,7 @@ public class DefaultNotificationParticipantResolver implements NotificationParti
                 participant.setConfirmStatus(cp.getPartStat());
                 participant.setComment(cp.getComment());
             }
-            participant.setConfiguration(defaultConfiguration);
+            participant.setConfiguration(defaultConfiguration.clone());
             retval.add(participant);
         }
 

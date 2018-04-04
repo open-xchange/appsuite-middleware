@@ -54,6 +54,7 @@ import static com.openexchange.subscribe.crawler.internal.FormStrings.FORM_LABEL
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import com.openexchange.datatypes.genericonf.DynamicFormDescription;
@@ -107,6 +108,7 @@ public class GenericSubscribeService extends AbstractSubscribeService {
         this.module = module;
     }
 
+    @SuppressWarnings("unused")
     protected void addExtraFields(final DynamicFormDescription form) {
         // May be overridden to include extra fields
     }
@@ -122,7 +124,7 @@ public class GenericSubscribeService extends AbstractSubscribeService {
     }
 
     @Override
-    public Collection getContent(final Subscription subscription) throws OXException {
+    public Collection<?> getContent(final Subscription subscription) throws OXException {
 
         final Workflow workflow = getWorkflow();
         workflow.setSubscription(subscription);
@@ -130,15 +132,21 @@ public class GenericSubscribeService extends AbstractSubscribeService {
         final Map<String, Object> configuration = subscription.getConfiguration();
         // All contacts should get a UUID for aggregation
         if (this.module == FolderObject.CONTACT){
-            final List list =  Arrays.asList(workflow.execute((String) configuration.get("login"), (String) configuration.get("password")));
-            final List<Contact> contacts = new ArrayList<Contact>();
+            Object[] executed = workflow.execute((String) configuration.get("login"), (String) configuration.get("password"));
+            if (null == executed) {
+                return Collections.emptyList();
+            }
+
+            final List<?> list =  Arrays.asList(executed);
+            final List<Contact> contacts = new ArrayList<Contact>(list.size());
             for (final Object object : list){
                 final Contact contact = (Contact) object;
                 contacts.add(contact);
             }
             return contacts;
         }
-        return Arrays.asList(workflow.execute((String) configuration.get("login"), (String) configuration.get("password")));
+        Object[] executed = workflow.execute((String) configuration.get("login"), (String) configuration.get("password"));
+        return executed != null ? Arrays.asList(executed) : Collections.emptyList();
     }
 
     public Workflow getWorkflow() {
@@ -146,6 +154,7 @@ public class GenericSubscribeService extends AbstractSubscribeService {
         try {
             workflow = WorkflowFactory.createWorkflowByString(workflowString);
         } catch (final OXException e) {
+            // ignore
         }
 
         if (null == workflow) {
