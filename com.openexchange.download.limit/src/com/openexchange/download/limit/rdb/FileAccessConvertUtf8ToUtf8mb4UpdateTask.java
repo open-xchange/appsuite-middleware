@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2016-2020 OX Software GmbH
+ *     Copyright (C) 2018-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,63 +49,21 @@
 
 package com.openexchange.download.limit.rdb;
 
-import com.openexchange.database.AbstractCreateTableImpl;
+import java.util.Collections;
+import com.openexchange.groupware.update.SimpleConvertUtf8ToUtf8mb4UpdateTask;
 
 /**
- * {@link FileAccessCreateTableService}
+ * {@link FileAccessConvertUtf8ToUtf8mb4UpdateTask}
  *
- * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
- * @since v7.8.2
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @since v7.10.0
  */
-public final class FileAccessCreateTableService extends AbstractCreateTableImpl {
-
-    private static final String FILE_ACCESS_TABLE = "fileAccess";
-
-    private static final String LIMIT_TABLE_CREATE_STMT = "CREATE TABLE " + FILE_ACCESS_TABLE + " (\n" +
-        "  cid int4 unsigned NOT NULL,\n" +
-        "  userid int4 unsigned NOT NULL,\n" +
-        "  accessed bigint(20) unsigned NOT NULL,\n" +
-        "  size bigint(20) unsigned NOT NULL,\n" +
-        "  PRIMARY KEY (`cid`,`userid`,`accessed`)" +
-        ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;";
+public class FileAccessConvertUtf8ToUtf8mb4UpdateTask extends SimpleConvertUtf8ToUtf8mb4UpdateTask {
 
     /**
-     * Gets the table names.
-     *
-     * @return The table names.
+     * Initialises a new {@link FileAccessConvertUtf8ToUtf8mb4UpdateTask}.
      */
-    public static String[] getTablesToCreate() {
-        return new String[] { FILE_ACCESS_TABLE };
-    }
-
-    /**
-     * Gets the CREATE-TABLE statements.
-     *
-     * @return The CREATE statements
-     */
-    public static String[] getCreateStmts() {
-        return new String[] { LIMIT_TABLE_CREATE_STMT };
-    }
-
-    /**
-     * Initializes a new {@link FileAccessCreateTableService}.
-     */
-    public FileAccessCreateTableService() {
-        super();
-    }
-
-    @Override
-    public String[] requiredTables() {
-        return NO_TABLES;
-    }
-
-    @Override
-    public String[] tablesToCreate() {
-        return getTablesToCreate();
-    }
-
-    @Override
-    protected String[] getCreateStatements() {
-        return getCreateStmts();
+    public FileAccessConvertUtf8ToUtf8mb4UpdateTask() {
+        super(Collections.singletonList("fileAccess"));
     }
 }
