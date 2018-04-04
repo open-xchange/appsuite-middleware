@@ -355,7 +355,7 @@ public abstract class AbstractConvertUtf8ToUtf8mb4Task extends UpdateTaskAdapter
      * @return <code>true</code> if the column should be modified; <code>false</code> otherwise
      * @throws SQLException if an SQL error is occurred
      */
-    protected boolean modifyVarChar(String schema, String tableName, String columnName, int size, Connection connection) throws SQLException {
+    private boolean modifyVarChar(String schema, String tableName, String columnName, int size, Connection connection) throws SQLException {
         int columnSize = getVarcharColumnSize(tableName, columnName, connection, schema);
         return columnSize >= size;
     }
@@ -393,11 +393,12 @@ public abstract class AbstractConvertUtf8ToUtf8mb4Task extends UpdateTaskAdapter
     }
 
     /**
+     * Changes the charset/collation of the specified table.
      * 
-     * @param connection
-     * @param schema
-     * @param table
-     * @throws SQLException
+     * @param connection The connection to use
+     * @param schema The schema name
+     * @param table The table name
+     * @throws SQLException If changing the table fails
      */
     protected void changeTable(Connection connection, String schema, String table) throws SQLException {
         changeTable(connection, schema, table, Collections.emptyMap());
@@ -418,13 +419,16 @@ public abstract class AbstractConvertUtf8ToUtf8mb4Task extends UpdateTaskAdapter
     }
 
     /**
+     * Changes the charset/collation of the specified table and (optionally) shrinks the specified VARCHAR columns and
+     * a {@link List} with the definitions of {@link Column}s to modify
+     * * @param connection The connection to use
      * 
-     * @param connection
-     * @param schema
-     * @param table
-     * @param optVarcharColumns
-     * @param modifyColumns
-     * @throws SQLException
+     * @param schema The schema name
+     * @param table The table name
+     * @param optVarcharColumns The optional VARCHAR columns with their respective VARCHAR sizes
+     *            (use only if the column is part of the PRIMARY KEY or is a (UNIQUE) KEY and it's size surpasses the limit of 767 bytes in total, i.e. VARCHAR length is greater than 191)
+     * @param modifyColumns a {@link List} with the definitions of {@link Column}s to modify
+     * @throws SQLException if changing the table fails
      */
     protected void changeTable(Connection connection, String schema, String table, Map<String, Integer> optVarcharColumns, List<Column> modifyColumns) throws SQLException {
         String createTable = getCreateTable(connection, table);
