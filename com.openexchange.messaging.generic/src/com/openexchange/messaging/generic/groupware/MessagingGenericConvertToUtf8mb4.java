@@ -55,7 +55,6 @@ import com.google.common.collect.ImmutableMap;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.SimpleConvertUtf8ToUtf8mb4UpdateTask;
 
-
 /**
  * {@link MessagingGenericConvertToUtf8mb4}
  *
@@ -77,5 +76,4 @@ public class MessagingGenericConvertToUtf8mb4 extends SimpleConvertUtf8ToUtf8mb4
         mapBuilder.put("serviceId", Integer.valueOf(255));
         changeTable(connection, params.getSchema().getSchema(), "messagingAccount", mapBuilder.build());
     }
-
 }

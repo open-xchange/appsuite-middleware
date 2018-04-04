@@ -49,7 +49,7 @@
 
 package com.openexchange.ajax.requesthandler.converters.preview.cache.groupware;
 
-import java.util.Collections;
+import com.google.common.collect.ImmutableList;
 import com.openexchange.groupware.update.SimpleConvertUtf8ToUtf8mb4UpdateTask;
 
 /**
@@ -63,6 +63,6 @@ public class PreviewTableUtf8Mb4UpdateTask extends SimpleConvertUtf8ToUtf8mb4Upd
      * Initialises a new {@link PreviewTableUtf8Mb4UpdateTask}.
      */
     public PreviewTableUtf8Mb4UpdateTask() {
-        super(Collections.singletonList("preview"), ChangeDataToLongblob.class.getName());
+        super(ImmutableList.of("preview", "previewData"), ChangeDataToLongblob.class.getName());
     }
 }

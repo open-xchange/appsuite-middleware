@@ -51,7 +51,6 @@ package com.openexchange.ajax.requesthandler.converters.preview.cache.groupware;
 
 import com.openexchange.database.AbstractCreateTableImpl;
 
-
 /**
  * {@link PreviewCacheCreateDataTableService}
  *
@@ -74,14 +73,14 @@ public final class PreviewCacheCreateDataTableService extends AbstractCreateTabl
      * @return The CREATE statements
      */
     public static String[] getCreateStmts() {
-        return new String[] { "CREATE TABLE "+"previewData"+" (" +
+        return new String[] { "CREATE TABLE previewData (" +
             " cid INT4 unsigned NOT NULL," +
             " user INT4 unsigned NOT NULL," +
             " id VARCHAR(128) CHARACTER SET latin1 NOT NULL," +
             " data LONGBLOB," +
             " PRIMARY KEY (cid, user, id)," +
             " INDEX `globaldocument` (cid, id)" +
-            ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" };
+            ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci" };
     }
 
     /**
@@ -105,5 +104,4 @@ public final class PreviewCacheCreateDataTableService extends AbstractCreateTabl
     protected String[] getCreateStatements() {
         return getCreateStmts();
     }
-
 }
