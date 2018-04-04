@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2016-2020 OX Software GmbH
+ *     Copyright (C) 2018-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,31 +49,20 @@
 
 package com.openexchange.rest.services.database.sql;
 
-import com.openexchange.database.AbstractCreateTableImpl;
+import com.google.common.collect.ImmutableList;
+import com.openexchange.groupware.update.SimpleConvertUtf8ToUtf8mb4UpdateTask;
 
 /**
- * {@link CreateServiceSchemaLockTable}
+ * {@link ServiceSchemaConvertUtf8ToUtf8mb4UpdateTask}
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class CreateServiceSchemaLockTable extends AbstractCreateTableImpl {
+public class ServiceSchemaConvertUtf8ToUtf8mb4UpdateTask extends SimpleConvertUtf8ToUtf8mb4UpdateTask {
 
-    @Override
-    public String[] requiredTables() {
-        return new String[0];
+    /**
+     * Initialises a new {@link ServiceSchemaConvertUtf8ToUtf8mb4UpdateTask}.
+     */
+    public ServiceSchemaConvertUtf8ToUtf8mb4UpdateTask() {
+        super(ImmutableList.of("serviceSchemaVersion", "serviceSchemaMigrationLock"));
     }
-
-    @Override
-    public String[] tablesToCreate() {
-        return new String[] { "serviceSchemaMigrationLock" };
-    }
-
-    @Override
-    protected String[] getCreateStatements() {
-        return new String[] { "CREATE TABLE `serviceSchemaMigrationLock` (" + 
-            "  `module` varchar(128) NOT NULL DEFAULT ''," + 
-            "  `expires` bigint(20) DEFAULT NULL," + 
-            "  PRIMARY KEY (`module`))" };
-    }
-
 }
