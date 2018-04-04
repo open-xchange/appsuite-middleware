@@ -67,7 +67,7 @@ public class ReminderTableUtf8Mb4UpdateTask extends SimpleConvertUtf8ToUtf8mb4Up
      * Initialises a new {@link ReminderTableUtf8Mb4UpdateTask}.
      */
     public ReminderTableUtf8Mb4UpdateTask() {
-        super(Collections.singletonList("reminder"));
+        super(Collections.emptyList());
     }
 
     /*

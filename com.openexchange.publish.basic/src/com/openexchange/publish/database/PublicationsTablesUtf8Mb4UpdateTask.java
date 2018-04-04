@@ -66,7 +66,7 @@ public class PublicationsTablesUtf8Mb4UpdateTask extends SimpleConvertUtf8ToUtf8
      * Initialises a new {@link PublicationsTablesUtf8Mb4UpdateTask}.
      */
     public PublicationsTablesUtf8Mb4UpdateTask() {
-        super(PublicationsAddEntityIndex.class, "publications", "sequence_publications", "publication_users");
+        super(PublicationsAddEntityIndex.class, "publications", "sequence_publications");
     }
 
     /*
