@@ -83,8 +83,11 @@ public abstract class AbstractConvertUtf8ToUtf8mb4Task extends UpdateTaskAdapter
 
     private static final org.slf4j.Logger LOGGER = org.slf4j.LoggerFactory.getLogger(AbstractConvertUtf8ToUtf8mb4Task.class);
 
-    /** The constant for the size of a VARCHAR column if it's part of a UNIQUE or PRIMARY KEY */
+    /** The constant for the size of a <code>VARCHAR</code> column if it's part of a UNIQUE or PRIMARY KEY */
     private static final int UNIQUE_VARCHAR_SIZE = 191;
+
+    /** Defines the upper character limit for a <code>VARCHAR</code> column. Longer columns will be converted to <code>TEXT</code> */
+    private static final int MAX_VARCHAR = 1024;
 
     /** The constant for <code>"utf8mb4"</code> character set */
     protected static final String UTF8MB4_CHARSET = "utf8mb4";
@@ -147,7 +150,7 @@ public abstract class AbstractConvertUtf8ToUtf8mb4Task extends UpdateTaskAdapter
     protected void innerPerform(Connection con, String schema) throws SQLException {
         for (String table : tablesToConvert()) {
             try {
-                changeTable(con, schema, table, null);
+                changeTable(con, schema, table);
             } catch (SQLException e) {
                 LOGGER.error("Failed to convert table {} from utf8 to utf8mb4. Reason: {}", table, e.getMessage());
                 throw e;
@@ -342,21 +345,19 @@ public abstract class AbstractConvertUtf8ToUtf8mb4Task extends UpdateTaskAdapter
     }
 
     /**
-     * Modifies the specified <code>VARCHAR</code> column to a <code>TEXT</code> if it exceeds the specified size
+     * Checks whether to modify the specified <code>VARCHAR</code> column to a <code>TEXT</code>, i.e. if it exceeds the specified size
      *
+     * @param schema The schema's name
      * @param tableName The table's name
      * @param columnName The column's name
      * @param size The size
-     * @param column the new {@link Column} definition
      * @param connection The {@link Connection}
-     * @param schema The schema's name
+     * @return <code>true</code> if the column should be modified; <code>false</code> otherwise
      * @throws SQLException if an SQL error is occurred
      */
-    protected void modifyVarChar(String tableName, String columnName, int size, Column column, Connection connection, String schema) throws SQLException {
+    protected boolean modifyVarChar(String schema, String tableName, String columnName, int size, Connection connection) throws SQLException {
         int columnSize = getVarcharColumnSize(tableName, columnName, connection, schema);
-        if (columnSize >= size) {
-            Tools.modifyColumns(connection, tableName, false, column);
-        }
+        return columnSize >= size;
     }
 
     /**
@@ -392,6 +393,17 @@ public abstract class AbstractConvertUtf8ToUtf8mb4Task extends UpdateTaskAdapter
     }
 
     /**
+     * 
+     * @param connection
+     * @param schema
+     * @param table
+     * @throws SQLException
+     */
+    protected void changeTable(Connection connection, String schema, String table) throws SQLException {
+        changeTable(connection, schema, table, Collections.emptyMap());
+    }
+
+    /**
      * Changes the charset/collation of the specified table and (optionally) shrinks the specified VARCHAR columns.
      *
      * @param connection The connection to use
@@ -402,6 +414,19 @@ public abstract class AbstractConvertUtf8ToUtf8mb4Task extends UpdateTaskAdapter
      * @throws SQLException If changing the table fails
      */
     protected void changeTable(Connection connection, String schema, String table, Map<String, Integer> optVarcharColumns) throws SQLException {
+        changeTable(connection, schema, table, optVarcharColumns, Collections.emptyList());
+    }
+
+    /**
+     * 
+     * @param connection
+     * @param schema
+     * @param table
+     * @param optVarcharColumns
+     * @param modifyColumns
+     * @throws SQLException
+     */
+    protected void changeTable(Connection connection, String schema, String table, Map<String, Integer> optVarcharColumns, List<Column> modifyColumns) throws SQLException {
         String createTable = getCreateTable(connection, table);
         if (createTable == null) {
             LOGGER.info("Table {} not found. Skipping.", table);
@@ -429,9 +454,9 @@ public abstract class AbstractConvertUtf8ToUtf8mb4Task extends UpdateTaskAdapter
             }
         }
 
-        // Next, determine the 'utf8' columns, which need to be converted to 'utf8mb4'
         PreparedStatement alterStmt = null;
         try {
+            // Next, determine the 'utf8' columns, which need to be converted to 'utf8mb4'
             Map<String, Column> columnsToModify = getColumsToModifyAsMap(connection, schema, table);
             if (false == columnsToModify.isEmpty() && null != optVarcharColumns) {
                 for (Map.Entry<String, Integer> varcharColumn : optVarcharColumns.entrySet()) {
@@ -443,6 +468,16 @@ public abstract class AbstractConvertUtf8ToUtf8mb4Task extends UpdateTaskAdapter
                             throw new SQLException("The update task '" + this.getClass().getName() + "' will result in data truncation for column '" + varcharColumn.getKey() + "' in table '" + table + "'. Aborting execution.");
                         }
                         columnsToModify.put(columnName, shrinkVarcharColumn(column, expectedSize));
+                    }
+                }
+            }
+
+            // Apply any modifications to the columns
+            if (false == modifyColumns.isEmpty() && null != modifyColumns) {
+                for (Column column : modifyColumns) {
+                    String columnName = column.getName();
+                    if (modifyVarChar(schema, table, columnName, MAX_VARCHAR, connection)) {
+                        columnsToModify.put(columnName, column);
                     }
                 }
             }

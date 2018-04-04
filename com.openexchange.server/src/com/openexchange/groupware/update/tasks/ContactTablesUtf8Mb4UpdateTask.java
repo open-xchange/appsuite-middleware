@@ -52,6 +52,7 @@ package com.openexchange.groupware.update.tasks;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Arrays;
+import java.util.Collections;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableMap.Builder;
 import com.openexchange.groupware.update.PerformParameters;
@@ -70,8 +71,7 @@ public class ContactTablesUtf8Mb4UpdateTask extends SimpleConvertUtf8ToUtf8mb4Up
      */
     public ContactTablesUtf8Mb4UpdateTask() {
         //@formatter:off
-        super(Arrays.asList("prg_dlist", "del_dlist", "prg_contacts_linkage", "prg_contacts_image",
-            "del_contacts_image", "del_contacts", "prg_contacts"), 
+        super(Arrays.asList("prg_dlist", "del_dlist", "prg_contacts_linkage", "prg_contacts_image", "del_contacts_image"), 
             "com.openexchange.contact.storage.rdb.sql.CorrectNumberOfImagesTask");
         //@formatter:on
     }
@@ -85,8 +85,6 @@ public class ContactTablesUtf8Mb4UpdateTask extends SimpleConvertUtf8ToUtf8mb4Up
     protected void before(PerformParameters params, Connection connection) throws SQLException {
         Column column = new Column("field17", "TEXT COLLATE utf8mb4_unicode_ci NULL");
         String schema = params.getSchema().getSchema();
-        modifyVarChar("prg_contacts", "field17", 1024, column, connection, schema);
-        modifyVarChar("del_contacts", "field17", 1024, column, connection, schema);
 
         Builder<String, Integer> mapBuilder = ImmutableMap.builder();
         mapBuilder.put("field01", 320);
@@ -94,7 +92,7 @@ public class ContactTablesUtf8Mb4UpdateTask extends SimpleConvertUtf8ToUtf8mb4Up
         mapBuilder.put("field66", 256);
         mapBuilder.put("field67", 256);
         ImmutableMap<String, Integer> map = mapBuilder.build();
-        changeTable(connection, schema, "del_contacts", map);
-        changeTable(connection, schema, "prg_contacts", map);
+        changeTable(connection, schema, "prg_contacts", map, Collections.singletonList(column));
+        changeTable(connection, schema, "del_contacts", map, Collections.singletonList(column));
     }
 }

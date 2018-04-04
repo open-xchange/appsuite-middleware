@@ -51,10 +51,11 @@ package com.openexchange.groupware.update.tasks;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.Collections;
+import java.util.Map;
 import com.google.common.collect.ImmutableList;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.SimpleConvertUtf8ToUtf8mb4UpdateTask;
-import com.openexchange.tools.update.Column;
 
 /**
  * {@link TaskConvertUtf8ToUtf8mb4Task} - Converts task tables to utf8mb4.
@@ -68,16 +69,18 @@ public class TaskConvertUtf8ToUtf8mb4Task extends SimpleConvertUtf8ToUtf8mb4Upda
      * Initializes a new {@link TaskConvertUtf8ToUtf8mb4Task}.
      */
     public TaskConvertUtf8ToUtf8mb4Task() {
-        super(ImmutableList.of("task", "task_participant", "task_eparticipant", "task_removedparticipant", "task_folder",
-            "del_task", "del_task_participant", "del_task_eparticipant", "del_task_folder"),
+        //@formatter:off
+        super(ImmutableList.of("task", "task_participant", "task_removedparticipant", 
+            "task_folder", "del_task", "del_task_participant", "del_task_folder"), 
             TasksAddFulltimeColumnTask.class.getName());
+        //@formatter:on
     }
 
     @Override
     protected void before(PerformParameters params, Connection connection) throws SQLException {
-        Column column = new Column("mail", "varchar(191) COLLATE utf8_unicode_ci NOT NULL");
         String schema = params.getSchema().getSchema();
-        modifyVarChar("task_eparticipant", "mail", 255, column, connection, schema);
-        modifyVarChar("del_task_eparticipant", "mail", 255, column, connection, schema);
+        Map<String, Integer> map = Collections.singletonMap("mail", 255);
+        changeTable(connection, schema, "task_eparticipant", map);
+        changeTable(connection, schema, "del_task_eparticipant", map);
     }
 }
