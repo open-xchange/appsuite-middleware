@@ -242,6 +242,8 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.websockets.monitoring"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.xml"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.squareup.okhttp3"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,documentation-generic"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,documentation-tools"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,javapns.notification.management"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,javax.annotation.concurrent"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,javax.mail"/>
@@ -250,7 +252,7 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,org.apache.felix.eventadmin.monitoring"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,org.apache.tika"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,org.fishwife.jrugged"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,org.yaml"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,org.yaml.snakeyaml"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,org.javasimon"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,org.json"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,org.magicwerk.brownies.collections"/>
