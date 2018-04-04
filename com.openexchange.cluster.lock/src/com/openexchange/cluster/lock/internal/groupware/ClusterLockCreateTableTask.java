@@ -58,7 +58,6 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
-import com.openexchange.server.ServiceLookup;
 
 /**
  * {@link ClusterLockCreateTableTask}
@@ -67,14 +66,11 @@ import com.openexchange.server.ServiceLookup;
  */
 public class ClusterLockCreateTableTask extends UpdateTaskAdapter {
 
-    private final ServiceLookup services;
-
     /**
      * Initialises a new {@link ClusterLockCreateTableTask}.
      */
-    public ClusterLockCreateTableTask(ServiceLookup services) {
+    public ClusterLockCreateTableTask() {
         super();
-        this.services = services;
     }
 
     @Override

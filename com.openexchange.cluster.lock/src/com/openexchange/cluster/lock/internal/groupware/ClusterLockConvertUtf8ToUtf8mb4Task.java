@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -49,59 +49,34 @@
 
 package com.openexchange.cluster.lock.internal.groupware;
 
-import com.openexchange.database.AbstractCreateTableImpl;
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.util.Collections;
+import com.openexchange.groupware.update.PerformParameters;
+import com.openexchange.groupware.update.SimpleConvertUtf8ToUtf8mb4UpdateTask;
 
 /**
- * {@link CreateClusterLockTable}
+ * {@link ClusterLockConvertUtf8ToUtf8mb4Task} - Converts infostore tables to utf8mb4.
  *
- * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.10.0
  */
-public class CreateClusterLockTable extends AbstractCreateTableImpl {
-    
-    static final String TABLE_NAME = "clusterLock";
-    
-    static final String CREATE_TABLE_STATEMENT = "CREATE TABLE clusterLock (" +
-        "cid INT4 UNSIGNED NOT NULL, " +
-        "user INT4 UNSIGNED NOT NULL, " +
-        "name VARCHAR(191) NOT NULL, " +
-        "timestamp INT8 UNSIGNED NOT NULL, " + 
-        "PRIMARY KEY (cid, user, name) " +
-        ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci";
+public class ClusterLockConvertUtf8ToUtf8mb4Task extends SimpleConvertUtf8ToUtf8mb4UpdateTask {
 
     /**
-     * Initialises a new {@link CreateClusterLockTable}.
+     * Initializes a new {@link ClusterLockConvertUtf8ToUtf8mb4Task}.
      */
-    public CreateClusterLockTable() {
-        super();
+    public ClusterLockConvertUtf8ToUtf8mb4Task() {
+        super(Collections.emptyList());
     }
 
     /*
      * (non-Javadoc)
      * 
-     * @see com.openexchange.database.CreateTableService#requiredTables()
+     * @see com.openexchange.groupware.update.SimpleConvertUtf8ToUtf8mb4UpdateTask#after(com.openexchange.groupware.update.PerformParameters, java.sql.Connection)
      */
     @Override
-    public String[] requiredTables() {
-        return new String[] {};
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.database.CreateTableService#tablesToCreate()
-     */
-    @Override
-    public String[] tablesToCreate() {
-        return new String[] { "clusterLock" };
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.database.AbstractCreateTableImpl#getCreateStatements()
-     */
-    @Override
-    protected String[] getCreateStatements() {
-        return new String[] { CREATE_TABLE_STATEMENT };
+    protected void after(PerformParameters params, Connection connection) throws SQLException {
+        changeTable(connection, params.getSchema().getSchema(), "clusterLock", Collections.singletonMap("name", 255));
     }
 }
