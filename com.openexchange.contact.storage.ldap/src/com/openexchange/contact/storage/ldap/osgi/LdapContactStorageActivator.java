@@ -151,7 +151,7 @@ public class LdapContactStorageActivator extends HousekeepingActivator implement
              * register update task, create table job and delete listener
              */
             registerService(CreateTableService.class, new LdapCreateTableService());
-            registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(new LdapCreateTableTask()));
+            registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(new LdapCreateTableTask(), new LdapConvertUtf8ToUtf8mb4UpdateTask()));
             registerService(DeleteListener.class, new LdapDeleteListener());
             /*
              * register configured storages
