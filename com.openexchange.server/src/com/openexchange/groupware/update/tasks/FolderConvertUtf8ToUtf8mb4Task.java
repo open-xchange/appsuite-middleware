@@ -71,7 +71,8 @@ public class FolderConvertUtf8ToUtf8mb4Task extends SimpleConvertUtf8ToUtf8mb4Up
     public FolderConvertUtf8ToUtf8mb4Task() {
         //@formatter:off
         super(ImmutableList.of("oxfolder_tree", "oxfolder_permissions", "oxfolder_specialfolders", "oxfolder_userfolders", 
-            "oxfolder_userfolders_standardfolders", "del_oxfolder_tree", "del_oxfolder_permissions", "oxfolder_lock", "oxfolder_property"),
+            "oxfolder_userfolders_standardfolders", "del_oxfolder_tree", "del_oxfolder_permissions", "oxfolder_lock", 
+            "oxfolder_property", "oxfolder_user_property"),
             AddTypeToFolderPermissionTableUpdateTask.class.getName());
         //@formatter:on
     }
