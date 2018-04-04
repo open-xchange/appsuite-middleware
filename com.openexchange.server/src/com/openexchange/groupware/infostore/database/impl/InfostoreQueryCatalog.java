@@ -672,7 +672,7 @@ public class InfostoreQueryCatalog {
         return builder.toString();
     }
 
-    public String getDeletedDocumentsQuery(final long folderId, final long since, final Metadata sort, final int order, final FieldChooser wins, final int contextId) {
+    public String getDeletedDocumentsQuery(final long folderId, final long since, final Metadata sort, final int order, @SuppressWarnings("unused") final FieldChooser wins, final int contextId) {
         final StringBuilder builder = new StringBuilder("SELECT infostore.id, infostore.folder_id").append(
             " FROM del_infostore as infostore WHERE infostore.folder_id = ").append(folderId).append(" AND infostore.cid = ").append(
                 contextId).append(SQL_CHUNK05).append(since);
