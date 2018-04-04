@@ -73,14 +73,20 @@ import com.openxchange.documentation.tools.internal.Property;
 public class ShowConfig {
 
     private static final Options options = new Options();
-    private static final String DEFAULT_FOLDER = "/opt/openexchange/docu"; //TODO needs to be adjusted
+    private static final String DEFAULT_FOLDER = "/opt/openexchange/documentation/etc";
+
+    private static final String SEARCH_OPTION = "s";
+    private static final String TAG_OPTION = "t";
+    private static final String KEY_OPTION = "k";
+    private static final String HELP_OPTION = "h";
+    private static final String ANSI_OPTION = "a";
+
     static {
-        options.addOption(OptionBuilder.withLongOpt("config").hasArgs(1).withDescription("The path to the folder containing the config docu. If omitted the default path is used.").isRequired(false).create("c"));
-        options.addOption(OptionBuilder.withLongOpt("search").hasArgs(1).withDescription("If set only properties which match the given search term are returned.").isRequired(false).create("s"));
-        options.addOption(OptionBuilder.withLongOpt("tag").hasArgs(1).withDescription("If set only properties with the given tag are returned.").isRequired(false).create("t"));
-        options.addOption(OptionBuilder.withLongOpt("key").hasArgs(1).withDescription("If set only properties with a key which contains the given term are returned.").isRequired(false).create("k"));
-        options.addOption(OptionBuilder.withLongOpt("help").hasArg(false).withDescription("Prints this usage.").isRequired(false).create("h"));
-        options.addOption(OptionBuilder.withLongOpt("useANSI").hasArg(true).withDescription("If set to 'true' the output will use ansi formatting. Defaults to 'true'.").isRequired(false).create("a"));
+        options.addOption(OptionBuilder.withLongOpt("search").hasArgs(1).withDescription("If set only properties which match the given search term are returned.").isRequired(false).create(SEARCH_OPTION));
+        options.addOption(OptionBuilder.withLongOpt("tag").hasArgs(1).withDescription("If set only properties with the given tag are returned.").isRequired(false).create(TAG_OPTION));
+        options.addOption(OptionBuilder.withLongOpt("key").hasArgs(1).withDescription("If set only properties with a key which contains the given term are returned.").isRequired(false).create(KEY_OPTION));
+        options.addOption(OptionBuilder.withLongOpt("help").hasArg(false).withDescription("Prints this usage.").isRequired(false).create(HELP_OPTION));
+        options.addOption(OptionBuilder.withLongOpt("useANSI").hasArg(true).withDescription("If set to 'true' the output will use ansi formatting. Defaults to 'true'.").isRequired(false).create(ANSI_OPTION));
     }
 
     public static void main(String[] args) {
@@ -88,18 +94,13 @@ public class ShowConfig {
         CommandLineParser parser = new PosixParser();
         try {
             CommandLine parse = parser.parse(options, args);
-            if(parse.hasOption("h")) {
+            if(parse.hasOption(HELP_OPTION)) {
                 printUsage(1);
             }
 
-            String path = parse.getOptionValue("c");
-            if(path == null) {
-                path = DEFAULT_FOLDER;
-            }
-
-            File yamlFolder = new File(path);
+            File yamlFolder = new File(DEFAULT_FOLDER);
             if (!yamlFolder.exists() || !yamlFolder.isDirectory()) {
-                System.out.println("Folder doesn't exist or is not a folder!");
+                System.out.println("Unable to find the config documentation. The folder containing the docu doesn't exists ('"+DEFAULT_FOLDER+"').");
                 System.exit(2);
             }
 
@@ -107,28 +108,28 @@ public class ShowConfig {
                 ConfigDocu configDocu = new ConfigDocu(yamlFolder);
 
                 List<Property> props = null;
-                if(parse.hasOption("t")) {
-                    props = configDocu.getProperties(parse.getOptionValue("t"));
+                if(parse.hasOption(TAG_OPTION)) {
+                    props = configDocu.getProperties(parse.getOptionValue(TAG_OPTION));
                 } else {
                     props = configDocu.getProperties();
                 }
 
-                if(parse.hasOption("k")) {
-                    String term = parse.getOptionValue("k");
+                if(parse.hasOption(KEY_OPTION)) {
+                    String term = parse.getOptionValue(KEY_OPTION);
                     props = props.stream()
                         .filter(prop -> prop.getKey().contains(term))
                         .collect(Collectors.toList());
                 }
-                if(parse.hasOption("s")) {
-                    String term = parse.getOptionValue("s");
+                if(parse.hasOption(SEARCH_OPTION)) {
+                    String term = parse.getOptionValue(SEARCH_OPTION);
                     props = props.stream()
                         .filter(prop -> prop.contains(term))
                         .collect(Collectors.toList());
                 }
 
                 boolean useAnsi = true;
-                if(parse.hasOption("a")) {
-                    useAnsi = Boolean.valueOf(parse.getOptionValue("a"));
+                if(parse.hasOption(ANSI_OPTION)) {
+                    useAnsi = Boolean.valueOf(parse.getOptionValue(ANSI_OPTION));
                 }
                 printProperties(props, useAnsi);
             } catch (FileNotFoundException e) {
