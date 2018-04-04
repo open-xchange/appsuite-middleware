@@ -707,6 +707,7 @@ public final class ManagedFileManagementImpl implements ManagedFileManagement {
         }
     }
 
+    @SuppressWarnings("resource")
     private static void copyFile(final File sourceFile, final File destFile) throws IOException {
         if (!destFile.exists()) {
             destFile.createNewFile();
@@ -719,12 +720,7 @@ public final class ManagedFileManagementImpl implements ManagedFileManagement {
             destination = new FileOutputStream(destFile).getChannel();
             destination.transferFrom(source, 0, source.size());
         } finally {
-            if (source != null) {
-                source.close();
-            }
-            if (destination != null) {
-                destination.close();
-            }
+            Streams.close(source, destination);
         }
     }
 
