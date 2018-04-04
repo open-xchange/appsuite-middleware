@@ -477,7 +477,7 @@ public abstract class AbstractConvertUtf8ToUtf8mb4Task extends UpdateTaskAdapter
             }
 
             // Apply any modifications to the columns
-            if (false == modifyColumns.isEmpty() && null != modifyColumns) {
+            if (null != modifyColumns && !modifyColumns.isEmpty()) {
                 for (Column column : modifyColumns) {
                     String columnName = column.getName();
                     if (modifyVarChar(schema, table, columnName, MAX_VARCHAR, connection)) {
