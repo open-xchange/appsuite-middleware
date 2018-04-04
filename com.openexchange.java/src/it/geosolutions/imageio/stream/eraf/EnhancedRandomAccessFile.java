@@ -258,10 +258,11 @@ public class EnhancedRandomAccessFile implements DataInput, DataOutput {
      *
      */
     @Override
-    public void finalize() {
+    protected void finalize() {
         try {
             close();
         } catch (IOException ex) {
+            // ignore
         }
     }
 
@@ -1797,6 +1798,7 @@ public class EnhancedRandomAccessFile implements DataInput, DataOutput {
      *             _more_
      */
     public void synch() throws IOException {
+        // nothing to do
     }
 
     public String getLocation() {
