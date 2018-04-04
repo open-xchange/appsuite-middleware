@@ -49,13 +49,8 @@
 
 package com.openexchange.groupware.update.tasks;
 
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.util.List;
 import com.google.common.collect.ImmutableList;
-import com.openexchange.groupware.update.AbstractConvertUtf8ToUtf8mb4Task;
-import com.openexchange.groupware.update.PerformParameters;
-
+import com.openexchange.groupware.update.SimpleConvertUtf8ToUtf8mb4UpdateTask;
 
 /**
  * {@link AggregatingContactsConvertUtf8ToUtf8mb4Task}
@@ -63,33 +58,12 @@ import com.openexchange.groupware.update.PerformParameters;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.10.0
  */
-public class AggregatingContactsConvertUtf8ToUtf8mb4Task extends AbstractConvertUtf8ToUtf8mb4Task {
+public class AggregatingContactsConvertUtf8ToUtf8mb4Task extends SimpleConvertUtf8ToUtf8mb4UpdateTask {
 
     /**
      * Initializes a new {@link AggregatingContactsConvertUtf8ToUtf8mb4Task}.
      */
     public AggregatingContactsConvertUtf8ToUtf8mb4Task() {
-        super();
+        super(ImmutableList.of("aggregatingContacts"), AggregatingContactTableService.class.getName());
     }
-
-    @Override
-    public String[] getDependencies() {
-        return new String[] { com.openexchange.groupware.update.tasks.AggregatingContactTableService.class.getName() };
-    }
-
-    @Override
-    protected List<String> tablesToConvert() {
-        return ImmutableList.of("aggregatingContacts");
-    }
-
-    @Override
-    protected void before(PerformParameters params, Connection connection) throws SQLException {
-        // Nothing
-    }
-
-    @Override
-    protected void after(PerformParameters params, Connection connection) throws SQLException {
-        // Nothing
-    }
-
 }
