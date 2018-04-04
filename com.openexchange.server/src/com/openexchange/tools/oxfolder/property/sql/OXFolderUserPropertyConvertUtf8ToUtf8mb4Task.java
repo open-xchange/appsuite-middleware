@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2016-2020 OX Software GmbH
+ *     Copyright (C) 2018-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,52 +47,22 @@
  *
  */
 
-package com.openexchange.tools.oxfolder.property.osgi;
+package com.openexchange.tools.oxfolder.property.sql;
 
-import java.util.Arrays;
-import com.openexchange.database.CreateTableService;
-import com.openexchange.database.DatabaseService;
-import com.openexchange.groupware.update.UpdateTaskProviderService;
-import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.server.ServiceExceptionCode;
-import com.openexchange.tools.oxfolder.property.FolderUserPropertyStorage;
-import com.openexchange.tools.oxfolder.property.impl.FolderUserPropertyStorageImpl;
-import com.openexchange.tools.oxfolder.property.sql.CreateFolderUserPropertyTable;
-import com.openexchange.tools.oxfolder.property.sql.CreateFolderUserPropertyTask;
-import com.openexchange.tools.oxfolder.property.sql.OXFolderUserPropertyConvertUtf8ToUtf8mb4Task;
+import java.util.Collections;
+import com.openexchange.groupware.update.SimpleConvertUtf8ToUtf8mb4UpdateTask;
 
 /**
- * {@link FolderUserPropertyActivator}
+ * {@link OXFolderUserPropertyConvertUtf8ToUtf8mb4Task}
  *
- * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
- * @since v7.10.0
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class FolderUserPropertyActivator extends HousekeepingActivator {
+public class OXFolderUserPropertyConvertUtf8ToUtf8mb4Task extends SimpleConvertUtf8ToUtf8mb4UpdateTask {
 
     /**
-     * Initializes a new {@link FolderUserPropertyActivator}.
-     * 
+     * Initialises a new {@link OXFolderUserPropertyConvertUtf8ToUtf8mb4Task}.
      */
-    public FolderUserPropertyActivator() {
-        super();
-    }
-
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { DatabaseService.class };
-    }
-
-    @Override
-    protected void startBundle() throws Exception {
-        // Register UpdateTask
-        DatabaseService dbService = getService(DatabaseService.class);
-        if (null == dbService) {
-            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(DatabaseService.class.getName());
-        }
-        registerService(UpdateTaskProviderService.class, () -> Arrays.asList(new CreateFolderUserPropertyTask(dbService), new OXFolderUserPropertyConvertUtf8ToUtf8mb4Task()));
-        registerService(CreateTableService.class, new CreateFolderUserPropertyTable());
-
-        // Register FolderUserPropertyStorage 
-        registerService(FolderUserPropertyStorage.class, new FolderUserPropertyStorageImpl(this));
+    public OXFolderUserPropertyConvertUtf8ToUtf8mb4Task() {
+        super(Collections.singletonList("oxfolder_user_property"));
     }
 }
