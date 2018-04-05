@@ -259,6 +259,12 @@ public class Messages implements LocalizableStrings {
 
     public static final String HAS_RESCHEDULED = "The appointment was rescheduled. Original date: %1$s. New date: %2$s";
 
+    public static final String HAS_RESCHEDULED_TIMEZONE = "The timezone of the appointment was changed. Original timezone: %1$s. New timezone: %2$s";
+
+    public static final String HAS_RESCHEDULED_TIMEZONE_START_DATE = "The timezone of the appointments start date was changed. Original timezone: %1$s. New timezone: %2$s";
+
+    public static final String HAS_RESCHEDULED_TIMEZONE_END_DATE = "The timezone of the appointments end date was changed. Original timezone: %1$s. New timezone: %2$s";
+
     public static final String ASK_RESCHEDULE = "Reschedule the event. Original date: %1$s. New date: %2$s";
 
     public static final String INTENTION_RESCHEDULE = "Reschedule the event. Original date/time: %1$s. New date/time: %2$s";
