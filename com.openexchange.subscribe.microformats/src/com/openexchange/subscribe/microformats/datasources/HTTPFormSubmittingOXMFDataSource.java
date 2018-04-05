@@ -114,6 +114,13 @@ public class HTTPFormSubmittingOXMFDataSource implements OXMFDataSource {
 
     private static final class FormSwitcher implements WidgetSwitcher {
 
+        /**
+         * Initializes a new {@link FormSwitcher}.
+         */
+        public FormSwitcher() {
+            super();
+        }
+
         @Override
         public Object checkbox(Object... args) {
             if(args[0] != null && args[0] == Boolean.TRUE) {

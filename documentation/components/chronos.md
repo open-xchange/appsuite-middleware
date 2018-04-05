@@ -618,7 +618,7 @@ Doing so, the actual progress of each context is printed out regularly, as well 
 
 #### Testing the Migration
 
-Especially in larger setups or installation with heavy calendar usage, it's recommended to test the migration in a lab or staging environment prior moving forward to the upgrade of the productive system. Ideally, some tests can be executed against a backed up dump or clone of the productive data, in order to get a feeling about the expected runtime and impact. 
+Especially in larger setups or installation with heavy calendar usage, it's recommended to test the migration in a lab or staging environment prior moving forward to the upgrade of the productive system. Ideally, some tests can be executed against a snapshot of the production database on a similar-sized database system. So the database shouldn't be created from an SQL dump but really through a snapshot of the database files. The reason is that databases are suffering from fragmentation if used for a longer timespan. Thus doing this operation on a new database created from a dump will not contain the fragmentation of the production database leading to a big performance increase. This deviation is to be expected in the factor X range so the dump variant is not just a few percent faster.
 
 The following list gives an overview about the necessary preparations before performing a test migration - the actual list depends on the concrete setup.
 

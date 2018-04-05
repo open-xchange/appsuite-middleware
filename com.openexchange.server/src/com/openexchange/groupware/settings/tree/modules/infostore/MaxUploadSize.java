@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2017-2020 OX Software GmbH
+ *     Copyright (C) 2016-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,89 +47,53 @@
  *
  */
 
-package com.openexchange.chronos.provider.schedjoules;
+package com.openexchange.groupware.settings.tree.modules.infostore;
+
+import com.openexchange.exception.OXException;
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.infostore.InfostoreConfig;
+import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.settings.IValueHandler;
+import com.openexchange.groupware.settings.PreferencesItemService;
+import com.openexchange.groupware.settings.ReadOnlyValue;
+import com.openexchange.groupware.settings.Setting;
+import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.session.Session;
 
 /**
- * {@link SchedJoulesFields}
+ * {@link MaxUploadSize}
  *
- * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @since v7.10.0
  */
-final class SchedJoulesFields {
-
-    ////////////////////// EXTERNAL ATTRIBUTES ////////////////////
+public class MaxUploadSize implements PreferencesItemService {
 
     /**
-     * The itemId that maps to a SchedJoules itemId
+     * Initializes a new {@link MaxUploadSize}.
      */
-    static final String ITEM_ID = "itemId";
+    public MaxUploadSize() {
+        super();
+    }
 
-    /**
-     * The user configuration's key for the folder's name
-     */
-    static final String NAME = "name";
+    @Override
+    public String[] getPath() {
+        return new String[] { "modules", "infostore", "maxUploadSize" };
+    }
 
-    /**
-     * The user configuration's key for all available/visible folders
-     */
-    static final String FOLDERS = "folders";
+    @Override
+    public IValueHandler getSharedValue() {
+        return new ReadOnlyValue() {
 
-    ////////////////////// INTERNAL ATTRIBUTES ////////////////////
+            @Override
+            public boolean isAvailable(UserConfiguration userConfig) {
+                return userConfig.hasInfostore();
+            }
 
-    /**
-     * The user configuration's key for the feed's URL
-     */
-    static final String URL = "url";
-
-    /**
-     * The refreshInterval for a folder.
-     */
-    static final String REFRESH_INTERVAL = "refreshInterval";
-
-    /**
-     * The optional locale for the item
-     */
-    static final String LOCALE = "locale";
-
-    /**
-     * The folder's color
-     */
-    static final String COLOR = "color";
-
-    /**
-     * Flag indicating whether the folder is used for sync
-     */
-    static final String USED_FOR_SYNC = "usedForSync";
-
-    /**
-     * The schedule transparency property
-     */
-    static final String SCHEDULE_TRANSP = "scheduleTransp";
-
-    /**
-     * The folder's description
-     */
-    static final String DESCRIPTION = "description";
-
-    /**
-     * The unique user key
-     */
-    static final String USER_KEY = "userKey";
-
-    /**
-     * The etag of a calendar
-     */
-    static final String ETAG = "etag";
-
-    /**
-     * The lastModified of a calendar. The timestamp represents
-     * the last time the events were modified and not the attributes
-     * of the calendar folder, e.g. color or name.
-     */
-    static final String LAST_MODIFIED = "lastModified";
-
-    /**
-     * The alarm of a calendar specified in minutes.
-     */
-    static final String ALARM = "alarm";
+            @Override
+            public void getValue(Session session, Context ctx, User user, UserConfiguration userConfig, Setting setting) throws OXException {
+                setting.setSingleValue(Long.valueOf(InfostoreConfig.getMaxUploadSize()));
+            }
+        };
+    }
 
 }

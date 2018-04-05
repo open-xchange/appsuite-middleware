@@ -95,7 +95,7 @@ import com.openexchange.admin.storage.interfaces.OXToolStorageInterface;
  */
 public class OXContextRestore extends OXCommonImpl implements OXContextRestoreInterface {
 
-    public class RunParserResult {
+    public static class RunParserResult {
 
         private final PoolIdSchemaAndVersionInfo result;
 
@@ -661,7 +661,7 @@ public class OXContextRestore extends OXCommonImpl implements OXContextRestoreIn
 
     public OXContextRestore() throws StorageException {
         super();
-        basicauth = new BasicAuthenticator();
+        basicauth = BasicAuthenticator.createNonPluginAwareAuthenticator();
     }
 
     @Override
