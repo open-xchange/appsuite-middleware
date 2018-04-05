@@ -57,6 +57,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -927,7 +928,7 @@ public final class PushManagerRegistry implements PushListenerService {
             }
 
             @Override
-            public T next() {
+            public T next() throws NoSuchElementException {
                 return iterator.next();
             }
 

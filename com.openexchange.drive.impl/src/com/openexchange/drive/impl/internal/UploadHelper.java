@@ -76,6 +76,7 @@ import com.openexchange.file.storage.File.Field;
 import com.openexchange.file.storage.FileStorageCapability;
 import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.FileStorageFileAccess.SortDirection;
+import com.openexchange.file.storage.Quota;
 import com.openexchange.file.storage.composition.FolderID;
 import com.openexchange.file.storage.composition.IDBasedFileAccess;
 import com.openexchange.file.storage.search.FileNameTerm;
@@ -297,6 +298,17 @@ public class UploadHelper {
      * Perfom the upload
      */
     Entry<File, String> upload(String path, FileVersion newVersion, InputStream uploadStream, String contentType, long offset, long totalLength) throws OXException {
+        /*
+         * check free space if total length is known
+         */
+        if (0 < totalLength) {
+            Quota[] quota = session.getStorage().getQuota();
+            if (null != quota && 0 < quota.length && null != quota[0] && Quota.UNLIMITED != quota[0].getLimit()) {
+                if (totalLength - offset > quota[0].getLimit() - quota[0].getUsage()) {
+                    throw DriveExceptionCodes.QUOTA_REACHED.create();
+                }
+            }
+        }
         /*
          * get/create upload file
          */

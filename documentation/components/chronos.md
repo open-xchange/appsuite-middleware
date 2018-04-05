@@ -2,10 +2,56 @@
 title: Calendar v2 aka Chronos 
 ---
 
+# Introduction
+
+Release 7.10.0 brings a major renovation of the Calendar module - the internal calendaring and scheduling logic is rewritten from scratch to be more aligned with the commonly used iCalendar model in the future (and move a bit away from MS Exchange/Outlook, accordingly). 
+
+The original calendar implementation at Open-Xchange served well for the last two decades. Various clients have come and gone during that time and were connected via different interfaces, with each of them having their own characteristics and API dialects to deal with. The commonly seen standard we needed to adopt and emulate has always been the calendaring and scheduling features of Microsoft Exchange, with its data- and collaboration model on the one hand, and the widely used Outlook client on the other hand. Nowadays, the open iCalendar format and related protocols like CalDAV or iMIP have evolved and are widely implemented in many popular clients and servers, with a usually acceptable interoperability. For future releases, Open-Xchange will also try and shift the focus away from the Microsoft world towards those open standards, especially to improve the support and interoperability for 3rd party clients like eM Client or the OX Sync App for Android. 
+
+While our server does have a CalDAV interface for some time now, there are still some conceptual differences between our internal data model (that is mostly based on MS Exchange / Outlook) and iCalendar via CalDAV. There are dozens of workarounds in place to mitigate the discrepancies, and in many aspects, we cannot do more than converting back and forth in a lossy "best effort" way. We only support a limited set of recurrence rules, only have one "reminder minutes" property to store a user's alarms for an event, we do not honor the organizer and attendee roles during scheduling, we discard everything else we cannot store in the database, and so on, just to name a few. 
+
+In order to accomplish our goals of having a more standards compliant calendar and scheduling server, some decent changes on the data model and the calendaring logic are required. However, the existing architecture and grown codebase of the existing calendar implementation did not seem to be a suitable basis for the required amount of necessary refactorings, given the fact that it grew and evolved for so many years now, went through the hands of various developers, is full of workarounds for Outlook/USM quirks and is not really maintainable or extendable anymore. So after all, we decided to take the chance and begun a major rewrite of the calendar module (aka Calendar v2 aka Chronos). 
+
+
+# HTTP API
+
+The new calendar implementation comes with a whole new *module* in the HTTP API: ``chronos``. However, the previous API (module ``calendar``) is still available for legacy clients like OX6 or USM. Internally, calls to the "old" module are converted appropriately, then routed to the new services, and the results are converted back to the previous format. In particular, the following parts of the HTTP API are affected by the new calendar implementation: 
+
+## Legacy module ``calendar``
+
+All actions in the ``calendar`` module will continue to work in v7.10.0, however, the functionality is limited to the previous data model. For example, only one reminder can be accessed using the legacy API, and no calendars from external calendar sources are available. Therefore, the whole ``calendar`` module in the HTTP API should be considered as **deprecated** with the new release.
+
+## New module ``chronos``
+
+To interact with the new calendar using the new data model, a new JSON module named ``chronos`` has been introduced. See the API documentation for details. 
+
+## Attachments & Reminder
+
+The functionality to work with attachments and reminders has been integrated into the module ``chronos`` (see the new API documentation for details). For legacy clients, the previous requests in the modules ``attachments`` and ``reminder`` are still in place, however, possibly with a reduced functionality, especially towards the handling of alarms. So, all *appointment*-related functionality within the ``attachments`` and ``reminder`` module is deprecated with v7.10.0.
+
+## Folders
+
+For the ``folders`` module, a new content type has been introduced in order to provide backwards-compatibility on the one hand, and support for the newly introduced provider/account architecture on the other hand. Doing so, any existing requests to the API will return the same responses as before (i.e. list the same folders with the same identifiers). All "new" folders will be returned when requesting folders of the content type ``event``, which includes both the previously used calendar *groupware* folders, as well as calendar folders representing external accounts. Differentiation is performed based on *composite* identifiers, which carry the information about the underlying calendar account.
+
+The calendar folders are now driven by a dedicated folder storage, and there's no folder hierarchy anymore, i.e. there are no subfolders. 
+ 
+## Import/Export
+
+...
+
+## iTIP
+
+...
+
+## Find
+
+The calendar-related functionality provided within the ``find`` module has been re-implemented using the new calendar stack. The format of the resulting documents has been adjusted to be compatible with the new data model, so that "event" results are returned now in favor of the previous "appointment" modules. 
+
 
 # Details
 
-This section provides some deeper insights for certain topics.
+This section provides some deeper insights for certain topics of the new calendar implementation. Whenever appropriate, semantical differences to the previous calendar stack or the standards are highlighted.
+ 
 
 ## Date/Time handling
 
@@ -406,7 +452,7 @@ In general the cache should be a blackbox for those implementations using it. Of
 
 Each Calendar Provider implementation can use its own refresh interval, again on a per-folder base. These value defines how long the cache should be used to answer requests for a dedicated folder of the underlying calendar. After the interval for the folder is exceeded the cache state will be updated by contacting the external calendar. New events will be added, removed ones will be deleted and changed events will be updated. 
 
-The refesh interval is defined in minutes. If the calendar provider implementation does provide a value bigger than 0 this will be taken into account. Otherwise the default of one day will be used.
+The refresh interval is defined in minutes. If the calendar provider implementation does provide a value bigger than 0 this will be taken into account. Otherwise the default of one day will be used.
 
 In cases where new folders have been added or previously existing folders have been removed on the external calendar site the caching layer will directly update its internal state which means changes on the folder structure will be instantly visible without considering the refresh interval!
 
@@ -572,7 +618,7 @@ Doing so, the actual progress of each context is printed out regularly, as well 
 
 #### Testing the Migration
 
-Especially in larger setups or installation with heavy calendar usage, it's recommended to test the migration in a lab or staging environment prior moving forward to the upgrade of the productive system. Ideally, some tests can be executed against a backed up dump or clone of the productive data, in order to get a feeling about the expected runtime and impact. 
+Especially in larger setups or installation with heavy calendar usage, it's recommended to test the migration in a lab or staging environment prior moving forward to the upgrade of the productive system. Ideally, some tests can be executed against a snapshot of the production database on a similar-sized database system. So the database shouldn't be created from an SQL dump but really through a snapshot of the database files. The reason is that databases are suffering from fragmentation if used for a longer timespan. Thus doing this operation on a new database created from a dump will not contain the fragmentation of the production database leading to a big performance increase. This deviation is to be expected in the factor X range so the dump variant is not just a few percent faster.
 
 The following list gives an overview about the necessary preparations before performing a test migration - the actual list depends on the concrete setup.
 
@@ -762,12 +808,12 @@ When importing or exporting calendar the data is truncated. This chapter describ
 
 ### Import
 
-During the import attendees and the organizer will be replaced by the user importing the event or the calendar. This is mainly done to avoid conflicts and unwanted invite or accept mails. There are three cases that lead to this discission:
+During the import attendees and the organizer will be replaced by the user importing the event or the calendar. This is mainly done to avoid conflicts and unwanted invite or accept mails. There are three cases that lead to this decision:
 
 #### No organizer set
-The event that is beeing imported doesn't have an organizer. Therefore the user importing the event becomes the new organizer. To be formally correct the organizer must inform all attendees with an invitaion mail to the new event. This generates mails to an event that already exists and hosted somewhere.
+The event that is being imported doesn't have an organizer. Therefore the user importing the event becomes the new organizer. To be formally correct the organizer must inform all attendees with an invitation mail to the new event. This generates mails to an event that already exists and hosted somewhere.
 
-#### External orgainzer
+#### External organizer
 The event to be imported is organized by an external. To notify the organizer of the users status a mail must be sent, letting the user automatically become a party crasher. 
 
 #### Internal organizer
@@ -779,7 +825,7 @@ The event to import is organized by another internal user. Therefore the event s
 Due privacy concerns and the above sketched problems with importing data, exporting a calendar or a single event will truncate some of the data. There a three different cases handled.
 
 #### Calendar user is the organizer
-The user is the organizer of the event but not an attendee. The user migth have no relationship to the attendees and only created the event on behalf of someone else. Therefore the attendees aren't added to the exported event. 
+The user is the organizer of the event but not an attendee. The user might have no relationship to the attendees and only created the event on behalf of someone else. Therefore the attendees aren't added to the exported event. 
 
 #### Calendar user is attendee
 Besides optional others attendees the user is an attendee of the event. To not expose other attendees those optinal other attendees are removed on the exported event.

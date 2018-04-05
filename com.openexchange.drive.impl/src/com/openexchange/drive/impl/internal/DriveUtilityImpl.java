@@ -118,7 +118,7 @@ import com.openexchange.tools.iterator.SearchIterator;
  */
 public class DriveUtilityImpl implements DriveUtility {
 
-    private static final Logger LOG = LoggerFactory.getLogger(DriveUtilityImpl.class);
+    static final Logger LOG = LoggerFactory.getLogger(DriveUtilityImpl.class);
 
     private static final String MODIFIED_BY = "modified_by";
     private static final String CREATED_BY = "created_by";
@@ -471,7 +471,7 @@ public class DriveUtilityImpl implements DriveUtility {
         syncSession.trace("Folder [" + directoryVersion + "] moved successfully.");
     }
 
-    private JSONArray getFileSharesMetadata(SyncSession session) throws OXException, JSONException {
+    JSONArray getFileSharesMetadata(SyncSession session) throws OXException, JSONException {
         List<FileStorageCapability> specialCapabilites = new ArrayList<FileStorageCapability>();
         List<Field> fields = new ArrayList<File.Field>();
         fields.addAll(DriveConstants.FILE_FIELDS);
@@ -494,7 +494,7 @@ public class DriveUtilityImpl implements DriveUtility {
         return jsonArray;
     }
 
-    private JSONArray getDirectorySharesMetadata(SyncSession session) throws OXException, JSONException {
+    JSONArray getDirectorySharesMetadata(SyncSession session) throws OXException, JSONException {
         List<FileStorageFolder> folders = session.getStorage().getSharedFolders();
         if (null == folders || 0 == folders.size()) {
             return new JSONArray(0);
@@ -516,7 +516,7 @@ public class DriveUtilityImpl implements DriveUtility {
         return jsonArray;
     }
 
-    private JSONObject getFileMetadata(SyncSession session, String path, FileVersion fileVersion) throws OXException, JSONException {
+    JSONObject getFileMetadata(SyncSession session, String path, FileVersion fileVersion) throws OXException, JSONException {
         File file = session.getStorage().getFileByName(path, fileVersion.getName(), true);
         if (null == file || false == ChecksumProvider.matches(session, file, fileVersion.getChecksum())) {
             throw DriveExceptionCodes.FILEVERSION_NOT_FOUND.create(fileVersion.getName(), fileVersion.getChecksum(), path);
@@ -527,7 +527,7 @@ public class DriveUtilityImpl implements DriveUtility {
         return jsonObject;
     }
 
-    private JSONObject getDirectoryMetadata(SyncSession session, DirectoryVersion directoryVersion) throws OXException, JSONException {
+    JSONObject getDirectoryMetadata(SyncSession session, DirectoryVersion directoryVersion) throws OXException, JSONException {
         ServerDirectoryVersion serverVersion = ServerDirectoryVersion.valueOf(directoryVersion, session);
         FileStorageFolder folder = session.getStorage().getFolder(serverVersion.getPath());
         JSONObject jsonObject = new JsonDirectoryMetadata(session, folder).build(false);
@@ -617,7 +617,7 @@ public class DriveUtilityImpl implements DriveUtility {
         return result;
     }
 
-    private final static String[] UNWANTED_FIELDS = new String[] { "own_rights", "permissions", "extended_permissions", "jump", "shareable", "preview", "thumbnail" };
+    final static String[] UNWANTED_FIELDS = new String[] { "own_rights", "permissions", "extended_permissions", "jump", "shareable", "preview", "thumbnail" };
 
     private JSONArray filterUnwantedFields(JSONArray array) {
         array.forEach(new Consumer<Object>() {
@@ -710,7 +710,7 @@ public class DriveUtilityImpl implements DriveUtility {
             super();
         }
 
-        public String getOrigin(FolderPath originPath, SyncSession session) throws JSONException {
+        public String getOrigin(FolderPath originPath, SyncSession session) {
             if (null == originPath) {
                 return null;
             }

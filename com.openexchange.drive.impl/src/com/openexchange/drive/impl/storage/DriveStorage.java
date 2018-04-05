@@ -176,7 +176,7 @@ public class DriveStorage {
             getFolderAccess().rollback();
             throw e;
         } finally {
-            if (null != t) {                
+            if (null != t) {
                 if (t instanceof Closeable) {
                     Streams.close((Closeable) t);
                 } else if (t instanceof AutoCloseable) {
@@ -196,7 +196,7 @@ public class DriveStorage {
      * Gets the quota limits and current usage for this storage. This includes both restrictions on the number of allowed files and the
      * size of the files in bytes. If there's no limit, {@link Quota#UNLIMITED} is returned.
      *
-     * @return An array of size 2, where the first element holds the quota of {@link Type#FILE}, and the second of {@link Type#STORAGE}
+     * @return An array of size 2, where the first element holds the quota of {@link Type#STORAGE}, and the second of {@link Type#FILE}
      * @throws OXException
      */
     public Quota[] getQuota() throws OXException {

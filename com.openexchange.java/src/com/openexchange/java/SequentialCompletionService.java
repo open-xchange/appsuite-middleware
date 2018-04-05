@@ -70,6 +70,7 @@ import java.util.concurrent.TimeUnit;
  */
 public class SequentialCompletionService<V> implements CompletionService<V>, Closeable {
 
+    @SuppressWarnings("rawtypes")
     static final FutureTask POISON = new EmptyFutureTask<Object>();
 
     private static class EmptyCallable<V> implements Callable<V> {
@@ -104,6 +105,7 @@ public class SequentialCompletionService<V> implements CompletionService<V>, Clo
             this.requestTaskQueue = requestTaskQueue;
         }
 
+        @SuppressWarnings("unchecked")
         void cancel() {
             submittedTasks.add(POISON);
         }
