@@ -293,7 +293,7 @@ public class Compat {
             if (null != recurrenceData) {
                 int recurrencePosition = ((StoredRecurrenceId) event.getRecurrenceId()).getRecurrencePosition();
                 try {
-                    recurrenceId = getRecurrenceID(Services.getService(RecurrenceService.class), recurrenceData, recurrencePosition);
+                    recurrenceId = getRecurrenceID(Services.getService(RecurrenceService.class, true), recurrenceData, recurrencePosition);
                 } catch (OXException e) {
                     if (false == "CAL-4061".equals(e.getErrorCode())) {
                         throw e;
