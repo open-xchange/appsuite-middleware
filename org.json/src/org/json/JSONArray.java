@@ -36,6 +36,7 @@ import java.util.ListIterator;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.json.helpers.FileBackedJSON;
 import org.json.helpers.UnsynchronizedStringReader;
 import org.json.helpers.UnsynchronizedStringWriter;
 import com.fasterxml.jackson.core.JsonGenerator;
@@ -1081,7 +1082,29 @@ public class JSONArray extends AbstractJSONValue implements Iterable<Object> {
                     ja.put(true);
                     break;
                 case VALUE_STRING:
-                    ja.put(jParser.getText());
+                    {
+                        int textLength = jParser.getTextLength();
+                        if (textLength > JSONObject.IN_MEMORY_TEXT_THRESHOLD) {
+                            FileBackedJSONStringProvider provider = FileBackedJSON.getFileBackedJSONStringProvider();
+                            if (null == provider) {
+                                ja.put(jParser.getText());
+                            } else {
+                                // Avoid construction of a String object
+                                FileBackedJSONString jsonString = provider.createFileBackedJSONString();
+                                try {
+                                    char[] textCharacters = jParser.getTextCharacters();
+                                    int textOffset = jParser.getTextOffset();
+                                    jsonString.write(textCharacters, textOffset, textLength);
+                                    jsonString.flush();
+                                    ja.put(jsonString);
+                                } finally {
+                                    jsonString.close();
+                                }
+                            }
+                        } else {
+                            ja.put(jParser.getText());
+                        }
+                    }
                     break;
                 default:
                     // Ignore
