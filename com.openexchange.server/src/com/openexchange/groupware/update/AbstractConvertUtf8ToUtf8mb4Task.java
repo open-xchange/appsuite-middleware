@@ -453,8 +453,7 @@ public abstract class AbstractConvertUtf8ToUtf8mb4Task extends UpdateTaskAdapter
      * @throws SQLException if changing the table fails
      */
     protected void changeTable(Connection connection, String schema, String table, Map<String, Integer> optVarcharColumns, List<Column> modifyColumns) throws SQLException {
-        String createTable = getCreateTable(connection, table);
-        if (createTable == null) {
+        if (!Tools.tableExists(connection, table)) {
             LOGGER.info("Table {} not found. Skipping.", table);
             return;
         }
