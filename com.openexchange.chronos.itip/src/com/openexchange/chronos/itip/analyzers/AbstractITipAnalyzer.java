@@ -297,7 +297,7 @@ public abstract class AbstractITipAnalyzer implements ITipAnalyzer {
 
     public boolean doAppointmentsDiffer(final Event update, final Event original) throws OXException {
         if (original == update) {
-            // Can be the same object .. so omit roundtrip of diff
+            // Can be the same object .. so avoid roundtrip of diff
             return false;
         }
         final ITipEventUpdate diff = new ITipEventUpdate(original, update, true, AbstractITipAnalyzer.SKIP);
