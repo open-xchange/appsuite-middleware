@@ -47,19 +47,46 @@
  *
  */
 
-package com.openexchange.database.migration.adapter.configdb.table;
+package com.openexchange.database.internal.change.utf8mb4.configdb;
+
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.util.List;
+import com.google.common.collect.ImmutableList;
+import com.openexchange.database.internal.change.utf8mb4.AbstractLiquibaseUtf8mb4Adapter;
 
 /**
  * 
- * {@link AdvertisementConfigCustomTaskChange}
+ * {@link ResellerToUtf8mb4Change}
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since v7.10.0
  */
-public class AdvertisementMappingToUtf8mb4Change extends AbstractSingleConfigDbChange {
+public class ResellerToUtf8mb4Change extends AbstractLiquibaseUtf8mb4Adapter {
 
     @Override
-    protected String getTableToChange() {
-        return "advertisement_mapping";
+    public String getConfirmationMessage() {
+        return "Reseller tables successfully converted to utf8mb4";
     }
+
+    @Override
+    protected void before(Connection configDbCon, String schemaName) throws SQLException {
+        // nothing to do
+    }
+
+    @Override
+    protected void after(Connection configDbCon, String schemaName) throws SQLException {
+        // nothing to do
+    }
+
+    @Override
+    protected List<String> tablesToConvert() {
+        return ImmutableList.of("restrictions", "context_restrictions", "context2subadmin", "subadmin", "subadmin_restrictions", "context_customfields");
+    }
+
+    @Override
+    protected String getDefaultSchemaName() {
+        return "configdb";
+    }
+
 }

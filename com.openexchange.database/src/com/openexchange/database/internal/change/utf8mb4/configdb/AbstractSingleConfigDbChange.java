@@ -47,20 +47,20 @@
  *
  */
 
-package com.openexchange.database.migration.adapter.configdb.table;
+package com.openexchange.database.internal.change.utf8mb4.configdb;
+
+import com.openexchange.database.internal.change.utf8mb4.AbstractSingleTableChange;
 
 /**
- * 
- * {@link AdvertisementConfigCustomTaskChange}
+ * {@link AbstractSingleConfigDbChange}
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since v7.10.0
  */
-public class ReplicationMonitorToUtf8mb4Change extends AbstractSingleConfigDbChange {
+public abstract class AbstractSingleConfigDbChange extends AbstractSingleTableChange {
 
     @Override
-    protected String getTableToChange() {
-        return "replicationMonitor";
+    protected final String getDefaultSchemaName() {
+        return "configdb";
     }
-
 }

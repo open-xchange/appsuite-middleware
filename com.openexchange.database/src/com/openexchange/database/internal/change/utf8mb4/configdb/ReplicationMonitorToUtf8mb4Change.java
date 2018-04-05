@@ -47,47 +47,20 @@
  *
  */
 
-package com.openexchange.database.migration.adapter.osgi;
-
-import com.openexchange.database.DatabaseService;
-import com.openexchange.database.migration.DBMigrationExecutorService;
-import com.openexchange.osgi.HousekeepingActivator;
+package com.openexchange.database.internal.change.utf8mb4.configdb;
 
 /**
- * Activator for the main migration bundle
+ * 
+ * {@link AdvertisementConfigCustomTaskChange}
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
- * @since 7.6.1
+ * @since v7.10.0
  */
-public class DBMigrationImplActivator extends HousekeepingActivator {
+public class ReplicationMonitorToUtf8mb4Change extends AbstractSingleConfigDbChange {
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class[] { DatabaseService.class };
+    protected String tableToConvert() {
+        return "replicationMonitor";
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void startBundle() throws Exception {
-        org.slf4j.LoggerFactory.getLogger(DBMigrationImplActivator.class).info("Starting bundle: {}", context.getBundle().getSymbolicName());
-
-        track(DBMigrationExecutorService.class, new DBMigrationServiceTracker(this, context));
-
-        openTrackers();
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void stopBundle() throws Exception {
-        org.slf4j.LoggerFactory.getLogger(DBMigrationImplActivator.class).info("Stopping bundle: {}", this.context.getBundle().getSymbolicName());
-
-        super.stopBundle();
-    }
 }

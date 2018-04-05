@@ -86,10 +86,10 @@ public abstract class AbstractLiquibaseUtf8mb4Adapter extends AbstractConvertUtf
             innerPerform(con, schemaName);
             after(con, schemaName);
         } catch (SQLException e) {
-            logger.error("Failed to convert ConfigDB tables to utf8mb4", e);
+            logger.error("Failed to convert schema to utf8mb4", e);
             throw new CustomChangeException("SQL error", e);
         } catch (RuntimeException e) {
-            logger.error("Failed to convert ConfigDB tables to utf8mb4", e);
+            logger.error("Failed to convert schema to utf8mb4", e);
             throw new CustomChangeException("Runtime error", e);
         }
     }

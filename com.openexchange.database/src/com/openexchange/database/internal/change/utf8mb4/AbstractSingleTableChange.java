@@ -54,7 +54,6 @@ import java.sql.SQLException;
 import java.util.Collections;
 import java.util.List;
 import com.google.common.collect.ImmutableList;
-import com.openexchange.database.internal.change.utf8mb4.AbstractLiquibaseUtf8mb4Adapter;
 import com.openexchange.java.Strings;
 
 /**

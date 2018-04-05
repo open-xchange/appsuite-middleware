@@ -47,13 +47,7 @@
  *
  */
 
-package com.openexchange.database.migration.adapter.configdb.table;
-
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.util.List;
-import com.google.common.collect.ImmutableList;
-import com.openexchange.groupware.update.AbstractLiquibaseUtf8mb4Adapter;
+package com.openexchange.database.internal.change.utf8mb4.configdb;
 
 /**
  * 
@@ -62,31 +56,10 @@ import com.openexchange.groupware.update.AbstractLiquibaseUtf8mb4Adapter;
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since v7.10.0
  */
-public class CountTablesToUtf8mb4Change extends AbstractLiquibaseUtf8mb4Adapter {
+public class Context2pushRegistrationToUtf8mb4Change extends AbstractSingleConfigDbChange {
 
     @Override
-    public String getConfirmationMessage() {
-        return "Count tables successfully converted to utf8mb4";
+    protected String tableToConvert() {
+        return "context2push_registration";
     }
-
-    @Override
-    protected List<String> tablesToConvert() {
-        return ImmutableList.of("contexts_per_filestore", "contexts_per_dbpool", "dbpool_lock", "contexts_per_dbschema", "dbschema_lock", "ctx_per_schema_sem");
-    }
-
-    @Override
-    protected void before(Connection configDbCon, String schemaName) throws SQLException {
-        // nothing to do
-    }
-
-    @Override
-    protected void after(Connection configDbCon, String schemaName) throws SQLException {
-        // nothing to do
-    }
-
-    @Override
-    protected String getDefaultSchemaName() {
-        return "configdb";
-    }
-
 }

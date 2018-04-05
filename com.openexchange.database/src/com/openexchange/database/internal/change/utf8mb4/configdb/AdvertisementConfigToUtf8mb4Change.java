@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.database.migration.adapter.configdb.table;
+package com.openexchange.database.internal.change.utf8mb4.configdb;
 
 /**
  * 
@@ -59,7 +59,7 @@ package com.openexchange.database.migration.adapter.configdb.table;
 public class AdvertisementConfigToUtf8mb4Change extends AbstractSingleConfigDbChange {
 
     @Override
-    protected String getTableToChange() {
+    protected String tableToConvert() {
         return "advertisement_config";
     }
 }
