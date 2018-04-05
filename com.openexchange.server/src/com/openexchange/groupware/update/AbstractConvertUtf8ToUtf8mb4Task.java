@@ -77,6 +77,8 @@ import com.openexchange.tools.update.Tools;
  * <span style="color:red;">Note</span>: Even if everything is performed in one transaction, MySQL can not roll-back DDL statements (ALTER TABLE)!
  *
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @since v7.10.0
  */
 public abstract class AbstractConvertUtf8ToUtf8mb4Task extends UpdateTaskAdapter {
@@ -88,6 +90,9 @@ public abstract class AbstractConvertUtf8ToUtf8mb4Task extends UpdateTaskAdapter
 
     /** Defines the upper character limit for a <code>VARCHAR</code> column. Longer columns will be converted to <code>TEXT</code> */
     private static final int MAX_VARCHAR = 1024;
+
+    /** The constant for <code>utf8</code> character set */
+    protected static final String UTF8_CHARSET = "utf8";
 
     /** The constant for <code>"utf8mb4"</code> character set */
     protected static final String UTF8MB4_CHARSET = "utf8mb4";
@@ -105,7 +110,7 @@ public abstract class AbstractConvertUtf8ToUtf8mb4Task extends UpdateTaskAdapter
 
     private static final String SHOW_CREATE_TABLE = "SHOW CREATE TABLE ";
 
-    private static final String COLUMN_INFORMATION = "SELECT COLUMN_NAME FROM information_schema.COLUMNS WHERE table_schema = ? AND CHARACTER_SET_NAME = 'utf8' AND TABLE_NAME = ?";
+    private static final String COLUMN_INFORMATION = "SELECT COLUMN_NAME FROM information_schema.COLUMNS WHERE table_schema = ? AND CHARACTER_SET_NAME = ? AND TABLE_NAME = ?";
 
     /**
      * Initializes a new {@link AbstractConvertUtf8ToUtf8mb4Task}.
@@ -197,6 +202,21 @@ public abstract class AbstractConvertUtf8ToUtf8mb4Task extends UpdateTaskAdapter
      * @throws SQLException If columns cannot be returned
      */
     protected List<Column> getColumsToModify(Connection con, String schema, String table) throws SQLException {
+        return getColumsToModify(con, schema, table, UTF8_CHARSET);
+    }
+
+    /**
+     * Determines the text columns, which need to be converted since they use
+     * the specified character set
+     * 
+     * @param con The connection to use
+     * @param schema The schema name
+     * @param table The name of the table to inspect
+     * @param charset The character set of the columns
+     * @return The columns that need to be altered
+     * @throws SQLException If columns cannot be returned
+     */
+    protected List<Column> getColumsToModify(Connection con, String schema, String table, String charset) throws SQLException {
         String createTable = getCreateTable(con, table);
         if (createTable == null) {
             return Collections.emptyList();
@@ -206,7 +226,8 @@ public abstract class AbstractConvertUtf8ToUtf8mb4Task extends UpdateTaskAdapter
         try {
             columnStmt = con.prepareStatement(COLUMN_INFORMATION);
             columnStmt.setString(1, schema);
-            columnStmt.setString(2, table);
+            columnStmt.setString(2, charset);
+            columnStmt.setString(3, table);
             columnRs = columnStmt.executeQuery();
             if (false == columnRs.next()) {
                 return Collections.emptyList();
