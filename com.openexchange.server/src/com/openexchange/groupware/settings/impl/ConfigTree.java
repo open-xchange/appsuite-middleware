@@ -350,6 +350,7 @@ public final class ConfigTree {
             com.openexchange.groupware.settings.tree.modules.folder.SharedFolders.class,
             com.openexchange.groupware.settings.tree.modules.infostore.GUI.class,
             com.openexchange.groupware.settings.tree.modules.infostore.Module.class,
+            com.openexchange.groupware.settings.tree.modules.infostore.MaxUploadSize.class,
             com.openexchange.groupware.settings.tree.modules.infostore.folder.Trash.class,
             com.openexchange.groupware.settings.tree.modules.infostore.folder.Pictures.class,
             com.openexchange.groupware.settings.tree.modules.infostore.folder.Documents.class,
