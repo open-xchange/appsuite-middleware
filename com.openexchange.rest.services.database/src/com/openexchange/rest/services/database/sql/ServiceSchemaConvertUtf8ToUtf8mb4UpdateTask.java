@@ -49,7 +49,12 @@
 
 package com.openexchange.rest.services.database.sql;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import com.google.common.collect.ImmutableList;
+import com.openexchange.database.Databases;
+import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.SimpleConvertUtf8ToUtf8mb4UpdateTask;
 
 /**
@@ -64,5 +69,24 @@ public class ServiceSchemaConvertUtf8ToUtf8mb4UpdateTask extends SimpleConvertUt
      */
     public ServiceSchemaConvertUtf8ToUtf8mb4UpdateTask() {
         super(ImmutableList.of("serviceSchemaVersion", "serviceSchemaMigrationLock"));
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.groupware.update.SimpleConvertUtf8ToUtf8mb4UpdateTask#before(com.openexchange.groupware.update.PerformParameters, java.sql.Connection)
+     */
+    @Override
+    protected void before(PerformParameters params, Connection connection) throws SQLException {
+        for (String t : tablesToConvert()) {
+            PreparedStatement stmt = null;
+            try {
+                String alterTable = alterTable(t, getColumsToModify(connection, params.getSchema().getSchema(), t, "latin1"), UTF8MB4_CHARSET, UTF8MB4_UNICODE_COLLATION);
+                stmt = connection.prepareStatement(alterTable);
+                stmt.execute();
+            } finally {
+                Databases.closeSQLStuff(stmt);
+            }
+        }
     }
 }
