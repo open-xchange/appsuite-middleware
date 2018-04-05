@@ -1506,7 +1506,7 @@ public class JSONObject extends AbstractJSONValue {
      * <p>
      * A String object of that size occupies roughly 0.5 megabytes (see <a href="https://is.gd/jr5JB4">here</a>)
      */
-    private static final int IN_MEMORY_TEXT_THRESHOLD = 256000;
+    static final int IN_MEMORY_TEXT_THRESHOLD = 256000;
 
     /**
      * Parses specified JSON object from given parser.
@@ -1583,6 +1583,7 @@ public class JSONObject extends AbstractJSONValue {
                                     int textOffset = jParser.getTextOffset();
                                     jsonString.write(textCharacters, textOffset, textLength);
                                     jsonString.flush();
+                                    jo.put(fieldName, jsonString);
                                 } finally {
                                     jsonString.close();
                                 }
