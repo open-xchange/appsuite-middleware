@@ -49,9 +49,12 @@
 
 package com.openexchange.chronos.itip.analyzers;
 
+import static com.openexchange.java.Autoboxing.I;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import java.util.Collections;
+import java.util.TimeZone;
+import org.dmfs.rfc5545.DateTime;
 import org.dmfs.rfc5545.Duration;
 import org.junit.Assert;
 import org.junit.Before;
@@ -159,10 +162,116 @@ public class UpdateITipAnalyzerTest2 {
     /*
      * ------------------------------ REQUEST TESTS ------------------------------
      */
+    // <-- Tests for bug 57883
     @Test
-    public void testAnalyze_request_EventParsed() throws Exception {
+    public void testAnalyze_request_DifferentTimeZones_Start() throws Exception {
+        message = ITipMockFactory.mockITipMessage(ITipMethod.REQUEST, update);
 
+        long timestamp = System.currentTimeMillis();
+        DateTime o = generateDateTime(timestamp);
+        DateTime u = generateDateTime(timestamp, "Europe/Berlin");
+
+        original.setStartDate(o);
+        update.setStartDate(u);
+
+        ITipAnalysis analyze = updateITipAnalyzer.analyze(message, null, wrapper, null, user, context, session);
+
+        Event newEvent = analyze.getChanges().get(0).getNewEvent();
+        Assert.assertThat("Timezone wasn't changed", newEvent.getStartDate(), is(u));
+        Assert.assertThat("Timezone was changed", newEvent.getEndDate(), is(original.getEndDate()));
+
+        Assert.assertThat("Diff description contains more elements then expected", I(analyze.getChanges().get(0).getDiffDescription().size()), is(I(1)));
     }
+
+    @Test
+    public void testAnalyze_request_DifferentTimeZones_End() throws Exception {
+        message = ITipMockFactory.mockITipMessage(ITipMethod.REQUEST, update);
+
+        long timestamp = System.currentTimeMillis();
+        DateTime o = generateDateTime(timestamp);
+        DateTime u = generateDateTime(timestamp, "Europe/Berlin");
+
+        original.setEndDate(o);
+        update.setEndDate(u);
+
+        ITipAnalysis analyze = updateITipAnalyzer.analyze(message, null, wrapper, null, user, context, session);
+
+        Event newEvent = analyze.getChanges().get(0).getNewEvent();
+        Assert.assertThat("Timezone wasn't changed", newEvent.getEndDate(), is(u));
+        Assert.assertThat("Timezone was changed", newEvent.getStartDate(), is(original.getStartDate()));
+
+        Assert.assertThat("Diff description contains more elements then expected", I(analyze.getChanges().get(0).getDiffDescription().size()), is(I(1)));
+    }
+
+    @Test
+    public void testAnalyze_request_DifferentTimeZones_Both() throws Exception {
+        message = ITipMockFactory.mockITipMessage(ITipMethod.REQUEST, update);
+
+        long timestamp = System.currentTimeMillis();
+        DateTime o = generateDateTime(timestamp);
+        DateTime u = generateDateTime(timestamp, "Europe/Berlin");
+
+        original.setStartDate(o);
+        original.setEndDate(generateDateTime(timestamp + 10000));
+
+        update.setStartDate(u);
+        update.setEndDate(generateDateTime(timestamp + 10000, "Europe/Berlin"));
+
+        ITipAnalysis analyze = updateITipAnalyzer.analyze(message, null, wrapper, null, user, context, session);
+
+        Event newEvent = analyze.getChanges().get(0).getNewEvent();
+        Assert.assertThat("Timezone wasn't changed", newEvent.getStartDate(), is(u));
+        Assert.assertThat("Timezone wasn't changed", newEvent.getEndDate(), is(update.getEndDate()));
+
+        Assert.assertThat("Diff description contains more elements then expected", I(analyze.getChanges().get(0).getDiffDescription().size()), is(I(1)));
+    }
+
+    @Test
+    public void testAnalyze_request_DifferentTimeZones_BothDifferent() throws Exception {
+        message = ITipMockFactory.mockITipMessage(ITipMethod.REQUEST, update);
+
+        long timestamp = System.currentTimeMillis();
+        DateTime o = generateDateTime(timestamp);
+        DateTime u = generateDateTime(timestamp, "Europe/Berlin");
+
+        original.setStartDate(o);
+        original.setEndDate(generateDateTime(timestamp + 10000));
+
+        update.setStartDate(u);
+        update.setEndDate(generateDateTime(timestamp + 10000, "Asia/Bangkok"));
+
+        ITipAnalysis analyze = updateITipAnalyzer.analyze(message, null, wrapper, null, user, context, session);
+
+        Event newEvent = analyze.getChanges().get(0).getNewEvent();
+        Assert.assertThat("Timezone wasn't changed", newEvent.getStartDate(), is(u));
+        Assert.assertThat("Timezone wasn't changed", newEvent.getEndDate(), is(update.getEndDate()));
+
+        Assert.assertThat("Diff description contains more elements then expected", I(analyze.getChanges().get(0).getDiffDescription().size()), is(I(2)));
+    }
+
+    @Test
+    public void testAnalyze_request_DifferentTimeZones_AndDIfferentTime() throws Exception {
+        message = ITipMockFactory.mockITipMessage(ITipMethod.REQUEST, update);
+
+        long timestamp = System.currentTimeMillis();
+        DateTime o = generateDateTime(timestamp);
+        DateTime u = generateDateTime(timestamp + 20000, "Europe/Berlin");
+
+        original.setStartDate(o);
+        original.setEndDate(generateDateTime(timestamp + 10000));
+
+        update.setStartDate(u);
+        update.setEndDate(generateDateTime(timestamp + 20000, "Asia/Bangkok"));
+
+        ITipAnalysis analyze = updateITipAnalyzer.analyze(message, null, wrapper, null, user, context, session);
+
+        Event newEvent = analyze.getChanges().get(0).getNewEvent();
+        Assert.assertThat("Timezone wasn't changed", newEvent.getStartDate(), is(u));
+        Assert.assertThat("Timezone wasn't changed", newEvent.getEndDate(), is(update.getEndDate()));
+
+        Assert.assertThat("Diff description contains more elements then expected", I(analyze.getChanges().get(0).getDiffDescription().size()), is(I(3)));
+    }
+    // End tests for 57883 -->
 
     /*
      * ------------------------------ COUNTER TESTS ------------------------------
@@ -280,6 +389,10 @@ public class UpdateITipAnalyzerTest2 {
     //        
     //    }
 
+    /*
+     * --------------------------------- HELPERS ---------------------------------
+     */
+
     private void prepareMicrosoftCounter() throws OXException {
         Attendee attendee = getAttendee();
         attendee.setPartStat(ParticipationStatus.NEEDS_ACTION);
@@ -291,12 +404,17 @@ public class UpdateITipAnalyzerTest2 {
         return original.getAttendees().get(0).getEntity() != user.getId() ? original.getAttendees().get(0) : original.getAttendees().get(1);
     }
 
-    private Attendee getAttendeeCopy() throws OXException {
-        return copy(getAttendee());
-    }
-
     private Attendee copy(Attendee original) throws OXException {
         return AttendeeMapper.getInstance().copy(original, new Attendee(), (AttendeeField[]) null);
+    }
+
+    private DateTime generateDateTime(long timestamp) {
+        String id = "UTC";
+        return generateDateTime(timestamp, id);
+    }
+
+    private DateTime generateDateTime(long timestamp, String id) {
+        return new DateTime(TimeZone.getTimeZone(id), timestamp);
     }
 
 }
