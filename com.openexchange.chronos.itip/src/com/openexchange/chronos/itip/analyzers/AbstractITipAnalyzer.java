@@ -236,6 +236,9 @@ public abstract class AbstractITipAnalyzer implements ITipAnalyzer {
         AttendeeField.SENT_BY, AttendeeField.URI };
 
     private boolean onlyStateChanged(ITipEventUpdate diff) {
+        if (null == diff) {
+            return false;
+        }
         if (diff.containsAnyChangesBeside(new EventField[] { EventField.ATTENDEES })) {
             return false;
         }
