@@ -104,7 +104,7 @@ public class StandardAuthenticationResultsValidatorTest extends AbstractTestMail
 
 
         MailAuthenticityResult result = validator.parseHeaders(authHeaders, from, allowedAuthServIds, null);
-        assertStatus(MailAuthenticityStatus.NEUTRAL, result.getStatus());
+        assertStatus(MailAuthenticityStatus.NONE, result.getStatus());
     }
 
     @Test
