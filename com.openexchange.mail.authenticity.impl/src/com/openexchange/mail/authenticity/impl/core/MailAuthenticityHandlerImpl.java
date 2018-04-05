@@ -158,15 +158,14 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
         final HeaderCollection headerCollection = mailMessage.getHeaders();
         final String[] authHeaders = headerCollection.getHeader(MessageHeaders.HDR_AUTHENTICATION_RESULTS);
         if (authHeaders == null || authHeaders.length == 0) {
-            // Pass on to custom handlers
-            mailMessage.setAuthenticityResult(MailAuthenticityResult.NEUTRAL_RESULT);
+            // No 'Authentication-Results header' - set overall status to 'none'
+            mailMessage.setAuthenticityResult(MailAuthenticityResult.NONE_RESULT);
             logMetrics(mailMessage.getMessageId(), Collections.emptyList(), mailMessage.getAuthenticityResult());
             return;
         }
 
         final InternetAddress[] from = mailMessage.getFrom();
         if (from == null || from.length == 0) {
-            // Pass on to custom handlers
             mailMessage.setAuthenticityResult(MailAuthenticityResult.NEUTRAL_RESULT);
             logMetrics(mailMessage.getMessageId(), Arrays.asList(authHeaders), mailMessage.getAuthenticityResult());
             return;
