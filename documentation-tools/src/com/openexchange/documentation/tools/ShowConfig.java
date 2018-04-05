@@ -51,7 +51,11 @@ package com.openexchange.documentation.tools;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -79,14 +83,25 @@ public class ShowConfig {
     private static final String TAG_OPTION = "t";
     private static final String KEY_OPTION = "k";
     private static final String HELP_OPTION = "h";
-    private static final String ANSI_OPTION = "a";
+    private static final String ANSI_OPTION = "n";
+    private static final String ONLY_KEY_OPTION = "o";
+    private static final String PRINT_TAG_OPTION = "p";
+
+    private static final Comparator<String> IGNORE_CASE_COMP = new Comparator<String>() {
+        @Override
+        public int compare(String s1, String s2) {
+            return s1.toLowerCase().compareTo(s2.toLowerCase());
+        }
+    };
 
     static {
-        options.addOption(OptionBuilder.withLongOpt("search").hasArgs(1).withDescription("If set only properties which match the given search term are returned.").isRequired(false).create(SEARCH_OPTION));
-        options.addOption(OptionBuilder.withLongOpt("tag").hasArgs(1).withDescription("If set only properties with the given tag are returned.").isRequired(false).create(TAG_OPTION));
-        options.addOption(OptionBuilder.withLongOpt("key").hasArgs(1).withDescription("If set only properties with a key which contains the given term are returned.").isRequired(false).create(KEY_OPTION));
         options.addOption(OptionBuilder.withLongOpt("help").hasArg(false).withDescription("Prints this usage.").isRequired(false).create(HELP_OPTION));
-        options.addOption(OptionBuilder.withLongOpt("useANSI").hasArg(true).withDescription("If set to 'true' the output will use ansi formatting. Defaults to 'true'.").isRequired(false).create(ANSI_OPTION));
+        options.addOption(OptionBuilder.withLongOpt("tag").hasArgs(1).withDescription("If set only properties with the given tag are returned.").isRequired(false).create(TAG_OPTION));
+        options.addOption(OptionBuilder.withLongOpt("search").hasArgs(1).withDescription("If set only properties which match the given search term are returned.").isRequired(false).create(SEARCH_OPTION));
+        options.addOption(OptionBuilder.withLongOpt("key").hasArgs(1).withDescription("If set only properties with a key which contains the given term are returned.").isRequired(false).create(KEY_OPTION));
+        options.addOption(OptionBuilder.withLongOpt("only-key").hasArg(false).withDescription("Prints only the key for each property.").isRequired(false).create(ONLY_KEY_OPTION));
+        options.addOption(OptionBuilder.withLongOpt("print-tags").hasArg(false).withDescription("Prints a list of available tags.").isRequired(false).create(PRINT_TAG_OPTION));
+        options.addOption(OptionBuilder.withLongOpt("no-color").hasArg(false).withDescription("Removes ansi color formatting.").isRequired(false).create(ANSI_OPTION));
     }
 
     public static void main(String[] args) {
@@ -106,6 +121,13 @@ public class ShowConfig {
 
             try {
                 ConfigDocu configDocu = new ConfigDocu(yamlFolder);
+
+                if(parse.hasOption(PRINT_TAG_OPTION)) {
+                    printTags(configDocu.getTags());
+                    System.exit(0);
+                }
+
+                boolean onlyKey = parse.hasOption(ONLY_KEY_OPTION);
 
                 List<Property> props = null;
                 if(parse.hasOption(TAG_OPTION)) {
@@ -131,7 +153,7 @@ public class ShowConfig {
                 if(parse.hasOption(ANSI_OPTION)) {
                     useAnsi = Boolean.valueOf(parse.getOptionValue(ANSI_OPTION));
                 }
-                printProperties(props, useAnsi);
+                printProperties(props, useAnsi, onlyKey);
             } catch (FileNotFoundException e) {
                 handleError(e);
             }
@@ -140,10 +162,27 @@ public class ShowConfig {
         }
     }
 
-    private static void printProperties(List<Property> props, boolean useAnsi){
+    /**
+     * Prints the given tags as a list
+     *
+     * @param tags The tags
+     */
+    private static void printTags(Set<String> tags) {
+        List<String> sortedTags = new ArrayList<>(tags);
+        Collections.sort(sortedTags, IGNORE_CASE_COMP);
+        System.out.println("Available tags:\n");
+        for(String tag : sortedTags) {
+            System.out.println(tag);
+        }
+
+    }
+
+    private static void printProperties(List<Property> props, boolean useAnsi, boolean onlyKey){
         for(Property prop: props) {
-            printProperty(prop, useAnsi);
-            System.out.println(format("\n-------------------------------------------------\n", ANSI_RED, useAnsi));
+            printProperty(prop, useAnsi, onlyKey);
+            if(!onlyKey) {
+                System.out.println(format("\n-------------------------------------------------\n", ANSI_RED, useAnsi));
+            }
         }
     }
 
@@ -152,8 +191,11 @@ public class ShowConfig {
     public static final String ANSI_BOLD = "\u001B[1m";
     public static final String ANSI_FRAME = "\u001B[51m";
 
-    private static void printProperty(Property prop, boolean useAnsi) {
+    private static void printProperty(Property prop, boolean useAnsi, boolean onlyKey) {
         printKeyValue("Key", prop.getKey(), useAnsi);
+        if(onlyKey) {
+            return;
+        }
         System.out.println(format("Description", ANSI_RED, useAnsi)+":");
         System.out.println(formatDescription(prop.getDescription(), useAnsi));
         printKeyValue("Default", prop.getDefaultValue(), true, useAnsi);
@@ -174,7 +216,6 @@ public class ShowConfig {
 
     private static String formatDescription(String value, boolean useAnsi) {
         if(useAnsi) {
-            // todo
             value = value.replaceAll("<code>|\\[\\[", ANSI_FRAME+" ");
             value = value.replaceAll("</code>|\\]\\]", " "+ANSI_RESET);
             value = value.replaceAll("<b>", ANSI_BOLD);
@@ -222,7 +263,7 @@ public class ShowConfig {
      */
     private static final void printUsage(int exitCode) {
         HelpFormatter hf = new HelpFormatter();
-        hf.setWidth(80);
+        hf.setWidth(120);
         hf.printHelp("showconfig", options);
         System.exit(exitCode);
     }
