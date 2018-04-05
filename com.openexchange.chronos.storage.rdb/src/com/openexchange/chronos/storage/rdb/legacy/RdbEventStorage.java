@@ -65,14 +65,17 @@ import java.util.List;
 import java.util.Set;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.CalendarUserType;
+import com.openexchange.chronos.Classification;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
+import com.openexchange.chronos.EventStatus;
 import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.common.DefaultRecurrenceData;
 import com.openexchange.chronos.compat.Appointment2Event;
 import com.openexchange.chronos.compat.Event2Appointment;
 import com.openexchange.chronos.compat.PositionAwareRecurrenceId;
+import com.openexchange.chronos.exception.ProblemSeverity;
 import com.openexchange.chronos.service.EntityResolver;
 import com.openexchange.chronos.service.RecurrenceData;
 import com.openexchange.chronos.service.SearchFilter;
@@ -85,6 +88,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.impl.IDGenerator;
+import com.openexchange.java.Strings;
 import com.openexchange.search.SearchTerm;
 
 /**
@@ -276,6 +280,7 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
             connection = dbProvider.getWriteConnection(context);
             txPolicy.setAutoCommit(connection, false);
             for (Event event : events) {
+                trackInvalidData(event);
                 updated += insertEvent(connection, context.getContextId(), event);
                 /*
                  * also take over series pattern from master for newly inserted change exception
@@ -300,6 +305,7 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
         try {
             connection = dbProvider.getWriteConnection(context);
             txPolicy.setAutoCommit(connection, false);
+            trackInvalidData(event);
             updated += updateEvent(connection, context.getContextId(), asInt(event.getId()), event);
             if (isSeriesMaster(event) && event.containsRecurrenceRule()) {
                 /*
@@ -383,6 +389,30 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
     @Override
     public void deleteAllEvents() throws OXException {
         throw new UnsupportedOperationException();
+    }
+
+    private void trackInvalidData(Event event) throws OXException {
+        if (event.containsClassification() && Classification.PRIVATE.equals(event.getClassification())) {
+            addInvalidDataWaring(event.getId(), EventField.CLASSIFICATION, ProblemSeverity.MAJOR, "Unable to store a 'private' classification", null);
+        }
+        if (event.containsGeo() && null != event.getGeo()) {
+            addInvalidDataWaring(event.getId(), EventField.GEO, ProblemSeverity.NORMAL, "Unable to store geo location", null);
+        }
+        if (event.containsRelatedTo() && null != event.getRelatedTo()) {
+            addInvalidDataWaring(event.getId(), EventField.RELATED_TO, ProblemSeverity.MINOR, "Unable to store related-to information", null);
+        }
+        if (event.containsExtendedProperties() && null != event.getExtendedProperties() && 0 < event.getExtendedProperties().size()) {
+            addInvalidDataWaring(event.getId(), EventField.EXTENDED_PROPERTIES, ProblemSeverity.NORMAL, "Unable to store extended properties", null);
+        }
+        if (event.containsColor() && Strings.isNotEmpty(event.getColor()) && 0 == Event2Appointment.getColorLabel(event.getColor())) {
+            addInvalidDataWaring(event.getId(), EventField.COLOR, ProblemSeverity.NORMAL, "Unable to store color", null);
+        }
+        if (event.containsStatus() && false == EventStatus.CONFIRMED.matches(event.getStatus())) {
+            addInvalidDataWaring(event.getId(), EventField.STATUS, ProblemSeverity.NORMAL, "Unable to store status", null);
+        }
+        if (event.containsEndDate() && null != event.getEndDate() && null != event.getEndDate().getTimeZone() && null != event.getStartDate() && false == event.getEndDate().getTimeZone().equals(event.getStartDate().getTimeZone())) {
+            addInvalidDataWaring(event.getId(), EventField.END_DATE, ProblemSeverity.NORMAL, "Unable to store end timezone", null);
+        }
     }
 
     private static int deleteEvents(Connection connection, int contextID, List<String> objectIDs) throws SQLException {
