@@ -356,7 +356,6 @@ public class EventNotificationPool implements EventNotificationPoolService, Runn
             this.principal = principal;
             if (this.original == null) {
                 this.original = original;
-                this.mostRecent = newEvent;
                 this.session = session;
             }
             if (this.session.getUserId() != original.getOrganizer().getEntity() && session.getUserId() == original.getOrganizer().getEntity()) {
