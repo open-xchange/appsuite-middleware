@@ -210,34 +210,7 @@ public class RdbAlarmStorage extends RdbStorage implements AlarmStorage {
 
     @Override
     public void insertAlarms(Event event, int userID, List<Alarm> alarms) throws OXException {
-        ReminderData reminder = getNextReminder(event, userID, alarms, null);
-        if (null == reminder) {
-            return;
-        }
-        int updated = 0;
-        Connection connection = null;
-        try {
-            connection = dbProvider.getWriteConnection(context);
-            txPolicy.setAutoCommit(connection, false);
-            ReminderData originalReminder = selectReminder(connection, context.getContextId(), asInt(event.getId()), userID);
-            if (null == originalReminder) {
-                updated += insertReminder(connection, context.getContextId(), event, userID, reminder);
-            } else {
-                ReminderData updatedReminder = getNextReminder(event, userID, alarms, originalReminder);
-                if (null == updatedReminder) {
-                    updated += deleteReminderMinutes(connection, context.getContextId(), asInt(event.getId()), new int[] { userID });
-                    updated += deleteReminderTriggers(connection, context.getContextId(), asInt(event.getId()), new int[] { userID });
-                } else {
-                    updated += updateReminderMinutes(connection, context.getContextId(), event, userID, updatedReminder.reminderMinutes);
-                    updated += updateReminderTrigger(connection, context.getContextId(), event, userID, updatedReminder.nextTriggerTime);
-                }
-            }
-            txPolicy.commit(connection);
-        } catch (SQLException e) {
-            throw asOXException(e);
-        } finally {
-            release(connection, updated);
-        }
+        updateAlarms(event, userID, alarms);
     }
 
     @Override
@@ -261,12 +234,18 @@ public class RdbAlarmStorage extends RdbStorage implements AlarmStorage {
             txPolicy.setAutoCommit(connection, false);
             ReminderData originalReminder = selectReminder(connection, context.getContextId(), asInt(event.getId()), userID);
             ReminderData updatedReminder = getNextReminder(event, userID, alarms, originalReminder);
-            if (null == updatedReminder) {
-                updated += deleteReminderMinutes(connection, context.getContextId(), asInt(event.getId()), new int[] { userID });
-                updated += deleteReminderTriggers(connection, context.getContextId(), asInt(event.getId()), new int[] { userID });
+            if (null == originalReminder) {
+                if (null != updatedReminder) {
+                    updated += insertReminder(connection, context.getContextId(), event, userID, updatedReminder);
+                }
             } else {
-                updated += updateReminderMinutes(connection, context.getContextId(), event, userID, updatedReminder.reminderMinutes);
-                updated += updateReminderTrigger(connection, context.getContextId(), event, userID, updatedReminder.nextTriggerTime);
+                if (null == updatedReminder) {
+                    updated += deleteReminderMinutes(connection, context.getContextId(), asInt(event.getId()), new int[] { userID });
+                    updated += deleteReminderTriggers(connection, context.getContextId(), asInt(event.getId()), new int[] { userID });
+                } else {
+                    updated += updateReminderMinutes(connection, context.getContextId(), event, userID, updatedReminder.reminderMinutes);
+                    updated += updateReminderTrigger(connection, context.getContextId(), event, userID, updatedReminder.nextTriggerTime);
+                }
             }
             txPolicy.commit(connection);
         } catch (SQLException e) {
