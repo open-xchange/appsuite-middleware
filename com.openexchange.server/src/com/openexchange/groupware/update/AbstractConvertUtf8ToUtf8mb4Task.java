@@ -236,7 +236,7 @@ public abstract class AbstractConvertUtf8ToUtf8mb4Task extends UpdateTaskAdapter
             List<Column> newColumns = new ArrayList<>();
             do {
                 String columnName = columnRs.getString("COLUMN_NAME");
-                Column column = newColumn(columnName, createTable);
+                Column column = newColumn(columnName, createTable, charset);
                 if (column != null) {
                     newColumns.add(column);
                 }
@@ -252,10 +252,11 @@ public abstract class AbstractConvertUtf8ToUtf8mb4Task extends UpdateTaskAdapter
      *
      * @param columnName The {@link Column}'s name
      * @param createTable The create table statement
+     * @param charset The table's character set
      * @return The new {@link Column} definition or <code>null</code> if the requested column is not part of the specified
      *         create table statement
      */
-    private Column newColumn(String columnName, String createTable) {
+    private Column newColumn(String columnName, String createTable, String charset) {
         Pattern pattern = Pattern.compile("[`'\u00b4\"]" + Pattern.quote(columnName) + "[`'\u00b4\"]([^,]*),");
         Matcher matcher = pattern.matcher(createTable);
         if (!matcher.find()) {
@@ -263,8 +264,8 @@ public abstract class AbstractConvertUtf8ToUtf8mb4Task extends UpdateTaskAdapter
         }
         String definition = matcher.group(1);
         boolean changed = false;
-        if (definition.contains("CHARACTER SET utf8") && !definition.contains("CHARACTER SET utf8mb4")) {
-            definition = definition.replace("CHARACTER SET utf8", "CHARACTER SET utf8mb4");
+        if (definition.contains("CHARACTER SET " + charset) && !definition.contains("CHARACTER SET utf8mb4")) {
+            definition = definition.replace("CHARACTER SET " + charset, "CHARACTER SET utf8mb4");
             changed = true;
         }
         if (definition.contains("COLLATE utf8_")) {
@@ -279,7 +280,7 @@ public abstract class AbstractConvertUtf8ToUtf8mb4Task extends UpdateTaskAdapter
      * Retrieves the <code>CREATE TABLE</code> statement for the specified table
      *
      * @param con The {@link Connection}
-     * @param table Tje table's name
+     * @param table The table's name
      * @return the <code>CREATE TABLE</code> statement for the specified table or <code>null</code>
      *         if the specified table does not exist
      * @throws SQLException if an SQL error is occurred
