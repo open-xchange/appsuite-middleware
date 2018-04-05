@@ -73,7 +73,7 @@ import com.openxchange.documentation.tools.internal.Property;
 public class ShowConfig {
 
     private static final Options options = new Options();
-    private static final String DEFAULT_FOLDER = "/opt/openexchange/documentation/etc";
+    private static final String DEFAULT_FOLDER = "/opt/open-xchange/documentation/etc";
 
     private static final String SEARCH_OPTION = "s";
     private static final String TAG_OPTION = "t";
