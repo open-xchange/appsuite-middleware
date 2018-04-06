@@ -103,7 +103,7 @@ public class RdbCalendarStorage implements CalendarStorage {
 
     @Override
     public AlarmStorage getAlarmStorage() {
-        return delegate.getAlarmStorage();
+        return alarmStorage;
     }
 
     @Override
@@ -136,6 +136,7 @@ public class RdbCalendarStorage implements CalendarStorage {
         Map<String, List<OXException>> warnings = new TreeMap<String, List<OXException>>(ID_COMPARATOR);
         warnings.putAll(eventStorage.getWarnings());
         warnings.putAll(attendeeStorage.getWarnings());
+        warnings.putAll(alarmStorage.getWarnings());
         warnings.putAll(delegate.getWarnings());
         return warnings;
     }
@@ -145,6 +146,7 @@ public class RdbCalendarStorage implements CalendarStorage {
         Map<String, List<OXException>> warnings = new TreeMap<String, List<OXException>>(ID_COMPARATOR);
         warnings.putAll(eventStorage.getAndFlushWarnings());
         warnings.putAll(attendeeStorage.getAndFlushWarnings());
+        warnings.putAll(alarmStorage.getAndFlushWarnings());
         warnings.putAll(delegate.getAndFlushWarnings());
         return warnings;
     }
