@@ -205,7 +205,7 @@ public class BasicSchedJoulesCalendarAccess extends BasicCachingCalendarAccess {
         StringBuilder sb = new StringBuilder();
         sb.append(urlStr);
         sb.append(urlStr.contains("?") ? "&" : "?");
-        sb.append("u=").append(userKey);
+        sb.append("u=").append(userKey).append("&al=none");
 
         return sb.toString();
     }
