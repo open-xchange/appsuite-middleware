@@ -187,13 +187,13 @@ After that, the actual mechanism evaluation takes place. The core implementation
 
 When all evaluation and parsing of the single mechanisms is done, the overall status is determined. If there are multiple results for a specific mechanism, the best result of that mechanism is picked and only that result for that specific mechanism contributes to the overall result. 
 
-If the `DMARC` status is `fail` then the overall result of the message is set to `fail`. If the `DMARC` status is `pass` and there is a domain match then the overall status is set to `pass`. If `DMARC` is not present or its status is set to other than `pass` and there is no domain match, then the `DKIM` mechanism is checked. 
+If the `DMARC` status is `fail` then the overall result of the message is set to `fail`. If the `DMARC` status is `pass` and there is a domain match then the overall status is set to `pass` and no further evaluation takes place. If `DMARC` is not present or its status is set to other than `pass` and there is no domain match, then the `DKIM` mechanism is checked. 
 
 If the `DKIM` status is `pass` and there is a domain match, then the overall status is set to `pass`, or to `neutral` if there is no domain match. If the `DKIM` status is other than `pass` or `fail`, then that status is converted to their respective overall status.
 
 Last, the `SPF` status is evaluated. Always depending on whether there is a domain match, the overall status is set to `pass` if the `SPF` status is also set to `pass`. Otherwise, it will be set to `neutral` or `fail` depending on whether the `DKIM` mechanism failed previously. An overall status of `neutral` or `fail` is also set when the status of `SPF` is neutral and there is or isn't a domain match respectively.
 
-The entire decision algorithm is summed up in the following table:
+The decision algorithm for DKIM and SPF is summed up in the following table:
 
  SPF                                       | DKIM                                       | Domain Match                                    | Result
 -------------------------------------------|--------------------------------------------|:-----------------------------------------------:|---------------------------------------------
@@ -284,6 +284,7 @@ com.openexchange.mail.authenticity.trusted.image.2 = http://abc.foobar.com/imgs/
 In the above example the single tenant is configured in a way that considers as trusted senders all addresses that can be matched with the `config` property, i.e. `support@*.foobar.com`, `support@*.foobar.de` and `support@*.foobar.org`. There are also a few images configured, i.e. the `fallbackImage`, the `image.1` and the `image.2`. An e-mail will be marked as trusted if the address of the sender is matched with any of the configured trusted e-mail addresses. The (optional) numerical suffix of each configured address maps to its corresponding `image.xx` property, meaning that if an e-mail is coming from `support@*.foobar.de` then the client will show the image that is configured under `image.1`, if the e-mail is coming from `support@*.foobar.org` then it will show the image that is configured under `image.2` and if there is no numerical suffix, then the `fallbackImage` will be used.
 
 ## Multi-Tenant Example Configuration
+
 ```properties
 com.openexchange.mail.authenticity.enabled = true
 
@@ -403,7 +404,7 @@ Authentication-Results: mx1.acme.org;
   "unconsidered_results": [
 
   ],
-  "status": "neutral"
+  "status": "none"
 }
 ```
 
