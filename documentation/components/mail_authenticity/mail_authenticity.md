@@ -236,6 +236,31 @@ If the feature is enabled but an e-mail is not applicable for mail authenticity 
 
 An e-mail may contain multiple `Authentication-Results` headers. In that case the headers are merged and examined as one.
 
+# Debugging
+
+There is a logger attached to the mail authenticity feature which can be set to `DEBUG` level (either via `logback.xml` or on the fly via the `logconf` command line tool) during a debbuging session. The debug log entry is a JSON object with the following fields:
+
+ - `mailId`: abbreviated hashed mail identifier
+ - `mechanismResults`: all parsed (and known) mechanism results that contribute to the overall result
+ - `overallResult`: the overall result
+ - `domainMismatch`: whether there is a domain mismatch
+ - `fromHeader`: the domain part of the `From` header
+ - `rawHeaders`: the raw `Authentication-Results` headers
+ 
+The `rawHeaders` may contain sensitive user information such as e-mail addresses, therefore it is disabled by default. The property `com.openexchange.mail.authenticity.logRawHeaders` controls that behaviour.
+
+To enable debug logging via logback.xml, simply add the following line to the `<configuration>` element:
+
+```xml
+<logger name="com.openexchange.mail.authenticity.impl.core.metrics" level="DEBUG"/>
+```
+
+To enable debug logging via logconf, execute:
+
+```bash
+$ /opt/open-xchange/sbin/logconf -a -l com.openexchange.mail.authenticity.impl.core.metrics=DEBUG
+```
+
 # Configuration
 
 Documentation for the required properties of the feature can be found [here](https://documentation.open-xchange.com/components/middleware/config/develop/#mode=features&feature=Mail Authenticity).
