@@ -322,7 +322,7 @@ public class CustomRuleChecker implements Reloadable{
                     return false;
                 }
             }
-            Object attribute = result.getAttribute(MailAuthenticityResultKey.FROM_DOMAIN);
+            Object attribute = result.getAttribute(MailAuthenticityResultKey.FROM_HEADER_DOMAIN);
             if (attribute != null && fromDomain != null && !attribute.toString().equalsIgnoreCase(fromDomain)) {
                 return false;
             }
