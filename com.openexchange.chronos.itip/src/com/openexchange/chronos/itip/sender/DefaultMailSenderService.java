@@ -532,18 +532,29 @@ public class DefaultMailSenderService implements MailSenderService {
      * @throws OXException In case the {@link HostnameService} can't be loaded
      */
     private String generateHeaderValue(Session session, String uid, boolean timestamp) throws OXException {
-        HostnameService hostnameService = Services.getOptionalService(HostnameService.class);
-        String hostname;
+        String hostname = null;
         try {
-            hostname = null == hostnameService ? InetAddress.getLocalHost().getCanonicalHostName() : hostnameService.getHostname(session.getUserId(), session.getContextId());
+            hostname = InetAddress.getLocalHost().getCanonicalHostName();
         } catch (UnknownHostException e) {
-            LOG.warn("Could not get hostname. Fall back to 'open-xchange.com'.");
-            hostname = "open-xchange.com";
+            // fall through
+            LOG.debug("Couldn't get hostname. Try to resolve via HostnameService.", e);
         }
+        if (Strings.isEmpty(hostname)) {
+            // Try to load via HostnameService
+            HostnameService hostnameService = Services.getOptionalService(HostnameService.class);
+            if (null != hostnameService) {
+                hostname = hostnameService.getHostname(session.getUserId(), session.getContextId());
+            }
+            if (Strings.isEmpty(hostname)) {
+                LOG.warn("Could not get hostname. Fall back to 'open-xchange.com'.");
+                hostname = "open-xchange.com";
+            }
+        }
+
         StringBuilder builder = new StringBuilder("<Appointment.");
         builder.append(uid);
-        builder.append(".");
         if (timestamp) {
+            builder.append(".");
             builder.append(String.valueOf(System.currentTimeMillis()));
         }
         builder.append("@");
