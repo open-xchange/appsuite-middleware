@@ -37,7 +37,7 @@ The calendar folders are now driven by a dedicated folder storage, and there's n
  
 ## Import/Export
 
-...
+Calendar-related actions in the import/export module of the HTTP API will continue to work transparently. For the import action, the returned folder identifiers in the responses will be the ones suitable for the targeted folder (i.e. composite identifiers when importing into a folder with content type ``event``, and relative numerical identifiers when importing to the previously used folders).
 
 ## iTIP
 
