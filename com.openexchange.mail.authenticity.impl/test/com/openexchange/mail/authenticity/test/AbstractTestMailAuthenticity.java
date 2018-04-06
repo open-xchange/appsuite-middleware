@@ -123,7 +123,6 @@ public abstract class AbstractTestMailAuthenticity {
         when(services.getService(MailAuthenticityMetricLogger.class)).thenReturn(metricsLogger);
         when(services.getService(LeanConfigurationService.class)).thenReturn(leanConfig);
         when(leanConfig.getProperty(1, 1, MailAuthenticityProperty.AUTHSERV_ID)).thenReturn("ox.io");
-        when(leanConfig.getBooleanProperty(MailAuthenticityProperty.LOG_METRICS)).thenReturn(false);
 
         mailMessage = mock(MailMessage.class);
         when(mailMessage.getHeaders()).thenReturn(headerCollection);
