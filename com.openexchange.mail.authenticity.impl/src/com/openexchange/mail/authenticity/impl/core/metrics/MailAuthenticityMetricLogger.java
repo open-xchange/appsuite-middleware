@@ -56,6 +56,7 @@ import com.openexchange.mail.dataobjects.MailAuthenticityResult;
  * {@link MailAuthenticityMetricLogger}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @since v7.10.0
  */
 public interface MailAuthenticityMetricLogger {
 

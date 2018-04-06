@@ -108,14 +108,13 @@ public class MailAuthenticityActivator extends HousekeepingActivator {
     protected void startBundle() throws Exception {
         final BundleContext context = this.context;
         // It is OK to pass service references since 'stopOnServiceUnavailability' returns 'true'
-        final MailAuthenticityHandlerRegistryImpl registry = new MailAuthenticityHandlerRegistryImpl(getService(LeanConfigurationService.class), context);
+        LeanConfigurationService leanConfigService = getService(LeanConfigurationService.class);
+
+        MailAuthenticityHandlerRegistryImpl registry = new MailAuthenticityHandlerRegistryImpl(leanConfigService, context);
         registerService(MailAuthenticityHandlerRegistry.class, registry);
 
-        LeanConfigurationService leanConfigService = getService(LeanConfigurationService.class);
-        if (leanConfigService.getBooleanProperty(MailAuthenticityProperty.LOG_METRICS)) {
-            registerService(MailAuthenticityMetricLogger.class, new MailAuthenticityMetricFileLogger());
-            trackService(MailAuthenticityMetricLogger.class);
-        }
+        registerService(MailAuthenticityMetricLogger.class, new MailAuthenticityMetricFileLogger(leanConfigService));
+        trackService(MailAuthenticityMetricLogger.class);
 
         track(MailAuthenticityHandler.class, registry);
         openTrackers();
@@ -124,7 +123,7 @@ public class MailAuthenticityActivator extends HousekeepingActivator {
         registerService(ForcedReloadable.class, authenticationHandler);
         CustomRuleChecker ruleChecker = new CustomRuleChecker(leanConfigService);
         registerService(Reloadable.class, ruleChecker);
-        final MailAuthenticityHandlerImpl handlerImpl = new MailAuthenticityHandlerImpl(authenticationHandler, this, ruleChecker);
+        MailAuthenticityHandlerImpl handlerImpl = new MailAuthenticityHandlerImpl(authenticationHandler, this, ruleChecker);
         registerService(MailAuthenticityHandler.class, handlerImpl);
         registerService(Reloadable.class, new ConfigReloader(registry, handlerImpl));
 
