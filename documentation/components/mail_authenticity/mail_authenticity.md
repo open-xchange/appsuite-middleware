@@ -198,21 +198,21 @@ The decision algorithm for DKIM and SPF is summed up in the following table:
  SPF                                       | DKIM                                       | Domain Match                                    | Result
 -------------------------------------------|--------------------------------------------|:-----------------------------------------------:|---------------------------------------------
 <span style="color: green">pass</span>     | <span style="color: green">pass</span>     | <span style="color: green">Yes</span>           | <span style="color: green">pass</span>
-<span style="color: green">pass</span>     | <span style="color: green">pass</span>     | <span style="color: red">No</span>              | <span style="color: yellow">neutral</span>
-<span style="color: green">pass</span>     | <span style="color: yellow">neutral</span> | <span style="color: green">Yes</span>           | <span style="color: green">pass</span>
-<span style="color: green">pass</span>     | <span style="color: yellow">neutral</span> | <span style="color: red">No</span>              | <span style="color: yellow">neutral</span>
-<span style="color: green">pass</span>     | <span style="color: red">fail</span>       | <span style="color: green">Yes</span>           | <span style="color: yellow">neutral</span>
+<span style="color: green">pass</span>     | <span style="color: green">pass</span>     | <span style="color: red">No</span>              | <span style="color: orange">neutral</span>
+<span style="color: green">pass</span>     | <span style="color: orange">neutral</span> | <span style="color: green">Yes</span>           | <span style="color: green">pass</span>
+<span style="color: green">pass</span>     | <span style="color: orange">neutral</span> | <span style="color: red">No</span>              | <span style="color: orange">neutral</span>
+<span style="color: green">pass</span>     | <span style="color: red">fail</span>       | <span style="color: green">Yes</span>           | <span style="color: orange">neutral</span>
 <span style="color: green">pass</span>     | <span style="color: red">fail</span>       | <span style="color: red">No</span>              | <span style="color: red">fail</span>
-<span style="color: yellow">neutral</span> | <span style="color: green">pass</span>     | <span style="color: green">Yes</span>           | <span style="color: green">pass</span>
-<span style="color: yellow">neutral</span> | <span style="color: green">pass</span>     | <span style="color: red">No</span>              | <span style="color: yellow">neutral</span>
-<span style="color: yellow">neutral</span> | <span style="color: yellow">neutral</span> | <span style="color: green">Yes</span>           | <span style="color: yellow">neutral</span>
-<span style="color: yellow">neutral</span> | <span style="color: yellow">neutral</span> | <span style="color: red">No</span>              | <span style="color: yellow">neutral</span>
-<span style="color: yellow">neutral</span> | <span style="color: red">fail</span>       | <span style="color: green">Yes</span>           | <span style="color: yellow">neutral</span>
-<span style="color: yellow">neutral</span> | <span style="color: red"> fail </span>     | <span style="color: red">No</span>              | <span style="color: red">fail</span>
+<span style="color: orange">neutral</span> | <span style="color: green">pass</span>     | <span style="color: green">Yes</span>           | <span style="color: green">pass</span>
+<span style="color: orange">neutral</span> | <span style="color: green">pass</span>     | <span style="color: red">No</span>              | <span style="color: orange">neutral</span>
+<span style="color: orange">neutral</span> | <span style="color: orange">neutral</span> | <span style="color: green">Yes</span>           | <span style="color: orange">neutral</span>
+<span style="color: orange">neutral</span> | <span style="color: orange">neutral</span> | <span style="color: red">No</span>              | <span style="color: orange">neutral</span>
+<span style="color: orange">neutral</span> | <span style="color: red">fail</span>       | <span style="color: green">Yes</span>           | <span style="color: orange">neutral</span>
+<span style="color: orange">neutral</span> | <span style="color: red"> fail </span>     | <span style="color: red">No</span>              | <span style="color: red">fail</span>
 <span style="color: red">fail</span>       | <span style="color: green">pass</span>     | <span style="color: green">Yes</span>           | <span style="color: red">fail</span>
 <span style="color: red">fail</span>       | <span style="color: green">pass</span>     | <span style="color: red">No</span>              | <span style="color: red">fail</span>
-<span style="color: red">fail</span>       | <span style="color: yellow">neutral</span> | <span style="color: green">Yes</span>           | <span style="color: red">fail</span>
-<span style="color: red">fail</span>       | <span style="color: yellow">neutral</span> | <span style="color: red">No</span>              | <span style="color: red">fail</span>
+<span style="color: red">fail</span>       | <span style="color: orange">neutral</span> | <span style="color: green">Yes</span>           | <span style="color: red">fail</span>
+<span style="color: red">fail</span>       | <span style="color: orange">neutral</span> | <span style="color: red">No</span>              | <span style="color: red">fail</span>
 <span style="color: red">fail</span>       | <span style="color: red">fail</span>       | <span style="color: green">Yes</span>           | <span style="color: red">fail</span>
 <span style="color: red">fail</span>       | <span style="color: red"> fail </span>     | <span style="color: red">No</span>              | <span style="color: red">fail</span>
 
