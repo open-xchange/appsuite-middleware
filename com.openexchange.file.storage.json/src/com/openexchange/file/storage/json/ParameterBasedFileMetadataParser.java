@@ -73,7 +73,7 @@ public class ParameterBasedFileMetadataParser {
 
     //@formatter:off
     private static final List<File.Field> POSSIBLE_FIELDS = Arrays.asList(Field.FOLDER_ID, Field.TITLE, Field.FILENAME, Field.FILE_MIMETYPE,
-        Field.FILE_MD5SUM, Field.DESCRIPTION, Field.ID, Field.VERSION, Field.VERSION_COMMENT, Field.CATEGORIES, Field.COLOR_LABEL, Field.FILE_SIZE);
+        Field.FILE_MD5SUM, Field.DESCRIPTION, Field.ID, Field.VERSION, Field.VERSION_COMMENT, Field.CATEGORIES, Field.COLOR_LABEL, Field.FILE_SIZE, Field.URL);
     //@formatter:on
 
     /**
@@ -136,7 +136,7 @@ public class ParameterBasedFileMetadataParser {
 
     /**
      * Gets the fields from the specified {@link AJAXRequestData}
-     * 
+     *
      * @param request the {@link AJAXRequestData}
      * @return A {@link List} with the set {@link Field}s
      */
