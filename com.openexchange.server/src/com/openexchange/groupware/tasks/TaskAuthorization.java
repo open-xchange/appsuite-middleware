@@ -58,6 +58,7 @@ import com.openexchange.tools.session.ServerSession;
 
 /**
  * This class implements authorization checks for attachments.
+ * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public class TaskAuthorization implements AttachmentAuthorization {
@@ -77,14 +78,12 @@ public class TaskAuthorization implements AttachmentAuthorization {
         final TaskStorage storage = TaskStorage.getInstance();
         final FolderStorage foldStor = FolderStorage.getInstance();
         try {
-            final Task task = storage.selectTask(session.getContext(), taskId, StorageType
-                .ACTIVE);
+            final Task task = storage.selectTask(session.getContext(), taskId, StorageType.ACTIVE);
             task.setParentFolderID(folderId);
             final FolderObject folder = Tools.getFolder(session.getContext(), folderId);
             Permission.checkWriteInFolder(session.getContext(), session.getUser(), session.getUserPermissionBits(), folder, task);
             // Check if task appears in folder.
-            foldStor.selectFolderById(session.getContext(), taskId, folderId, StorageType
-                .ACTIVE);
+            foldStor.selectFolderById(session.getContext(), taskId, folderId, StorageType.ACTIVE);
         } catch (final OXException e) {
             throw e;
         }
@@ -104,19 +103,11 @@ public class TaskAuthorization implements AttachmentAuthorization {
     @Override
     public void checkMayReadAttachments(ServerSession session, int folderId, int taskId) throws OXException {
         final TaskStorage storage = TaskStorage.getInstance();
-        final FolderObject folder;
-        final Task task;
-        try {
-            folder = Tools.getFolder(session.getContext(), folderId);
-            task = storage.selectTask(session.getContext(), taskId, StorageType.ACTIVE);
-        } catch (final OXException e) {
-            throw e;
-        }
-        try {
-            Permission.canReadInFolder(session.getContext(), session.getUser(), session.getUserPermissionBits(), folder, task);
-        } catch (final OXException e) {
-            throw e;
-        }
+        final FolderObject folder = Tools.getFolder(session.getContext(), folderId);
+        
+        Permission.canReadInFolder(session.getContext(), session.getUser(), session.getUserPermissionBits(), folder);
+
+        final Task task = storage.selectTask(session.getContext(), taskId, StorageType.ACTIVE);
         Set<Folder> folderMappings = FolderStorage.getInstance().selectFolder(session.getContext(), taskId, StorageType.ACTIVE);
         Folder matchingFolder = FolderStorage.getFolder(folderMappings, folderId);
         if (null == matchingFolder || (Tools.isFolderShared(folder, session.getUser()) && task.getPrivateFlag())) {
