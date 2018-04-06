@@ -34,6 +34,16 @@ properties:
       file: mailAuthenticity.properties
       packageName: open-xchange-mail-authenticity
       tags: ["Mail Authenticity","Mail"]
+    - key: com.openexchange.mail.authenticity.logRawHeaders
+      description: |
+        Specifies whether the raw headers of the mail messages will be logged in the DEBUG level
+      defaultValue: false
+      version: 7.10.0
+      reloadable: true
+      configcascadeAware: false
+      file: mailAuthenticity.properties
+      packageName: open-xchange-mail-authenticity
+      tags: ["Mail Authenticity","Mail"]
     - key: com.openexchange.mail.authenticity.trusted.tenants
       description: |
         A comma separated list of tenants.
