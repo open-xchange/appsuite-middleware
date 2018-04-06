@@ -4,7 +4,7 @@ title: Mail Authenticity
 
 Since 7.10.0 the OX middleware provides the Mail Authenticity feature for the end user which enables her to be visually aware of the authentication status of emails that she receives and helps her identify phishing mails from regular communication.
 
-## Motivation
+# Motivation
 
 We live in an era where security matters. The Internet has not only become a vast ocean of information (both useful and useless), but a hive of predators lurking to steal personal information by claiming to be someone you trust. 
 
@@ -20,7 +20,7 @@ In the old ages they used signatures to sign their messages and sealing wax with
 
 A similar method is being used in the digital age and is called *Email Authentication*. Though the naming might be a bit misleading and can be easily confused with user authentication, in reality it actually authenticates with a series of different authentication mechanisms that the message is not forged or altered and is indeed originating from the source it claims to be coming from. To avoid any confusion, we slightly altered the naming to *Email Authenticity*. During the rest of the article the *Email Authentication* will be used to refer to the technical standards that make the verification possible, while the term *Email Authenticity* will be used to refer our implementation and implementation details.
 
-## Foundation
+# Foundation
 
 The Email Authentication is actually a collection of different authentication mechanism approaches, each with its own advantages and disadvantages (out of the scope of this article) that are used in conjunction. The Email Authenticity in the middleware's core is based on three of those mechanisms, namely [SPF](https://tools.ietf.org/html/rfc7208), [DKIM]( https://tools.ietf.org/html/rfc6376) and [DMARC](https://tools.ietf.org/html/rfc7489). All three standards provide different aspects to email authentication and they address complementary issues. In a nutshell:
 
@@ -28,7 +28,7 @@ The Email Authentication is actually a collection of different authentication me
  - **DKIM** provides digital signatures and encryption keys that verify that an e-mail messages was not forged, faked or altered
  - **DMARC** links SPF and DKIM under one roof and provides reports and feedback to the domain owner about the results of the previous mentioned mechanisms.
  
-### SPF (Sender Policy Framework)
+## SPF (Sender Policy Framework)
 
 The way `SPF` works is as follows. The domain owner publishes a DNS record listing all servers that are allowed to send out emails from that domain. Additionally it may contain a policy on how to deal with illegitimate senders. Those policies are: NEUTRAL, SOFTFAIL and FAIL.
 
@@ -68,7 +68,7 @@ Received-SPF: pass (aliceland.com: domain of bob@foobar.com
 
 In this case bob from the domain `foobar.com` sent an e-mail to alice in the `aliceland.com` domain. The SPF mechanism authenticates the sender IP address and verifies that the sender is permitted to send e-mails from that particular domain.
 
-### DKIM (DomainKeys Identified Mail)
+## DKIM (DomainKeys Identified Mail)
 
 The DKIM on the other hand instead of verifying the origin of the mail, it deploys digital signatures to guarantee that the portions of the message were not altered, forged or faked along the way. Much like the sealing wax sigils in the old ages but in digital form ;-)
 
@@ -110,7 +110,7 @@ Subject: Hello there
 ```
 The signature can be verified at any hop by retrieving the public key from the DNS. If the signature validates then the domain name is the authenticated identity.
 
-### DMARC (Domain-based Message Authentication, Reporting, and Conformance)
+## DMARC (Domain-based Message Authentication, Reporting, and Conformance)
 
 The DMARC is built on top of SPF and DKIM and unifies both mechanisms. The domain owner publishes a policy denoting whether she is using SPF and/or DKIM and how e-mail receivers should deal with validation failures. Possible policies are: `none`, `quarantine` and `reject`. In addition an e-mail address is published where aggregated reports about successful validations and failures shall be sent to. This policy is published as a DNS record.
 
@@ -142,7 +142,7 @@ Authentication-Results: mx.aliceland.com;
 ```
 The key attributes for each mechanism in the `Authentication-Results` header is the domain the e-mail originated from. In case of `SPF` that information is stored in the `smtp.mailfrom` attribute, in case of `DKIM` in the `header.i` attribute and in case of `DMARC` in the `header.from` attribute.
 
-## The Big Picture
+# The Big Picture
 
 Now, let's see how all the pieces of the puzzle fit together. This is illustrated below.
 
@@ -157,11 +157,11 @@ Bob checks his e-mail messages via the MUA (in this case the OX AppSuite). The h
 
 It is worth noting that between the `example.com` mail relay server and the `acme.org` mail exchange server there might be also some more mail relay hops, some might have DKIM enabled, some SPF, some none at all. The in-between mail hops may or may not apply further mail authentication mechanisms. Every time a mail authentication mechanism is applied, a new header in the e-mail will reflect that.
   
-## Header Analysis
+# Header Analysis
 
 As explained before, all the authentication mechanism results are collected and summarised in the `Authentication-Results` header. An e-mail may contain none, one or more such headers. The OX middleware relies on those headers to determine whether an e-mail is safe or not.
 
-### Header Structure
+## Header Structure
 
 The `Authentication-Results` header begins with the `authserv-id` token which references the administrative management domain. It is an arbitrary string but usually it has the format of a domain name. After the `authserv-id` follow the results of all authentication mechanisms separated by a semicolon. Values enclosed in parenthesis are considered as comments and are ignored from the analysis process. Every mechanism has different attributes, but all have one common, that of the authentication status. An example header is illustrated below:
 
@@ -175,7 +175,7 @@ Authentication-Results: mx.aliceland.com;
 
 There are different statuses for each mechanism defined in their respective RFCs, but in general there are only three that are relevant for the end user, whether the mechanism: a) passed the validation, b) failed it or c) an error occurred. The OX middleware takes into consideration all different statuses and based on a decision matrix it marks each e-mail with an overall status of either `pass`, `fail`, or `neutral`. The OX middleware also assigns the `not-analyzed` status but the purpose of that is explained in a later section.
 
-### Header Evaluation
+## Header Evaluation
 
 First things first, the existence of the `Authentication-Results` header(s) is checked. If no such header exists, then the message is marked as `neutral`. In case there are multiple `Authentication-Results` headers then all of them are evaluated (top to bottom).
 
@@ -219,7 +219,7 @@ The entire decision algorithm is summed up in the following table:
 
 Please note that the headers of messages in the "Drafts" or "Sent" folder are not analysed. Furthermore, only messages of the primary account of a user are evaluated.
 
-## API Enhancements
+# API Enhancements
 
 The response of the single mail fetch `mail?action=get` is now extended over a new field `authenticity` which is documented [here](https://documentation.open-xchange.com/components/middleware/http/develop/#!/Mail/getMail). The `authenticity` field is referenced in multi-mail fetch actions like `mail?action=all` with two column identifiers, 664 and 665, which reflect the light and heavy weighted versions of the `authenticity` field. The light weighted version includes the overall status of the e-mail, while the heavy weighted includes all the information.
 
@@ -236,11 +236,11 @@ If the feature is enabled but an e-mail is not applicable for mail authenticity 
 
 An e-mail may contain multiple `Authentication-Results` headers. In that case the headers are merged and examined as one.
 
-## Configuration
+# Configuration
 
 Documentation for the required properties of the feature can be found [here](https://documentation.open-xchange.com/components/middleware/config/develop/#mode=features&feature=Mail Authenticity).
 
-### How to enable
+## How to enable
 
 In general the feature can be enabled with the property `com.openexchange.mail.authenticity.enabled` which by default is set to `false`.
 
@@ -249,7 +249,7 @@ Once enabled, a boolean JSlob entry under `io.ox/mail//features/authenticity` in
 GET http://{{server}}/appsuite/api/jslob?action=get&id=io.ox/mail&session={{session}}
 ```
 
-### Further Core Configuration Properties
+## Further Core Configuration Properties
 
 There are more properties that define the behavior of this feature.
 
@@ -257,7 +257,7 @@ First and foremost is the `com.openexchange.mail.authenticity.threshold` propert
 
 It is possible to whitelist mail servers with a specific `authserv-id` (as described in [RFC7601, Section-2.2](https://tools.ietf.org/html/rfc7601#section-2.2]) via the `com.openexchange.mail.authenticity.authServId` property. By default that property is empty and all mails that include an `authserv-id` in their `Mail-Authentication` header will be ignored. If that's the case then their result will be set to `not-analyzed`.
 
-### Trusted Mail Highlighting Properties
+## Trusted Mail Highlighting Properties
 
 It is also possible to configure the middleware in a way that highlights authenticated e-mails from certain trusted mail addresses. It can be configured per-tenant and per e-mail address.
 
@@ -269,9 +269,9 @@ The property `com.openexchange.mail.authenticity.trusted.[tenant.]image.[imageId
 
 The property `com.openexchange.mail.authenticity.trusted.[tenant].fallbackImage` defines for each tenant the fall-back image that is to be shown by the clients for trusted e-mail addresses without a configured image.
 
-## Appendix A: Example Configuration
+# Appendix A: Example Configuration
 
-#### Single Tenant Example Configuration
+## Single Tenant Example Configuration
 
 ```properties
 com.openexchange.mail.authenticity.enabled = true
@@ -283,7 +283,7 @@ com.openexchange.mail.authenticity.trusted.image.2 = http://abc.foobar.com/imgs/
 
 In the above example the single tenant is configured in a way that considers as trusted senders all addresses that can be matched with the `config` property, i.e. `support@*.foobar.com`, `support@*.foobar.de` and `support@*.foobar.org`. There are also a few images configured, i.e. the `fallbackImage`, the `image.1` and the `image.2`. An e-mail will be marked as trusted if the address of the sender is matched with any of the configured trusted e-mail addresses. The (optional) numerical suffix of each configured address maps to its corresponding `image.xx` property, meaning that if an e-mail is coming from `support@*.foobar.de` then the client will show the image that is configured under `image.1`, if the e-mail is coming from `support@*.foobar.org` then it will show the image that is configured under `image.2` and if there is no numerical suffix, then the `fallbackImage` will be used.
 
-#### Multi-Tenant Example Configuration
+## Multi-Tenant Example Configuration
 ```properties
 com.openexchange.mail.authenticity.enabled = true
 
@@ -302,11 +302,11 @@ com.openexchange.mail.authenticity.trusted.myhost2.fallbackImage = http://myhost
 In a multi-tenant situation the configuration is a bit different. The `[tenant]` part of the property is filled with the corresponding tenant name. In this example `myhost1` considers as trusted senders all addresses that can be matched with the `config` property, i.e. `info@*.myhost1.com` and `*@myhost1.org` and the tenant `myhost2` all addresses that come from `sales@*.myhost2.com` and `marketing@otherdomain.com`. The images map to the e-mail addresses as they do with the single-tenant example.
 
 
-## Appendix B: Examples of Common Results
+# Appendix B: Examples of Common Results
 
 In this section there are some example `Authentication-Results` and their evaluated result as JSON object.
 
-### Trivial Pass All Mechanisms
+## Trivial Pass All Mechanisms
 
 ```mail
 From: Bob <bob@foobar.com>
@@ -343,7 +343,7 @@ Authentication-Results: mx.acme.org;
 }
 ```
 
-### Mechanisms Pass But No `From` Domain Match
+## Mechanisms Pass But No `From` Domain Match
 
 ```mail
 From: Jane Doe <jane.doe@acme.foobar.com>
@@ -372,7 +372,7 @@ Authentication-Results: mx.acme.org;
 }
 ```
 
-### The `none` Case
+## The `none` Case
 
 ```mail
 From: Bob <bob@foobar.com>
@@ -407,7 +407,7 @@ Authentication-Results: mx1.acme.org;
 }
 ```
 
-### Unknown Mechanisms
+## Unknown Mechanisms
 
 ```mail
 From: Bob <bob@foobar.com>
@@ -439,7 +439,7 @@ Authentication-Results: mx1.acme.org;
 }
 ```
 
-### Mechanisms Failed
+## Mechanisms Failed
 
 ```mail
 From: Eve Your Co-Worker <eve@acme.org>
