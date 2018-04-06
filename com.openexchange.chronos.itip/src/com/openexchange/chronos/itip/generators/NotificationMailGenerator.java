@@ -154,8 +154,8 @@ public class NotificationMailGenerator implements ITipMailGenerator {
         this.calendarUtilities = Services.getService(CalendarUtilities.class);
 
         this.recipients = resolver.resolveAllRecipients(original, updated, user, onBehalfOf, ctx, session, principal);
-        this.participants = resolver.getAllParticipants(this.recipients, updated, user, ctx);
-        this.resources = resolver.getResources(updated, ctx);
+        this.participants = resolver.getAllParticipants(this.recipients, updated);
+        this.resources = resolver.getResources(updated);
 
         for (final NotificationParticipant participant : recipients) {
             if (participant.hasRole(ITipRole.ORGANIZER)) {
