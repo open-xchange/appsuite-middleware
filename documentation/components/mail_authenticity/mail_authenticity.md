@@ -179,7 +179,7 @@ There are different statuses for each mechanism defined in their respective RFCs
 
 First things first, the existence of the `Authentication-Results` header(s) is checked. If no such header exists, then the message is marked as `neutral`. In case there are multiple `Authentication-Results` headers then all of them are evaluated (top to bottom).
 
-Then the existence and validation of the `authserv-id` takes place. It is possible to configure the middleware in a way that only certain `authserv-id`s are considered as safe for a specific setup. In the [Configuration](#Configuration) section it is described how to configure that setting. If the `authserv-id` string is missing from the `Authentication-Results` header, then that header is being completely ignored from the evaluation. If it's the only `Authentication-Results` header in the message, then that message will be marked as `neutral`, otherwise the algorithm will process the next header.
+Then the existence and validation of the `authserv-id` takes place. It is possible to configure the middleware in a way that only certain `authserv-id`s are considered as safe for a specific setup. In the [Configuration](#Configuration) section it is described how to configure that setting. If the `authserv-id` string is missing from the `Authentication-Results` header, then that header is being completely ignored from the evaluation. If it's the only `Authentication-Results` header in the message, then that message will be marked as `none`, otherwise the algorithm will process the next header.
 
 Then the domain of the sender is extracted out of the `From` header of the e-mail message. The domain will be later used to verify whether it matches the domain attribute from the different mechanisms, i.e. for `SPF` the `smtp.mailfrom` attribute, for `DKIM` the `header.i` attribute and for `DMARC` the `header.from` attribute. If the domain extracted from the `From` header does not match domain attributes of all present mechanisms, then the mail will be marked either as `neutral` or `fail`, depending on the outcome of the individual mechanisms statuses.
 
@@ -223,12 +223,13 @@ Please note that the headers of messages in the "Drafts" or "Sent" folder are no
 
 The response of the single mail fetch `mail?action=get` is now extended over a new field `authenticity` which is documented [here](https://documentation.open-xchange.com/components/middleware/http/develop/#!/Mail/getMail). The `authenticity` field is referenced in multi-mail fetch actions like `mail?action=all` with two column identifiers, 664 and 665, which reflect the light and heavy weighted versions of the `authenticity` field. The light weighted version includes the overall status of the e-mail, while the heavy weighted includes all the information.
 
-There are four statuses in total:
+There are five statuses in total:
 
  - `pass`: The e-mail has passed the authenticity validation (The green case)
  - `fail`: The e-mail has failed the authenticity validation (The red case)
  - `neutral`: One or more authenticity mechanisms failed, or the authserv-id is malformed or not existent (The yellow case)
  - `not-analyzed`: The e-mail was not analysed either due to an error, or due to the configured `threshold` date
+ - `none`: The e-mail has either no `Authentication-Results` header, or every (known) mechanism (`DMARC`, `DKIM`, `SPF`) yields a `none` status, or the `authserv-id` does not match any of the allowed `authserv-id`s defined via configuration.
 
 If the feature is not enabled (either globally or via config-cascade for the user), then the `authenticity` field should not be present in the `mail?action=get` response and the corresponding column (if requested) in `mail?action=all` should be `null`.
 
