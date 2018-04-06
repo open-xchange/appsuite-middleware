@@ -271,7 +271,7 @@ public class OXUtilMySQLStorageCommon {
         Statement stmt = null;
         try {
             stmt = con.createStatement();
-            stmt.executeUpdate("CREATE DATABASE `" + name + "` DEFAULT CHARACTER SET utf8 COLLATE utf8_unicode_ci");
+            stmt.executeUpdate("CREATE DATABASE `" + name + "` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci");
         } catch (final SQLException e) {
             LOG.error("SQL Error", e);
             throw new StorageException(e.getMessage(), e);
