@@ -109,6 +109,7 @@ import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.exception.OXException;
 import com.openexchange.osgi.ServiceSet;
 import com.openexchange.session.Session;
+import com.openexchange.threadpool.ThreadPools;
 
 /**
  * {@link CalendarServiceImpl}
@@ -524,18 +525,28 @@ public class CalendarServiceImpl implements CalendarService {
     }
 
     private <T extends InternalCalendarResult> T notifyHandlers(T result, boolean trackAttendeeUsage) {
-        CalendarEvent calendarEvent = result.getCalendarEvent();
-        if (trackAttendeeUsage) {
-            trackAttendeeUsage(result.getSession(), calendarEvent);
+        Runnable notifyRunnable = () -> {
+            CalendarEvent calendarEvent = result.getCalendarEvent();
+            if (trackAttendeeUsage) {
+                trackAttendeeUsage(result.getSession(), calendarEvent);
+            }
+            notifyHandlers(calendarEvent);
+        };
+        final boolean ASYNC = true;
+        if (ASYNC) {
+            ThreadPools.submitElseExecute(ThreadPools.task(notifyRunnable));
+        } else {
+            notifyRunnable.run();
         }
-        notifyHandlers(calendarEvent);
         return result;
     }
 
     private void notifyHandlers(CalendarEvent event) {
         for (CalendarHandler handler : calendarHandlers) {
+            long start = System.currentTimeMillis();
             try {
                 handler.handle(event);
+                LOG.trace("{} handled successfully by {} ({} ms elapsed)", event, handler, L(System.currentTimeMillis() - start));
             } catch (Exception e) {
                 getLogger(getClass()).warn("Unexpected error while handling {}: {}", event, e.getMessage(), e);
             }
