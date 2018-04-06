@@ -77,6 +77,7 @@ import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.passwordmechs.PasswordMechFactory;
 import com.openexchange.quota.QuotaProvider;
 import com.openexchange.quota.QuotaService;
+import com.openexchange.sessiond.SessiondService;
 import com.openexchange.share.ShareService;
 import com.openexchange.share.groupware.ModuleSupport;
 import com.openexchange.share.impl.DefaultShareService;
@@ -116,7 +117,7 @@ public class ShareActivator extends HousekeepingActivator {
             DatabaseService.class, HtmlService.class, UserPermissionService.class, UserConfigurationService.class, ContactService.class,
             ContactUserStorage.class, ThreadPoolService.class, TimerService.class, ExecutorService.class, ConfigViewFactory.class,
             QuotaService.class, FolderCacheInvalidationService.class, ClusterTimerService.class, GuestService.class,
-            DispatcherPrefixService.class, CapabilityService.class, GroupService.class, PasswordMechFactory.class };
+            DispatcherPrefixService.class, CapabilityService.class, GroupService.class, PasswordMechFactory.class, SessiondService.class };
     }
 
     @Override
