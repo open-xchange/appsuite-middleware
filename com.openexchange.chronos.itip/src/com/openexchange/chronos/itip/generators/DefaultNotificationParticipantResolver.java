@@ -167,7 +167,7 @@ public class DefaultNotificationParticipantResolver implements NotificationParti
         boolean foundOnBehalfOf = false;
         boolean foundPrincipal = false;
 
-        final String appId = (update.getId() == null && original != null) ? original.getId() : update.getId();
+        final String eventId = (update.getId() == null && original != null) ? original.getId() : update.getId();
 
         for (final User u : participantUsers) {
             final int id = u.getId();
@@ -201,7 +201,7 @@ public class DefaultNotificationParticipantResolver implements NotificationParti
             participant.setUser(u);
             participant.setContext(ctx);
 
-            String folderIdForUser = util.getFolderIdForUser(session, appId, u.getId());
+            String folderIdForUser = util.getFolderIdForUser(session, eventId, u.getId());
             if (folderIdForUser == null) {
                 folderIdForUser = update.getFolderId();
             }
@@ -243,7 +243,7 @@ public class DefaultNotificationParticipantResolver implements NotificationParti
 
             participant.setUser(user);
             participant.setContext(ctx);
-            participant.setFolderId(util.getFolderIdForUser(session, appId, user.getId()));
+            participant.setFolderId(util.getFolderIdForUser(session, eventId, user.getId()));
 
             final NotificationConfiguration configuration = defaultConfiguration.clone();
             configure(user, ctx, configuration, participant.hasRole(ITipRole.ORGANIZER));
@@ -278,7 +278,7 @@ public class DefaultNotificationParticipantResolver implements NotificationParti
 
             participant.setUser(onBehalfOf);
             participant.setContext(ctx);
-            participant.setFolderId(util.getFolderIdForUser(session, appId, onBehalfOf.getId()));
+            participant.setFolderId(util.getFolderIdForUser(session, eventId, onBehalfOf.getId()));
 
             final NotificationConfiguration configuration = defaultConfiguration.clone();
             configure(onBehalfOf, ctx, configuration, participant.hasRole(ITipRole.ORGANIZER));
@@ -313,7 +313,7 @@ public class DefaultNotificationParticipantResolver implements NotificationParti
 
             participant.setUser(principalUser);
             participant.setContext(ctx);
-            participant.setFolderId(util.getFolderIdForUser(session, appId, principalUser.getId()));
+            participant.setFolderId(util.getFolderIdForUser(session, eventId, principalUser.getId()));
 
             final NotificationConfiguration configuration = defaultConfiguration.clone();
             configure(principalUser, ctx, configuration, participant.hasRole(ITipRole.ORGANIZER));
@@ -447,7 +447,7 @@ public class DefaultNotificationParticipantResolver implements NotificationParti
     }
 
     @Override
-    public List<NotificationParticipant> getAllParticipants(final List<NotificationParticipant> allRecipients, final Event event, final User user, final Context ctx) {
+    public List<NotificationParticipant> getAllParticipants(final List<NotificationParticipant> allRecipients, final Event event) {
         final List<NotificationParticipant> filtered = new ArrayList<NotificationParticipant>();
         final Set<Integer> userIds = new HashSet<Integer>();
         final List<Attendee> users = event.getAttendees();
@@ -472,7 +472,7 @@ public class DefaultNotificationParticipantResolver implements NotificationParti
     }
 
     @Override
-    public List<NotificationParticipant> getResources(final Event event, final Context ctx) throws OXException {
+    public List<NotificationParticipant> getResources(final Event event) {
         final List<Attendee> resources = CalendarUtils.filter(event.getAttendees(), Boolean.TRUE, CalendarUserType.RESOURCE);
         if (resources == null) {
             return Collections.emptyList();
