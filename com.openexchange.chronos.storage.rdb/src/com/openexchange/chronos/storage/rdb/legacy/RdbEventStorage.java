@@ -75,6 +75,7 @@ import com.openexchange.chronos.common.DefaultRecurrenceData;
 import com.openexchange.chronos.compat.Appointment2Event;
 import com.openexchange.chronos.compat.Event2Appointment;
 import com.openexchange.chronos.compat.PositionAwareRecurrenceId;
+import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.exception.ProblemSeverity;
 import com.openexchange.chronos.service.EntityResolver;
 import com.openexchange.chronos.service.RecurrenceData;
@@ -280,7 +281,7 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
             connection = dbProvider.getWriteConnection(context);
             txPolicy.setAutoCommit(connection, false);
             for (Event event : events) {
-                trackInvalidData(event);
+                checkUnsupportedData(event);
                 updated += insertEvent(connection, context.getContextId(), event);
                 /*
                  * also take over series pattern from master for newly inserted change exception
@@ -305,7 +306,7 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
         try {
             connection = dbProvider.getWriteConnection(context);
             txPolicy.setAutoCommit(connection, false);
-            trackInvalidData(event);
+            checkUnsupportedData(event);
             updated += updateEvent(connection, context.getContextId(), asInt(event.getId()), event);
             if (isSeriesMaster(event) && event.containsRecurrenceRule()) {
                 /*
@@ -391,27 +392,34 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
         throw new UnsupportedOperationException();
     }
 
-    private void trackInvalidData(Event event) throws OXException {
+    /**
+     * Checks if the supplied event does not contain properties or property values that are not supported by the underlying storage.
+     *
+     * @param event The event to check
+     * @throws OXException {@link CalendarExceptionCodes#IGNORED_INVALID_DATA}
+     */
+    protected void checkUnsupportedData(Event event) throws OXException {
         if (event.containsClassification() && Classification.PRIVATE.equals(event.getClassification())) {
-            addInvalidDataWaring(event.getId(), EventField.CLASSIFICATION, ProblemSeverity.MAJOR, "Unable to store a 'private' classification", null);
+            addUnsupportedDataError(event.getId(), EventField.CLASSIFICATION, ProblemSeverity.MAJOR, "Unable to store a 'private' classification");
         }
         if (event.containsGeo() && null != event.getGeo()) {
-            addInvalidDataWaring(event.getId(), EventField.GEO, ProblemSeverity.NORMAL, "Unable to store geo location", null);
+            addUnsupportedDataError(event.getId(), EventField.GEO, ProblemSeverity.NORMAL, "Unable to store geo location");
         }
         if (event.containsRelatedTo() && null != event.getRelatedTo()) {
-            addInvalidDataWaring(event.getId(), EventField.RELATED_TO, ProblemSeverity.MINOR, "Unable to store related-to information", null);
+            addUnsupportedDataError(event.getId(), EventField.RELATED_TO, ProblemSeverity.MINOR, "Unable to store related-to information");
         }
         if (event.containsExtendedProperties() && null != event.getExtendedProperties() && 0 < event.getExtendedProperties().size()) {
-            addInvalidDataWaring(event.getId(), EventField.EXTENDED_PROPERTIES, ProblemSeverity.NORMAL, "Unable to store extended properties", null);
+            addUnsupportedDataError(event.getId(), EventField.EXTENDED_PROPERTIES, ProblemSeverity.NORMAL, "Unable to store extended properties");
         }
         if (event.containsColor() && Strings.isNotEmpty(event.getColor()) && 0 == Event2Appointment.getColorLabel(event.getColor())) {
-            addInvalidDataWaring(event.getId(), EventField.COLOR, ProblemSeverity.NORMAL, "Unable to store color", null);
+            addUnsupportedDataError(event.getId(), EventField.COLOR, ProblemSeverity.NORMAL, "Unable to store color");
         }
         if (event.containsStatus() && false == EventStatus.CONFIRMED.matches(event.getStatus())) {
-            addInvalidDataWaring(event.getId(), EventField.STATUS, ProblemSeverity.NORMAL, "Unable to store status", null);
+            addUnsupportedDataError(event.getId(), EventField.STATUS, ProblemSeverity.NORMAL, "Unable to store status");
         }
-        if (event.containsEndDate() && null != event.getEndDate() && null != event.getEndDate().getTimeZone() && null != event.getStartDate() && false == event.getEndDate().getTimeZone().equals(event.getStartDate().getTimeZone())) {
-            addInvalidDataWaring(event.getId(), EventField.END_DATE, ProblemSeverity.NORMAL, "Unable to store end timezone", null);
+        if (event.containsEndDate() && null != event.getEndDate() && null != event.getEndDate().getTimeZone() &&
+            null != event.getStartDate() && false == event.getEndDate().getTimeZone().equals(event.getStartDate().getTimeZone())) {
+            addUnsupportedDataError(event.getId(), EventField.END_DATE, ProblemSeverity.NORMAL, "Unable to store end timezone");
         }
     }
 

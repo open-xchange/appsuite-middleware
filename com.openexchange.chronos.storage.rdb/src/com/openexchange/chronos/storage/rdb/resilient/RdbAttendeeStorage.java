@@ -54,6 +54,7 @@ import java.util.List;
 import java.util.Map;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.ParticipationStatus;
+import com.openexchange.chronos.exception.ProblemSeverity;
 import com.openexchange.chronos.service.CalendarUtilities;
 import com.openexchange.chronos.storage.AttendeeStorage;
 import com.openexchange.exception.OXException;
@@ -76,10 +77,13 @@ public class RdbAttendeeStorage extends RdbResilientStorage implements AttendeeS
      * @param delegate The delegate storage
      * @param handleTruncations <code>true</code> to automatically handle data truncation warnings, <code>false</code>, otherwise
      * @param handleIncorrectStrings <code>true</code> to automatically handle incorrect string warnings, <code>false</code>, otherwise
+     * @param unsupportedDataThreshold The threshold defining up to which severity unsupported data errors can be ignored, or <code>null</code> to not ignore any
+     *            unsupported data error at all
      */
-    public RdbAttendeeStorage(ServiceLookup services, AttendeeStorage delegate, boolean handleTruncations, boolean handleIncorrectStrings) {
+    public RdbAttendeeStorage(ServiceLookup services, AttendeeStorage delegate, boolean handleTruncations, boolean handleIncorrectStrings, ProblemSeverity unsupportedDataThreshold) {
         super(services, handleTruncations, handleIncorrectStrings);
         this.delegate = delegate;
+        setUnsupportedDataThreshold(unsupportedDataThreshold, delegate);
     }
 
     @Override
