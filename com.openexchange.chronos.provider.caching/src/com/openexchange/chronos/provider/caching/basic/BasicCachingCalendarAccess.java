@@ -301,7 +301,7 @@ public abstract class BasicCachingCalendarAccess implements BasicCalendarAccess,
         try {
             ExternalCalendarResult externalCalendarResult = this.getAllEvents();
             if (externalCalendarResult.isUpdated()) {
-                CalendarParameters lParameters = new DefaultCalendarParameters(getParameters()).set(CalendarParameters.PARAMETER_AUTO_HANDLE_DATA_TRUNCATIONS, Boolean.TRUE).set(CalendarParameters.PARAMETER_AUTO_HANDLE_INCORRECT_STRINGS, Boolean.TRUE);
+                CalendarParameters lParameters = new DefaultCalendarParameters(getParameters()).set(CalendarParameters.PARAMETER_IGNORE_STORAGE_WARNINGS, Boolean.TRUE);
                 new OSGiCalendarStorageOperation<Void>(Services.getServiceLookup(), session.getContextId(), account.getAccountId(), lParameters) {
 
                     @Override

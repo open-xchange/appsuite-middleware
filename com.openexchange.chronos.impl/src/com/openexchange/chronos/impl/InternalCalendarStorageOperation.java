@@ -109,13 +109,11 @@ public abstract class InternalCalendarStorageOperation<T> extends CalendarStorag
 
     @Override
     protected CalendarStorage initStorage(DBProvider dbProvider, DBTransactionPolicy txPolicy) throws OXException {
-        boolean handleTruncations = b(session.get(CalendarParameters.PARAMETER_AUTO_HANDLE_DATA_TRUNCATIONS, Boolean.class, Boolean.FALSE));
-        boolean handleIncorrectStrings = b(session.get(CalendarParameters.PARAMETER_AUTO_HANDLE_INCORRECT_STRINGS, Boolean.class, Boolean.FALSE));
         Context context = ServerSessionAdapter.valueOf(session.getSession()).getContext();
         CalendarStorageFactory storageFactory = Services.getService(CalendarStorageFactory.class);
         CalendarStorage storage = storageFactory.create(context, Utils.ACCOUNT_ID, session.getEntityResolver(), dbProvider, txPolicy);
-        if (handleIncorrectStrings || handleTruncations) {
-            storage = storageFactory.makeResilient(storage, handleTruncations, handleIncorrectStrings);
+        if (b(session.get(CalendarParameters.PARAMETER_IGNORE_STORAGE_WARNINGS, Boolean.class, Boolean.FALSE))) {
+            storage = storageFactory.makeResilient(storage);
         }
         return storage;
     }
