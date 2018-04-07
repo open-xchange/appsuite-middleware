@@ -387,32 +387,6 @@ public class Check {
     }
 
     /**
-     * Checks
-     * <ul>
-     * <li>that the start- and enddate properties are set in the event</li>
-     * <li>that the end date does is not before the start date</li>
-     * <li>that both start and enddate are either both <i>all-day</i> or not</li>
-     * <li>that both start and enddate are either both <i>floating</i> or not</li>
-     * </ul>
-     *
-     * @param event The event to check
-     * @see Check#mandatoryFields(Event, EventField...)
-     * @throws OXException {@link CalendarExceptionCodes#MANDATORY_FIELD}, {@link CalendarExceptionCodes#END_BEFORE_START}
-     */
-    public static void startAndEndDate(Event event) throws OXException {
-        mandatoryFields(event, EventField.START_DATE, EventField.END_DATE);
-        if (event.getStartDate().after(event.getEndDate())) {
-            throw CalendarExceptionCodes.END_BEFORE_START.create(String.valueOf(event.getStartDate()), String.valueOf(event.getEndDate()));
-        }
-        if (event.getStartDate().isAllDay() != event.getEndDate().isAllDay()) {
-            throw CalendarExceptionCodes.INCOMPATIBLE_DATE_TYPES.create(String.valueOf(event.getStartDate()), String.valueOf(event.getEndDate()));
-        }
-        if (event.getStartDate().isFloating() != event.getEndDate().isFloating()) {
-            throw CalendarExceptionCodes.INCOMPATIBLE_DATE_TYPES.create(String.valueOf(event.getStartDate()), String.valueOf(event.getEndDate()));
-        }
-    }
-
-    /**
      * Checks that the supplied search pattern length is equal to or greater than a configured minimum.
      *
      * @param minimumPatternLength The minimum search pattern length, or <code>0</code> for no limitation
