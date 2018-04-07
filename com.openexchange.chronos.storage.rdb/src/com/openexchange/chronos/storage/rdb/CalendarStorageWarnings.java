@@ -152,7 +152,23 @@ public abstract class CalendarStorageWarnings {
      * @throws {@link CalendarExceptionCodes#UNSUPPORTED_DATA}
      */
     public void addUnsupportedDataError(String eventId, EventField field, ProblemSeverity severity, String message) throws OXException {
-        OXException error = CalendarExceptionCodes.UNSUPPORTED_DATA.create(eventId, getReadableName(field), String.valueOf(severity), message);
+        addUnsupportedDataError(eventId, field, severity, message, null);
+    }
+
+    /**
+     * Initializes a new {@link CalendarExceptionCodes#UNSUPPORTED_DATA} error that occurred when processing the data of a specific event.
+     * <p/>
+     * In case errors up to a certain problem severity can be ignored, an appropriate warning is tracked, otherwise, the error is raised.
+     *
+     * @param eventId The identifier of the event the error is associated with
+     * @param field The corresponding event field of the unsupported data
+     * @param severity The problem severity
+     * @param message The message providing details of the error
+     * @param cause The optional initial cause
+     * @throws {@link CalendarExceptionCodes#UNSUPPORTED_DATA}
+     */
+    public void addUnsupportedDataError(String eventId, EventField field, ProblemSeverity severity, String message, Throwable cause) throws OXException {
+        OXException error = CalendarExceptionCodes.UNSUPPORTED_DATA.create(cause, eventId, getReadableName(field), String.valueOf(severity), message);
         if (null == unsupportedDataThreshold || 0 > unsupportedDataThreshold.compareTo(severity)) {
             //            error.setCategory(Category.CATEGORY_ERROR);
             throw error;

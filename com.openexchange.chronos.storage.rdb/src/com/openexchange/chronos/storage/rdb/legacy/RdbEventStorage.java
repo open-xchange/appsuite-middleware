@@ -53,6 +53,7 @@ import static com.openexchange.chronos.common.CalendarUtils.isSeriesException;
 import static com.openexchange.chronos.common.CalendarUtils.isSeriesMaster;
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.I2i;
+import static com.openexchange.osgi.Tools.requireService;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -79,10 +80,12 @@ import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.exception.ProblemSeverity;
 import com.openexchange.chronos.service.EntityResolver;
 import com.openexchange.chronos.service.RecurrenceData;
+import com.openexchange.chronos.service.RecurrenceService;
 import com.openexchange.chronos.service.SearchFilter;
 import com.openexchange.chronos.service.SearchOptions;
 import com.openexchange.chronos.storage.EventStorage;
 import com.openexchange.chronos.storage.rdb.RdbStorage;
+import com.openexchange.chronos.storage.rdb.osgi.Services;
 import com.openexchange.database.provider.DBProvider;
 import com.openexchange.database.provider.DBTransactionPolicy;
 import com.openexchange.exception.OXException;
@@ -420,6 +423,13 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
         if (event.containsEndDate() && null != event.getEndDate() && null != event.getEndDate().getTimeZone() &&
             null != event.getStartDate() && false == event.getEndDate().getTimeZone().equals(event.getStartDate().getTimeZone())) {
             addUnsupportedDataError(event.getId(), EventField.END_DATE, ProblemSeverity.NORMAL, "Unable to store end timezone");
+        }
+        if (event.containsRecurrenceRule() && null != event.getRecurrenceRule()) {
+            try {
+                Event2Appointment.getSeriesPattern(requireService(RecurrenceService.class, Services.get()), new DefaultRecurrenceData(event));
+            } catch (OXException e) {
+                addUnsupportedDataError(event.getId(), EventField.RECURRENCE_RULE, ProblemSeverity.MAJOR, e.getMessage(), e);
+            }
         }
     }
 
