@@ -49,6 +49,7 @@
 
 package com.openexchange.chronos.storage;
 
+import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.EntityResolver;
 import com.openexchange.database.provider.DBProvider;
 import com.openexchange.database.provider.DBTransactionPolicy;
@@ -85,13 +86,13 @@ public interface CalendarStorageFactory {
 
     /**
      * Wraps a calendar storage into a special <i>resilient</i> calendar storage that tries to automatically handle SQL <i>truncation</i>
-     * and <i>incorrect string</i> warnings by adjusting the affected strings, and retrying the operation.
+     * and <i>incorrect string</i> warnings by adjusting the affected strings, and retrying the operation. Additionally, no exceptions are
+     * raised when trying to store properties or property values that are not supported by the storage.
      *
      * @param storage The calendar storage to wrap
-     * @param handleTruncations <code>true</code> to automatically handle data truncation warnings, <code>false</code>, otherwise
-     * @param handleIncorrectStrings <code>true</code> to automatically handle incorrect string warnings, <code>false</code>, otherwise
      * @return The wrapped calendar storage
+     * @see CalendarParameters#PARAMETER_IGNORE_STORAGE_WARNINGS
      */
-    CalendarStorage makeResilient(CalendarStorage storage, boolean handleTruncations, boolean handleIncorrectStrings);
+    CalendarStorage makeResilient(CalendarStorage storage);
 
 }
