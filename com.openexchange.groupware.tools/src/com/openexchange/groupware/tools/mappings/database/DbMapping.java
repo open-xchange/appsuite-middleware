@@ -90,11 +90,11 @@ public interface DbMapping<T, O> extends Mapping<T, O> {
     String getColumnLabel(String prefix);
 
 	/**
-	 * Gets the readable name of the mapped property.
-	 *
-     * @param object The object
-	 * @return The readable name
-	 */
+     * Gets the readable name of the mapped property.
+     *
+     * @param object The object, or <code>null</code> if not available
+     * @return The readable name
+     */
 	String getReadableName(O object);
 
 	/**
