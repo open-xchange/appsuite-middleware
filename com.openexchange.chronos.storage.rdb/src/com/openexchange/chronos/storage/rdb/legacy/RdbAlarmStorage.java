@@ -418,7 +418,7 @@ public class RdbAlarmStorage extends RdbStorage implements AlarmStorage {
             if (AlarmAction.DISPLAY.equals(alarm.getAction())) {
                 displayAlarms.add(alarm);
             } else {
-                addInvalidDataWaring(event.getId(), EventField.ALARMS, ProblemSeverity.MAJOR, "Can only store DISPLAY alarms", null);
+                addUnsupportedDataError(event.getId(), EventField.ALARMS, ProblemSeverity.MAJOR, "Can only store DISPLAY alarms");
             }
         }
         if (displayAlarms.isEmpty()) {
@@ -437,7 +437,7 @@ public class RdbAlarmStorage extends RdbStorage implements AlarmStorage {
             } else if (0 <= getReminderMinutes(alarm.getTrigger(), event, timeZone)) {
                 regularAlarms.add(alarm);
             } else {
-                addInvalidDataWaring(event.getId(), EventField.ALARMS, ProblemSeverity.NORMAL, "Can only store triggers prior start of event", null);
+                addUnsupportedDataError(event.getId(), EventField.ALARMS, ProblemSeverity.NORMAL, "Can only store triggers prior start of event");
             }
         }
         Alarm snoozeAlarm = chooseNextAlarm(event, originalReminder, snoozeAlarms, timeZone);
@@ -458,7 +458,7 @@ public class RdbAlarmStorage extends RdbStorage implements AlarmStorage {
              * regular alarm, only
              */
             if (1 < regularAlarms.size()) {
-                addInvalidDataWaring(event.getId(), EventField.ALARMS, ProblemSeverity.MAJOR, "Cannot store more than one alarm", null);
+                addUnsupportedDataError(event.getId(), EventField.ALARMS, ProblemSeverity.MAJOR, "Cannot store more than one alarm");
             }
             Alarm regularAlarm = chooseNextAlarm(event, originalReminder, regularAlarms, timeZone);
             if (null != regularAlarm) {

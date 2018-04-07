@@ -300,7 +300,7 @@ public class ITipHandler implements CalendarHandler {
                 if (mail.getStateType() == null) {
                     mail.setStateType(type);
                 }
-                if (null != exceptions) {
+                if (null != exceptions && null != mail.getMessage()) {
                     // Set exceptions
                     for (Event exception : exceptions) {
                         mail.getMessage().addException(exception);

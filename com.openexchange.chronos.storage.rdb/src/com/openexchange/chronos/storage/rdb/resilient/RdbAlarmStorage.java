@@ -49,106 +49,119 @@
 
 package com.openexchange.chronos.storage.rdb.resilient;
 
-import static com.openexchange.chronos.common.CalendarUtils.ID_COMPARATOR;
 import java.util.List;
 import java.util.Map;
-import java.util.TreeMap;
+import com.openexchange.chronos.Alarm;
+import com.openexchange.chronos.Event;
 import com.openexchange.chronos.exception.ProblemSeverity;
 import com.openexchange.chronos.storage.AlarmStorage;
-import com.openexchange.chronos.storage.AlarmTriggerStorage;
-import com.openexchange.chronos.storage.AttachmentStorage;
-import com.openexchange.chronos.storage.AttendeeStorage;
-import com.openexchange.chronos.storage.CalendarAccountStorage;
-import com.openexchange.chronos.storage.CalendarStorage;
-import com.openexchange.chronos.storage.CalendarStorageUtilities;
-import com.openexchange.chronos.storage.EventStorage;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceLookup;
 
 /**
- * {@link CalendarStorage}
+ * {@link RdbAlarmStorage}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public class RdbCalendarStorage implements CalendarStorage {
+public class RdbAlarmStorage extends RdbResilientStorage implements AlarmStorage {
 
-    private final CalendarStorage delegate;
-    private final RdbEventStorage eventStorage;
-    private final RdbAttendeeStorage attendeeStorage;
-    private final RdbAlarmStorage alarmStorage;
+    private final AlarmStorage delegate;
 
     /**
-     * Initializes a new {@link RdbCalendarStorage}.
+     * Initializes a new {@link RdbAlarmStorage}.
      *
      * @param services A service lookup reference
      * @param delegate The delegate storage
      * @param handleTruncations <code>true</code> to automatically handle data truncation warnings, <code>false</code>, otherwise
      * @param handleIncorrectStrings <code>true</code> to automatically handle incorrect string warnings, <code>false</code>, otherwise
-     * @param unsupportedDataThreshold The threshold defining up to which severity unsupported data errors can be ignored, or
-     *            <code>null</code> to not ignore any unsupported data error at all
+     * @param unsupportedDataThreshold The threshold defining up to which severity unsupported data errors can be ignored, or <code>null</code> to not ignore any
+     *            unsupported data error at all
      */
-    public RdbCalendarStorage(ServiceLookup services, CalendarStorage delegate, boolean handleTruncations, boolean handleIncorrectStrings, ProblemSeverity unsupportedDataThreshold) {
-        super();
+    public RdbAlarmStorage(ServiceLookup services, AlarmStorage delegate, boolean handleTruncations, boolean handleIncorrectStrings, ProblemSeverity unsupportedDataThreshold) {
+        super(services, handleTruncations, handleIncorrectStrings);
         this.delegate = delegate;
-        this.eventStorage = new RdbEventStorage(services, delegate.getEventStorage(), handleTruncations, handleIncorrectStrings, unsupportedDataThreshold);
-        this.attendeeStorage = new RdbAttendeeStorage(services, delegate.getAttendeeStorage(), handleTruncations, handleIncorrectStrings, unsupportedDataThreshold);
-        this.alarmStorage = new RdbAlarmStorage(services, delegate.getAlarmStorage(), handleTruncations, handleIncorrectStrings, unsupportedDataThreshold);
+        setUnsupportedDataThreshold(unsupportedDataThreshold, delegate);
     }
 
     @Override
-    public EventStorage getEventStorage() {
-        return eventStorage;
+    public int nextId() throws OXException {
+        return delegate.nextId();
     }
 
     @Override
-    public AlarmStorage getAlarmStorage() {
-        return alarmStorage;
+    public void insertAlarms(Event event, int userID, List<Alarm> alarms) throws OXException {
+        delegate.insertAlarms(event, userID, alarms);
     }
 
     @Override
-    public AttachmentStorage getAttachmentStorage() {
-        return delegate.getAttachmentStorage();
+    public void insertAlarms(Event event, Map<Integer, List<Alarm>> alarmsByUserId) throws OXException {
+        delegate.insertAlarms(event, alarmsByUserId);
     }
 
     @Override
-    public AttendeeStorage getAttendeeStorage() {
-        return attendeeStorage;
+    public void insertAlarms(Map<String, Map<Integer, List<Alarm>>> alarmsByUserByEventId) throws OXException {
+        delegate.insertAlarms(alarmsByUserByEventId);
     }
 
     @Override
-    public AlarmTriggerStorage getAlarmTriggerStorage() {
-        return delegate.getAlarmTriggerStorage();
+    public Map<Integer, List<Alarm>> loadAlarms(Event event) throws OXException {
+        return delegate.loadAlarms(event);
     }
 
     @Override
-    public CalendarAccountStorage getAccountStorage() {
-        return delegate.getAccountStorage();
+    public List<Alarm> loadAlarms(Event event, int userID) throws OXException {
+        return delegate.loadAlarms(event, userID);
     }
 
     @Override
-    public CalendarStorageUtilities getUtilities() {
-        return delegate.getUtilities();
+    public Map<String, List<Alarm>> loadAlarms(List<Event> events, int userID) throws OXException {
+        return delegate.loadAlarms(events, userID);
     }
 
     @Override
-    public Map<String, List<OXException>> getWarnings() {
-        Map<String, List<OXException>> warnings = new TreeMap<String, List<OXException>>(ID_COMPARATOR);
-        warnings.putAll(eventStorage.getWarnings());
-        warnings.putAll(attendeeStorage.getWarnings());
-        warnings.putAll(alarmStorage.getWarnings());
-        warnings.putAll(delegate.getWarnings());
-        return warnings;
+    public Map<String, Map<Integer, List<Alarm>>> loadAlarms(List<Event> events) throws OXException {
+        return delegate.loadAlarms(events);
     }
 
     @Override
-    public Map<String, List<OXException>> getAndFlushWarnings() {
-        Map<String, List<OXException>> warnings = new TreeMap<String, List<OXException>>(ID_COMPARATOR);
-        warnings.putAll(eventStorage.getAndFlushWarnings());
-        warnings.putAll(attendeeStorage.getAndFlushWarnings());
-        warnings.putAll(alarmStorage.getAndFlushWarnings());
-        warnings.putAll(delegate.getAndFlushWarnings());
-        return warnings;
+    public void updateAlarms(Event event, int userID, List<Alarm> alarms) throws OXException {
+        delegate.updateAlarms(event, userID, alarms);
+    }
+
+    @Override
+    public void deleteAlarms(String eventId) throws OXException {
+        delegate.deleteAlarms(eventId);
+    }
+
+    @Override
+    public void deleteAlarms(List<String> eventIds) throws OXException {
+        delegate.deleteAlarms(eventIds);
+    }
+
+    @Override
+    public void deleteAlarms(int userId) throws OXException {
+        delegate.deleteAlarms(userId);
+    }
+
+    @Override
+    public void deleteAllAlarms() throws OXException {
+        delegate.deleteAllAlarms();
+    }
+
+    @Override
+    public void deleteAlarms(String eventId, int userId) throws OXException {
+        delegate.deleteAlarms(eventId, userId);
+    }
+
+    @Override
+    public void deleteAlarms(String eventId, int[] userIds) throws OXException {
+        delegate.deleteAlarms(eventId, userIds);
+    }
+
+    @Override
+    public void deleteAlarms(String eventId, int userId, int[] alarmIds) throws OXException {
+        delegate.deleteAlarms(eventId, userId, alarmIds);
     }
 
 }

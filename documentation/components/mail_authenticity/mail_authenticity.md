@@ -4,7 +4,7 @@ title: Mail Authenticity
 
 Since 7.10.0 the OX middleware provides the Mail Authenticity feature for the end user which enables her to be visually aware of the authentication status of emails that she receives and helps her identify phishing mails from regular communication.
 
-## Motivation
+# Motivation
 
 We live in an era where security matters. The Internet has not only become a vast ocean of information (both useful and useless), but a hive of predators lurking to steal personal information by claiming to be someone you trust. 
 
@@ -20,7 +20,7 @@ In the old ages they used signatures to sign their messages and sealing wax with
 
 A similar method is being used in the digital age and is called *Email Authentication*. Though the naming might be a bit misleading and can be easily confused with user authentication, in reality it actually authenticates with a series of different authentication mechanisms that the message is not forged or altered and is indeed originating from the source it claims to be coming from. To avoid any confusion, we slightly altered the naming to *Email Authenticity*. During the rest of the article the *Email Authentication* will be used to refer to the technical standards that make the verification possible, while the term *Email Authenticity* will be used to refer our implementation and implementation details.
 
-## Foundation
+# Foundation
 
 The Email Authentication is actually a collection of different authentication mechanism approaches, each with its own advantages and disadvantages (out of the scope of this article) that are used in conjunction. The Email Authenticity in the middleware's core is based on three of those mechanisms, namely [SPF](https://tools.ietf.org/html/rfc7208), [DKIM]( https://tools.ietf.org/html/rfc6376) and [DMARC](https://tools.ietf.org/html/rfc7489). All three standards provide different aspects to email authentication and they address complementary issues. In a nutshell:
 
@@ -28,7 +28,7 @@ The Email Authentication is actually a collection of different authentication me
  - **DKIM** provides digital signatures and encryption keys that verify that an e-mail messages was not forged, faked or altered
  - **DMARC** links SPF and DKIM under one roof and provides reports and feedback to the domain owner about the results of the previous mentioned mechanisms.
  
-### SPF (Sender Policy Framework)
+## SPF (Sender Policy Framework)
 
 The way `SPF` works is as follows. The domain owner publishes a DNS record listing all servers that are allowed to send out emails from that domain. Additionally it may contain a policy on how to deal with illegitimate senders. Those policies are: NEUTRAL, SOFTFAIL and FAIL.
 
@@ -68,7 +68,7 @@ Received-SPF: pass (aliceland.com: domain of bob@foobar.com
 
 In this case bob from the domain `foobar.com` sent an e-mail to alice in the `aliceland.com` domain. The SPF mechanism authenticates the sender IP address and verifies that the sender is permitted to send e-mails from that particular domain.
 
-### DKIM (DomainKeys Identified Mail)
+## DKIM (DomainKeys Identified Mail)
 
 The DKIM on the other hand instead of verifying the origin of the mail, it deploys digital signatures to guarantee that the portions of the message were not altered, forged or faked along the way. Much like the sealing wax sigils in the old ages but in digital form ;-)
 
@@ -110,7 +110,7 @@ Subject: Hello there
 ```
 The signature can be verified at any hop by retrieving the public key from the DNS. If the signature validates then the domain name is the authenticated identity.
 
-### DMARC (Domain-based Message Authentication, Reporting, and Conformance)
+## DMARC (Domain-based Message Authentication, Reporting, and Conformance)
 
 The DMARC is built on top of SPF and DKIM and unifies both mechanisms. The domain owner publishes a policy denoting whether she is using SPF and/or DKIM and how e-mail receivers should deal with validation failures. Possible policies are: `none`, `quarantine` and `reject`. In addition an e-mail address is published where aggregated reports about successful validations and failures shall be sent to. This policy is published as a DNS record.
 
@@ -142,7 +142,7 @@ Authentication-Results: mx.aliceland.com;
 ```
 The key attributes for each mechanism in the `Authentication-Results` header is the domain the e-mail originated from. In case of `SPF` that information is stored in the `smtp.mailfrom` attribute, in case of `DKIM` in the `header.i` attribute and in case of `DMARC` in the `header.from` attribute.
 
-## The Big Picture
+# The Big Picture
 
 Now, let's see how all the pieces of the puzzle fit together. This is illustrated below.
 
@@ -157,11 +157,11 @@ Bob checks his e-mail messages via the MUA (in this case the OX AppSuite). The h
 
 It is worth noting that between the `example.com` mail relay server and the `acme.org` mail exchange server there might be also some more mail relay hops, some might have DKIM enabled, some SPF, some none at all. The in-between mail hops may or may not apply further mail authentication mechanisms. Every time a mail authentication mechanism is applied, a new header in the e-mail will reflect that.
   
-## Header Analysis
+# Header Analysis
 
 As explained before, all the authentication mechanism results are collected and summarised in the `Authentication-Results` header. An e-mail may contain none, one or more such headers. The OX middleware relies on those headers to determine whether an e-mail is safe or not.
 
-### Header Structure
+## Header Structure
 
 The `Authentication-Results` header begins with the `authserv-id` token which references the administrative management domain. It is an arbitrary string but usually it has the format of a domain name. After the `authserv-id` follow the results of all authentication mechanisms separated by a semicolon. Values enclosed in parenthesis are considered as comments and are ignored from the analysis process. Every mechanism has different attributes, but all have one common, that of the authentication status. An example header is illustrated below:
 
@@ -175,11 +175,11 @@ Authentication-Results: mx.aliceland.com;
 
 There are different statuses for each mechanism defined in their respective RFCs, but in general there are only three that are relevant for the end user, whether the mechanism: a) passed the validation, b) failed it or c) an error occurred. The OX middleware takes into consideration all different statuses and based on a decision matrix it marks each e-mail with an overall status of either `pass`, `fail`, or `neutral`. The OX middleware also assigns the `not-analyzed` status but the purpose of that is explained in a later section.
 
-### Header Evaluation
+## Header Evaluation
 
 First things first, the existence of the `Authentication-Results` header(s) is checked. If no such header exists, then the message is marked as `neutral`. In case there are multiple `Authentication-Results` headers then all of them are evaluated (top to bottom).
 
-Then the existence and validation of the `authserv-id` takes place. It is possible to configure the middleware in a way that only certain `authserv-id`s are considered as safe for a specific setup. In the [Configuration](#Configuration) section it is described how to configure that setting. If the `authserv-id` string is missing from the `Authentication-Results` header, then that header is being completely ignored from the evaluation. If it's the only `Authentication-Results` header in the message, then that message will be marked as `neutral`, otherwise the algorithm will process the next header.
+Then the existence and validation of the `authserv-id` takes place. It is possible to configure the middleware in a way that only certain `authserv-id`s are considered as safe for a specific setup. In the [Configuration](#Configuration) section it is described how to configure that setting. If the `authserv-id` string is missing from the `Authentication-Results` header, then that header is being completely ignored from the evaluation. If it's the only `Authentication-Results` header in the message, then that message will be marked as `none`, otherwise the algorithm will process the next header.
 
 Then the domain of the sender is extracted out of the `From` header of the e-mail message. The domain will be later used to verify whether it matches the domain attribute from the different mechanisms, i.e. for `SPF` the `smtp.mailfrom` attribute, for `DKIM` the `header.i` attribute and for `DMARC` the `header.from` attribute. If the domain extracted from the `From` header does not match domain attributes of all present mechanisms, then the mail will be marked either as `neutral` or `fail`, depending on the outcome of the individual mechanisms statuses.
 
@@ -187,48 +187,49 @@ After that, the actual mechanism evaluation takes place. The core implementation
 
 When all evaluation and parsing of the single mechanisms is done, the overall status is determined. If there are multiple results for a specific mechanism, the best result of that mechanism is picked and only that result for that specific mechanism contributes to the overall result. 
 
-If the `DMARC` status is `fail` then the overall result of the message is set to `fail`. If the `DMARC` status is `pass` and there is a domain match then the overall status is set to `pass`. If `DMARC` is not present or its status is set to other than `pass` and there is no domain match, then the `DKIM` mechanism is checked. 
+If the `DMARC` status is `fail` then the overall result of the message is set to `fail`. If the `DMARC` status is `pass` and there is a domain match then the overall status is set to `pass` and no further evaluation takes place. If `DMARC` is not present or its status is set to other than `pass` and there is no domain match, then the `DKIM` mechanism is checked. 
 
 If the `DKIM` status is `pass` and there is a domain match, then the overall status is set to `pass`, or to `neutral` if there is no domain match. If the `DKIM` status is other than `pass` or `fail`, then that status is converted to their respective overall status.
 
 Last, the `SPF` status is evaluated. Always depending on whether there is a domain match, the overall status is set to `pass` if the `SPF` status is also set to `pass`. Otherwise, it will be set to `neutral` or `fail` depending on whether the `DKIM` mechanism failed previously. An overall status of `neutral` or `fail` is also set when the status of `SPF` is neutral and there is or isn't a domain match respectively.
 
-The entire decision algorithm is summed up in the following table:
+The decision algorithm for DKIM and SPF is summed up in the following table:
 
  SPF                                       | DKIM                                       | Domain Match                                    | Result
 -------------------------------------------|--------------------------------------------|:-----------------------------------------------:|---------------------------------------------
 <span style="color: green">pass</span>     | <span style="color: green">pass</span>     | <span style="color: green">Yes</span>           | <span style="color: green">pass</span>
-<span style="color: green">pass</span>     | <span style="color: green">pass</span>     | <span style="color: red">No</span>              | <span style="color: yellow">neutral</span>
-<span style="color: green">pass</span>     | <span style="color: yellow">neutral</span> | <span style="color: green">Yes</span>           | <span style="color: green">pass</span>
-<span style="color: green">pass</span>     | <span style="color: yellow">neutral</span> | <span style="color: red">No</span>              | <span style="color: yellow">neutral</span>
-<span style="color: green">pass</span>     | <span style="color: red">fail</span>       | <span style="color: green">Yes</span>           | <span style="color: yellow">neutral</span>
+<span style="color: green">pass</span>     | <span style="color: green">pass</span>     | <span style="color: red">No</span>              | <span style="color: orange">neutral</span>
+<span style="color: green">pass</span>     | <span style="color: orange">neutral</span> | <span style="color: green">Yes</span>           | <span style="color: green">pass</span>
+<span style="color: green">pass</span>     | <span style="color: orange">neutral</span> | <span style="color: red">No</span>              | <span style="color: orange">neutral</span>
+<span style="color: green">pass</span>     | <span style="color: red">fail</span>       | <span style="color: green">Yes</span>           | <span style="color: orange">neutral</span>
 <span style="color: green">pass</span>     | <span style="color: red">fail</span>       | <span style="color: red">No</span>              | <span style="color: red">fail</span>
-<span style="color: yellow">neutral</span> | <span style="color: green">pass</span>     | <span style="color: green">Yes</span>           | <span style="color: green">pass</span>
-<span style="color: yellow">neutral</span> | <span style="color: green">pass</span>     | <span style="color: red">No</span>              | <span style="color: yellow">neutral</span>
-<span style="color: yellow">neutral</span> | <span style="color: yellow">neutral</span> | <span style="color: green">Yes</span>           | <span style="color: yellow">neutral</span>
-<span style="color: yellow">neutral</span> | <span style="color: yellow">neutral</span> | <span style="color: red">No</span>              | <span style="color: yellow">neutral</span>
-<span style="color: yellow">neutral</span> | <span style="color: red">fail</span>       | <span style="color: green">Yes</span>           | <span style="color: yellow">neutral</span>
-<span style="color: yellow">neutral</span> | <span style="color: red"> fail </span>     | <span style="color: red">No</span>              | <span style="color: red">fail</span>
+<span style="color: orange">neutral</span> | <span style="color: green">pass</span>     | <span style="color: green">Yes</span>           | <span style="color: green">pass</span>
+<span style="color: orange">neutral</span> | <span style="color: green">pass</span>     | <span style="color: red">No</span>              | <span style="color: orange">neutral</span>
+<span style="color: orange">neutral</span> | <span style="color: orange">neutral</span> | <span style="color: green">Yes</span>           | <span style="color: orange">neutral</span>
+<span style="color: orange">neutral</span> | <span style="color: orange">neutral</span> | <span style="color: red">No</span>              | <span style="color: orange">neutral</span>
+<span style="color: orange">neutral</span> | <span style="color: red">fail</span>       | <span style="color: green">Yes</span>           | <span style="color: orange">neutral</span>
+<span style="color: orange">neutral</span> | <span style="color: red"> fail </span>     | <span style="color: red">No</span>              | <span style="color: red">fail</span>
 <span style="color: red">fail</span>       | <span style="color: green">pass</span>     | <span style="color: green">Yes</span>           | <span style="color: red">fail</span>
 <span style="color: red">fail</span>       | <span style="color: green">pass</span>     | <span style="color: red">No</span>              | <span style="color: red">fail</span>
-<span style="color: red">fail</span>       | <span style="color: yellow">neutral</span> | <span style="color: green">Yes</span>           | <span style="color: red">fail</span>
-<span style="color: red">fail</span>       | <span style="color: yellow">neutral</span> | <span style="color: red">No</span>              | <span style="color: red">fail</span>
+<span style="color: red">fail</span>       | <span style="color: orange">neutral</span> | <span style="color: green">Yes</span>           | <span style="color: red">fail</span>
+<span style="color: red">fail</span>       | <span style="color: orange">neutral</span> | <span style="color: red">No</span>              | <span style="color: red">fail</span>
 <span style="color: red">fail</span>       | <span style="color: red">fail</span>       | <span style="color: green">Yes</span>           | <span style="color: red">fail</span>
 <span style="color: red">fail</span>       | <span style="color: red"> fail </span>     | <span style="color: red">No</span>              | <span style="color: red">fail</span>
 
 
 Please note that the headers of messages in the "Drafts" or "Sent" folder are not analysed. Furthermore, only messages of the primary account of a user are evaluated.
 
-## API Enhancements
+# API Enhancements
 
 The response of the single mail fetch `mail?action=get` is now extended over a new field `authenticity` which is documented [here](https://documentation.open-xchange.com/components/middleware/http/develop/#!/Mail/getMail). The `authenticity` field is referenced in multi-mail fetch actions like `mail?action=all` with two column identifiers, 664 and 665, which reflect the light and heavy weighted versions of the `authenticity` field. The light weighted version includes the overall status of the e-mail, while the heavy weighted includes all the information.
 
-There are four statuses in total:
+There are five statuses in total:
 
  - `pass`: The e-mail has passed the authenticity validation (The green case)
  - `fail`: The e-mail has failed the authenticity validation (The red case)
  - `neutral`: One or more authenticity mechanisms failed, or the authserv-id is malformed or not existent (The yellow case)
  - `not-analyzed`: The e-mail was not analysed either due to an error, or due to the configured `threshold` date
+ - `none`: The e-mail has either no `Authentication-Results` header, or every (known) mechanism (`DMARC`, `DKIM`, `SPF`) yields a `none` status, or the `authserv-id` does not match any of the allowed `authserv-id`s defined via configuration.
 
 If the feature is not enabled (either globally or via config-cascade for the user), then the `authenticity` field should not be present in the `mail?action=get` response and the corresponding column (if requested) in `mail?action=all` should be `null`.
 
@@ -236,11 +237,36 @@ If the feature is enabled but an e-mail is not applicable for mail authenticity 
 
 An e-mail may contain multiple `Authentication-Results` headers. In that case the headers are merged and examined as one.
 
-## Configuration
+# Debugging
+
+There is a logger attached to the mail authenticity feature which can be set to `DEBUG` level (either via `logback.xml` or on the fly via the `logconf` command line tool) during a debbuging session. The debug log entry is a JSON object with the following fields:
+
+ - `mailId`: abbreviated hashed mail identifier
+ - `mechanismResults`: all parsed (and known) mechanism results that contribute to the overall result
+ - `overallResult`: the overall result
+ - `domainMismatch`: whether there is a domain mismatch
+ - `fromHeader`: the domain part of the `From` header
+ - `rawHeaders`: the raw `Authentication-Results` headers
+ 
+The `rawHeaders` may contain sensitive user information such as e-mail addresses, therefore it is disabled by default. The property `com.openexchange.mail.authenticity.logRawHeaders` controls that behaviour.
+
+To enable debug logging via logback.xml, simply add the following line to the `<configuration>` element:
+
+```xml
+<logger name="com.openexchange.mail.authenticity.impl.core.metrics" level="DEBUG"/>
+```
+
+To enable debug logging via logconf, execute:
+
+```bash
+$ /opt/open-xchange/sbin/logconf -a -l com.openexchange.mail.authenticity.impl.core.metrics=DEBUG
+```
+
+# Configuration
 
 Documentation for the required properties of the feature can be found [here](https://documentation.open-xchange.com/components/middleware/config/develop/#mode=features&feature=Mail Authenticity).
 
-### How to enable
+## How to enable
 
 In general the feature can be enabled with the property `com.openexchange.mail.authenticity.enabled` which by default is set to `false`.
 
@@ -249,7 +275,7 @@ Once enabled, a boolean JSlob entry under `io.ox/mail//features/authenticity` in
 GET http://{{server}}/appsuite/api/jslob?action=get&id=io.ox/mail&session={{session}}
 ```
 
-### Further Core Configuration Properties
+## Further Core Configuration Properties
 
 There are more properties that define the behavior of this feature.
 
@@ -257,7 +283,7 @@ First and foremost is the `com.openexchange.mail.authenticity.threshold` propert
 
 It is possible to whitelist mail servers with a specific `authserv-id` (as described in [RFC7601, Section-2.2](https://tools.ietf.org/html/rfc7601#section-2.2]) via the `com.openexchange.mail.authenticity.authServId` property. By default that property is empty and all mails that include an `authserv-id` in their `Mail-Authentication` header will be ignored. If that's the case then their result will be set to `not-analyzed`.
 
-### Trusted Mail Highlighting Properties
+## Trusted Mail Highlighting Properties
 
 It is also possible to configure the middleware in a way that highlights authenticated e-mails from certain trusted mail addresses. It can be configured per-tenant and per e-mail address.
 
@@ -269,9 +295,9 @@ The property `com.openexchange.mail.authenticity.trusted.[tenant.]image.[imageId
 
 The property `com.openexchange.mail.authenticity.trusted.[tenant].fallbackImage` defines for each tenant the fall-back image that is to be shown by the clients for trusted e-mail addresses without a configured image.
 
-## Appendix A: Example Configuration
+# Appendix A: Example Configuration
 
-#### Single Tenant Example Configuration
+## Single Tenant Example Configuration
 
 ```properties
 com.openexchange.mail.authenticity.enabled = true
@@ -283,7 +309,8 @@ com.openexchange.mail.authenticity.trusted.image.2 = http://abc.foobar.com/imgs/
 
 In the above example the single tenant is configured in a way that considers as trusted senders all addresses that can be matched with the `config` property, i.e. `support@*.foobar.com`, `support@*.foobar.de` and `support@*.foobar.org`. There are also a few images configured, i.e. the `fallbackImage`, the `image.1` and the `image.2`. An e-mail will be marked as trusted if the address of the sender is matched with any of the configured trusted e-mail addresses. The (optional) numerical suffix of each configured address maps to its corresponding `image.xx` property, meaning that if an e-mail is coming from `support@*.foobar.de` then the client will show the image that is configured under `image.1`, if the e-mail is coming from `support@*.foobar.org` then it will show the image that is configured under `image.2` and if there is no numerical suffix, then the `fallbackImage` will be used.
 
-#### Multi-Tenant Example Configuration
+## Multi-Tenant Example Configuration
+
 ```properties
 com.openexchange.mail.authenticity.enabled = true
 
@@ -302,11 +329,11 @@ com.openexchange.mail.authenticity.trusted.myhost2.fallbackImage = http://myhost
 In a multi-tenant situation the configuration is a bit different. The `[tenant]` part of the property is filled with the corresponding tenant name. In this example `myhost1` considers as trusted senders all addresses that can be matched with the `config` property, i.e. `info@*.myhost1.com` and `*@myhost1.org` and the tenant `myhost2` all addresses that come from `sales@*.myhost2.com` and `marketing@otherdomain.com`. The images map to the e-mail addresses as they do with the single-tenant example.
 
 
-## Appendix B: Examples of Common Results
+# Appendix B: Examples of Common Results
 
 In this section there are some example `Authentication-Results` and their evaluated result as JSON object.
 
-### Trivial Pass All Mechanisms
+## Trivial Pass All Mechanisms
 
 ```mail
 From: Bob <bob@foobar.com>
@@ -343,7 +370,7 @@ Authentication-Results: mx.acme.org;
 }
 ```
 
-### Mechanisms Pass But No `From` Domain Match
+## Mechanisms Pass But No `From` Domain Match
 
 ```mail
 From: Jane Doe <jane.doe@acme.foobar.com>
@@ -372,7 +399,7 @@ Authentication-Results: mx.acme.org;
 }
 ```
 
-### The `none` Case
+## The `none` Case
 
 ```mail
 From: Bob <bob@foobar.com>
@@ -403,11 +430,11 @@ Authentication-Results: mx1.acme.org;
   "unconsidered_results": [
 
   ],
-  "status": "neutral"
+  "status": "none"
 }
 ```
 
-### Unknown Mechanisms
+## Unknown Mechanisms
 
 ```mail
 From: Bob <bob@foobar.com>
@@ -439,7 +466,7 @@ Authentication-Results: mx1.acme.org;
 }
 ```
 
-### Mechanisms Failed
+## Mechanisms Failed
 
 ```mail
 From: Eve Your Co-Worker <eve@acme.org>

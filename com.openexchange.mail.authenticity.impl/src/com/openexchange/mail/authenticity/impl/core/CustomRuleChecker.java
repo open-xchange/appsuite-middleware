@@ -124,8 +124,8 @@ public class CustomRuleChecker implements Reloadable{
                                 ruleMap.get("spf_domain"),
                                 toList(ruleMap.get("dkim_status")),
                                 ruleMap.get("dkim_domain"),
-                                ruleMap.get("result"),
-                                ruleMap.get("from_domain")));
+                                ruleMap.get("from_domain"),
+                                ruleMap.get("result")));
         }
         return rules.build();
     }
@@ -322,7 +322,7 @@ public class CustomRuleChecker implements Reloadable{
                     return false;
                 }
             }
-            Object attribute = result.getAttribute(MailAuthenticityResultKey.FROM_DOMAIN);
+            Object attribute = result.getAttribute(MailAuthenticityResultKey.FROM_HEADER_DOMAIN);
             if (attribute != null && fromDomain != null && !attribute.toString().equalsIgnoreCase(fromDomain)) {
                 return false;
             }

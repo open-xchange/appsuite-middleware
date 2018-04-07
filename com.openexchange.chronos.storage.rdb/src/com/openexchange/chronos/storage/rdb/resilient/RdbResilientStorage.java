@@ -49,6 +49,7 @@
 
 package com.openexchange.chronos.storage.rdb.resilient;
 
+import com.openexchange.chronos.exception.ProblemSeverity;
 import com.openexchange.chronos.storage.rdb.CalendarStorageWarnings;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceLookup;
@@ -84,6 +85,20 @@ public abstract class RdbResilientStorage extends CalendarStorageWarnings {
         this.services = services;
         this.handleIncorrectStrings = handleIncorrectStrings;
         this.handleTruncations = handleTruncations;
+    }
+
+    /**
+     * Configures the severity threshold defining which unsupported data errors can be ignored.
+     *
+     * @param severityThreshold The threshold defining up to which severity unsupported data errors can be ignored, or
+     *            <code>null</code> to not ignore any unsupported data error at all
+     * @param delegate The delegate storage
+     */
+    protected void setUnsupportedDataThreshold(ProblemSeverity severityThreshold, Object delegate) {
+        super.setUnsupportedDataThreshold(severityThreshold);
+        if (CalendarStorageWarnings.class.isInstance(delegate)) {
+            ((CalendarStorageWarnings) delegate).setUnsupportedDataThreshold(severityThreshold);
+        }
     }
 
     /**

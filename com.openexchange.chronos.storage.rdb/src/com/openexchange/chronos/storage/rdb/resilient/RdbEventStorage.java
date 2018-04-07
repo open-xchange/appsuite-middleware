@@ -54,6 +54,7 @@ import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.RecurrenceId;
+import com.openexchange.chronos.exception.ProblemSeverity;
 import com.openexchange.chronos.service.CalendarUtilities;
 import com.openexchange.chronos.service.SearchFilter;
 import com.openexchange.chronos.service.SearchOptions;
@@ -81,10 +82,13 @@ public class RdbEventStorage extends RdbResilientStorage implements EventStorage
      * @param delegate The delegate storage
      * @param handleTruncations <code>true</code> to automatically handle data truncation warnings, <code>false</code>, otherwise
      * @param handleIncorrectStrings <code>true</code> to automatically handle incorrect string warnings, <code>false</code>, otherwise
+     * @param unsupportedDataThreshold The threshold defining up to which severity unsupported data errors can be ignored, or
+     *            <code>null</code> to not ignore any unsupported data error at all
      */
-    public RdbEventStorage(ServiceLookup services, EventStorage delegate, boolean handleTruncations, boolean handleIncorrectStrings) {
+    public RdbEventStorage(ServiceLookup services, EventStorage delegate, boolean handleTruncations, boolean handleIncorrectStrings, ProblemSeverity unsupportedDataThreshold) {
         super(services, handleTruncations, handleIncorrectStrings);
         this.delegate = delegate;
+        setUnsupportedDataThreshold(unsupportedDataThreshold, delegate);
     }
 
     @Override

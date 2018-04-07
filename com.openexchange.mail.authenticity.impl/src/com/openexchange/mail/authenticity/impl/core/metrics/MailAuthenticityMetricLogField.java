@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2017-2020 OX Software GmbH
+ *     Copyright (C) 2016-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,72 +47,18 @@
  *
  */
 
-package com.openexchange.mail.authenticity;
-
-import com.openexchange.config.lean.Property;
+package com.openexchange.mail.authenticity.impl.core.metrics;
 
 /**
- * {@link MailAuthenticityProperty} - Properties for mail authenticity validation.
+ * {@link MailAuthenticityMetricLogField}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public enum MailAuthenticityProperty implements Property {
-    /**
-     * Defines whether the mail authenticity core feature is enabled
-     * <p>
-     * Defaults to <code>false</code>
-     */
-    ENABLED("enabled", Boolean.FALSE),
-    /**
-     * Defines the date after which the e-mails will be analyzed
-     * <p>
-     * Defaults to 0
-     */
-    THRESHOLD("threshold", Long.valueOf(0)),
-    /**
-     * Defines the MANDATORY <code>authserv-id</code>. It can contain a single arbitrary string
-     * or a comma separated list of arbitrary strings
-     * <p>
-     * Default is empty.
-     *
-     * @see <a href="https://tools.ietf.org/html/rfc7601#section-2.2">RFC-7601, Section 2.2</a>
-     */
-    AUTHSERV_ID("authServId", ""),
-    /**
-     * <p>Defines whether the raw headers of a message will be logged in DEBUG level.</p>
-     * 
-     * <p>Defaults to <code>false</code></p>
-     */
-    LOG_RAW_HEADERS("logRawHeaders", Boolean.FALSE);
-
-    private final Object defaultValue;
-    private final String fqn;
-
-    /**
-     * Initializes a new {@link MailAuthenticityProperty}.
-     */
-    private MailAuthenticityProperty(String suffix, Object defaultValue) {
-        this.defaultValue = defaultValue;
-        fqn = "com.openexchange.mail.authenticity." + suffix;
-    }
-
-    /**
-     * Gets the fully qualified name for the property
-     *
-     * @return the fully qualified name for the property
-     */
-    @Override
-    public String getFQPropertyName() {
-        return fqn;
-    }
-
-    /**
-     * Gets the default value of this property
-     *
-     * @return the default value of this property
-     */
-    @Override
-    public Object getDefaultValue() {
-        return defaultValue;
-    }
+public enum MailAuthenticityMetricLogField {
+    mailId,
+    rawHeaders,
+    mechanismResults,
+    overallResult,
+    domainMismatch,
+    fromHeader,
 }

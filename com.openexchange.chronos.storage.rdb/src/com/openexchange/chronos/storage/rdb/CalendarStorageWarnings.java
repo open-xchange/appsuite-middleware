@@ -73,12 +73,23 @@ public abstract class CalendarStorageWarnings {
     protected static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CalendarStorageWarnings.class);
 
     private SortedMap<String, List<OXException>> warnings;
+    private ProblemSeverity unsupportedDataThreshold;
 
     /**
      * Initializes a new {@link CalendarStorageWarnings}.
      */
     protected CalendarStorageWarnings() {
         super();
+    }
+
+    /**
+     * Configures the severity threshold defining which unsupported data errors can be ignored.
+     *
+     * @param severityThreshold The threshold defining up to which severity unsupported data errors can be ignored, or
+     *            <code>null</code> to not ignore any unsupported data error at all
+     */
+    public void setUnsupportedDataThreshold(ProblemSeverity severityThreshold) {
+        this.unsupportedDataThreshold = severityThreshold;
     }
 
     /**
@@ -103,16 +114,37 @@ public abstract class CalendarStorageWarnings {
      * @param severity The problem severity
      * @param message The message providing details of the warning
      * @param cause The optional initial cause
+     * @return The added warning
      */
-    public void addInvalidDataWaring(String eventId, EventField field, ProblemSeverity severity, String message, Throwable cause) {
+    public OXException addInvalidDataWaring(String eventId, EventField field, ProblemSeverity severity, String message, Throwable cause) {
         OXException warning = CalendarExceptionCodes.IGNORED_INVALID_DATA.create(cause, eventId, field, String.valueOf(severity), message);
-        //        warning.setProperty(ProblemSeverity.class.getName(), severity.name());
         if (0 > ProblemSeverity.NORMAL.compareTo(severity)) {
             LOG.info(warning.getLogMessage());
         } else {
             LOG.debug(warning.getLogMessage());
         }
         addWarning(eventId, warning);
+        return warning;
+    }
+
+    /**
+     * Initializes a new {@link CalendarExceptionCodes#UNSUPPORTED_DATA} error that occurred when processing the data of a specific event.
+     * <p/>
+     * In case errors up to a certain problem severity can be ignored, an appropriate warning is tracked, otherwise, the error is raised.
+     *
+     * @param eventId The identifier of the event the error is associated with
+     * @param field The corresponding event field of the unsupported data
+     * @param severity The problem severity
+     * @param message The message providing details of the error
+     * @throws {@link CalendarExceptionCodes#UNSUPPORTED_DATA}
+     */
+    public void addUnsupportedDataError(String eventId, EventField field, ProblemSeverity severity, String message) throws OXException {
+        OXException error = CalendarExceptionCodes.UNSUPPORTED_DATA.create(eventId, field, severity, message);
+        if (null == unsupportedDataThreshold || 0 > unsupportedDataThreshold.compareTo(severity)) {
+            //            error.setCategory(Category.CATEGORY_ERROR);
+            throw error;
+        }
+        addInvalidDataWaring(eventId, field, severity, message, error);
     }
 
     /**

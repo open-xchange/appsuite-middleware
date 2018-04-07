@@ -78,7 +78,6 @@ import com.openexchange.mail.authenticity.mechanism.dkim.DKIMResult;
 import com.openexchange.mail.authenticity.mechanism.dmarc.DMARCResult;
 import com.openexchange.mail.authenticity.mechanism.spf.SPFResult;
 import com.openexchange.mail.dataobjects.MailAuthenticityResult;
-import com.openexchange.session.Session;
 
 /**
  * {@link StandardAuthenticationResultsValidator} - The standard parser and validator for <code>Authentication-Results</code> headers and <code>From</code> header of an E-Mail.
@@ -130,7 +129,7 @@ public class StandardAuthenticationResultsValidator implements AuthenticationRes
     }
 
     @Override
-    public MailAuthenticityResult parseHeaders(List<String> authenticationHeaders, InternetAddress from, List<AllowedAuthServId> allowedAuthServIds, Session notNeeded) throws OXException {
+    public MailAuthenticityResult parseHeaders(List<String> authenticationHeaders, InternetAddress from, List<AllowedAuthServId> allowedAuthServIds) throws OXException {
         MailAuthenticityResult overallResult = new MailAuthenticityResult(MailAuthenticityStatus.NEUTRAL);
         List<MailAuthenticityMechanismResult> results = new ArrayList<>();
         List<Map<String, String>> unconsideredResults = new ArrayList<>();

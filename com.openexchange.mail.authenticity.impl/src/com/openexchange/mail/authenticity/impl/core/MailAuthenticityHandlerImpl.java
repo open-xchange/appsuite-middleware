@@ -175,7 +175,7 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
         MailAuthenticityResult authenticityResult = MailAuthenticityResult.NOT_ANALYZED_RESULT;
         try {
             AuthenticationResultsValidator validator = getValidator();
-            authenticityResult = validator.parseHeaders(headers, from[0], getAllowedAuthServIds(session), session);
+            authenticityResult = validator.parseHeaders(headers, from[0], getAllowedAuthServIds(session));
         } catch (Exception e) {
             LOGGER.error("An error occurred during parsing the '{}' header of mail {} in folder {}", MessageHeaders.HDR_AUTHENTICATION_RESULTS, mailMessage.getMailId(), mailMessage.getFolder(), e);
         }
