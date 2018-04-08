@@ -80,7 +80,7 @@ import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
 /**
- * 
+ *
  * {@link AbstractITipAction}
  *
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
@@ -198,8 +198,7 @@ public abstract class AbstractITipAction implements AJAXActionService {
 
     protected CalendarSession initCalendarSession(ServerSession session) throws OXException {
         CalendarSession calendarSession = services.getService(CalendarService.class).init(session);
-        calendarSession.set(CalendarParameters.PARAMETER_AUTO_HANDLE_INCORRECT_STRINGS, Boolean.TRUE);
-        calendarSession.set(CalendarParameters.PARAMETER_AUTO_HANDLE_DATA_TRUNCATIONS, Boolean.TRUE);
+        calendarSession.set(CalendarParameters.PARAMETER_IGNORE_STORAGE_WARNINGS, Boolean.TRUE);
         return calendarSession;
     }
 }

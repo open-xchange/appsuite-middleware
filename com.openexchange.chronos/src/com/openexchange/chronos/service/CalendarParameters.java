@@ -202,28 +202,28 @@ public interface CalendarParameters {
     /**
      * {@link Boolean}
      * <p/>
-     * Configures whether possible incorrect string warnings that occurred in the storage layer should be handled automatically or not.
-     * <p/>
-     * If set to <code>true</code>, incorrect strings in the affected calendar data are replaced, and another attempt to store the data is
-     * performed implicitly, up to a fixed number of retry attempts. Defaults to <code>false</code>, so that an appropriate exception
-     * bubbles up.
-     *
-     * @see CalendarExceptionCodes#INCORRECT_STRING
-     */
-    static final String PARAMETER_AUTO_HANDLE_INCORRECT_STRINGS = "autoHandleIncorrectStrings";
-
-    /**
-     * {@link Boolean}
-     * <p/>
-     * Configures whether possible data truncation warnings that occurred in the storage layer should be handled automatically or not.
-     * <p/>
-     * If set to <code>true</code>, strings exceeding the storage capacity in the affected calendar data are truncated, and another
-     * attempt to store the data is performed implicitly, up to a fixed number of retry attempts. Defaults to <code>false</code>, so that
-     * an appropriate exception bubbles up.
+     * Configures whether possible warnings that occurred in the storage layer during write operations should be handled automatically or
+     * not. This includes
+     * <ul>
+     * <li><b>Auto-handling data truncations:</b><br/>
+     * Strings exceeding the storage capacity in the affected calendar data are truncated, and another attempt to store the data is
+     * performed implicitly, up to a fixed number of retry attempts.
+     * </li>
+     * <li><b>Auto-handling incorrect strings:</b><br/>
+     * Incorrect strings in the affected calendar data are replaced, and another attempt to store the data is performed implicitly, up to
+     * a fixed number of retry attempts.
+     * </li>
+     * <li><b>Skip unsupported data:</b><br/>
+     * Specific properties or property values that are not supported by the underlying storage are ignored silently.
+     * </li>
+     * </ul>
+     * Defaults to <code>false</code>, so that an appropriate exception bubbles up when the data cannot be stored as expected.
      *
      * @see CalendarExceptionCodes#DATA_TRUNCATION
+     * @see CalendarExceptionCodes#INCORRECT_STRING
+     * @see CalendarExceptionCodes#UNSUPPORTED_DATA
      */
-    static final String PARAMETER_AUTO_HANDLE_DATA_TRUNCATIONS = "autoHandleDataTruncations";
+    static final String PARAMETER_IGNORE_STORAGE_WARNINGS = "ignoreStorageWarnings";
 
     /**
      * {@link Boolean}
