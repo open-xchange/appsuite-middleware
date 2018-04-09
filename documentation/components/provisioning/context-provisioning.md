@@ -21,7 +21,7 @@ Therefore, the context create and delete mechanism have been revised, trying to 
 * The "inmemory" bulk creation mode for contexts is no more supported, since the reworked context provisioning renders that option obsolete
 
 # Introduction of count tables
-The biggest change is the usage of count-tables that were introduced by Carsten Höger and Dennis Sieben in a proof of concept implementation for Orange and their main goal is a quick detection of the next suitable file storage and 
+The biggest change is the usage of count-tables that were introduced by Carsten Höger and Dennis Sieben in a proof of concept implementation and their main goal is a quick detection of the next suitable file storage and 
 database (schema) for a new context as a quick look-up of a file storage's or database's occupancy is provided. This avoids the need to execute slow/stressing `COUNT` queries. Those tables track:
 
 * Number of contexts per file storage
