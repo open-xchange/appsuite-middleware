@@ -42,3 +42,24 @@ The previous endpoint for legacy clients is still available (module ``calendar/i
 
 The calendar-related functionality provided within the ``find`` module has been re-implemented using the new calendar stack. The format of the resulting documents has been adjusted to be compatible with the new data model, so that "event" results are returned now in favor of the previous "appointment" modules. 
 
+
+# Internal SPIs
+
+Within the middleware, new services have been established for the calendaring and scheduling domain, while old ones have been removed. 
+
+## ICalService
+
+For common conversion routines to and from the iCalendar format, the *singleton* service ``com.openexchange.chronos.ical.ICalService`` is available, providing support for ``VEVENT``, ``VFREEBUSY``, ``VTIMEZONE`` and ``VAVAILABILITY`` components. The previously used ``com.openexchange.data.conversion.ical.ICalEmitter`` and ``com.openexchange.data.conversion.ical.ICalParser`` are still available for ``VTODO`` <-> Task conversions.
+
+## CalendarService
+
+The central ``com.openexchange.chronos.service.CalendarService`` provides access to all calendar-related functionality for the *internal* calendar account. The service is always accessed with an initialized calendar session for the acting user. The previously used AppointmentSQLInterface is no longer available.   
+
+## IDBasedCalendarAccess
+
+The ``com.openexchange.chronos.provider.composition.IDBasedCalendarAccess`` interface serves as single entry point for all read-, write- and delete-operations from the client's point of view, offering the same interface independently of the underlying calendar implementation. It acts as broker and routes requests to the targeted calendar provider. Calendar access can be initialized using the ``com.openexchange.chronos.provider.composition.IDBasedCalendarAccessFactory`` service.     
+
+## CalendarProvider and CalendarAccess
+
+Concrete calendar services need to supply and register an implementation of the ``com.openexchange.chronos.provider.CalendarProvider`` service, providing the infrastructure to create, update and delete calendar accounts. Access to an account's calendar data is provided through the ``com.openexchange.chronos.provider.CalendarAccess`` interface, which is initialized via the corresponding provider.
+
