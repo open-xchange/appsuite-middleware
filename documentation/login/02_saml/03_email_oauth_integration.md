@@ -1,5 +1,5 @@
 ---
-Title: SAML Bearer Assertion Authorization Grant
+title: E-Mail Authentication with OAuth 2.0
 ---
 
 With version 7.8.4 the middleware supports OAuth authentication for the primary mail account via SAML Bearer Assertion Authorization Grant.
