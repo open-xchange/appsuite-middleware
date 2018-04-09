@@ -64,5 +64,15 @@ import com.openexchange.exception.OXException;
  */
 public interface ITipAnalyzerService {
 
+    /**
+     * Analyzes the given iCal file.
+     * 
+     * @param ical The iCal file as {@link InputStream}. Stream does <b>not</b> get closed
+     * @param format The format to use. <code>html</code> for a {@link com.openexchange.chronos.itip.generators.HTMLWrapper}, else a {@link com.openexchange.chronos.itip.generators.changes.PassthroughWrapper} is used
+     * @param session The {@link CalendarSession}
+     * @param mailHeader Mail header key-value pairs. Can influence the analyzer to use, if special handling for some clients are necessary, etc.
+     * @return {@link List} of {@link ITipAnalysis} containing the analyzed events.
+     * @throws OXException Various. DB, access, permission, etc.
+     */
     public List<ITipAnalysis> analyze(InputStream ical, String format, CalendarSession session, Map<String, String> mailHeader) throws OXException;
 }
