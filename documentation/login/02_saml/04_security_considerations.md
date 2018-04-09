@@ -1,5 +1,5 @@
 ---
-title: SAML 2.0 Security Considerations
+title: Security Considerations
 ---
 
 # General Assumptions
