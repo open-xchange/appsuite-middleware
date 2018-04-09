@@ -51,11 +51,11 @@ package com.openexchange.ajax.framework;
 
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.ConcurrentHashSet;
 import com.openexchange.test.pool.TestContextPool;
 import com.openexchange.test.pool.TestUser;
 import com.openexchange.testing.httpclient.invoker.ApiClient;
@@ -74,7 +74,8 @@ public abstract class AbstractAPIClientSession extends AbstractClientSession {
 
     protected LoginApi loginApi;
     protected ApiClient apiClient;
-    private Set<ApiClient> apiClients;
+
+    private Set<ApiClient> apiClients = new ConcurrentHashSet<>(1);
 
     /**
      * Default constructor.
@@ -98,9 +99,6 @@ public abstract class AbstractAPIClientSession extends AbstractClientSession {
     }
 
     protected void rememberClient(ApiClient client) {
-        if (apiClients == null) {
-            apiClients = new HashSet<>(1);
-        }
         apiClients.add(client);
     }
 
