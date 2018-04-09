@@ -53,7 +53,6 @@ import org.apache.commons.lang.StringEscapeUtils;
 import com.openexchange.chronos.ParticipationStatus;
 import com.openexchange.chronos.compat.ShownAsTransparency;
 import com.openexchange.chronos.itip.generators.changes.PassthroughWrapper;
-import com.openexchange.groupware.container.Appointment;
 
 /**
  * {@link HTMLWrapper}
