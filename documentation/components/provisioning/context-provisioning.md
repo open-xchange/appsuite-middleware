@@ -28,7 +28,7 @@ database (schema) for a new context as a quick look-up of a file storage's or da
 * Number of contexts per database host
 * Number of contexts per database schema
 
-To ensure those count tables do reflect a consistent state, the 'checkcountsconsistency' tool is available and once invoked takes care that entries and counters do hold the right values:
+To ensure those count tables do reflect a consistent state, the `checkcountsconsistency` tool is available and once invoked takes care that entries and counters do hold the right values:
 
 * Create missing entries
 * Drop non-existent entries
