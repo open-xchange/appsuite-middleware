@@ -54,7 +54,6 @@ import org.junit.runners.Suite;
 
 @RunWith(Suite.class)
 @Suite.SuiteClasses({
-    Bug8681forICAL.class,
     Bug8681forVCard.class,
     Bug8681forCSV.class
 })
