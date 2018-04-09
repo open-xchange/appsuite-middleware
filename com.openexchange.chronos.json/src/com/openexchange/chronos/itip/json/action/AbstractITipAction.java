@@ -73,6 +73,7 @@ import com.openexchange.conversion.DataArguments;
 import com.openexchange.conversion.DataProperties;
 import com.openexchange.conversion.DataSource;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Streams;
 import com.openexchange.osgi.RankingAwareNearRegistryServiceTracker;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
@@ -110,12 +111,15 @@ public abstract class AbstractITipAction implements AJAXActionService {
         TimeZone outputTimeZone = timezoneParameter == null ? tz : TimeZone.getTimeZone(timezoneParameter);
 
         Map<String, String> mailHeader = new HashMap<String, String>();
-        InputStream stream = getInputStreamAndFillMailHeader(requestData, session, mailHeader);
-        List<ITipAnalysis> analysis = analyzer.analyze(stream, requestData.getParameter("descriptionFormat"), initCalendarSession(session), mailHeader);
+        InputStream stream = null;
         try {
+            stream = getInputStreamAndFillMailHeader(requestData, session, mailHeader);
+            List<ITipAnalysis> analysis = analyzer.analyze(stream, requestData.getParameter("descriptionFormat"), initCalendarSession(session), mailHeader);
             return process(analysis, requestData, session, outputTimeZone);
         } catch (JSONException e) {
             throw AjaxExceptionCodes.JSON_ERROR.create(e);
+        } finally {
+            Streams.close(stream);
         }
     }
 

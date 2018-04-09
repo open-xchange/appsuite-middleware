@@ -417,7 +417,7 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
         if (event.containsColor() && Strings.isNotEmpty(event.getColor()) && 0 == Event2Appointment.getColorLabel(event.getColor())) {
             addUnsupportedDataError(event.getId(), EventField.COLOR, ProblemSeverity.NORMAL, "Unable to store color");
         }
-        if (event.containsStatus() && false == EventStatus.CONFIRMED.matches(event.getStatus())) {
+        if (event.containsStatus() && null != event.getStatus() && false == EventStatus.CONFIRMED.matches(event.getStatus())) {
             addUnsupportedDataError(event.getId(), EventField.STATUS, ProblemSeverity.NORMAL, "Unable to store status");
         }
         if (event.containsEndDate() && null != event.getEndDate() && null != event.getEndDate().getTimeZone() &&

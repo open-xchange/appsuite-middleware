@@ -55,11 +55,13 @@ DateTimeData {
 }  
 ```
 
-## References / further reading
+***
+**_References / further reading:_**
 - https://tools.ietf.org/html/rfc5545
 - https://github.com/dmfs/rfc5545-datetime
 - https://devguide.calconnect.org/Handling-Dates-and-Times/
 - https://tools.ietf.org/html/rfc4791#section-7.3
+***
 
 
 # Timezones
@@ -84,14 +86,15 @@ In order to also accept non-Olson timezones, such unknown timezones are attempte
 - If an unknown timezone is parsed, and at least one known timezone with the same rules exists, use the timezone whose identifier is most similar (*Levenshtein distance*) to the parsed one
 - Use the calendar user timezone, otherwise
 
-
-## References / further reading
+***
+**_References / further reading:_**
 - https://tools.ietf.org/html/rfc5545
 - https://devguide.calconnect.org/Time-Zones/Time-Zones/
 - http://www.twinsun.com/tz/tz-link.htm
 - http://www.oracle.com/technetwork/java/javase/timezones-137583.html
 - com.openexchange.chronos.impl.Utils#selectTimeZone
 - http://unicode.org/repos/cldr/trunk/common/supplemental/windowsZones.xml
+***
 
 
 # Relation of Organizer / Principal / Folder-Owner / Creator
@@ -153,7 +156,8 @@ In order to convert between the legacy properties for organizer/principal and th
   ``organizer``/``organizerId`` is taken from Organizer  
   ``principal``/``principalId`` empty  
   
-## References / further reading
+***
+**_References / further reading:_**
 - https://tools.ietf.org/html/rfc4791
 - https://tools.ietf.org/html/rfc6638
 - https://msdn.microsoft.com/en-us/library/office/bb856541.aspx
@@ -164,6 +168,7 @@ In order to convert between the legacy properties for organizer/principal and th
 - com.openexchange.calendar.itip.ITipCalendarWrapper.onBehalfOf(int)
 - com.openexchange.calendar.itip.ITipConsistencyCalendar.setPrincipal(CalendarDataObject)
 - com.openexchange.calendar.json.actions.chronos.EventConverter.getOrganizer(int, String, int, String)
+***
 
 
 # Per-Attendee delete exceptions
@@ -176,10 +181,12 @@ According to the RFC 6638, in such a scenario the attendee effectively gets a di
 
 While appropriate handling has originally been in place as incoming/outgoing "patches" within the CalDAV implementation, this is now considered directly within the Chronos service itself, so that the change- and delete-exception arrays in series events may be different based on the actual calendar user.
 
-## References / further reading
+***
+**_References / further reading:_**
 - https://tools.ietf.org/html/rfc6638#section-3.2.6
 - com.openexchange.chronos.impl.Utils.applyExceptionDates(CalendarStorage, Event, int)
 - com.openexchange.chronos.impl.performer.UpdatePerformer.updateDeleteExceptions(Event, Event)
+***
  
 
 # Classification / Private flag
@@ -199,7 +206,8 @@ Internally, the following semantics apply for the classifications:
 
 For synchronization via CalDAV, the event classification is passed and read *as-is*, with the exception of the Apple calendar clients who require some special treatment (in form of a proprietary spec) in this topic. When exporting calendar object resources whose classification is different from ``PUBLIC`` for an Apple client, the parent ``VCALENDAR`` component is decorated with an additional property ``X-CALENDARSERVER-ACCESS``, set to the value of the (series master) event's classification. In the same way during import, the passed value of ``X-CALENDARSERVER-ACCESS`` is considered and transferred from the parent ``VCALENDAR`` component to each contained ``VEVENT``.
 
-## References / further reading
+***
+**_References / further reading:_**
 - https://tools.ietf.org/html/rfc5545#section-3.8.1.3
 - https://github.com/apple/ccs-calendarserver/blob/master/doc/Extensions/caldav-privateevents.txt
 - http://blog.coeno.com/offentliche-private-und-vertrauliche-kalenderereignisse-und-wie-man-sie-richtig-nutzt/
@@ -208,6 +216,7 @@ For synchronization via CalDAV, the event classification is passed and read *as-
 - com.openexchange.chronos.compat.Appointment2Event.getClassification(boolean)
 - com.openexchange.chronos.impl.Check.classificationIsValid(Classification, UserizedFolder)
 - com.openexchange.chronos.impl.Utils.NON_CLASSIFIED_FIELDS
+***
 
 
 # Move between Folders
@@ -220,35 +229,39 @@ The user performing the move must be equipped with appropriate permissions for t
 
 In *group-scheduled* events with multiple attendees, the calendar user's *role* in the event is checked as well, i.e. it's required to be the organizer of the event (see "Permissions" below. Additionally, recurring event series (or change exception events) cannot be moved. And finally, there's a limitation towards moving events with a classification of ``PRIVATE`` or ``CONFIDENTIAL`` (which correlates to the legacy *private* flag). In this case, events must not be moved to a *public* folder, or moved between personal folders of different users (~ *shared* to *private* and vice versa).
 
+## Move Sceanrios
+
 After the general restrictions have been checked and are fulfilled, the following happens depending on the source- and target folder type. Implicitly, this also includes triggering of further updates, like updating the folder informations for stored alarm triggers or inserting tombstone objects in the database so that the deletion from the source folder can be successfully tracked by differential synchronization protocols.    
 
-## Public calendar folder 1 -> Public calendar folder 2
+### Public calendar folder 1 -> Public calendar folder 2
 - Update the common public folder identifier of the event
 
-## Personal calendar folder 1 of User A -> Personal calendar folder 2 of same User A
+### Personal calendar folder 1 of User A -> Personal calendar folder 2 of same User A
 - Update attendee A's parent folder identifier
 
-## Personal calendar folder of User A -> Personal calendar folder of other User B (non *group-scheduled* event)
+### Personal calendar folder of User A -> Personal calendar folder of other User B (non *group-scheduled* event)
 - Update the common folder identifier of the event
 - Update the calendar user of the event to user B
 
-## Personal calendar folder of User A -> Personal calendar folder of other User B ("pseudo" *group-scheduled* event with one attendee/organizer)
+### Personal calendar folder of User A -> Personal calendar folder of other User B ("pseudo" *group-scheduled* event with one attendee/organizer)
 - Update the original calendar user attendee A to user attendee B and take over his target folder identifier
 
-## Personal calendar folder of User A -> Personal calendar folder of other User B (*group-scheduled* event with multiple attendees)
+### Personal calendar folder of User A -> Personal calendar folder of other User B (*group-scheduled* event with multiple attendees)
 - Not allowed to avoid ambiguities
 
-## Public calendar folder -> Personal calendar folder of User A
+### Public calendar folder -> Personal calendar folder of User A
 - Update attendee A's parent folder identifier accordingly
 - Assign default parent folder identifier for all other user attendees 
 
-## Personal calendar folder of User A -> Public calendar folder
+### Personal calendar folder of User A -> Public calendar folder
 - Take over common public folder identifier for all user attendees 
-  
-## References / further reading
+
+***
+**_References / further reading:_**
 - com.openexchange.chronos.impl.performer.MovePerformer
 - https://intranet.open-xchange.com/wiki/backend-team:info:calendar#move_appointments_between_folders
 - com.openexchange.ajax.appointment.MoveTestNew
+***
 
    
 # Conversion of Recurrence Rules
@@ -272,12 +285,14 @@ If an event series is decorated with an end date, this used to be stored as *the
 
 Therefore, some information might currently get lost when converting a recurrence rule to a legacy series pattern, since the time fraction of the date-time value from the ``RRULE`` has to be truncated prior saving. Also, some special checks need to be in place during conversion to prevent an additional occurrence if the client-supplied ``UNTIL`` lies behind the last occurrence (and possibly right before the start date of a next occurrence).  
 
-## References / further reading
+***
+**_References / further reading:_**
 - https://tools.ietf.org/html/rfc5545#section-3.3.10
 - https://intranet.open-xchange.com/wiki/backend-team:info:calendar#serientermine
 - com.openexchange.groupware.calendar.CalendarDataObject
 - com.openexchange.chronos.compat.Recurrence
 - com.openexchange.chronos.compat.Recurrence.getSeriesEnd
+***
 
 
 # Reset of Participation Status
@@ -298,10 +313,11 @@ In contrast to the rather strict definition in the standard, the following, slig
 
 Doing so, the parstats are not resetted whenever the event's effective timeframe is reduced, e.g. the event is re-scheduled to start half an hour later, or end a couple of minutes earlier.
 
-
-## References / further reading
+***
+**_References / further reading:_**
 - https://tools.ietf.org/html/rfc6638#section-3.2.8
 - com.openexchange.chronos.impl.performer.EventUpdateProcessor#needsParticipationStatusReset
+***
 
 
 # Reset of Change Exceptions
@@ -312,10 +328,12 @@ In the Chronos stack, a slightly enhanced approach is used so that not necessari
 
 Additionally, it is now possible to apply a changed recurrence rule to a specific and all future occurrences of the series, which is handled by splitting the event series into two parts - see below for more details.
 
-## References / further reading
+***
+**_References / further reading:_**
 - com.openexchange.calendar.api.CalendarCollection.detectTimeChange
 - com.openexchange.calendar.CalendarOperation.checkPatternChange
 - com.openexchange.calendar.CalendarMySQL.deleteAllRecurringExceptions
+***
 
 
 # Smart update of Event Series
@@ -350,11 +368,12 @@ To avoid possible ambiguities, only certain changes considered, where the change
 - Removed attendees are also removed from change exceptions, in case they previously attended there, too.
 - For changes to an event's start- and/or enddate, the same change is only propagated if both properties are equal to the original value in the change exception, i.e. the change exception's timeslot is still matching the recurrence.
 
-
-## References / further reading
+***
+**_References / further reading:_**
 - https://raw.githubusercontent.com/apple/ccs-calendarserver/master/doc/Extensions/caldav-recursplit.txt
 - com.openexchange.chronos.impl.performer.EventUpdateProcessor#propagateToChangeExceptions
 - com.openexchange.chronos.impl.performer#SplitPerformer
+***
 
 
 # External Calendar Users
@@ -375,11 +394,12 @@ Internally within the Chronos stack, all URIs are kept as (escaped) URI string, 
 
 When being converted back to a plain e-mail address string (as used for external participants in the legacy stack), such URIs are decoded implicitly; additionally, ASCII-encoded (punycode) addresses with international domain names (IDN) are converted back to their unicode representation, too. This is the case when converting to an external participant in the legacy HTTP API, as well as when storing such an attendee in the ``dateExternal`` table. 
 
-## References / further reading
-
+***
+**_References / further reading:_**
 - https://tools.ietf.org/html/rfc5545#section-3.3.3
 - com.openexchange.chronos.common.CalendarUtils.extractEMailAddress(String)
 - com.openexchange.chronos.impl.Check.requireValidEMail(T)
+***
 
 
 # Provider/Account Framework
@@ -479,13 +499,15 @@ However, based on RFC 5545, this is handling was **wrong** (the CalDAV layer alr
 
 ## Chronos: No implicit Participant (possible)
 
-While not necessarly needed, for now events are still stored using the calendar user as implicit participant, so that compatibility can be guaranteed for the legacy data structure and for existing clients. For CalDAV, the same workarounds as described above are still in place. 
+While not necessarily needed, for now events are still stored using the calendar user as implicit participant, so that compatibility can be guaranteed for the legacy data structure and for existing clients. For CalDAV, the same workarounds as described above are still in place. 
 
 Eventually, once no backwards compatibility is needed anymore, this quirk will be removed, i.e. we'll no longer add the current calendar user as attendee and organizer implicitly in case no further attendees are defined. 
 
-## References / further reading
+***
+**_References / further reading:_**
 - https://bugs.horde.org/ticket/10697
 - com.openexchange.chronos.impl.Utils#isEnforceDefaultAttendee
+***
 
 
 # Event Flags
@@ -518,9 +540,11 @@ Via this property, events will get decorated with different aspects that are rel
 - ``first_occurrence``: The event represents the *first* occurrence of a recurring event series.
 - ``last_occurrence``: The event represents the *last* occurrence of a recurring event series.
 
-## References / further reading
+***
+**_References / further reading:_**
 - com.openexchange.chronos.EventFlag
 - com.openexchange.chronos.common.CalendarUtils#getFlags
+***
 
 
 # Last-Modified / Created
@@ -537,10 +561,12 @@ While letting the server assign those timestamps based on the current time autom
 
 For backwards compatibility, the new ``timestamp`` property is used to drive the ``last-modified`` property in the legacy HTTP API. Additionally, due to the ``NOT NULL`` column definitions, the respective values in the legacy storage are derived from the acting calendar user and the timestamp property as needed. 
 
-## References / further reading
+***
+**_References / further reading:_**
 - https://tools.ietf.org/html/rfc5545#section-3.8.7
 - http://oxpedia.org/index.php?title=HTTP_API#Date_and_time
 - https://bugzilla.mozilla.org/show_bug.cgi?id=303663#c2
+***
 
 
 # Allowed Attendee Changes
@@ -565,9 +591,11 @@ Additionally, to aid the typical *reply* of an attendee to a meeting request, a 
 
 In case a client attempts to modify a group-scheduled event using the CalDAV interface in a not allowed way, the request is answered with the ``CALDAV:allowed-attendee-scheduling-object-change`` precondition error. Besides the per-user properties defined in RFC 6638, there are no further exceptions. However, if a client attempts to store a non-standard *X*-property in the iCalendar resource, no error is thrown and the extended property is dropped silently (as clients actually do it, e.g. a custom ``X-APPLE-TRAVEL-ADVISORY-BEHAVIOR`` or ``X-LIC-ERROR``).
 
-## References / further reading
+***
+**_References / further reading:_**
 - https://tools.ietf.org/html/rfc6638#section-3.2.2
 - com.openexchange.chronos.impl.performer.AbstractUpdatePerformer#requireWritePermissions
+***
 
 
 # Permissions
@@ -625,10 +653,12 @@ So, in order to finally use 4-byte UTF-8 character sets, the MySQL server should
 
 As noted above in "Migration of legacy data", the database will work temporarily in a mode where all write operations are 'replayed' to the legacy database tables after the migration is finished, to prevent data loss in case a downgrade should ever be required. As the previously used database tables do still not support astral symbols, those problematic characters are removed implicitly when storing them there. 
 
-## References / further reading
+***
+**_References / further reading:_**
 - https://dev.mysql.com/doc/connector-j/en/connector-j-reference-charsets.html
 - https://bugs.open-xchange.com/show_bug.cgi?id=54504
 - https://confluence.open-xchange.com/display/MID/MySql+charsets+and+collations
+***
 
 
 # Import and Export

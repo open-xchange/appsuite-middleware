@@ -1,5 +1,5 @@
 ---
-title: OpenID Connect 1.0 SSO Integration
+title: OpenID Connect 1.0 SSO
 ---
 
 # Introduction
@@ -30,37 +30,37 @@ There are also two autologin flows supported, one with redirect to the OP for a 
 ## Login code flow
 The following diagram describes the whole code flow login process. The current implementation does not gather additional user informations like described in step 6.
 
-![Code flow login](APIgw_Relationship Oauth2.png "Code flow login")
+![Code flow login](01_openid/APIgw_Relationship Oauth2.png "Code flow login")
 
 
 ## Autologin with check for a valid OP session
-![Autologin via OP](Autologin via OP.png "Autologin via OP")
+![Autologin via OP](openid/Autologin via OP.png "Autologin via OP")
 
 If no valid session is present on side of the OP, the user is asked to login first. The handling on side of the Relying party is untouched by this scenario. 
 Additionally there is an example implementation of the verification dialog in the `examples/backend-samples` repository which should work with a connect2ID OpenID server. 
 The according project is `com.openexchange.sample.c2id-logout-page-jsp`. The example is called with the following parameters:
 
 
-	id_token_hint:eyJraWQiOiJDWHVwIiwiYWxn...
-	post_logout_redirect_uri:https://192.168.33.109//appsuite/api/oidc/logout
-	state:di26WOr8iZyVFReDvgsNwueDolfgwuB1rpjbo3t99Wo
+  id_token_hint:eyJraWQiOiJDWHVwIiwiYWxn...
+  post_logout_redirect_uri:https://192.168.33.109//appsuite/api/oidc/logout
+  state:di26WOr8iZyVFReDvgsNwueDolfgwuB1rpjbo3t99Wo
 
 * `id_token_hint`: The users id token, to acquire the correct session.
 * `post_logout_redirect`: Where should the user be redirected after the confirmation.
 * `state`: A generated state property, to verify the response later.
 
 ## Autologin directly in Appsuite
-![Autologin direct](Autologin direct.png "Autologin direct")
+![Autologin direct](01_openid/Autologin direct.png "Autologin direct")
 
 If no OIDC cookie exists, the standard login procedure is triggered.
 
 ## Logout with redirect to OP and termination of session
-![Logout via OP](Logout via OP.png "Logout via OP")
+![Logout via OP](01_openid/Logout via OP.png "Logout via OP")
 
 If an error occurs during the logout process, like an invalid response from the OP, the RP session is terminated anyways.
 
 ## Direct Logout from Appsuite
-![Logout direct](Logout direct.png "Logout direct")
+![Logout direct](01_openid/Logout direct.png "Logout direct")
 
 # Developers Guide
 There are three relevant bundles, the `com.openexchange.oidc` bundle, which contains all relevant interfaces. The default implementation, contained in the `com.openexchange.oidc.impl` bundle, which uses the Nimbus SDK

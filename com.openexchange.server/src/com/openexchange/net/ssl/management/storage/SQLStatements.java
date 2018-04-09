@@ -59,12 +59,12 @@ final class SQLStatements {
     /**
      * Inserts on duplicate key updates a certificate
      */
-    final static String INSERT_ON_DUPLICATE_UPDATE = "INSERT INTO user_certificate (cid, userid, host, fingerprint, trusted) VALUES (?,?,?,?,?) ON DUPLICATE KEY UPDATE trusted=?";
+    final static String INSERT_ON_DUPLICATE_UPDATE = "INSERT INTO user_certificate (cid, userid, host_hash, host, fingerprint, trusted) VALUES (?,?,?,?,?,?) ON DUPLICATE KEY UPDATE trusted=?";
 
     /**
      * Gets the certificate for a specified host
      */
-    final static String GET_FOR_HOST = "SELECT * FROM  user_certificate WHERE cid=? AND userid=? AND host=? AND fingerprint=?";
+    final static String GET_FOR_HOST = "SELECT * FROM  user_certificate WHERE cid=? AND userid=? AND host_hash=? AND fingerprint=?";
 
     /**
      * Gets the certificate
@@ -79,17 +79,17 @@ final class SQLStatements {
     /**
      * Checks for existence
      */
-    final static String CONTAINS = "SELECT 1 FROM user_certificate WHERE cid=? AND userid=? AND host=? AND fingerprint=?";
+    final static String CONTAINS = "SELECT 1 FROM user_certificate WHERE cid=? AND userid=? AND host_hash=? AND fingerprint=?";
 
     /**
      * Checks if the certificate is trusted
      */
-    final static String IS_TRUSTED = "SELECT trusted from user_certificate WHERE cid=? AND userid=? AND host=? AND fingerprint=?";
+    final static String IS_TRUSTED = "SELECT trusted from user_certificate WHERE cid=? AND userid=? AND host_hash=? AND fingerprint=?";
 
     /**
      * Deletes certificate for a specified host
      */
-    final static String DELETE_FOR_HOST = "DELETE FROM user_certificate WHERE cid=? AND userid=? AND host=? AND fingerprint=?";
+    final static String DELETE_FOR_HOST = "DELETE FROM user_certificate WHERE cid=? AND userid=? AND host_hash=? AND fingerprint=?";
 
     /**
      * Deletes all certificates for the specified user

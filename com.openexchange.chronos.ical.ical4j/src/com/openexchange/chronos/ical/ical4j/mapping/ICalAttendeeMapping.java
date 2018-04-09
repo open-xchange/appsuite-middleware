@@ -196,6 +196,11 @@ public abstract class ICalAttendeeMapping<T extends CalendarComponent, U> extend
         } else {
             property.getParameters().removeAll(Parameter.MEMBER);
         }
+        if (Strings.isNotEmpty(attendee.getEMail())) {
+            property.getParameters().replace(new XParameter("EMAIL", attendee.getEMail()));
+        } else {
+            property.getParameters().removeAll("EMAIL");
+        }
         if (null != attendee.getExtendedParameters() && 0 < attendee.getExtendedParameters().size()) {
             for (ExtendedPropertyParameter parameter : attendee.getExtendedParameters()) {
                 property.getParameters().replace(new XParameter(parameter.getName(), parameter.getValue()));
@@ -252,6 +257,9 @@ public abstract class ICalAttendeeMapping<T extends CalendarComponent, U> extend
                         if (Member.class.isInstance(parameter)) {
                             attendee.setMember(getUris(((Member) parameter).getGroups()));
                         }
+                        break;
+                    case "EMAIL":
+                        attendee.setEMail(value);
                         break;
                     default:
                         extendedParameters.add(new ExtendedPropertyParameter(parameter.getName(), parameter.getValue()));
