@@ -218,7 +218,7 @@ public class TestMailAuthenticityHandler extends AbstractTestMailAuthenticity {
         perform("ox.io; dkim=temperror (no key for signature) header.i=@aliceland.com header.s=dkim header.b=sl5RAv9n; spf=fail (ox.io: domain of bob@aliceland.com does not designate 1.2.3.4 as permitted sender) smtp.mailfrom=bob@aliceland.com");
 
         assertStatus(MailAuthenticityStatus.FAIL, result.getStatus());
-        assertEquals("The domain does not match", "aliceland.com", result.getAttribute(MailAuthenticityResultKey.FROM_DOMAIN));
+        assertNull("The domain does not match", result.getAttribute(MailAuthenticityResultKey.FROM_DOMAIN));
         assertAmount(2);
 
         List<MailAuthenticityMechanismResult> results = result.getAttribute(MailAuthenticityResultKey.MAIL_AUTH_MECH_RESULTS, List.class);
@@ -372,7 +372,7 @@ public class TestMailAuthenticityHandler extends AbstractTestMailAuthenticity {
         perform("ox.io; dmarc=pass (p=NONE sp=NONE dis=NONE) header.from=foobar.com");
 
         assertStatus(MailAuthenticityStatus.NEUTRAL, result.getStatus());
-        assertEquals("The domain does not match", "foobar.com", result.getAttribute(MailAuthenticityResultKey.FROM_DOMAIN));
+        assertNull("The domain does not match", result.getAttribute(MailAuthenticityResultKey.FROM_DOMAIN));
         assertAmount(1);
 
         List<MailAuthenticityMechanismResult> results = result.getAttribute(MailAuthenticityResultKey.MAIL_AUTH_MECH_RESULTS, List.class);
@@ -390,7 +390,7 @@ public class TestMailAuthenticityHandler extends AbstractTestMailAuthenticity {
         perform("ox.io; dmarc=pass (p=NONE sp=NONE dis=NONE) header.from=foobar.com; dmarc=fail (p=NONE sp=NONE dis=NONE) header.from=some.foobar.com");
 
         assertStatus(MailAuthenticityStatus.NEUTRAL, result.getStatus());
-        assertEquals("The domain does not match", "foobar.com", result.getAttribute(MailAuthenticityResultKey.FROM_DOMAIN));
+        assertNull("The domain does not match", result.getAttribute(MailAuthenticityResultKey.FROM_DOMAIN));
         assertAmount(1);
         assertUnconsideredAmount(0);
 
@@ -450,9 +450,9 @@ public class TestMailAuthenticityHandler extends AbstractTestMailAuthenticity {
         //@formatter:on
 
         assertStatus(MailAuthenticityStatus.NEUTRAL, result.getStatus());
-        assertDomain("FoObAr.cOM", result.getAttribute(MailAuthenticityResultKey.FROM_DOMAIN, String.class)); // The SPF domain
+        assertNull("The domain does not match", result.getAttribute(MailAuthenticityResultKey.FROM_DOMAIN));
         assertTrue("Domain mismatch was expected", result.getAttribute(MailAuthenticityResultKey.DOMAN_MISMATCH, Boolean.class)); // FIXME: Should be adjusted accordingly after fixing bug 57353
-        
+
         List<MailAuthenticityMechanismResult> results = result.getAttribute(MailAuthenticityResultKey.MAIL_AUTH_MECH_RESULTS, List.class);
         assertAuthenticityMechanismResult(results.get(0), "fooBAR.com", DMARCResult.NONE);
         assertAuthenticityMechanismResult(results.get(1), "some.thirdparty.com", DKIMResult.FAIL);

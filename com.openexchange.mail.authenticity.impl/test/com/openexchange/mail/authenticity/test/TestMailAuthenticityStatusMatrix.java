@@ -50,6 +50,7 @@
 package com.openexchange.mail.authenticity.test;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 import java.util.List;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
@@ -102,7 +103,7 @@ public class TestMailAuthenticityStatusMatrix extends AbstractTestMailAuthentici
         perform("ox.io; spf=pass smtp.mailfrom=example.net; dkim=pass (good signature) header.d=example.net");
 
         assertStatus(MailAuthenticityStatus.NEUTRAL, result.getStatus());
-        assertEquals("The domain does not match", "example.net", result.getAttribute(MailAuthenticityResultKey.FROM_DOMAIN));
+        assertNull("The domain does not match", result.getAttribute(MailAuthenticityResultKey.FROM_DOMAIN));
         assertAmount(2);
 
         assertAuthenticityMechanismResult((MailAuthenticityMechanismResult) result.getAttribute(MailAuthenticityResultKey.MAIL_AUTH_MECH_RESULTS, List.class).get(0), "example.net", DKIMResult.PASS);
@@ -134,7 +135,7 @@ public class TestMailAuthenticityStatusMatrix extends AbstractTestMailAuthentici
         perform("ox.io; spf=pass smtp.mailfrom=example.net; dkim=neutral header.d=example.net");
 
         assertStatus(MailAuthenticityStatus.NEUTRAL, result.getStatus());
-        assertEquals("The domain does not match", "example.net", result.getAttribute(MailAuthenticityResultKey.FROM_DOMAIN));
+        assertNull("The domain does not match", result.getAttribute(MailAuthenticityResultKey.FROM_DOMAIN));
         assertAmount(2);
 
         assertAuthenticityMechanismResult((MailAuthenticityMechanismResult) result.getAttribute(MailAuthenticityResultKey.MAIL_AUTH_MECH_RESULTS, List.class).get(0), "example.net", DKIMResult.NEUTRAL);
@@ -150,7 +151,7 @@ public class TestMailAuthenticityStatusMatrix extends AbstractTestMailAuthentici
         perform("ox.io; spf=pass smtp.mailfrom=example.net; dkim=fail (bad signature) header.d=example.net");
 
         assertStatus(MailAuthenticityStatus.NEUTRAL, result.getStatus());
-        assertEquals("The domain does not match", "example.net", result.getAttribute(MailAuthenticityResultKey.FROM_DOMAIN));
+        assertNull("The domain does not match", result.getAttribute(MailAuthenticityResultKey.FROM_DOMAIN));
         assertAmount(2);
 
         assertAuthenticityMechanismResult((MailAuthenticityMechanismResult) result.getAttribute(MailAuthenticityResultKey.MAIL_AUTH_MECH_RESULTS, List.class).get(0), "example.net", DKIMResult.FAIL);
@@ -166,7 +167,7 @@ public class TestMailAuthenticityStatusMatrix extends AbstractTestMailAuthentici
         perform("ox.io; spf=pass smtp.mailfrom=example.net; dkim=fail (bad signature) header.d=example.net");
 
         assertStatus(MailAuthenticityStatus.FAIL, result.getStatus());
-        assertEquals("The domain does not match", "example.net", result.getAttribute(MailAuthenticityResultKey.FROM_DOMAIN));
+        assertNull("The domain does not match", result.getAttribute(MailAuthenticityResultKey.FROM_DOMAIN));
         assertAmount(2);
 
         assertAuthenticityMechanismResult((MailAuthenticityMechanismResult) result.getAttribute(MailAuthenticityResultKey.MAIL_AUTH_MECH_RESULTS, List.class).get(0), "example.net", DKIMResult.FAIL);
@@ -198,7 +199,7 @@ public class TestMailAuthenticityStatusMatrix extends AbstractTestMailAuthentici
         perform("ox.io; spf=neutral smtp.mailfrom=example.net; dkim=pass (good signature) header.d=example.net");
 
         assertStatus(MailAuthenticityStatus.NEUTRAL, result.getStatus());
-        assertEquals("The domain does not match", "example.net", result.getAttribute(MailAuthenticityResultKey.FROM_DOMAIN));
+        assertNull("The domain does not match", result.getAttribute(MailAuthenticityResultKey.FROM_DOMAIN));
         assertAmount(2);
 
         assertAuthenticityMechanismResult((MailAuthenticityMechanismResult) result.getAttribute(MailAuthenticityResultKey.MAIL_AUTH_MECH_RESULTS, List.class).get(0), "example.net", DKIMResult.PASS);
@@ -214,7 +215,7 @@ public class TestMailAuthenticityStatusMatrix extends AbstractTestMailAuthentici
         perform("ox.io; spf=neutral smtp.mailfrom=example.net; dkim=neutral header.d=example.net");
 
         assertStatus(MailAuthenticityStatus.NEUTRAL, result.getStatus());
-        assertEquals("The domain does not match", "example.net", result.getAttribute(MailAuthenticityResultKey.FROM_DOMAIN));
+        assertNull("The domain does not match", result.getAttribute(MailAuthenticityResultKey.FROM_DOMAIN));
         assertAmount(2);
 
         assertAuthenticityMechanismResult((MailAuthenticityMechanismResult) result.getAttribute(MailAuthenticityResultKey.MAIL_AUTH_MECH_RESULTS, List.class).get(0), "example.net", DKIMResult.NEUTRAL);
@@ -230,7 +231,7 @@ public class TestMailAuthenticityStatusMatrix extends AbstractTestMailAuthentici
         perform("ox.io; spf=neutral smtp.mailfrom=example.net; dkim=neutral header.d=example.net");
 
         assertStatus(MailAuthenticityStatus.NEUTRAL, result.getStatus());
-        assertEquals("The domain does not match", "example.net", result.getAttribute(MailAuthenticityResultKey.FROM_DOMAIN));
+        assertNull("The domain does not match", result.getAttribute(MailAuthenticityResultKey.FROM_DOMAIN));
         assertAmount(2);
 
         assertAuthenticityMechanismResult((MailAuthenticityMechanismResult) result.getAttribute(MailAuthenticityResultKey.MAIL_AUTH_MECH_RESULTS, List.class).get(0), "example.net", DKIMResult.NEUTRAL);
@@ -246,7 +247,7 @@ public class TestMailAuthenticityStatusMatrix extends AbstractTestMailAuthentici
         perform("ox.io; spf=neutral smtp.mailfrom=example.net; dkim=fail (bad signature) header.d=example.net");
 
         assertStatus(MailAuthenticityStatus.NEUTRAL, result.getStatus());
-        assertEquals("The domain does not match", "example.net", result.getAttribute(MailAuthenticityResultKey.FROM_DOMAIN));
+        assertNull("The domain does not match", result.getAttribute(MailAuthenticityResultKey.FROM_DOMAIN));
         assertAmount(2);
 
         assertAuthenticityMechanismResult((MailAuthenticityMechanismResult) result.getAttribute(MailAuthenticityResultKey.MAIL_AUTH_MECH_RESULTS, List.class).get(0), "example.net", DKIMResult.FAIL);
@@ -262,7 +263,7 @@ public class TestMailAuthenticityStatusMatrix extends AbstractTestMailAuthentici
         perform("ox.io; spf=neutral smtp.mailfrom=example.net; dkim=fail (bad signature) header.d=example.net");
 
         assertStatus(MailAuthenticityStatus.FAIL, result.getStatus());
-        assertEquals("The domain does not match", "example.net", result.getAttribute(MailAuthenticityResultKey.FROM_DOMAIN));
+        assertNull("The domain does not match", result.getAttribute(MailAuthenticityResultKey.FROM_DOMAIN));
         assertAmount(2);
 
         assertAuthenticityMechanismResult((MailAuthenticityMechanismResult) result.getAttribute(MailAuthenticityResultKey.MAIL_AUTH_MECH_RESULTS, List.class).get(0), "example.net", DKIMResult.FAIL);
@@ -294,7 +295,7 @@ public class TestMailAuthenticityStatusMatrix extends AbstractTestMailAuthentici
         perform("ox.io; spf=fail smtp.mailfrom=example.net; dkim=pass (good signature) header.d=example.net");
 
         assertStatus(MailAuthenticityStatus.FAIL, result.getStatus());
-        assertEquals("The domain does not match", "example.net", result.getAttribute(MailAuthenticityResultKey.FROM_DOMAIN));
+        assertNull("The domain does not match", result.getAttribute(MailAuthenticityResultKey.FROM_DOMAIN));
         assertAmount(2);
 
         assertAuthenticityMechanismResult((MailAuthenticityMechanismResult) result.getAttribute(MailAuthenticityResultKey.MAIL_AUTH_MECH_RESULTS, List.class).get(0), "example.net", DKIMResult.PASS);
@@ -310,7 +311,7 @@ public class TestMailAuthenticityStatusMatrix extends AbstractTestMailAuthentici
         perform("ox.io; spf=fail smtp.mailfrom=example.net; dkim=neutral header.d=example.net");
 
         assertStatus(MailAuthenticityStatus.FAIL, result.getStatus());
-        assertEquals("The domain does not match", "example.net", result.getAttribute(MailAuthenticityResultKey.FROM_DOMAIN));
+        assertNull("The domain does not match", result.getAttribute(MailAuthenticityResultKey.FROM_DOMAIN));
         assertAmount(2);
 
         assertAuthenticityMechanismResult((MailAuthenticityMechanismResult) result.getAttribute(MailAuthenticityResultKey.MAIL_AUTH_MECH_RESULTS, List.class).get(0), "example.net", DKIMResult.NEUTRAL);
@@ -326,7 +327,7 @@ public class TestMailAuthenticityStatusMatrix extends AbstractTestMailAuthentici
         perform("ox.io; spf=fail smtp.mailfrom=example.net; dkim=neutral header.d=example.net");
 
         assertStatus(MailAuthenticityStatus.FAIL, result.getStatus());
-        assertEquals("The domain does not match", "example.net", result.getAttribute(MailAuthenticityResultKey.FROM_DOMAIN));
+        assertNull("The domain does not match", result.getAttribute(MailAuthenticityResultKey.FROM_DOMAIN));
         assertAmount(2);
 
         assertAuthenticityMechanismResult((MailAuthenticityMechanismResult) result.getAttribute(MailAuthenticityResultKey.MAIL_AUTH_MECH_RESULTS, List.class).get(0), "example.net", DKIMResult.NEUTRAL);
@@ -342,7 +343,7 @@ public class TestMailAuthenticityStatusMatrix extends AbstractTestMailAuthentici
         perform("ox.io; spf=fail smtp.mailfrom=example.net; dkim=fail (bad signature) header.d=example.net");
 
         assertStatus(MailAuthenticityStatus.FAIL, result.getStatus());
-        assertEquals("The domain does not match", "example.net", result.getAttribute(MailAuthenticityResultKey.FROM_DOMAIN));
+        assertNull("The domain does not match", result.getAttribute(MailAuthenticityResultKey.FROM_DOMAIN));
         assertAmount(2);
 
         assertAuthenticityMechanismResult((MailAuthenticityMechanismResult) result.getAttribute(MailAuthenticityResultKey.MAIL_AUTH_MECH_RESULTS, List.class).get(0), "example.net", DKIMResult.FAIL);
@@ -358,7 +359,7 @@ public class TestMailAuthenticityStatusMatrix extends AbstractTestMailAuthentici
         perform("ox.io; spf=fail smtp.mailfrom=example.net; dkim=fail (bad signature) header.d=example.net");
 
         assertStatus(MailAuthenticityStatus.FAIL, result.getStatus());
-        assertEquals("The domain does not match", "example.net", result.getAttribute(MailAuthenticityResultKey.FROM_DOMAIN));
+        assertNull("The domain does not match", result.getAttribute(MailAuthenticityResultKey.FROM_DOMAIN));
         assertAmount(2);
 
         assertAuthenticityMechanismResult((MailAuthenticityMechanismResult) result.getAttribute(MailAuthenticityResultKey.MAIL_AUTH_MECH_RESULTS, List.class).get(0), "example.net", DKIMResult.FAIL);
