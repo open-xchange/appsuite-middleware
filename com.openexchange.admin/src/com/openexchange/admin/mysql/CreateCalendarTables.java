@@ -246,12 +246,12 @@ public class CreateCalendarTables extends AbstractCreateTableImpl {
     private static final String CREATE_DATE_EXTERNAL = "CREATE TABLE " + TABLE_DATE_EXTERNAL + " ("
         + "cid INT4 UNSIGNED NOT NULL,"
         + "objectId INT4 UNSIGNED NOT NULL,"
-        + "mailAddress VARCHAR(255) NOT NULL,"
+        + "mailAddress VARCHAR(255) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,"
         + "displayName VARCHAR(255),"
         + "confirm INT4 UNSIGNED NOT NULL,"
         + "reason TEXT,"
         + "PRIMARY KEY (cid,objectId,`mailAddress`(255))"
-        + ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
+        + ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;";
 
     /**
      * Table name of delDateExternal table
@@ -264,12 +264,12 @@ public class CreateCalendarTables extends AbstractCreateTableImpl {
     private static final String CREATE_DEL_DATE_EXTERNAL = "CREATE TABLE " + TABLE_DEL_DATE_EXTERNAL + " ("
         + "cid INT4 UNSIGNED NOT NULL,"
         + "objectId INT4 UNSIGNED NOT NULL,"
-        + "mailAddress VARCHAR(255) NOT NULL,"
+        + "mailAddress VARCHAR(255) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,"
         + "displayName VARCHAR(255),"
         + "confirm INT4 UNSIGNED NOT NULL,"
         + "reason TEXT,"
         + "PRIMARY KEY (cid,objectId,`mailAddress`(255))"
-        + ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
+        + ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;";
 
     /**
      * Initializes a new {@link CreateCalendarTables}.

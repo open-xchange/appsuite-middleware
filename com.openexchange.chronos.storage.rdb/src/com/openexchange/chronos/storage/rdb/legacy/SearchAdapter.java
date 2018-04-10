@@ -74,6 +74,7 @@ import com.openexchange.chronos.compat.Event2Appointment;
 import com.openexchange.chronos.service.SearchFilter;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.tools.mappings.database.DbMapping;
+import com.openexchange.java.Strings;
 import com.openexchange.java.util.TimeZones;
 import com.openexchange.search.CompositeSearchTerm;
 import com.openexchange.search.CompositeSearchTerm.CompositeOperation;
@@ -272,7 +273,7 @@ public class SearchAdapter {
             stringBuilder.append(" AND EXISTS (SELECT 1 FROM dateExternal WHERE dateExternal.cid = ");
             appendConstantOperand(Integer.valueOf(contextID), Types.INTEGER);
             stringBuilder.append(" AND dateExternal.objectId=").append(prefixEvents).append("intfield01 AND dateExternal.mailAddress = ");
-            appendConstantOperand(queries.get(0), Types.VARCHAR);
+            appendConstantOperand(Strings.replaceSurrogatePairs(queries.get(0), '@'), Types.VARCHAR);
             stringBuilder.append(')');
         } else {
             stringBuilder.append(" AND EXISTS (SELECT 1 FROM dateExternal WHERE dateExternal.cid = ");

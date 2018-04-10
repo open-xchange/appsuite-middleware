@@ -51,9 +51,8 @@ package com.openexchange.groupware.update.tasks;
 
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.Arrays;
 import java.util.Collections;
-import java.util.Map;
+import java.util.List;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.SimpleConvertUtf8ToUtf8mb4UpdateTask;
 
@@ -66,18 +65,17 @@ import com.openexchange.groupware.update.SimpleConvertUtf8ToUtf8mb4UpdateTask;
 public class LegacyCalendarTablesUtf8Mb4UpdateTask extends SimpleConvertUtf8ToUtf8mb4UpdateTask {
 
     /**
-     * Initialises a new {@link LegacyCalendarTablesUtf8Mb4UpdateTask}.
+     * Initializes a new {@link LegacyCalendarTablesUtf8Mb4UpdateTask}.
      */
     public LegacyCalendarTablesUtf8Mb4UpdateTask() {
-        super(Arrays.asList("prg_dates", "del_dates", "prg_date_rights", "prg_dates_members", "del_date_rights", "del_dates_members"), 
-            "com.openexchange.groupware.update.tasks.CalendarAddIndex2DatesMembersV2");
+        super(CalendarAddIndex2DatesMembersV2.class, "prg_dates", "del_dates", "prg_date_rights", "prg_dates_members", "del_date_rights", "del_dates_members");
     }
 
     @Override
     protected void after(PerformParameters params, Connection connection) throws SQLException {
         // Manually change dateExternal and delDateExternal
-        Map<String, Integer> varcharColumns = Collections.singletonMap("mailAddress", 255);
-        changeTable(connection, params.getSchema().getSchema(), "dateExternal", varcharColumns);
-        changeTable(connection, params.getSchema().getSchema(), "delDateExternal", varcharColumns);
+        List<String> columnsToIgnore = Collections.singletonList("mailAddress");
+        changeTable(connection, params.getSchema().getSchema(), "dateExternal", columnsToIgnore);
+        changeTable(connection, params.getSchema().getSchema(), "delDateExternal", columnsToIgnore);
     }
 }
