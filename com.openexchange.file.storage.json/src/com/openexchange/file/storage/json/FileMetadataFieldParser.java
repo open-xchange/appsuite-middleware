@@ -93,7 +93,7 @@ public class FileMetadataFieldParser {
         }
         switch(field) {
         case CATEGORIES: {
-            if (value == null) {
+            if (val == null) {
                 return null;
             }
             if (String.class.isInstance(val)) {

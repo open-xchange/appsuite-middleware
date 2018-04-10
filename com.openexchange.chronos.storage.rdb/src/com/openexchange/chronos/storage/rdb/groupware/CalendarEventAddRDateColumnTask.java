@@ -47,85 +47,54 @@
  *
  */
 
-package com.openexchange.net.ssl.config.impl.internal;
+package com.openexchange.chronos.storage.rdb.groupware;
 
-import java.util.List;
-import com.openexchange.net.ssl.config.SSLConfigurationService;
-import com.openexchange.net.ssl.config.TrustLevel;
+import static com.openexchange.database.Databases.autocommit;
+import static com.openexchange.database.Databases.rollback;
+import java.sql.Connection;
+import java.sql.SQLException;
+import com.openexchange.exception.OXException;
+import com.openexchange.groupware.update.PerformParameters;
+import com.openexchange.groupware.update.UpdateExceptionCodes;
+import com.openexchange.groupware.update.UpdateTaskAdapter;
+import com.openexchange.tools.update.Column;
+import com.openexchange.tools.update.Tools;
 
 /**
- * {@link TrustAllSSLConfigurationService} - The SSL configuration service in case trust-all is configured.
+ * {@link CalendarEventAddRDateColumnTask}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
- * @since v7.8.3
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @since v7.10.0
  */
-public class TrustAllSSLConfigurationService implements SSLConfigurationService {
+public class CalendarEventAddRDateColumnTask extends UpdateTaskAdapter {
 
-    private static final TrustAllSSLConfigurationService INSTANCE = new TrustAllSSLConfigurationService();
-
-    /**
-     * Gets the singleton instance.
-     *
-     * @return The instance
-     */
-    public static TrustAllSSLConfigurationService getInstance() {
-        return INSTANCE;
-    }
-
-    // ------------------------------------------------------------------------------------------------------------------
-
-    /**
-     * Initializes a new {@link TrustAllSSLConfigurationService}.
-     */
-    private TrustAllSSLConfigurationService() {
-        super();
+    @Override
+    public String[] getDependencies() {
+        return new String[] { "com.openexchange.chronos.storage.rdb.groupware.ChronosCreateTableTask"
+        };
     }
 
     @Override
-    public boolean isWhitelisted(String hostName) {
-        return true;
+    public void perform(PerformParameters params) throws OXException {
+        Connection connection = params.getConnection();
+        boolean rollback = false;
+        try {
+            connection.setAutoCommit(false);
+            rollback = true;
+            Tools.checkAndAddColumns(connection, "calendar_event", new Column("rDate", "TEXT DEFAULT NULL"));
+            Tools.checkAndAddColumns(connection, "calendar_event_tombstone", new Column("rDate", "TEXT DEFAULT NULL"));
+            connection.commit();
+            rollback = false;
+        } catch (SQLException e) {
+            throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
+        } catch (RuntimeException e) {
+            throw UpdateExceptionCodes.OTHER_PROBLEM.create(e, e.getMessage());
+        } finally {
+            if (rollback) {
+                rollback(connection);
+            }
+            autocommit(connection);
+        }
     }
 
-    @Override
-    public TrustLevel getTrustLevel() {
-        return TrustLevel.TRUST_ALL;
-    }
-
-    @Override
-    public String[] getSupportedProtocols() {
-        List<String> protocols = SSLProperties.getSupportedProtocols();
-        return protocols.toArray(new String[protocols.size()]);
-    }
-
-    @Override
-    public String[] getSupportedCipherSuites() {
-        List<String> cipherSuites = SSLProperties.getSupportedCipherSuites();
-        return cipherSuites.toArray(new String[cipherSuites.size()]);
-    }
-
-    @Override
-    public boolean isVerifyHostname() {
-        return false;
-    }
-
-    @Override
-    public boolean isDefaultTruststoreEnabled() {
-        return true;
-    }
-
-    @Override
-    public boolean isCustomTruststoreEnabled() {
-        return false;
-    }
-
-    @Override
-    public String getCustomTruststoreLocation() {
-        return null;
-    }
-
-    @Override
-    public String getCustomTruststorePassword() {
-        return null;
-    }
 }
