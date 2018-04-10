@@ -68,14 +68,13 @@ public class LdapConvertUtf8ToUtf8mb4Task extends SimpleConvertUtf8ToUtf8mb4Upda
      * Initializes a new {@link LdapConvertUtf8ToUtf8mb4Task}.
      */
     public LdapConvertUtf8ToUtf8mb4Task() {
-        super(ImmutableList.of("groups", "del_groups", "user", "del_user", "groups_member", 
-            "login2user", "user_attribute", "resource", "del_resource"), 
+        super(ImmutableList.of("groups", "del_groups", "user", "del_user", "groups_member",
+            "login2user", "user_attribute", "resource", "del_resource"),
             ChangePrimaryKeyForUserAttribute.class.getName());
     }
 
     @Override
     protected void after(PerformParameters params, Connection connection) throws SQLException {
-        String schema = params.getSchema().getSchema();
-        changeTable(connection, schema, "user_alias", Collections.singletonMap("alias", 255));
+        changeTable(connection, params.getSchema().getSchema(), "user_alias", Collections.singletonList("alias"));
     }
 }

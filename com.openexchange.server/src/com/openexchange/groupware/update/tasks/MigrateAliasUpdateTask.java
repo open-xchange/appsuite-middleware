@@ -109,7 +109,7 @@ public class MigrateAliasUpdateTask extends AbstractUserAliasTableUpdateTask {
             stmt.execute("CREATE TABLE `user_alias` ( " // --> Also specified in com.openexchange.admin.mysql.CreateLdap2SqlTables.createAliasTable
             + "`cid` INT4 UNSIGNED NOT NULL, "
             + "`user` INT4 UNSIGNED NOT NULL, "
-            + "`alias` VARCHAR(191) NOT NULL, "
+            + "`alias` VARCHAR(255) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL, "
             + "`uuid` BINARY(16) DEFAULT NULL,"
             + "PRIMARY KEY (`cid`, `user`, `alias`) "
             + ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;");
