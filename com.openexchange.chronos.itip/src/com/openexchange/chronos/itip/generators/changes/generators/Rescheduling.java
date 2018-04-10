@@ -89,20 +89,20 @@ public class Rescheduling implements ChangeDescriptionGenerator {
         return sentences;
     }
 
-    private String timeString(Event appointment, ITipEventUpdate diff, Locale locale, TimeZone timezone) {
+    private String timeString(Event event, ITipEventUpdate diff, Locale locale, TimeZone timezone) {
         Format format = chooseFormat(diff, timezone);
-        if (differentDays(appointment.getStartDate(), appointment.getEndDate(), timezone)) {
+        if (differentDays(event.getStartDate(), event.getEndDate(), timezone)) {
             format = Format.DIFFERENT_DAYS;
         }
-        return time(format, appointment, locale, timezone);
+        return time(format, event, locale, timezone);
     }
 
-    private String updatedTimeString(Event appointment, ITipEventUpdate diff, Locale locale, TimeZone timezone) {
+    private String updatedTimeString(Event event, ITipEventUpdate diff, Locale locale, TimeZone timezone) {
         Format format = chooseFormat(diff, timezone);
-        if (differentDays(appointment.getStartDate(), appointment.getEndDate(), timezone)) {
+        if (differentDays(event.getStartDate(), event.getEndDate(), timezone)) {
             format = Format.DIFFERENT_DAYS;
         }
-        return updatedTime(format, appointment, locale, timezone);
+        return updatedTime(format, event, locale, timezone);
     }
 
     private String updatedTime(Format format, Event updated, Locale locale, TimeZone timezone) {
