@@ -217,11 +217,9 @@ public class TimeoutHttpURLFeedFetcher extends AbstractFeedFetcher implements Re
             }
 
             HttpURLConnection httpConnection = (HttpURLConnection) connection;
-            if ("https".equals(feedUrl.getProtocol()) || 443 == feedUrl.getPort()) {
-                HttpsURLConnection httpsConnection = (HttpsURLConnection) httpConnection;
+            if ("https".equalsIgnoreCase(feedUrl.getProtocol()) || 443 == feedUrl.getPort()) {
                 SSLSocketFactory sslSocketFactory = Services.getService(SSLSocketFactoryProvider.class).getDefault();
-                HttpsURLConnection.setDefaultSSLSocketFactory(sslSocketFactory);
-                httpConnection = httpsConnection;
+                ((HttpsURLConnection) httpConnection).setSSLSocketFactory(sslSocketFactory);
             }
 
             if (connectTimout > 0) {

@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,32 +47,54 @@
  *
  */
 
-package com.openexchange.chronos.itip;
+package com.openexchange.chronos.storage.rdb.groupware;
 
-import java.io.InputStream;
-import java.util.List;
-import java.util.Map;
-import com.openexchange.chronos.service.CalendarSession;
+import static com.openexchange.database.Databases.autocommit;
+import static com.openexchange.database.Databases.rollback;
+import java.sql.Connection;
+import java.sql.SQLException;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.update.PerformParameters;
+import com.openexchange.groupware.update.UpdateExceptionCodes;
+import com.openexchange.groupware.update.UpdateTaskAdapter;
+import com.openexchange.tools.update.Column;
+import com.openexchange.tools.update.Tools;
 
 /**
- * 
- * {@link ITipAnalyzerService}
+ * {@link CalendarEventAddRDateColumnTask}
  *
- * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public interface ITipAnalyzerService {
+public class CalendarEventAddRDateColumnTask extends UpdateTaskAdapter {
 
-    /**
-     * Analyzes the given iCal file.
-     * 
-     * @param ical The iCal file as {@link InputStream}. Stream does <b>not</b> get closed
-     * @param format The format to use. <code>html</code> for a {@link com.openexchange.chronos.itip.generators.HTMLWrapper}, else a {@link com.openexchange.chronos.itip.generators.changes.PassthroughWrapper} is used
-     * @param session The {@link CalendarSession}
-     * @param mailHeader Mail header key-value pairs. Can influence the analyzer to use, if special handling for some clients are necessary, etc.
-     * @return {@link List} of {@link ITipAnalysis} containing the analyzed events.
-     * @throws OXException Various. DB, access, permission, etc.
-     */
-    public List<ITipAnalysis> analyze(InputStream ical, String format, CalendarSession session, Map<String, String> mailHeader) throws OXException;
+    @Override
+    public String[] getDependencies() {
+        return new String[] { "com.openexchange.chronos.storage.rdb.groupware.ChronosCreateTableTask"
+        };
+    }
+
+    @Override
+    public void perform(PerformParameters params) throws OXException {
+        Connection connection = params.getConnection();
+        boolean rollback = false;
+        try {
+            connection.setAutoCommit(false);
+            rollback = true;
+            Tools.checkAndAddColumns(connection, "calendar_event", new Column("rDate", "TEXT DEFAULT NULL"));
+            Tools.checkAndAddColumns(connection, "calendar_event_tombstone", new Column("rDate", "TEXT DEFAULT NULL"));
+            connection.commit();
+            rollback = false;
+        } catch (SQLException e) {
+            throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
+        } catch (RuntimeException e) {
+            throw UpdateExceptionCodes.OTHER_PROBLEM.create(e, e.getMessage());
+        } finally {
+            if (rollback) {
+                rollback(connection);
+            }
+            autocommit(connection);
+        }
+    }
+
 }

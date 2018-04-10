@@ -156,7 +156,7 @@ public class UserSharedFoldersPerformer extends AbstractUserizedFolderPerformer 
             final List<SortableId> allFolderIds;
             try {
                 SortableId[] userSharedFolders = folderStorage.getUserSharedFolders(treeId, contentType, storageParameters);
-                allFolderIds = userSharedFolders != null ? Arrays.asList() : Collections.emptyList();
+                allFolderIds = null != userSharedFolders ? Arrays.asList(userSharedFolders) : Collections.emptyList();
             } catch (UnsupportedOperationException e) {
                 LOG.warn("Operation is not supported for folder storage {} (content-type={})", folderStorage.getClass().getSimpleName(), contentType, e);
                 return new UserizedFolder[0];

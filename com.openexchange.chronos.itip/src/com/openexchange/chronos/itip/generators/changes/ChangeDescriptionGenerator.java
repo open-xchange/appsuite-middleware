@@ -66,7 +66,25 @@ import com.openexchange.groupware.contexts.Context;
  */
 public interface ChangeDescriptionGenerator {
 
+    /**
+     * An arrays of fields for which human readable {@link Sentence}s can be build
+     * 
+     * @return An array of processible {@link EventField}s
+     */
     public EventField[] getFields();
 
+    /**
+     * Generate human readable sentences for specific fields on given diff
+     * 
+     * @param ctx The {@link Context}
+     * @param original The original {@link Event}
+     * @param updated The updated {@link Event}
+     * @param diff The {@link ITipEventUpdate} of the events
+     * @param locale The {@link Locale} to get the human readable sentences in
+     * @param timezone The {@link TimeZone} of the user
+     * @return A {@link List} of human readable {@link Sentence} describing the diff
+     * @throws OXException In case sentences can't be generated
+     * @see #getFields()
+     */
     public List<Sentence> getDescriptions(Context ctx, Event original, Event updated, ITipEventUpdate diff, Locale locale, TimeZone timezone) throws OXException;
 }

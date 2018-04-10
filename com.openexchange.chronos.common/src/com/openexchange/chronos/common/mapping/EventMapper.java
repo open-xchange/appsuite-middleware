@@ -879,6 +879,34 @@ public class EventMapper extends DefaultMapper<Event, EventField> {
                 object.removeRecurrenceId();
             }
         });
+        mappings.put(EventField.RECURRENCE_DATES, new DefaultMapping<SortedSet<RecurrenceId>, Event>() {
+
+            @Override
+            public void copy(Event from, Event to) throws OXException {
+                SortedSet<RecurrenceId> value = get(from);
+                set(to, null == value ? null : new TreeSet<RecurrenceId>(value));
+            }
+
+            @Override
+            public boolean isSet(Event object) {
+                return object.containsRecurrenceDates();
+            }
+
+            @Override
+            public void set(Event object, SortedSet<RecurrenceId> value) throws OXException {
+                object.setRecurrenceDates(value);
+            }
+
+            @Override
+            public SortedSet<RecurrenceId> get(Event object) {
+                return object.getRecurrenceDates();
+            }
+
+            @Override
+            public void remove(Event object) {
+                object.removeRecurrenceDates();
+            }
+        });
         mappings.put(EventField.CHANGE_EXCEPTION_DATES, new DefaultMapping<SortedSet<RecurrenceId>, Event>() {
 
             @Override

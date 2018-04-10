@@ -205,6 +205,7 @@ public class ITipEventUpdate implements EventUpdate {
         for (ItemUpdate<Attendee, AttendeeField> updatedItem : updatedItems) {
             Set<AttendeeField> temp = new HashSet<>(updatedItem.getUpdatedFields());
             temp.remove(AttendeeField.PARTSTAT);
+            temp.remove(AttendeeField.COMMENT);
             if (!temp.isEmpty()) {
                 return false;
             }

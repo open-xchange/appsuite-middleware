@@ -323,6 +323,16 @@ public class UnmodifiableEvent extends DelegatingEvent {
     }
 
     @Override
+    public void setRecurrenceDates(SortedSet<RecurrenceId> value) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void removeRecurrenceDates() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public void setChangeExceptionDates(SortedSet<RecurrenceId> value) {
         throw new UnsupportedOperationException();
     }

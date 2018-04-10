@@ -539,7 +539,9 @@ public class EventNotificationPool implements EventNotificationPoolService, Runn
             copyParticipantStates(original, facsimile);
 
             ITipMailGenerator generator = generatorFactory.create(facsimile, mostRecent, session, -1, principal);
-            generator.noActor();
+            if (moreThanOneUserActed()) {
+                generator.noActor();
+            }
             List<NotificationParticipant> recipients = generator.getRecipients();
             for (NotificationParticipant participant : recipients) {
                 if (participant.isExternal()) {
