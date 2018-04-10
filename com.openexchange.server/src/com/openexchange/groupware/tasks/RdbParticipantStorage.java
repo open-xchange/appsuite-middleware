@@ -69,6 +69,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.ExternalUserParticipant;
 import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.java.Strings;
 import com.openexchange.tools.Collections;
 import com.openexchange.tools.sql.DBUtils;
 
@@ -322,7 +323,7 @@ public class RdbParticipantStorage extends ParticipantStorage {
             stmt.setInt(counter++, ctx.getContextId());
             stmt.setInt(counter++, taskId);
             for (final String address : addresses) {
-                stmt.setString(counter++, address);
+                stmt.setString(counter++, Strings.replaceSurrogatePairs(address, '@'));
             }
             deleted = stmt.executeUpdate();
         } catch (final SQLException e) {

@@ -52,7 +52,7 @@ package com.openexchange.groupware.update.tasks;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Collections;
-import java.util.Map;
+import java.util.List;
 import com.google.common.collect.ImmutableList;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.SimpleConvertUtf8ToUtf8mb4UpdateTask;
@@ -70,8 +70,8 @@ public class TaskConvertUtf8ToUtf8mb4Task extends SimpleConvertUtf8ToUtf8mb4Upda
      */
     public TaskConvertUtf8ToUtf8mb4Task() {
         //@formatter:off
-        super(ImmutableList.of("task", "task_participant", "task_removedparticipant", 
-            "task_folder", "del_task", "del_task_participant", "del_task_folder"), 
+        super(ImmutableList.of("task", "task_participant", "task_removedparticipant",
+            "task_folder", "del_task", "del_task_participant", "del_task_folder"),
             TasksAddFulltimeColumnTask.class.getName());
         //@formatter:on
     }
@@ -79,8 +79,8 @@ public class TaskConvertUtf8ToUtf8mb4Task extends SimpleConvertUtf8ToUtf8mb4Upda
     @Override
     protected void before(PerformParameters params, Connection connection) throws SQLException {
         String schema = params.getSchema().getSchema();
-        Map<String, Integer> map = Collections.singletonMap("mail", 255);
-        changeTable(connection, schema, "task_eparticipant", map);
-        changeTable(connection, schema, "del_task_eparticipant", map);
+        List<String> columnsToIgnore = Collections.singletonList("mail");
+        changeTable(connection, schema, "task_eparticipant", columnsToIgnore);
+        changeTable(connection, schema, "del_task_eparticipant", columnsToIgnore);
     }
 }
