@@ -111,7 +111,7 @@ public class SSLConfigActivator extends HousekeepingActivator {
             {
                 TrustLevel trustLevel = SSLProperties.trustLevel(configService);
                 if (TrustLevel.TRUST_ALL.equals(trustLevel)) {
-                    sslConfigurationService = new TrustAllSSLConfigurationService();
+                    sslConfigurationService = TrustAllSSLConfigurationService.getInstance();
                 } else {
                     RestrictedSSLConfigurationService restrictedSslConfigurationService = new RestrictedSSLConfigurationService(trustLevel, configService);
                     sslConfigurationService = restrictedSslConfigurationService;
