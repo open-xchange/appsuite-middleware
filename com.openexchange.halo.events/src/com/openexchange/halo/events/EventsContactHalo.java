@@ -128,7 +128,7 @@ public class EventsContactHalo extends AbstractContactHalo implements HaloContac
         boolean committed = false;
         try {
             calendarAccess.startTransaction();
-            resultsPerFolder = initCalendarAccess(request).searchEvents(null, filters, null);
+            resultsPerFolder = calendarAccess.searchEvents(null, filters, null);
             calendarAccess.commit();
             committed = true;
         } finally {
