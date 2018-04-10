@@ -63,9 +63,9 @@ public final class CreateOAuthGrantTableService extends AbstractCreateTableImpl 
     private static final String CREATE_GRANT_TABLE = "CREATE TABLE `oauth_grant` (" +
         " `cid` INT4 unsigned NOT NULL," +
         " `user` INT4 unsigned NOT NULL," +
-        " `refresh_token` VARCHAR(255) CHARACTER SET utf8 COLLATE utf8_unicode_ciNOT NULL," +
-        " `access_token` VARCHAR(255) CHARACTER SET utf8 COLLATE utf8_unicode_ciNOT NULL," +
-        " `client` VARCHAR(255) CHARACTER SET utf8 COLLATE utf8_unicode_ciNOT NULL," +
+        " `refresh_token` VARCHAR(255) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL," +
+        " `access_token` VARCHAR(255) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL," +
+        " `client` VARCHAR(255) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL," +
         " `expiration_date` BIGINT(64) NOT NULL," +
         " `scopes` VARCHAR(767) NOT NULL," +
         " `creation_date` BIGINT(64) NOT NULL," +
