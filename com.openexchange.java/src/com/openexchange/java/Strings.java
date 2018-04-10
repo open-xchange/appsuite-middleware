@@ -1644,4 +1644,47 @@ public class Strings {
         return false;
     }
 
+    /**
+     * Replaces possible surrogate pairs (aka astral characters) in specified {@link String} instance with given character.
+     *
+     * @param str The string to replace in
+     * @param newChar The character to use to replace surrogate pairs
+     * @return The resulting string
+     */
+    public static String replaceSurrogatePairs(String str, char newChar) {
+        if (null == str) {
+            return str;
+        }
+
+        String s = Normalizer.normalize(str, Form.NFC);
+        StringBuilder sb = null;
+        int len = s.length();
+        for (int i = 0; i < len; i++) {
+            char ch = s.charAt(i);
+            if (i + 1 < len) {
+                char nc = s.charAt(i + 1);
+                if (Character.isSurrogatePair(ch, nc)) {
+                    i++;
+                    if (null == sb) {
+                        sb = new StringBuilder(len);
+                        if (i - 1 > 0) {
+                            sb.append(s, 0, i - 1);
+                        }
+                    }
+                    sb.append(newChar);
+                } else {
+                    if (null != sb) {
+                        sb.append(ch);
+                    }
+                }
+            } else {
+                if (null != sb) {
+                    sb.append(ch);
+                }
+            }
+        }
+
+        return null == sb ? s : sb.toString();
+    }
+
 }
