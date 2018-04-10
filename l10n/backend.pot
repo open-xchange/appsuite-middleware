@@ -126,13 +126,17 @@ msgstr ""
 msgid "Events"
 msgstr ""
 
+#. * The displayed name for the {@link EventField#LOCATION} property of an event
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.calendar.printing/src/com/openexchange/calendar/printing/CalendarPrintingStrings.java:69
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/CalendarStrings.java:69
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/calendar/CalendarFieldStrings.java:62
 msgid "Location"
 msgstr ""
 
+#. * The displayed name for the {@link EventField#ATTENDEES} property of an event
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.calendar.printing/src/com/openexchange/calendar/printing/CalendarPrintingStrings.java:71
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.calendar.printing/src/com/openexchange/calendar/printing/templating/Strings.java:67
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/CalendarStrings.java:84
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/calendar/CalendarFieldStrings.java:67
 msgid "Participants"
 msgstr ""
@@ -1073,6 +1077,71 @@ msgstr ""
 msgid "Private"
 msgstr ""
 
+#. * The displayed name for the {@link EventField#SUMMARY} property of an event
+#. Search in original mail subject
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/CalendarStrings.java:66
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.mail/src/com/openexchange/file/storage/mail/find/MailDriveStrings.java:73
+msgid "Subject"
+msgstr ""
+
+#. * The displayed name for the {@link EventField#START_DATE} property of an event
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/CalendarStrings.java:72
+msgid "Starts on"
+msgstr ""
+
+#. * The displayed name for the {@link EventField#END_DATE} property of an event
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/CalendarStrings.java:75
+msgid "Ends on"
+msgstr ""
+
+#. * The displayed name for the {@link EventField#RECURRENCE_RULE} property of an event
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/CalendarStrings.java:78
+msgid "Repeat"
+msgstr ""
+
+#. * The displayed name for the {@link EventField#DESCRIPTION} property of an event
+#. A document's description
+#. Task attribute name
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/CalendarStrings.java:81
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/infostore/InfostoreStrings.java:73
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/AttributeNames.java:84
+msgid "Description"
+msgstr ""
+
+#. * The displayed name for the {@link EventField#ALARMS} property of an event
+#. -
+#. * MISC
+#.
+#. Reminder
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/CalendarStrings.java:87
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:636
+msgid "Reminder"
+msgstr ""
+
+#. * The displayed name for the {@link EventField#CLASSIFICATION} property of an event
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/CalendarStrings.java:90
+msgid "Visibility"
+msgstr ""
+
+#. * The displayed name for the {@link EventField#COLOR} property of an event
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/CalendarStrings.java:93
+msgid "Color"
+msgstr ""
+
+#. * The displayed name for the {@link EventField#TRANSP} property of an event
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/CalendarStrings.java:96
+msgid "Show as"
+msgstr ""
+
+#. * The displayed name for the {@link EventField#ATTACHMENTS} property of an event
+#. Has attachment
+#. The module attachments
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/CalendarStrings.java:99
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/mail/MailStrings.java:89
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/attach/impl/AttachmentStrings.java:62
+msgid "Attachments"
+msgstr ""
+
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:62
 msgid "The requested appointment was not found."
 msgstr ""
@@ -1274,40 +1343,44 @@ msgid "The maximum number of calendar subscriptions is exceeded."
 msgstr ""
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:136
-msgid "The value for \"%2$s\" is invalid and wasn't be applied."
+msgid "The value for \"%2$s\" is invalid and wasn't applied."
 msgstr ""
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:138
-msgid "The '%1$s' is either not an internal user or does not exist."
+msgid "The value for \"%2$s\" is not supported and wasn't applied."
 msgstr ""
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:140
-msgid "Authentication failed."
+msgid "The '%1$s' is either not an internal user or does not exist."
 msgstr ""
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:142
+msgid "Authentication failed."
+msgstr ""
+
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:144
 msgid ""
 "Unable to create account. There have been issues with the provided "
 "authentication."
 msgstr ""
 
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:144
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:146
 msgid "The quota for account '%1$s' in context '%2$s' exceeded the limit."
 msgstr ""
 
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:146
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:148
 msgid "The requested attachment was not found."
 msgstr ""
 
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:148
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:150
 msgid "Too many appointments are queried. Please choose a shorter timeframe."
 msgstr ""
 
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:150
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:152
 msgid "The appointment contains too many participants."
 msgstr ""
 
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:152
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:154
 msgid "The appointment contains too many reminders."
 msgstr ""
 
@@ -2413,11 +2486,6 @@ msgstr ""
 msgid "To"
 msgstr ""
 
-#. Search in original mail subject
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.mail/src/com/openexchange/file/storage/mail/find/MailDriveStrings.java:73
-msgid "Subject"
-msgstr ""
-
 #. Search in file type.
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.mail/src/com/openexchange/file/storage/mail/find/MailDriveStrings.java:76
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:81
@@ -3262,13 +3330,6 @@ msgstr ""
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/mail/MailStrings.java:86
 msgid "in attachment file names"
-msgstr ""
-
-#. Has attachment
-#. The module attachments
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/mail/MailStrings.java:89
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/attach/impl/AttachmentStrings.java:62
-msgid "Attachments"
 msgstr ""
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/mail/MailStrings.java:91
@@ -6829,14 +6890,6 @@ msgstr ""
 msgid "Task (tentative)"
 msgstr ""
 
-#. -
-#. * MISC
-#.
-#. Reminder
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:636
-msgid "Reminder"
-msgstr ""
-
 #. No resources have been scheduled.
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:639
 msgid "No resources have been scheduled."
@@ -7262,13 +7315,6 @@ msgstr ""
 msgid "Your search took too long in order to be accomplished."
 msgstr ""
 
-#. A document's description
-#. Task attribute name
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/infostore/InfostoreStrings.java:73
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/AttributeNames.java:84
-msgid "Description"
-msgstr ""
-
 #. A document's version comment
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/infostore/InfostoreStrings.java:79
 msgid "Version comment"
@@ -7626,7 +7672,7 @@ msgid "Error while inserting task."
 msgstr ""
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:67
-msgid "This is not a task folder."
+msgid "Folder cannot be found."
 msgstr ""
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:69

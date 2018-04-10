@@ -126,10 +126,4 @@ final class SchedJoulesFields {
      * of the calendar folder, e.g. color or name.
      */
     static final String LAST_MODIFIED = "lastModified";
-
-    /**
-     * The alarm of a calendar specified in minutes.
-     */
-    static final String ALARM = "alarm";
-
 }

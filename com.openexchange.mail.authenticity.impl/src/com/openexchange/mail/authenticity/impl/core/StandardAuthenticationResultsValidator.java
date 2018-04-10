@@ -78,7 +78,6 @@ import com.openexchange.mail.authenticity.mechanism.dkim.DKIMResult;
 import com.openexchange.mail.authenticity.mechanism.dmarc.DMARCResult;
 import com.openexchange.mail.authenticity.mechanism.spf.SPFResult;
 import com.openexchange.mail.dataobjects.MailAuthenticityResult;
-import com.openexchange.session.Session;
 
 /**
  * {@link StandardAuthenticationResultsValidator} - The standard parser and validator for <code>Authentication-Results</code> headers and <code>From</code> header of an E-Mail.
@@ -130,7 +129,7 @@ public class StandardAuthenticationResultsValidator implements AuthenticationRes
     }
 
     @Override
-    public MailAuthenticityResult parseHeaders(List<String> authenticationHeaders, InternetAddress from, List<AllowedAuthServId> allowedAuthServIds, Session notNeeded) throws OXException {
+    public MailAuthenticityResult parseHeaders(List<String> authenticationHeaders, InternetAddress from, List<AllowedAuthServId> allowedAuthServIds) throws OXException {
         MailAuthenticityResult overallResult = new MailAuthenticityResult(MailAuthenticityStatus.NEUTRAL);
         List<MailAuthenticityMechanismResult> results = new ArrayList<>();
         List<Map<String, String>> unconsideredResults = new ArrayList<>();
@@ -367,10 +366,10 @@ public class StandardAuthenticationResultsValidator implements AuthenticationRes
         }
 
         if (bestOfDMARC != null) {
-            overallResult.addAttribute(MailAuthenticityResultKey.FROM_DOMAIN, bestOfDMARC.getDomain());
             // If DMARC passes we set the overall status to PASS
             if (DMARCResult.PASS.equals(bestOfDMARC.getResult()) && bestOfDMARC.isDomainMatch()) {
                 overallResult.setStatus(MailAuthenticityStatus.PASS);
+                overallResult.addAttribute(MailAuthenticityResultKey.FROM_DOMAIN, bestOfDMARC.getDomain());
                 return;
             } else if (DMARCResult.FAIL.equals(bestOfDMARC.getResult())) {
                 overallResult.setStatus(MailAuthenticityStatus.FAIL);
@@ -415,6 +414,7 @@ public class StandardAuthenticationResultsValidator implements AuthenticationRes
             case PASS:
                 if (bestOfDKIM.isDomainMatch()) {
                     overallResult.setStatus(MailAuthenticityStatus.PASS);
+                    overallResult.addAttribute(MailAuthenticityResultKey.FROM_DOMAIN, bestOfDKIM.getDomain());
                 } else {
                     overallResult.setStatus(MailAuthenticityStatus.NEUTRAL);
                 }
@@ -428,9 +428,7 @@ public class StandardAuthenticationResultsValidator implements AuthenticationRes
             default:
                 overallResult.setStatus(bestOfDKIM.getResult().convert());
         }
-        if (Strings.isNotEmpty(bestOfDKIM.getDomain())) {
-            overallResult.addAttribute(MailAuthenticityResultKey.FROM_DOMAIN, bestOfDKIM.getDomain());
-        }
+
         return dkimFailed;
     }
 
@@ -479,6 +477,7 @@ public class StandardAuthenticationResultsValidator implements AuthenticationRes
                 } else if (MailAuthenticityStatus.PASS != overallResult.getStatus()) {
                     if (bestOfSPF.isDomainMatch()) {
                         overallResult.setStatus(MailAuthenticityStatus.PASS);
+                        overallResult.addAttribute(MailAuthenticityResultKey.FROM_DOMAIN, bestOfSPF.getDomain());
                     } else {
                         overallResult.setStatus(MailAuthenticityStatus.NEUTRAL);
                     }
@@ -493,9 +492,6 @@ public class StandardAuthenticationResultsValidator implements AuthenticationRes
             default:
                 // Override
                 overallResult.setStatus(bestOfSPF.getResult().convert());
-        }
-        if (Strings.isNotEmpty(bestOfSPF.getDomain())) {
-            overallResult.addAttribute(MailAuthenticityResultKey.FROM_DOMAIN, bestOfSPF.getDomain());
         }
     }
 

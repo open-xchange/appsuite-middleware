@@ -133,7 +133,9 @@ public class CalendarExceptionMessages implements LocalizableStrings {
 
     public static final String MAX_ACCOUNTS_EXCEEDED_MSG = "The maximum number of calendar subscriptions is exceeded.";
 
-    public static final String IGNORED_INVALID_DATA_MSG = "The value for \"%2$s\" is invalid and wasn't be applied.";
+    public static final String IGNORED_INVALID_DATA_MSG = "The value for \"%2$s\" is invalid and wasn't applied.";
+
+    public static final String UNSUPPORTED_DATA_MSG = "The value for \"%2$s\" is not supported and wasn't applied.";
 
     public static final String UNKNOWN_INTERNAL_ATTENDEE_MSG = "The '%1$s' is either not an internal user or does not exist.";
 

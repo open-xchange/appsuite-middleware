@@ -52,8 +52,6 @@ package com.openexchange.chronos.itip.sender;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
 import java.util.List;
 import java.util.Locale;
 import java.util.function.Consumer;
@@ -532,22 +530,14 @@ public class DefaultMailSenderService implements MailSenderService {
      * @throws OXException In case the {@link HostnameService} can't be loaded
      */
     private String generateHeaderValue(Session session, String uid, boolean timestamp) throws OXException {
-        HostnameService hostnameService = Services.getOptionalService(HostnameService.class);
-        String hostname;
-        try {
-            hostname = null == hostnameService ? InetAddress.getLocalHost().getCanonicalHostName() : hostnameService.getHostname(session.getUserId(), session.getContextId());
-        } catch (UnknownHostException e) {
-            LOG.warn("Could not get hostname. Fall back to 'open-xchange.com'.");
-            hostname = "open-xchange.com";
-        }
         StringBuilder builder = new StringBuilder("<Appointment.");
         builder.append(uid);
-        builder.append(".");
         if (timestamp) {
+            builder.append(".");
             builder.append(String.valueOf(System.currentTimeMillis()));
         }
         builder.append("@");
-        builder.append(hostname);
+        builder.append("open-xchange.com");
         builder.append(">");
         return builder.toString();
     }

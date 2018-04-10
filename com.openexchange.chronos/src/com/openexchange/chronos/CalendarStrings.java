@@ -62,6 +62,42 @@ public class CalendarStrings implements LocalizableStrings {
     /** The summary that is inserted for <i>private</i> events the requesting user has no access to */
     public static final String SUMMARY_PRIVATE = "Private";
 
+    /** The displayed name for the {@link EventField#SUMMARY} property of an event */
+    public static final String FIELD_SUMMARY = "Subject";
+
+    /** The displayed name for the {@link EventField#LOCATION} property of an event */
+    public static final String FIELD_LOCATION = "Location";
+
+    /** The displayed name for the {@link EventField#START_DATE} property of an event */
+    public static final String FIELD_START_DATE = "Starts on";
+
+    /** The displayed name for the {@link EventField#END_DATE} property of an event */
+    public static final String FIELD_END_DATE = "Ends on";
+
+    /** The displayed name for the {@link EventField#RECURRENCE_RULE} property of an event */
+    public static final String FIELD_RECURRENCE_RULE = "Repeat";
+
+    /** The displayed name for the {@link EventField#DESCRIPTION} property of an event */
+    public static final String FIELD_DESCRIPTION = "Description";
+
+    /** The displayed name for the {@link EventField#ATTENDEES} property of an event */
+    public static final String FIELD_ATTENDEES = "Participants";
+
+    /** The displayed name for the {@link EventField#ALARMS} property of an event */
+    public static final String FIELD_ALARMS = "Reminder";
+
+    /** The displayed name for the {@link EventField#CLASSIFICATION} property of an event */
+    public static final String FIELD_CLASSIFICATION = "Visibility";
+
+    /** The displayed name for the {@link EventField#COLOR} property of an event */
+    public static final String FIELD_COLOR = "Color";
+
+    /** The displayed name for the {@link EventField#TRANSP} property of an event */
+    public static final String FIELD_TRANSP = "Show as";
+
+    /** The displayed name for the {@link EventField#ATTACHMENTS} property of an event */
+    public static final String FIELD_ATTACHMENTS = "Attachments";
+
     /**
      * Prevent instantiation.
      */

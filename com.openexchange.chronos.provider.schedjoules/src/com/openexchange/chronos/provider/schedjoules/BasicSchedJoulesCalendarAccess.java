@@ -189,8 +189,7 @@ public class BasicSchedJoulesCalendarAccess extends BasicCachingCalendarAccess {
     private URL getFeedURL(JSONObject folder) throws MalformedURLException, JSONException, OXException {
         URL url = new URL(folder.getString(SchedJoulesFields.URL));
         String userKey = getUserKey();
-        String alarmValue = getAlarm();
-        return new URL(generateURL(url, userKey, alarmValue));
+        return new URL(generateURL(url, userKey));
     }
 
     /**
@@ -200,14 +199,13 @@ public class BasicSchedJoulesCalendarAccess extends BasicCachingCalendarAccess {
      * @param userKey The user key to append
      * @return The generated URL
      */
-    private String generateURL(URL url, String userKey, String alarmValue) {
+    private String generateURL(URL url, String userKey) {
         String urlStr = url.toString();
 
         StringBuilder sb = new StringBuilder();
         sb.append(urlStr);
         sb.append(urlStr.contains("?") ? "&" : "?");
-        sb.append("u=").append(userKey).append("&");
-        sb.append("al=").append(alarmValue);
+        sb.append("u=").append(userKey).append("&al=none");
 
         return sb.toString();
     }
@@ -225,25 +223,6 @@ public class BasicSchedJoulesCalendarAccess extends BasicCachingCalendarAccess {
             throw SchedJoulesProviderExceptionCodes.MISSING_USER_KEY.create(account.getAccountId(), session.getUserId(), session.getContextId());
         }
         return key;
-    }
-
-    /**
-     * Retrieves the alarm value (in minutes)
-     * 
-     * @return The alarm value in minutes or the string 'none' if no alarm is set
-     * @throws OXException if an invalid alarm value was specified
-     */
-    private String getAlarm() throws OXException {
-        String alarm = account.getInternalConfiguration().optString(SchedJoulesFields.ALARM);
-        if (Strings.isEmpty(alarm)) {
-            return "none";
-        }
-        try {
-            Integer.parseInt(alarm);
-            return alarm;
-        } catch (NumberFormatException e) {
-            throw SchedJoulesProviderExceptionCodes.INVALID_ALARM_VALUE.create(account.getAccountId(), session.getUserId(), session.getContextId(), alarm);
-        }
     }
 
     @Override

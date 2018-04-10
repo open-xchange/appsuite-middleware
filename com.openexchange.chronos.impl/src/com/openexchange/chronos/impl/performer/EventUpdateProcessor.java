@@ -352,7 +352,7 @@ public class EventUpdateProcessor implements EventUpdate {
                 break;
             case START_DATE:
             case END_DATE:
-                Check.startAndEndDate(updatedEvent);
+                Check.startAndEndDate(session, updatedEvent);
                 break;
             case RECURRENCE_RULE:
                 Check.recurrenceRuleIsValid(session.getRecurrenceService(), updatedEvent);

@@ -87,7 +87,7 @@ public class StandardAuthenticationResultsValidatorTest extends AbstractTestMail
         InternetAddress from = new QuotedInternetAddress("Super Hosting <rootserver@hosting.foreigner.com>");
 
 
-        MailAuthenticityResult result = validator.parseHeaders(authHeaders, from, allowedAuthServIds, null);
+        MailAuthenticityResult result = validator.parseHeaders(authHeaders, from, allowedAuthServIds);
         assertStatus(MailAuthenticityStatus.PASS, result.getStatus());
     }
 
@@ -103,7 +103,7 @@ public class StandardAuthenticationResultsValidatorTest extends AbstractTestMail
         InternetAddress from = new QuotedInternetAddress("Alice <alice@foo.de>");
 
 
-        MailAuthenticityResult result = validator.parseHeaders(authHeaders, from, allowedAuthServIds, null);
+        MailAuthenticityResult result = validator.parseHeaders(authHeaders, from, allowedAuthServIds);
         assertStatus(MailAuthenticityStatus.NONE, result.getStatus());
     }
 
@@ -120,7 +120,7 @@ public class StandardAuthenticationResultsValidatorTest extends AbstractTestMail
         InternetAddress from = new QuotedInternetAddress("\"Aha! (Steffen Templin)\" <ce3453825a6c1f0be41c5dc0@mailer.aha.io>");
 
 
-        MailAuthenticityResult result = validator.parseHeaders(authHeaders, from, allowedAuthServIds, null);
+        MailAuthenticityResult result = validator.parseHeaders(authHeaders, from, allowedAuthServIds);
         assertStatus(MailAuthenticityStatus.PASS, result.getStatus());
     }
 

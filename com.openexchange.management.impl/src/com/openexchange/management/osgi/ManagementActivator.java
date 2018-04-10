@@ -128,12 +128,12 @@ public final class ManagementActivator extends HousekeepingActivator {
     @Override
     protected synchronized void stopBundle() throws Exception {
         LOG.info("stopping bundle: com.openexchange.management");
+        super.stopBundle();
         stopInternal();
         /*
          * Clear service registry
          */
         getServiceRegistry().clearRegistry();
-        super.stopBundle();
     }
 
     private void startInternal() throws OXException {

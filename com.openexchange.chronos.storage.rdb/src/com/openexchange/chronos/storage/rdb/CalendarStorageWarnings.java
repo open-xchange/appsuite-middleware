@@ -52,6 +52,7 @@ package com.openexchange.chronos.storage.rdb;
 import static com.openexchange.chronos.common.CalendarUtils.ID_COMPARATOR;
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.SortedMap;
 import java.util.TreeMap;
@@ -60,6 +61,8 @@ import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.exception.ProblemSeverity;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.tools.mappings.database.DbMapping;
+import com.openexchange.i18n.tools.StringHelper;
 
 /**
  * {@link CalendarStorage}
@@ -73,12 +76,33 @@ public abstract class CalendarStorageWarnings {
     protected static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CalendarStorageWarnings.class);
 
     private SortedMap<String, List<OXException>> warnings;
+    private ProblemSeverity unsupportedDataThreshold;
+    private Locale locale;
 
     /**
      * Initializes a new {@link CalendarStorageWarnings}.
      */
     protected CalendarStorageWarnings() {
         super();
+    }
+
+    /**
+     * Sets the locale to use when generating translated error messages.
+     *
+     * @param locale The locale
+     */
+    public void setLocale(Locale locale) {
+        this.locale = locale;
+    }
+
+    /**
+     * Configures the severity threshold defining which unsupported data errors can be ignored.
+     *
+     * @param severityThreshold The threshold defining up to which severity unsupported data errors can be ignored, or
+     *            <code>null</code> to not ignore any unsupported data error at all
+     */
+    public void setUnsupportedDataThreshold(ProblemSeverity severityThreshold) {
+        this.unsupportedDataThreshold = severityThreshold;
     }
 
     /**
@@ -103,16 +127,53 @@ public abstract class CalendarStorageWarnings {
      * @param severity The problem severity
      * @param message The message providing details of the warning
      * @param cause The optional initial cause
+     * @return The added warning
      */
-    public void addInvalidDataWaring(String eventId, EventField field, ProblemSeverity severity, String message, Throwable cause) {
-        OXException warning = CalendarExceptionCodes.IGNORED_INVALID_DATA.create(cause, eventId, field, String.valueOf(severity), message);
-        //        warning.setProperty(ProblemSeverity.class.getName(), severity.name());
+    public OXException addInvalidDataWaring(String eventId, EventField field, ProblemSeverity severity, String message, Throwable cause) {
+        OXException warning = CalendarExceptionCodes.IGNORED_INVALID_DATA.create(cause, eventId, getReadableName(field), String.valueOf(severity), message);
         if (0 > ProblemSeverity.NORMAL.compareTo(severity)) {
             LOG.info(warning.getLogMessage());
         } else {
             LOG.debug(warning.getLogMessage());
         }
         addWarning(eventId, warning);
+        return warning;
+    }
+
+    /**
+     * Initializes a new {@link CalendarExceptionCodes#UNSUPPORTED_DATA} error that occurred when processing the data of a specific event.
+     * <p/>
+     * In case errors up to a certain problem severity can be ignored, an appropriate warning is tracked, otherwise, the error is raised.
+     *
+     * @param eventId The identifier of the event the error is associated with
+     * @param field The corresponding event field of the unsupported data
+     * @param severity The problem severity
+     * @param message The message providing details of the error
+     * @throws {@link CalendarExceptionCodes#UNSUPPORTED_DATA}
+     */
+    public void addUnsupportedDataError(String eventId, EventField field, ProblemSeverity severity, String message) throws OXException {
+        addUnsupportedDataError(eventId, field, severity, message, null);
+    }
+
+    /**
+     * Initializes a new {@link CalendarExceptionCodes#UNSUPPORTED_DATA} error that occurred when processing the data of a specific event.
+     * <p/>
+     * In case errors up to a certain problem severity can be ignored, an appropriate warning is tracked, otherwise, the error is raised.
+     *
+     * @param eventId The identifier of the event the error is associated with
+     * @param field The corresponding event field of the unsupported data
+     * @param severity The problem severity
+     * @param message The message providing details of the error
+     * @param cause The optional initial cause
+     * @throws {@link CalendarExceptionCodes#UNSUPPORTED_DATA}
+     */
+    public void addUnsupportedDataError(String eventId, EventField field, ProblemSeverity severity, String message, Throwable cause) throws OXException {
+        OXException error = CalendarExceptionCodes.UNSUPPORTED_DATA.create(cause, eventId, getReadableName(field), String.valueOf(severity), message);
+        if (null == unsupportedDataThreshold || 0 > unsupportedDataThreshold.compareTo(severity)) {
+            //            error.setCategory(Category.CATEGORY_ERROR);
+            throw error;
+        }
+        addInvalidDataWaring(eventId, field, severity, message, error);
     }
 
     /**
@@ -137,6 +198,33 @@ public abstract class CalendarStorageWarnings {
         Map<String, List<OXException>> result = new TreeMap<String, List<OXException>>(warnings);
         warnings = null;
         return result;
+    }
+
+    /**
+     * Gets the human-readable name for a specific event field, optionally translated if a locale is defined.
+     *
+     * @param field The field to get the readable name for
+     * @return The readable name, falling back to the plain field name if no readable name is available
+     */
+    protected String getReadableName(EventField field) {
+        return getReadableName(field, EventMapper.getInstance().opt(field));
+    }
+
+    /**
+     * Gets the human-readable name for a specific event field, optionally translated if a locale is defined.
+     *
+     * @param field The field to get the readable name for
+     * @param mapping The associated database mapping for the field, or <code>null</code> if there is none
+     * @return The readable name, falling back to the plain field name if no readable name is available
+     */
+    protected <O, E extends Enum<E>> String getReadableName(E field, DbMapping<? extends Object, O> mapping) {
+        if (null != mapping) {
+            String readableName = mapping.getReadableName(null);
+            if (null != readableName) {
+                return StringHelper.valueOf(locale).getString(readableName);
+            }
+        }
+        return String.valueOf(field);
     }
 
 }

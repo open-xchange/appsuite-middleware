@@ -90,6 +90,7 @@ import static com.openexchange.chronos.exception.CalendarExceptionMessages.UNSUP
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.UNSUPPORTED_CLASSIFICATION_FOR_MOVE_MSG;
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.UNSUPPORTED_CLASSIFICATION_FOR_OCCURRENCE_MSG;
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.UNSUPPORTED_CLASSIFICATION_FOR_RESOURCE_MSG;
+import static com.openexchange.chronos.exception.CalendarExceptionMessages.UNSUPPORTED_DATA_MSG;
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.UNSUPPORTED_FOLDER_MSG;
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.UNSUPPORTED_OPERATION_FOR_PROVIDER_MSG;
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.UNSUPPORTED_RRULE_MSG;
@@ -370,10 +371,15 @@ public enum CalendarExceptionCodes implements DisplayableOXExceptionCode {
      */
     MAX_ACCOUNTS_EXCEEDED("Maximum number of accounts exceeded [provider %1$s, limit %2$d, current %3$d]", MAX_ACCOUNTS_EXCEEDED_MSG, Category.CATEGORY_USER_INPUT, 5075),
     /**
-     * <li>The value for \"%2$s\" is invalid and wasn't be applied.</li>
+     * <li>The value for \"%2$s\" is invalid and wasn't applied.</li>
      * <li>Ignored invalid data [id %1$s, field %2$s, severity %3$s, message %4$s]</li>
      */
     IGNORED_INVALID_DATA("Ignored invalid data [id %1$s, field %2$s, severity %3$s, message %4$s]", IGNORED_INVALID_DATA_MSG, Category.CATEGORY_WARNING, 1990),
+    /**
+     * <li>The value for \"%2$s\" is not supported and wasn't applied.</li>
+     * <li>Unsupported data [id %1$s, field %2$s, severity %3$s, message %4$s]</li>
+     */
+    UNSUPPORTED_DATA("Unsupported data [id %1$s, field %2$s, severity %3$s, message %4$s]", UNSUPPORTED_DATA_MSG, Category.CATEGORY_TRUNCATED, 1991),
 
     //TODO: check if needed/useful, check code
     /**

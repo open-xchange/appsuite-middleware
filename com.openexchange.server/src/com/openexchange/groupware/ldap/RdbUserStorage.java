@@ -1365,6 +1365,7 @@ public class RdbUserStorage extends UserStorage {
                      */
                     stringBuilder.append(" AND guestCreatedBy=0");
                 }
+                stringBuilder.append(" ORDER BY id;");
                 stmt = con.prepareStatement(stringBuilder.toString());
                 stmt.setInt(1, context.getContextId());
                 stmt.setString(2, pattern);

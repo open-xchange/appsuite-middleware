@@ -55,11 +55,14 @@ import static com.openexchange.chronos.common.CalendarUtils.matches;
 import static com.openexchange.chronos.impl.Utils.getCalendarUserId;
 import static com.openexchange.java.Autoboxing.L;
 import java.util.List;
+import org.dmfs.rfc5545.DateTime;
 import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.Attendee;
+import com.openexchange.chronos.CalendarStrings;
 import com.openexchange.chronos.CalendarUserType;
 import com.openexchange.chronos.Classification;
 import com.openexchange.chronos.Event;
+import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.RecurrenceRange;
 import com.openexchange.chronos.common.CalendarUtils;
@@ -74,6 +77,7 @@ import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.type.PublicType;
+import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.java.Strings;
 import com.openexchange.quota.Quota;
 import com.openexchange.quota.QuotaExceptionCodes;
@@ -187,6 +191,42 @@ public class Check extends com.openexchange.chronos.common.Check {
             throw CalendarExceptionCodes.EVENT_NOT_FOUND_IN_FOLDER.create(folder.getId(), event.getId());
         }
         return folder.getId();
+    }
+
+    /**
+     * Checks
+     * <ul>
+     * <li>that the start- and enddate properties are set in the event</li>
+     * <li>that the end date does is not before the start date</li>
+     * <li>that both start and enddate are either both <i>all-day</i> or not</li>
+     * <li>that both start and enddate are either both <i>floating</i> or not</li>
+     * </ul>
+     *
+     * @param session The calendar session
+     * @param event The event to check
+     * @see Check#mandatoryFields(Event, EventField...)
+     * @throws OXException {@link CalendarExceptionCodes#MANDATORY_FIELD}, {@link CalendarExceptionCodes#END_BEFORE_START}
+     */
+    public static void startAndEndDate(CalendarSession session, Event event) throws OXException {
+        DateTime startDate = event.getStartDate();
+        if (null == startDate) {
+            String fieldName = StringHelper.valueOf(session.getEntityResolver().getLocale(session.getUserId())).getString(CalendarStrings.FIELD_START_DATE);
+            throw CalendarExceptionCodes.MANDATORY_FIELD.create(fieldName);
+        }
+        DateTime endDate = event.getEndDate();
+        if (null == endDate) {
+            String fieldName = StringHelper.valueOf(session.getEntityResolver().getLocale(session.getUserId())).getString(CalendarStrings.FIELD_END_DATE);
+            throw CalendarExceptionCodes.MANDATORY_FIELD.create(fieldName);
+        }
+        if (startDate.after(endDate)) {
+            throw CalendarExceptionCodes.END_BEFORE_START.create(String.valueOf(startDate), String.valueOf(endDate));
+        }
+        if (startDate.isAllDay() != endDate.isAllDay()) {
+            throw CalendarExceptionCodes.INCOMPATIBLE_DATE_TYPES.create(String.valueOf(startDate), String.valueOf(endDate));
+        }
+        if (startDate.isFloating() != endDate.isFloating()) {
+            throw CalendarExceptionCodes.INCOMPATIBLE_DATE_TYPES.create(String.valueOf(startDate), String.valueOf(endDate));
+        }
     }
 
     /**

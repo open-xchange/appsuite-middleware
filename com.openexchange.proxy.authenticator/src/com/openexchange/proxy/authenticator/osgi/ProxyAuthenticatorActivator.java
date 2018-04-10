@@ -212,10 +212,8 @@ public class ProxyAuthenticatorActivator extends HousekeepingActivator {
      */
     private void removeSecurityManager() {
         final SecurityManager oldSecurityManager = this.oldSecurityManager;
-        if (null != oldSecurityManager) {
-            this.oldSecurityManager = null;
-            System.setSecurityManager(oldSecurityManager);
-        }
+        this.oldSecurityManager = null;
+        System.setSecurityManager(oldSecurityManager);
     }
 
 }

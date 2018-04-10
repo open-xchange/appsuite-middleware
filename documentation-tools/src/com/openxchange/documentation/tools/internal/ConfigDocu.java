@@ -55,7 +55,9 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import org.yaml.snakeyaml.TypeDescription;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.constructor.Constructor;
@@ -117,6 +119,21 @@ public class ConfigDocu {
                 if(prop.getTags().contains(tag)) {
                     result.add(prop);
                 }
+            }
+        }
+        return result;
+    }
+
+    /**
+     * Returns a list of available tags
+     *
+     * @return the list of tags
+     */
+    public Set<String> getTags() {
+        HashSet<String> result = new HashSet<>();
+        for(YamlFile file: data) {
+            for(Property prop: file.getProperties()) {
+                result.addAll(prop.getTags());
             }
         }
         return result;

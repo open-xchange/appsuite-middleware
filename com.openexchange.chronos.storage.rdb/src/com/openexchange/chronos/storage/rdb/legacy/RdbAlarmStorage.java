@@ -49,7 +49,6 @@
 
 package com.openexchange.chronos.storage.rdb.legacy;
 
-import static com.openexchange.chronos.common.AlarmUtils.filter;
 import static com.openexchange.chronos.common.AlarmUtils.findAlarm;
 import static com.openexchange.chronos.common.CalendarUtils.isSeriesMaster;
 import static com.openexchange.groupware.tools.mappings.database.DefaultDbMapper.getParameters;
@@ -210,34 +209,7 @@ public class RdbAlarmStorage extends RdbStorage implements AlarmStorage {
 
     @Override
     public void insertAlarms(Event event, int userID, List<Alarm> alarms) throws OXException {
-        ReminderData reminder = getNextReminder(event, userID, alarms, null);
-        if (null == reminder) {
-            return;
-        }
-        int updated = 0;
-        Connection connection = null;
-        try {
-            connection = dbProvider.getWriteConnection(context);
-            txPolicy.setAutoCommit(connection, false);
-            ReminderData originalReminder = selectReminder(connection, context.getContextId(), asInt(event.getId()), userID);
-            if (null == originalReminder) {
-                updated += insertReminder(connection, context.getContextId(), event, userID, reminder);
-            } else {
-                ReminderData updatedReminder = getNextReminder(event, userID, alarms, originalReminder);
-                if (null == updatedReminder) {
-                    updated += deleteReminderMinutes(connection, context.getContextId(), asInt(event.getId()), new int[] { userID });
-                    updated += deleteReminderTriggers(connection, context.getContextId(), asInt(event.getId()), new int[] { userID });
-                } else {
-                    updated += updateReminderMinutes(connection, context.getContextId(), event, userID, updatedReminder.reminderMinutes);
-                    updated += updateReminderTrigger(connection, context.getContextId(), event, userID, updatedReminder.nextTriggerTime);
-                }
-            }
-            txPolicy.commit(connection);
-        } catch (SQLException e) {
-            throw asOXException(e);
-        } finally {
-            release(connection, updated);
-        }
+        updateAlarms(event, userID, alarms);
     }
 
     @Override
@@ -261,12 +233,18 @@ public class RdbAlarmStorage extends RdbStorage implements AlarmStorage {
             txPolicy.setAutoCommit(connection, false);
             ReminderData originalReminder = selectReminder(connection, context.getContextId(), asInt(event.getId()), userID);
             ReminderData updatedReminder = getNextReminder(event, userID, alarms, originalReminder);
-            if (null == updatedReminder) {
-                updated += deleteReminderMinutes(connection, context.getContextId(), asInt(event.getId()), new int[] { userID });
-                updated += deleteReminderTriggers(connection, context.getContextId(), asInt(event.getId()), new int[] { userID });
+            if (null == originalReminder) {
+                if (null != updatedReminder) {
+                    updated += insertReminder(connection, context.getContextId(), event, userID, updatedReminder);
+                }
             } else {
-                updated += updateReminderMinutes(connection, context.getContextId(), event, userID, updatedReminder.reminderMinutes);
-                updated += updateReminderTrigger(connection, context.getContextId(), event, userID, updatedReminder.nextTriggerTime);
+                if (null == updatedReminder) {
+                    updated += deleteReminderMinutes(connection, context.getContextId(), asInt(event.getId()), new int[] { userID });
+                    updated += deleteReminderTriggers(connection, context.getContextId(), asInt(event.getId()), new int[] { userID });
+                } else {
+                    updated += updateReminderMinutes(connection, context.getContextId(), event, userID, updatedReminder.reminderMinutes);
+                    updated += updateReminderTrigger(connection, context.getContextId(), event, userID, updatedReminder.nextTriggerTime);
+                }
             }
             txPolicy.commit(connection);
         } catch (SQLException e) {
@@ -432,8 +410,18 @@ public class RdbAlarmStorage extends RdbStorage implements AlarmStorage {
         /*
          * consider ACTION=DISPLAY alarms, only
          */
-        List<Alarm> displayAlarms = filter(alarms, AlarmAction.DISPLAY);
-        if (null == displayAlarms || 0 == displayAlarms.size()) {
+        if (null == alarms || alarms.isEmpty()) {
+            return null;
+        }
+        List<Alarm> displayAlarms = new ArrayList<Alarm>(alarms.size());
+        for (Alarm alarm : alarms) {
+            if (AlarmAction.DISPLAY.equals(alarm.getAction())) {
+                displayAlarms.add(alarm);
+            } else {
+                addUnsupportedDataError(event.getId(), EventField.ALARMS, ProblemSeverity.MAJOR, "Can only store DISPLAY alarms");
+            }
+        }
+        if (displayAlarms.isEmpty()) {
             return null;
         }
         /*
@@ -448,6 +436,8 @@ public class RdbAlarmStorage extends RdbStorage implements AlarmStorage {
                 snoozeAlarms.add(alarm);
             } else if (0 <= getReminderMinutes(alarm.getTrigger(), event, timeZone)) {
                 regularAlarms.add(alarm);
+            } else {
+                addUnsupportedDataError(event.getId(), EventField.ALARMS, ProblemSeverity.NORMAL, "Can only store triggers prior start of event");
             }
         }
         Alarm snoozeAlarm = chooseNextAlarm(event, originalReminder, snoozeAlarms, timeZone);
@@ -467,6 +457,9 @@ public class RdbAlarmStorage extends RdbStorage implements AlarmStorage {
             /*
              * regular alarm, only
              */
+            if (1 < regularAlarms.size()) {
+                addUnsupportedDataError(event.getId(), EventField.ALARMS, ProblemSeverity.MAJOR, "Cannot store more than one alarm");
+            }
             Alarm regularAlarm = chooseNextAlarm(event, originalReminder, regularAlarms, timeZone);
             if (null != regularAlarm) {
                 Date nextTriggerTime = optNextTriggerTime(event, regularAlarm, timeZone);

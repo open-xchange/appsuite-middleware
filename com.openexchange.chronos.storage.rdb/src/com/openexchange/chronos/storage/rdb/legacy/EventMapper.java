@@ -68,6 +68,7 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import org.dmfs.rfc5545.DateTime;
+import com.openexchange.chronos.CalendarStrings;
 import com.openexchange.chronos.CalendarUser;
 import com.openexchange.chronos.Classification;
 import com.openexchange.chronos.Event;
@@ -373,7 +374,7 @@ public class EventMapper extends DefaultDbMapper<Event, EventField> {
                 event.removeModifiedBy();
             }
         });
-        mappings.put(EventField.SUMMARY, new VarCharMapping<Event>("field01", "Summary") {
+        mappings.put(EventField.SUMMARY, new VarCharMapping<Event>("field01", CalendarStrings.FIELD_SUMMARY) {
 
             @Override
             public void set(Event event, String value) {
@@ -395,7 +396,7 @@ public class EventMapper extends DefaultDbMapper<Event, EventField> {
                 event.removeSummary();
             }
         });
-        mappings.put(EventField.LOCATION, new VarCharMapping<Event>("field02", "Location") {
+        mappings.put(EventField.LOCATION, new VarCharMapping<Event>("field02", CalendarStrings.FIELD_LOCATION) {
 
             @Override
             public void set(Event event, String value) {
@@ -417,7 +418,7 @@ public class EventMapper extends DefaultDbMapper<Event, EventField> {
                 event.removeLocation();
             }
         });
-        mappings.put(EventField.DESCRIPTION, new VarCharMapping<Event>("field04", "Description") {
+        mappings.put(EventField.DESCRIPTION, new VarCharMapping<Event>("field04", CalendarStrings.FIELD_DESCRIPTION) {
 
             @Override
             public void set(Event event, String value) {
@@ -461,7 +462,7 @@ public class EventMapper extends DefaultDbMapper<Event, EventField> {
                 event.removeCategories();
             }
         });
-        mappings.put(EventField.CLASSIFICATION, new IntegerMapping<Event>("pflag", "Classification") {
+        mappings.put(EventField.CLASSIFICATION, new IntegerMapping<Event>("pflag", CalendarStrings.FIELD_CLASSIFICATION) {
 
             @Override
             public void set(Event event, Integer value) {
@@ -492,7 +493,7 @@ public class EventMapper extends DefaultDbMapper<Event, EventField> {
                 return 1;
             }
         });
-        mappings.put(EventField.COLOR, new IntegerMapping<Event>("intfield03", "Color") {
+        mappings.put(EventField.COLOR, new IntegerMapping<Event>("intfield03", CalendarStrings.FIELD_COLOR) {
 
             @Override
             public void set(Event event, Integer value) {
@@ -514,7 +515,7 @@ public class EventMapper extends DefaultDbMapper<Event, EventField> {
                 event.removeColor();
             }
         });
-        mappings.put(EventField.START_DATE, new DateTimeMapping<Event>("timestampfield01", "timezone", "intfield07", "Start date") {
+        mappings.put(EventField.START_DATE, new DateTimeMapping<Event>("timestampfield01", "timezone", "intfield07", CalendarStrings.FIELD_START_DATE) {
 
             @Override
             public int set(PreparedStatement statement, int parameterIndex, Event event) throws SQLException {
@@ -548,7 +549,7 @@ public class EventMapper extends DefaultDbMapper<Event, EventField> {
                 event.removeStartDate();
             }
         });
-        mappings.put(EventField.END_DATE, new DateMapping<Event>("timestampfield02", "End date") {
+        mappings.put(EventField.END_DATE, new DateMapping<Event>("timestampfield02", CalendarStrings.FIELD_END_DATE) {
 
             @Override
             public boolean isSet(Event event) {
@@ -571,7 +572,7 @@ public class EventMapper extends DefaultDbMapper<Event, EventField> {
                 return null == value ? null : new Date(value.getTimestamp());
             }
         });
-        mappings.put(EventField.TRANSP, new IntegerMapping<Event>("intfield06", "Transparency") {
+        mappings.put(EventField.TRANSP, new IntegerMapping<Event>("intfield06", CalendarStrings.FIELD_TRANSP) {
 
             @Override
             public void set(Event event, Integer value) {
@@ -668,7 +669,7 @@ public class EventMapper extends DefaultDbMapper<Event, EventField> {
                 event.removeRecurrenceId();
             }
         });
-        mappings.put(EventField.RECURRENCE_RULE, new DefaultDbMultiMapping<String, Event>(new String[] { "field06", "intfield04" }, "Recurrence rule") {
+        mappings.put(EventField.RECURRENCE_RULE, new DefaultDbMultiMapping<String, Event>(new String[] { "field06", "intfield04" }, CalendarStrings.FIELD_RECURRENCE_RULE) {
 
             @Override
             public String get(ResultSet resultSet, String[] columnLabels) throws SQLException {

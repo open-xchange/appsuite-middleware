@@ -79,10 +79,11 @@ public enum MailAuthenticityProperty implements Property {
      */
     AUTHSERV_ID("authServId", ""),
     /**
-     * Defines whether metrics of the core handler will be logged for future assertion purposes.
-     * Disabled by default.
+     * <p>Defines whether the raw headers of a message will be logged in DEBUG level.</p>
+     * 
+     * <p>Defaults to <code>false</code></p>
      */
-    LOG_METRICS("logMetrics", Boolean.FALSE);
+    LOG_RAW_HEADERS("logRawHeaders", Boolean.FALSE);
 
     private final Object defaultValue;
     private final String fqn;
