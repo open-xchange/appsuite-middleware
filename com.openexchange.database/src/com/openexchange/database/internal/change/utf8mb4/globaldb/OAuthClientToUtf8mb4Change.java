@@ -53,8 +53,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Collections;
 import java.util.List;
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableMap.Builder;
+import com.google.common.collect.ImmutableList;
 import com.openexchange.database.internal.change.utf8mb4.AbstractSingleTableChange;
 
 /**
@@ -79,12 +78,7 @@ public class OAuthClientToUtf8mb4Change extends AbstractSingleTableChange {
 
     @Override
     protected void after(Connection connection, String schemaName) throws SQLException {
-        Builder<String, Integer> mapBuilder = ImmutableMap.builder();
-        mapBuilder.put("id", 255);
-        mapBuilder.put("gid", 255);
-        mapBuilder.put("name", 255);
-        ImmutableMap<String, Integer> map = mapBuilder.build();
-        changeTable(connection, schemaName, tableToConvert(), map);
+        changeTable(connection, schemaName, tableToConvert(), Collections.emptyMap(), ImmutableList.of("id", "gid", "name"));
     }
 
     @Override

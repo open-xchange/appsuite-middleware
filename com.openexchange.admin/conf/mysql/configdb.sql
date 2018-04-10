@@ -54,7 +54,7 @@ CREATE TABLE context (
 
 CREATE TABLE filestore (
     id INT4 UNSIGNED NOT NULL,
-    uri VARCHAR(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+    uri VARCHAR(255) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,
     size INT8 UNSIGNED NOT NULL,
     max_context INT4,
     PRIMARY KEY (id),
@@ -71,14 +71,14 @@ CREATE TABLE filestore2user (
 
 CREATE TABLE server (
     server_id INT4 UNSIGNED NOT NULL,
-    name VARCHAR(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+    name VARCHAR(255) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,
     PRIMARY KEY (server_id),
     CONSTRAINT server_name_unique UNIQUE (name)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE login2context (
     cid INT4 UNSIGNED NOT NULL,
-    login_info VARCHAR(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+    login_info VARCHAR(255) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,
     PRIMARY KEY (`login_info`),
     FOREIGN KEY(`cid`) REFERENCES context (`cid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

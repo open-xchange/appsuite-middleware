@@ -57,9 +57,11 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -165,6 +167,22 @@ public abstract class AbstractLiquibaseUtf8mb4Adapter implements CustomTaskChang
      * @throws SQLException if changing the table fails
      */
     protected void changeTable(Connection connection, String schema, String table, Map<String, Integer> optVarcharColumns) throws SQLException {
+        changeTable(connection, schema, table, optVarcharColumns, Collections.emptyList());
+    }
+
+    /**
+     * Changes the charset/collation of the specified table and (optionally) shrinks the specified VARCHAR columns and
+     * a {@link List} with the definitions of {@link Column}s to modify
+     * 
+     * @param connection The connection to use
+     * @param schema The schema name
+     * @param table The table name
+     * @param optVarcharColumns The optional VARCHAR columns with their respective VARCHAR sizes
+     *            (use only if the column is part of the PRIMARY KEY or is a (UNIQUE) KEY and it's size surpasses the limit of 767 bytes in total, i.e. VARCHAR length is greater than 191)
+     * @param optColumnsToIgnore The optional listing of columns that are supposed to be ignored
+     * @throws SQLException if changing the table fails
+     */
+    protected void changeTable(Connection connection, String schema, String table, Map<String, Integer> optVarcharColumns, List<String> optColumnsToIgnore) throws SQLException {
         String createTable = getCreateTable(connection, table);
         if (createTable == null) {
             LOGGER.info("Table {} not found. Skipping.", table);
@@ -195,7 +213,7 @@ public abstract class AbstractLiquibaseUtf8mb4Adapter implements CustomTaskChang
         PreparedStatement alterStmt = null;
         try {
             // Next, determine the 'utf8' columns, which need to be converted to 'utf8mb4'
-            Map<String, Column> columnsToModify = getColumsToModifyAsMap(connection, schema, table);
+            Map<String, Column> columnsToModify = getColumsToModifyAsMap(connection, schema, table, optColumnsToIgnore);
             if (false == columnsToModify.isEmpty() && null != optVarcharColumns) {
                 for (Map.Entry<String, Integer> varcharColumn : optVarcharColumns.entrySet()) {
                     String columnName = varcharColumn.getKey();
@@ -285,11 +303,12 @@ public abstract class AbstractLiquibaseUtf8mb4Adapter implements CustomTaskChang
      * @param con The connection to use
      * @param schema The schema name
      * @param table The name of the table to inspect
+     * @param optColumnsToIgnore The optional listing of columns that are supposed to be ignored
      * @return The map view of the columns that need to be altered
      * @throws SQLException If columns cannot be returned
      */
-    protected Map<String, Column> getColumsToModifyAsMap(Connection con, String schema, String table) throws SQLException {
-        List<Column> columsToModify = getColumsToModify(con, schema, table);
+    protected Map<String, Column> getColumsToModifyAsMap(Connection con, String schema, String table, List<String> optColumnsToIgnore) throws SQLException {
+        List<Column> columsToModify = getColumsToModify(con, schema, table, optColumnsToIgnore);
         if (null == columsToModify) {
             return null;
         }
@@ -306,7 +325,10 @@ public abstract class AbstractLiquibaseUtf8mb4Adapter implements CustomTaskChang
         return m;
     }
 
-    private static final String COLUMN_INFORMATION = "SELECT COLUMN_NAME FROM information_schema.COLUMNS WHERE table_schema = ? AND CHARACTER_SET_NAME = 'utf8' AND TABLE_NAME = ?";
+    private static final String COLUMN_INFORMATION = "SELECT COLUMN_NAME FROM information_schema.COLUMNS WHERE table_schema = ? AND CHARACTER_SET_NAME = ? AND TABLE_NAME = ?";
+
+    /** The constant for <code>utf8</code> character set */
+    protected static final String UTF8_CHARSET = "utf8";
 
     /**
      * Determines the text columns, which need to be converted since they use
@@ -315,10 +337,27 @@ public abstract class AbstractLiquibaseUtf8mb4Adapter implements CustomTaskChang
      * @param con The connection to use
      * @param schema The schema name
      * @param table The name of the table to inspect
+     * @param optColumnsToIgnore The optional listing of columns that are supposed to be ignored
      * @return The columns that need to be altered
      * @throws SQLException If columns cannot be returned
      */
-    protected List<Column> getColumsToModify(Connection con, String schema, String table) throws SQLException {
+    protected List<Column> getColumsToModify(Connection con, String schema, String table, List<String> optColumnsToIgnore) throws SQLException {
+        return getColumsToModify(con, schema, table, UTF8_CHARSET, optColumnsToIgnore);
+    }
+
+    /**
+     * Determines the text columns, which need to be converted since they use
+     * the specified character set
+     *
+     * @param con The connection to use
+     * @param schema The schema name
+     * @param table The name of the table to inspect
+     * @param charset The character set of the columns
+     * @param optColumnsToIgnore The optional listing of columns that are supposed to be ignored
+     * @return The columns that need to be altered
+     * @throws SQLException If columns cannot be returned
+     */
+    protected List<Column> getColumsToModify(Connection con, String schema, String table, String charset, List<String> optColumnsToIgnore) throws SQLException {
         String createTable = getCreateTable(con, table);
         if (createTable == null) {
             return Collections.emptyList();
@@ -328,35 +367,51 @@ public abstract class AbstractLiquibaseUtf8mb4Adapter implements CustomTaskChang
         try {
             columnStmt = con.prepareStatement(COLUMN_INFORMATION);
             columnStmt.setString(1, schema);
-            columnStmt.setString(2, table);
+            columnStmt.setString(2, charset);
+            columnStmt.setString(3, table);
             columnRs = columnStmt.executeQuery();
             if (false == columnRs.next()) {
                 return Collections.emptyList();
             }
 
             List<Column> newColumns = new ArrayList<>();
-            do {
-                String columnName = columnRs.getString("COLUMN_NAME");
-                Column column = newColumn(columnName, createTable);
-                if (column != null) {
-                    newColumns.add(column);
-                }
-            } while (columnRs.next());
+            if (null == optColumnsToIgnore || optColumnsToIgnore.isEmpty()) {
+                do {
+                    String columnName = columnRs.getString("COLUMN_NAME");
+                    Column column = newColumn(columnName, createTable, charset);
+                    if (column != null) {
+                        newColumns.add(column);
+                    }
+                } while (columnRs.next());
+            } else {
+                Set<String> ignorees = new HashSet<>(optColumnsToIgnore);
+                do {
+                    String columnName = columnRs.getString("COLUMN_NAME");
+                    if (false == ignorees.contains(columnName)) {
+                        Column column = newColumn(columnName, createTable, charset);
+                        if (column != null) {
+                            newColumns.add(column);
+                        }
+                    }
+                } while (columnRs.next());
+            }
+
             return newColumns;
         } finally {
             Databases.closeSQLStuff(columnRs, columnStmt);
         }
     }
-
+    
     /**
      * Returns a new {@link Column} definition with its character set and collation set to the utf8mb4 derivative.
      *
      * @param columnName The {@link Column}'s name
      * @param createTable The create table statement
+     * @param charset The table's character set
      * @return The new {@link Column} definition or <code>null</code> if the requested column is not part of the specified
      *         create table statement
      */
-    private Column newColumn(String columnName, String createTable) {
+    private Column newColumn(String columnName, String createTable, String charset) {
         Pattern pattern = Pattern.compile("[`'\u00b4\"]" + Pattern.quote(columnName) + "[`'\u00b4\"]([^,]*),");
         Matcher matcher = pattern.matcher(createTable);
         if (!matcher.find()) {
@@ -364,8 +419,8 @@ public abstract class AbstractLiquibaseUtf8mb4Adapter implements CustomTaskChang
         }
         String definition = matcher.group(1);
         boolean changed = false;
-        if (definition.contains("CHARACTER SET utf8") && !definition.contains("CHARACTER SET utf8mb4")) {
-            definition = definition.replace("CHARACTER SET utf8", "CHARACTER SET utf8mb4");
+        if (definition.contains("CHARACTER SET " + charset) && !definition.contains("CHARACTER SET utf8mb4")) {
+            definition = definition.replace("CHARACTER SET " + charset, "CHARACTER SET utf8mb4");
             changed = true;
         }
         if (definition.contains("COLLATE utf8_")) {

@@ -77,9 +77,9 @@ public class ConfigDbToUtf8mb4Change extends AbstractLiquibaseUtf8mb4Adapter {
 
     @Override
     protected void after(Connection configDbCon, String schemaName) throws SQLException {
-        changeTable(configDbCon, schemaName, "login2context", Collections.singletonMap("login_info", 255));
-        changeTable(configDbCon, schemaName, "filestore", Collections.singletonMap("uri", 255));
-        changeTable(configDbCon, schemaName, "server", Collections.singletonMap("name", 255));
+        changeTable(configDbCon, schemaName, "login2context", Collections.emptyMap(), ImmutableList.of("login_info"));
+        changeTable(configDbCon, schemaName, "filestore", Collections.emptyMap(), ImmutableList.of("uri"));
+        changeTable(configDbCon, schemaName, "server", Collections.emptyMap(), ImmutableList.of("name"));
     }
 
     @Override
