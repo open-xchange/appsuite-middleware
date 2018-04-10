@@ -63,19 +63,14 @@ import com.openexchange.groupware.update.SimpleConvertUtf8ToUtf8mb4UpdateTask;
 public class PublicationsTablesUtf8Mb4UpdateTask extends SimpleConvertUtf8ToUtf8mb4UpdateTask {
 
     /**
-     * Initialises a new {@link PublicationsTablesUtf8Mb4UpdateTask}.
+     * Initializes a new {@link PublicationsTablesUtf8Mb4UpdateTask}.
      */
     public PublicationsTablesUtf8Mb4UpdateTask() {
         super(PublicationsAddEntityIndex.class, "publications", "sequence_publications");
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.groupware.update.AbstractConvertUtf8ToUtf8mb4Task#after(com.openexchange.groupware.update.PerformParameters, java.sql.Connection)
-     */
     @Override
     protected void before(PerformParameters params, Connection connection) throws SQLException {
-        changeTable(connection, params.getSchema().getSchema(), "publication_users", Collections.singletonMap("name", 255));
+        changeTable(connection, params.getSchema().getSchema(), "publication_users", Collections.singletonList("name"));
     }
 }

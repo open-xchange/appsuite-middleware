@@ -60,9 +60,9 @@ public class CreatePublicationTables extends AbstractCreateTableImpl {
 
     public static final String CREATE_USER_AND_PASSWORD_CREATE_STATEMENT =
         "CREATE TABLE publication_users (" +
-            "cid INT4 UNSIGNED NOT NULL," +
-            "id INT4 UNSIGNED NOT NULL," +
-            "name VARCHAR(191) NOT NULL," +
+        "cid INT4 UNSIGNED NOT NULL," +
+        "id INT4 UNSIGNED NOT NULL," +
+        "name VARCHAR(255) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL," +
         	"password VARCHAR(255) NOT NULL," +
         	"created INT8 NOT NULL DEFAULT 0," +
         	"lastModified INT8 NOT NULL DEFAULT 0," +
