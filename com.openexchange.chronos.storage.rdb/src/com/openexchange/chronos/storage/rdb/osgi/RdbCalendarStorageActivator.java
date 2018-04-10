@@ -55,6 +55,7 @@ import com.openexchange.caching.CacheService;
 import com.openexchange.chronos.service.CalendarUtilities;
 import com.openexchange.chronos.service.RecurrenceService;
 import com.openexchange.chronos.storage.CalendarStorageFactory;
+import com.openexchange.chronos.storage.rdb.groupware.CalendarEventAddRDateColumnTask;
 import com.openexchange.chronos.storage.rdb.groupware.ChronosCreateTableService;
 import com.openexchange.chronos.storage.rdb.groupware.ChronosCreateTableTask;
 import com.openexchange.chronos.storage.rdb.groupware.DeleteAndChangeExceptionConsistencyTask;
@@ -115,7 +116,7 @@ public class RdbCalendarStorageActivator extends HousekeepingActivator {
              */
             registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(new DeleteAndChangeExceptionConsistencyTask()));
             registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(new ExceptionSeriesPatternConsistencyTask()));
-            registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(new ChronosCreateTableTask(), new ChronosStorageMigrationTask(this)));
+            registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(new ChronosCreateTableTask(), new CalendarEventAddRDateColumnTask(), new ChronosStorageMigrationTask(this)));
             registerService(CreateTableService.class, new ChronosCreateTableService());
             /*
              * register storage factory services
