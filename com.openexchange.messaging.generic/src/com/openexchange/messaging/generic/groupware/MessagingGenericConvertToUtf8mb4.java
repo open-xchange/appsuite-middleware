@@ -51,7 +51,7 @@ package com.openexchange.messaging.generic.groupware;
 
 import java.sql.Connection;
 import java.sql.SQLException;
-import com.google.common.collect.ImmutableMap;
+import java.util.Collections;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.SimpleConvertUtf8ToUtf8mb4UpdateTask;
 
@@ -72,8 +72,6 @@ public class MessagingGenericConvertToUtf8mb4 extends SimpleConvertUtf8ToUtf8mb4
 
     @Override
     protected void after(PerformParameters params, Connection connection) throws SQLException {
-        ImmutableMap.Builder<String, Integer> mapBuilder = ImmutableMap.builder();
-        mapBuilder.put("serviceId", Integer.valueOf(255));
-        changeTable(connection, params.getSchema().getSchema(), "messagingAccount", mapBuilder.build());
+        changeTable(connection, params.getSchema().getSchema(), "messagingAccount", Collections.singletonList("serviceId"));
     }
 }

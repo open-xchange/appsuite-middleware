@@ -82,7 +82,7 @@ public final class MessagingGenericCreateTableTask extends AbstractCreateTableIm
         return "CREATE TABLE messagingAccount (" +
         " cid INT4 unsigned NOT NULL," +
         " user INT4 unsigned NOT NULL," +
-        " serviceId VARCHAR(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL," +
+        " serviceId VARCHAR(255) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL," +
         " account INT4 unsigned NOT NULL," +
         " confId INT4 unsigned NOT NULL," +
         " displayName VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL," +

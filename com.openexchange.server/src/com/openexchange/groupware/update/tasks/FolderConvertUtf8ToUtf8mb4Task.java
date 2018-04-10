@@ -51,8 +51,6 @@ package com.openexchange.groupware.update.tasks;
 
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.Collections;
-import java.util.Map;
 import com.google.common.collect.ImmutableList;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.SimpleConvertUtf8ToUtf8mb4UpdateTask;
@@ -70,8 +68,8 @@ public class FolderConvertUtf8ToUtf8mb4Task extends SimpleConvertUtf8ToUtf8mb4Up
      */
     public FolderConvertUtf8ToUtf8mb4Task() {
         //@formatter:off
-        super(ImmutableList.of("oxfolder_tree", "oxfolder_permissions", "oxfolder_specialfolders", "oxfolder_userfolders", 
-            "oxfolder_userfolders_standardfolders", "del_oxfolder_tree", "del_oxfolder_permissions", "oxfolder_lock", 
+        super(ImmutableList.of("oxfolder_tree", "oxfolder_permissions", "oxfolder_specialfolders", "oxfolder_userfolders",
+            "oxfolder_userfolders_standardfolders", "del_oxfolder_tree", "del_oxfolder_permissions", "oxfolder_lock",
             "oxfolder_property"),
             AddTypeToFolderPermissionTableUpdateTask.class.getName());
         //@formatter:on
@@ -79,15 +77,13 @@ public class FolderConvertUtf8ToUtf8mb4Task extends SimpleConvertUtf8ToUtf8mb4Up
 
     @Override
     protected void after(PerformParameters params, Connection connection) throws SQLException {
-        Map<String, Integer> folderIdVarcharColumn = Collections.singletonMap("folderId", 192);
-
         String schema = params.getSchema().getSchema();
-        changeTable(connection, schema, "virtualTree", folderIdVarcharColumn);
-        changeTable(connection, schema, "virtualPermission", folderIdVarcharColumn);
-        changeTable(connection, schema, "virtualSubscription", folderIdVarcharColumn);
+        changeTable(connection, schema, "virtualTree", ImmutableList.of("folderId", "parentId"));
+        changeTable(connection, schema, "virtualPermission", ImmutableList.of("folderId"));
+        changeTable(connection, schema, "virtualSubscription", ImmutableList.of("folderId"));
 
-        changeTable(connection, schema, "virtualBackupTree", folderIdVarcharColumn);
-        changeTable(connection, schema, "virtualBackupPermission", folderIdVarcharColumn);
-        changeTable(connection, schema, "virtualBackupSubscription", folderIdVarcharColumn);
+        changeTable(connection, schema, "virtualBackupTree", ImmutableList.of("folderId", "parentId"));
+        changeTable(connection, schema, "virtualBackupPermission", ImmutableList.of("folderId"));
+        changeTable(connection, schema, "virtualBackupSubscription", ImmutableList.of("folderId"));
     }
 }

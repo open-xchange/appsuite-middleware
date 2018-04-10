@@ -72,11 +72,11 @@ public class ClusterLockConvertUtf8ToUtf8mb4Task extends SimpleConvertUtf8ToUtf8
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.groupware.update.SimpleConvertUtf8ToUtf8mb4UpdateTask#after(com.openexchange.groupware.update.PerformParameters, java.sql.Connection)
      */
     @Override
     protected void after(PerformParameters params, Connection connection) throws SQLException {
-        changeTable(connection, params.getSchema().getSchema(), "clusterLock", Collections.singletonMap("name", 255));
+        changeTable(connection, params.getSchema().getSchema(), "clusterLock", Collections.singletonList("name"));
     }
 }

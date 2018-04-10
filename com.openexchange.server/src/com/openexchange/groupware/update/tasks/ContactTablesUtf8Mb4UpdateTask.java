@@ -71,14 +71,14 @@ public class ContactTablesUtf8Mb4UpdateTask extends SimpleConvertUtf8ToUtf8mb4Up
      */
     public ContactTablesUtf8Mb4UpdateTask() {
         //@formatter:off
-        super(Arrays.asList("prg_dlist", "del_dlist", "prg_contacts_linkage", "prg_contacts_image", "del_contacts_image"), 
+        super(Arrays.asList("prg_dlist", "del_dlist", "prg_contacts_linkage", "prg_contacts_image", "del_contacts_image"),
             "com.openexchange.contact.storage.rdb.sql.CorrectNumberOfImagesTask");
         //@formatter:on
     }
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.groupware.update.SimpleConvertUtf8ToUtf8mb4UpdateTask#before(com.openexchange.groupware.update.PerformParameters, java.sql.Connection)
      */
     @Override
@@ -92,7 +92,7 @@ public class ContactTablesUtf8Mb4UpdateTask extends SimpleConvertUtf8ToUtf8mb4Up
         mapBuilder.put("field66", 256);
         mapBuilder.put("field67", 256);
         ImmutableMap<String, Integer> map = mapBuilder.build();
-        changeTable(connection, schema, "prg_contacts", map, Collections.singletonList(column));
-        changeTable(connection, schema, "del_contacts", map, Collections.singletonList(column));
+        changeTable(connection, schema, "prg_contacts", map, Collections.singletonList(column), Collections.emptyList());
+        changeTable(connection, schema, "del_contacts", map, Collections.singletonList(column), Collections.emptyList());
     }
 }

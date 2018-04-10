@@ -52,7 +52,6 @@ package com.openexchange.oauth.provider.impl.groupware;
 import java.sql.Connection;
 import java.sql.SQLException;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.SimpleConvertUtf8ToUtf8mb4UpdateTask;
 
@@ -73,9 +72,6 @@ public class OAuthGrantConvertUtf8ToUtf8mb4Task extends SimpleConvertUtf8ToUtf8m
 
     @Override
     protected void after(PerformParameters params, Connection connection) throws SQLException {
-        ImmutableMap.Builder<String, Integer> mapBuilder = ImmutableMap.builder();
-        mapBuilder.put("refresh_token", 255);
-        mapBuilder.put("access_token", 255);
-        changeTable(connection, params.getSchema().getSchema(), "oauth_grant", mapBuilder.build());
+        changeTable(connection, params.getSchema().getSchema(), "oauth_grant", ImmutableList.of("refresh_token", "access_token", "client"));
     }
 }
