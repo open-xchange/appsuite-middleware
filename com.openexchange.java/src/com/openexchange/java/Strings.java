@@ -1623,4 +1623,25 @@ public class Strings {
         return Tools.getUnsignedLong(s);
     }
 
+    /**
+     * Checks if specified {@link String} instance contains a surrogate pair (aka astral character),
+     * which reside in the range of 65,535 (0xFFFF) to 1,114,111 (0x10FFFF) of the Unicode characters spectrum.
+     *
+     * @param str The string to check
+     * @return <code>true</code> if string contains a surrogate pair; otherwise <code>false</code>
+     */
+    public static boolean containsSurrogatePairs(String str) {
+        if (null == str) {
+            return false;
+        }
+
+        int len = str.length();
+        for (int i = 1; i < len; i++) {
+            if (Character.isSurrogatePair(str.charAt(i - 1), str.charAt(i))) {
+                return true;
+            }
+        }
+        return false;
+    }
+
 }
