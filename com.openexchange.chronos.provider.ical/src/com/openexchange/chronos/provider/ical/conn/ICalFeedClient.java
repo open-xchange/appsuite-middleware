@@ -69,7 +69,6 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.client.utils.DateUtils;
 import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.util.EntityUtils;
 import com.openexchange.auth.info.AuthInfo;
 import com.openexchange.auth.info.AuthType;
 import com.openexchange.chronos.ical.ICalParameters;
@@ -169,15 +168,11 @@ public class ICalFeedClient {
         ICalService iCalService = Services.getService(ICalService.class);
         ICalParameters parameters = iCalService.initParameters();
         parameters.set(ICalParameters.IGNORE_UNSET_PROPERTIES, Boolean.TRUE);
-        InputStream inputStream = null;
-        try {
-            inputStream = Streams.bufferedInputStreamFor(httpEntity.getContent());
+        try (InputStream inputStream = Streams.bufferedInputStreamFor(httpEntity.getContent())) {
             return iCalService.importICal(inputStream, parameters);
         } catch (UnsupportedOperationException | IOException e) {
             LOG.error("Error while processing the retrieved information:{}.", e.getMessage(), e);
             throw ICalProviderExceptionCodes.UNEXPECTED_FEED_ERROR.create(iCalFeedConfig.getFeedUrl(), e.getMessage());
-        } finally {
-            Streams.close(inputStream);
         }
     }
 
@@ -266,7 +261,6 @@ public class ICalFeedClient {
         return statusCode;
     }
 
-
     /**
      * Resets given HTTP request
      *
@@ -278,24 +272,6 @@ public class ICalFeedClient {
                 request.reset();
             } catch (final Exception e) {
                 // Ignore
-            }
-        }
-    }
-
-    /**
-     * Ensures that the entity content is fully consumed and the content stream, if exists, is closed silently.
-     *
-     * @param response The HTTP response to consume and close
-     */
-    protected static void consume(HttpResponse response) {
-        if (null != response) {
-            HttpEntity entity = response.getEntity();
-            if (null != entity) {
-                try {
-                    EntityUtils.consume(entity);
-                } catch (Exception e) {
-                    // Ignore
-                }
             }
         }
     }
