@@ -53,9 +53,9 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import java.rmi.server.UID;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
+import java.util.Set;
 import java.util.TimeZone;
 import com.openexchange.ajax.chronos.manager.CalendarFolderManager;
 import com.openexchange.ajax.chronos.manager.EventManager;
@@ -87,8 +87,8 @@ public class AbstractChronosTest extends AbstractEnhancedApiClientSession {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AbstractChronosTest.class);
 
-    Map<UserApi, List<EventId>> eventIds;
-    Map<UserApi, List<String>> folderToDelete;
+    private Set<EventId> eventIds;
+    private Set<String> folderToDelete;
     private long lastTimeStamp;
 
     protected UserApi defaultUserApi;
@@ -136,10 +136,7 @@ public class AbstractChronosTest extends AbstractEnhancedApiClientSession {
         Exception exception = null;
         try {
             if (eventIds != null) {
-                for (UserApi api : eventIds.keySet()) {
-                    // FIXME: Switch to EventManager
-                    api.getChronosApi().deleteEvent(api.getSession(), System.currentTimeMillis(), eventIds.get(api), null, null, false, false);
-                }
+                defaultUserApi.getChronosApi().deleteEvent(defaultUserApi.getSession(), null, new ArrayList(eventIds), null, null, false, false);
             }
         } catch (Exception e) {
             exception = e;
@@ -150,9 +147,7 @@ public class AbstractChronosTest extends AbstractEnhancedApiClientSession {
 
         try {
             if (folderToDelete != null) {
-                for (UserApi api : folderToDelete.keySet()) {
-                    api.getFoldersApi().deleteFolders(api.getSession(), folderToDelete.get(api), "0", System.currentTimeMillis(), "event", true, true, false);
-                }
+                defaultUserApi.getFoldersApi().deleteFolders(defaultUserApi.getSession(), new ArrayList<>(folderToDelete), "0", null, "event", true, false, false);
             }
         } catch (Exception e) {
             exception = e;
@@ -173,28 +168,21 @@ public class AbstractChronosTest extends AbstractEnhancedApiClientSession {
      */
     protected void rememberEventId(UserApi userApi, EventId eventId) {
         if (eventIds == null) {
-            eventIds = new HashMap<>();
+            eventIds = new HashSet<>();
         }
-        if (!eventIds.containsKey(userApi)) {
-            eventIds.put(userApi, new ArrayList<>(1));
-        }
-        eventIds.get(userApi).add(eventId);
+        eventIds.add(eventId);
     }
 
     /**
-     * Keeps track of the specified folder for the specified user
+     * Keeps track of the specified folder
      *
-     * @param userApi The {@link UserApi}
      * @param folder The folder
      */
-    protected void rememberFolder(UserApi userApi, String folder) {
+    protected void rememberFolder(String folder) {
         if (folderToDelete == null) {
-            folderToDelete = new HashMap<>();
+            folderToDelete = new HashSet<>();
         }
-        if (!folderToDelete.containsKey(userApi)) {
-            folderToDelete.put(userApi, new ArrayList<>(1));
-        }
-        folderToDelete.get(userApi).add(folder);
+        folderToDelete.add(folder);
     }
 
     /**
@@ -229,7 +217,7 @@ public class AbstractChronosTest extends AbstractEnhancedApiClientSession {
         checkResponse(createFolder.getError(), createFolder.getErrorDesc(), createFolder.getData());
 
         String result = createFolder.getData();
-        rememberFolder(api, result);
+        rememberFolder(result);
 
         return result;
     }
