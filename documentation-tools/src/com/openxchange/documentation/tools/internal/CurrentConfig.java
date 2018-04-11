@@ -50,94 +50,73 @@
 package com.openxchange.documentation.tools.internal;
 
 import java.io.File;
-import java.io.FileFilter;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import org.yaml.snakeyaml.TypeDescription;
-import org.yaml.snakeyaml.Yaml;
-import org.yaml.snakeyaml.constructor.Constructor;
+import java.io.FilenameFilter;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Properties;
 
 /**
- * {@link ConfigDocu}
+ * {@link CurrentConfig}
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.10.0
  */
-public class ConfigDocu {
+public class CurrentConfig {
 
-    private ArrayList<YamlFile> data;
+    private final Map<Object, Object> properties = new HashMap<>(100);
+    private static final FilenameFilter PROPERTY_FILTER = new FilenameFilter() {
+
+        @Override
+        public boolean accept(File dir, String name) {
+            return name.endsWith(".properties");
+        }
+    };
+    private static final FilenameFilter FOLDER_FILTER = new FilenameFilter() {
+
+        @Override
+        public boolean accept(File current, String name) {
+            return new File(current, name).isDirectory();
+        }
+    };
 
     /**
-     * Initializes a new {@link ConfigDocu}.
+     * Initializes a new {@link CurrentConfig}.
      *
+     * @throws IOException
      * @throws FileNotFoundException
      */
-    public ConfigDocu(File yamlFolder) throws FileNotFoundException {
-        Constructor constructor = new Constructor(YamlFile.class);
-        TypeDescription propertyDescription = new TypeDescription(YamlFile.class);
-        propertyDescription.addPropertyParameters("data", Property.class);
-        constructor.addTypeDescription(propertyDescription);
-        Yaml yaml = new Yaml(constructor);
-        data = new ArrayList<>();
-        FileFilter filter = new FileFilter() {
-
-            @Override
-            public boolean accept(File file) {
-                return !file.isDirectory() && file.getName().endsWith(".yml") && !file.getName().equals("template.yml");
-            }
-        };
-        File[] files = yamlFolder.listFiles(filter);
-        Arrays.sort(files);
-        for (File file : files) {
-            YamlFile tmpData = (YamlFile) yaml.load(new FileInputStream(file));
-            data.add(tmpData);
+    public CurrentConfig(String folder) throws FileNotFoundException, IOException {
+        File parentFolder = new File(folder);
+        if (parentFolder.exists() && parentFolder.isDirectory()) {
+            loadSubFolder(parentFolder);
         }
+
     }
 
-    public List<Property> getProperties(){
-        List<Property> result = new ArrayList<>(data.size() * 5);
-        for(YamlFile file: data) {
-            result.addAll(file.getProperties());
-        }
-        return result;
-    }
+    private void loadSubFolder(File folder) throws FileNotFoundException, IOException {
 
-    /**
-     * Returns all properties with the given tag
-     * @param tag The tag
-     * @return A list of properties
-     */
-    public List<Property> getProperties(String tag){
-        List<Property> result = new ArrayList<>(20);
-        for(YamlFile file: data) {
-            for(Property prop: file.getProperties()) {
-                if(prop.getTags().contains(tag)) {
-                    result.add(prop);
-                }
+        String[] propFiles = folder.list(PROPERTY_FILTER);
+
+        for (String prop : propFiles) {
+            Properties props = new Properties();
+            try (FileInputStream stream = new FileInputStream(new File(folder.getAbsolutePath(), prop))) {
+                props.load(stream);
+                properties.putAll(props);
             }
         }
-        return result;
-    }
 
-    /**
-     * Returns a list of available tags
-     *
-     * @return the list of tags
-     */
-    public Set<String> getTags() {
-        HashSet<String> result = new HashSet<>();
-        for(YamlFile file: data) {
-            for(Property prop: file.getProperties()) {
-                result.addAll(prop.getTags());
-            }
+        String[] subDirectories = folder.list(FOLDER_FILTER);
+        for (String dir : subDirectories) {
+            loadSubFolder(new File(folder.getAbsolutePath(), dir));
         }
-        return result;
+
     }
 
+    public String getValue(String key) {
+        return properties.get(key) != null ? properties.get(key).toString() : null;
+    }
 
 }
