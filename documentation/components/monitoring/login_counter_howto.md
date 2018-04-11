@@ -4,11 +4,11 @@ title: Access Login Counter data with Jolokia
 
 This article describes how to access information exposed through JMX by Open-Xchange with the Jolokia JMX-to-HTTP bridge, using "Login Counter" as an example.
 
-## Install Open-Xchange
+# Install Open-Xchange
 
 See the [quick install guide](http://oxpedia.org/wiki/index.php?title=AppSuite:Main_Page_AppSuite#quickinstall) if you don't have Open-Xchange installed yet. Jolokia is part of the base product, no extra packages are needed.
 
-## Enable Jolokia
+# Enable Jolokia
 
 In `etc/jolokia.properties`, enable Jolokia by setting the following properties:
 
@@ -26,7 +26,7 @@ com.openexchange.jolokia.servlet.name = /monitoring/jolokia
 ```
 If you do, you need to adjust the examples below as well.
 
-## Allow access from other hosts
+# Allow access from other hosts
 
 This is an optional step in case you want to access the Jolokia interface from other hosts other than `localhost`. This may be very helpful during the development phase of a project. Please be aware that this interface exposes lots of "interesting" data, so if you remove the restriction to localhost, you need to ensure by other means (network setup, firewalls, web server configuration, ...) that no unauthorised access is possible on production systems.
 
@@ -46,7 +46,7 @@ On a default installation as described by our installation guides, this would be
 
 Reload your apache config and restart the `open-xchange` service for the changes to take effect.
 
-## Access the Jolokia interface
+# Access the Jolokia interface
 
 On localhost, call:
 

@@ -1,5 +1,5 @@
 ---
-Title: Jolokia - OX munin scripts
+title: Jolokia - OX munin scripts
 ---
 
 # How to install Munin scripts for Open-Xchange
