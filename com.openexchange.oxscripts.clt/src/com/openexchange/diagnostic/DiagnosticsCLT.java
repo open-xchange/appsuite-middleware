@@ -65,7 +65,7 @@ import com.openexchange.diagnostics.rmi.RemoteDiagnosticService;
  */
 public class DiagnosticsCLT extends AbstractRmiCLI<Void> {
 
-    private static final String CLT_NAME = "diagnostics [-c] | [-v] | [-r] | [-a|-a=aliases]";
+    private static final String CLT_NAME = "diagnostics [-c] | [-v] | [-r] | [-a]";
 
     /**
      * Entry point
