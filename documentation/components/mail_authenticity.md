@@ -146,7 +146,7 @@ The key attributes for each mechanism in the `Authentication-Results` header is 
 
 Now, let's see how all the pieces of the puzzle fit together. This is illustrated below.
 
-![](big_picture.svg)
+![](mail_authenticity/big_picture.svg)
 
 The Alice is the domain owner of the `example.com` domain and she publishes the DNS records for the authentication mechanisms she has enabled for her mail servers. The mail servers of her domain are also configured for using those authentication mechanisms.
 
