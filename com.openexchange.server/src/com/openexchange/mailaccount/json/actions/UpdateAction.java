@@ -116,6 +116,10 @@ public final class UpdateAction extends AbstractMailAccountAction implements Mai
 
     @Override
     protected AJAXRequestResult innerPerform(final AJAXRequestData requestData, final ServerSession session, final JSONValue jData) throws OXException, JSONException {
+        if (null == jData) {
+            throw AjaxExceptionCodes.MISSING_REQUEST_BODY.create();
+        }
+
         MailAccountDescription accountDescription = new MailAccountDescription();
         List<OXException> warnings = new LinkedList<>();
         Set<Attribute> fieldsToUpdate = DefaultMailAccountParser.getInstance().parse(accountDescription, jData.toObject(), warnings);
