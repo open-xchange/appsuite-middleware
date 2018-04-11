@@ -1,4 +1,6 @@
-#LoginCounter
+---
+title: LoginCounter
+---
 
 Whenever a user is logged in through the login servlet, the context id, user id, client identification string and a time stamp is saved to the database. If a database entry for this combination of context, user and client is already present, only the timestamp is updated. This means that the database holds the information for the last login of a specific user with a specific client. This data can be retrieved again with the logincounter tool to show how many users logged in through which client(s) in a given timeframe.
 
