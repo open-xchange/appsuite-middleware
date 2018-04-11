@@ -95,13 +95,13 @@ public class DatabaseRESTPerformer {
     private static final int MAX_ROWS = 1000;
     private static final int QUERY_LIMIT = 100;
 
-    private DatabaseAccessType accessType;
+    DatabaseAccessType accessType;
 
-    private Connection connection;
+    Connection connection;
     private Transaction tx;
 
-    private ConnectionPostProcessor postProcessor;
-    private ConnectionPostProcessor oldPostProcessor;
+    ConnectionPostProcessor postProcessor;
+    ConnectionPostProcessor oldPostProcessor;
 
     private final List<Statement> statements = new LinkedList<Statement>();
     private final List<ResultSet> resultSets = new LinkedList<ResultSet>();
@@ -109,17 +109,17 @@ public class DatabaseRESTPerformer {
     private Integer ctxId;
 
     private boolean skipVersionNegotiation;
-    private boolean success = false;
+    boolean success = false;
 
-    private String moduleInfo;
-    private MonitoredMetadata monitoredMetadata;
+    String moduleInfo;
+    MonitoredMetadata monitoredMetadata;
 
     private BeforeHandler beforeHandler;
 
     private final RESTRequest request;
 
     private final ServiceLookup services;
-    private final DatabaseEnvironment environment;
+    final DatabaseEnvironment environment;
 
     /**
      *
@@ -783,7 +783,7 @@ public class DatabaseRESTPerformer {
 
     // Utilities
 
-    private DatabaseService dbService() throws OXException {
+    DatabaseService dbService() {
         return services.getService(DatabaseService.class);
     }
 
@@ -1061,7 +1061,7 @@ public class DatabaseRESTPerformer {
      * @param hName Header name
      * @param hValue Header value
      */
-    private void halt(Status statusCode, String hName, String hValue) {
+    void halt(Status statusCode, String hName, String hValue) {
         ResponseBuilder builder = Response.status(statusCode).header(hName, hValue);
         addHeaders(builder);
         Response r = builder.build();
