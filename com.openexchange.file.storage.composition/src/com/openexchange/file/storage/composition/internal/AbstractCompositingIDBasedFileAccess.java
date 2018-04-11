@@ -747,7 +747,7 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractCompo
                 /*
                  * Reload the document to get it's folder id.
                  */
-                File fileMetadata = access.getFileMetadata(fileFolder, objectId, FileStorageFileAccess.CURRENT_VERSION);
+                File fileMetadata = access.getFileMetadata(FileStorageFileAccess.ALL_FOLDERS, objectId, FileStorageFileAccess.CURRENT_VERSION);
                 fileName = fileMetadata.getFileName();
                 folderID = new FolderID(serviceId, accountId, fileMetadata.getFolderId());
             } else {
