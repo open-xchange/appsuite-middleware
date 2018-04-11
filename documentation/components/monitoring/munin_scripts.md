@@ -1,5 +1,5 @@
 ---
-title: Jolokia - OX munin scripts
+title: Munin scripts
 ---
 
 # How to install Munin scripts for Open-Xchange
@@ -340,9 +340,4 @@ For further information how to setup this file, [http://www.jolokia.org/referenc
 ## Jolokia with Grizzly
 
 When using Grizzly and munin scripts on the same machine, you can connect to jolokia directly with the servers address, e.g.: ``http://localhost:8009/monitoring/jolokia``. When connecting through another machine, a best practise is to use the same forwarding as described below.
-
-# Example
-
-For a more detailed example, see [Jolokia login counter HOWTO](https://oxpedia.org/wiki/index.php?title=Jolokia_LoginCounter_HOWTO)
-
 
