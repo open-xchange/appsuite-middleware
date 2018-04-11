@@ -197,7 +197,7 @@ public final class ManagedFileManagementImpl implements ManagedFileManagement {
                             String fname = null != file && file.exists() ? file.getName() : "";
                             cur.delete();
                             filesIter.remove();
-                            logger.debug("Removed expired managed file {}", fname);
+                            logger.debug("Removed expired managed file {}, id {}", fname, cur.getID());
                         } else {
                             // For Safety's sake, cleanse from orphaned files
                             if (null != orphanedFiles) {

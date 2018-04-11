@@ -146,8 +146,10 @@ public class MailAuthenticityMetricFileLogger implements MailAuthenticityMetricL
     private void logMechanisms(JSONObject log, MailAuthenticityResult overallResult) throws JSONException {
         List<MailAuthenticityMechanismResult> results = overallResult.getAttribute(MailAuthenticityResultKey.MAIL_AUTH_MECH_RESULTS, List.class);
         JSONArray resultsArray = new JSONArray();
-        for (MailAuthenticityMechanismResult result : results) {
-            logMechanism(resultsArray, result);
+        if (null != results) {
+            for (MailAuthenticityMechanismResult result : results) {
+                logMechanism(resultsArray, result);
+            }
         }
         log.put(MailAuthenticityMetricLogField.mechanismResults.name(), resultsArray);
     }

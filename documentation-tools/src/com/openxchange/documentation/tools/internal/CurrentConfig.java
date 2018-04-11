@@ -47,42 +47,76 @@
  *
  */
 
-package com.openexchange.ajax.sessionmanagement;
+package com.openxchange.documentation.tools.internal;
 
-import com.openexchange.ajax.framework.AbstractAPIClientSession;
-import com.openexchange.testing.httpclient.invoker.ApiClient;
-import com.openexchange.testing.httpclient.modules.SessionmanagementApi;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FilenameFilter;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Properties;
 
 /**
- * {@link AbstractSessionManagementTest}
+ * {@link CurrentConfig}
  *
- * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
+ * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.10.0
  */
-public class AbstractSessionManagementTest extends AbstractAPIClientSession {
+public class CurrentConfig {
 
-    protected ApiClient apiClient2;
+    private final Map<Object, Object> properties = new HashMap<>(100);
+    private static final FilenameFilter PROPERTY_FILTER = new FilenameFilter() {
 
-    private SessionmanagementApi api;
+        @Override
+        public boolean accept(File dir, String name) {
+            return name.endsWith(".properties");
+        }
+    };
+    private static final FilenameFilter FOLDER_FILTER = new FilenameFilter() {
 
-    @Override
-    public void setUp() throws Exception {
-        super.setUp();
+        @Override
+        public boolean accept(File current, String name) {
+            return new File(current, name).isDirectory();
+        }
+    };
 
-        // Remove all other sessions to make sure tests run independently
-        api = new SessionmanagementApi(apiClient);
-        api.clear(apiClient.getSession());
+    /**
+     * Initializes a new {@link CurrentConfig}.
+     *
+     * @throws IOException
+     * @throws FileNotFoundException
+     */
+    public CurrentConfig(String folder) throws FileNotFoundException, IOException {
+        File parentFolder = new File(folder);
+        if (parentFolder.exists() && parentFolder.isDirectory()) {
+            loadSubFolder(parentFolder);
+        }
 
-        // For the same user
-        apiClient2 = generateApiClient(testUser);
     }
 
-    @Override
-    public void tearDown() throws Exception {
-        super.tearDown();
+    private void loadSubFolder(File folder) throws FileNotFoundException, IOException {
+
+        String[] propFiles = folder.list(PROPERTY_FILTER);
+
+        for (String prop : propFiles) {
+            Properties props = new Properties();
+            try (FileInputStream stream = new FileInputStream(new File(folder.getAbsolutePath(), prop))) {
+                props.load(stream);
+                properties.putAll(props);
+            }
+        }
+
+        String[] subDirectories = folder.list(FOLDER_FILTER);
+        for (String dir : subDirectories) {
+            loadSubFolder(new File(folder.getAbsolutePath(), dir));
+        }
+
     }
 
-    protected SessionmanagementApi getApi() {
-        return api;
+    public String getValue(String key) {
+        return properties.get(key) != null ? properties.get(key).toString() : null;
     }
+
 }

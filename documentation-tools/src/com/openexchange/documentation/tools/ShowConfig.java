@@ -51,6 +51,7 @@ package com.openexchange.documentation.tools;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -65,6 +66,7 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.PosixParser;
 import com.openxchange.documentation.tools.internal.ConfigDocu;
+import com.openxchange.documentation.tools.internal.CurrentConfig;
 import com.openxchange.documentation.tools.internal.Property;
 
 /**
@@ -78,6 +80,7 @@ public class ShowConfig {
 
     private static final Options options = new Options();
     private static final String DEFAULT_FOLDER = "/opt/open-xchange/documentation/etc";
+    private static final String CURRENT_CONFIG_FOLDER = "/opt/open-xchange/etc";
 
     private static final String SEARCH_OPTION = "s";
     private static final String TAG_OPTION = "t";
@@ -86,6 +89,8 @@ public class ShowConfig {
     private static final String ANSI_OPTION = "n";
     private static final String ONLY_KEY_OPTION = "o";
     private static final String PRINT_TAG_OPTION = "p";
+    private static final String INCLUDE_CONFIGURED_VALUE_OPTION = "i";
+    private static final String DIFFERENCES_ONLY_OPTION = "d";
 
     private static final Comparator<String> IGNORE_CASE_COMP = new Comparator<String>() {
         @Override
@@ -102,6 +107,8 @@ public class ShowConfig {
         options.addOption(OptionBuilder.withLongOpt("only-key").hasArg(false).withDescription("Prints only the key for each property.").isRequired(false).create(ONLY_KEY_OPTION));
         options.addOption(OptionBuilder.withLongOpt("print-tags").hasArg(false).withDescription("Prints a list of available tags.").isRequired(false).create(PRINT_TAG_OPTION));
         options.addOption(OptionBuilder.withLongOpt("no-color").hasArg(false).withDescription("Removes ansi color formatting.").isRequired(false).create(ANSI_OPTION));
+        options.addOption(OptionBuilder.withLongOpt("include_configured").hasArg(false).withDescription("Also prints the current configured value if present.").isRequired(false).create(INCLUDE_CONFIGURED_VALUE_OPTION));
+        options.addOption(OptionBuilder.withLongOpt("only_differences").hasArg(false).withDescription("Only prints properties which are configured and have a different value than the default.").isRequired(false).create(DIFFERENCES_ONLY_OPTION));
     }
 
     public static void main(String[] args) {
@@ -153,7 +160,21 @@ public class ShowConfig {
                 if(parse.hasOption(ANSI_OPTION)) {
                     useAnsi = Boolean.valueOf(parse.getOptionValue(ANSI_OPTION));
                 }
-                printProperties(props, useAnsi, onlyKey);
+
+                CurrentConfig currentConfig = null;
+                boolean diffOnly = parse.hasOption(DIFFERENCES_ONLY_OPTION);
+                if (parse.hasOption(INCLUDE_CONFIGURED_VALUE_OPTION) || diffOnly) {
+                    try {
+                        currentConfig = new CurrentConfig(CURRENT_CONFIG_FOLDER);
+                    } catch (IOException e) {
+                        System.err.println("Unable to read current configuration.");
+                        if (diffOnly) {
+                            handleError(e);
+                        }
+                    }
+                }
+
+                printProperties(props, currentConfig, useAnsi, onlyKey, diffOnly);
             } catch (FileNotFoundException e) {
                 handleError(e);
             }
@@ -177,11 +198,21 @@ public class ShowConfig {
 
     }
 
-    private static void printProperties(List<Property> props, boolean useAnsi, boolean onlyKey){
+    private static void printProperties(List<Property> props, CurrentConfig config, boolean useAnsi, boolean onlyKey, boolean onlyDiff) {
         for(Property prop: props) {
-            printProperty(prop, useAnsi, onlyKey);
-            if(!onlyKey) {
-                System.out.println(format("\n-------------------------------------------------\n", ANSI_RED, useAnsi));
+            if (config != null) {
+                String current = config.getValue(prop.getKey());
+                if (!onlyDiff || (current != null && !current.equals(prop.getDefaultValue()))) {
+                    printProperty(prop, current, useAnsi, onlyKey);
+                    if (!onlyKey) {
+                        System.out.println(format("\n-------------------------------------------------\n", ANSI_RED, useAnsi));
+                    }
+                }
+            } else {
+                printProperty(prop, null, useAnsi, onlyKey);
+                if (!onlyKey) {
+                    System.out.println(format("\n-------------------------------------------------\n", ANSI_RED, useAnsi));
+                }
             }
         }
     }
@@ -191,7 +222,7 @@ public class ShowConfig {
     public static final String ANSI_BOLD = "\u001B[1m";
     public static final String ANSI_FRAME = "\u001B[51m";
 
-    private static void printProperty(Property prop, boolean useAnsi, boolean onlyKey) {
+    private static void printProperty(Property prop, String currentValue, boolean useAnsi, boolean onlyKey) {
         printKeyValue("Key", prop.getKey(), useAnsi);
         if(onlyKey) {
             return;
@@ -199,6 +230,9 @@ public class ShowConfig {
         System.out.println(format("Description", ANSI_RED, useAnsi)+":");
         System.out.println(formatDescription(prop.getDescription(), useAnsi));
         printKeyValue("Default", prop.getDefaultValue(), true, useAnsi);
+        if (currentValue != null) {
+            printKeyValue("Configured value", currentValue, true, useAnsi);
+        }
         printKeyValue("File", prop.getFile(), useAnsi);
         printKeyValue("Version", prop.getVersion(), useAnsi);
         printKeyValue("Package", prop.getPackageName(), useAnsi);
@@ -252,7 +286,7 @@ public class ShowConfig {
      * @param e The error
      */
     private static final void handleError(Exception e){
-        System.out.println("An error occured: "+e.getMessage());
+        System.err.println("An error occured: " + e.getMessage());
         System.exit(3);
     }
 

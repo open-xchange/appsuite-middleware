@@ -484,7 +484,7 @@ public class BasicICalCalendarProviderTest extends AbstractExternalProviderChron
         assertEquals(38, allEvents.size());
 
         FolderData folderData = folderManager.getFolder(newFolderId);
-        folderData.getComOpenexchangeCalendarConfig().setRefreshInterval("100000");
+        folderData.getComOpenexchangeCalendarConfig().setRefreshInterval(100000);
         FolderDataComOpenexchangeCalendarExtendedPropertiesColor folderDataComOpenexchangeCalendarExtendedPropertiesColor = new FolderDataComOpenexchangeCalendarExtendedPropertiesColor();
         folderDataComOpenexchangeCalendarExtendedPropertiesColor.setValue("blue");
         folderData.getComOpenexchangeCalendarExtendedProperties().setColor(folderDataComOpenexchangeCalendarExtendedPropertiesColor);

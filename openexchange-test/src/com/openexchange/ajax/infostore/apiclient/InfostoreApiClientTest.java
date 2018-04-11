@@ -95,7 +95,6 @@ public class InfostoreApiClientTest extends AbstractAPIClientSession {
     @Before
     public void setUp() throws Exception {
         super.setUp();
-        getApiClient().login(testUser.getLogin(), testUser.getPassword());
         this.folderId = createFolderForTest();
         infostoreApi = new InfostoreApi(getApiClient());
     }
