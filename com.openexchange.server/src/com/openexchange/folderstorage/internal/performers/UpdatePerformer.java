@@ -50,7 +50,6 @@
 package com.openexchange.folderstorage.internal.performers;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -73,7 +72,6 @@ import com.openexchange.folderstorage.SetterAwareFolder;
 import com.openexchange.folderstorage.SortableId;
 import com.openexchange.folderstorage.StorageParametersUtility;
 import com.openexchange.folderstorage.UpdateOperation;
-import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.folderstorage.database.contentType.InfostoreContentType;
 import com.openexchange.folderstorage.filestorage.contentType.FileStorageContentType;
 import com.openexchange.folderstorage.internal.CalculatePermission;
@@ -686,49 +684,6 @@ public final class UpdatePerformer extends AbstractUserizedFolderPerformer {
         if (storage.startTransaction(storageParameters, true)) {
             openedStorages.add(storage);
         }
-    }
-
-    private boolean equallyNamedSibling(final String name, final String treeId, final String parentId, final Collection<FolderStorage> openedStorages) throws OXException {
-        final ListPerformer listPerformer;
-        if (null == session) {
-            listPerformer = new ListPerformer(user, context, null);
-        } else {
-            listPerformer = new ListPerformer(session, null);
-        }
-        listPerformer.setStorageParameters(storageParameters);
-        final UserizedFolder[] subfolders = listPerformer.doList(treeId, parentId, true, openedStorages, false);
-        for (final UserizedFolder userizedFolder : subfolders) {
-            if (name.equals(userizedFolder.getName())) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    private String nonExistingName(final String name, final String treeId, final String parentId, final Collection<FolderStorage> openedStorages) throws OXException {
-        final ListPerformer listPerformer;
-        if (null == session) {
-            listPerformer = new ListPerformer(user, context, null);
-        } else {
-            listPerformer = new ListPerformer(session, null);
-        }
-        listPerformer.setStorageParameters(storageParameters);
-        final UserizedFolder[] subfolders = listPerformer.doList(treeId, parentId, true, openedStorages, false);
-        final StringBuilder sb = new StringBuilder();
-        String nonExistingName = name;
-        int i = 0;
-        int count = 0;
-        while (i < subfolders.length) {
-            if (nonExistingName.equals(subfolders[i].getName())) {
-                sb.setLength(0);
-                sb.append(name).append('_').append(String.valueOf(++count));
-                nonExistingName = sb.toString();
-                i = 0;
-            } else {
-                i++;
-            }
-        }
-        return nonExistingName;
     }
 
     /**
