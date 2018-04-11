@@ -31,7 +31,7 @@ public class StringChangeLogSerializer implements ChangeLogSerializer {
 
     private String serializeObject(LiquibaseSerializable objectToSerialize, int indent) {
         try {
-            StringBuffer buffer = new StringBuffer();
+            StringBuilder buffer = new StringBuilder();
             buffer.append("[");
 
             SortedSet<String> values = new TreeSet<String>();
@@ -84,18 +84,23 @@ public class StringChangeLogSerializer implements ChangeLogSerializer {
             return "[]";
         }
 
-        String returnString = "[\n";
+        StringBuilder returnStringBuilder = new StringBuilder("[\n");
+        boolean first = true;
         for (Object object : collection) {
-            if (object instanceof LiquibaseSerializable) {
-                returnString += indent(indent) + serializeObject((LiquibaseSerializable) object, indent + 1) + ",\n";
+            if (first) {
+                first = false;
             } else {
-                returnString += indent(indent) + object.toString() + ",\n";
+                returnStringBuilder.append(",\n");
+            }
+            if (object instanceof LiquibaseSerializable) {
+                returnStringBuilder.append(indent(indent)).append(serializeObject((LiquibaseSerializable) object, indent + 1));
+            } else {
+                returnStringBuilder.append(indent(indent)).append(object.toString());
             }
         }
-        returnString = returnString.replaceFirst(",$", "");
-        returnString += indent(indent - 1) + "]";
+        returnStringBuilder.append(indent(indent - 1)).append("]");
 
-        return returnString;
+        return returnStringBuilder.toString();
 
     }
 
