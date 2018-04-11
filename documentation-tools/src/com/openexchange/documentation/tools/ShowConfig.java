@@ -55,6 +55,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -67,6 +68,7 @@ import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.PosixParser;
 import com.openxchange.documentation.tools.internal.ConfigDocu;
 import com.openxchange.documentation.tools.internal.CurrentConfig;
+import com.openxchange.documentation.tools.internal.CurrentConfig.PropertyWithLocation;
 import com.openxchange.documentation.tools.internal.Property;
 
 /**
@@ -199,22 +201,99 @@ public class ShowConfig {
     }
 
     private static void printProperties(List<Property> props, CurrentConfig config, boolean useAnsi, boolean onlyKey, boolean onlyDiff) {
+        if (useAnsi) {
+            System.out.println(ANSI_BOLD + "Properties:" + ANSI_RESET);
+        } else {
+            System.out.println("Properties:");
+        }
         for(Property prop: props) {
             if (config != null) {
-                String current = config.getValue(prop.getKey());
-                if (!onlyDiff || (current != null && !current.equals(prop.getDefaultValue()))) {
-                    printProperty(prop, current, useAnsi, onlyKey);
+                List<PropertyWithLocation> list = config.getValue(prop.getKey());
+                PropertyWithLocation matchedProp = findMatch(prop.getFile(), list);
+                if (!onlyDiff || (matchedProp != null && matchedProp.getValue().equals(prop.getDefaultValue()))) {
+                    String value = null;
+                    if (matchedProp != null) {
+                        value = matchedProp.getValue();
+                    }
+                    printProperty(prop, value, useAnsi, onlyKey);
                     if (!onlyKey) {
-                        System.out.println(format("\n-------------------------------------------------\n", ANSI_RED, useAnsi));
+                        printWarningForDuplicateEntries(props, prop, list, useAnsi);
+                        System.out.println("\n" + format("-------------------------------------------------", ANSI_RED, useAnsi) + "\n");
                     }
                 }
             } else {
                 printProperty(prop, null, useAnsi, onlyKey);
                 if (!onlyKey) {
-                    System.out.println(format("\n-------------------------------------------------\n", ANSI_RED, useAnsi));
+                    System.out.println("\n" + format("-------------------------------------------------", ANSI_RED, useAnsi) + "\n");
                 }
             }
         }
+    }
+
+    /**
+     * Prints a warning message for duplicate configured properties.
+     *
+     * @param props All properties
+     * @param prop The current property
+     * @param list A list of possible duplicates
+     * @param useAnsi Whether to use ansi coloring or not
+     */
+    private static void printWarningForDuplicateEntries(List<Property> props, Property prop, List<PropertyWithLocation> list, boolean useAnsi) {
+        if (list != null && list.size() > 1) {
+            for (Property tmpProp : props) {
+                if (!prop.equals(tmpProp) && tmpProp.getKey().equals(prop.getKey())) {
+                    Iterator<PropertyWithLocation> iter = list.iterator();
+                    while (iter.hasNext()) {
+                        PropertyWithLocation next = iter.next();
+                        if (tmpProp.getFile().equalsIgnoreCase(next.getLocation().getName())) {
+                            // belongs to a different property with the same name
+                            iter.remove();
+                            break;
+                        }
+                    }
+                }
+            }
+            if (list.size() > 1) {
+                printWarning(prop, list, useAnsi);
+            }
+        }
+    }
+
+    /**
+     * Find the property which match the preferred location or the last one if none matches.
+     *
+     * @param file The preferred filename
+     * @param list The list of properties
+     * @return The {@link PropertyWithLocation} or null in case list is null
+     */
+    private static PropertyWithLocation findMatch(String file, List<PropertyWithLocation> list) {
+        if (list == null) {
+            return null;
+        }
+        for (PropertyWithLocation prop : list) {
+            if (prop.getLocation().getName().equals(file)) {
+                return prop;
+            }
+        }
+        return list.get(list.size() - 1);
+    }
+
+    private static final String WARNING = "There are multiple values defined for the same property:\n";
+    private static final String ADVICE = "  This could indicate a misconfiguration.\n";
+
+    /**
+     * @param prop
+     * @param list
+     * @param useAnsi
+     */
+    private static void printWarning(Property prop, List<PropertyWithLocation> list, boolean useAnsi) {
+        StringBuilder builder = new StringBuilder();
+        builder.append(WARNING);
+        for (PropertyWithLocation propLoc : list) {
+            builder.append("  - '").append(propLoc.getValue()).append("' in file '").append(propLoc.getLocation()).append("'\n");
+        }
+        builder.append("\n").append(ADVICE);
+        printKeyValue("\nWarning", builder.toString(), useAnsi);
     }
 
     public static final String ANSI_RESET = "\u001B[0m";
@@ -258,7 +337,8 @@ public class ShowConfig {
             value = value.replaceAll("\\[\\[|\\]\\]", "");
         }
         value = value.replaceAll("<li>", "-");
-        return value.replaceAll("\\<[^>]*>","");
+        value = value.replaceAll("\\<[^>]*>", "");
+        return "  " + value.replaceAll("\n", "\n  ");
     }
 
     private static String format(String value, String color, boolean useAnsi) {
