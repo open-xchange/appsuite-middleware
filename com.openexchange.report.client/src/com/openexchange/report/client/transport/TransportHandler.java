@@ -65,6 +65,8 @@ import java.net.URLEncoder;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.Scanner;
 import javax.management.openmbean.CompositeData;
 import javax.net.ssl.HttpsURLConnection;
@@ -209,12 +211,20 @@ public class TransportHandler {
             }
             throw new MalformedURLException("Problem contacting report server: " + httpURLConnection.getResponseCode());
         }
-        final BufferedReader in = new BufferedReader(new InputStreamReader(httpURLConnection.getInputStream()));
-        String buffer = "";
-        while ((buffer = in.readLine()) != null) {
-            System.out.println(new StringBuilder().append(REPORT_SERVER_URL).append(" said: ").append(buffer).toString());
+        String charset = httpURLConnection.getContentType();
+        if (null != charset) {
+            Pattern charsetPattern = Pattern.compile("charset= *([a-zA-Z-0-9_]+)(;|$)");
+            Matcher m = charsetPattern.matcher(charset);
+            charset = m.find() ? m.group(1) : null;
         }
-        in.close();
+        try (BufferedReader in = new BufferedReader(new InputStreamReader(httpURLConnection.getInputStream(), null == charset ? "UTF-8" : charset));) {
+            StringBuilder sb = new StringBuilder(REPORT_SERVER_URL).append(" said: ");
+            int reslen = sb.length();
+            for (String line; (line = in.readLine()) != null;) {
+                sb.setLength(reslen);
+                System.out.println(sb.append(line).toString());
+            }
+        }
     }
 
     private String createReportString(JSONObject metadata) throws JSONException {
