@@ -73,6 +73,7 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.LdapExceptionCode;
 import com.openexchange.groupware.ldap.UserExceptionCode;
 import com.openexchange.java.Sets;
+import com.openexchange.java.Strings;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.services.ServerServiceRegistry;
@@ -117,6 +118,9 @@ public class RdbContextStorage extends ContextStorage {
 
     @Override
     public int getContextId(final String loginInfo) throws OXException {
+        if (Strings.containsSurrogatePairs(loginInfo)) {
+            return NOT_FOUND;
+        }
         final Connection con;
         try {
             con = DBPool.pickup();

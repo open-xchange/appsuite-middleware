@@ -68,6 +68,7 @@ import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.java.Strings;
 import com.openexchange.user.UserService;
 
 
@@ -131,10 +132,9 @@ public class ParallelsOXAuthentication implements AuthenticationService {
 
 
 
-            if ("".equals(gui_loginstring.trim()) || "".equals(gui_password.trim())) {
+            if ("".equals(gui_loginstring.trim()) || "".equals(gui_password.trim()) || Strings.containsSurrogatePairs(gui_loginstring)) {
                 throw LoginExceptionCodes.INVALID_CREDENTIALS.create();
             }
-
 
             LOG.debug("Now trying to resolve ox-username and ox-context...");
 
