@@ -117,7 +117,6 @@ public class MailAuthenticityTest extends AbstractConfigAwareAPIClientSession {
         super.setUpConfiguration();
 
         // Setup client and import mails ------------------------
-        getApiClient().login(testUser.getLogin(), testUser.getPassword());
         api = new MailApi(getApiClient());
         imageApi = new ImageApi(getApiClient());
 
