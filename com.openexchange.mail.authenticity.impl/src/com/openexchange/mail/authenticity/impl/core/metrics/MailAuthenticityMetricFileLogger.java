@@ -112,10 +112,10 @@ public class MailAuthenticityMetricFileLogger implements MailAuthenticityMetricL
         try {
             logRawHeaders(jLog, rawHeaders);
             logMechanisms(jLog, overallResult);
-            jLog.put(MailAuthenticityMetricLogField.mailId.name(), DigestUtils.sha256Hex(mailId).substring(0, 12));
-            jLog.put(MailAuthenticityMetricLogField.domainMismatch.name(), overallResult.getAttribute(MailAuthenticityResultKey.DOMAN_MISMATCH, Boolean.class));
-            jLog.put(MailAuthenticityMetricLogField.overallResult.name(), overallResult.getAttribute(MailAuthenticityResultKey.STATUS));
-            jLog.put(MailAuthenticityMetricLogField.fromHeader.name(), overallResult.getAttribute(MailAuthenticityResultKey.FROM_HEADER_DOMAIN));
+            jLog.put(MailAuthenticityMetricLogField.mail_id.name(), DigestUtils.sha256Hex(mailId).substring(0, 12));
+            jLog.put(MailAuthenticityMetricLogField.domain_mismatch.name(), overallResult.getAttribute(MailAuthenticityResultKey.DOMAN_MISMATCH, Boolean.class));
+            jLog.put(MailAuthenticityMetricLogField.overall_result.name(), overallResult.getAttribute(MailAuthenticityResultKey.STATUS));
+            jLog.put(MailAuthenticityMetricLogField.from_header.name(), overallResult.getAttribute(MailAuthenticityResultKey.FROM_HEADER_DOMAIN));
             return jLog;
         } catch (JSONException e) {
             LOGGER.error("Unable to compile debug log entry for mail with id '{}'", mailId, e);
@@ -138,7 +138,7 @@ public class MailAuthenticityMetricFileLogger implements MailAuthenticityMetricL
         for (String rawHeader : rawHeaders) {
             jRawHeadersArray.put(rawHeader);
         }
-        jLog.put(MailAuthenticityMetricLogField.rawHeaders.name(), jRawHeadersArray);
+        jLog.put(MailAuthenticityMetricLogField.raw_headers.name(), jRawHeadersArray);
     }
 
     /**
@@ -152,15 +152,15 @@ public class MailAuthenticityMetricFileLogger implements MailAuthenticityMetricL
     private void logMechanisms(JSONObject jLog, MailAuthenticityResult overallResult) throws JSONException {
         List<MailAuthenticityMechanismResult> results = overallResult.getAttribute(MailAuthenticityResultKey.MAIL_AUTH_MECH_RESULTS, List.class);
         if (null == results) {
-            jLog.put(MailAuthenticityMetricLogField.mechanismResults.name(), JSONArray.EMPTY_ARRAY);
+            jLog.put(MailAuthenticityMetricLogField.mechanism_results.name(), JSONArray.EMPTY_ARRAY);
             return;
         }
 
-        JSONArray jResultsArray = new JSONArray(results.size());
+        JSONObject jResultsObject = new JSONObject();
         for (MailAuthenticityMechanismResult result : results) {
-            logMechanism(jResultsArray, result);
+            logMechanism(jResultsObject, result);
         }
-        jLog.put(MailAuthenticityMetricLogField.mechanismResults.name(), jResultsArray);
+        jLog.put(MailAuthenticityMetricLogField.mechanism_results.name(), jResultsObject);
     }
 
     /**
@@ -170,14 +170,13 @@ public class MailAuthenticityMetricFileLogger implements MailAuthenticityMetricL
      * @param result The {@link MailAuthenticityMechanismResult}
      * @throws JSONException if a JSON error is occurred
      */
-    private void logMechanism(JSONArray jResultsArray, MailAuthenticityMechanismResult result) throws JSONException {
+    private void logMechanism(JSONObject resultsObject, MailAuthenticityMechanismResult result) throws JSONException {
         JSONObject jResultLog = new JSONObject();
-        jResultLog.put("mechanism", result.getMechanism().getTechnicalName());
-        jResultLog.put("result", result.getResult().getTechnicalName());
+        jResultLog.put(MailAuthenticityMetricLogField.result.name(), result.getResult().getTechnicalName());
         for (Map.Entry<String, String> entry : result.getProperties().entrySet()) {
             jResultLog.put(entry.getKey(), entry.getValue());
         }
-        jResultLog.put("domainMismatch", !result.isDomainMatch());
-        jResultsArray.put(jResultLog);
+        jResultLog.put(MailAuthenticityMetricLogField.domain_mismatch.name(), !result.isDomainMatch());
+        resultsObject.put(result.getMechanism().getTechnicalName(), jResultLog);
     }
 }
