@@ -56,6 +56,8 @@ import java.io.InputStreamReader;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.Collection;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.XMLReader;
@@ -92,22 +94,31 @@ public class MicroformatContactParser extends ContactHandler implements Subscrip
      */
     protected String readSubscription(final Subscription subscription) throws IOException{
         BufferedReader buffy = null;
-        final StringBuilder bob = new StringBuilder();
-
         try {
             final URL url = new URL(""); //new URL(subscription.getUrl());
             final URLConnection connection = url.openConnection();
-            buffy = new BufferedReader( new InputStreamReader( connection.getInputStream() ) );
+            String charset = connection.getContentType();
+            if (null != charset) {
+                Pattern charsetPattern = Pattern.compile("charset= *([a-zA-Z-0-9_]+)(;|$)");
+                Matcher m = charsetPattern.matcher(charset);
+                if (m.find()) {
+                    charset = m.group(1);
+                } else {
+                    charset = null;
+                }
+            }
+            buffy = new BufferedReader( new InputStreamReader( connection.getInputStream(), null == charset ? "UTF-8" : charset ) );
             String line = buffy.readLine();
+            StringBuilder bob = new StringBuilder();
             while (line != null){
                 bob.append (line);
                 bob.append ('\n');
                 line = buffy.readLine();
             }
+            return bob.toString();
         } finally {
             Streams.close(buffy);
         }
-        return bob.toString();
     }
 
     @Override
