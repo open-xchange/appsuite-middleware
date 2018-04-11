@@ -51,6 +51,7 @@ package com.openexchange.admin.console;
 
 import java.io.OutputStream;
 import java.io.PrintStream;
+import java.nio.charset.StandardCharsets;
 
 /**
  * {@link StringPrintStream} - Gathers everything written to print stream as a string.
@@ -110,7 +111,7 @@ public class StringPrintStream extends PrintStream {
         public void write(final byte[] b, final int off, final int len) {
             final byte[] bytes = new byte[len];
             System.arraycopy(b, off, bytes, 0, len);
-            builder.append(new String(bytes));
+            builder.append(new String(bytes, StandardCharsets.UTF_8));
         }
 
         @Override
