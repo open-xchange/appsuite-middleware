@@ -67,7 +67,7 @@ public class RateLimiterMBeanImpl extends StandardMBean implements RateLimiterMB
     /** Window size for average calculation: 1 hour */
     private static final long WINDOW_SIZE = 60L * 60000L;
 
-    private final LinkedBlockingDeque<Measurement> measurements;
+    final LinkedBlockingDeque<Measurement> measurements;
     private final Timer timer;
 
     /**
@@ -126,6 +126,13 @@ public class RateLimiterMBeanImpl extends StandardMBean implements RateLimiterMB
 
     private final class MeasureTask extends TimerTask {
 
+        /**
+         * Initializes a new {@link RateLimiterMBeanImpl.MeasureTask}.
+         */
+        MeasureTask() {
+            super();
+        }
+
         @Override
         public void run() {
             measurements.add(new Measurement(RateLimiter.getProcessedRequests()));
@@ -141,12 +148,12 @@ public class RateLimiterMBeanImpl extends StandardMBean implements RateLimiterMB
         }
     }
 
-    private final class Measurement {
+    private static final class Measurement {
 
         private final long timestamp;
         private final long measuredProcessedRequest;
 
-        public Measurement(long processedRequests) {
+        Measurement(long processedRequests) {
             super();
             this.measuredProcessedRequest = processedRequests;
             this.timestamp = System.currentTimeMillis();
@@ -157,7 +164,7 @@ public class RateLimiterMBeanImpl extends StandardMBean implements RateLimiterMB
          *
          * @return The timestamp
          */
-        public long getTimestamp() {
+        long getTimestamp() {
             return timestamp;
         }
 
@@ -166,7 +173,7 @@ public class RateLimiterMBeanImpl extends StandardMBean implements RateLimiterMB
          *
          * @return The processed requests
          */
-        public long getProcessedRequests() {
+        long getProcessedRequests() {
             return measuredProcessedRequest;
         }
 
