@@ -3964,9 +3964,7 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
                             String scheme = rs.getString(pos++); // if the value is SQL NULL, the value returned is null
                             if (null != scheme) {
                                 int schemaCount = rs.getInt(pos++);
-                                boolean schemaBeingLockedOrNeedsUpdate = OXToolStorageInterface.getInstance().schemaBeingLockedOrNeedsUpdate(databaseId, scheme);
-                                boolean notExceeded = schemaCount < maxNumberOfContextsPerSchema;
-                                if (notExceeded && false == schemaBeingLockedOrNeedsUpdate) {
+                                if (schemaCount < maxNumberOfContextsPerSchema && false == OXToolStorageInterface.getInstance().schemaBeingLockedOrNeedsUpdate(databaseId, scheme)) {
                                     db.setScheme(scheme);
                                     db.setSchemaCount(schemaCount);
                                 } else {
