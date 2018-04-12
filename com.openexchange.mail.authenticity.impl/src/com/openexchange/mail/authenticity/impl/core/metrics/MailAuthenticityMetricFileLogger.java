@@ -50,6 +50,7 @@
 package com.openexchange.mail.authenticity.impl.core.metrics;
 
 import java.util.List;
+import java.util.Map;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -83,91 +84,99 @@ public class MailAuthenticityMetricFileLogger implements MailAuthenticityMetricL
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.mail.authenticity.impl.core.metrics.MailAuthenticityMetricLogger#log(java.util.List, com.openexchange.mail.dataobjects.MailAuthenticityResult)
      */
     @Override
     public void log(String mailId, List<String> rawHeaders, MailAuthenticityResult overallResult) {
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("{}", compileLog(mailId, rawHeaders, overallResult));
-        }
+        Object arg = new Object() {
+
+            @Override
+            public String toString() {
+                return compileLog(mailId, rawHeaders, overallResult).toString();
+            }
+        };
+        LOGGER.debug("{}", arg);
     }
 
     /**
      * Compiles the entire log entry
-     * 
+     *
      * @param mailId The mail identifier
      * @param rawHeaders a {@link List} with the raw headers of the message
      * @param overallResult The overall {@link MailAuthenticityResult}
      * @return A {@link JSONObject} with the log entry
      */
-    private JSONObject compileLog(String mailId, List<String> rawHeaders, MailAuthenticityResult overallResult) {
-        JSONObject log = new JSONObject();
+    JSONObject compileLog(String mailId, List<String> rawHeaders, MailAuthenticityResult overallResult) {
+        JSONObject jLog = new JSONObject();
         try {
-            logRawHeaders(log, rawHeaders);
-            logMechanisms(log, overallResult);
-            log.put(MailAuthenticityMetricLogField.mailId.name(), DigestUtils.sha256Hex(mailId).substring(0, 12));
-            log.put(MailAuthenticityMetricLogField.domainMismatch.name(), overallResult.getAttribute(MailAuthenticityResultKey.DOMAN_MISMATCH, Boolean.class));
-            log.put(MailAuthenticityMetricLogField.overallResult.name(), overallResult.getAttribute(MailAuthenticityResultKey.STATUS));
-            log.put(MailAuthenticityMetricLogField.fromHeader.name(), overallResult.getAttribute(MailAuthenticityResultKey.FROM_HEADER_DOMAIN));
-            return log;
+            logRawHeaders(jLog, rawHeaders);
+            logMechanisms(jLog, overallResult);
+            jLog.put(MailAuthenticityMetricLogField.mail_id.name(), DigestUtils.sha256Hex(mailId).substring(0, 12));
+            jLog.put(MailAuthenticityMetricLogField.domain_mismatch.name(), overallResult.getAttribute(MailAuthenticityResultKey.DOMAN_MISMATCH, Boolean.class));
+            jLog.put(MailAuthenticityMetricLogField.overall_result.name(), overallResult.getStatus().getTechnicalName());
+            jLog.put(MailAuthenticityMetricLogField.from_header.name(), overallResult.getAttribute(MailAuthenticityResultKey.FROM_HEADER_DOMAIN));
+            return jLog;
         } catch (JSONException e) {
             LOGGER.error("Unable to compile debug log entry for mail with id '{}'", mailId, e);
         }
-        return log;
+        return jLog;
     }
 
     /**
      * Log the raw headers if enabled.
-     * 
-     * @param log The log object
+     *
+     * @param jLog The JSON log object
      * @param rawHeaders The {@link List} with the raw headers of the message
      * @throws JSONException if a JSON error is occurred
      */
-    private void logRawHeaders(JSONObject log, List<String> rawHeaders) throws JSONException {
+    private void logRawHeaders(JSONObject jLog, List<String> rawHeaders) throws JSONException {
         if (!leanConfigService.getBooleanProperty(MailAuthenticityProperty.LOG_RAW_HEADERS)) {
             return;
         }
-        JSONArray rawHeadersArray = new JSONArray();
+        JSONArray jRawHeadersArray = new JSONArray(rawHeaders.size());
         for (String rawHeader : rawHeaders) {
-            rawHeadersArray.put(rawHeader);
+            jRawHeadersArray.put(rawHeader);
         }
-        log.put(MailAuthenticityMetricLogField.rawHeaders.name(), rawHeadersArray);
+        jLog.put(MailAuthenticityMetricLogField.raw_headers.name(), jRawHeadersArray);
     }
 
     /**
      * Log the mechanisms
-     * 
-     * @param log The log object
+     *
+     * @param jLog The JSON log object
      * @param overallResult The overall result containing the mechanisms
      * @throws JSONException if a JSON error is occurred
      */
     @SuppressWarnings("unchecked")
-    private void logMechanisms(JSONObject log, MailAuthenticityResult overallResult) throws JSONException {
+    private void logMechanisms(JSONObject jLog, MailAuthenticityResult overallResult) throws JSONException {
         List<MailAuthenticityMechanismResult> results = overallResult.getAttribute(MailAuthenticityResultKey.MAIL_AUTH_MECH_RESULTS, List.class);
-        JSONArray resultsArray = new JSONArray();
-        if (null != results) {
-            for (MailAuthenticityMechanismResult result : results) {
-                logMechanism(resultsArray, result);
-            }
+        if (null == results) {
+            jLog.put(MailAuthenticityMetricLogField.mechanism_results.name(), JSONArray.EMPTY_ARRAY);
+            return;
         }
-        log.put(MailAuthenticityMetricLogField.mechanismResults.name(), resultsArray);
+
+        JSONObject jResultsObject = new JSONObject();
+        for (MailAuthenticityMechanismResult result : results) {
+            logMechanism(jResultsObject, result);
+        }
+        jLog.put(MailAuthenticityMetricLogField.mechanism_results.name(), jResultsObject);
     }
 
     /**
      * Log a single mechanism
-     * 
-     * @param resultsArray The array holding all the logged mechanism results
+     *
+     * @param jResultsArray The JSON array holding all the logged mechanism results
      * @param result The {@link MailAuthenticityMechanismResult}
      * @throws JSONException if a JSON error is occurred
      */
-    private void logMechanism(JSONArray resultsArray, MailAuthenticityMechanismResult result) throws JSONException {
-        JSONObject resultLog = new JSONObject();
-        resultLog.put("result", result.getResult().getTechnicalName());
-        for (String k : result.getProperties().keySet()) {
-            resultLog.put(k, result.getProperties().get(k));
+    private void logMechanism(JSONObject resultsObject, MailAuthenticityMechanismResult result) throws JSONException {
+        JSONObject jResultLog = new JSONObject();
+        jResultLog.put(MailAuthenticityMetricLogField.result.name(), result.getResult().getTechnicalName());
+        for (Map.Entry<String, String> entry : result.getProperties().entrySet()) {
+            jResultLog.put(entry.getKey(), entry.getValue());
         }
-        resultLog.put("domainMismatch", !result.isDomainMatch());
-        resultsArray.put(resultLog);
+        jResultLog.put(MailAuthenticityMetricLogField.domain_mismatch.name(), !result.isDomainMatch());
+        resultsObject.put(result.getMechanism().getTechnicalName(), jResultLog);
     }
 }

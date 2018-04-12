@@ -47,20 +47,55 @@
  *
  */
 
-package com.openexchange.mail.authenticity.impl.core.metrics;
+package com.openexchange.folderstorage;
+
 
 /**
- * {@link MailAuthenticityMetricLogField}
+ * {@link ImmutableTypePermission} is an implementation of the {@link BasicPermission} class which only allows to change the type of the permission once.
  *
- * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+ * @since v7.10.0
  */
-public enum MailAuthenticityMetricLogField {
-    mail_id,
-    raw_headers,
-    mechanism_results,
-    overall_result,
-    domain_mismatch,
-    from_header,
-    result,
-    mechanism;
+public final class ImmutableTypePermission extends BasicPermission {
+
+    /**
+     * serialVersionUID
+     */
+    private static final long serialVersionUID = 1L;
+
+    /**
+     * Initializes a new {@link ImmutableTypePermission}.
+     *
+     * @param entity
+     * @param group
+     * @param bits
+     */
+    public ImmutableTypePermission(int entity, boolean group, int bits) {
+        super(entity, group, bits);
+    }
+
+    @Override
+    public void setType(FolderPermissionType type) {
+        if (this.type == null) {
+            super.setType(type);
+        }
+    }
+
+    @Override
+    public Object clone() {
+        // Clones are not immutable and therefore a new BasicPermission is returned
+        BasicPermission clone = new BasicPermission();
+        clone.entity = getEntity();
+        clone.group = isGroup();
+        clone.system = getSystem();
+        clone.type = getType();
+        clone.legator = getPermissionLegator();
+        clone.admin = isAdmin();
+        clone.folderPermission = getFolderPermission();
+        clone.readPermission = getReadPermission();
+        clone.writePermission = getWritePermission();
+        clone.deletePermission = getDeletePermission();
+        return clone;
+    }
+
 }

@@ -54,8 +54,12 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FilenameFilter;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Properties;
 
 /**
@@ -96,15 +100,31 @@ public class CurrentConfig {
 
     }
 
+    @SuppressWarnings("unchecked")
     private void loadSubFolder(File folder) throws FileNotFoundException, IOException {
 
         String[] propFiles = folder.list(PROPERTY_FILTER);
 
         for (String prop : propFiles) {
             Properties props = new Properties();
-            try (FileInputStream stream = new FileInputStream(new File(folder.getAbsolutePath(), prop))) {
+            File tmpFile = new File(folder.getAbsolutePath(), prop);
+            try (FileInputStream stream = new FileInputStream(tmpFile)) {
                 props.load(stream);
-                properties.putAll(props);
+                for (Entry<Object, Object> entry : props.entrySet()) {
+                    if (properties.containsKey(entry.getKey())) {
+                        Object object = properties.get(entry.getKey());
+                        if(object instanceof PropertyWithLocation) {
+                            ArrayList<PropertyWithLocation> list = new ArrayList<>(2);
+                            list.add((PropertyWithLocation) object);
+                            list.add(new PropertyWithLocation(tmpFile, entry.getValue()));
+                            properties.put(entry.getKey(), list);
+                        } else {
+                            ((List<PropertyWithLocation>) object).add(new PropertyWithLocation(tmpFile, entry.getValue()));
+                        }
+                    } else {
+                        properties.put(entry.getKey(), new PropertyWithLocation(tmpFile, entry.getValue()));
+                    }
+                }
             }
         }
 
@@ -115,8 +135,49 @@ public class CurrentConfig {
 
     }
 
-    public String getValue(String key) {
-        return properties.get(key) != null ? properties.get(key).toString() : null;
+    @SuppressWarnings("unchecked")
+    public List<PropertyWithLocation> getValue(String key) {
+        Object object = properties.get(key);
+        if (object == null) {
+            return null;
+        }
+        if (object instanceof PropertyWithLocation) {
+            return Collections.singletonList((PropertyWithLocation) object);
+        } else {
+            return (List<PropertyWithLocation>) object;
+        }
+    }
+
+    public final class PropertyWithLocation {
+
+        private final File location;
+        private final Object value;
+
+        /**
+         * Initializes a new {@link CurrentConfig.PropertyWithLocation}.
+         */
+        public PropertyWithLocation(File location, Object value) {
+            this.location = location;
+            this.value = value;
+        }
+
+        /**
+         * Gets the location
+         *
+         * @return The location
+         */
+        public File getLocation() {
+            return location;
+        }
+
+        /**
+         * Gets the value
+         *
+         * @return The value
+         */
+        public String getValue() {
+            return value != null ? value.toString() : null;
+        }
     }
 
 }

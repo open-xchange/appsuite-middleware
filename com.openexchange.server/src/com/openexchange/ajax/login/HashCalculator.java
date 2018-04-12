@@ -50,6 +50,7 @@
 package com.openexchange.ajax.login;
 
 import static com.openexchange.java.Strings.isEmpty;
+import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.regex.Pattern;
@@ -107,7 +108,7 @@ public class HashCalculator {
         if (null != service) {
             final String fieldList = service.getProperty("com.openexchange.cookie.hash.fields", "");
             fields = Pattern.compile("\\s*,\\s*").split(fieldList, 0);
-            salt = service.getProperty("com.openexchange.cookie.hash.salt", "replaceMe1234567890").getBytes();
+            salt = service.getProperty("com.openexchange.cookie.hash.salt", "replaceMe1234567890").getBytes(StandardCharsets.UTF_8);
         }
     }
 
