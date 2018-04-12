@@ -3964,10 +3964,19 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
                             String scheme = rs.getString(pos++); // if the value is SQL NULL, the value returned is null
                             if (null != scheme) {
                                 int schemaCount = rs.getInt(pos++);
-                                if (schemaCount < maxNumberOfContextsPerSchema && false == OXToolStorageInterface.getInstance().schemaBeingLockedOrNeedsUpdate(databaseId, scheme)) {
+                                boolean schemaBeingLockedOrNeedsUpdate = OXToolStorageInterface.getInstance().schemaBeingLockedOrNeedsUpdate(databaseId, scheme);
+                                boolean notExceeded = schemaCount < maxNumberOfContextsPerSchema;
+                                if (notExceeded && false == schemaBeingLockedOrNeedsUpdate) {
                                     db.setScheme(scheme);
                                     db.setSchemaCount(schemaCount);
                                 } else {
+                                    // Database w/o a schema
+                                    if (null == dbsWithoutSchema) {
+                                        dbsWithoutSchema = new LinkedHashMap<>();
+                                        dbsWithoutSchema.put(I(databaseId), db);
+                                    } else if (false == dbsWithoutSchema.containsKey(I(databaseId))) {
+                                        dbsWithoutSchema.put(I(databaseId), db);
+                                    }
                                     selectDatabase = false;
                                     checkNext = true;
                                 }
