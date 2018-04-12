@@ -49,6 +49,7 @@
 
 package com.openexchange.groupware.update.internal;
 
+import static com.eaio.util.text.HumanTime.exactly;
 import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -214,9 +215,12 @@ public final class UpdateExecutor {
             int poolId = this.poolId;
             AbstractConnectionProvider connectionProvider = contextId > 0 ? new ContextConnectionProvider(contextId) : new PoolAndSchemaConnectionProvider(poolId, schema);
             try {
+                long startNanos;
+                long durMillis;
                 for (final UpdateTaskV2 task : scheduled) {
                     final String taskName = task.getClass().getSimpleName();
                     boolean success = false;
+                    startNanos = System.nanoTime();
                     try {
                         LOG.info("Starting update task {} on schema {}.", taskName, state.getSchema());
                         ProgressState logger = new ProgressStatusImpl(taskName, state.getSchema());
@@ -226,8 +230,9 @@ public final class UpdateExecutor {
                     } catch (final OXException e) {
                         LOG.error("", e);
                     }
+                    durMillis = TimeUnit.MILLISECONDS.convert(System.nanoTime() - startNanos, TimeUnit.NANOSECONDS);
                     if (success) {
-                        LOG.info("Update task {} on schema {} done.", taskName, state.getSchema());
+                        LOG.info("Update task {} on schema {} done ({}).", taskName, state.getSchema(), exactly(durMillis, true));
                     } else {
                         if (throwExceptionOnFailure) {
                             throw SchemaExceptionCodes.TASK_FAILED.create(taskName, state.getSchema());
@@ -235,7 +240,7 @@ public final class UpdateExecutor {
                         if (null != failures) {
                             failures.offer(new TaskInfo(taskName, state.getSchema()));
                         }
-                        LOG.error("Update task {} on schema {} failed.", taskName, state.getSchema());
+                        LOG.error("Update task {} on schema {} failed ({}).", taskName, state.getSchema(), exactly(durMillis, true));
                     }
                     addExecutedTask(task.getClass().getName(), success, poolId, state.getSchema());
                 }
