@@ -484,6 +484,14 @@ EOF
 
     # SoftwareChange_Request-82
     ox_remove_property com.openexchange.caching.jcs.enabled /opt/open-xchange/etc/cache.properties
+
+    # SoftwareChange_Request-151
+    if dpkg --compare-versions "7.10.0-0" gt-nl "$1"; then
+      VALUE=$(ox_read_property com.openexchange.push.allowedClients /opt/open-xchange/etc/mail-push.properties)
+      if [ "\"USM-EAS*\", \"USM-JSON*\", \"open-xchange-mailapp\"" = "${VALUE}" ]; then
+        ox_set_property com.openexchange.push.allowedClients "${VALUE}, \"open-xchange-mobile-api-facade*\"" /opt/open-xchange/etc/mail-push.properties
+      fi
+    fi
 }
 
 setConfigFilePermissions() {
