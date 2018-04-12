@@ -480,8 +480,8 @@ public abstract class AbstractConvertUtf8ToUtf8mb4Task extends UpdateTaskAdapter
     /**
      * Changes the charset/collation of the specified table and (optionally) shrinks the specified VARCHAR columns and
      * a {@link List} with the definitions of {@link Column}s to modify
-     * * @param connection The connection to use
-     *
+     * 
+     * @param connection The connection to use
      * @param schema The schema name
      * @param table The table name
      * @param optVarcharColumns The optional VARCHAR columns with their respective VARCHAR sizes

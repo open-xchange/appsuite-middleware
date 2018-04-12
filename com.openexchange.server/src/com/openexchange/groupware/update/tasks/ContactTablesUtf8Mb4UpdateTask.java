@@ -53,8 +53,6 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.Collections;
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableMap.Builder;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.SimpleConvertUtf8ToUtf8mb4UpdateTask;
 import com.openexchange.tools.update.Column;
@@ -86,13 +84,7 @@ public class ContactTablesUtf8Mb4UpdateTask extends SimpleConvertUtf8ToUtf8mb4Up
         Column column = new Column("field17", "TEXT COLLATE utf8mb4_unicode_ci NULL");
         String schema = params.getSchema().getSchema();
 
-        Builder<String, Integer> mapBuilder = ImmutableMap.builder();
-        mapBuilder.put("field01", 320);
-        mapBuilder.put("field65", 256);
-        mapBuilder.put("field66", 256);
-        mapBuilder.put("field67", 256);
-        ImmutableMap<String, Integer> map = mapBuilder.build();
-        changeTable(connection, schema, "prg_contacts", map, Collections.singletonList(column), Collections.emptyList());
-        changeTable(connection, schema, "del_contacts", map, Collections.singletonList(column), Collections.emptyList());
+        changeTable(connection, schema, "prg_contacts", Collections.emptyMap(), Collections.singletonList(column), Collections.emptyList());
+        changeTable(connection, schema, "del_contacts", Collections.emptyMap(), Collections.singletonList(column), Collections.emptyList());
     }
 }
