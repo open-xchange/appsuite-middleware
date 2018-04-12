@@ -64,7 +64,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 import com.openexchange.database.Databases;
 import com.openexchange.java.Strings;
 import liquibase.change.custom.CustomTaskChange;
