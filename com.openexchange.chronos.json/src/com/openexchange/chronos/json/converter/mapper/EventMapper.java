@@ -708,6 +708,49 @@ public class EventMapper extends DefaultJsonMapper<Event, EventField> {
                 object.removeRecurrenceId();
             }
         });
+        mappings.put(EventField.RECURRENCE_DATES, new ListMapping<String, Event>(ChronosJsonFields.RECURRENCE_DATES, null) {
+
+            @Override
+            public boolean isSet(Event object) {
+                return object.containsRecurrenceDates();
+            }
+
+            @Override
+            public void set(Event object, List<String> value) throws OXException {
+                if (null == value) {
+                    object.setRecurrenceDates(null);
+                } else {
+                    SortedSet<RecurrenceId> recurrenceIds = new TreeSet<RecurrenceId>();
+                    for (String dateTimeString : value) {
+                        recurrenceIds.add(new DefaultRecurrenceId(dateTimeString));
+                    }
+                    object.setRecurrenceDates(recurrenceIds);
+                }
+            }
+
+            @Override
+            public List<String> get(Event object) {
+                SortedSet<RecurrenceId> recurrenceIds = object.getRecurrenceDates();
+                if (null == recurrenceIds) {
+                    return null;
+                }
+                List<String> value = new ArrayList<String>(recurrenceIds.size());
+                for (RecurrenceId recurrenceId : recurrenceIds) {
+                    value.add(recurrenceId.getValue().toString());
+                }
+                return value;
+            }
+
+            @Override
+            public void remove(Event object) {
+                object.removeRecurrenceDates();
+            }
+
+            @Override
+            protected String deserialize(JSONArray array, int index, TimeZone timeZone) throws JSONException, OXException {
+                return array.getString(index);
+            }
+        });
         mappings.put(EventField.CHANGE_EXCEPTION_DATES, new ListMapping<String, Event>(ChronosJsonFields.CHANGE_EXCEPTION_DATES, null) {
 
             @Override

@@ -57,6 +57,7 @@ import static com.openexchange.chronos.common.CalendarUtils.getUserIDs;
 import static com.openexchange.chronos.common.CalendarUtils.hasExternalOrganizer;
 import static com.openexchange.chronos.common.CalendarUtils.isAllDay;
 import static com.openexchange.chronos.common.CalendarUtils.isOpaqueTransparency;
+import static com.openexchange.chronos.common.CalendarUtils.isSeriesException;
 import static com.openexchange.chronos.common.CalendarUtils.isSeriesMaster;
 import static com.openexchange.chronos.common.CalendarUtils.matches;
 import static com.openexchange.chronos.impl.Check.requireUpToDateTimestamp;
@@ -152,8 +153,14 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
         if (null == recurrenceId && updatedEventData.containsRecurrenceId()) {
             recurrenceId = updatedEventData.getRecurrenceId();
         }
-        if (isSeriesMaster(originalEvent) && null != recurrenceId) {
-            updateRecurrence(originalEvent, recurrenceId, updatedEventData);
+        if (null != recurrenceId) {
+            if (isSeriesMaster(originalEvent)) {
+                updateRecurrence(originalEvent, recurrenceId, updatedEventData);
+            } else if (isSeriesException(originalEvent) && recurrenceId.equals(originalEvent.getRecurrenceId())) {
+                updateEvent(originalEvent, updatedEventData);
+            } else {
+                throw CalendarExceptionCodes.INVALID_RECURRENCE_ID.create(String.valueOf(recurrenceId), null);
+            }
         } else {
             updateEvent(originalEvent, updatedEventData);
         }

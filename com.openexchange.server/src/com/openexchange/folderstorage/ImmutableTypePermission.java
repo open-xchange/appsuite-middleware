@@ -47,42 +47,55 @@
  *
  */
 
-package com.openexchange.ajax.sessionmanagement;
+package com.openexchange.folderstorage;
 
-import com.openexchange.ajax.framework.AbstractAPIClientSession;
-import com.openexchange.testing.httpclient.invoker.ApiClient;
-import com.openexchange.testing.httpclient.modules.SessionmanagementApi;
 
 /**
- * {@link AbstractSessionManagementTest}
+ * {@link ImmutableTypePermission} is an implementation of the {@link BasicPermission} class which only allows to change the type of the permission once.
  *
- * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
+ * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.10.0
  */
-public class AbstractSessionManagementTest extends AbstractAPIClientSession {
+public final class ImmutableTypePermission extends BasicPermission {
 
-    protected ApiClient apiClient2;
+    /**
+     * serialVersionUID
+     */
+    private static final long serialVersionUID = 1L;
 
-    private SessionmanagementApi api;
-
-    @Override
-    public void setUp() throws Exception {
-        super.setUp();
-
-        // Remove all other sessions to make sure tests run independently
-        api = new SessionmanagementApi(apiClient);
-        api.clear(apiClient.getSession());
-
-        // For the same user
-        apiClient2 = generateApiClient(testUser);
+    /**
+     * Initializes a new {@link ImmutableTypePermission}.
+     *
+     * @param entity
+     * @param group
+     * @param bits
+     */
+    public ImmutableTypePermission(int entity, boolean group, int bits) {
+        super(entity, group, bits);
     }
 
     @Override
-    public void tearDown() throws Exception {
-        super.tearDown();
+    public void setType(FolderPermissionType type) {
+        if (this.type == null) {
+            super.setType(type);
+        }
     }
 
-    protected SessionmanagementApi getApi() {
-        return api;
+    @Override
+    public Object clone() {
+        // Clones are not immutable and therefore a new BasicPermission is returned
+        BasicPermission clone = new BasicPermission();
+        clone.entity = getEntity();
+        clone.group = isGroup();
+        clone.system = getSystem();
+        clone.type = getType();
+        clone.legator = getPermissionLegator();
+        clone.admin = isAdmin();
+        clone.folderPermission = getFolderPermission();
+        clone.readPermission = getReadPermission();
+        clone.writePermission = getWritePermission();
+        clone.deletePermission = getDeletePermission();
+        return clone;
     }
+
 }

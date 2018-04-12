@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,42 +47,53 @@
  *
  */
 
-package com.openexchange.ajax.sessionmanagement;
+package com.openexchange.java;
 
-import com.openexchange.ajax.framework.AbstractAPIClientSession;
-import com.openexchange.testing.httpclient.invoker.ApiClient;
-import com.openexchange.testing.httpclient.modules.SessionmanagementApi;
+import java.net.URLConnection;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
- * {@link AbstractSessionManagementTest}
+ * {@link URLConnections} - Utility class for {@link URLConnection}s.
  *
- * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.10.0
  */
-public class AbstractSessionManagementTest extends AbstractAPIClientSession {
+public class URLConnections {
 
-    protected ApiClient apiClient2;
-
-    private SessionmanagementApi api;
-
-    @Override
-    public void setUp() throws Exception {
-        super.setUp();
-
-        // Remove all other sessions to make sure tests run independently
-        api = new SessionmanagementApi(apiClient);
-        api.clear(apiClient.getSession());
-
-        // For the same user
-        apiClient2 = generateApiClient(testUser);
+    /**
+     * Prevent instantiation.
+     */
+    private URLConnections() {
+        super();
     }
 
-    @Override
-    public void tearDown() throws Exception {
-        super.tearDown();
+    private static final Pattern CHARSET_DETECTION = Pattern.compile("charset= *([a-zA-Z-0-9_]+)(;|$)");
+
+    /**
+     * Tries to determine the charset from specified URL connection.
+     * <p>
+     * <div style="background-color:#FFDDDD; padding:6px; margin:0px;">
+     * <b>Note</b>: The connection is required to be connected; that is {@link URLConnection#connect()} has been called.
+     * </div>
+     *
+     * @param connection The URL connection to retrieve the charset from
+     * @param def The default charset to return
+     * @return The charset or <code>def</code>
+     */
+    public static String getCharsetFrom(URLConnection connection, String def) {
+        if (null == connection) {
+            return null;
+        }
+
+        String mimeType = connection.getContentType();
+        if (null == mimeType) {
+            return null;
+        }
+
+        Pattern charsetPattern = CHARSET_DETECTION;
+        Matcher m = charsetPattern.matcher(mimeType);
+        return m.find() ? m.group(1) : def;
     }
 
-    protected SessionmanagementApi getApi() {
-        return api;
-    }
 }

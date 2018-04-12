@@ -2945,7 +2945,7 @@ public class Contact extends CommonObject {
                 setBusinessCategory((String) value);
                 break;
             case CONTEXTID:
-                setContextId(((Integer) value).intValue());
+                setContextId(null == value ? 0 : ((Integer) value).intValue());
                 break;
             case STATE_OTHER:
                 setStateOther((String) value);

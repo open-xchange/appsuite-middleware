@@ -50,7 +50,13 @@
 package com.openexchange.diagnostic;
 
 import java.rmi.RemoteException;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
@@ -65,7 +71,84 @@ import com.openexchange.diagnostics.rmi.RemoteDiagnosticService;
  */
 public class DiagnosticsCLT extends AbstractRmiCLI<Void> {
 
-    private static final String CLT_NAME = "diagnostics [-c] | [-v] | [-r] | [-a|-a=aliases]";
+    private static final String CLT_NAME = "diagnostics [-c][-v][-r][-a|-al]";
+
+    /**
+     * {@link CommandLineOption} - Sums up all available command line options
+     * and executes the relevant remote methods via the specified {@link RemoteDiagnosticService}
+     */
+    private enum CommandLineOption {
+        c("Available Cipher Suites") {
+
+            @Override
+            List<String> executeWith(RemoteDiagnosticService service) throws RemoteException {
+                return service.getCipherSuites();
+            }
+        },
+        a("Available Charsets") {
+
+            @Override
+            List<String> executeWith(RemoteDiagnosticService service) throws RemoteException {
+                return service.getCharsets(false);
+            }
+        },
+        r("Available SSL Protocols") {
+
+            @Override
+            List<String> executeWith(RemoteDiagnosticService service) throws RemoteException {
+                return service.getProtocols();
+            }
+
+        },
+        v("Server version") {
+
+            @Override
+            List<String> executeWith(RemoteDiagnosticService service) throws RemoteException {
+                return Collections.singletonList(service.getVersion());
+            }
+
+        },
+        al("Available Charsets") {
+
+            @Override
+            List<String> executeWith(RemoteDiagnosticService service) throws RemoteException {
+                return service.getCharsets(true);
+            }
+
+        };
+
+        private final String header;
+
+        /**
+         * 
+         * Initialises a new {@link CommandLineOption}.
+         * 
+         * @param header
+         */
+        private CommandLineOption(String header) {
+            this.header = header;
+        }
+
+        /**
+         * Executes this {@link CommandLineOption} with the specified {@link RemoteDiagnosticService}
+         * 
+         * @param service The {@link RemoteDiagnosticService} to use for execution
+         * @return A {@link List} of {@link String}s
+         * @throws RemoteException if an error is occurred
+         */
+        abstract List<String> executeWith(RemoteDiagnosticService service) throws RemoteException;
+
+        /**
+         * Gets the header
+         *
+         * @return The header
+         */
+        public String getHeader() {
+            return header;
+        }
+    }
+
+    private final Set<CommandLineOption> toExecute;
 
     /**
      * Entry point
@@ -81,6 +164,7 @@ public class DiagnosticsCLT extends AbstractRmiCLI<Void> {
      */
     public DiagnosticsCLT() {
         super();
+        toExecute = new HashSet<>(8);
     }
 
     /*
@@ -103,8 +187,8 @@ public class DiagnosticsCLT extends AbstractRmiCLI<Void> {
         options.addOption(new Option("c", "cipher-suites", false, "A list with all supported cipher suites of this JVM."));
         options.addOption(new Option("v", "version", false, "The server's version."));
         options.addOption(new Option("r", "protocols", false, "A list with all supported SSL protocols of this JVM."));
-        options.addOption(new Option("a", "charsets", false, "A list with all supported charsets of this JVM."));
-        options.addOption(new Option("al", "charsets-long", false, "A long list with all supported charsets of this JVM. Along the charsets their aliases will also be listed as a comma separated list. The name of each charset will always be first."));
+        options.addOption(new Option("a", "charsets", false, "A list with all supported charsets of this JVM. This switch is mutually-exclusive with it's counter-part '-al'"));
+        options.addOption(new Option("al", "charsets-long", false, "A long list with all supported charsets of this JVM. Along the charsets their aliases will also be listed as a comma separated list. The name of each charset will always be first. This switch is mutually-exclusive with it's counter-part '-a'"));
     }
 
     /*
@@ -115,40 +199,46 @@ public class DiagnosticsCLT extends AbstractRmiCLI<Void> {
     @Override
     protected Void invoke(Options options, CommandLine cmd, String optRmiHostName) throws Exception {
         RemoteDiagnosticService diagnosticService = getRmiStub(optRmiHostName, RemoteDiagnosticService.RMI_NAME);
-        if (cmd.hasOption("c")) {
-            System.out.println("Available Cipher Suites");
-            System.out.println("-----------------------");
-            printList(diagnosticService.getCipherSuites());
-        } else if (cmd.hasOption("v")) {
-            System.out.println("Server version: " + diagnosticService.getVersion());
-        } else if (cmd.hasOption("r")) {
-            System.out.println("Available SSL Protocols");
-            System.out.println("-----------------------");
-            printList(diagnosticService.getProtocols());
-        } else if (cmd.hasOption("a")) {
-            System.out.println("Available Charsets");
-            System.out.println("------------------");
-            printList(diagnosticService.getCharsets(false));
-        } else if (cmd.hasOption("al")) {
-            System.out.println("Available Charsets");
-            System.out.println("------------------");
-            printList(diagnosticService.getCharsets(true));
-        } else {
+        if (toExecute.isEmpty()) {
             System.err.println("Missing parameter");
             printHelp();
         }
+
+        Map<String, List<String>> lists = new HashMap<>(4);
+        for (CommandLineOption clo : toExecute) {
+            lists.put(clo.getHeader(), clo.executeWith(diagnosticService));
+        }
+        printLists(lists);
+
         return null;
+    }
+
+    /**
+     * @param lists
+     */
+    private void printLists(Map<String, List<String>> lists) {
+        for (Entry<String, List<String>> entry : lists.entrySet()) {
+            printList(entry.getKey(), entry.getValue());
+        }
     }
 
     /**
      * Prints the specified {@link List} to the standard output
      * 
+     * @param header The header of the list
      * @param list The {@link List} to print
      */
-    private void printList(List<String> list) {
+    private void printList(String header, List<String> list) {
+        System.out.println(header);
+        StringBuilder b = new StringBuilder(header.length());
+        for (int c = 0; c < header.length(); c++) {
+            b.append('-');
+        }
+        System.out.println(b.toString());
         for (String element : list) {
             System.out.println(element);
         }
+        System.out.println();
     }
 
     /*
@@ -168,7 +258,15 @@ public class DiagnosticsCLT extends AbstractRmiCLI<Void> {
      */
     @Override
     protected void checkOptions(CommandLine cmd) {
-        // no-op
+        for (CommandLineOption clo : CommandLineOption.values()) {
+            if (cmd.hasOption(clo.name())) {
+                toExecute.add(clo);
+            }
+        }
+        if (toExecute.contains(CommandLineOption.a) && toExecute.contains(CommandLineOption.al)) {
+            System.err.println("The command line options '-a' and '-al' are mutually-exclusive. The option '-al' takes preference");
+            toExecute.remove(CommandLineOption.a);
+        }
     }
 
     /*

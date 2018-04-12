@@ -79,7 +79,6 @@ registerdatabase
  -p,--dbpasswd <dbpasswd>                        * Password for the database   
  -m,--master <true/false>                        * Set this if the registered database is the master
  -M,--masterid <masterid>                          If this database isn't the master give the id of the master here
- -w,--dbweight <dbweight>                          The db weight for this database. Default: 100
  -x,--maxunit <maxunit>                            The maximum number of contexts in this database.. Default: 1000
  -l,--poolhardlimit <true/false>                   Db pool hardlimit. Default: true
  -o,--poolinitial <poolinitial>                    Db pool initial. Default: 0 

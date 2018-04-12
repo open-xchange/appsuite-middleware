@@ -606,6 +606,26 @@ public abstract class DelegatingEvent extends Event {
     }
 
     @Override
+    public SortedSet<RecurrenceId> getRecurrenceDates() {
+        return delegate.getRecurrenceDates();
+    }
+
+    @Override
+    public void setRecurrenceDates(SortedSet<RecurrenceId> value) {
+        delegate.setRecurrenceDates(value);
+    }
+
+    @Override
+    public void removeRecurrenceDates() {
+        delegate.removeRecurrenceDates();
+    }
+
+    @Override
+    public boolean containsRecurrenceDates() {
+        return delegate.containsRecurrenceDates();
+    }
+
+    @Override
     public SortedSet<RecurrenceId> getChangeExceptionDates() {
         return delegate.getChangeExceptionDates();
     }

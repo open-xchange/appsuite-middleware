@@ -53,7 +53,6 @@ import com.openexchange.chronos.Event;
 import com.openexchange.chronos.itip.ITipMessage;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.exception.OXException;
-import com.openexchange.session.Session;
 
 /**
  * {@link ITipMessageGenerator}
@@ -67,7 +66,7 @@ public interface ITipMessageGenerator {
      * 
      * @param original The original {@link Event}
      * @param updated The updated {@link Event}
-     * @param session The current {@link Session}
+     * @param session The current {@link CalendarSession}
      * @return A human readable and translated {@link ITipMessage}
      * @throws OXException In case message can't be generated
      */

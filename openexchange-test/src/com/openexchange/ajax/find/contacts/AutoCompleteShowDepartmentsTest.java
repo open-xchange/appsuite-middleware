@@ -117,9 +117,6 @@ public class AutoCompleteShowDepartmentsTest extends AbstractAPIClientSession {
         clients = new HashMap<>();
         randomUsers = new HashSet<>();
 
-        // Login clients
-        apiClient.login(testUser.getLogin(), testUser.getPassword());
-
         for (int i = 0; i < AMOUNT_OF_TEST_USERS; i++) {
             TestUser testUser = testContext.acquireUser();
             if (testUser == null) {
@@ -129,7 +126,6 @@ public class AutoCompleteShowDepartmentsTest extends AbstractAPIClientSession {
             LOG.info("Acquired user '{}'", testUser);
 
             ApiClient client = generateApiClient(testUser);
-            client.login(testUser.getLogin(), testUser.getPassword());
             rememberClient(client);
             testUsers.put(testUser.getUser(), testUser);
             clients.put(testUser.getUser(), client);

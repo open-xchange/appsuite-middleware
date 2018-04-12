@@ -80,7 +80,7 @@ public class ConfigDocu {
     public ConfigDocu(File yamlFolder) throws FileNotFoundException {
         Constructor constructor = new Constructor(YamlFile.class);
         TypeDescription propertyDescription = new TypeDescription(YamlFile.class);
-        propertyDescription.putListPropertyType("data", Property.class);
+        propertyDescription.addPropertyParameters("data", Property.class);
         constructor.addTypeDescription(propertyDescription);
         Yaml yaml = new Yaml(constructor);
         data = new ArrayList<>();

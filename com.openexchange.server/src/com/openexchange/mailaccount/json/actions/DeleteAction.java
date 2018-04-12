@@ -89,8 +89,8 @@ public final class DeleteAction extends AbstractMailAccountAction {
         /*
          * Compose JSON array with id
          */
-        if (jBody == null) {
-            throw AjaxExceptionCodes.INVALID_JSON_REQUEST_BODY.create();
+        if (null == jBody) {
+            throw AjaxExceptionCodes.MISSING_REQUEST_BODY.create();
         }
         final JSONArray jsonArray = jBody.toArray();
         final int len = jsonArray.length();

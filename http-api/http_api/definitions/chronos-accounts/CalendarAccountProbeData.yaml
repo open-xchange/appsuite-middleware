@@ -36,7 +36,7 @@ properties:
         type: string
         description: (ical provider only) The URI of the ICal feed that should be subscribed.
       refreshInterval:
-        type: string
+        type: integer
         description: (ical provider only) Defines the refresh interval used for the subscribed ICal feed.
       login:
         type: string

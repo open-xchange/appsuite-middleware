@@ -1,0 +1,183 @@
+/*
+ *
+ *    OPEN-XCHANGE legal information
+ *
+ *    All intellectual property rights in the Software are protected by
+ *    international copyright laws.
+ *
+ *
+ *    In some countries OX, OX Open-Xchange, open xchange and OXtender
+ *    as well as the corresponding Logos OX Open-Xchange and OX are registered
+ *    trademarks of the OX Software GmbH group of companies.
+ *    The use of the Logos is not covered by the GNU General Public License.
+ *    Instead, you are allowed to use these Logos according to the terms and
+ *    conditions of the Creative Commons License, Version 2.5, Attribution,
+ *    Non-commercial, ShareAlike, and the interpretation of the term
+ *    Non-commercial applicable to the aforementioned license is published
+ *    on the web site http://www.open-xchange.com/EN/legal/index.html.
+ *
+ *    Please make sure that third-party modules and libraries are used
+ *    according to their respective licenses.
+ *
+ *    Any modifications to this package must retain all copyright notices
+ *    of the original copyright holder(s) for the original code used.
+ *
+ *    After any such modifications, the original and derivative code shall remain
+ *    under the copyright of the copyright holder(s) and/or original author(s)per
+ *    the Attribution and Assignment Agreement that can be located at
+ *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
+ *    given Attribution for the derivative code and a license granting use.
+ *
+ *     Copyright (C) 2016-2020 OX Software GmbH
+ *     Mail: info@open-xchange.com
+ *
+ *
+ *     This program is free software; you can redistribute it and/or modify it
+ *     under the terms of the GNU General Public License, Version 2 as published
+ *     by the Free Software Foundation.
+ *
+ *     This program is distributed in the hope that it will be useful, but
+ *     WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ *     or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
+ *     for more details.
+ *
+ *     You should have received a copy of the GNU General Public License along
+ *     with this program; if not, write to the Free Software Foundation, Inc., 59
+ *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ *
+ */
+
+package com.openxchange.documentation.tools.internal;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FilenameFilter;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Properties;
+
+/**
+ * {@link CurrentConfig}
+ *
+ * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+ * @since v7.10.0
+ */
+public class CurrentConfig {
+
+    private final Map<Object, Object> properties = new HashMap<>(100);
+    private static final FilenameFilter PROPERTY_FILTER = new FilenameFilter() {
+
+        @Override
+        public boolean accept(File dir, String name) {
+            return name.endsWith(".properties");
+        }
+    };
+    private static final FilenameFilter FOLDER_FILTER = new FilenameFilter() {
+
+        @Override
+        public boolean accept(File current, String name) {
+            return new File(current, name).isDirectory();
+        }
+    };
+
+    /**
+     * Initializes a new {@link CurrentConfig}.
+     *
+     * @throws IOException
+     * @throws FileNotFoundException
+     */
+    public CurrentConfig(String folder) throws FileNotFoundException, IOException {
+        File parentFolder = new File(folder);
+        if (parentFolder.exists() && parentFolder.isDirectory()) {
+            loadSubFolder(parentFolder);
+        }
+
+    }
+
+    @SuppressWarnings("unchecked")
+    private void loadSubFolder(File folder) throws FileNotFoundException, IOException {
+
+        String[] propFiles = folder.list(PROPERTY_FILTER);
+
+        for (String prop : propFiles) {
+            Properties props = new Properties();
+            File tmpFile = new File(folder.getAbsolutePath(), prop);
+            try (FileInputStream stream = new FileInputStream(tmpFile)) {
+                props.load(stream);
+                for (Entry<Object, Object> entry : props.entrySet()) {
+                    if (properties.containsKey(entry.getKey())) {
+                        Object object = properties.get(entry.getKey());
+                        if(object instanceof PropertyWithLocation) {
+                            ArrayList<PropertyWithLocation> list = new ArrayList<>(2);
+                            list.add((PropertyWithLocation) object);
+                            list.add(new PropertyWithLocation(tmpFile, entry.getValue()));
+                            properties.put(entry.getKey(), list);
+                        } else {
+                            ((List<PropertyWithLocation>) object).add(new PropertyWithLocation(tmpFile, entry.getValue()));
+                        }
+                    } else {
+                        properties.put(entry.getKey(), new PropertyWithLocation(tmpFile, entry.getValue()));
+                    }
+                }
+            }
+        }
+
+        String[] subDirectories = folder.list(FOLDER_FILTER);
+        for (String dir : subDirectories) {
+            loadSubFolder(new File(folder.getAbsolutePath(), dir));
+        }
+
+    }
+
+    @SuppressWarnings("unchecked")
+    public List<PropertyWithLocation> getValue(String key) {
+        Object object = properties.get(key);
+        if (object == null) {
+            return null;
+        }
+        if (object instanceof PropertyWithLocation) {
+            return Collections.singletonList((PropertyWithLocation) object);
+        } else {
+            return (List<PropertyWithLocation>) object;
+        }
+    }
+
+    public final class PropertyWithLocation {
+
+        private final File location;
+        private final Object value;
+
+        /**
+         * Initializes a new {@link CurrentConfig.PropertyWithLocation}.
+         */
+        public PropertyWithLocation(File location, Object value) {
+            this.location = location;
+            this.value = value;
+        }
+
+        /**
+         * Gets the location
+         *
+         * @return The location
+         */
+        public File getLocation() {
+            return location;
+        }
+
+        /**
+         * Gets the value
+         *
+         * @return The value
+         */
+        public String getValue() {
+            return value != null ? value.toString() : null;
+        }
+    }
+
+}

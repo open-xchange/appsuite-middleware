@@ -8,7 +8,7 @@ This command-line-tool allows to create additional database schemata which can b
 
 It's either possible to determine the database where the schema is created yourself or to let the middleware automatically decide where to create the newly schema.
 
-Please notice that the created schemata will **not** be available for the automatic schema select strategy. Instead use the "--schema-name" parameter for context creation. 
+Please notice that the created schemata will **not** be available for the automatic schema select strategy. Instead use the "--schema" parameter for context creation. 
 
 ## Parameters
 

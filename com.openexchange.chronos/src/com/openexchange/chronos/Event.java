@@ -94,6 +94,7 @@ public class Event {
     private String seriesId;
     private String recurrenceRule;
     private RecurrenceId recurrenceId;
+    private SortedSet<RecurrenceId> recurrenceDates;
     private SortedSet<RecurrenceId> changeExceptionDates;
     private SortedSet<RecurrenceId> deleteExceptionDates;
 
@@ -1079,6 +1080,42 @@ public class Event {
      */
     public boolean containsRecurrenceId() {
         return setFields.contains(EventField.RECURRENCE_ID);
+    }
+
+    /**
+     * Gets the recurrence dates of the event.
+     *
+     * @return The recurrence dates
+     */
+    public SortedSet<RecurrenceId> getRecurrenceDates() {
+        return recurrenceDates;
+    }
+
+    /**
+     * Sets the recurrence dates of the event.
+     *
+     * @param value The recurrence dates to set
+     */
+    public void setRecurrenceDates(SortedSet<RecurrenceId> value) {
+        recurrenceDates = value;
+        setFields.add(EventField.RECURRENCE_DATES);
+    }
+
+    /**
+     * Removes the recurrence dates of the event.
+     */
+    public void removeRecurrenceDates() {
+        recurrenceDates = null;
+        setFields.remove(EventField.RECURRENCE_DATES);
+    }
+
+    /**
+     * Gets a value indicating whether the recurrence dates of the event has been set or not.
+     *
+     * @return <code>true</code> if the recurrence dates is set, <code>false</code>, otherwise
+     */
+    public boolean containsRecurrenceDates() {
+        return setFields.contains(EventField.RECURRENCE_DATES);
     }
 
     /**

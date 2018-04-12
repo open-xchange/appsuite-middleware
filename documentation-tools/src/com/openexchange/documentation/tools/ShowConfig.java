@@ -51,9 +51,11 @@ package com.openexchange.documentation.tools;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -65,6 +67,8 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.PosixParser;
 import com.openxchange.documentation.tools.internal.ConfigDocu;
+import com.openxchange.documentation.tools.internal.CurrentConfig;
+import com.openxchange.documentation.tools.internal.CurrentConfig.PropertyWithLocation;
 import com.openxchange.documentation.tools.internal.Property;
 
 /**
@@ -78,6 +82,7 @@ public class ShowConfig {
 
     private static final Options options = new Options();
     private static final String DEFAULT_FOLDER = "/opt/open-xchange/documentation/etc";
+    private static final String CURRENT_CONFIG_FOLDER = "/opt/open-xchange/etc";
 
     private static final String SEARCH_OPTION = "s";
     private static final String TAG_OPTION = "t";
@@ -86,6 +91,8 @@ public class ShowConfig {
     private static final String ANSI_OPTION = "n";
     private static final String ONLY_KEY_OPTION = "o";
     private static final String PRINT_TAG_OPTION = "p";
+    private static final String INCLUDE_CONFIGURED_VALUE_OPTION = "i";
+    private static final String DIFFERENCES_ONLY_OPTION = "d";
 
     private static final Comparator<String> IGNORE_CASE_COMP = new Comparator<String>() {
         @Override
@@ -102,6 +109,8 @@ public class ShowConfig {
         options.addOption(OptionBuilder.withLongOpt("only-key").hasArg(false).withDescription("Prints only the key for each property.").isRequired(false).create(ONLY_KEY_OPTION));
         options.addOption(OptionBuilder.withLongOpt("print-tags").hasArg(false).withDescription("Prints a list of available tags.").isRequired(false).create(PRINT_TAG_OPTION));
         options.addOption(OptionBuilder.withLongOpt("no-color").hasArg(false).withDescription("Removes ansi color formatting.").isRequired(false).create(ANSI_OPTION));
+        options.addOption(OptionBuilder.withLongOpt("include_configured").hasArg(false).withDescription("Also prints the current configured value if present.").isRequired(false).create(INCLUDE_CONFIGURED_VALUE_OPTION));
+        options.addOption(OptionBuilder.withLongOpt("only_differences").hasArg(false).withDescription("Only prints properties which are configured and have a different value than the default.").isRequired(false).create(DIFFERENCES_ONLY_OPTION));
     }
 
     public static void main(String[] args) {
@@ -153,7 +162,21 @@ public class ShowConfig {
                 if(parse.hasOption(ANSI_OPTION)) {
                     useAnsi = Boolean.valueOf(parse.getOptionValue(ANSI_OPTION));
                 }
-                printProperties(props, useAnsi, onlyKey);
+
+                CurrentConfig currentConfig = null;
+                boolean diffOnly = parse.hasOption(DIFFERENCES_ONLY_OPTION);
+                if (parse.hasOption(INCLUDE_CONFIGURED_VALUE_OPTION) || diffOnly) {
+                    try {
+                        currentConfig = new CurrentConfig(CURRENT_CONFIG_FOLDER);
+                    } catch (IOException e) {
+                        System.err.println("Unable to read current configuration.");
+                        if (diffOnly) {
+                            handleError(e);
+                        }
+                    }
+                }
+
+                printProperties(props, currentConfig, useAnsi, onlyKey, diffOnly);
             } catch (FileNotFoundException e) {
                 handleError(e);
             }
@@ -177,13 +200,100 @@ public class ShowConfig {
 
     }
 
-    private static void printProperties(List<Property> props, boolean useAnsi, boolean onlyKey){
+    private static void printProperties(List<Property> props, CurrentConfig config, boolean useAnsi, boolean onlyKey, boolean onlyDiff) {
+        if (useAnsi) {
+            System.out.println(ANSI_BOLD + "Properties:" + ANSI_RESET);
+        } else {
+            System.out.println("Properties:");
+        }
         for(Property prop: props) {
-            printProperty(prop, useAnsi, onlyKey);
-            if(!onlyKey) {
-                System.out.println(format("\n-------------------------------------------------\n", ANSI_RED, useAnsi));
+            if (config != null) {
+                List<PropertyWithLocation> list = config.getValue(prop.getKey());
+                PropertyWithLocation matchedProp = findMatch(prop.getFile(), list);
+                if (!onlyDiff || (matchedProp != null && matchedProp.getValue().equals(prop.getDefaultValue()))) {
+                    String value = null;
+                    if (matchedProp != null) {
+                        value = matchedProp.getValue();
+                    }
+                    printProperty(prop, value, useAnsi, onlyKey);
+                    if (!onlyKey) {
+                        printWarningForDuplicateEntries(props, prop, list, useAnsi);
+                        System.out.println("\n" + format("-------------------------------------------------", ANSI_RED, useAnsi) + "\n");
+                    }
+                }
+            } else {
+                printProperty(prop, null, useAnsi, onlyKey);
+                if (!onlyKey) {
+                    System.out.println("\n" + format("-------------------------------------------------", ANSI_RED, useAnsi) + "\n");
+                }
             }
         }
+    }
+
+    /**
+     * Prints a warning message for duplicate configured properties.
+     *
+     * @param props All properties
+     * @param prop The current property
+     * @param list A list of possible duplicates
+     * @param useAnsi Whether to use ansi coloring or not
+     */
+    private static void printWarningForDuplicateEntries(List<Property> props, Property prop, List<PropertyWithLocation> list, boolean useAnsi) {
+        if (list != null && list.size() > 1) {
+            for (Property tmpProp : props) {
+                if (!prop.equals(tmpProp) && tmpProp.getKey().equals(prop.getKey())) {
+                    Iterator<PropertyWithLocation> iter = list.iterator();
+                    while (iter.hasNext()) {
+                        PropertyWithLocation next = iter.next();
+                        if (tmpProp.getFile().equalsIgnoreCase(next.getLocation().getName())) {
+                            // belongs to a different property with the same name
+                            iter.remove();
+                            break;
+                        }
+                    }
+                }
+            }
+            if (list.size() > 1) {
+                printWarning(prop, list, useAnsi);
+            }
+        }
+    }
+
+    /**
+     * Find the property which match the preferred location or the last one if none matches.
+     *
+     * @param file The preferred filename
+     * @param list The list of properties
+     * @return The {@link PropertyWithLocation} or null in case list is null
+     */
+    private static PropertyWithLocation findMatch(String file, List<PropertyWithLocation> list) {
+        if (list == null) {
+            return null;
+        }
+        for (PropertyWithLocation prop : list) {
+            if (prop.getLocation().getName().equals(file)) {
+                return prop;
+            }
+        }
+        return list.get(list.size() - 1);
+    }
+
+    private static final String WARNING = "There are multiple values defined for the same property:\n";
+    private static final String ADVICE = "  This could indicate a misconfiguration.\n";
+
+    /**
+     * @param prop
+     * @param list
+     * @param useAnsi
+     */
+    private static void printWarning(Property prop, List<PropertyWithLocation> list, boolean useAnsi) {
+        StringBuilder builder = new StringBuilder();
+        builder.append(WARNING);
+        for (PropertyWithLocation propLoc : list) {
+            builder.append("  - '").append(propLoc.getValue()).append("' in file '").append(propLoc.getLocation()).append("'\n");
+        }
+        builder.append("\n").append(ADVICE);
+        printKeyValue("\nWarning", builder.toString(), useAnsi);
     }
 
     public static final String ANSI_RESET = "\u001B[0m";
@@ -191,7 +301,7 @@ public class ShowConfig {
     public static final String ANSI_BOLD = "\u001B[1m";
     public static final String ANSI_FRAME = "\u001B[51m";
 
-    private static void printProperty(Property prop, boolean useAnsi, boolean onlyKey) {
+    private static void printProperty(Property prop, String currentValue, boolean useAnsi, boolean onlyKey) {
         printKeyValue("Key", prop.getKey(), useAnsi);
         if(onlyKey) {
             return;
@@ -199,6 +309,9 @@ public class ShowConfig {
         System.out.println(format("Description", ANSI_RED, useAnsi)+":");
         System.out.println(formatDescription(prop.getDescription(), useAnsi));
         printKeyValue("Default", prop.getDefaultValue(), true, useAnsi);
+        if (currentValue != null) {
+            printKeyValue("Configured value", currentValue, true, useAnsi);
+        }
         printKeyValue("File", prop.getFile(), useAnsi);
         printKeyValue("Version", prop.getVersion(), useAnsi);
         printKeyValue("Package", prop.getPackageName(), useAnsi);
@@ -224,7 +337,8 @@ public class ShowConfig {
             value = value.replaceAll("\\[\\[|\\]\\]", "");
         }
         value = value.replaceAll("<li>", "-");
-        return value.replaceAll("\\<[^>]*>","");
+        value = value.replaceAll("\\<[^>]*>", "");
+        return "  " + value.replaceAll("\n", "\n  ");
     }
 
     private static String format(String value, String color, boolean useAnsi) {
@@ -252,7 +366,7 @@ public class ShowConfig {
      * @param e The error
      */
     private static final void handleError(Exception e){
-        System.out.println("An error occured: "+e.getMessage());
+        System.err.println("An error occured: " + e.getMessage());
         System.exit(3);
     }
 

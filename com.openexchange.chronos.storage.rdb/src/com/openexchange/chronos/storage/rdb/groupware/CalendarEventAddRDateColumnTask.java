@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,42 +47,54 @@
  *
  */
 
-package com.openexchange.ajax.sessionmanagement;
+package com.openexchange.chronos.storage.rdb.groupware;
 
-import com.openexchange.ajax.framework.AbstractAPIClientSession;
-import com.openexchange.testing.httpclient.invoker.ApiClient;
-import com.openexchange.testing.httpclient.modules.SessionmanagementApi;
+import static com.openexchange.database.Databases.autocommit;
+import static com.openexchange.database.Databases.rollback;
+import java.sql.Connection;
+import java.sql.SQLException;
+import com.openexchange.exception.OXException;
+import com.openexchange.groupware.update.PerformParameters;
+import com.openexchange.groupware.update.UpdateExceptionCodes;
+import com.openexchange.groupware.update.UpdateTaskAdapter;
+import com.openexchange.tools.update.Column;
+import com.openexchange.tools.update.Tools;
 
 /**
- * {@link AbstractSessionManagementTest}
+ * {@link CalendarEventAddRDateColumnTask}
  *
- * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public class AbstractSessionManagementTest extends AbstractAPIClientSession {
-
-    protected ApiClient apiClient2;
-
-    private SessionmanagementApi api;
+public class CalendarEventAddRDateColumnTask extends UpdateTaskAdapter {
 
     @Override
-    public void setUp() throws Exception {
-        super.setUp();
-
-        // Remove all other sessions to make sure tests run independently
-        api = new SessionmanagementApi(apiClient);
-        api.clear(apiClient.getSession());
-
-        // For the same user
-        apiClient2 = generateApiClient(testUser);
+    public String[] getDependencies() {
+        return new String[] { "com.openexchange.chronos.storage.rdb.groupware.ChronosCreateTableTask"
+        };
     }
 
     @Override
-    public void tearDown() throws Exception {
-        super.tearDown();
+    public void perform(PerformParameters params) throws OXException {
+        Connection connection = params.getConnection();
+        boolean rollback = false;
+        try {
+            connection.setAutoCommit(false);
+            rollback = true;
+            Tools.checkAndAddColumns(connection, "calendar_event", new Column("rDate", "TEXT DEFAULT NULL"));
+            Tools.checkAndAddColumns(connection, "calendar_event_tombstone", new Column("rDate", "TEXT DEFAULT NULL"));
+            connection.commit();
+            rollback = false;
+        } catch (SQLException e) {
+            throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
+        } catch (RuntimeException e) {
+            throw UpdateExceptionCodes.OTHER_PROBLEM.create(e, e.getMessage());
+        } finally {
+            if (rollback) {
+                rollback(connection);
+            }
+            autocommit(connection);
+        }
     }
 
-    protected SessionmanagementApi getApi() {
-        return api;
-    }
 }

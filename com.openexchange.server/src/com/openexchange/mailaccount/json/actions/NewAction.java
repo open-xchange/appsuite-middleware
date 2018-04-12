@@ -90,6 +90,7 @@ import com.openexchange.mailaccount.json.parser.DefaultMailAccountParser;
 import com.openexchange.mailaccount.json.writer.DefaultMailAccountWriter;
 import com.openexchange.oauth.provider.resourceserver.annotations.OAuthAction;
 import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -115,6 +116,9 @@ public final class NewAction extends AbstractMailAccountAction implements MailAc
     protected AJAXRequestResult innerPerform(AJAXRequestData requestData, ServerSession session, JSONValue jData) throws OXException, JSONException {
         if (!session.getUserPermissionBits().isMultipleMailAccounts()) {
             throw MailAccountExceptionCodes.NOT_ENABLED.create(Integer.valueOf(session.getUserId()), Integer.valueOf(session.getContextId()));
+        }
+        if (null == jData) {
+            throw AjaxExceptionCodes.MISSING_REQUEST_BODY.create();
         }
 
         MailAccountDescription accountDescription = new MailAccountDescription();

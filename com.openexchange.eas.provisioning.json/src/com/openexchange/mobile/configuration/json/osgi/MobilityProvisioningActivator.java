@@ -93,7 +93,6 @@ public class MobilityProvisioningActivator extends HousekeepingActivator {
     @Override
     protected void startBundle() throws Exception {
         try {
-
             final MobilityProvisioningServiceRegistry registry = getInstance();
             registry.clearRegistry();
             registry.clearActionServices();
@@ -132,9 +131,9 @@ public class MobilityProvisioningActivator extends HousekeepingActivator {
             /*
              * Close service trackers
              */
-            cleanUp();
             getInstance().clearRegistry();
             getInstance().clearActionServices();
+            super.stopBundle();
         } catch (final Throwable t) {
             LOG.error("", t);
             throw t instanceof Exception ? (Exception) t : new Exception(t);

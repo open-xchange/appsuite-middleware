@@ -82,7 +82,7 @@ public class SSLActivator extends HousekeepingActivator {
 
             TrustedSSLSocketFactory.init();
 
-            DefaultSSLSocketFactoryProvider factoryProvider = DefaultSSLSocketFactoryProvider.getInstance();
+            DefaultSSLSocketFactoryProvider factoryProvider = new DefaultSSLSocketFactoryProvider(getService(SSLConfigurationService.class));
             registerService(SSLSocketFactoryProvider.class, factoryProvider);
 
             // Host name verification is done implicitly (if enabled through configuration) through com.openexchange.tools.ssl.DelegatingSSLSocket
