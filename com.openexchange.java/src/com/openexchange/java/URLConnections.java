@@ -78,9 +78,10 @@ public class URLConnections {
      * </div>
      *
      * @param connection The URL connection to retrieve the charset from
-     * @return The charset or <code>null</code>
+     * @param def The default charset to return
+     * @return The charset or <code>def</code>
      */
-    public static String getCharsetFrom(URLConnection connection) {
+    public static String getCharsetFrom(URLConnection connection, String def) {
         if (null == connection) {
             return null;
         }
@@ -92,7 +93,7 @@ public class URLConnections {
 
         Pattern charsetPattern = CHARSET_DETECTION;
         Matcher m = charsetPattern.matcher(mimeType);
-        return m.find() ? m.group(1) : null;
+        return m.find() ? m.group(1) : def;
     }
 
 }
