@@ -513,7 +513,7 @@ public class RdbAlarmTriggerStorage extends RdbStorage implements AlarmTriggerSt
         return triggers;
     }
 
-    private static ReminderData selectReminder(Connection connection, int contextID, int eventID, int userID) throws SQLException, OXException {
+    private static ReminderData selectReminder(Connection connection, int contextID, int eventID, int userID) throws SQLException {
         String sql = new StringBuilder().append("SELECT m.reminder,r.object_id,r.alarm,r.last_modified FROM prg_dates_members AS m ").append("LEFT JOIN reminder AS r ON m.cid=r.cid AND m.member_uid=r.userid AND m.object_id=r.target_id ").append("WHERE m.cid=? AND m.member_uid=? AND m.object_id=?;").toString();
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
             int parameterIndex = 1;

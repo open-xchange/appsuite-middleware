@@ -166,7 +166,7 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
      *
      * @param updatePerformer The update performer to take over the settings from
      */
-    protected AbstractUpdatePerformer(AbstractUpdatePerformer updatePerformer) throws OXException {
+    protected AbstractUpdatePerformer(AbstractUpdatePerformer updatePerformer) {
         super(updatePerformer.session, updatePerformer.storage);
         this.folder = updatePerformer.folder;
         this.calendarUser = updatePerformer.calendarUser;

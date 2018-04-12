@@ -354,7 +354,7 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
      * @param attendeeHelper The attendee helper for the update
      * @return <code>true</code> if conflict checks should take place, <code>false</code>, otherwise
      */
-    private boolean needsConflictCheck(EventUpdate eventUpdate) throws OXException {
+    private boolean needsConflictCheck(EventUpdate eventUpdate) {
         if (eventUpdate.getUpdatedFields().contains(EventField.START_DATE) &&
             eventUpdate.getUpdate().getStartDate().before(eventUpdate.getOriginal().getStartDate())) {
             /*
