@@ -51,13 +51,15 @@ package com.openexchange.ajax.login;
 
 import java.util.Set;
 import com.openexchange.capabilities.Capability;
+import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.configuration.CookieHashSource;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.util.Tools;
 import com.openexchange.log.LogProperties;
 import com.openexchange.login.ConfigurationProperty;
 import com.openexchange.server.services.ServerServiceRegistry;
-import com.openexchange.serverconfig.ServerConfig;
-import com.openexchange.serverconfig.ServerConfigService;
+import com.openexchange.session.Session;
+import com.openexchange.sessiond.impl.ThreadLocalSessionHolder;
 
 /**
  * Object to store the configuration parameters for the different login process mechanisms.
@@ -132,10 +134,38 @@ public final class LoginConfiguration {
      * @return <code>true</code> if auto-login is enabled; otherwise <code>false</code>
      */
     public boolean isSessiondAutoLogin(String hostName) {
+        return isSessiondAutoLogin(hostName, null);
+    }
+
+    /**
+     * Checks if auto-login is enabled for given host name
+     *
+     * @param hostName The host name to check for
+     * @param optSession The optional session to use
+     * @return <code>true</code> if auto-login is enabled; otherwise <code>false</code>
+     */
+    public boolean isSessiondAutoLogin(String hostName, Session optSession) {
         try {
-            ServerConfigService configService = ServerServiceRegistry.getInstance().getService(ServerConfigService.class);
-            ServerConfig config = configService.getServerConfig(hostName, -1, -1);
-            Set<Capability> capabilities = config.getCapabilities();
+            if (null != hostName) {
+                LogProperties.put(LogProperties.Name.HOSTNAME, hostName);
+            }
+
+            CapabilityService capabilityService = ServerServiceRegistry.getInstance().getService(CapabilityService.class);
+            if (null == capabilityService) {
+                LOGGER.warn("Missing capability service. Unable to reliably check auto-login capability for host {}. Using default '{}' as fall-back for auto-login (as configured through \"{}\" property", hostName, sessiondAutoLogin, ConfigurationProperty.SESSIOND_AUTOLOGIN.getPropertyName());
+                return sessiondAutoLogin;
+            }
+
+            Set<Capability> capabilities;
+            {
+                Session ses = null == optSession ? ThreadLocalSessionHolder.getInstance().getSessionObject() : optSession;
+                if (null == ses) {
+                    capabilities = capabilityService.getCapabilities(getUserId(), getContextId(), true, true).asSet();
+                } else {
+                    capabilities = capabilityService.getCapabilities(ses, true).asSet();
+                }
+            }
+
             if (null != capabilities) {
                 return capabilities.contains(CAPABILITY_AUTOLOGIN);
             }
@@ -198,6 +228,37 @@ public final class LoginConfiguration {
 
     public boolean isCheckPunyCodeLoginString() {
         return checkPunyCodeLoginString;
+    }
+
+
+    // ----------------------------------------------------------------------------------------------------------------------------------------------------------
+
+    /**
+     * Retrieves the context identifier from the {@link LogProperties}
+     *
+     * @return the context identifier from the LogProperties
+     */
+    private int getContextId() {
+        return getLogPropertyValue(LogProperties.Name.SESSION_CONTEXT_ID);
+    }
+
+    /**
+     * Retrieves the user identifier from the {@link LogProperties}
+     *
+     * @return the user identifier from the {@link LogProperties}
+     */
+    private int getUserId() {
+        return getLogPropertyValue(LogProperties.Name.SESSION_USER_ID);
+    }
+
+    /**
+     * Retrieves value of the specified property from the {@link LogProperties}
+     *
+     * @param name The log property's name
+     * @return the property's value
+     */
+    private int getLogPropertyValue(LogProperties.Name name) {
+        return Tools.getUnsignedInteger(LogProperties.get(name));
     }
 
 }
