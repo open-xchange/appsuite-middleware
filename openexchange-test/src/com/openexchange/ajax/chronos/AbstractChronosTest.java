@@ -59,7 +59,6 @@ import java.util.Set;
 import java.util.TimeZone;
 import com.openexchange.ajax.chronos.manager.CalendarFolderManager;
 import com.openexchange.ajax.chronos.manager.EventManager;
-import com.openexchange.ajax.chronos.manager.ICalImportExportManager;
 import com.openexchange.configuration.asset.AssetManager;
 import com.openexchange.exception.OXException;
 import com.openexchange.testing.httpclient.invoker.ApiClient;
@@ -72,9 +71,7 @@ import com.openexchange.testing.httpclient.models.FoldersVisibilityResponse;
 import com.openexchange.testing.httpclient.models.NewFolderBody;
 import com.openexchange.testing.httpclient.models.NewFolderBodyFolder;
 import com.openexchange.testing.httpclient.modules.ChronosApi;
-import com.openexchange.testing.httpclient.modules.ExportApi;
 import com.openexchange.testing.httpclient.modules.FoldersApi;
-import com.openexchange.testing.httpclient.modules.ImportApi;
 
 /**
  * {@link AbstractChronosTest}
@@ -94,13 +91,10 @@ public class AbstractChronosTest extends AbstractEnhancedApiClientSession {
     protected UserApi defaultUserApi;
     protected ChronosApi chronosApi;
     private FoldersApi foldersApi;
-    protected ImportApi importApi;
-    protected ExportApi exportApi;
     protected String defaultFolderId;
 
     protected EventManager eventManager;
     protected AssetManager assetManager;
-    protected ICalImportExportManager importExportManager;
     protected CalendarFolderManager folderManager;
 
     /**
@@ -124,9 +118,6 @@ public class AbstractChronosTest extends AbstractEnhancedApiClientSession {
         defaultFolderId = getDefaultFolder();
         assetManager = new AssetManager();
         eventManager = new EventManager(defaultUserApi, defaultFolderId);
-        importApi = new ImportApi(client);
-        exportApi = new ExportApi(client);
-        importExportManager = new ICalImportExportManager(exportApi, importApi);
         folderManager = new CalendarFolderManager(defaultUserApi, foldersApi);
     }
 
