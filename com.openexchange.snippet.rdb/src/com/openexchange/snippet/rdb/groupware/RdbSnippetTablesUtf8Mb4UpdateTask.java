@@ -49,7 +49,9 @@
 
 package com.openexchange.snippet.rdb.groupware;
 
-import java.util.Arrays;
+import java.sql.Connection;
+import java.sql.SQLException;
+import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.SimpleConvertUtf8ToUtf8mb4UpdateTask;
 
 /**
@@ -63,6 +65,11 @@ public class RdbSnippetTablesUtf8Mb4UpdateTask extends SimpleConvertUtf8ToUtf8mb
      * Initialises a new {@link RdbSnippetTablesUtf8Mb4UpdateTask}.
      */
     public RdbSnippetTablesUtf8Mb4UpdateTask() {
-        super(Arrays.asList("snippet", "snippetContent", "snippetAttachment", "snippetMisc", "snippetAttachmentBinary"), RdbSnippetAddAttachmentMimeTypeAndDisposition.class.getName());
+        super(RdbSnippetAddAttachmentMimeTypeAndDisposition.class, "snippet", "snippetContent", "snippetAttachment", "snippetMisc", "snippetAttachmentBinary");
+    }
+
+    @Override
+    protected void before(PerformParameters params, Connection connection) throws SQLException {
+        super.before(params, connection);
     }
 }

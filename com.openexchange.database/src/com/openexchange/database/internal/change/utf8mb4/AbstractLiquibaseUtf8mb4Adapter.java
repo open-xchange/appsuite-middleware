@@ -142,7 +142,7 @@ public abstract class AbstractLiquibaseUtf8mb4Adapter implements CustomTaskChang
 
     /**
      * Changes the charset/collation of the specified table.
-     * 
+     *
      * @param connection The connection to use
      * @param schema The schema name
      * @param table The table name
@@ -158,7 +158,7 @@ public abstract class AbstractLiquibaseUtf8mb4Adapter implements CustomTaskChang
     /**
      * Changes the charset/collation of the specified table and (optionally) shrinks the specified VARCHAR columns and
      * a {@link List} with the definitions of {@link Column}s to modify
-     * 
+     *
      * @param connection The connection to use
      * @param schema The schema name
      * @param table The table name
@@ -173,7 +173,7 @@ public abstract class AbstractLiquibaseUtf8mb4Adapter implements CustomTaskChang
     /**
      * Changes the charset/collation of the specified table and (optionally) shrinks the specified VARCHAR columns and
      * a {@link List} with the definitions of {@link Column}s to modify
-     * 
+     *
      * @param connection The connection to use
      * @param schema The schema name
      * @param table The table name
@@ -242,7 +242,7 @@ public abstract class AbstractLiquibaseUtf8mb4Adapter implements CustomTaskChang
 
     /**
      * Checks whether data stored in the specified column in the specified table exceeds the maximum new column size
-     * 
+     *
      * @param connection The connection
      * @param column The column name
      * @param table The table name
@@ -401,7 +401,7 @@ public abstract class AbstractLiquibaseUtf8mb4Adapter implements CustomTaskChang
             Databases.closeSQLStuff(columnRs, columnStmt);
         }
     }
-    
+
     /**
      * Returns a new {@link Column} definition with its character set and collation set to the utf8mb4 derivative.
      *
@@ -524,24 +524,45 @@ public abstract class AbstractLiquibaseUtf8mb4Adapter implements CustomTaskChang
      * @return The <code>"ALTER TABLE..."</code> statement or <code>null</code> if nothing needs to be changed
      */
     protected String alterTable(String table, List<Column> columns, String tableCharset, String tableCollation) {
-        if ((columns == null || columns.isEmpty()) && Strings.isEmpty(tableCollation) && Strings.isEmpty(tableCharset)) {
+        boolean columnsGiven = columns != null && !columns.isEmpty();
+        boolean tableCharsetGiven = Strings.isNotEmpty(tableCharset);
+        boolean tableCollationGiven = Strings.isNotEmpty(tableCollation);
+        if (false == columnsGiven && false == tableCharsetGiven && false == tableCollationGiven) {
+            // Nothing to do
             return null;
         }
 
-        StringBuilder sb = new StringBuilder();
+        StringBuilder sb = new StringBuilder(128);
         sb.append("ALTER TABLE ");
         sb.append(table);
-        if (columns != null && !columns.isEmpty()) {
-            sb.append(columns.stream().map(c -> c.getName() + " " + c.getDefinition()).collect(Collectors.joining(", MODIFY COLUMN ", " MODIFY COLUMN ", ",")));
+
+        if (columnsGiven) {
+            // Append "MODIFY COLUMN" statements
+            boolean first = true;
+            for (Column column : columns) {
+                if (first) {
+                    first = false;
+                } else {
+                    sb.append(',');
+                }
+                sb.append(" MODIFY COLUMN ").append(column.getName()).append(' ').append(column.getDefinition());
+            }
         }
-        if (Strings.isNotEmpty(tableCharset)) {
-            sb.append(" DEFAULT CHARACTER SET=");
-            sb.append(tableCharset);
+        if (tableCharsetGiven || tableCollationGiven) {
+            // Append modification of default charset/collation
+            if (columnsGiven) {
+                sb.append(',');
+            }
+            if (tableCharsetGiven) {
+                sb.append(" DEFAULT CHARACTER SET=");
+                sb.append(tableCharset);
+            }
+            if (tableCollationGiven) {
+                sb.append(" COLLATE=");
+                sb.append(tableCollation);
+            }
         }
-        if (Strings.isNotEmpty(tableCollation)) {
-            sb.append(" COLLATE=");
-            sb.append(tableCollation);
-        }
+
         return sb.toString();
     }
 

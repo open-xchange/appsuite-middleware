@@ -49,7 +49,10 @@
 
 package com.openexchange.snippet.mime.groupware;
 
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.Arrays;
+import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.SimpleConvertUtf8ToUtf8mb4UpdateTask;
 
 /**
@@ -64,5 +67,10 @@ public class MimeSnippetTablesUtf8Mb4UpdateTask extends SimpleConvertUtf8ToUtf8m
      */
     public MimeSnippetTablesUtf8Mb4UpdateTask() {
         super(Arrays.asList("snippet"), SnippetSizeColumnUpdateTask.class.getName());
+    }
+
+    @Override
+    protected void before(PerformParameters params, Connection connection) throws SQLException {
+        super.before(params, connection);
     }
 }
