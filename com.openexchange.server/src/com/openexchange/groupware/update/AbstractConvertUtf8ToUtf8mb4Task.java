@@ -334,14 +334,15 @@ public abstract class AbstractConvertUtf8ToUtf8mb4Task extends UpdateTaskAdapter
      * @return The <code>"ALTER TABLE..."</code> statement or <code>null</code> if nothing needs to be changed
      */
     protected String alterTable(String table, List<Column> columns, String tableCharset, String tableCollation) {
-        if ((columns == null || columns.isEmpty()) && Strings.isEmpty(tableCollation) && Strings.isEmpty(tableCharset)) {
+        boolean noColumnsGiven = columns == null || columns.isEmpty();
+        if (noColumnsGiven && Strings.isEmpty(tableCollation) && Strings.isEmpty(tableCharset)) {
             return null;
         }
 
-        StringBuilder sb = new StringBuilder();
+        StringBuilder sb = new StringBuilder(128);
         sb.append("ALTER TABLE ");
         sb.append(table);
-        if (columns != null && !columns.isEmpty()) {
+        if (false == noColumnsGiven) {
             sb.append(columns.stream().map(c -> c.getName() + " " + c.getDefinition()).collect(Collectors.joining(", MODIFY COLUMN ", " MODIFY COLUMN ", ",")));
         }
         if (Strings.isNotEmpty(tableCharset)) {
