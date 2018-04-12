@@ -62,7 +62,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
@@ -334,25 +333,45 @@ public abstract class AbstractConvertUtf8ToUtf8mb4Task extends UpdateTaskAdapter
      * @return The <code>"ALTER TABLE..."</code> statement or <code>null</code> if nothing needs to be changed
      */
     protected String alterTable(String table, List<Column> columns, String tableCharset, String tableCollation) {
-        boolean noColumnsGiven = columns == null || columns.isEmpty();
-        if (noColumnsGiven && Strings.isEmpty(tableCollation) && Strings.isEmpty(tableCharset)) {
+        boolean columnsGiven = columns != null && !columns.isEmpty();
+        boolean tableCharsetGiven = Strings.isNotEmpty(tableCharset);
+        boolean tableCollationGiven = Strings.isNotEmpty(tableCollation);
+        if (false == columnsGiven && false == tableCharsetGiven && false == tableCollationGiven) {
+            // Nothing to do
             return null;
         }
 
         StringBuilder sb = new StringBuilder(128);
         sb.append("ALTER TABLE ");
         sb.append(table);
-        if (false == noColumnsGiven) {
-            sb.append(columns.stream().map(c -> c.getName() + " " + c.getDefinition()).collect(Collectors.joining(", MODIFY COLUMN ", " MODIFY COLUMN ", ",")));
+
+        if (columnsGiven) {
+            // Append "MODIFY COLUMN" statements
+            boolean first = true;
+            for (Column column : columns) {
+                if (first) {
+                    first = false;
+                } else {
+                    sb.append(',');
+                }
+                sb.append(" MODIFY COLUMN ").append(column.getName()).append(' ').append(column.getDefinition());
+            }
         }
-        if (Strings.isNotEmpty(tableCharset)) {
-            sb.append(" DEFAULT CHARACTER SET=");
-            sb.append(tableCharset);
+        if (tableCharsetGiven || tableCollationGiven) {
+            // Append modification of default charset/collation
+            if (columnsGiven) {
+                sb.append(',');
+            }
+            if (tableCharsetGiven) {
+                sb.append(" DEFAULT CHARACTER SET=");
+                sb.append(tableCharset);
+            }
+            if (tableCollationGiven) {
+                sb.append(" COLLATE=");
+                sb.append(tableCollation);
+            }
         }
-        if (Strings.isNotEmpty(tableCollation)) {
-            sb.append(" COLLATE=");
-            sb.append(tableCollation);
-        }
+
         return sb.toString();
     }
 
