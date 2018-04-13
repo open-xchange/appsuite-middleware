@@ -49,8 +49,6 @@
 
 package com.openexchange.ajax.login;
 
-import java.util.Set;
-import com.openexchange.capabilities.Capability;
 import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.configuration.CookieHashSource;
 import com.openexchange.exception.OXException;
@@ -118,14 +116,12 @@ public final class LoginConfiguration {
      * @return <code>true</code> if auto-login is enabled; otherwise <code>false</code>
      */
     public boolean isSessiondAutoLogin() {
-        String hostname = LogProperties.getHostName();
-        if (hostname != null) {
-            return isSessiondAutoLogin(hostname);
+        String hostName = LogProperties.getHostName();
+        if (hostName != null) {
+            return isSessiondAutoLogin0(hostName, null);
         }
         return sessiondAutoLogin;
     }
-
-    private static final Capability CAPABILITY_AUTOLOGIN = new Capability("autologin");
 
     /**
      * Checks if auto-login is enabled for given host name
@@ -145,32 +141,28 @@ public final class LoginConfiguration {
      * @return <code>true</code> if auto-login is enabled; otherwise <code>false</code>
      */
     public boolean isSessiondAutoLogin(String hostName, Session optSession) {
-        try {
-            if (null != hostName) {
-                LogProperties.put(LogProperties.Name.HOSTNAME, hostName);
-            }
+        if (null == hostName) {
+            return sessiondAutoLogin;
+        }
 
+        LogProperties.put(LogProperties.Name.HOSTNAME, hostName);
+        return isSessiondAutoLogin0(hostName, optSession);
+    }
+
+    private static final String CAPABILITY_AUTOLOGIN = "autologin";
+
+    private boolean isSessiondAutoLogin0(String hostName, Session optSession) {
+        try {
             CapabilityService capabilityService = ServerServiceRegistry.getInstance().getService(CapabilityService.class);
             if (null == capabilityService) {
                 LOGGER.warn("Missing capability service. Unable to reliably check auto-login capability for host {}. Using default '{}' as fall-back for auto-login (as configured through \"{}\" property", hostName, sessiondAutoLogin, ConfigurationProperty.SESSIOND_AUTOLOGIN.getPropertyName());
-                return sessiondAutoLogin;
-            }
-
-            Set<Capability> capabilities;
-            {
+            } else {
                 Session ses = null == optSession ? ThreadLocalSessionHolder.getInstance().getSessionObject() : optSession;
                 if (null == ses) {
-                    capabilities = capabilityService.getCapabilities(getUserId(), getContextId(), true, true).asSet();
-                } else {
-                    capabilities = capabilityService.getCapabilities(ses, true).asSet();
+                    return capabilityService.getCapabilities(getUserId(), getContextId(), false, true).contains(CAPABILITY_AUTOLOGIN);
                 }
+                return capabilityService.getCapabilities(ses).contains(CAPABILITY_AUTOLOGIN);
             }
-
-            if (null != capabilities) {
-                return capabilities.contains(CAPABILITY_AUTOLOGIN);
-            }
-
-            LOGGER.warn("Retrieved server configuration for host {} misses the capabilities set required for checking auto-login capability. Using default '{}' as fall-back for auto-login (as configured through \"{}\" property", hostName, sessiondAutoLogin, ConfigurationProperty.SESSIOND_AUTOLOGIN.getPropertyName());
         } catch (OXException e) {
             // fallback to default
             LOGGER.warn("Failed to retrieve server configuration for host {}. Using default '{}' as fall-back for auto-login (as configured through \"{}\" property", hostName, sessiondAutoLogin, ConfigurationProperty.SESSIOND_AUTOLOGIN.getPropertyName(), e);
