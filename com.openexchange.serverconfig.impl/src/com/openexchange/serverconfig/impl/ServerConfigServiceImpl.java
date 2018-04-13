@@ -81,6 +81,7 @@ import com.openexchange.serverconfig.ServerConfig;
 import com.openexchange.serverconfig.ServerConfigService;
 import com.openexchange.serverconfig.ServerConfigServicesLookup;
 import com.openexchange.session.Session;
+import com.openexchange.tools.session.SessionHolder;
 
 
 /**
@@ -281,7 +282,18 @@ public class ServerConfigServiceImpl implements ServerConfigService {
 
     @Override
     public ServerConfig getServerConfig(String hostName, int userID, int contextID) throws OXException {
-        return createNewServerConfig0(hostName, userID, contextID, null);
+        Session session = null;
+        {
+            SessionHolder sessionHolder = serviceLookup.getOptionalService(SessionHolder.class);
+            if (null != sessionHolder) {
+                session = sessionHolder.getSessionObject();
+                if (null != session && (session.getContextId() != contextID || session.getUserId() != userID)) {
+                    session = null;
+                }
+            }
+        }
+
+        return createNewServerConfig0(hostName, userID, contextID, session);
     }
 
     @Override

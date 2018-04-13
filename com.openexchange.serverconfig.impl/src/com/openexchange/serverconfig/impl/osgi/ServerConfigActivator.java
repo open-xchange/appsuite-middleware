@@ -71,6 +71,7 @@ import com.openexchange.serverconfig.impl.values.Hosts;
 import com.openexchange.serverconfig.impl.values.Languages;
 import com.openexchange.serverconfig.impl.values.Prefix;
 import com.openexchange.serverconfig.impl.values.ServerVersion;
+import com.openexchange.tools.session.SessionHolder;
 
 /**
  * {@link ServerConfigActivator}
@@ -108,6 +109,7 @@ public class ServerConfigActivator extends HousekeepingActivator {
         );
         rememberTracker(configFilterTracker);
         trackService(DispatcherPrefixService.class);
+        trackService(SessionHolder.class);
         openTrackers();
 
         ServerConfigServicesLookup serverConfigServicesLookup = new ServerConfigServicesLookup() {

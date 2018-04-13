@@ -1,3 +1,9 @@
+open-xchange-websockets-grizzly (7.8.4-27) stable; urgency=medium
+
+  * Build for patch 2018-04-12 (4674)
+
+ -- Thorben Betten <thorben.betten@open-xchange.com>  Thu, 12 Apr 2018 22:42:05 +0200
+
 open-xchange-websockets-grizzly (7.8.4-26) stable; urgency=medium
 
   * Build for patch 2018-04-03 (4642)
