@@ -110,7 +110,8 @@ public class ICalEventImportExportTest extends AbstractImportExportTest {
 
     @Test
     public void testSingleEventImport() throws Exception {
-        List<EventData> eventData = getEventData(ICalImportExportManager.SINGLE_IMPORT_ICS);
+
+        List<EventData> eventData = parseEventData(getImportResponse(ICalImportExportManager.SINGLE_IMPORT_ICS));
         assertEquals(1, eventData.size());
         assertEquals(ICalImportExportManager.SINGLE_IMPORT_ICS_SUMMARY, eventData.get(0).getSummary());
         assertEquals(ICalImportExportManager.SINGLE_IMPORT_ICS_UID, eventData.get(0).getUid());
@@ -118,7 +119,7 @@ public class ICalEventImportExportTest extends AbstractImportExportTest {
 
     @Test
     public void testSeriesEventImport() throws Exception {
-        List<EventData> eventData = getEventData(ICalImportExportManager.SERIES_IMPORT_ICS);
+        List<EventData> eventData = parseEventData(getImportResponse(ICalImportExportManager.SERIES_IMPORT_ICS));
         assertEquals(1, eventData.size());
         assertEquals(ICalImportExportManager.SERIES_IMPORT_ICS_SUMMARY, eventData.get(0).getSummary());
         assertEquals(ICalImportExportManager.SERIES_IMPORT_ICS_UID, eventData.get(0).getUid());
@@ -126,7 +127,7 @@ public class ICalEventImportExportTest extends AbstractImportExportTest {
 
     @Test
     public void testICalEventRecurrenceImport() throws Exception {
-        List<EventData> eventData = getEventData(ICalImportExportManager.RECURRENCE_IMPORT_ICS);
+        List<EventData> eventData = parseEventData(getImportResponse(ICalImportExportManager.RECURRENCE_IMPORT_ICS));
         assertFalse(eventData.isEmpty());
         for (EventData event : eventData) {
             assertEquals(ICalImportExportManager.RECURRENCE_IMPORT_ICS_SUMMARY, event.getSummary());
@@ -139,14 +140,14 @@ public class ICalEventImportExportTest extends AbstractImportExportTest {
 
     @Test
     public void testICalEventImportUIDHandling() throws Exception {
-        getEventData(ICalImportExportManager.RECURRENCE_IMPORT_ICS);
+        parseEventData(getImportResponse(ICalImportExportManager.RECURRENCE_IMPORT_ICS));
         String response = importICalFile(ICalImportExportManager.RECURRENCE_IMPORT_ICS);
         assertTrue(response.contains("The appointment could not be created due to another conflicting appointment with the same unique identifier"));
     }
 
     @Test
     public void testICalImportExportRoundTrip() throws Exception {
-        List<EventData> eventData = getEventData(ICalImportExportManager.SERIES_IMPORT_ICS);
+        List<EventData> eventData = parseEventData(getImportResponse(ICalImportExportManager.SERIES_IMPORT_ICS));
         assertEquals(1, eventData.size());
         assertEquals(ICalImportExportManager.SERIES_IMPORT_ICS_SUMMARY, eventData.get(0).getSummary());
         assertEquals(ICalImportExportManager.SERIES_IMPORT_ICS_UID, eventData.get(0).getUid());
