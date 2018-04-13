@@ -76,7 +76,9 @@ public final class EmptyTIntSet implements TIntSet, Serializable {
         return INSTANCE;
     }
 
-    private final EmptyTIntIterator emptyIter;
+    // -------------------------------------------------------------------------------
+
+    private final transient EmptyTIntIterator emptyIter;
 
     /**
      * Initializes a new {@link EmptyTIntSet}.
