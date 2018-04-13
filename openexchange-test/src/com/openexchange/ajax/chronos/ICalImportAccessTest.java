@@ -49,66 +49,65 @@
 
 package com.openexchange.ajax.chronos;
 
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-import java.io.File;
-import java.util.List;
+import java.rmi.Naming;
+import org.junit.Test;
+import com.openexchange.admin.rmi.OXUserInterface;
+import com.openexchange.admin.rmi.dataobjects.Context;
+import com.openexchange.admin.rmi.dataobjects.Credentials;
+import com.openexchange.admin.rmi.dataobjects.UserModuleAccess;
 import com.openexchange.ajax.chronos.manager.ICalImportExportManager;
-import com.openexchange.configuration.asset.Asset;
-import com.openexchange.configuration.asset.AssetType;
-import com.openexchange.testing.httpclient.models.EventData;
-import com.openexchange.testing.httpclient.models.EventId;
-import com.openexchange.testing.httpclient.models.InfoItemExport;
-import com.openexchange.testing.httpclient.modules.ExportApi;
-import com.openexchange.testing.httpclient.modules.ImportApi;
+import com.openexchange.configuration.AJAXConfig;
+import com.openexchange.configuration.AJAXConfig.Property;
 
 /**
- * {@link AbstractImportExportTest}
+ * {@link ICalImportAccessTest}
  *
  * @author <a href="mailto:Jan-Oliver.Huhn@open-xchange.com">Jan-Oliver Huhn</a>
  * @since v7.10.0
  */
-public class AbstractImportExportTest extends AbstractChronosTest {
+public class ICalImportAccessTest extends AbstractImportExportTest {
 
-    protected ICalImportExportManager importExportManager;
-
-    protected ImportApi importApi;
-    protected ExportApi exportApi;
+    private com.openexchange.admin.rmi.dataobjects.User user;
+    private Credentials credentials;
+    private OXUserInterface iface;
+    private Context ctx;
 
     @Override
     public void setUp() throws Exception {
         super.setUp();
-        importApi = new ImportApi(getApiClient());
-        exportApi = new ExportApi(getApiClient());
-        importExportManager = new ICalImportExportManager(exportApi, importApi);
+        this.user = new com.openexchange.admin.rmi.dataobjects.User(getApiClient().getUserId().intValue());
+        this.credentials = new Credentials(admin.getUser(), admin.getPassword());
+        this.iface = (OXUserInterface) Naming.lookup("rmi://" + AJAXConfig.getProperty(Property.RMI_HOST) + ":1099/" + OXUserInterface.RMI_NAME);
+        this.ctx = new Context();
+        this.ctx.setId(Integer.valueOf(defaultUserApi.getUser().getContext()));
+        setModuleAccess(false);
     }
 
-    protected String getImportResponse(String fileName) throws Exception {
-        return importICalFile(fileName);
+    @Override
+    public void tearDown() throws Exception {
+        super.tearDown();
+        setModuleAccess(true);
     }
 
-    protected List<EventData> parseEventData(String response) throws Exception {
-        List<EventId> eventIds = importExportManager.parseImportJSONResponseToEventIds(response);
-        eventManager.rememberEventIds(eventIds);
-        return eventManager.listEvents(eventIds);
+    @Test
+    public void testImportCalendarAccess() throws Exception {
+        String errorResponse = getImportResponse(ICalImportExportManager.SINGLE_IMPORT_ICS);
+        assertNotNull(errorResponse);
+        assertTrue(errorResponse.contains("error\":\"You do not have appropriate permissions to view the folder.\""));
+        assertTrue(errorResponse.contains("categories\":\"PERMISSION_DENIED"));
     }
 
-    protected String importICalFile(String fileName) throws Exception {
-        Asset asset = assetManager.getAsset(AssetType.ics, fileName);
-        return importExportManager.importICalFile(defaultUserApi.getSession(), defaultFolderId, new File(asset.getAbsolutePath()), true, false);
+    private void setModuleAccess(boolean hasAccess) throws Exception {
+        UserModuleAccess access = iface.getModuleAccess(ctx, user, credentials);
+        access.setTasks(hasAccess);
+        access.setCalendar(hasAccess);
+        changeModuleAccess(access);
     }
 
-    protected void assertEventData(List<EventData> eventData, String iCalExport) {
-        for (EventData event : eventData) {
-            assertTrue(iCalExport.contains(event.getUid()));
-            assertTrue(iCalExport.contains(event.getSummary()));
-        }
-    }
-
-    protected void addInfoItemExport(List<InfoItemExport> itemList, String folderId, String objectId) {
-        InfoItemExport item = new InfoItemExport();
-        item.folderId(folderId);
-        item.id(objectId);
-        itemList.add(item);
+    private void changeModuleAccess(UserModuleAccess access) throws Exception {
+        iface.changeModuleAccess(ctx, user, access, credentials);
     }
 
 }
