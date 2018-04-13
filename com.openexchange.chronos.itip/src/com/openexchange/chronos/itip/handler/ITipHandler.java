@@ -121,11 +121,9 @@ public class ITipHandler implements CalendarHandler {
 
     @Override
     public void handle(CalendarEvent event) {
-        boolean suppress = event.getCalendarParameters() != null && event.getCalendarParameters().contains(CalendarParameters.PARAMETER_SUPPRESS_ITIP) && event.getCalendarParameters().get(CalendarParameters.PARAMETER_SUPPRESS_ITIP, Boolean.class).booleanValue();
-        if (suppress) {
-            return;
-        }
-        if (event.getAccountId() != CalendarAccount.DEFAULT_ACCOUNT.getAccountId()) {
+        if (event == null ||
+            event.getCalendarParameters() != null && event.getCalendarParameters().contains(CalendarParameters.PARAMETER_SUPPRESS_ITIP) && event.getCalendarParameters().get(CalendarParameters.PARAMETER_SUPPRESS_ITIP, Boolean.class).booleanValue() ||
+            event.getAccountId() != CalendarAccount.DEFAULT_ACCOUNT.getAccountId()) {
             return;
         }
 
