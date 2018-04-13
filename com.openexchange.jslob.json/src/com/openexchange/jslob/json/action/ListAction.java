@@ -62,6 +62,7 @@ import com.openexchange.jslob.JSlobExceptionCodes;
 import com.openexchange.jslob.JSlobService;
 import com.openexchange.jslob.json.JSlobRequest;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
 /**
  * {@link ListAction}
@@ -90,6 +91,10 @@ public final class ListAction extends JSlobAction {
                 serviceId = DEFAULT_SERVICE_ID;
             }
             final JSlobService jslobService = getJSlobService(serviceId);
+            Object obj = jslobRequest.getRequestData().requireData();
+            if (!(obj instanceof JSONArray)) {
+                throw AjaxExceptionCodes.INVALID_JSON_REQUEST_BODY.create();
+            }
             final JSONArray ids = (JSONArray) jslobRequest.getRequestData().requireData();
             final int length = ids.length();
             // Check length

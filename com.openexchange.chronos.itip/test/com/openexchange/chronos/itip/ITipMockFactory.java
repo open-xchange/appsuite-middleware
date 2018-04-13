@@ -47,12 +47,14 @@
  *
  */
 
-package com.openexchange.chronos;
+package com.openexchange.chronos.itip;
 
 import java.util.Collections;
 import org.mockito.Matchers;
 import org.mockito.Mockito;
 import org.powermock.api.support.membermodification.MemberModifier;
+import com.openexchange.chronos.Event;
+import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.common.mapping.EventMapper;
 import com.openexchange.chronos.itip.ITipIntegrationUtility;
 import com.openexchange.chronos.itip.ITipMessage;

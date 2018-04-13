@@ -49,7 +49,6 @@
 
 package com.openexchange.groupware.upload.quotachecker;
 
-import org.apache.commons.lang.Validate;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.configuration.ServerConfig.Property;
 import com.openexchange.exception.OXException;
@@ -84,9 +83,7 @@ public final class MailUploadQuotaChecker extends UploadQuotaChecker {
     public MailUploadQuotaChecker(final UserSettingMail settings) {
         super();
 
-        Validate.notNull(settings, "UserSettingMail cannot be null!");
-
-        long quota = settings.getUploadQuota();
+        long quota = null == settings ? -1 : settings.getUploadQuota();
         if (quota >= 0) {
             uploadQuota = 0 == quota ? -1 : quota;
         } else {
@@ -96,12 +93,12 @@ public final class MailUploadQuotaChecker extends UploadQuotaChecker {
                 globalQuota = ServerConfig.getLong(Property.MAX_UPLOAD_SIZE);
             } catch (final OXException e) {
                 LOG.error("", e);
-                globalQuota = 0L;
+                globalQuota = Long.valueOf(0);
             }
-            uploadQuota = globalQuota;
+            uploadQuota = globalQuota.longValue();
         }
 
-        long quotaPerFile = settings.getUploadQuotaPerFile();
+        long quotaPerFile = null == settings ? -1 : settings.getUploadQuotaPerFile();
         uploadQuotaPerFile = quotaPerFile > 0 ? quotaPerFile : -1;
     }
 

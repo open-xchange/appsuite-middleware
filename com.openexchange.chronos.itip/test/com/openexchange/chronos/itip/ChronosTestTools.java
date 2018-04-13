@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.chronos;
+package com.openexchange.chronos.itip;
 
 import java.util.Collections;
 import java.util.LinkedList;
@@ -57,6 +57,16 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import org.dmfs.rfc5545.DateTime;
+import com.openexchange.chronos.Attendee;
+import com.openexchange.chronos.AttendeeField;
+import com.openexchange.chronos.CalendarUser;
+import com.openexchange.chronos.CalendarUserType;
+import com.openexchange.chronos.Event;
+import com.openexchange.chronos.EventField;
+import com.openexchange.chronos.Organizer;
+import com.openexchange.chronos.ParticipantRole;
+import com.openexchange.chronos.ParticipationStatus;
+import com.openexchange.chronos.ResourceId;
 import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.service.CalendarConfig;
 import com.openexchange.chronos.service.CalendarParameters;

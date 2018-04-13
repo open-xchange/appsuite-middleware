@@ -56,6 +56,7 @@ import com.openexchange.chronos.itip.analyzers.ReplyITipAnalyzerTest;
 import com.openexchange.chronos.itip.analyzers.UpdateITipAnalyzerTest;
 import com.openexchange.chronos.itip.analyzers.UpdateITipAnalyzerTest2;
 import com.openexchange.chronos.itip.generators.DefaultNotificationParticipantResolverTest;
+import com.openexchange.chronos.itip.handler.ITipHandlerTest;
 
 /**
  * 
@@ -69,10 +70,8 @@ import com.openexchange.chronos.itip.generators.DefaultNotificationParticipantRe
     DefaultNotificationParticipantResolverTest.class,
     UpdateITipAnalyzerTest.class,
     UpdateITipAnalyzerTest2.class,
-    ReplyITipAnalyzerTest.class
+    ReplyITipAnalyzerTest.class,
+    ITipHandlerTest.class,
 })
 public class UnitTests {
-
-    public UnitTests() {
-    }
 }

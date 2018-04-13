@@ -179,10 +179,8 @@ public final class EventFactory {
      */
     public static EventData createSingleTwoHourEvent(int userId, String summary) {
         Calendar start = Calendar.getInstance();
-        start.setTimeInMillis(System.currentTimeMillis());
-
         Calendar end = Calendar.getInstance();
-        end.setTimeInMillis(System.currentTimeMillis() + TimeUnit.HOURS.toMillis(2));
+        end.setTimeInMillis(end.getTimeInMillis() + TimeUnit.HOURS.toMillis(2));
 
         return createSingleEvent(userId, summary, DateTimeUtil.getDateTime(start), DateTimeUtil.getDateTime(end));
     }
