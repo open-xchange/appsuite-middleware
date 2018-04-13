@@ -208,6 +208,7 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
             /*
              * update for new change exception; prepare & insert a plain exception first, based on the original data from the master
              */
+            Map<Integer, List<Alarm>> alarms = storage.getAlarmStorage().loadAlarms(originalSeriesMaster);
             Event newExceptionEvent = prepareException(originalSeriesMaster, recurrenceId);
             Check.quotaNotExceeded(storage, session);
             storage.getEventStorage().insertEvent(newExceptionEvent);
@@ -231,7 +232,6 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
             Event updatedMasterEvent = loadEventData(originalSeriesMaster.getId());
             resultTracker.trackUpdate(originalSeriesMaster, updatedMasterEvent);
 
-            Map<Integer, List<Alarm>> alarms = storage.getAlarmStorage().loadAlarms(updatedMasterEvent);
             storage.getAlarmTriggerStorage().deleteTriggers(originalSeriesMaster.getId());
             storage.getAlarmTriggerStorage().insertTriggers(updatedMasterEvent, alarms);
         }
