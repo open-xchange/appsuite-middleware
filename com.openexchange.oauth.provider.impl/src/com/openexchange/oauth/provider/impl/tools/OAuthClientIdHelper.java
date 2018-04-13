@@ -66,6 +66,8 @@ import com.openexchange.oauth.provider.exceptions.OAuthProviderExceptionCodes;
 public class OAuthClientIdHelper {
 
     private static final OAuthClientIdHelper INSTANCE = new OAuthClientIdHelper();
+    
+    private static final String EMPTY_STRING = new String();
 
     /**
      * Gets the {@link OAuthClientIdHelper instance}.
@@ -157,7 +159,7 @@ public class OAuthClientIdHelper {
         if (firstUuid.matches(uuidRegex) && secondUuid.matches(uuidRegex)) {
             return groupId;
         }
-        return new String();
+        return EMPTY_STRING;
     }
 
     /**

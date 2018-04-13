@@ -95,6 +95,6 @@ Package: open-xchange-linkedin
 Architecture: all
 Section: oldlibs
 Priority: extra
-Description: Emtpy transitional package.
+Description: Empty transitional package.
  This package can be removed as the integration of Open-Xchange with LinkedIn
  was discontinued.

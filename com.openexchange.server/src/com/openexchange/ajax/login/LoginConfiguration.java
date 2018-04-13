@@ -51,14 +51,15 @@ package com.openexchange.ajax.login;
 
 import java.util.Set;
 import com.openexchange.capabilities.Capability;
+import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.configuration.CookieHashSource;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.util.Tools;
 import com.openexchange.log.LogProperties;
 import com.openexchange.login.ConfigurationProperty;
 import com.openexchange.server.services.ServerServiceRegistry;
-import com.openexchange.serverconfig.ServerConfig;
-import com.openexchange.serverconfig.ServerConfigService;
+import com.openexchange.session.Session;
+import com.openexchange.sessiond.impl.ThreadLocalSessionHolder;
 
 /**
  * Object to store the configuration parameters for the different login process mechanisms.
@@ -133,15 +134,38 @@ public final class LoginConfiguration {
      * @return <code>true</code> if auto-login is enabled; otherwise <code>false</code>
      */
     public boolean isSessiondAutoLogin(String hostName) {
+        return isSessiondAutoLogin(hostName, null);
+    }
+
+    /**
+     * Checks if auto-login is enabled for given host name
+     *
+     * @param hostName The host name to check for
+     * @param optSession The optional session to use
+     * @return <code>true</code> if auto-login is enabled; otherwise <code>false</code>
+     */
+    public boolean isSessiondAutoLogin(String hostName, Session optSession) {
         try {
-            ServerConfigService configService = ServerServiceRegistry.getInstance().getService(ServerConfigService.class);
-            if (null == configService) {
-                LOGGER.warn("Missing server configuration service. Unable to reliably check auto-login capability for host {}. Using default '{}' as fall-back for auto-login (as configured through \"{}\" property", hostName, sessiondAutoLogin, ConfigurationProperty.SESSIOND_AUTOLOGIN.getPropertyName());
+            if (null != hostName) {
+                LogProperties.put(LogProperties.Name.HOSTNAME, hostName);
+            }
+
+            CapabilityService capabilityService = ServerServiceRegistry.getInstance().getService(CapabilityService.class);
+            if (null == capabilityService) {
+                LOGGER.warn("Missing capability service. Unable to reliably check auto-login capability for host {}. Using default '{}' as fall-back for auto-login (as configured through \"{}\" property", hostName, sessiondAutoLogin, ConfigurationProperty.SESSIOND_AUTOLOGIN.getPropertyName());
                 return sessiondAutoLogin;
             }
 
-            ServerConfig config = configService.getServerConfig(hostName, getUserId(), getContextId());
-            Set<Capability> capabilities = config.getCapabilities();
+            Set<Capability> capabilities;
+            {
+                Session ses = null == optSession ? ThreadLocalSessionHolder.getInstance().getSessionObject() : optSession;
+                if (null == ses) {
+                    capabilities = capabilityService.getCapabilities(getUserId(), getContextId(), true, true).asSet();
+                } else {
+                    capabilities = capabilityService.getCapabilities(ses, true).asSet();
+                }
+            }
+
             if (null != capabilities) {
                 return capabilities.contains(CAPABILITY_AUTOLOGIN);
             }

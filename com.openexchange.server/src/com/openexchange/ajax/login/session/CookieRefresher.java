@@ -83,7 +83,7 @@ public class CookieRefresher implements SessionServletInterceptor {
 
     @Override
     public void intercept(Session session, HttpServletRequest req, HttpServletResponse resp) throws OXException {
-        boolean autoLogin = conf.isSessiondAutoLogin(req.getServerName());
+        boolean autoLogin = conf.isSessiondAutoLogin(req.getServerName(), session);
         if (!autoLogin && conf.getCookieExpiry() >= 0) {
             return;
         }
@@ -147,7 +147,7 @@ public class CookieRefresher implements SessionServletInterceptor {
                 }
 
                 session.setParameter(PARAM_COOKIE_REFRESH_TIMESTAMP, createNewStamp());
-                if (conf.isSessiondAutoLogin(host)) {
+                if (conf.isSessiondAutoLogin(host, session)) {
                     session.setParameter(PARAM_REFRESH_SESSION_COOKIE_FLAG, Boolean.TRUE);
                 }
                 return true;

@@ -77,7 +77,6 @@
                 passwordMech VARCHAR(32) NOT NULL,
                 PRIMARY KEY(`guest_id`, `cid`,`uid`),
                 FOREIGN KEY(`guest_id`) REFERENCES guest (`id`),
-                INDEX(guest_id)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
         </sql>
         <rollback>

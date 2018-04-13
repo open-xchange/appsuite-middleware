@@ -274,8 +274,10 @@ public class AllPerformer extends AbstractQueryPerformer {
             searchTerm = new CompositeSearchTerm(CompositeOperation.AND)
                 // arithmetic comparison with 'NULL' will also return false
                 .addSearchTerm(searchTerm)
-                .addSearchTerm(getSearchTerm(AttendeeField.FOLDER_ID, SingleOperation.LESS_OR_EQUAL, I(0)))
                 .addSearchTerm(getSearchTerm(EventField.FOLDER_ID, SingleOperation.GREATER_THAN, I(0)))
+                .addSearchTerm(new CompositeSearchTerm(CompositeOperation.OR)
+                    .addSearchTerm(getSearchTerm(AttendeeField.FOLDER_ID, SingleOperation.ISNULL))
+                    .addSearchTerm(getSearchTerm(AttendeeField.FOLDER_ID, SingleOperation.LESS_OR_EQUAL, I(0))))
             ;
         } else if (false == includePublic && includePrivate) {
             /*
