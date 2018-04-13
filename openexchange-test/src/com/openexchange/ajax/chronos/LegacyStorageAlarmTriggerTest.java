@@ -88,23 +88,25 @@ public class LegacyStorageAlarmTriggerTest extends AbstractAlarmTriggerTest {
     public void testTimeShiftOfEventSeries() throws Exception {
         // Create an event series with a alarm
         EventData eventSeries = EventFactory.createSeriesEvent(defaultUserApi.getCalUser(), "testTimeShiftOfEventSeries", 4);
-        eventSeries.setAlarms(Collections.singletonList(AlarmFactory.createDisplayAlarm("-PT10M")));
+        eventSeries.setStartDate(DateTimeUtil.incrementDateTimeData(eventSeries.getStartDate(), TimeUnit.DAYS.toMillis(1)));
+        eventSeries.setEndDate(DateTimeUtil.incrementDateTimeData(eventSeries.getEndDate(), TimeUnit.DAYS.toMillis(1)));
+        eventSeries.setAlarms(Collections.singletonList(AlarmFactory.createDisplayAlarm("-PT60M")));
 
         EventData expectedEventData = eventManager.createEvent(eventSeries);
         getAndAssertAlarms(expectedEventData, 1);
 
-        getAndCheckAlarmTrigger(1);
+        AlarmTrigger firstTrigger = getAndCheckAlarmTrigger(1).get(0);
 
         EventData event = getAndAssertAlarms(expectedEventData, 1);
-//        assertNull(getEvent.getAlarms().get(0).getAcknowledged());
 
         // Create an exception by moving the next occurence to a different time slot
-        String recurrence = expectedEventData.getAlarms().get(0).getTrigger().getDateTime();
-        DateTimeData oldTriggerTime = DateTimeUtil.incrementDateTimeData(event.getStartDate(), -TimeUnit.MINUTES.toMillis(10));
+        String recurrence = firstTrigger.getRecurrenceId();
+        DateTimeData oldTriggerTime = DateTimeUtil.incrementDateTimeData(eventSeries.getStartDate(), -TimeUnit.MINUTES.toMillis(60));
         // add shift by one hour
-        event.setStartDate(DateTimeUtil.incrementDateTimeData(event.getStartDate(), TimeUnit.HOURS.toMillis(1)));
-        event.setEndDate(DateTimeUtil.incrementDateTimeData(event.getEndDate(), TimeUnit.HOURS.toMillis(1)));
-        EventData updateOccurenceEvent = eventManager.updateOccurenceEvent(event, recurrence);
+        event.setStartDate(DateTimeUtil.incrementDateTimeData(eventSeries.getStartDate(), TimeUnit.HOURS.toMillis(1)));
+        event.setEndDate(DateTimeUtil.incrementDateTimeData(eventSeries.getEndDate(), TimeUnit.HOURS.toMillis(1)));
+        event.setRecurrenceId(recurrence);
+        eventManager.updateOccurenceEvent(event, recurrence);
 
         AlarmTriggerData triggerData = getAndCheckAlarmTrigger(2);
 
@@ -113,7 +115,7 @@ public class LegacyStorageAlarmTriggerTest extends AbstractAlarmTriggerTest {
 
         for(AlarmTrigger trigger : triggerData) {
             Date parseZuluDateTime = DateTimeUtil.parseZuluDateTime(trigger.getTime());
-            assertTrue(parseZuluDateTime.getTime() == exceptionTriggerTime.getTime() || parseZuluDateTime.getTime() == expectedTriggerTime.getTime());
+            assertTrue("The trigger time is wrong. Expected either " + exceptionTriggerTime + " or " + expectedTriggerTime + " but was " + parseZuluDateTime, parseZuluDateTime.getTime() == exceptionTriggerTime.getTime() || parseZuluDateTime.getTime() == expectedTriggerTime.getTime());
         }
     }
 }
