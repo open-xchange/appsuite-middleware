@@ -83,12 +83,8 @@ public class CookieRefresher implements SessionServletInterceptor {
 
     @Override
     public void intercept(Session session, HttpServletRequest req, HttpServletResponse resp) throws OXException {
-        boolean autoLogin = conf.isSessiondAutoLogin(req.getServerName(), session);
-        if (!autoLogin && conf.getCookieExpiry() >= 0) {
-            return;
-        }
-
-        if (needsCookieRefresh(session, req.getServerName())) {
+        String host = req.getServerName();
+        if (needsCookieRefresh(session, host)) {
             String hash = session.getHash();
 
             // Write secret+public cookie
@@ -96,14 +92,12 @@ public class CookieRefresher implements SessionServletInterceptor {
 
             // Refresh HTTP session, too
             req.getSession();
-        } else if (autoLogin) {
-            if (needsSessionCookieRefresh(session)) {
-                String hash = session.getHash();
+        } else if (needsSessionCookieRefresh(session) && conf.isSessiondAutoLogin(host, session)) {
+            String hash = session.getHash();
 
-                // Check whether to write session cookie as well
-                if (refreshSessionCookie(session.getSessionID(), LoginServlet.SESSION_PREFIX + hash, req)) {
-                    LoginServlet.writeSessionCookie(resp, session, hash, req.isSecure(), req.getServerName());
-                }
+            // Check whether to write session cookie as well
+            if (refreshSessionCookie(session.getSessionID(), LoginServlet.SESSION_PREFIX + hash, req)) {
+                LoginServlet.writeSessionCookie(resp, session, hash, req.isSecure(), req.getServerName());
             }
         }
     }
