@@ -234,6 +234,8 @@ public class UpdateAttendeePerformer extends AbstractUpdatePerformer {
                 Attendee originalExceptionAttendee = Check.attendeeExists(originalExceptionEvent, attendee);
                 updateAttendee(originalExceptionEvent, originalExceptionAttendee, attendee);
             } else {
+
+                Map<Integer, List<Alarm>> alarms = storage.getAlarmStorage().loadAlarms(originalSeriesMaster);
                 /*
                  * update for new change exception; prepare & insert a plain exception first, based on the original data from the master
                  */
@@ -262,7 +264,6 @@ public class UpdateAttendeePerformer extends AbstractUpdatePerformer {
                 Event updatedMasterEvent = loadEventData(originalSeriesMaster.getId());
                 resultTracker.trackUpdate(originalSeriesMaster, updatedMasterEvent);
 
-                Map<Integer, List<Alarm>> alarms = storage.getAlarmStorage().loadAlarms(updatedMasterEvent);
                 storage.getAlarmTriggerStorage().deleteTriggers(originalSeriesMaster.getId());
                 storage.getAlarmTriggerStorage().insertTriggers(updatedMasterEvent, alarms);
             }
