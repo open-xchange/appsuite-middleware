@@ -89,6 +89,11 @@ public class DataAwareRecurrenceId extends DefaultRecurrenceId implements Recurr
     }
 
     @Override
+    public long[] getRecurrenceDates() {
+        return recurrenceData.getRecurrenceDates();
+    }
+
+    @Override
     public int hashCode() {
         return super.hashCode();
     }
