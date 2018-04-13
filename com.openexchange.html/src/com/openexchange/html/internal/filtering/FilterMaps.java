@@ -382,7 +382,7 @@ public final class FilterMaps {
                 + "html.style.width=\"N,auto,\"\n"
                 + "html.style.word-spacing=\"n\"\n"
                 + "html.style.z-index=\"0\"\n"
-                + "html.style.-webkit-box-sizing=\"border-box\"\\n" + "html.style.-moz-box-sizing=\"border-box\"\\n"
+                + "html.style.-webkit-box-sizing=\"border-box\"\\n" + "html.style.-moz-box-sizing=\"border-box\"\n"
                 + "\n"
                 + "\n"
                 + "# CSS combi-map\n"
