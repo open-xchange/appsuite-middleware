@@ -49,6 +49,9 @@
 
 package com.openexchange.filestore.swift;
 
+import static com.openexchange.filestore.utils.PropertyNameBuilder.optIntProperty;
+import static com.openexchange.filestore.utils.PropertyNameBuilder.optProperty;
+import static com.openexchange.filestore.utils.PropertyNameBuilder.requireProperty;
 import static com.openexchange.osgi.Tools.requireService;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -91,6 +94,7 @@ import com.openexchange.filestore.swift.impl.token.Token;
 import com.openexchange.filestore.swift.impl.token.TokenStorage;
 import com.openexchange.filestore.swift.impl.token.TokenStorageImpl;
 import com.openexchange.filestore.utils.DefaultDatabaseAccess;
+import com.openexchange.filestore.utils.PropertyNameBuilder;
 import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
 import com.openexchange.rest.client.httpclient.HttpClients;
@@ -336,21 +340,22 @@ public class SwiftFileStorageFactory implements FileStorageProvider {
      */
     private SwiftConfig initSwiftConfig(String filestoreID) throws OXException {
         ConfigurationService config = services.getService(ConfigurationService.class);
+        PropertyNameBuilder nameBuilder = new PropertyNameBuilder("com.openexchange.filestore.swift.");
 
         // User name
-        String userName = requireProperty(filestoreID, "userName", config);
+        String userName = requireProperty(filestoreID, "userName", nameBuilder, config);
 
         // API type & value
-        AuthInfo.Type authType = AuthInfo.Type.typeFor(requireProperty(filestoreID, "authType", config));
+        AuthInfo.Type authType = AuthInfo.Type.typeFor(requireProperty(filestoreID, "authType", nameBuilder, config));
         if (null == authType) {
             throw ConfigurationExceptionCodes.INVALID_CONFIGURATION.create("Unsupported auth type: " + authType);
         }
-        String authValue = requireProperty(filestoreID, "authValue", config);
+        String authValue = requireProperty(filestoreID, "authValue", nameBuilder, config);
 
         // Config type
         ConfigType configType;
         {
-            String sConfigType = config.getProperty(property(filestoreID, "configType"), ConfigType.MANUAL.getId());
+            String sConfigType = optProperty(filestoreID, "configType", ConfigType.MANUAL.getId(), nameBuilder, config);
             configType = ConfigType.configTypeFor(sConfigType);
             if (null == configType) {
                 throw ConfigurationExceptionCodes.INVALID_CONFIGURATION.create("Invalid value for 'com.openexchange.filestore.swift." + filestoreID + ".configType': " + sConfigType);
@@ -358,16 +363,16 @@ public class SwiftFileStorageFactory implements FileStorageProvider {
         }
 
         // Tenant name, identity URL, and domain
-        String tenantName = optProperty(filestoreID, "tenantName", config);
-        String identityUrl = optProperty(filestoreID, "identityUrl", config);
-        String domain = optProperty(filestoreID, "domain", config);
+        String tenantName = optProperty(filestoreID, "tenantName", null, nameBuilder, config);
+        String identityUrl = optProperty(filestoreID, "identityUrl", null, nameBuilder, config);
+        String domain = optProperty(filestoreID, "domain", null, nameBuilder, config);
 
         // HTTP client configuration
-        int maxConnections = config.getIntProperty(property(filestoreID, "maxConnections"), 100);
-        int maxConnectionsPerHost = config.getIntProperty(property(filestoreID, "maxConnectionsPerHost"), 100);
-        int connectionTimeout = config.getIntProperty(property(filestoreID, "connectionTimeout"), 5000);
-        int socketReadTimeout = config.getIntProperty(property(filestoreID, "socketReadTimeout"), 15000);
-        int heartbeatInterval = config.getIntProperty(property(filestoreID, "heartbeatInterval"), 60000);
+        int maxConnections = optIntProperty(filestoreID, "maxConnections", 100, nameBuilder, config);
+        int maxConnectionsPerHost = optIntProperty(filestoreID, "maxConnectionsPerHost", 100, nameBuilder, config);
+        int connectionTimeout = optIntProperty(filestoreID, "connectionTimeout", 5000, nameBuilder, config);
+        int socketReadTimeout = optIntProperty(filestoreID, "socketReadTimeout", 15000, nameBuilder, config);
+        int heartbeatInterval = optIntProperty(filestoreID, "heartbeatInterval", 60000, nameBuilder, config);
 
         // Create the HTTP client
         CloseableHttpClient httpClient = HttpClients.getHttpClient(ClientConfig.newInstance()
@@ -383,9 +388,9 @@ public class SwiftFileStorageFactory implements FileStorageProvider {
             EndpointPool endpointPool;
             if (ConfigType.MANUAL == configType) {
                 // Manual end-point configuration
-                String protocol = requireProperty(filestoreID, "protocol", config);
-                String path = requireProperty(filestoreID, "path", config);
-                String hosts = requireProperty(filestoreID, "hosts", config);
+                String protocol = requireProperty(filestoreID, "protocol", nameBuilder, config);
+                String path = requireProperty(filestoreID, "path", nameBuilder, config);
+                String hosts = requireProperty(filestoreID, "hosts", nameBuilder, config);
 
                 List<String> urls = new LinkedList<String>();
                 for (String host : Strings.splitAndTrim(hosts, ",")) {
@@ -426,9 +431,9 @@ public class SwiftFileStorageFactory implements FileStorageProvider {
                 }
 
                 // By interface, region and container name
-                String sInterface = requireProperty(filestoreID, "interface", config);
-                String region = requireProperty(filestoreID, "region", config);
-                String containerName = requireProperty(filestoreID, "containerName", config);
+                String sInterface = requireProperty(filestoreID, "interface", nameBuilder, config);
+                String region = requireProperty(filestoreID, "region", nameBuilder, config);
+                String containerName = requireProperty(filestoreID, "containerName", nameBuilder, config);
 
                 try {
                     TokenAndResponse tokenAndResponse = SwiftClient.doAcquireNewToken(userName, authInfo, httpClient);
@@ -470,25 +475,6 @@ public class SwiftFileStorageFactory implements FileStorageProvider {
         } finally {
             Streams.close(httpClient);
         }
-    }
-
-    private static String requireProperty(String filestoreID, String property, ConfigurationService config) throws OXException {
-        String propName = property(filestoreID, property);
-        String value = config.getProperty(propName);
-        if (Strings.isEmpty(value)) {
-            throw ConfigurationExceptionCodes.PROPERTY_MISSING.create(propName);
-        }
-        return value;
-    }
-
-    private static String optProperty(String filestoreID, String property, ConfigurationService config) {
-        String propName = property(filestoreID, property);
-        String value = config.getProperty(propName);
-        return Strings.isEmpty(value) ? null : value;
-    }
-
-    private static String property(String filestoreID, String property) {
-        return new StringBuilder("com.openexchange.filestore.swift.").append(filestoreID).append('.').append(property).toString();
     }
 
     /**

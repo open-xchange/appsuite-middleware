@@ -49,6 +49,9 @@
 
 package com.openexchange.filestore.s3.internal;
 
+import static com.openexchange.filestore.utils.PropertyNameBuilder.optBoolProperty;
+import static com.openexchange.filestore.utils.PropertyNameBuilder.optProperty;
+import static com.openexchange.filestore.utils.PropertyNameBuilder.requireProperty;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -91,6 +94,7 @@ import com.openexchange.configuration.ConfigurationExceptionCodes;
 import com.openexchange.exception.OXException;
 import com.openexchange.filestore.FileStorage;
 import com.openexchange.filestore.FileStorageProvider;
+import com.openexchange.filestore.utils.PropertyNameBuilder;
 import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
 import com.openexchange.server.ServiceExceptionCode;
@@ -161,7 +165,7 @@ public class S3FileStorageFactory implements FileStorageProvider {
                 if (null == configService) {
                     throw ServiceExceptionCode.absentService(ConfigurationService.class);
                 }
-                StringBuilder propNameBuilder = new StringBuilder("com.openexchange.filestore.s3.");
+                PropertyNameBuilder propNameBuilder = new PropertyNameBuilder("com.openexchange.filestore.s3.");
                 AmazonS3ClientInfo clientInfo = initClient(filestoreID, propNameBuilder, configService);
                 AmazonS3Client client = clientInfo.client;
                 String bucketName = initBucket(client, filestoreID, propNameBuilder, configService);
@@ -202,14 +206,6 @@ public class S3FileStorageFactory implements FileStorageProvider {
         return RANKING;
     }
 
-    private static String getPropertyName(StringBuilder builder, String filestoreID, String appendix) {
-        int len = builder.length();
-        builder.append(filestoreID).append('.').append(appendix);
-        String propName = builder.toString();
-        builder.setLength(len);
-        return propName;
-    }
-
     /**
      * Initializes an {@link AmazonS3Client} as configured by the referenced authority part of the supplied URI.
      *
@@ -217,21 +213,21 @@ public class S3FileStorageFactory implements FileStorageProvider {
      * @return The client
      * @throws OXException
      */
-    private AmazonS3ClientInfo initClient(String filestoreID, StringBuilder sb, ConfigurationService configService) throws OXException {
+    private AmazonS3ClientInfo initClient(String filestoreID, PropertyNameBuilder propNameBuilder, ConfigurationService configService) throws OXException {
         /*
          * prepare credentials
          */
-        String accessKey = requireProperty(getPropertyName(sb, filestoreID, "accessKey"), configService);
-        String secretKey = requireProperty(getPropertyName(sb, filestoreID, "secretKey"), configService);
+        String accessKey = requireProperty(filestoreID, "accessKey", propNameBuilder, configService);
+        String secretKey = requireProperty(filestoreID, "secretKey", propNameBuilder, configService);
         BasicAWSCredentials credentials = new BasicAWSCredentials(accessKey, secretKey);
         /*
          * instantiate client
          */
-        ClientConfiguration clientConfiguration = getClientConfiguration(filestoreID, sb, configService);
+        ClientConfiguration clientConfiguration = getClientConfiguration(filestoreID, propNameBuilder, configService);
         AmazonS3Builder<?, ?> clientBuilder;
         boolean encrypted;
         {
-            String encryption = configService.getProperty(getPropertyName(sb, filestoreID, "encryption"), "none");
+            String encryption = optProperty(filestoreID, "encryption", "none", propNameBuilder, configService);
             if (Strings.isEmpty(encryption) || "none".equals(encryption)) {
                 AmazonS3ClientBuilder builder = AmazonS3ClientBuilder.standard()
                     .withCredentials(new AWSStaticCredentialsProvider(credentials))
@@ -242,7 +238,7 @@ public class S3FileStorageFactory implements FileStorageProvider {
                 AmazonS3EncryptionClientBuilder builder = AmazonS3EncryptionClientBuilder.standard()
                     .withCredentials(new AWSStaticCredentialsProvider(credentials))
                     .withClientConfiguration(clientConfiguration)
-                    .withEncryptionMaterials(new StaticEncryptionMaterialsProvider(getEncryptionMaterials(filestoreID, encryption, sb, configService)))
+                    .withEncryptionMaterials(new StaticEncryptionMaterialsProvider(getEncryptionMaterials(filestoreID, encryption, propNameBuilder, configService)))
                     .withCryptoConfiguration(new CryptoConfiguration());
                 clientBuilder = builder;
                 encrypted = true;
@@ -251,23 +247,23 @@ public class S3FileStorageFactory implements FileStorageProvider {
         /*
          * configure client
          */
-        String endpoint = configService.getProperty(getPropertyName(sb, filestoreID, "endpoint"));
+        String endpoint = optProperty(filestoreID, "endpoint", null, propNameBuilder, configService);
         if (false == Strings.isEmpty(endpoint)) {
             clientBuilder.setEndpointConfiguration(new EndpointConfiguration(endpoint, null));
         } else {
-            String region = configService.getProperty(getPropertyName(sb, filestoreID, "region"), "us-west-2");
+            String region = optProperty(filestoreID, "region", "us-west-2", propNameBuilder, configService);
             try {
                 clientBuilder.withRegion(Regions.fromName(region));
             } catch (IllegalArgumentException e) {
                 throw ConfigurationExceptionCodes.INVALID_CONFIGURATION.create(e, region);
             }
         }
-        if (configService.getBoolProperty(getPropertyName(sb, filestoreID, "pathStyleAccess"), true)) {
+        if (optBoolProperty(filestoreID, "pathStyleAccess", true, propNameBuilder, configService)) {
             clientBuilder.setPathStyleAccessEnabled(Boolean.TRUE);
         }
         clientBuilder.withRequestHandlers(ETagCorrectionHandler.getInstance());
         long chunkSize;
-        String chunkSizeValue = configService.getProperty(getPropertyName(sb, filestoreID, "chunkSize"), "5MB");
+        String chunkSizeValue = optProperty(filestoreID, "chunkSize", "5MB", propNameBuilder, configService);
         try {
             chunkSize = ConfigTools.parseBytes(chunkSizeValue);
         } catch (NumberFormatException e) {
@@ -276,30 +272,30 @@ public class S3FileStorageFactory implements FileStorageProvider {
         return new AmazonS3ClientInfo((AmazonS3Client) clientBuilder.build(), encrypted, chunkSize);
     }
 
-    private ClientConfiguration getClientConfiguration(String filestoreID, StringBuilder sb, ConfigurationService configService) {
+    private ClientConfiguration getClientConfiguration(String filestoreID, PropertyNameBuilder propNameBuilder, ConfigurationService configService) {
         ClientConfiguration clientConfiguration = new ClientConfiguration();
-        String signerOverride = configService.getProperty(getPropertyName(sb, filestoreID, "signerOverride"), "S3SignerType");
+        String signerOverride = optProperty(filestoreID, "signerOverride", "S3SignerType", propNameBuilder, configService);
         if (false == Strings.isEmpty(signerOverride)) {
             clientConfiguration.setSignerOverride(signerOverride);
         }
-        String proxyHost = System.getProperty("http.proxyHost");
 
-        if(proxyHost != null) {
+        String proxyHost = System.getProperty("http.proxyHost");
+        if (proxyHost != null) {
             clientConfiguration.setProxyHost(proxyHost);
             String proxyPort = System.getProperty("http.proxyPort");
-            if(proxyPort != null) {
-                clientConfiguration.setProxyPort(Integer.valueOf(proxyPort));
+            if (proxyPort != null) {
+                clientConfiguration.setProxyPort(Integer.parseInt(proxyPort));
             }
 
             String nonProxyHosts = System.getProperty("http.nonProxyHosts");
-            if(Strings.isNotEmpty(nonProxyHosts)) {
+            if (Strings.isNotEmpty(nonProxyHosts)) {
                 clientConfiguration.setNonProxyHosts(nonProxyHosts);
             }
 
             String login = System.getProperty("http.proxyUser");
             String password = System.getProperty("http.proxyPassword");
 
-            if(login != null && password != null) {
+            if (login != null && password != null) {
                 clientConfiguration.setProxyUsername(login);
                 clientConfiguration.setProxyPassword(password);
             }
@@ -307,13 +303,13 @@ public class S3FileStorageFactory implements FileStorageProvider {
         return clientConfiguration;
     }
 
-    private EncryptionMaterials getEncryptionMaterials(String filestoreID, String encryptionMode, StringBuilder sb, ConfigurationService configService) throws OXException {
+    private EncryptionMaterials getEncryptionMaterials(String filestoreID, String encryptionMode, PropertyNameBuilder propNameBuilder, ConfigurationService configService) throws OXException {
         if (!"rsa".equalsIgnoreCase(encryptionMode)) {
             throw ConfigurationExceptionCodes.INVALID_CONFIGURATION.create("Unknown encryption mode: " + encryptionMode);
         }
 
-        String keyStore = requireProperty(getPropertyName(sb, filestoreID, "encryption.rsa.keyStore"), configService);
-        String password = requireProperty(getPropertyName(sb, filestoreID, "encryption.rsa.password"), configService);
+        String keyStore = requireProperty(filestoreID, "encryption.rsa.keyStore", propNameBuilder, configService);
+        String password = requireProperty(filestoreID, "encryption.rsa.password", propNameBuilder, configService);
         KeyPair keyPair = extractKeys(keyStore, password);
         return new EncryptionMaterials(keyPair);
     }
@@ -379,8 +375,8 @@ public class S3FileStorageFactory implements FileStorageProvider {
      * @return The bucket name
      * @throws OXException If initialization fails
      */
-    private String initBucket(AmazonS3Client s3client, String filestoreID, StringBuilder sb, ConfigurationService configService) throws OXException {
-        String bucketName = requireProperty(getPropertyName(sb, filestoreID, "bucketName"), configService);
+    private String initBucket(AmazonS3Client s3client, String filestoreID, PropertyNameBuilder propNameBuilder, ConfigurationService configService) throws OXException {
+        String bucketName = requireProperty(filestoreID, "bucketName", propNameBuilder, configService);
 
         boolean bucketExists = false;
         try {
@@ -394,7 +390,7 @@ public class S3FileStorageFactory implements FileStorageProvider {
         }
 
         if (false == bucketExists) {
-            String region = configService.getProperty(getPropertyName(sb, filestoreID, "region"), "us-west-2");
+            String region = optProperty(filestoreID, "region", "us-west-2", propNameBuilder, configService);
             try {
                 s3client.createBucket(new CreateBucketRequest(bucketName, Region.fromValue(region)));
             } catch (IllegalArgumentException e) {
@@ -415,14 +411,6 @@ public class S3FileStorageFactory implements FileStorageProvider {
         }
 
         return bucketName;
-    }
-
-    private String requireProperty(String propertyName, ConfigurationService configService) throws OXException {
-        String property = configService.getProperty(propertyName);
-        if (Strings.isEmpty(property)) {
-            throw ConfigurationExceptionCodes.PROPERTY_MISSING.create(propertyName);
-        }
-        return property;
     }
 
     /**
