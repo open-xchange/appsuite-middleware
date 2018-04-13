@@ -201,16 +201,18 @@ public final class EmptyTIntSet implements TIntSet, Serializable {
         return true;
     }
 
-    private class EmptyTIntIterator implements TIntIterator, Serializable {
+    private static class EmptyTIntIterator implements TIntIterator, Serializable {
 
         private static final long serialVersionUID = 1L;
 
-        public EmptyTIntIterator() {
+        EmptyTIntIterator() {
             super();
         }
 
         @Override
-        public void remove() {}
+        public void remove() {
+            // Nothing to do
+        }
 
         @Override
         public boolean hasNext() {
