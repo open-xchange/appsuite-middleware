@@ -80,4 +80,11 @@ public interface RecurrenceData {
      */
     long[] getExceptionDates();
 
+    /**
+     * Gets the list of recurrence dates to include in the recurrence set.
+     *
+     * @return The recurrence dates, or <code>null</code> if there are none
+     */
+    long[] getRecurrenceDates();
+
 }

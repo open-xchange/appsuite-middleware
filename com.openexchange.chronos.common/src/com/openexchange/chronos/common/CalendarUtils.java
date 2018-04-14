@@ -167,7 +167,7 @@ public class CalendarUtils {
     private static final Set<EventField> DEFAULT_FIELDS = Collections.unmodifiableSet(EnumSet.copyOf(Arrays.asList(
         EventField.ID, EventField.SERIES_ID, EventField.FOLDER_ID, EventField.RECURRENCE_ID, EventField.TIMESTAMP, EventField.CREATED_BY,
         EventField.CALENDAR_USER, EventField.CLASSIFICATION, EventField.START_DATE, EventField.END_DATE, EventField.RECURRENCE_RULE,
-        EventField.CHANGE_EXCEPTION_DATES, EventField.DELETE_EXCEPTION_DATES, EventField.ORGANIZER
+        EventField.CHANGE_EXCEPTION_DATES, EventField.DELETE_EXCEPTION_DATES, EventField.RECURRENCE_DATES, EventField.ORGANIZER
     )));
 
     /** A collection of identifying meta fields */

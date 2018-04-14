@@ -50,9 +50,12 @@
 package com.openexchange.server.impl;
 
 import java.text.NumberFormat;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Properties;
 import java.util.Stack;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Strings;
 import com.openexchange.server.Initialization;
 import com.openexchange.tools.exceptions.ExceptionUtils;
 import com.openexchange.version.Version;
@@ -186,21 +189,55 @@ public class Starter implements Initialization {
      * Dump server information.
      */
     private static final void dumpServerInfos() {
+        StringBuilder message = new StringBuilder(64);
+        List<Object> args = new ArrayList<>();
+        String sep = Strings.getLineSeparator();
+
         try {
-            final Properties p = System.getProperties();
-            LOG.info("{} {} {}", p.getProperty("os.name"), p.getProperty("os.arch"), p.getProperty("os.version"));
-            LOG.info(p.getProperty("java.runtime.version"));
-            final long totalMemory = Runtime.getRuntime().totalMemory() >> 10;
-            LOG.info("VM Total Memory       : {} KB", NumberFormat.getNumberInstance().format(totalMemory));
-            final long freeMemory = Runtime.getRuntime().freeMemory() >> 10;
-            LOG.info("VM Free Memory        : {} KB", NumberFormat.getNumberInstance().format(freeMemory));
-            final long usedMemory = totalMemory - freeMemory;
-            LOG.info("VM Used Memory        : {} KB", NumberFormat.getNumberInstance().format(usedMemory));
+            Properties p = System.getProperties();
+
+            message.append("Server info{}");
+            args.add(sep);
+
+            message.append("Operating system : {} {} {}{}");
+            args.add(p.getProperty("os.name"));
+            args.add(p.getProperty("os.arch"));
+            args.add(p.getProperty("os.version"));
+            args.add(sep);
+
+
+            message.append("Java             : {}{}");
+            args.add(p.getProperty("java.runtime.version"));
+            args.add(sep);
+
+            message.append("VM Total Memory  : {} KB{}");
+            long totalMemory = Runtime.getRuntime().totalMemory() >> 10;
+            args.add(NumberFormat.getNumberInstance().format(totalMemory));
+            args.add(sep);
+
+            message.append("VM Free Memory   : {} KB{}");
+            long freeMemory = Runtime.getRuntime().freeMemory() >> 10;
+            args.add(NumberFormat.getNumberInstance().format(freeMemory));
+            args.add(sep);
+
+            message.append("VM Used Memory   : {} KB{}");
+            long usedMemory = totalMemory - freeMemory;
+            args.add(NumberFormat.getNumberInstance().format(usedMemory));
+            args.add(sep);
         } catch (final Exception gee) {
             LOG.error("", gee);
         }
-        LOG.info("System version : {} Server [{}] initializing ...", Version.NAME, Version.getInstance().getVersionString());
-        LOG.info("Server Footprint : {}", OXException.getServerId());
+
+        message.append("System version   : {} Server [{}] initializing ...{}");
+        args.add(Version.NAME);
+        args.add(Version.getInstance().getVersionString());
+        args.add(sep);
+
+        message.append("Server Footprint : {}{}");
+        args.add(OXException.getServerId());
+        args.add(sep);
+
+        LOG.info(message.toString(), args.toArray(new Object[args.size()]));
     }
 
     /**

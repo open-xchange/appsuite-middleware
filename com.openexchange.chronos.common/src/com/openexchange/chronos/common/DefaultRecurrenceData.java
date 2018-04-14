@@ -66,6 +66,7 @@ public class DefaultRecurrenceData implements RecurrenceData {
     private final String rrule;
     private final DateTime seriesStart;
     private final long[] exceptionDates;
+    private final long[] recurrenceDates;
 
     /**
      * Initializes a new {@link DefaultRecurrenceData}.
@@ -75,23 +76,41 @@ public class DefaultRecurrenceData implements RecurrenceData {
      * @param exceptionDates The list of exception dates to exclude from the recurrence set, or <code>null</code> if there are none
      */
     public DefaultRecurrenceData(String rrule, DateTime seriesStart, long[] exceptionDates) {
+        this(rrule, seriesStart, exceptionDates, null);
+    }
+
+    /**
+     * Initializes a new {@link DefaultRecurrenceData}.
+     *
+     * @param rrule The underlying recurrence rule
+     * @param seriesStart The series start date, usually the date of the first occurrence
+     * @param exceptionDates The list of exception dates to exclude from the recurrence set, or <code>null</code> if there are none
+     * @param recurrenceDates The list of recurrence dates to include in the recurrence set, or <code>null</code> if there are none
+     */
+    public DefaultRecurrenceData(String rrule, DateTime seriesStart, long[] exceptionDates, long[] recurrenceDates) {
         super();
         this.rrule = rrule;
         this.seriesStart = seriesStart;
         this.exceptionDates = exceptionDates;
+        this.recurrenceDates = recurrenceDates;
     }
 
     /**
      * Initializes a new {@link DefaultRecurrenceData} based on a series master event.
      * <p/>
-     * The exception dates are derived the exception dates of the recurrence master event (as per {@link Event#getDeleteExceptionDates()})
-     * and overridden instances (as per {@link Event#getChangeExceptionDates()}).
+     * The exception dates are derived from the delete exception dates of the recurrence master event (as per
+     * {@link Event#getDeleteExceptionDates()}) and overridden instances (as per {@link Event#getChangeExceptionDates()}). Also, the
+     * recurrence dates are taken over from the recurrence master (as per {@link Event#getRecurrenceDates()}).
      *
      * @param seriesMaster The series master event
      * @param changeExceptionDates The recurrence identifiers of the overridden occurrences, or <code>null</code> if there are none
      */
     public DefaultRecurrenceData(Event seriesMaster) {
-        this(seriesMaster.getRecurrenceRule(), seriesMaster.getStartDate(), CalendarUtils.getExceptionDates(combine(seriesMaster.getDeleteExceptionDates(), seriesMaster.getChangeExceptionDates())));
+        this(seriesMaster.getRecurrenceRule(),
+            seriesMaster.getStartDate(),
+            CalendarUtils.getExceptionDates(combine(seriesMaster.getDeleteExceptionDates(), seriesMaster.getChangeExceptionDates())),
+            CalendarUtils.getExceptionDates(seriesMaster.getRecurrenceDates())
+        );
     }
 
     @Override
@@ -110,10 +129,16 @@ public class DefaultRecurrenceData implements RecurrenceData {
     }
 
     @Override
+    public long[] getRecurrenceDates() {
+        return recurrenceDates;
+    }
+
+    @Override
     public String toString() {
         StringBuilder sb = new StringBuilder("DefaultRecurrenceData [rrule=").append(rrule);
         sb.append(", seriesStart=").append(seriesStart);
         sb.append(", exceptionDates=").append((null == exceptionDates ? "null" : Arrays.toString(exceptionDates)));
+        sb.append(", recurrenceDates=").append((null == exceptionDates ? "null" : Arrays.toString(exceptionDates)));
         sb.append(']');
         return sb.toString();
     }

@@ -52,6 +52,7 @@ package com.openexchange.chronos.impl.performer;
 import static com.openexchange.chronos.common.AlarmUtils.filterRelativeTriggers;
 import static com.openexchange.chronos.common.CalendarUtils.find;
 import static com.openexchange.chronos.common.CalendarUtils.getAlarmIDs;
+import static com.openexchange.chronos.common.CalendarUtils.getExceptionDates;
 import static com.openexchange.chronos.common.CalendarUtils.getFolderView;
 import static com.openexchange.chronos.common.CalendarUtils.isGroupScheduled;
 import static com.openexchange.chronos.common.CalendarUtils.isLastUserAttendee;
@@ -862,8 +863,8 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
      * @return <code>true</code> if the event's recurrence set yields at least one further occurrence, <code>false</code>, otherwise
      */
     protected boolean hasFurtherOccurrences(Event seriesMaster, SortedSet<RecurrenceId> recurrenceIds) throws OXException {
-        long[] exceptionDates = CalendarUtils.getExceptionDates(recurrenceIds);
-        RecurrenceData recurrenceData = new DefaultRecurrenceData(seriesMaster.getRecurrenceRule(), seriesMaster.getStartDate(), exceptionDates);
+        RecurrenceData recurrenceData = new DefaultRecurrenceData(
+            seriesMaster.getRecurrenceRule(), seriesMaster.getStartDate(), getExceptionDates(recurrenceIds), getExceptionDates(seriesMaster.getRecurrenceDates()));
         try {
             return session.getRecurrenceService().iterateRecurrenceIds(recurrenceData).hasNext();
         } catch (OXException e) {

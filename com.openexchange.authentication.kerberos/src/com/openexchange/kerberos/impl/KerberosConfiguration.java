@@ -70,10 +70,13 @@ public final class KerberosConfiguration {
 
     private static final Logger LOG = LoggerFactory.getLogger(KerberosConfiguration.class);
 
-    private static String moduleName;
-    private static String userModuleName;
-
-    public static boolean configure(ConfigurationService config) {
+    /**
+     * Gets the Kerberos configuration.
+     *
+     * @param config The configuration service to use
+     * @return The Kerberos configuration
+     */
+    public static KerberosConfiguration configure(ConfigurationService config) {
         boolean configured = true;
 
         System.setProperty("sun.security.krb5.debug", config.getProperty(DEBUG.getName(), DEBUG.getDefault()));
@@ -96,12 +99,12 @@ public final class KerberosConfiguration {
             configured = false;
         }
 
-//        System.setProperty("javax.security.auth.useSubjectCredsOnly", "false");
+        //        System.setProperty("javax.security.auth.useSubjectCredsOnly", "false");
 
-        moduleName = config.getProperty(MODULE_NAME.getName(), MODULE_NAME.getDefault());
-        userModuleName = config.getProperty(USER_MODULE_NAME.getName(), USER_MODULE_NAME.getDefault());
+        String moduleName = config.getProperty(MODULE_NAME.getName(), MODULE_NAME.getDefault());
+        String userModuleName = config.getProperty(USER_MODULE_NAME.getName(), USER_MODULE_NAME.getDefault());
         configured = configured && readConfiguration(moduleName);
-        return configured;
+        return new KerberosConfiguration(configured, moduleName, userModuleName);
     }
 
     private static boolean readConfiguration(String serviceName) {
@@ -110,15 +113,44 @@ public final class KerberosConfiguration {
         return null != entry;
     }
 
-    public static String getModuleName() {
+    // -------------------------------------------------------------------------------------------------------------
+
+    private final boolean configured;
+    private final String moduleName;
+    private final String userModuleName;
+
+    private KerberosConfiguration(boolean configured, String moduleName, String userModuleName) {
+        super();
+        this.configured = configured;
+        this.moduleName = moduleName;
+        this.userModuleName = userModuleName;
+    }
+
+    /**
+     * Checks if Kerberos is configured
+     *
+     * @return <code>true</code> if configured; otherwise <code>false</code>
+     */
+    public boolean isConfigured() {
+        return configured;
+    }
+
+    /**
+     * Gets the module name
+     *
+     * @return The module name
+     */
+    public String getModuleName() {
         return moduleName;
     }
 
-    public static String getUserModuleName() {
+    /**
+     * Gets the module name of the user
+     *
+     * @return The user's module name
+     */
+    public String getUserModuleName() {
         return userModuleName;
     }
 
-    private KerberosConfiguration() {
-        super();
-    }
 }

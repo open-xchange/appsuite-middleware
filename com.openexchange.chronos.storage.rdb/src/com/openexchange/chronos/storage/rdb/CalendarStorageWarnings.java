@@ -84,6 +84,7 @@ public abstract class CalendarStorageWarnings {
      */
     protected CalendarStorageWarnings() {
         super();
+        this.unsupportedDataThreshold = ProblemSeverity.MINOR;
     }
 
     /**
