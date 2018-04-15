@@ -124,7 +124,7 @@ public abstract class AbstractShareBasedLoginRequestHandler extends AbstractLogi
 
         private final GuestInfo guest;
         private final ShareTarget target;
-        private final LoginConfiguration conf;
+        private final LoginConfiguration loginConfiguration;
         private final HttpServletRequest httpRequest;
         private final ShareTargetPath targetPath;
 
@@ -141,7 +141,7 @@ public abstract class AbstractShareBasedLoginRequestHandler extends AbstractLogi
         ShareLoginClosure(GuestInfo guest, ShareTarget target, ShareTargetPath targetPath, LoginConfiguration conf, HttpServletRequest httpRequest) {
             this.guest = guest;
             this.target = target;
-            this.conf = conf;
+            this.loginConfiguration = conf;
             this.httpRequest = httpRequest;
             this.targetPath = targetPath;
         }
@@ -181,8 +181,8 @@ public abstract class AbstractShareBasedLoginRequestHandler extends AbstractLogi
 
                 // Parse & check the HTTP request
                 String[] additionalsForHash = new String[] { String.valueOf(context.getContextId()), String.valueOf(user.getId()) };
-                String client = LoginTools.parseClient(httpRequest, false, conf.getDefaultClient());
-                request = LoginTools.parseLogin(httpRequest, loginInfo.getUsername(), loginInfo.getPassword(), false, client, conf.isCookieForceHTTPS(), false, additionalsForHash);
+                String client = LoginTools.parseClient(httpRequest, false, loginConfiguration.getDefaultClient());
+                request = LoginTools.parseLogin(httpRequest, loginInfo.getUsername(), loginInfo.getPassword(), false, client, loginConfiguration.isCookieForceHTTPS(), false, additionalsForHash);
                 LoginPerformer.sanityChecks(request);
                 LoginPerformer.checkClient(request, user, context);
 
@@ -249,6 +249,7 @@ public abstract class AbstractShareBasedLoginRequestHandler extends AbstractLogi
                 }
 
                 // Generate the login result
+                final ShareTarget target = this.target;
                 LoginResultImpl retval = new AbstractJsonEnhancingLoginResult() {
                     @Override
                     protected void doEnhanceJson(JSONObject jLoginResult) throws OXException, JSONException {
