@@ -442,7 +442,7 @@ public abstract class AbstractShareBasedLoginRequestHandler extends AbstractLogi
      * Checks the share's authentication mode against performed login
      *
      * @param authenticationMode The authentication mode to check
-     * @return <code>true</code> if authentication mode mmatches; otherwise <code>false</code>
+     * @return <code>true</code> if authentication mode matches; otherwise <code>false</code>
      * @throws OXException If check fails for any reason
      */
     protected abstract boolean checkAuthenticationMode(AuthenticationMode authenticationMode) throws OXException;
