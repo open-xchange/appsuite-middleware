@@ -1,3 +1,9 @@
+open-xchange-authentication-imap (7.8.3-48) stable; urgency=medium
+
+  * Build for patch 2018-04-23 (4669)
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Mon, 16 Apr 2018 16:06:18 +0200
+
 open-xchange-authentication-imap (7.8.3-47) stable; urgency=medium
 
   * Build for patch 2018-03-26 (4618)
