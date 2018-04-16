@@ -54,6 +54,7 @@ import java.sql.Connection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import com.openexchange.database.IncorrectStringSQLException;
 import com.openexchange.exception.OXException;
@@ -235,13 +236,27 @@ public final class Tools {
 
     public static OXException parseIncorrectString(IncorrectStringSQLException e) {
         final Mapper<?> mapper = SQL.mapColumn(e.getColumn());
+
+        return createIncorrectStringException(mapper, e);
+    }
+
+    public static OXException parseIncorrectStringFromExternalParticipants(IncorrectStringSQLException e) {
+        final Mapper<?> mapper = SQL.mapFromExternalParticipantsColumn(e.getColumn());
+
+        Objects.requireNonNull(mapper, "No mapper for column '" + e.getColumn() + "' found. Please check your MySQL configuration for utf8mb4 support (via SHOW VARIABLES) as an insert for mentioned column normally should not fail.");
+        return createIncorrectStringException(mapper, e);
+    }
+
+    private static OXException createIncorrectStringException(Mapper<?> mapper, IncorrectStringSQLException e) {
         final String incorrectString = e.getIncorrectString();
         OXException incorrectStringException = TaskExceptionCode.INCORRECT_STRING.create(e, incorrectString, new LocalizableArgument(mapper.getDisplayName()));
         incorrectStringException.addProblematic(new OXException.IncorrectString() {
+
             @Override
             public int getId() {
                 return mapper.getId();
             }
+
             @Override
             public String getIncorrectString() {
                 return incorrectString;

@@ -359,7 +359,7 @@ public class RdbParticipantStorage extends ParticipantStorage {
         } catch (DataTruncation e) {
             throw parseTruncatedE(con, e, type, participants);
         } catch (IncorrectStringSQLException e) {
-            throw Tools.parseIncorrectString(e);
+            throw Tools.parseIncorrectStringFromExternalParticipants(e);
         } catch (SQLException e) {
             throw TaskExceptionCode.SQL_ERROR.create(e);
         }
