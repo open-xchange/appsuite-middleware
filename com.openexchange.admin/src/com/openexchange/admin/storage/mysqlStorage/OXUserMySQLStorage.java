@@ -49,6 +49,13 @@
 
 package com.openexchange.admin.storage.mysqlStorage;
 
+import static com.openexchange.admin.storage.mysqlStorage.AdminMySQLStorageUtil.leaseConnectionForContext;
+import static com.openexchange.admin.storage.mysqlStorage.AdminMySQLStorageUtil.leaseReadConnectionForConfigDB;
+import static com.openexchange.admin.storage.mysqlStorage.AdminMySQLStorageUtil.leaseWriteContextConnectionWithoutTimeout;
+import static com.openexchange.admin.storage.mysqlStorage.AdminMySQLStorageUtil.releaseConfigDBConnection;
+import static com.openexchange.admin.storage.mysqlStorage.AdminMySQLStorageUtil.releaseWriteContextConnection;
+import static com.openexchange.admin.storage.mysqlStorage.AdminMySQLStorageUtil.releaseWriteContextConnectionAfterReading;
+import static com.openexchange.admin.storage.mysqlStorage.AdminMySQLStorageUtil.releaseWriteContextConnectionWithoutTimeout;
 import static com.openexchange.admin.storage.mysqlStorage.OXUtilMySQLStorageCommon.isEmpty;
 import static com.openexchange.database.Databases.autocommit;
 import static com.openexchange.database.Databases.closeSQLStuff;
@@ -101,7 +108,6 @@ import com.openexchange.admin.rmi.dataobjects.Group;
 import com.openexchange.admin.rmi.dataobjects.User;
 import com.openexchange.admin.rmi.dataobjects.UserModuleAccess;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
-import com.openexchange.admin.rmi.exceptions.PoolException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.services.AdminServiceRegistry;
 import com.openexchange.admin.storage.interfaces.OXToolStorageInterface;
@@ -216,10 +222,9 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
         if (null == id) {
             throw new StorageException("Missing context identifier");
         }
-        Connection con = null;
+        Connection con = leaseReadConnectionForConfigDB(cache);
         PreparedStatement stmt = null;
         try {
-            con = cache.getReadConnectionForConfigDB();
             stmt = con.prepareStatement("SELECT 1 FROM context WHERE cid = ? LIMIT 1");
             stmt.setInt(1, id.intValue());
             return stmt.executeQuery().next();
@@ -229,24 +234,9 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
         } catch (final SQLException e) {
             log.error("SQL Error", e);
             throw new StorageException(e);
-        } catch (final PoolException e) {
-            log.error("Pool Error", e);
-            throw new StorageException(e);
         } finally {
-            if (null != stmt) {
-                try {
-                    stmt.close();
-                } catch (final SQLException e) {
-                    // Ignore
-                }
-            }
-            if (null != con) {
-                try {
-                    cache.pushReadConnectionForConfigDB(con);
-                } catch (final Exception e) {
-                    log.error("Error pushing connection to pool!", e);
-                }
-            }
+            Databases.closeSQLStuff(stmt);
+            releaseConfigDBConnection(con, cache);
         }
     }
 
@@ -254,12 +244,10 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
     public Set<String> getCapabilities(Context ctx, User user) throws StorageException {
         final int contextId = ctx.getId().intValue();
         // SQL resources
-        Connection con = null;
+        Connection con = leaseConnectionForContext(contextId, cache);
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
-            con = cache.getConnectionForContext(contextId);
-
             stmt = con.prepareStatement("SELECT cap FROM capability_user WHERE cid=? AND user=?");
             stmt.setInt(1, contextId);
             stmt.setInt(2, user.getId().intValue());
@@ -275,18 +263,9 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
         } catch (final SQLException e) {
             log.error("SQL Error", e);
             throw new StorageException(e);
-        } catch (final PoolException e) {
-            log.error("Pool Error", e);
-            throw new StorageException(e);
         } finally {
             Databases.closeSQLStuff(rs, stmt);
-            if (null != con) {
-                try {
-                    cache.pushConnectionForContext(contextId, con);
-                } catch (final PoolException e) {
-                    log.error("Error pushing connection to pool for context {}!", ctx.getId(), e);
-                }
-            }
+            releaseWriteContextConnection(con, ctx, cache);
         }
     }
 
@@ -296,12 +275,11 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
         int userId = user.getId().intValue();
 
         // SQL resources
-        Connection con = null;
+        Connection con = leaseConnectionForContext(contextId, cache);
         PreparedStatement stmt = null;
         boolean rollback = false;
         boolean autocommit = false;
         try {
-            con = cache.getConnectionForContext(contextId);
             con.setAutoCommit(false); // BEGIN
             autocommit = true;
             rollback = true;
@@ -343,9 +321,6 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
         } catch (final SQLException e) {
             log.error("SQL Error", e);
             throw new StorageException(e);
-        } catch (final PoolException e) {
-            log.error("Pool Error", e);
-            throw new StorageException(e);
         } finally {
             Databases.closeSQLStuff(stmt);
             if (rollback) {
@@ -354,13 +329,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             if (autocommit) {
                 autocommit(con);
             }
-            if (null != con) {
-                try {
-                    cache.pushConnectionForContext(contextId, con);
-                } catch (final PoolException e) {
-                    log.error("Error pushing connection to pool for context {}!", ctx.getId(), e);
-                }
-            }
+            releaseWriteContextConnection(con, ctx, cache);
         }
     }
 
@@ -368,12 +337,11 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
     public void changeCapabilities(final Context ctx, final User user, final Set<String> capsToAdd, final Set<String> capsToRemove, final Set<String> capsToDrop, final Credentials auth) throws StorageException {
         final int contextId = ctx.getId().intValue();
         // SQL resources
-        Connection con = null;
+        Connection con = leaseConnectionForContext(contextId, cache);
         PreparedStatement stmt = null;
         boolean rollback = false;
         boolean autocommit = false;
         try {
-            con = cache.getConnectionForContext(contextId);
             con.setAutoCommit(false); // BEGIN
             autocommit = true;
             rollback = true;
@@ -530,9 +498,6 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
         } catch (final SQLException e) {
             log.error("SQL Error", e);
             throw new StorageException(e);
-        } catch (final PoolException e) {
-            log.error("Pool Error", e);
-            throw new StorageException(e);
         } finally {
             Databases.closeSQLStuff(stmt);
             if (rollback) {
@@ -541,55 +506,29 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             if (autocommit) {
                 autocommit(con);
             }
-            if (null != con) {
-                try {
-                    cache.pushConnectionForContext(contextId, con);
-                } catch (final PoolException e) {
-                    log.error("Error pushing connection to pool for context {}!", ctx.getId(), e);
-                }
-            }
+            releaseWriteContextConnection(con, ctx, cache);
         }
     }
 
     @Override
     public void enableUser(int userId, Context ctx) throws StorageException {
         int contextId = ctx.getId().intValue();
-        Connection con = null;
+        Connection con = leaseConnectionForContext(contextId, cache);
         try {
-            con = cache.getConnectionForContext(contextId);
             setUserEnabled(userId, contextId, true, con);
-        } catch (final PoolException e) {
-            log.error("Pool Error", e);
-            throw new StorageException(e);
         } finally {
-            if (con != null) {
-                try {
-                    cache.pushConnectionForContext(contextId, con);
-                } catch (final PoolException exp) {
-                    log.error("Pool Error pushing ox write connection to pool!", exp);
-                }
-            }
+            releaseWriteContextConnection(con, ctx, cache);
         }
     }
 
     @Override
     public void disableUser(int userId, Context ctx) throws StorageException {
         int contextId = ctx.getId().intValue();
-        Connection con = null;
+        Connection con = leaseConnectionForContext(contextId, cache);
         try {
-            con = cache.getConnectionForContext(contextId);
             setUserEnabled(userId, contextId, false, con);
-        } catch (final PoolException e) {
-            log.error("Pool Error", e);
-            throw new StorageException(e);
         } finally {
-            if (con != null) {
-                try {
-                    cache.pushConnectionForContext(contextId, con);
-                } catch (final PoolException exp) {
-                    log.error("Pool Error pushing ox write connection to pool!", exp);
-                }
-            }
+            releaseWriteContextConnection(con, ctx, cache);
         }
     }
 
@@ -647,15 +586,13 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
         int contextId = ctx.getId().intValue();
         int userId = usrdata.getId().intValue();
 
-        Connection con = null;
+        Connection con = leaseConnectionForContext(contextId, cache);
         PreparedStatement stmt = null;
         PreparedStatement folder_update = null;
 
         boolean rollback = false;
 
         try {
-            con = cache.getConnectionForContext(contextId);
-
             // first fill the user_data hash to update user table
             con.setAutoCommit(false);
             rollback = true;
@@ -1329,9 +1266,6 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             // End of JCS
 
             log.info("User {} in context {} changed!", Integer.valueOf(userId), Integer.valueOf(contextId));
-        } catch (final PoolException e) {
-            log.error("Pool Error", e);
-            throw new StorageException(e);
         } catch (final DataTruncation dt) {
             log.error(AdminCache.DATA_TRUNCATION_ERROR_MSG, dt);
             throw AdminCache.parseDataTruncation(dt);
@@ -1356,14 +1290,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             }
             closeSQLStuff(folder_update);
             closeSQLStuff(stmt);
-
-            if (con != null) {
-                try {
-                    cache.pushConnectionForContext(contextId, con);
-                } catch (final PoolException exp) {
-                    log.error("Pool Error pushing ox write connection to pool!", exp);
-                }
-            }
+            releaseWriteContextConnection(con, ctx, cache);
         }
     }
 
@@ -2347,11 +2274,9 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
     @Override
     public int create(final Context ctx, final User usrdata, final UserModuleAccess moduleAccess) throws StorageException {
         int context_id = ctx.getId().intValue();
-        Connection write_ox_con = null;
+        Connection write_ox_con = leaseConnectionForContext(context_id, cache);
         boolean rollback = false;
         try {
-            write_ox_con = cache.getConnectionForContext(context_id);
-
             final int internal_user_id = nextId(context_id, com.openexchange.groupware.Types.PRINCIPAL, write_ox_con);
             final int contact_id = nextId(context_id, com.openexchange.groupware.Types.CONTACT, write_ox_con);
             final int uid_number = (Integer.parseInt(prop.getUserProp(AdminProperties.User.UID_NUMBER_START, "-1")) > 0) ? nextId(context_id, com.openexchange.groupware.Types.UID_NUMBER, write_ox_con) : -1;
@@ -2372,10 +2297,6 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
         } catch (final SQLException sql) {
             log.error("SQL Error", sql);
             throw new StorageException(sql.toString());
-        } catch (final PoolException e) {
-            log.error("Pool Error", e);
-            //no rollback operations on ox db connection needed, as the pool did not return any connection
-            throw new StorageException(e);
         } catch (final RuntimeException e) {
             log.error("", e);
             throw e;
@@ -2384,34 +2305,18 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 Databases.rollback(write_ox_con);
             }
             autocommit(write_ox_con);
-            if (write_ox_con != null) {
-                try {
-                    cache.pushConnectionForContext(context_id, write_ox_con);
-                } catch (final PoolException ex) {
-                    log.error("Pool Error pushing ox write connection to pool!", ex);
-                }
-            }
+            releaseWriteContextConnection(write_ox_con, ctx, cache);
         }
     }
 
     @Override
     public int[] getAll(Context ctx) throws StorageException {
-        int context_id = ctx.getId().intValue();
-        Connection read_ox_con = null;
+        int contextId = ctx.getId().intValue();
+        Connection read_ox_con = leaseConnectionForContext(contextId, cache);
         try {
-            read_ox_con = cache.getConnectionForContext(context_id);
             return getAll(ctx, read_ox_con);
-        } catch (final PoolException e) {
-            log.error("Pool Error", e);
-            throw new StorageException(e);
         } finally {
-            if (read_ox_con != null) {
-                try {
-                    cache.pushConnectionForContextAfterReading(context_id, read_ox_con);
-                } catch (final PoolException exp) {
-                    log.error("Pool Error pushing ox read connection to pool!", exp);
-                }
-            }
+            releaseWriteContextConnectionAfterReading(read_ox_con, contextId, cache);
         }
     }
 
@@ -2452,14 +2357,12 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
 
     @Override
     public User[] listUsersWithOwnFilestore(final Context context, final Integer filestore_id) throws StorageException {
-        int context_id = context.getId().intValue();
+        int contextId = context.getId().intValue();
 
-        Connection read_ox_con = null;
+        Connection read_ox_con = leaseConnectionForContext(contextId, cache);
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
-            read_ox_con = cache.getConnectionForContext(context_id);
-
             StringBuilder sb = new StringBuilder();
             sb.append("SELECT us.id FROM user us LEFT JOIN login2user lu ON us.id = lu.id AND us.cid = lu.cid ").append("LEFT JOIN prg_contacts con ON us.id = con.userid AND us.cid = con.cid WHERE us.cid = ? ");
 
@@ -2471,7 +2374,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
 
             String query = sb.toString();
             stmt = read_ox_con.prepareStatement(query);
-            stmt.setInt(1, context_id);
+            stmt.setInt(1, contextId);
             if (filestore_id != null) {
                 stmt.setInt(2, filestore_id.intValue());
             }
@@ -2484,21 +2387,12 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
         } catch (SQLException e) {
             log.error("SQL Error", e);
             throw new StorageException(e.toString());
-        } catch (PoolException e) {
-            log.error("Pool Error", e);
-            throw new StorageException(e);
         } catch (RuntimeException e) {
             log.error("", e);
             throw e;
         } finally {
             Databases.closeSQLStuff(rs, stmt);
-            if (read_ox_con != null) {
-                try {
-                    cache.pushConnectionForContextAfterReading(context_id, read_ox_con);
-                } catch (PoolException exp) {
-                    log.error("Pool Error pushing ox read connection to pool!", exp);
-                }
-            }
+            releaseWriteContextConnectionAfterReading(read_ox_con, contextId, cache);
         }
     }
 
@@ -2523,7 +2417,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
     }
 
     private User[] listInternal(final Context ctx, final String search_pattern, final boolean ignoreCase, final boolean includeGuests, final boolean excludeUsers) throws StorageException {
-        int context_id = ctx.getId().intValue();
+        int contextId = ctx.getId().intValue();
         String new_search_pattern = null;
         boolean pattern = false;
         if (null != search_pattern) {
@@ -2531,14 +2425,13 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             pattern = !"%".equals(new_search_pattern);
         }
 
-        Connection read_ox_con = null;
+        Connection read_ox_con = leaseConnectionForContext(contextId, cache);
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
-            read_ox_con = cache.getConnectionForContext(context_id);
             String sql = buildQuery(new_search_pattern, ignoreCase, includeGuests, excludeUsers);
             stmt = read_ox_con.prepareStatement(sql);
-            stmt.setInt(1, context_id);
+            stmt.setInt(1, contextId);
             if (pattern) {
                 stmt.setString(2, new_search_pattern);
                 stmt.setString(3, new_search_pattern);
@@ -2552,21 +2445,12 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
         } catch (SQLException e) {
             log.error("SQL Error", e);
             throw new StorageException(e.toString());
-        } catch (PoolException e) {
-            log.error("Pool Error", e);
-            throw new StorageException(e);
         } catch (RuntimeException e) {
             log.error("", e);
             throw e;
         } finally {
             Databases.closeSQLStuff(rs, stmt);
-            if (read_ox_con != null) {
-                try {
-                    cache.pushConnectionForContextAfterReading(context_id, read_ox_con);
-                } catch (PoolException exp) {
-                    log.error("Pool Error pushing ox read connection to pool!", exp);
-                }
-            }
+            releaseWriteContextConnectionAfterReading(read_ox_con, contextId, cache);
         }
     }
 
@@ -2686,7 +2570,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
         query.append(" FROM user JOIN login2user USING (cid,id) JOIN prg_contacts ON (user.cid=prg_contacts.cid AND user.id=prg_contacts.userid) ");
         query.append("WHERE user.cid = ? AND user.id = ?");
 
-        Connection read_ox_con = null;
+        Connection read_ox_con = leaseConnectionForContext(contextId, cache);
         PreparedStatement stmtuid = null;
         PreparedStatement stmt2 = null;
         PreparedStatement stmtid = null;
@@ -2696,7 +2580,6 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
         List<User> userlist = new LinkedList<>();
 
         try {
-            read_ox_con = cache.getConnectionForContext(contextId);
             final OXToolStorageInterface oxtool = OXToolStorageInterface.getInstance();
             final int adminForContext = oxtool.getAdminForContext(ctx, read_ox_con);
 
@@ -2893,9 +2776,6 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             }
 
             return userlist.toArray(new User[userlist.size()]);
-        } catch (PoolException e) {
-            log.error("Pool Error", e);
-            throw new StorageException(e);
         } catch (SQLException e) {
             log.error("SQL Error", e);
             throw new StorageException(e.toString());
@@ -2919,13 +2799,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             throw new StorageException(e.toString());
         } finally {
             Databases.closeSQLStuff(stmtuid, stmt2, stmtid, stmtuserattributes, stmtusm, stmtacc);
-            if (read_ox_con != null) {
-                try {
-                    cache.pushConnectionForContextAfterReading(contextId, read_ox_con);
-                } catch (final PoolException exp) {
-                    log.error("Pool Error pushing ox read connection to pool!", exp);
-                }
-            }
+            releaseWriteContextConnectionAfterReading(read_ox_con, contextId, cache);
         }
     }
 
@@ -3146,11 +3020,10 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             DBUtils.TransactionRollbackCondition condition = new DBUtils.TransactionRollbackCondition(3);
             do {
                 int contextId = ctx.getId().intValue();
-                Connection con = null;
+                Connection con = leaseWriteContextConnectionWithoutTimeout(contextId, cache);
                 condition.resetTransactionRollbackException();
                 boolean rollback = false;
                 try {
-                    con = cache.getConnectionForContextNoTimeout(contextId);
                     startTransaction(con);
                     rollback = true;
 
@@ -3163,9 +3036,6 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
 
                     con.commit();
                     rollback = false;
-                } catch (final PoolException e) {
-                    log.error("Pool Error", e);
-                    throw new StorageException(e);
                 } catch (final StorageException st) {
                     final SQLException sqle = DBUtils.extractSqlException(st);
                     if (!condition.isFailedTransactionRollback(sqle)) {
@@ -3185,11 +3055,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                         rollback(con);
                     }
                     autocommit(con);
-                    try {
-                        cache.pushConnectionForContextNoTimeout(contextId, con);
-                    } catch (final PoolException e) {
-                        log.error("Pool Error pushing ox write connection to pool!", e);
-                    }
+                    releaseWriteContextConnectionWithoutTimeout(con, contextId, cache);
                 }
             } while (retry(condition, users, ctx));
         } catch (final SQLException sql) {
@@ -3215,10 +3081,9 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
     public void changeModuleAccess(final Context ctx, final int[] userIds, final UserModuleAccess moduleAccess) throws StorageException {
         int contextId = ctx.getId().intValue();
 
-        Connection con = null;
+        Connection con = leaseConnectionForContext(contextId, cache);
         boolean rollback = false;
         try {
-            con = cache.getConnectionForContext(contextId);
             con.setAutoCommit(false);
             rollback = true;
 
@@ -3270,9 +3135,6 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 }
             }
             // End of JCS
-        } catch (final PoolException e) {
-            log.error("Pool Error", e);
-            throw new StorageException(e);
         } catch (final SQLException e) {
             log.error("SQL Error", e);
             throw new StorageException(e.toString());
@@ -3283,13 +3145,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             if (rollback) {
                 rollback(con);
             }
-            if (null != con) {
-                try {
-                    cache.pushConnectionForContext(contextId, con);
-                } catch (final PoolException e) {
-                    log.error("Pool Error pushing ox write connection to pool!", e);
-                }
-            }
+            releaseWriteContextConnection(con, ctx, cache);
         }
     }
 
@@ -3301,9 +3157,8 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
     @Override
     public UserModuleAccess getModuleAccess(final Context ctx, final int user_id) throws StorageException {
         int contextId = ctx.getId().intValue();
-        Connection read_ox_con = null;
+        Connection read_ox_con = leaseConnectionForContext(contextId, cache);
         try {
-            read_ox_con = cache.getConnectionForContext(contextId);
             int[] all_groups_of_user = getGroupsForUser(ctx, user_id, read_ox_con);
 
             UserPermissionBits user = RdbUserPermissionBitsStorage.adminLoadUserPermissionBits(user_id, all_groups_of_user, contextId, read_ox_con);
@@ -3338,9 +3193,6 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             acc.setGlobalAddressBookDisabled(adminHelper.isGlobalAddressBookDisabled(contextId, user_id, read_ox_con));
             acc.setPublicFolderEditable(adminHelper.isPublicFolderEditable(contextId, user_id, read_ox_con));
             return acc;
-        } catch (final PoolException polex) {
-            log.error("Pool error", polex);
-            throw new StorageException(polex);
         } catch (final SQLException sqle) {
             log.error("SQL Error ", sqle);
             throw new StorageException(sqle.toString());
@@ -3348,13 +3200,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             log.error("OX Error ", e);
             throw new StorageException(e.toString(), e);
         } finally {
-            if (read_ox_con != null) {
-                try {
-                    cache.pushConnectionForContextAfterReading(contextId, read_ox_con);
-                } catch (final PoolException exp) {
-                    log.error("Pool Error pushing ox read connection to pool!", exp);
-                }
-            }
+            releaseWriteContextConnectionAfterReading(read_ox_con, contextId, cache);
         }
 
     }
@@ -3637,14 +3483,12 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
 
     @Override
     public User[] listUsersByAliasDomain(Context context, String aliasDomain) throws StorageException {
-        int context_id = context.getId().intValue();
+        int contextId = context.getId().intValue();
 
-        Connection read_ox_con = null;
+        Connection read_ox_con = leaseConnectionForContext(contextId, cache);
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
-            read_ox_con = cache.getConnectionForContext(context_id);
-
             StringBuilder sb = new StringBuilder();
             sb.append("SELECT us.id FROM user us LEFT JOIN user_alias la ON us.id = la.user AND us.cid = la.cid ");
             sb.append("WHERE us.cid = ? and la.alias LIKE ?");
@@ -3663,21 +3507,12 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
         } catch (SQLException e) {
             log.error("SQL Error", e);
             throw new StorageException(e.toString());
-        } catch (PoolException e) {
-            log.error("Pool Error", e);
-            throw new StorageException(e);
         } catch (RuntimeException e) {
             log.error("", e);
             throw e;
         } finally {
             Databases.closeSQLStuff(rs, stmt);
-            if (read_ox_con != null) {
-                try {
-                    cache.pushConnectionForContextAfterReading(context_id, read_ox_con);
-                } catch (PoolException exp) {
-                    log.error("Pool Error pushing ox read connection to pool!", exp);
-                }
-            }
+            releaseWriteContextConnectionAfterReading(read_ox_con, contextId, cache);
         }
     }
 

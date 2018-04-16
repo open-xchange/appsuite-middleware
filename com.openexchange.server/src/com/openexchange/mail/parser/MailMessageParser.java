@@ -361,6 +361,7 @@ public final class MailMessageParser {
                     }
                     MimeMessage mimeMessage = cloneMessage(mail, mail.getReceivedDate());
                     MailMessage reparsedMail = MimeMessageConverter.convertMessage(mimeMessage, false);
+                    reset();
                     parseMailContent(reparsedMail, handler, prefix, 1);
                 }
             }
