@@ -12,7 +12,7 @@ Additional information can be found [here](http://www.jolokia.org/).
 
 ## jolokia.properties
 
-The jolokia properties are documented [here](https://documentation.open-xchange.com/components/middleware/config/7.10.0/#mode=features&feature=Jolokia).
+The jolokia properties are documented [here](https://documentation.open-xchange.com/components/middleware/config{{ site.baseurl }}/#mode=features&feature=Jolokia).
 
 Keep in mind that Jolokia will not start unless you set `com.openexchange.jolokia.start = true` , `com.openexchange.jolokia.user = yourUser` and to `com.openexchange.jolokia.password = yourPassword`.
 
