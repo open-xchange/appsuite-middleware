@@ -59,6 +59,7 @@ import javax.servlet.http.HttpServletResponse;
 import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXExceptionConstants;
 import com.openexchange.file.storage.FileStorageFileAccess.IDTuple;
+import com.openexchange.filestore.QuotaFileStorageExceptionCodes;
 import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.EffectiveInfostorePermission;
@@ -630,6 +631,9 @@ public class DocumentMetadataResource extends AbstractResource implements OXWebd
                 } catch (final OXException x) {
                     if (CATEGORY_PERMISSION_DENIED == x.getCategory()) {
                         throw WebdavProtocolException.Code.GENERAL_ERROR.create(url, HttpServletResponse.SC_UNAUTHORIZED);
+                    }
+                    if (QuotaFileStorageExceptionCodes.STORE_FULL.equals(x)) {
+                        throw WebdavProtocolException.Code.GENERAL_ERROR.create(url, Protocol.SC_INSUFFICIENT_STORAGE);
                     }
                     throw WebdavProtocolException.Code.GENERAL_ERROR.create(url, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, x, new Object[0]);
                 } catch (final Exception x) {

@@ -62,7 +62,7 @@ import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.configuration.AJAXConfig.Property;
 
 /**
- * {@link ICalImportAccessTest}
+ * {@link ICalImportAccessTest} This test is a substitution for the test Bug8681forICAL
  *
  * @author <a href="mailto:Jan-Oliver.Huhn@open-xchange.com">Jan-Oliver Huhn</a>
  * @since v7.10.0

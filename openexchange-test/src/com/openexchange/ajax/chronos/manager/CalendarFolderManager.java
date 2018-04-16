@@ -109,7 +109,7 @@ public class CalendarFolderManager extends AbstractManager {
     }
 
     /**
-     * 
+     *
      * @param module
      * @param providerId
      * @param title
@@ -125,7 +125,7 @@ public class CalendarFolderManager extends AbstractManager {
 
     /**
      * Creates a folder for the specified module and provider
-     * 
+     *
      * @param module The module
      * @param providerId The provider identifier
      * @param config The configuration
@@ -151,7 +151,7 @@ public class CalendarFolderManager extends AbstractManager {
 
     /**
      * Retrieves the folder with the specified identifier
-     * 
+     *
      * @param folderId The folder identifier
      * @return the {@link FolderData}
      * @throws ApiException if an API error is occurred
@@ -163,7 +163,7 @@ public class CalendarFolderManager extends AbstractManager {
 
     /**
      * Retrieves the folder with the specified identifier
-     * 
+     *
      * @param folderId The folder identifier
      * @return the {@link FolderData}
      * @throws ApiException if an API error is occurred
@@ -180,7 +180,7 @@ public class CalendarFolderManager extends AbstractManager {
 
     /**
      * Updates the folder with the specified identifier
-     * 
+     *
      * @param defaultFolderId The folder identifier
      * @return The {@link FolderUpdateResponse}
      * @throws ApiException if an API error is occurred
@@ -192,7 +192,7 @@ public class CalendarFolderManager extends AbstractManager {
 
     /**
      * Updates the folder with the specified identifier
-     * 
+     *
      * @param defaultFolderId The folder identifier
      * @return The {@link FolderUpdateResponse}
      * @throws ApiException if an API error is occurred
@@ -212,7 +212,7 @@ public class CalendarFolderManager extends AbstractManager {
 
     /**
      * Deletes the folder with the specified identifier
-     * 
+     *
      * @param folderId The folder identifier
      * @throws ApiException if an API error is occurred
      */
@@ -222,7 +222,7 @@ public class CalendarFolderManager extends AbstractManager {
 
     /**
      * Deletes the folders with the specified identifier
-     * 
+     *
      * @param defaultFolderId The folder identifiers
      * @throws ApiException if an API error is occurred
      */

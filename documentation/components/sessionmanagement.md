@@ -29,10 +29,12 @@ configuration of this service is needed.
 
 ## Blacklisting clients
 Example configuration to blacklist OX Mailapp and clients connected via Exchange ActiveSync:
-```com.openexchange.session.management.blacklist=open-xchange-mobile-api-facade,open-xchange-mailapp,USM-EAS```
+```properties
+com.openexchange.session.management.blacklist=open-xchange-mobile-api-facade,open-xchange-mailapp,USM-EAS
+```
 
 ## Example response for sessionmanagement?action=all
-```
+```json
 {
    "data":[
       {
@@ -77,8 +79,8 @@ Example configuration to blacklist OX Mailapp and clients connected via Exchange
 ```
 
 Clients are grouped in the following types:
-```browser```, e.g. for web UI
-```oxapp```, for apps like OX Drive or OX Mailapp
-```eas```, for clients connected via Exchange ActiveSync
-```dav```, for clients connected via CalDAV/CardDAV
-```other```, all other clients
+* ```browser``` - e.g. for web UI  
+* ```oxapp``` - for apps like OX Drive or OX Mailapp
+* ```eas``` - for clients connected via Exchange ActiveSync
+* ```dav``` - for clients connected via CalDAV/CardDAV
+* ```other``` - all other clients
