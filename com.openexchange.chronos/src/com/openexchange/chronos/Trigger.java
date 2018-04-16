@@ -150,8 +150,8 @@ public class Trigger {
 
     /**
      * Sets the <i>related</i> attribute indicating the relationship to the parent calendar component of the trigger.
-     *
-     * @return The <i>related</i> attribute to set
+     * 
+     * @param related The {@link Related} attribute
      */
 	public void setRelated(Related related) {
 		this.related = related;
@@ -168,8 +168,8 @@ public class Trigger {
 
     /**
      * Sets the fixed date-time of the trigger.
-     *
-     * @return The date-time value to set
+     * 
+     * @param dateTime The {@link Date} to set
      */
 	public void setDateTime(Date dateTime) {
 		this.dateTime = dateTime;
