@@ -75,3 +75,10 @@ Example configuration to blacklist OX Mailapp and clients connected via Exchange
    ]
 }
 ```
+
+Clients are grouped in the following types:
+```browser```, e.g. for web UI
+```oxapp```, for apps like OX Drive or OX Mailapp
+```eas```, for clients connected via Exchange ActiveSync
+```dav```, for clients connected via CalDAV/CardDAV
+```other```, all other clients
