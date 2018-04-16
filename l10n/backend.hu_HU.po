@@ -6,7 +6,7 @@ msgstr ""
 "Project-Id-Version: backend\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2018-02-20 10:57+0100\n"
+"PO-Revision-Date: 2018-03-26 13:49+0200\n"
 "Last-Translator: Kalman Kemenczy <kalman@workshop-chapina.com>\n"
 "Language-Team: Hungarian <hu@workshop-chapina.com>\n"
 "Language: hu_HU\n"
@@ -91,6 +91,7 @@ msgstr "Naptárak és találkozók szinkronizációja."
 #. - Read all your appointments.
 #. - ...
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.calendar.json/src/com/openexchange/calendar/json/osgi/OAuthScopeDescription.java:58
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.json/src/com/openexchange/chronos/json/oauth/OAuthScopeDescription.java:63
 msgid "Read all your appointments."
 msgstr "Összes találkozó elolvasása."
 
@@ -98,6 +99,7 @@ msgstr "Összes találkozó elolvasása."
 #. - Create, modify and delete appointments.
 #. - ...
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.calendar.json/src/com/openexchange/calendar/json/osgi/OAuthScopeDescription.java:63
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.json/src/com/openexchange/chronos/json/oauth/OAuthScopeDescription.java:65
 msgid "Create, modify and delete appointments."
 msgstr "Találkozó létrehozása, módosítása és törlése."
 
@@ -138,7 +140,7 @@ msgid "Comments"
 msgstr "Megjegyzések"
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.calendar.printing/src/com/openexchange/calendar/printing/CalendarPrintingStrings.java:75
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:275
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:268
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.printing/src/com/openexchange/printing/Messages.java:62
 msgid "The entire day"
 msgstr "Egész nap"
@@ -163,7 +165,7 @@ msgid "Undecided"
 msgstr "Nincs döntés"
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.calendar.printing/src/com/openexchange/calendar/printing/templating/Strings.java:66
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:273
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:266
 msgid "Resources"
 msgstr "Erőforrások"
 
@@ -539,17 +541,12 @@ msgid ""
 msgstr "%1$s szeretne naprakész lenni ezzel a(z) %2$s találkozóval kapcsolatban. Küldjön neki egy másik meghívót."
 
 #. *
-#. * Example: "UserXY has accepted the invitation"
+#. * Examples:
+#. * <p>"UserXY has accepted the invitation"
+#. * <p>"UserXY has declined the invitation"
+#. * <p>"UserXY has tentatively accepted the invitation"
 #.
-#. *
-#. * Example: "UserXY has declined the invitation"
-#.
-#. *
-#. * Example: "UserXY has tentatively accepted the invitation"
-#.
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:103
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:118
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:133
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:106
 msgid "%1$s has %2$s the invitation:"
 msgstr "%1$s %2$s a meghívást:"
 
@@ -562,9 +559,9 @@ msgstr "%1$s %2$s a meghívást:"
 #. *
 #. * Example: "UserXY has tentatively accepted the invitation on behalf of UserAB"
 #.
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:108
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:123
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:138
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:111
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:121
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:131
 msgid "%1$s has %2$s the invitation on behalf of %3$s:"
 msgstr "%1$s, %2$s nevében %3$s a meghívást:"
 
@@ -577,173 +574,173 @@ msgstr "%1$s, %2$s nevében %3$s a meghívást:"
 #. *
 #. * Example: "UserXY has tentatively accepted the invitation on your behalf"
 #.
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:113
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:128
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:143
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:116
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:126
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:136
 msgid "%1$s has %2$s the invitation on your behalf:"
 msgstr "%1$s, %2$s nevében a meghívást:"
 
 #. public static final String TENTATIVELY_ACCEPTED = "tentatively accepted";
 #. Used if a participant changed it status to either 'Accepted', 'Denied', or 'Tentatively accepted'
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:148
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:141
 msgid "%1$s sets the status to %2$s for this appointment:"
 msgstr "%1$s %2$s állapotra módosította ezt a találkozót:"
 
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:150
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:143
 msgid "On behalf of %3$s, %1$s sets the status for this appointment to %2$s:"
 msgstr "%3$s nevében, %1$s %2$s állapotra módosította ezt a találkozót:"
 
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:152
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:145
 msgid "On your behalf, %1$s sets your status for this appointment to %2$s:"
 msgstr "Az Ön nevében, %1$s %2$s állapotra módosította ezt a találkozót:"
 
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:154
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:147
 msgid "none"
 msgstr "nincs"
 
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:156
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:149
 msgid "%1$s would like you to change the appointment:"
 msgstr "%1$s megváltoztatná a találkozót:"
 
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:158
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:151
 msgid "%1$s has asked %2$s to change the event:"
 msgstr "%1$s az esemény megváltoztatását kérte ettől: %2$s"
 
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:160
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:153
 msgid "You have been invited to an event by %1$s:"
 msgstr "Meghívást kapott egy eseményre ettől: %1$s:"
 
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:162
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:155
 msgid "You have been invited to an event organized by %1$s on behalf of %2$s"
 msgstr "Meghívást kapott egy eseményre ettől: %1$s, %2$s nevében"
 
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:164
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:157
 msgid "%1$s is organizing an event on your behalf."
 msgstr "%1$s szervezi az eseményt az Ön nevében."
 
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:166
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:159
 msgid "%1$s created a recurrence exception. Original date: %2$s:"
 msgstr "%1$s ismétlődési kivételt hozott létre. Eredeti dátum: %2$s:"
 
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:168
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:161
 msgid "%1$s has changed an event:"
 msgstr "%1$s megváltoztatta az eseményt:"
 
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:170
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:163
 msgid "%1$s has changed an event on behalf of %2$s:"
 msgstr "%1$s, %2$s nevében megváltoztatta az eseményt:"
 
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:172
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:165
 msgid "%1$s has changed an event on your behalf:"
 msgstr "%1$s megváltoztatta az eseményt, az Ön nevében:"
 
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:174
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:167
 msgid "When:"
 msgstr "Mikor:"
 
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:176
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:169
 msgid "Direct link:"
 msgstr "Közvetlen hivatkozás:"
 
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:178
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:171
 msgid "Where:"
 msgstr "Hol:"
 
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:180
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:173
 msgid "Participants:"
 msgstr "Résztvevők:"
 
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:182
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:175
 msgid "Details:"
 msgstr "Részletek:"
 
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:184
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:177
 msgid "Show as:"
 msgstr "Megjelenítés:"
 
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:186
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:179
 msgid "Created:"
 msgstr "Létrehozva:"
 
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:188
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:181
 msgid "Modified:"
 msgstr "Módosítva:"
 
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:190
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:183
 msgid ""
 "%1$s has deleted an appointment on behalf of %2$s, or you have been removed "
 "as a participant:"
 msgstr "%1$s törölt egy találkozót %2$s nevében, vagy Ön már nem résztvevője az eseménynek:"
 
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:192
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:185
 msgid "%1$s has deleted an appointment on your behalf:"
 msgstr "%1$s törölt egy találkozót az Ön nevében:"
 
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:194
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:187
 msgid ""
 "%1$s has deleted an appointment, or you have been removed as a participant:"
 msgstr "%1$s törölt egy találkozót, vagy Ön már nem résztvevője az eseménynek:"
 
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:196
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:198
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:189
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:191
 msgid "Change the subject to %1$s."
 msgstr "Változtassa meg a tárgyat erre: %1$s."
 
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:200
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:193
 msgid "The appointment has a new subject: %1$s."
 msgstr "A találkozónak új tárgya van: %1$s."
 
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:202
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:195
 msgid "The appointment will now be shown as: \"%1$s\"."
 msgstr "A találkozó mostantól így jelenik meg: %1$s."
 
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:204
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:197
 msgid "The appointment timezone was changed to: %1$s"
 msgstr "A találkozó időzónája erre változott: %1$s."
 
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:206
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:208
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:199
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:201
 msgid "Change the location to %1$s."
 msgstr "Változtassa meg a helyszínt erre: %1$s."
 
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:210
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:203
 msgid "The appointment takes place in a new location: %1$s."
 msgstr "A találkozó egy új helyszínen lesz: %1$s."
 
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:212
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:214
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:205
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:207
 msgid "Use the appointment description below."
 msgstr "Használja az alábbi találkozó-leírásokat."
 
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:216
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:209
 msgid "The appointment description has changed."
 msgstr "A találkozó leírása megváltozott."
 
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:218
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:211
 msgid "Please invite %1$s to the appointment."
 msgstr "Hívja meg a következő személyt a találkozóra: %1$s."
 
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:220
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:213
 msgid "Add %1$s to the appointment."
 msgstr "%1$s hozzáadása a találkozóhoz."
 
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:222
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:215
 msgid "%1$s has been invited to the appointment."
 msgstr "%1$s meghívva erre a találkozóra."
 
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:224
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:226
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:217
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:219
 msgid "Remove %1$s from the appointment."
 msgstr "Távolítsa el a következő személyt a találkozó résztvevői közül: %1$s."
 
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:228
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:221
 msgid "%1$s has been removed from the appointment."
 msgstr "%1$s eltávolítva a találkozó résztvevői közül."
 
 #. *
 #. * Example: "UserXY has accepted the appointment."
 #.
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:233
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:226
 msgid "%1$s has %2$s the appointment."
 msgstr "%1$s elfogadta a(z) %2$s találkozót."
 
@@ -755,124 +752,124 @@ msgstr "%1$s elfogadta a(z) %2$s találkozót."
 #. * Confirmation statuses
 #.
 #. waiting
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:239
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:232
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:696
 msgid "waiting"
 msgstr "várakozás"
 
 #.
 #. public static final String TENTATIVELY_ACCEPT = "tentatively accept";
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:243
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:245
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:236
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:238
 msgid "Invite the group %1$s to the appointment."
 msgstr "Hívja meg a következő csoportot a találkozóra: %1$s."
 
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:247
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:240
 msgid "The group %1$s has been invited to the appointment"
 msgstr "%1$s csapat meghívva erre a találkozóra"
 
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:249
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:251
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:242
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:244
 msgid "Remove the group %1$s from the appointment."
 msgstr "Távolítsa el a következő csoportot a találkozó résztvevői közül: %1$s."
 
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:253
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:246
 msgid "The group %1$s has been removed from the appointment"
 msgstr "%1$s csoport eltávolítva a találkozó résztvevői közül"
 
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:255
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:248
 msgid "Reserve the resource %1$s for the appointment"
 msgstr "Foglalja le a(z) %1$s erőforrást a találkozóhoz"
 
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:257
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:250
 msgid "Reserve the resource %1$s for the appointment."
 msgstr "Foglalja le a(z) %1$s erőforrást a találkozóhoz."
 
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:259
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:252
 msgid "The resource %1$s has been reserved for the appointment"
 msgstr "A(z) %1$s erőforrás lefoglalva a találkozóhoz"
 
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:261
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:254
 msgid "Remove the resource %1$s from the appointment"
 msgstr "Távolítsa el a következő erőforrást a találkozóról: %1$s"
 
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:263
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:256
 msgid "Remove the resource %1$s from the appointment."
 msgstr "Távolítsa el a következő erőforrást a találkozóról: %1$s."
 
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:265
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:258
 msgid "The resource %1$s is no longer reserved for the appointment"
 msgstr "A(z) %1$s erőforrás már nincs lefoglalva a találkozóhoz"
 
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:267
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:260
 msgid "The appointment was rescheduled. Original date: %1$s. New date: %2$s"
 msgstr "A találkozó átütemezése került. Eredeti dátum: %1$s. Új dátum: %2$s"
 
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:269
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:262
 msgid "Reschedule the event. Original date: %1$s. New date: %2$s"
 msgstr "Esemény átütemezve. Eredeti dátum: %1$s. Új dátum: %2$s"
 
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:271
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:264
 msgid "Reschedule the event. Original date/time: %1$s. New date/time: %2$s"
 msgstr "Esemény átütemezése. Eredeti dátum: %1$s. Új dátum: %2$s"
 
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:277
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:270
 msgid "New appointment: %1$s"
 msgstr "Új találkozó: %1$s"
 
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:279
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:272
 msgid "Appointment changed: %1$s"
 msgstr "Találkozó megváltozott: %1$s"
 
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:281
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:274
 msgid "Appointment canceled: %1$s"
 msgstr "Találkozó lemondva: %1$s"
 
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:283
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:276
 msgid "Proposed changes for appointment: %1$s"
 msgstr "Javasolt módosítások ehhez a találkozóhoz: %1$s"
 
 #. Used to indicate that a participant resetted his status to 'Waiting'; neither 'Accepted, 'Denied' nor 'Tentatively accepted'
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:286
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:279
 msgid "%1$s sets the status to 'none' for: %1$s"
 msgstr "%1$s az állapot értékét „nincs”-re állította itt: %1$s"
 
 #. Example: Subject: Doe, Jane accepted the invitation: My Appointment with Jane
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:289
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:282
 msgid "%1$s %2$s the invitation: %3$s"
 msgstr "%1$s %2$s a meghívást: %3$s"
 
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:291
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:284
 msgid "Resend the invitation for: %1$s"
 msgstr "Küldje újra a meghívást a következő személynek: %1$s"
 
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:293
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:286
 msgid "Change not accepted for: %1$s"
 msgstr "A módosítás nincs elfogadva ehhez: %1$s"
 
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:295
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:288
 msgid "All times will be shown in the timezone %1$s"
 msgstr "Minden idő ebben az időzónában jelenik meg: %1$s"
 
 #. E.g. "Jane has accepted the appointment, but would like to make a counter proposal: "
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:298
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:291
 msgid ""
 "%1$s has %2$s the appointment, but would like to make a counter proposal: "
 msgstr "%1$s %2$s a találkozót, de másik javaslatot szeretne tenni: "
 
 #. TODO: Mah/Cisco, please describe what is meant with the wording 'chair'
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:301
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:294
 msgid ""
 "You have received this E-Mail because you are the chair for this appointment."
 msgstr "Azért kapta ezt a levelet, mert ezt a találkozót Ön vezeti."
 
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:303
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:296
 msgid ""
 "You have received this E-Mail because you are the organizer of this "
 "appointment."
 msgstr "Azért kapta ezt a levelet, mert ezt a találkozót Ön szervezi."
 
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:305
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:298
 msgid ""
 "You have received this E-Mail because this appointment contains the resource "
 "%1$s which is managed by you."
@@ -913,14 +910,6 @@ msgstr "A tartalomazonosító \"%1$s\" egy nem létező mellékletre utal a tör
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.json/src/com/openexchange/chronos/json/exception/CalendarExceptionMessages.java:81
 msgid "The metadata of the attachment '%1$s' does not have a content-id."
 msgstr "A(z) '%1$s' mellékletet tartalmazó metaadatnak nincs tartalomazonosítója."
-
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.json/src/com/openexchange/chronos/json/oauth/OAuthScopeDescription.java:63
-msgid "Read all your events."
-msgstr "Összes esemény elolvasása."
-
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.json/src/com/openexchange/chronos/json/oauth/OAuthScopeDescription.java:65
-msgid "Create, modify and delete events."
-msgstr "Események létrehozása, módosítása és törlése."
 
 #. *
 #. * The name of the contact birthdays calendar provider.
@@ -1030,6 +1019,26 @@ msgid ""
 "we can do about it."
 msgstr "Távoli kiszolgálóhiba történt a hírcsatorna szolgáltató oldalán. Semmit nem tehetünk, hogy ez megoldódjon."
 
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.provider.ical/src/com/openexchange/chronos/provider/ical/exception/ICalProviderExceptionMessages.java:85
+msgid ""
+"Access to this calendar is restricted. Please enter your credentials and try "
+"again."
+msgstr "A naptárhoz való hozzáférés korlátozott. Kérjük, adja meg hitelesítő adatait, és próbálja meg újra."
+
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.provider.ical/src/com/openexchange/chronos/provider/ical/exception/ICalProviderExceptionMessages.java:87
+msgid "Authentication failed. Please enter your credentials and try again."
+msgstr "Sikertelen volt a hitelesítés. Kérjük, adja meg hitelesítő adatait, és próbálja meg újra."
+
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.provider.ical/src/com/openexchange/chronos/provider/ical/exception/ICalProviderExceptionMessages.java:89
+msgid ""
+"Access to this calendar is restricted. Please enter your password and try "
+"again."
+msgstr "A naptárhoz való hozzáférés korlátozott. Adja meg a jelszavát, és próbálja meg újra."
+
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.provider.ical/src/com/openexchange/chronos/provider/ical/exception/ICalProviderExceptionMessages.java:91
+msgid "Authentication failed. Please enter your password and try again."
+msgstr "Sikertelen volt a hitelesítés. Adja meg a jelszavát, és próbálja meg újra."
+
 #. *
 #. * The name of the internal calendar provider.
 #.
@@ -1131,90 +1140,94 @@ msgstr "A befejezés időpontja a kezdő dátum előtt van. Kérjük, javítsa k
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:96
 msgid ""
 "Appointments in non-personal folders must not be classified as \"private\" "
-"or \"confidential\"."
-msgstr "A nem személyes mappákban lévő találkozók nem minősülhetnek \"privátnak\" vagy \"bizalmasnak\"."
+"or \"secret\"."
+msgstr "A nem személyes mappákban lévő találkozók nem minősíthetők \"privátnak\" vagy \"titkosnak\"."
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:98
-msgid ""
-"Appointments classified as \"private\" or \"confidential\" cannot be moved "
-"to this type of folder."
-msgstr "A \"privát\" vagy \"bizalmas\" besorolások nem helyezhetők át ebbe a mappába."
+msgid "Appointments with resources must not be classified as \"secret\"."
+msgstr "Az erőforrásokkal való találkozókat nem szabad \"titkosnak\" minősíteni."
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:100
+msgid ""
+"Appointments classified as \"private\" or \"secret\" cannot be moved to this "
+"type of folder."
+msgstr "A \"privát\" vagy \"titkos\" találkozók nem helyezhetők át ebbe a mappába."
+
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:102
 msgid "Occurrences of appointment series must not be classified differently."
 msgstr "A találkozósorozat találkozóit nem szabad különbözőképpen sorolni."
 
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:102
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:104
 msgid ""
 "The supplied recurrence rule is invalid. Please correct the rule and try "
 "again."
 msgstr "A megadott visszatérési szabály érvénytelen. Kérjük, javítsa ki a szabályt, és próbálja újra."
 
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:104
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:106
 msgid ""
 "The supplied reminder is invalid. Please correct the reminder and try again."
 msgstr "A megadott emlékeztető érvénytelen. Kérjük, javítsa ki az emlékeztetőt, és próbálja újra."
 
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:106
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:108
 msgid ""
 "The supplied timezone is invalid. Please select a valid timezone and try "
 "again."
 msgstr "A megadott időzóna érvénytelen. Kérjük, válasszon egy érvényes időzónát, és próbálkozzon újra."
 
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:108
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:110
 msgid ""
 "The supplied geographical location is invalid. Please select valid "
 "coordinates and try again."
 msgstr "A megadott földrajzi hely érvénytelen. Kérjük, válasszon érvényes koordinátákat, és próbálkozzon újra."
 
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:110
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:112
 msgid ""
 "The supplied types of start and end date are incompatible. Please correct "
 "the appointment times and try again."
 msgstr "A megadott kezdési és befejező dátum típusok nem kompatibilisek. Kérjük, javítsa ki a találkozó időpontját, és próbálkozzon újra."
 
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:112
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:114
 msgid ""
 "The supplied recurrence rule is not supported. Please use adjust the rule "
 "and try again."
 msgstr "A megadott visszatérési szabály nem támogatott. Kérjük, használja a szabály módosítását, és próbálja újra."
 
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:114
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:116
 msgid ""
 "The targeted occurrence is not part of the appointment series. Please select "
 "a valid recurrence identifier and try again."
 msgstr "A megcélzott esemény nem része a találkozósorozatnak. Kérjük, válasszon ki egy érvényes ismétlődő azonosítót, és próbálja újra."
 
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:116
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:118
 msgid ""
 "The split of the appointment series cannot be performed. Please select a "
 "valid split point and try again."
 msgstr "A találkozósorozat szétválasztása nem végezhető el. Kérjük, válasszon egy érvényes szétválasztási pontot, és próbálkozzon újra."
 
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:118
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:120
 msgid "Moving an appointment series into another folder is not supported."
 msgstr "A találkozósorozat egy másik mappába történő áthelyezése nem támogatott."
 
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:120
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:122
 msgid ""
 "Moving an occurrence of an appointment series into another folder is not "
 "supported."
 msgstr "A találkozósorozat egy találkozójának egy másik mappába történő áthelyezése nem támogatott."
 
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:122
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:124
 msgid "The calendar user \"%1$s\" is invalid."
 msgstr "A(z) \"%1$s\" naptár felhasználó érvénytelen."
 
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:124
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:126
 msgid ""
 "The supplied configuration is invalid. Please correct the configuration and "
 "try again."
 msgstr "A megadott beállítás érvénytelen. Kérjük, javítsa ki a beállítást, és próbálja újra."
 
 #. In order to accomplish the search, %1$d or more characters are required.
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:126
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:128
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:80
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/FindExceptionMessages.java:81
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/FindExceptionMessages.java:84
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:135
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:122
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:138
@@ -1222,7 +1235,7 @@ msgid ""
 "In order to accomplish the search, %1$d or more characters are required."
 msgstr "A keresés végrehajtásához legalább %1$d karakter szükséges."
 
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:128
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:130
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:137
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:130
 msgid ""
@@ -1230,51 +1243,51 @@ msgid ""
 "problematic character and try again."
 msgstr "A(z) \"%2$s\" mezőben lévő \"%1$s\" karaktert nem lehet elmenteni. Távolítsa el a problémás karaktert és próbálja újra."
 
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:130
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:132
 msgid ""
 "Some data entered exceeded the field limit. Please shorten the value for "
 "\"%1$s\" (limit: %2$d, current: %3$d) and try again."
 msgstr "Egyes beírt adatok meghaladták a mező korlátját. Kérjük, rövidítse le a \"%1$s\" értéket (méretkorlát: %2$d, aktuális méret: %3$d), és próbálkozzon újra."
 
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:132
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:134
 msgid "The maximum number of calendar subscriptions is exceeded."
 msgstr "A naptárbejegyzések maximális száma túllépve."
 
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:134
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:136
 msgid "The value for \"%2$s\" is invalid and wasn't be applied."
 msgstr "A (z) \"%2$s\" érték érvénytelen, és nem alkalmazható."
 
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:136
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:138
 msgid "The '%1$s' is either not an internal user or does not exist."
 msgstr "A (z) '%1$s' nem belső felhasználó, vagy nem létezik."
 
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:138
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:140
 msgid "Authentication failed."
 msgstr "A hitelesítés nem sikerült."
 
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:140
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:142
 msgid ""
 "Unable to create account. There have been issues with the provided "
 "authentication."
 msgstr "Nem sikerült fiókot létrehozni. Problémák adódtak a megadott hitelesítéssel."
 
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:142
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:144
 msgid "The quota for account '%1$s' in context '%2$s' exceeded the limit."
 msgstr "A (z) \"%1$s\" fiókhoz tartozó kvóta a(z) \"%2$s\" kontextusban túllépte a korlátot."
 
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:144
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:146
 msgid "The requested attachment was not found."
 msgstr "A keresett melléklet nem található."
 
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:146
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:148
 msgid "Too many appointments are queried. Please choose a shorter timeframe."
 msgstr "Túl sok találkozót lett lekérdezve. Kérjük, válasszon rövidebb időkeretet."
 
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:148
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:150
 msgid "The appointment contains too many participants."
 msgstr "A találkozó túl sok résztvevőt tartalmaz."
 
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:150
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:152
 msgid "The appointment contains too many reminders."
 msgstr "A találkozó túl sok emlékeztető tartalmaz."
 
@@ -1966,11 +1979,11 @@ msgstr "Összes névjegy beolvasása."
 msgid "Create, modify and delete contacts."
 msgstr "Névjegyek létrehozása, módosítása és törlése."
 
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.conversion/src/com/openexchange/conversion/DataExceptionMessages.java:61
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.conversion/src/com/openexchange/conversion/DataExceptionMessages.java:62
 msgid "The type %1$s of the provided file is not supported."
 msgstr "A fájl megadott %1$s típusa nem támogatott."
 
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.conversion/src/com/openexchange/conversion/DataExceptionMessages.java:63
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.conversion/src/com/openexchange/conversion/DataExceptionMessages.java:64
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.textxtraction/src/com/openexchange/textxtraction/TextXtractExceptionMessages.java:62
 msgid "The following field(s) are too long: %1$s"
 msgstr "A következő mezők túl hosszúak: %1$s"
@@ -2852,6 +2865,11 @@ msgid ""
 "configured for this filestore."
 msgstr "Az S3 tároló \"Bad Request\" hibaüzenetet adott. Ellenőrizze, hogy a com.openexchange.filestore.s3.[filestoreID].signerOverride megfelelő beállítását ehhez a fájltárolóhoz."
 
+#. Failed to create a bucket for name "%1$s" using region "%2$s"
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.filestore.s3/src/com/openexchange/filestore/s3/internal/S3ExceptionMessages.java:157
+msgid "Failed to create a bucket for name \"%1$s\" using region \"%2$s\""
+msgstr "Nem sikerült létrehozni egy bucketet a(z) \"%1$s\" névhez a(z) \"%2$s\" régióval"
+
 #. No such document: %1$s
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.filestore.sproxyd/src/com/openexchange/filestore/sproxyd/SproxydExceptionMessages.java:63
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.filestore.swift/src/com/openexchange/filestore/swift/SwiftExceptionMessages.java:64
@@ -2910,40 +2928,45 @@ msgstr "A keresési szűrő nem tartalmazza a keresési feltételt."
 msgid "A search filter contained an unknown field: '%1$s'."
 msgstr "A keresési szűrő ismeretlen mezőt tartalmaz: '%1$s'."
 
+#. The value '%1$s' is invalid for option '%2$s'.
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/FindExceptionMessages.java:81
+msgid "The value '%1$s' is invalid for option '%2$s'."
+msgstr "A(z) '%1$s' érték érvénytelen a(z) '%2$s' opciónál."
+
 #. The facet \"%1$s\" is mandatory and has to be set.
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/FindExceptionMessages.java:84
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/FindExceptionMessages.java:87
 msgid "The facet \"%1$s\" is mandatory and has to be set."
 msgstr "A(z) „%1$s” alapértelmezett és megadása kötelező."
 
 #. Could not parse \"%1$s\".
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/FindExceptionMessages.java:87
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/FindExceptionMessages.java:90
 msgid "Could not parse \"%1$s\"."
 msgstr "A(z) %1$s URI nem dolgozható fel."
 
 #. The folder id \"%1$s\" is invalid for module \"%2$s\".
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/FindExceptionMessages.java:90
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/FindExceptionMessages.java:93
 msgid "The folder id \"%1$s\" is invalid for module \"%2$s\"."
 msgstr "A(z) \"%1$s\" mappaazonosító nem érvényes a(z) \"%2$s\" modulhoz."
 
 #. The folder type \"%1$s\" is not supported.
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/FindExceptionMessages.java:93
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/FindExceptionMessages.java:96
 msgid "The folder type \"%1$s\" is not supported."
 msgstr "A(z) „%1$s” mappatípus nem támogatott."
 
 #. The facet types \"%1$s\" and \"%2$s\" conflict with each other and must not be used within one request.
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/FindExceptionMessages.java:96
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/FindExceptionMessages.java:99
 msgid ""
 "The facet types \"%1$s\" and \"%2$s\" conflict with each other and must not "
 "be used within one request."
 msgstr "A(z) „%1$s” és „%2$s\" nézettípusok ütköznek és nem használhatók egy kérésen belül."
 
 #. You are not allowed to search in module \"%1$s\".
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/FindExceptionMessages.java:99
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/FindExceptionMessages.java:102
 msgid "You are not allowed to search in module \"%1$s\"."
 msgstr "Nem kereshet a(z) „%1$s” modulban."
 
 #. The query yielded too many results to be displayed. Please refine your search options and try again.
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/FindExceptionMessages.java:102
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/FindExceptionMessages.java:105
 msgid ""
 "The query yielded too many results to be displayed. Please refine your "
 "search options and try again."
@@ -8366,13 +8389,13 @@ msgstr "%1$s a következő fájlokat osztotta meg:"
 
 #. * View file
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/json/compose/share/ShareComposeStrings.java:84
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:218
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:253
 msgid "View file"
 msgstr "Fájl megtekintése"
 
 #. * View files
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/json/compose/share/ShareComposeStrings.java:86
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:221
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:256
 msgid "View files"
 msgstr "Fájlok megtekintése"
 
@@ -8380,7 +8403,7 @@ msgstr "Fájlok megtekintése"
 #. Indicates the elapsed date for affected message's attachments
 #. * The link will expire on 01/01/16 *
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/json/compose/share/ShareComposeStrings.java:90
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:236
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:277
 msgid "The link will expire on %1$s"
 msgstr "A hivatkozás lejárati ideje: %1$s"
 
@@ -9510,6 +9533,10 @@ msgstr "A keresett megosztás jelenleg nem érhető el. Kérem, próbálja újra
 msgid "image"
 msgstr "kép"
 
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/groupware/TargetProxyTypeStrings.java:69
+msgid "calendar"
+msgstr "naptár"
+
 #. subject
 #. * $username has shared file "$filename" with you.
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:65
@@ -9551,290 +9578,373 @@ msgstr "%1$s megosztotta a(z) \"%2$s\" mappát Önnel."
 msgid "%1$s has shared %2$d folders with you."
 msgstr "%1$s megosztott %2$s mappát Önnel."
 
-#. * $username has shared file "$filename" with the group "Sales Dept.".
+#. * $username has shared the calendar "$folder" with you.
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:89
+msgid "%1$s has shared the calendar \"%2$s\" with you."
+msgstr "%1$s megosztotta veled a(z) \"%2$s\" naptárat."
+
+#. * $username has shared $number calendars with you.
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:92
+msgid "%1$s has shared %2$d calendars with you."
+msgstr "%1$s megosztott %2$s mappát Önnel."
+
+#. * $username has shared file "$filename" with the group "Sales Dept.".
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:95
 msgid "%1$s has shared the file \"%2$s\" with the group \"%3$s\"."
 msgstr "%1$s megosztotta a(z) \"%2$s\" fájlt a(z) \"%3$s\" csoporttal."
 
 #. * $username has shared $number_of_files files with the group "Sales Dept.".
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:92
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:98
 msgid "%1$s has shared %2$s files with the group \"%3$s\"."
 msgstr "%1$s megosztott %2$s fájlt a(z) \"%3$s\" csoporttal."
 
 #. * $username has shared image "$filename" with the group "Sales Dept.".
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:95
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:101
 msgid "%1$s has shared the image \"%2$s\" with the group \"%3$s\"."
 msgstr "%1$s megosztotta a(z) \"%2$s\" képet a(z) \"%3$s\" csoporttal."
 
 #. * $username has shared $number_of_images images with the group "Sales Dept.".
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:98
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:104
 msgid "%1$s has shared %2$s images with the group \"%3$s\"."
 msgstr "%1$s megosztott %2$s képet a(z) \"%3$s\" csoporttal."
 
 #. * $username has shared item "$filename" with the group "Sales Dept.".
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:101
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:107
 msgid "%1$s has shared the item \"%2$s\" with the group \"%3$s\"."
 msgstr "%1$s megosztotta a(z) \"%2$s\" elemet a(z) \"%3$s\" csoporttal."
 
 #. * $username has shared $number items with the group "Sales Dept.".
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:104
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:110
 msgid "%1$s has shared %2$s items with the group \"%3$s\"."
 msgstr "%1$s megosztott %2$s elemet a(z) \"%3$s\" csoporttal."
 
 #. * $username has shared folder "$folder" with the group "Sales Dept.".
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:107
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:113
 msgid "%1$s has shared the folder \"%2$s\" with the group \"%3$s\"."
 msgstr "%1$s megosztotta a(z) \"%2$s\" mappát a(z) \"%3$s\" csoporttal."
 
 #. * $username has shared $number folders with the group "Sales Dept.".
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:110
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:116
 msgid "%1$s has shared %2$d folders with the group \"%3$s\"."
 msgstr "%1$s megosztott %2$s mappát a(z) \"%3$s\" csoporttal."
 
+#. * $username has shared calendar "$folder" with the group "Sales Dept.".
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:119
+msgid "%1$s has shared the calendar \"%2$s\" with the group \"%3$s\"."
+msgstr "%1$s megosztotta a(z) \"%2$s\" naptár a(z) \"%3$s\" csoporttal."
+
+#. * $username has shared $number calendars with the group "Sales Dept.".
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:122
+msgid "%1$s has shared %2$d calendars with the group \"%3$s\"."
+msgstr "%1$s megosztott %2$s naptárt a(z) \"%3$s\" csoporttal."
+
 #. detailed body
 #. * $username ($user_email) has shared file "$filename" with you. Please click the button below to view it.
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:114
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:126
 msgid ""
 "%1$s (%2$s) has shared the file \"%3$s\" with you. Please click the button "
 "below to view it."
 msgstr "%1$s (%2$s) megosztotta a(z) \"%3$s\" fájlt Önnel. Megtekintéséhez kattintson az alatta lévő gombra."
 
 #. * $username ($user_email) has shared $number_of_files files with you. Please click the button below to view them.
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:117
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:129
 msgid ""
 "%1$s (%2$s) has shared %3$s files with you. Please click the button below to "
 "view them."
 msgstr "%1$s (%2$s) megosztott %3$s fájlt Önnel. Megtekintésükhöz kattintson az alatta lévő gombra."
 
 #. * $username ($user_email) has shared image "$filename" with you. Please click the button below to view it.
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:120
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:132
 msgid ""
 "%1$s (%2$s) has shared the image \"%3$s\" with you. Please click the button "
 "below to view it."
 msgstr "%1$s (%2$s) megosztotta a(z) \"%3$s\" képet Önnel. Megtekintéséhez kattintson az alatta lévő gombra."
 
 #. * $username ($user_email) has shared $number_of_images images with you. Please click the button below to view them.
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:123
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:135
 msgid ""
 "%1$s (%2$s) has shared %3$s images with you. Please click the button below "
 "to view them."
 msgstr "%1$s (%2$s) megosztott %3$s képet Önnel. Megtekintésükhöz kattintson az alatta lévő gombra."
 
 #. * $username ($user_email) has shared item "$filename" with you. Please click the button below to view it.
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:126
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:138
 msgid ""
 "%1$s (%2$s) has shared the item \"%3$s\" with you. Please click the button "
 "below to view it."
 msgstr "%1$s (%2$s) megosztotta a(z) \"%3$s\" elemet Önnel. Megtekintéséhez kattintson az alatta lévő gombra."
 
 #. * $username ($user_email) has shared $number items with you. Please click the button below to view them.
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:129
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:141
 msgid ""
 "%1$s (%2$s) has shared %3$s items with you. Please click the button below to "
 "view them."
 msgstr "%1$s (%2$s) megosztott %3$s elemet Önnel. Megtekintésükhöz kattintson az alatta lévő gombra."
 
 #. * $username ($user_email) has shared folder $folder with you. Please click the button below to view it.
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:132
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:144
 msgid ""
 "%1$s (%2$s) has shared the folder \"%3$s\" with you. Please click the button "
 "below to view it."
 msgstr "%1$s (%2$s) megosztotta a(z) \"%3$s\" mappát Önnel. Megtekintéséhez kattintson az alatta lévő gombra."
 
 #. * $username ($user_email) has shared folder $number folders with you. Please click the button below to view them.
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:135
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:147
 msgid ""
 "%1$s (%2$s) has shared %3$ folders with you. Please click the button below "
 "to view them."
 msgstr "%1$s (%2$s) megosztott %3$s elemet Önnel. Megtekintésükhöz kattintson az alatta lévő gombra."
 
+#. * $username ($user_email) has shared calendar $folder with you. Please click the button below to view it.
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:150
+msgid ""
+"%1$s (%2$s) has shared the calendar \"%3$s\" with you. Please click the "
+"button below to view it."
+msgstr "%1$s (%2$s) megosztotta a(z) \"%3$s\" naptárt Önnel. Megtekintéséhez kattintson az alatta lévő gombra."
+
+#. * $username ($user_email) has shared $number calendars with you. Please click the button below to view them.
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:153
+msgid ""
+"%1$s (%2$s) has shared %3$ calendars with you. Please click the button below "
+"to view them."
+msgstr "%1$s (%2$s) megosztott %3$s naptárt Önnel. Megtekintésükhöz kattintson az alatta lévő gombra."
+
 #. * $username ($user_email) has shared file "$filename" with the group "Sales Dept.". Please click the button below to view it.
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:138
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:156
 msgid ""
 "%1$s (%2$s) has shared the file \"%3$s\" with the group \"%4$s\". Please "
 "click the button below to view it."
 msgstr "%1$s (%2$s) megosztotta a(z) \"%3$s\" fájlt a(z) \"%4$s\" csoporttal. Megtekintéséhez kattintson az alatta lévő gombra."
 
 #. * $username ($user_email) has shared $number_of_files files with the group "Sales Dept.". Please click the button below to view them.
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:141
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:159
 msgid ""
 "%1$s (%2$s) has shared %3$s files with the group \"%4$s\". Please click the "
 "button below to view them."
 msgstr "%1$s (%2$s) megosztott %3$s fájlt a(z) \"%4$s\" csoporttal. Megtekintésükhöz kattintson az alatta lévő gombra."
 
 #. * $username ($user_email) has shared image "$filename" with the group "Sales Dept.". Please click the button below to view it.
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:144
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:162
 msgid ""
 "%1$s (%2$s) has shared the image \"%3$s\" with the group \"%4$s\". Please "
 "click the button below to view it."
 msgstr "%1$s (%2$s) megosztotta a(z) \"%3$s\" képet a(z) \"%4$s\" csoporttal. Megtekintéséhez kattintson az alatta lévő gombra."
 
 #. * $username ($user_email) has shared $number_of_images images with the group "Sales Dept.". Please click the button below to view them.
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:147
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:165
 msgid ""
 "%1$s (%2$s) has shared %3$s images with the group \"%4$s\". Please click the "
 "button below to view them."
 msgstr "%1$s (%2$s) megosztott %3$s képet a(z) \"%4$s\" csoporttal. Megtekintésükhöz kattintson az alatta lévő gombra."
 
 #. * $username ($user_email) has shared item "$filename" with the group "Sales Dept.". Please click the button below to view it.
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:150
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:168
 msgid ""
 "%1$s (%2$s) has shared the item \"%3$s\" with the group \"%4$s\". Please "
 "click the button below to view it."
 msgstr "%1$s (%2$s) megosztotta a(z) \"%3$s\" elemet a(z) \"%4$s\" csoporttal. Megtekintéséhez kattintson az alatta lévő gombra."
 
 #. * $username ($user_email) has shared $number items with the group "Sales Dept.". Please click the button below to view them.
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:153
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:171
 msgid ""
 "%1$s (%2$s) has shared %3$s items with the group \"%4$s\". Please click the "
 "button below to view them."
 msgstr "%1$s (%2$s) megosztott %3$s elemet a(z) \"%4$s\" csoporttal. Megtekintésükhöz kattintson az alatta lévő gombra."
 
 #. * $username ($user_email) has shared folder $folder with the group "Sales Dept.". Please click the button below to view it.
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:156
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:174
 msgid ""
 "%1$s (%2$s) has shared the folder \"%3$s\" with the group \"%4$s\". Please "
 "click the button below to view it."
 msgstr "%1$s (%2$s) megosztotta a(z) \"%3$s\" mappát a(z) \"%4$s\" csoporttal. Megtekintéséhez kattintson az alatta lévő gombra."
 
 #. * $username ($user_email) has shared folder $number folders with the group "Sales Dept.". Please click the button below to view them.
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:159
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:177
 msgid ""
 "%1$s (%2$s) has shared %3$ folders with the group \"%4$s\". Please click the "
 "button below to view them."
 msgstr "%1$s (%2$s) megosztott %3$s elemet a(z) \"%4$s\" csoporttal. Megtekintésükhöz kattintson az alatta lévő gombra."
 
+#. * $username ($user_email) has shared the calendar $folder with the group "Sales Dept.". Please click the button below to view it.
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:180
+msgid ""
+"%1$s (%2$s) has shared the calendar \"%3$s\" with the group \"%4$s\". Please "
+"click the button below to view it."
+msgstr "%1$s (%2$s) megosztotta a(z) \"%3$s\" naptárt a(z) \"%4$s\" csoporttal. Megtekintéséhez kattintson az alatta lévő gombra."
+
+#. * $username ($user_email) has shared $number calendars with the group "Sales Dept.". Please click the button below to view them.
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:183
+msgid ""
+"%1$s (%2$s) has shared %3$ calendars with the group \"%4$s\". Please click "
+"the button below to view them."
+msgstr "%1$s (%2$s) megosztott %3$s naptárt a(z) \"%4$s\" csoporttal. Megtekintésükhöz kattintson az alatta lévő gombra."
+
 #. * $username ($user_email) has shared file "$filename" with you and left you a message:
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:163
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:186
 msgid ""
 "%1$s (%2$s) has shared the file \"%3$s\" with you and left you a message:"
 msgstr "%1$s (%2$s) megosztotta a(z) \"%3$s\" fájlt Önnel és a következő üzenetet hagyta:"
 
 #. * $username ($user_email) has shared $number_of_files files with you and left you a message:
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:166
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:189
 msgid "%1$s (%2$s) has shared %3$s files with you and left you a message:"
 msgstr "%1$s (%2$s) megosztott %3$s fájlt Önnel és a következő üzenetet hagyta:"
 
 #. * $username ($user_email) has shared photo "$filename" with you and left you a message:
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:169
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:192
 msgid ""
 "%1$s (%2$s) has shared the image \"%3$s\" with you and left you a message:"
 msgstr "%1$s (%2$s) megosztotta a(z) \"%3$s\" képet Önnel és a következő üzenetet hagyta:"
 
 #. * $username ($user_email) has shared $number_of_images images with you and left you a message:
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:172
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:195
 msgid "%1$s (%2$s) has shared %3$s images with you and left you a message:"
 msgstr "%1$s (%2$s) megosztott %3$s képet Önnel és a következő üzenetet hagyta:"
 
 #. * $username ($user_email) has shared a folder with you and left you a message:
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:175
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:198
 msgid ""
 "%1$s (%2$s) has shared the folder \"%3$s\" with you and left you a message:"
 msgstr "%1$s (%2$s) megosztotta a(z) \"%3$s\" mappát Önnel és a következő üzenetet hagyta:"
 
+#. * $username ($user_email) has shared a calendar with you and left you a message:
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:201
+msgid ""
+"%1$s (%2$s) has shared the calendar \"%3$s\" with you and left you a message:"
+msgstr "%1$s (%2$s) megosztotta a(z) \"%3$s\" naptárt Önnel és a következő üzenetet hagyta:"
+
 #. * $username ($user_email) has shared item "$filename" with you.
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:178
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:204
 msgid ""
 "%1$s (%2$s) has shared the item \"%3$s\" with you and left you a message:"
 msgstr "%1$s (%2$s) megosztotta a(z) \"%3$s\" elemet Önnel és a következő üzenetet hagyta:"
 
 #. * $username ($user_email) has shared $number_of_items items with you.
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:181
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:207
 msgid "%1$s (%2$s) has shared %3$d items with you and left you a message:"
 msgstr "%1$s (%2$s) megosztott %3$s elemet Önnel és a következő üzenetet hagyta:"
 
 #. * $username ($user_email) has shared $number_of_folder items with you.
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:184
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:210
 msgid "%1$s (%2$s) has shared %3$d folders with you and left you a message:"
 msgstr "%1$s (%2$s) megosztott %3$s mappát Önnel és a következő üzenetet hagyta:"
 
+#. * $username ($user_email) has shared $number_of_folder calendars with you.
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:213
+msgid "%1$s (%2$s) has shared %3$d calendars with you and left you a message:"
+msgstr "%1$s (%2$s) megosztott %3$s naptárt Önnel és a következő üzenetet hagyta:"
+
 #. * $username ($user_email) has shared file "$filename" with the group "Sales Dept." and left a message:
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:187
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:216
 msgid ""
 "%1$s (%2$s) has shared the file \"%3$s\" with the group \"%4$s\" and left a "
 "message:"
 msgstr "%1$s (%2$s) megosztotta a(z) \"%3$s\" fájlt a(z) \"%4$s\" csoporttal és a következő üzenetet hagyta:"
 
 #. * $username ($user_email) has shared $number_of_files files with the group "Sales Dept." and left a message:
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:190
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:219
 msgid ""
 "%1$s (%2$s) has shared %3$s files with the group \"%4$s\" and left a message:"
 msgstr "%1$s (%2$s) megosztott %3$s fájlt a(z) \"%4$s\" csoporttal és a következő üzenetet hagyta:"
 
 #. * $username ($user_email) has shared photo "$filename" with the group "Sales Dept." and left a message:
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:193
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:222
 msgid ""
 "%1$s (%2$s) has shared the image \"%3$s\" with the group \"%4$s\" and left a "
 "message:"
 msgstr "%1$s (%2$s) megosztotta a(z) \"%3$s\" képet a(z) \"%4$s\" csoporttal és a következő üzenetet hagyta:"
 
 #. * $username ($user_email) has shared $number_of_images images with the group "Sales Dept." and left a message:
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:196
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:225
 msgid ""
 "%1$s (%2$s) has shared %3$s images with the group \"%4$s\" and left a "
 "message:"
 msgstr "%1$s (%2$s) megosztott %3$s képet a(z) \"%4$s\" csoporttal és a következő üzenetet hagyta:"
 
 #. * $username ($user_email) has shared a folder with the group "Sales Dept." and left a message:
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:199
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:228
 msgid ""
 "%1$s (%2$s) has shared the folder \"%3$s\" with the group \"%4$s\" and left "
 "a message:"
 msgstr "%1$s (%2$s) megosztotta a(z) \"%3$s\" mappát a(z) \"%4$s\" csoporttal és a következő üzenetet hagyta:"
 
+#. * $username ($user_email) has shared a calendar with the group "Sales Dept." and left a message:
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:231
+msgid ""
+"%1$s (%2$s) has shared the calendar \"%3$s\" with the group \"%4$s\" and "
+"left a message:"
+msgstr "%1$s (%2$s) megosztotta a(z) \"%3$s\" naptárt a(z) \"%4$s\" csoporttal és a következő üzenetet hagyta:"
+
 #. * $username ($user_email) has shared item "$filename" with the group "Sales Dept." and left a message:
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:202
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:234
 msgid ""
 "%1$s (%2$s) has shared the item \"%3$s\" with the group \"%4$s\" and left a "
 "message:"
 msgstr "%1$s (%2$s) megosztotta a(z) \"%3$s\" elemet a(z) \"%4$s\" csoporttal és a következő üzenetet hagyta:"
 
 #. * $username ($user_email) has shared $number_of_items items with the group "Sales Dept." and left a message:
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:205
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:237
 msgid ""
 "%1$s (%2$s) has shared %3$d items with the group \"%4$s\" and left a message:"
 msgstr "%1$s (%2$s) megosztott %3$s elemet a(z) \"%4$s\" csoporttal és a következő üzenetet hagyta:"
 
 #. * $username ($user_email) has shared $number_of_folder items with the group "Sales Dept." and left a message:
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:208
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:240
 msgid ""
 "%1$s (%2$s) has shared %3$d folders with the group \"%4$s\" and left a "
 "message:"
 msgstr "%1$s (%2$s) megosztott %3$s mappát a(z) \"%4$s\" csoporttal és a következő üzenetet hagyta:"
 
+#. * $username ($user_email) has shared $number_of_folder calendars with the group "Sales Dept." and left a message:
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:243
+msgid ""
+"%1$s (%2$s) has shared %3$d calendars with the group \"%4$s\" and left a "
+"message:"
+msgstr "%1$s (%2$s) megosztott %3$s naptárt a(z) \"%4$s\" csoporttal és a következő üzenetet hagyta:"
+
 #. button with label
 #. * View image
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:212
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:247
 msgid "View image"
 msgstr "Kép megtekintése"
 
 #. * View images
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:215
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:250
 msgid "View images"
 msgstr "Képek megtekintése"
 
 #. * View folder
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:224
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:259
 msgid "View folder"
 msgstr "Mappa megtekintése"
 
 #. * View folders
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:227
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:262
 msgid "View folders"
 msgstr "Mappák megtekintése"
 
+#. * View calendar
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:265
+msgid "View calendar"
+msgstr "Naptár megtekintése"
+
+#. * View calendars
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:268
+msgid "View calendars"
+msgstr "Naptárak megtekintése"
+
 #. * View item
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:230
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:271
 msgid "View item"
 msgstr "Elem megtekintése"
 
 #. * View items
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:233
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:274
 msgid "View items"
 msgstr "Elemek megtekintése"
 
 #. * The link is password protected. To see it you must use the following password: kac7Nede *
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:239
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:280
 msgid ""
 "This link is password protected. You need the following password to open it:"
 msgstr "Ez a hivatkozás jelszóval védett, megnyitásához a következő jelszóra van szükség:"
@@ -9845,40 +9955,40 @@ msgstr "Ez a hivatkozás jelszóval védett, megnyitásához a következő jelsz
 #. *
 #. * OX App Suite - Forgot your password?
 #.
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:248
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:289
 msgid "%1$s - Forgot your password?"
 msgstr "%1$s - Elfelejtette a jelszót?"
 
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:250
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:291
 msgid "Hello,"
 msgstr "Üdvözöljük!"
 
 #. * we got informed that you forgot your password. You can set a new password here:
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:253
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:294
 msgid ""
 "we got informed that you forgot your password. You can set a new password "
 "here:"
 msgstr "értesítést kaptunk arról, hogy elfelejtette a jelszavát. Itt új jelszót állíthat be."
 
 #. * Set password
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:256
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:297
 msgid "Set password"
 msgstr "Jelszó beállítása"
 
 #. * If you didn't request this, please ignore this email. Your password won't change until you access the button above and set a new one.
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:259
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:300
 msgid ""
 "If you didn't request this, please ignore this email. Your password won't "
 "change until you access the button above and set a new one."
 msgstr "Amennyiben nem kért ilyet, akkor hagyja figyelmen kívül ezt a levelet. A jelszava nem fog addig megváltozni, amíg a fenti gombbal nem állít be egy újat."
 
 #. * This is an automated message, please do not reply.
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:262
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:303
 msgid "This is an automated message, please do not reply."
 msgstr "Ez egy automatikus üzenet, kérjük ne válaszoljon rá."
 
 #. An error occurred for user 'unknown'
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:265
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:306
 msgid "unknown"
 msgstr "ismeretlen"
 
@@ -9886,12 +9996,12 @@ msgstr "ismeretlen"
 #. * Drive Mail notifications
 #.
 #. * and %1$d more files.
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:271
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:312
 msgid "and %1$d more files."
 msgstr "és további %1$d fájl."
 
 #. * and 1 more file.
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:274
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:315
 msgid "and 1 more file."
 msgstr "és további 1 fájl."
 
@@ -12505,6 +12615,26 @@ msgstr "UTC"
 msgid "Zulu"
 msgstr "Zulu"
 
+#~ msgid "Read all your events."
+#~ msgstr "Összes esemény elolvasása."
+
+#~ msgid "Create, modify and delete events."
+#~ msgstr "Események létrehozása, módosítása és törlése."
+
+#~ msgid ""
+#~ "Appointments in non-personal folders must not be classified as \"private"
+#~ "\" or \"confidential\"."
+#~ msgstr ""
+#~ "A nem személyes mappákban lévő találkozók nem minősülhetnek \"privátnak\" "
+#~ "vagy \"bizalmasnak\"."
+
+#~ msgid ""
+#~ "Appointments classified as \"private\" or \"confidential\" cannot be "
+#~ "moved to this type of folder."
+#~ msgstr ""
+#~ "A \"privát\" vagy \"bizalmas\" besorolások nem helyezhetők át ebbe a "
+#~ "mappába."
+
 #~ msgctxt "verb"
 #~ msgid "accepted"
 #~ msgstr "elfogadva"
@@ -13233,9 +13363,6 @@ msgstr "Zulu"
 
 #~ msgid "modules/caldav/url > io.ox/caldav//url"
 #~ msgstr "modules/caldav/url > io.ox/caldav//url"
-
-#~ msgid "calendar"
-#~ msgstr "naptár"
 
 #~ msgid "starting bundle: \"com.openexchange.carddav\""
 #~ msgstr "kötegelt indítás: \"com.openexchange.carddav\""

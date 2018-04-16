@@ -727,6 +727,9 @@ abstract class AbstractSMTPTransport extends MailTransport implements MimeSuppor
                 }
             }
         } catch (javax.mail.AuthenticationFailedException e) {
+            if (accountId == Account.DEFAULT_ID) {
+                LOG.warn("", e);
+            }
             throw MimeMailExceptionCode.TRANSPORT_INVALID_CREDENTIALS.create(e, smtpConfig.getServer(), e.getMessage());
         } catch (MessagingException e) {
             if (MimeMailException.isSSLHandshakeException(e)) {

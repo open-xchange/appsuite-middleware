@@ -228,11 +228,13 @@ Munin-scripts for Jolokia need an additional perl modules json and lwp, which ar
 
 If not, please install the following modules:
 
-Debian: 
+Debian:
+
 * libwww-perl
 * libjson-perl
 
-rpm
+rpm:
+
 * perl-JSON
 * perl-libwww-perl
 
@@ -339,5 +341,5 @@ For further information how to setup this file, [http://www.jolokia.org/referenc
 
 ## Jolokia with Grizzly
 
-When using Grizzly and munin scripts on the same machine, you can connect to jolokia directly with the servers address, e.g.: ``http://localhost:8009/monitoring/jolokia``. When connecting through another machine, a best practise is to use the same forwarding as described below.
+When using Grizzly and munin scripts on the same machine, you can connect to jolokia directly with the servers address, e.g.: ``http://localhost:8009/monitoring/jolokia``. When connecting through another machine, a best practise is to use the same forwarding as described in the [login counter example](login_counter_howto.html).
 

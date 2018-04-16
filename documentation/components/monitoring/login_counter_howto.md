@@ -128,7 +128,7 @@ A more detailed documentation on how to use the Jolokia interface can be found [
 
 More information about the parameters `p1`, `p2`, etc. can be found at the [source code](http://oxpedia.org/wiki/index.php?title=SourceCodeAccess).
 
-In the example above, to get the number of logins in a specific timeframe and with a specific client, we need to call the method `getNumberOfLogins` with the parameters `startDate`, `endDate`, `aggregate` and `clientstring`. They correspond to the command line parameters to the `logincounter` command line tool as described [here](http://oxpedia.org/wiki/index.php?title=AppSuite:Logincounter).
+In the example above, to get the number of logins in a specific timeframe and with a specific client, we need to call the method `getNumberOfLogins` with the parameters `startDate`, `endDate`, `aggregate` and `clientstring`. They correspond to the command line parameters of the `logincounter` command line tool as described [here](http://oxpedia.org/wiki/index.php?title=AppSuite:Logincounter).
 
 In `curl` this call would look like this:
 

@@ -47,32 +47,52 @@
  *
  */
 
-package com.openexchange.groupware.importexport;
+package com.openexchange.ajax.importexport;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-import java.io.UnsupportedEncodingException;
-import java.sql.SQLException;
+import java.io.ByteArrayInputStream;
 import org.junit.Test;
-import com.openexchange.api2.TasksSQLInterface;
-import com.openexchange.data.conversion.ical.ical4j.internal.calendar.Participants;
-import com.openexchange.exception.OXException;
-import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.ajax.importexport.actions.ICalImportRequest;
+import com.openexchange.ajax.importexport.actions.ICalImportResponse;
+import com.openexchange.ajax.task.ManagedTaskTest;
 import com.openexchange.groupware.container.Participant;
-import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.groupware.tasks.Task;
-import com.openexchange.groupware.tasks.TasksSQLImpl;
-import com.openexchange.importexport.formats.Format;
 
-public class Bug8475 extends AbstractICalImportTest {
+/**
+ * {@link Bug8475Test_TaskAttendeeHandling}
+ *
+ * @author <a href="mailto:Jan-Oliver.Huhn@open-xchange.com">Jan-Oliver Huhn</a>
+ * @since v7.10.0
+ */
+public class Bug8475Test_TaskAttendeeHandling extends ManagedTaskTest {
+
+    private final String task =
+        "BEGIN:VCALENDAR\n"
+        + "VERSION:2.0\n"
+        + "PRODID:-//Apple Computer\\, Inc//iCal 1.5//EN\n"
+        + "BEGIN:VTODO\n"
+        + "ORGANIZER:MAILTO:tobias.friedrich@open-xchange.com\n"
+        + "ATTENDEE:MAILTO:tobias.prinz@open-xchange.com\n"
+        + "DTSTART:20070608T080000Z\n"
+        + "STATUS:COMPLETED\n"
+        + "SUMMARY:Test todo\n"
+        + "UID:8D4FFA7A-ABC0-11D7-8200-00306571349C-RID\n"
+        + "DUE:20070618T080000Z\n"
+        + "END:VTODO\n"
+        + "END:VCALENDAR";
 
     @Test
-    public void testAttendeeNotFound() throws OXException, UnsupportedEncodingException, SQLException, OXException, NumberFormatException, OXException, OXException {
-        final String ical = "BEGIN:VCALENDAR\n" + "VERSION:2.0\n" + "PRODID:-//Apple Computer\\, Inc//iCal 1.5//EN\n" + "BEGIN:VTODO\n" + "ORGANIZER:MAILTO:tobias.friedrich@open-xchange.com\n" + "ATTENDEE:MAILTO:tobias.prinz@open-xchange.com\n" + "DTSTART:20070608T080000Z\n" + "STATUS:COMPLETED\n" + "SUMMARY:Test todo\n" + "UID:8D4FFA7A-ABC0-11D7-8200-00306571349C-RID\n" + "DUE:20070618T080000Z\n" + "END:VTODO\n" + "END:VCALENDAR";
-        final ImportResult res = performOneEntryCheck(ical, Format.ICAL, FolderObject.TASK, "8475", ctx, false);
+    public void testAttendeeNotFound() throws Exception {
+        final ICalImportRequest request = new ICalImportRequest(folderID, new ByteArrayInputStream(task.toString().getBytes(com.openexchange.java.Charsets.UTF_8)), false);
+        ICalImportResponse response = getClient().execute(request);
+        assertEquals(1, response.getImports().length);
 
-        final TasksSQLInterface tasks = new TasksSQLImpl(sessObj);
-        final Task task = tasks.getTaskById(Integer.valueOf(res.getObjectId()), Integer.valueOf(res.getFolder()));
+        String objectId = response.getImports()[0].getObjectId();
+        Task task = ttm.getTaskFromServer(folderID, Integer.parseInt(objectId));
+        assertNotNull(task);
 
         final Participant[] participants = task.getParticipants();
         assertEquals("One participant?", 1, participants.length);
@@ -82,24 +102,43 @@ public class Bug8475 extends AbstractICalImportTest {
                 found = true;
             }
         }
-        assertTrue("Found attendee?", found);
+        assertTrue("The attendee tobias.prinz@open-xchange.com couldnt be found", found);
     }
 
     @Test
     public void testInternalAttendee() throws Exception {
-        final User testUser = getUserParticipant();
-        final String ical = "BEGIN:VCALENDAR\n" + "VERSION:2.0\n" + "PRODID:-//Apple Computer\\, Inc//iCal 1.5//EN\n" + "BEGIN:VTODO\n" + "ORGANIZER:MAILTO:tobias.friedrich@open-xchange.com\n" + "ATTENDEE:MAILTO:" + testUser.getMail() + "\n" + "DTSTART:20070608T080000Z\n" + "STATUS:COMPLETED\n" + "SUMMARY:Test todo\n" + "UID:8D4FFA7A-ABC0-11D7-8200-00306571349C-RID\n" + "DUE:20070618T080000Z\n" + "END:VTODO\n" + "END:VCALENDAR";
-        final ImportResult res = performOneEntryCheck(ical, Format.ICAL, FolderObject.TASK, "8475", ctx, false);
 
-        final TasksSQLInterface tasks = new TasksSQLImpl(sessObj);
-        final Task task = tasks.getTaskById(Integer.valueOf(res.getObjectId()), Integer.valueOf(res.getFolder()));
+        final String ical =
+            "BEGIN:VCALENDAR\n"
+            + "VERSION:2.0\n"
+            + "PRODID:-//Apple Computer\\, Inc//iCal 1.5//EN\n"
+            + "BEGIN:VTODO\n"
+            + "ORGANIZER:MAILTO:tobias.friedrich@open-xchange.com\n"
+            + "ATTENDEE:MAILTO:"
+            + testUser.getLogin() + "\n"
+            + "DTSTART:20070608T080000Z\n"
+            + "STATUS:COMPLETED\n"
+            + "SUMMARY:Test todo\n"
+            + "UID:8D4FFA7A-ABC0-11D7-8200-00306571349C-RID\n"
+            + "DUE:20070618T080000Z\n"
+            + "END:VTODO\n" + "END:VCALENDAR";
+
+        final ICalImportRequest request = new ICalImportRequest(folderID, new ByteArrayInputStream(ical.toString().getBytes(com.openexchange.java.Charsets.UTF_8)), false);
+        ICalImportResponse response = getClient().execute(request);
+        assertEquals(1, response.getImports().length);
+
+        String objectId = response.getImports()[0].getObjectId();
+        Task task = ttm.getTaskFromServer(folderID, Integer.parseInt(objectId));
 
         final Participant[] participants = task.getParticipants();
         assertEquals("One participant?", 1, participants.length);
         final Participant p = participants[0];
-        final User user = Participants.userResolver.loadUser(testUser.getId(), ctx);
-        assertEquals("User \"" + testUser.getMail() + "\"" + testUser.getMail().length() + " gets participant \"" + p + "\"" + p.toString().length() + ". using resolver " + Participants.userResolver + "\"" + user + "\"", testUser.getId(), p.getIdentifier());
-        // FIXME: Grossly violates encapsulation
+
+        assertEquals(1, task.getUsers().length);
+        UserParticipant internalParticipant = task.getUsers()[0];
+        assertNotNull(internalParticipant);
+        assertEquals(task.getCreatedBy(), internalParticipant.getIdentifier());
 
     }
+
 }
