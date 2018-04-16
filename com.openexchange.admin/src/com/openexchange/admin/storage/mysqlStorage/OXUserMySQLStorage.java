@@ -193,10 +193,6 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
 
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(OXUserMySQLStorage.class);
 
-    private static final String SYMBOLIC_NAME_CACHE = "com.openexchange.caching";
-
-    private static final String NAME_OXCACHE = "oxcache";
-
     // DEFAULTS FOR USER CREATE; SHOULD BE MOVED TO PROPERTIES FILE
     private static final String DEFAULT_TIMEZONE_CREATE = "Europe/Berlin";
 
@@ -1292,23 +1288,6 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             closeSQLStuff(stmt);
             releaseWriteContextConnection(con, ctx, cache);
         }
-    }
-
-    /**
-     * Checks whether the oldAlias set contains the new alias (ignoring the case) and removes it if it does.
-     *
-     * @param newAlias The new alias
-     * @param oldAlias The old alias set
-     * @return true if it contains the new alias
-     */
-    private boolean containsAndRemove(String newAlias, Set<String> oldAlias) {
-        for (String alias : oldAlias) {
-            if (alias.equalsIgnoreCase(newAlias)) {
-                oldAlias.remove(alias);
-                return true;
-            }
-        }
-        return false;
     }
 
     private int getDefaultInfoStoreFolder(final User user, final Context ctx, final Connection con) {
@@ -2897,14 +2876,12 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
 
                 // delete from user_setting_admin if user is mailadmin
                 final OXToolStorageInterface tools = OXToolStorageInterface.getInstance();
-                boolean is_admin = false;
                 if (userId == tools.getAdminForContext(ctx, write_ox_con)) {
                     stmt = write_ox_con.prepareStatement("DELETE FROM user_setting_admin WHERE cid = ? AND user = ?");
                     stmt.setInt(1, contextId);
                     stmt.setInt(2, userId);
                     stmt.executeUpdate();
                     stmt.close();
-                    is_admin = true;
                 }
 
                 stmt = write_ox_con.prepareStatement("DELETE FROM user_setting WHERE cid = ? AND user_id = ?");
