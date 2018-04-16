@@ -76,7 +76,6 @@ import com.openexchange.groupware.importexport.mappers.PropertyDrivenMapperTest;
 
     //separate tests for reported bugs
     //       Bug7470Test.class , //FIXME
-    Bug8654.class,
     Bug8681Suite.class,
 
 })
