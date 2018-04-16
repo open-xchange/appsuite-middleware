@@ -58,6 +58,7 @@ import org.dmfs.rfc5545.DateTime;
 import org.dmfs.rfc5545.recurrenceset.RecurrenceSetIterator;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.RecurrenceId;
+import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.common.ChronosLogger;
 import com.openexchange.chronos.common.DefaultRecurrenceData;
 import com.openexchange.chronos.service.RecurrenceData;
@@ -102,7 +103,7 @@ public abstract class AbstractRecurrenceIterator<T> implements RecurrenceIterato
      * @param ignoreExceptions Determines if exceptions should be ignored. If true, all occurrences are calculated as if no exceptions exist. Note: This does not add change exceptions. See {@link ChangeExceptionAwareRecurrenceIterator}
      */
     protected AbstractRecurrenceIterator(RecurrenceConfig config, Event master, boolean forwardToOccurrence, Calendar start, Calendar end, Integer limit, boolean ignoreExceptions) throws OXException {
-        this(config, new DefaultRecurrenceData(master.getRecurrenceRule(), master.getStartDate(), ignoreExceptions ? null : getExceptionDates(master)), getEventDuration(master), forwardToOccurrence, start, end, null, limit);
+        this(config, new DefaultRecurrenceData(master.getRecurrenceRule(), master.getStartDate(), ignoreExceptions ? null : getExceptionDates(master), CalendarUtils.getExceptionDates(master.getRecurrenceDates())), getEventDuration(master), forwardToOccurrence, start, end, null, limit);
     }
 
     /**

@@ -50,71 +50,65 @@
 package com.openexchange.ajax.chronos;
 
 import static org.junit.Assert.assertTrue;
-import java.util.ArrayList;
+import java.io.File;
 import java.util.List;
-import com.openexchange.ajax.chronos.factory.AlarmFactory;
-import com.openexchange.ajax.chronos.factory.AttendeeFactory;
-import com.openexchange.ajax.chronos.manager.EventManager;
-import com.openexchange.testing.httpclient.invoker.ApiClient;
-import com.openexchange.testing.httpclient.models.Alarm;
-import com.openexchange.testing.httpclient.models.Attendee;
-import com.openexchange.testing.httpclient.models.AttendeeAndAlarm;
-import com.openexchange.testing.httpclient.models.ChronosCalendarResultResponse;
+import com.openexchange.ajax.chronos.manager.ICalImportExportManager;
+import com.openexchange.configuration.asset.Asset;
+import com.openexchange.configuration.asset.AssetType;
 import com.openexchange.testing.httpclient.models.EventData;
-import com.openexchange.testing.httpclient.models.Trigger.RelatedEnum;
+import com.openexchange.testing.httpclient.models.EventId;
+import com.openexchange.testing.httpclient.models.InfoItemExport;
+import com.openexchange.testing.httpclient.modules.ExportApi;
+import com.openexchange.testing.httpclient.modules.ImportApi;
 
 /**
- * {@link AbstractAttendeeTest}
+ * {@link AbstractImportExportTest}
  *
  * @author <a href="mailto:Jan-Oliver.Huhn@open-xchange.com">Jan-Oliver Huhn</a>
  * @since v7.10.0
  */
-public class AbstractAttendeeTest extends AbstractChronosTest {
+public class AbstractImportExportTest extends AbstractChronosTest {
 
-    protected String folderId2;
-    protected UserApi user2;
-    protected EventManager eventManager2;
+    protected ICalImportExportManager importExportManager;
+
+    protected ImportApi importApi;
+    protected ExportApi exportApi;
 
     @Override
     public void setUp() throws Exception {
         super.setUp();
-        ApiClient client = generateApiClient(testUser2);
-        rememberClient(client);
-        EnhancedApiClient enhancedClient = generateEnhancedClient(testUser2);
-        rememberClient(enhancedClient);
-
-        user2 = new UserApi(client, enhancedClient, testUser2);
-        folderId2 = getDefaultFolder(user2.getSession(), client);
-        eventManager2 = new EventManager(user2, getDefaultFolder(user2.getSession(), client));
+        importApi = new ImportApi(getApiClient());
+        exportApi = new ExportApi(getApiClient());
+        importExportManager = new ICalImportExportManager(exportApi, importApi);
     }
 
-    protected EventData updateAlarms(String eventId, long timestamp, List<Alarm> body, String recurrenceId) throws Exception {
-        ChronosCalendarResultResponse calendarResult = user2.getChronosApi().updateAlarms(user2.getSession(), folderId2, eventId, timestamp, body, recurrenceId, false);
-        List<EventData> updates = calendarResult.getData().getUpdated();
-        assertTrue(updates.size() == 1);
-        return updates.get(0);
+    protected String getImportResponse(String fileName) throws Exception {
+        return importICalFile(fileName);
     }
 
-    public List<Attendee> addAdditionalAttendee(EventData expectedEventData) {
-        ArrayList<Attendee> atts = new ArrayList<>(2);
-        atts.addAll(expectedEventData.getAttendees());
-        Attendee attendee2 = AttendeeFactory.createIndividual(user2.getCalUser());
-        attendee2.setPartStat("ACCEPTED");
-        atts.add(attendee2);
-        return atts;
+    protected List<EventData> parseEventData(String response) throws Exception {
+        List<EventId> eventIds = importExportManager.parseImportJSONResponseToEventIds(response);
+        eventManager.rememberEventIds(eventIds);
+        return eventManager.listEvents(eventIds);
     }
 
-    protected AttendeeAndAlarm createAttendeeAndAlarm(EventData updatedEvent, int attendeeId) {
-        AttendeeAndAlarm body = new AttendeeAndAlarm();
-        for (Attendee attendee : updatedEvent.getAttendees()) {
-            if (attendee.getEntity() == attendeeId) {
-                attendee.setPartStat("TENTATIVE");
-                attendee.setMember(null);
-                body.attendee(attendee);
-            }
+    protected String importICalFile(String fileName) throws Exception {
+        Asset asset = assetManager.getAsset(AssetType.ics, fileName);
+        return importExportManager.importICalFile(defaultUserApi.getSession(), defaultFolderId, new File(asset.getAbsolutePath()), true, false);
+    }
+
+    protected void assertEventData(List<EventData> eventData, String iCalExport) {
+        for (EventData event : eventData) {
+            assertTrue(iCalExport.contains(event.getUid()));
+            assertTrue(iCalExport.contains(event.getSummary()));
         }
-        body.addAlarmsItem(AlarmFactory.createAlarm("-PT20M", RelatedEnum.START));
-        return body;
+    }
+
+    protected void addInfoItemExport(List<InfoItemExport> itemList, String folderId, String objectId) {
+        InfoItemExport item = new InfoItemExport();
+        item.folderId(folderId);
+        item.id(objectId);
+        itemList.add(item);
     }
 
 }

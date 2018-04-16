@@ -173,6 +173,14 @@ public class SplitPerformer extends AbstractUpdatePerformer {
         updatedSeriesMaster.setRelatedTo(relatedTo);
         Consistency.setModified(session, timestamp, updatedSeriesMaster, session.getUserId());
         /*
+         * distribute recurrence dates prior / on or after the split time
+         */
+        if (false == isNullOrEmpty(originalEvent.getRecurrenceDates())) {
+            Entry<SortedSet<RecurrenceId>, SortedSet<RecurrenceId>> splittedRecurrenceDates = splitExceptionDates(originalEvent.getRecurrenceDates(), splitPoint);
+            detachedSeriesMaster.setRecurrenceDates(splittedRecurrenceDates.getKey());
+            updatedSeriesMaster.setRecurrenceDates(splittedRecurrenceDates.getValue());
+        }
+        /*
          * distribute delete exception dates prior / on or after the split time
          */
         if (false == isNullOrEmpty(originalEvent.getDeleteExceptionDates())) {

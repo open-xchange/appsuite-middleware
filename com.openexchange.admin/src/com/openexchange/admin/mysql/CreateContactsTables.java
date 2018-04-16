@@ -123,8 +123,7 @@ public class CreateContactsTables extends AbstractCreateTableImpl {
         + "cid INT4 NOT NULL,"
         + "uuid binary(16) NOT NULL,"
         + "PRIMARY KEY (cid, uuid),"
-        + "INDEX (intfield01, intfield02, cid),"
-        + "INDEX (cid)"
+        + "INDEX (intfield01, intfield02, cid)"
         + ") ENGINE = InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
 
     /**

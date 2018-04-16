@@ -3968,6 +3968,13 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
                                     db.setScheme(scheme);
                                     db.setSchemaCount(schemaCount);
                                 } else {
+                                    // Database w/o a schema
+                                    if (null == dbsWithoutSchema) {
+                                        dbsWithoutSchema = new LinkedHashMap<>();
+                                        dbsWithoutSchema.put(I(databaseId), db);
+                                    } else if (false == dbsWithoutSchema.containsKey(I(databaseId))) {
+                                        dbsWithoutSchema.put(I(databaseId), db);
+                                    }
                                     selectDatabase = false;
                                     checkNext = true;
                                 }

@@ -76,8 +76,7 @@ public class CreateMiscTables extends AbstractCreateTableImpl {
         + "uuid BINARY(16) NOT NULL,"
         + "PRIMARY KEY (cid, uuid),"
         + "INDEX (firstid),"
-        + "INDEX (secondid),"
-        + "INDEX (cid)"
+        + "INDEX (secondid)"
       + ") ENGINE = InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
 
     private static final String createReminderTable = "CREATE TABLE reminder ("

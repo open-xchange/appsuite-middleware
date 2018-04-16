@@ -333,6 +333,28 @@ public class EventMapper extends DefaultDbMapper<Event, EventField> {
                 event.removeRecurrenceId();
             }
         });
+        mappings.put(EventField.RECURRENCE_DATES, new RecurrenceIdListMapping<Event>("rDate", "Recurrence dates") {
+
+            @Override
+            public boolean isSet(Event event) {
+                return event.containsRecurrenceDates();
+            }
+
+            @Override
+            public void remove(Event event) {
+                event.removeRecurrenceDates();
+            }
+
+            @Override
+            protected SortedSet<RecurrenceId> getRecurrenceIds(Event event) {
+                return event.getRecurrenceDates();
+            }
+
+            @Override
+            protected void setRecurrenceIds(Event event, SortedSet<RecurrenceId> value) {
+                event.setRecurrenceDates(value);
+            }
+        });
         mappings.put(EventField.CHANGE_EXCEPTION_DATES, new RecurrenceIdListMapping<Event>("overriddenDate", "Change exceptions") {
 
             @Override

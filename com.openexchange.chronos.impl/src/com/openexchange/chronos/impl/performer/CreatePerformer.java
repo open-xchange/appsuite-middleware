@@ -220,6 +220,7 @@ public class CreatePerformer extends AbstractUpdatePerformer {
         if (eventData.containsRecurrenceRule() && null != eventData.getRecurrenceRule()) {
             event.setRecurrenceRule(Check.recurrenceRuleIsValid(session.getRecurrenceService(), eventData));
             event.setSeriesId(event.getId());
+            event.setRecurrenceDates(eventData.getRecurrenceDates());
             event.setDeleteExceptionDates(Check.recurrenceIdsExist(session.getRecurrenceService(), event, eventData.getDeleteExceptionDates()));
         }
         /*

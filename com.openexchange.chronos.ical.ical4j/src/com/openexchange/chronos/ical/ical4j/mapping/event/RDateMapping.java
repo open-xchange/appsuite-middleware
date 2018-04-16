@@ -57,33 +57,33 @@ import net.fortuna.ical4j.model.DateList;
 import net.fortuna.ical4j.model.Property;
 import net.fortuna.ical4j.model.component.VEvent;
 import net.fortuna.ical4j.model.property.DateListProperty;
-import net.fortuna.ical4j.model.property.ExDate;
+import net.fortuna.ical4j.model.property.RDate;
 
 /**
- * {@link ExDateMapping}
+ * {@link RDateMapping}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public class ExDateMapping extends ICalDateListMapping<VEvent, Event> {
+public class RDateMapping extends ICalDateListMapping<VEvent, Event> {
 
-    public ExDateMapping() {
-        super(Property.EXDATE);
+    public RDateMapping() {
+        super(Property.RDATE);
     }
 
     @Override
     protected SortedSet<RecurrenceId> getValue(Event event) {
-        return event.getDeleteExceptionDates();
+        return event.getRecurrenceDates();
     }
 
     @Override
     protected void setValue(Event event, SortedSet<RecurrenceId> value) {
-        event.setDeleteExceptionDates(value);
+        event.setRecurrenceDates(value);
     }
 
     @Override
     protected DateListProperty createProperty(DateList dateList) {
-        return new ExDate(dateList);
+        return new RDate(dateList);
     }
 
 }

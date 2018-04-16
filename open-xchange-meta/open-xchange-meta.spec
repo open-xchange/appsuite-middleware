@@ -263,8 +263,8 @@ Group:          Applications/Productivity
 Summary:        The Open-Xchange Meta package for OX6 backend packages
 
 %description -n open-xchange-linkedin
-Emtpy transitional package as the integration of Open-Xchange with LinkedIn was
-discontinued. This package can be removed.
+Empty transitional package. This package can be removed as the integration of
+Open-Xchange with LinkedIn was discontinued.
 
 Authors:
 --------

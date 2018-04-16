@@ -815,7 +815,7 @@ public class LoginServlet extends AJAXServlet {
             throw SessionExceptionCodes.SESSION_EXPIRED.create(sessionId);
         }
         final LoginConfiguration conf = getLoginConfiguration(session);
-        if (!conf.isSessiondAutoLogin(req.getServerName()) && CookieType.SESSION == type) {
+        if (!conf.isSessiondAutoLogin(req.getServerName(), session) && CookieType.SESSION == type) {
             throw AjaxExceptionCodes.DISABLED_ACTION.create("store");
         }
         try {

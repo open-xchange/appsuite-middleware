@@ -852,9 +852,13 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
         if (adjustedTarget.equals(target)) {
             return false;
         }
-        if (false == adjustedTarget.getFolderToLoad().equals(adjustedTarget.getFolder())) {
+        String folderToLoad = adjustedTarget.getFolderToLoad();
+        if (null == folderToLoad) {
+            return false;
+        }
+        if (false == folderToLoad.equals(adjustedTarget.getFolder())) {
             ShareTarget realTarget = new ShareTarget(adjustedTarget);
-            realTarget.setFolder(adjustedTarget.getFolderToLoad());
+            realTarget.setFolder(folderToLoad);
             if (realTarget.equals(target)) {
                 return false;
             }
