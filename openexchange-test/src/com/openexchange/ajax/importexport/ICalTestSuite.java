@@ -89,7 +89,8 @@ import com.openexchange.test.concurrent.ParallelSuite;
     Bug22059Test.class,
     Bug27474Test.class,
     Bug28071Test.class,
-    Bug56435Test_TaskStateRoundtrip.class
+    Bug56435Test_TaskStateRoundtrip.class,
+    Bug8475Test_TaskAttendeeHandling.class
 })
 public final class ICalTestSuite {
 }
