@@ -63,11 +63,13 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
+import com.openexchange.java.util.Tools;
 
 /**
  * {@link Strings} - A library for performing operations that create Strings
@@ -111,12 +113,13 @@ public class Strings {
         if (null == s) {
             return false;
         }
-        boolean startsWith = false;
-        for (int i = prefixes.length; !startsWith && i-- > 0;) {
+        for (int i = prefixes.length; i-- > 0;) {
             String prefix = prefixes[i];
-            startsWith = null == prefix ? false : s.startsWith(prefix, 0);
+            if (null != prefix && s.startsWith(prefix, 0)) {
+                return true;
+            }
         }
-        return startsWith;
+        return false;
     }
 
     /**
@@ -171,6 +174,23 @@ public class Strings {
     }
 
     /**
+     * Builds up a string from passed strings.
+     *
+     * @param strings The strings
+     * @return The string build up from concatenating strings
+     */
+    public static String concat(String... strings) {
+        if (null == strings || 0 == strings.length) {
+            return "";
+        }
+        StringBuilder sb = new StringBuilder(2048);
+        for (String str : strings) {
+            sb.append(str == null ? "null" : str);
+        }
+        return sb.toString();
+    }
+
+    /**
      * Builds up a string from passed objects.
      *
      * @param delimiter The delimiter string
@@ -191,8 +211,7 @@ public class Strings {
         StringBuilder sb = new StringBuilder(2048);
         sb.append(objects[0] == null ? "null" : objects[0].toString());
         for (int i = 1; i < length; i++) {
-            sb.append(delimiter);
-            sb.append(objects[i] == null ? "null" : objects[i].toString());
+            sb.append(delimiter).append(objects[i] == null ? "null" : objects[i].toString());
         }
         return sb.toString();
     }
@@ -218,8 +237,7 @@ public class Strings {
         StringBuilder sb = new StringBuilder(2048);
         sb.append(strings[0] == null ? "null" : strings[0]);
         for (int i = 1; i < length; i++) {
-            sb.append(delimiter);
-            sb.append(strings[i] == null ? "null" : strings[i]);
+            sb.append(delimiter).append(strings[i] == null ? "null" : strings[i]);
         }
         return sb.toString();
     }
@@ -276,6 +294,52 @@ public class Strings {
             case '7':
             case '8':
             case '9':
+                return true;
+            default:
+                return false;
+        }
+    }
+
+    /**
+     * High speed test for punctuation character!
+     *
+     * @return <code>true</code> if the indicated character is a punctuation; otherwise <code>false</code>
+     */
+    public static boolean isPunctuation(char ch) {
+        switch (ch) {
+            case '!':
+            case '"':
+            case '#':
+            case '$':
+            case '%':
+            case '&':
+            case '\'':
+            case '(':
+            case ')':
+            case '*':
+            case '+':
+            case ',':
+            case '-':
+            case '.':
+            case '/':
+            case ':':
+            case ';':
+            case '<':
+            case '=':
+            case '>':
+            case '?':
+            case '@':
+            case '[':
+            case ']':
+            case '\\':
+            case '^':
+            case '_':
+            case 96:
+            case 180:
+            case '{':
+            case '|':
+            case '}':
+            case '~':
                 return true;
             default:
                 return false;
@@ -434,22 +498,41 @@ public class Strings {
         return splitByDelimNotInQuotes(str, ',');
     }
 
-    private static final Pattern P_SPLIT_COMMA = Pattern.compile("\\s*,\\s*");
+    // private static final Pattern P_SPLIT_COMMA = Pattern.compile("\\s*,\\s*");
 
     /**
      * Splits given string by comma separator.
      *
      * @param s The string to split
-     * @return The splitted string
+     * @return The split string
      */
     public static String[] splitByComma(final String s) {
-        if (null == s) {
-            return null;
-        }
-        return P_SPLIT_COMMA.split(s, 0);
+        return splitBy(s, ',', true);
     }
 
-    private static final Pattern P_SPLIT_DOT = Pattern.compile("\\s*\\.\\s*");
+   // private static final Pattern P_SPLIT_COLON = Pattern.compile("\\s*\\:\\s*");
+
+    /**
+     * Splits given string by colon separator.
+     *
+     * @param s The string to split
+     * @return The split string
+     */
+    public static String[] splitByColon(final String s) {
+        return splitBy(s, ':', true);
+    }
+
+    /**
+     * Splits given string by semi-colon separator.
+     *
+     * @param s The string to split
+     * @return The split string
+     */
+    public static String[] splitBySemiColon(final String s) {
+        return splitBy(s, ';', true);
+    }
+
+    // private static final Pattern P_SPLIT_DOT = Pattern.compile("\\s*\\.\\s*");
 
     /**
      * Splits given string by dots.
@@ -458,13 +541,45 @@ public class Strings {
      * @return The split string
      */
     public static String[] splitByDots(final String s) {
+        return splitBy(s, '.', true);
+    }
+
+    /**
+     * Splits given string by specified character.
+     *
+     * @param s The string to split
+     * @param delim The delimiter to split by
+     * @param trimMatches <code>true</code> to trim tokens; otherwise <code>false</code>
+     * @return The split string
+     */
+    public static String[] splitBy(String s, char delim, boolean trimMatches) {
         if (null == s) {
             return null;
         }
-        return P_SPLIT_DOT.split(s, 0);
+        int length = s.length();
+        if (length == 0) {
+            return new String[] { trimMatches ? s.trim() : s };
+        }
+
+        int pos = s.indexOf(delim, 0);
+        if (pos < 0) {
+            return new String[] { trimMatches ? s.trim() : s };
+        }
+
+        List<String> matchList = new ArrayList<String>();
+        int prevPos = 0;
+        do {
+            matchList.add(trimMatches ? s.substring(prevPos, pos).trim() : s.substring(prevPos, pos));
+            prevPos = pos + 1;
+            pos = prevPos < length ? s.indexOf(delim, prevPos) : -1;
+        } while (pos >= 0);
+        if (prevPos <= length) {
+            matchList.add(trimMatches ? s.substring(prevPos).trim() : s.substring(prevPos));
+        }
+        return matchList.toArray(new String[matchList.size()]);
     }
 
-    private static final Pattern P_SPLIT_AMP = Pattern.compile("&");
+    // private static final Pattern P_SPLIT_AMP = Pattern.compile("&");
 
     /**
      * Splits given string by ampersands <code>'&'</code>.
@@ -473,10 +588,7 @@ public class Strings {
      * @return The split string
      */
     public static String[] splitByAmps(final String s) {
-        if (null == s) {
-            return null;
-        }
-        return P_SPLIT_AMP.split(s, 0);
+        return splitBy(s, '&', false);
     }
 
     private static final Pattern P_SPLIT_CRLF = Pattern.compile("\r?\n");
@@ -485,7 +597,7 @@ public class Strings {
      * Splits given string by CR?LF; yields line-wise output.
      *
      * @param s The string to split
-     * @return The splitted string
+     * @return The split string
      */
     public static String[] splitByCRLF(final String s) {
         if (null == s) {
@@ -494,13 +606,28 @@ public class Strings {
         return P_SPLIT_CRLF.split(s, 0);
     }
 
+    private static final Pattern P_SPLIT_TAB = Pattern.compile("\t");
+
+    /**
+     * Splits given string by tabs.
+     *
+     * @param s The string to split
+     * @return The split string
+     */
+    public static String[] splitByTab(final String s) {
+        if (null == s) {
+            return null;
+        }
+        return P_SPLIT_TAB.split(s, 0);
+    }
+
     private static final Pattern P_SPLIT_WHITESPACE = Pattern.compile("\\s+");
 
     /**
      * Splits given string by whitespaces.
      *
      * @param s The string to split
-     * @return The splitted string
+     * @return The split string
      */
     public static String[] splitByWhitespaces(final String s) {
         if (null == s) {
@@ -576,19 +703,57 @@ public class Strings {
     /**
      * Checks for an empty string.
      *
-     * @param string The string
-     * @return <code>true</code> if input is null or empty; else <code>false</code>
+     * @param str The string
+     * @return <code>true</code> if input is <code>null</code>, empty or only consists of white-space characters; else <code>false</code>
      */
-    public static boolean isEmpty(final String string) {
-        if (null == string) {
+    public static boolean isEmpty(final String str) {
+        if (null == str) {
             return true;
         }
-        final int len = string.length();
+        final int len = str.length();
         boolean isWhitespace = true;
-        for (int i = 0; isWhitespace && i < len; i++) {
-            isWhitespace = isWhitespace(string.charAt(i));
+        for (int i = len; isWhitespace && i-- > 0;) {
+            isWhitespace = isWhitespace(str.charAt(i));
         }
         return isWhitespace;
+    }
+
+    /**
+     * Checks for a non-empty string.
+     *
+     * @param string The string
+     * @return <code>true</code> if input is a non-empty string; else <code>false</code>
+     */
+    public static boolean isNotEmpty(final String string) {
+        return !isEmpty(string);
+    }
+
+    /**
+     * Checks for an empty character sequence.
+     *
+     * @param charSeq The character sequence
+     * @return <code>true</code> if input is <code>null</code>, empty or only consists of white-space characters; else <code>false</code>
+     */
+    public static boolean isEmptyCharSequence(final CharSequence charSeq) {
+        if (null == charSeq) {
+            return true;
+        }
+        final int len = charSeq.length();
+        boolean isWhitespace = true;
+        for (int i = len; isWhitespace && i-- > 0;) {
+            isWhitespace = isWhitespace(charSeq.charAt(i));
+        }
+        return isWhitespace;
+    }
+
+    /**
+     * Checks for a non-empty character sequence.
+     *
+     * @param charSeq The character sequence
+     * @return <code>true</code> if input is a non-empty string; else <code>false</code>
+     */
+    public static boolean isNotEmptyCharSequence(final CharSequence charSeq) {
+        return !isEmptyCharSequence(charSeq);
     }
 
     /**
@@ -614,12 +779,15 @@ public class Strings {
         }
     }
 
-    private static final CharsetDecoder UTF8_CHARSET_DECODER;
-    static {
-        final CharsetDecoder utf8Decoder = Charsets.UTF_8.newDecoder();
-        utf8Decoder.onMalformedInput(CodingErrorAction.REPORT);
-        utf8Decoder.onUnmappableCharacter(CodingErrorAction.REPORT);
-        UTF8_CHARSET_DECODER = utf8Decoder;
+    /* In a holder class to defer initialization until needed. */
+    private static class Holder {
+        static final CharsetDecoder UTF8_CHARSET_DECODER;
+        static {
+            final CharsetDecoder utf8Decoder = Charsets.UTF_8.newDecoder();
+            utf8Decoder.onMalformedInput(CodingErrorAction.REPORT);
+            utf8Decoder.onUnmappableCharacter(CodingErrorAction.REPORT);
+            UTF8_CHARSET_DECODER = utf8Decoder;
+        }
     }
 
     /**
@@ -630,7 +798,7 @@ public class Strings {
      */
     public static boolean isUTF8Bytes(final byte[] bytes) {
         try {
-            UTF8_CHARSET_DECODER.decode(ByteBuffer.wrap(bytes));
+            Holder.UTF8_CHARSET_DECODER.decode(ByteBuffer.wrap(bytes));
             return true;
         } catch (final CharacterCodingException e) {
             return false;
@@ -648,20 +816,68 @@ public class Strings {
         if (coll == null) {
             return null;
         }
-        final int size = coll.size();
+
+        int size = coll.size();
         if (size == 0) {
             return "";
         }
-        final StringBuilder builder = new StringBuilder(size << 4);
-        for (final Object obj : coll) {
-            if (obj == null) {
-                builder.append("null");
-            } else {
-                builder.append(obj.toString());
-            }
-            builder.append(connector);
+
+        StringBuilder builder = new StringBuilder(size << 4);
+        Iterator<? extends Object> it = coll.iterator();
+        {
+            Object obj = it.next();
+            builder.append(obj == null ? "null" : obj.toString());
         }
-        return builder.substring(0, builder.length() - connector.length());
+        while (it.hasNext()) {
+            Object obj = it.next();
+            builder.append(connector).append(obj == null ? "null" : obj.toString());
+        }
+        return builder.toString();
+    }
+
+    /**
+     * Joins a collection of objects by connecting the results of their #toString() method with a connector
+     *
+     * @param coll Collection to be connected
+     * @param connector Connector place between two objects
+     * @param builder The string builder to use
+     * @return connected strings or null if collection == null or empty string if collection is empty
+     */
+    public static void join(final Collection<? extends Object> coll, final String connector, final StringBuilder builder) {
+        if (coll == null) {
+            return;
+        }
+
+        int size = coll.size();
+        if (size == 0) {
+            return;
+        }
+
+        Iterator<? extends Object> it = coll.iterator();
+        {
+            Object obj = it.next();
+            builder.append(obj == null ? "null" : obj.toString());
+        }
+        while (it.hasNext()) {
+            Object obj = it.next();
+            builder.append(connector).append(obj == null ? "null" : obj.toString());
+        }
+    }
+
+    /**
+     * Joins an array of integers by connecting their String representations with a connector
+     *
+     * @param arr Integers to be connected
+     * @param connector Connector place between two objects
+     * @param builder The string builder to use
+     * @return connected strings or null if collection == null or empty string if collection is empty
+     */
+    public static void join(final int[] arr, final String connector, final StringBuilder builder) {
+        final List<Integer> list = new LinkedList<Integer>();
+        for (final int i : arr) {
+            list.add(Autoboxing.I(i));
+        }
+        join(list, connector, builder);
     }
 
     public static <T> String join(final T[] arr, final String connector) {
@@ -909,13 +1125,24 @@ public class Strings {
         if (null == chars) {
             return null;
         }
-        final int length = chars.length();
-        final StringBuilder builder = new StringBuilder(length);
+
+        int length = chars.length();
+        StringBuilder builder = null;
         for (int i = 0; i < length; i++) {
-            final char c = chars.charAt(i);
-            builder.append((c >= 'a') && (c <= 'z') ? (char) (c & 0x5f) : c);
+            char c = chars.charAt(i);
+            if (null == builder) {
+                if ((c >= 'a') && (c <= 'z')) {
+                    builder = new StringBuilder(length);
+                    if (i > 0) {
+                        builder.append(chars, 0, i);
+                    }
+                    builder.append((char) (c & 0x5f));
+                }
+            } else {
+                builder.append((c >= 'a') && (c <= 'z') ? (char) (c & 0x5f) : c);
+            }
         }
-        return builder.toString();
+        return null == builder ? chars.toString() : builder.toString();
     }
 
     /** ASCII-wise to lower-case */
@@ -923,13 +1150,24 @@ public class Strings {
         if (null == chars) {
             return null;
         }
-        final int length = chars.length();
-        final StringBuilder builder = new StringBuilder(length);
+
+        int length = chars.length();
+        StringBuilder builder = null;
         for (int i = 0; i < length; i++) {
-            final char c = chars.charAt(i);
-            builder.append((c >= 'A') && (c <= 'Z') ? (char) (c ^ 0x20) : c);
+            char c = chars.charAt(i);
+            if (null == builder) {
+                if ((c >= 'A') && (c <= 'Z')) {
+                    builder = new StringBuilder(length);
+                    if (i > 0) {
+                        builder.append(chars, 0, i);
+                    }
+                    builder.append((char) (c ^ 0x20));
+                }
+            } else {
+                builder.append((c >= 'A') && (c <= 'Z') ? (char) (c ^ 0x20) : c);
+            }
         }
-        return builder.toString();
+        return null == builder ? chars.toString() : builder.toString();
     }
 
     private static char[] lowercases = {
@@ -996,16 +1234,17 @@ public class Strings {
         if (Strings.isEmpty(separator)) {
             throw new IllegalArgumentException("Missing separator");
         }
-        ArrayList<String> trimmedSplits = new ArrayList<String>();
+
         try {
             String[] splits = input.split(separator);
+            ArrayList<String> trimmedSplits = new ArrayList<String>(splits.length);
             for (String string : splits) {
                 trimmedSplits.add(string.trim());
             }
+            return trimmedSplits;
         } catch (PatternSyntaxException pse) {
-            throw new IllegalArgumentException("Illegal pattern syntax");
+            throw new IllegalArgumentException("Illegal pattern syntax", pse);
         }
-        return trimmedSplits;
     }
 
     /**
@@ -1256,6 +1495,19 @@ public class Strings {
         return (s.toString());
     }
 
+    /**
+     * Converts int[] to String[]
+     *
+     * @param arr int[] that should be converted
+     * @return String[] ints as String
+     */
+    public static String[] convert(final int[] arr) {
+        String connector = ";";
+        StringBuilder builder = new StringBuilder();
+        Strings.join(arr, connector, builder);
+        return builder.toString().split(connector);
+    }
+
     private static boolean contains(char c, char[] charArray) {
         for (char character : charArray) {
             if (c == character) {
@@ -1297,6 +1549,78 @@ public class Strings {
         }
 
         return sb;
+    }
+
+    /**
+     *
+     * @param array
+     * @return
+     */
+    public static String toWhitespaceSeparatedList(String[] array) {
+        StringBuilder sb = new StringBuilder();
+        if (null != array && array.length > 0) {
+            for (String s : array) {
+                sb.append(s).append(" ");
+            }
+            sb.deleteCharAt(sb.length() - 1);
+        }
+        return sb.toString();
+    }
+
+    /**
+     *
+     * @param array
+     * @return
+     */
+    public static String toCommaSeparatedList(String[] array) {
+        StringBuilder sb = new StringBuilder();
+        if (null != array && array.length > 0) {
+            for (String s : array) {
+                sb.append(s).append(",");
+            }
+            sb.deleteCharAt(sb.length() - 1);
+        }
+        return sb.toString();
+    }
+
+    /**
+     * Parses a positive <code>int</code> value from passed {@link String} instance.
+     *
+     * @param s The string to parse
+     * @return The parsed positive <code>int</code> value or <code>-1</code> if parsing failed
+     */
+    public static final int parseUnsignedInt(String s) {
+        return Tools.getUnsignedInteger(s);
+    }
+
+    /**
+     * Parses a positive <code>int</code> value from passed {@link String} instance.
+     *
+     * @param s The string to parse
+     * @return The parsed positive <code>int</code> value or <code>-1</code> if parsing failed
+     */
+    public static final int getUnsignedInt(String s) {
+        return Tools.getUnsignedInteger(s);
+    }
+
+    /**
+     * Parses a positive <code>long</code> value from passed {@link String} instance.
+     *
+     * @param s The string to parse
+     * @return The parsed positive <code>long</code> value or <code>-1</code> if parsing failed
+     */
+    public static final long parseUnsignedLong(String s) {
+        return Tools.getUnsignedLong(s);
+    }
+
+    /**
+     * Parses a positive <code>long</code> value from passed {@link String} instance.
+     *
+     * @param s The string to parse
+     * @return The parsed positive <code>long</code> value or <code>-1</code> if parsing failed
+     */
+    public static final long getUnsignedLong(String s) {
+        return Tools.getUnsignedLong(s);
     }
 
 }
