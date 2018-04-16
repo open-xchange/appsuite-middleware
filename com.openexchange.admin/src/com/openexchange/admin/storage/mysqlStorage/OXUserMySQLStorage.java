@@ -641,6 +641,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
         }
     }
 
+    // FIXME: Consider a more dynamic, interface-based construct for changing the individual attributes
     @Override
     public void change(final Context ctx, final User usrdata) throws StorageException {
         int contextId = ctx.getId().intValue();
@@ -661,8 +662,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
 
             lock(contextId, con);
 
-            // ########## Update login2user table if USERNAME_CHANGEABLE=true
-            // ##################
+            // ################## Update login2user table if USERNAME_CHANGEABLE=true ##################
             if (cache.getProperties().getUserProp(AdminProperties.User.USERNAME_CHANGEABLE, false) && usrdata.getName() != null && usrdata.getName().trim().length() > 0) {
                 if (cache.getProperties().getUserProp(AdminProperties.User.CHECK_NOT_ALLOWED_CHARS, true)) {
                     OXToolStorageInterface.getInstance().validateUserName(usrdata.getName());
@@ -954,7 +954,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 }
             }
 
-            // onyl if min. 1 field set , exeute update on contact table
+            // only if at least 1 field is set , execute update on contact table
             if (prg_contacts_update_needed) {
 
                 contact_query.delete(contact_query.length() - 2, contact_query.length() - 1);
@@ -1328,7 +1328,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             }
             // End of JCS
 
-            log.info("User {} changed!", Integer.valueOf(userId));
+            log.info("User {} in context {} changed!", Integer.valueOf(userId), Integer.valueOf(contextId));
         } catch (final PoolException e) {
             log.error("Pool Error", e);
             throw new StorageException(e);
@@ -1341,39 +1341,15 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
         } catch (final ServiceException e) {
             log.error("Required service is missing.", e);
             throw new StorageException(e);
-        } catch (final IllegalArgumentException e) {
-            log.error("Error", e);
-            throw new StorageException(e);
-        } catch (final IllegalAccessException e) {
-            log.error("Error", e);
-            throw new StorageException(e);
-        } catch (final InvocationTargetException e) {
-            log.error("Error", e);
-            throw new StorageException(e);
-        } catch (final SecurityException e) {
-            log.error("Error", e);
-            throw new StorageException(e);
-        } catch (final NoSuchMethodException e) {
-            log.error("Error", e);
-            throw new StorageException(e);
-        } catch (final NoSuchAlgorithmException e) {
-            log.error("Error", e);
-            throw new StorageException(e);
-        } catch (final UnsupportedEncodingException e) {
+        } catch (final IllegalArgumentException | IllegalAccessException | InvocationTargetException | SecurityException | NoSuchMethodException | NoSuchAlgorithmException | UnsupportedEncodingException | OXException | InvalidDataException e) {
             log.error("Error", e);
             throw new StorageException(e);
         } catch (final RuntimeException e) {
             log.error("", e);
             throw e;
-        } catch (final OXException e) {
-            log.error("Error", e);
-            throw new StorageException(e);
         } catch (final URISyntaxException e) {
             log.error("", e);
             throw new StorageException(e.toString());
-        } catch (InvalidDataException e) {
-            log.error("", e);
-            throw new StorageException(e);
         } finally {
             if (rollback) {
                 rollback(con);
