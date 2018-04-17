@@ -88,6 +88,12 @@ public class AbstractAttendeeTest extends AbstractChronosTest {
         eventManager2 = new EventManager(user2, getDefaultFolder(user2.getSession(), client));
     }
 
+    @Override
+    public void tearDown() throws Exception {
+        eventManager2.cleanUp();
+        super.tearDown();
+    }
+
     protected EventData updateAlarms(String eventId, long timestamp, List<Alarm> body, String recurrenceId) throws Exception {
         ChronosCalendarResultResponse calendarResult = user2.getChronosApi().updateAlarms(user2.getSession(), folderId2, eventId, timestamp, body, recurrenceId, false);
         List<EventData> updates = calendarResult.getData().getUpdated();

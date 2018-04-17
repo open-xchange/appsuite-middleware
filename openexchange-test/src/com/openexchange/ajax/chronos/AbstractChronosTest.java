@@ -97,6 +97,8 @@ public class AbstractChronosTest extends AbstractEnhancedApiClientSession {
     protected AssetManager assetManager;
     protected CalendarFolderManager folderManager;
 
+    protected String folderId;
+
     /**
      * Initializes a new {@link AbstractChronosTest}.
      */
@@ -119,6 +121,7 @@ public class AbstractChronosTest extends AbstractEnhancedApiClientSession {
         assetManager = new AssetManager();
         eventManager = new EventManager(defaultUserApi, defaultFolderId);
         folderManager = new CalendarFolderManager(defaultUserApi, foldersApi);
+        folderId = createAndRememberNewFolder(defaultUserApi, defaultUserApi.getSession(), getDefaultFolder(), defaultUserApi.getCalUser().intValue());
     }
 
     @Override

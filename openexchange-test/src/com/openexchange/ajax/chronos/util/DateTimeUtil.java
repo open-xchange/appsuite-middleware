@@ -152,7 +152,9 @@ public final class DateTimeUtil {
      */
     public static Date parseDateTime(DateTimeData time) throws ParseException {
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd'T'HHmmss");
-        dateFormat.setTimeZone(TimeZone.getTimeZone(time.getTzid()));
+        if(time.getTzid() != null) {
+            dateFormat.setTimeZone(TimeZone.getTimeZone(time.getTzid()));
+        }
         return dateFormat.parse(time.getValue());
     }
 
@@ -190,7 +192,9 @@ public final class DateTimeUtil {
 
         Date date = new Date(millis);
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd'T'HHmmss");
-        dateFormat.setTimeZone(TimeZone.getTimeZone(timezoneId));
+        if(timezoneId != null) {
+            dateFormat.setTimeZone(timezoneId == null ? TimeZone.getDefault() : TimeZone.getTimeZone(timezoneId));
+        }
         result.setValue(dateFormat.format(date));
 
         return result;

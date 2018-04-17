@@ -501,7 +501,7 @@ public class EventUpdateProcessor implements EventUpdate {
      * @param originalEvent The original event
      * @param updatedEvent The updated event
      */
-    private void adjustForNonGroupScheduled(Event originalEvent, Event updatedEvent) throws OXException {
+    private void adjustForNonGroupScheduled(Event originalEvent, Event updatedEvent) {
         /*
          * no group-scheduled event (any longer), ensure to take over common calendar folder & user, remove organizer
          */
@@ -672,7 +672,7 @@ public class EventUpdateProcessor implements EventUpdate {
      * @param changeExceptions The change exception events
      * @return The resulting list of (possibly adjusted) change exceptions
      */
-    private List<Event> adjustDeletedChangeExceptions(Event seriesMaster, List<Event> changeExceptions) throws OXException {
+    private List<Event> adjustDeletedChangeExceptions(Event seriesMaster, List<Event> changeExceptions) {
         if (false == isNullOrEmpty(seriesMaster.getDeleteExceptionDates())) {
             if (false == isNullOrEmpty(changeExceptions)) {
                 List<Event> newChangeExceptions = new ArrayList<Event>(changeExceptions);
@@ -745,7 +745,7 @@ public class EventUpdateProcessor implements EventUpdate {
      *
      * @param attendees The event's attendees
      */
-    private void resetParticipationStatus(List<Attendee> attendees) throws OXException {
+    private void resetParticipationStatus(List<Attendee> attendees) {
         for (Attendee attendee : CalendarUtils.filter(attendees, null, CalendarUserType.INDIVIDUAL)) {
             if (calendarUser.getEntity() == attendee.getEntity() || ParticipationStatus.NEEDS_ACTION.equals(attendee.getPartStat())) {
                 continue;
