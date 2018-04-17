@@ -63,11 +63,13 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
+import com.openexchange.java.util.Tools;
 
 /**
  * {@link Strings} - A library for performing operations that create Strings
@@ -304,7 +306,6 @@ public class Strings {
      * @return <code>true</code> if the indicated character is a punctuation; otherwise <code>false</code>
      */
     public static boolean isPunctuation(char ch) {
-        // !"#$%&'()*+,-./:;<=>?@[\]^_`\u00b4{|}~
         switch (ch) {
             case '!':
             case '"':
@@ -404,7 +405,7 @@ public class Strings {
         if (null == str) {
             return null;
         }
-        List<String> splitted = new LinkedList<>();
+        List<String> splitted = new LinkedList<String>();
         int inQuotes = 0;
         boolean escaped = false;
         StringBuilder s = new StringBuilder(16);
@@ -453,7 +454,7 @@ public class Strings {
         if (null == str) {
             return null;
         }
-        List<String> splitted = new LinkedList<>();
+        List<String> splitted = new LinkedList<String>();
         boolean inQuotes = false;
         boolean escaped = false;
         StringBuilder s = new StringBuilder(16);
@@ -497,7 +498,7 @@ public class Strings {
         return splitByDelimNotInQuotes(str, ',');
     }
 
-    private static final Pattern P_SPLIT_COMMA = Pattern.compile("\\s*,\\s*");
+    // private static final Pattern P_SPLIT_COMMA = Pattern.compile("\\s*,\\s*");
 
     /**
      * Splits given string by comma separator.
@@ -506,13 +507,10 @@ public class Strings {
      * @return The split string
      */
     public static String[] splitByComma(final String s) {
-        if (null == s) {
-            return null;
-        }
-        return P_SPLIT_COMMA.split(s, 0);
+        return splitBy(s, ',', true);
     }
 
-    private static final Pattern P_SPLIT_COLON = Pattern.compile("\\s*\\:\\s*");
+   // private static final Pattern P_SPLIT_COLON = Pattern.compile("\\s*\\:\\s*");
 
     /**
      * Splits given string by colon separator.
@@ -521,13 +519,20 @@ public class Strings {
      * @return The split string
      */
     public static String[] splitByColon(final String s) {
-        if (null == s) {
-            return null;
-        }
-        return P_SPLIT_COLON.split(s, 0);
+        return splitBy(s, ':', true);
     }
 
-    private static final Pattern P_SPLIT_DOT = Pattern.compile("\\s*\\.\\s*");
+    /**
+     * Splits given string by semi-colon separator.
+     *
+     * @param s The string to split
+     * @return The split string
+     */
+    public static String[] splitBySemiColon(final String s) {
+        return splitBy(s, ';', true);
+    }
+
+    // private static final Pattern P_SPLIT_DOT = Pattern.compile("\\s*\\.\\s*");
 
     /**
      * Splits given string by dots.
@@ -536,13 +541,45 @@ public class Strings {
      * @return The split string
      */
     public static String[] splitByDots(final String s) {
+        return splitBy(s, '.', true);
+    }
+
+    /**
+     * Splits given string by specified character.
+     *
+     * @param s The string to split
+     * @param delim The delimiter to split by
+     * @param trimMatches <code>true</code> to trim tokens; otherwise <code>false</code>
+     * @return The split string
+     */
+    public static String[] splitBy(String s, char delim, boolean trimMatches) {
         if (null == s) {
             return null;
         }
-        return P_SPLIT_DOT.split(s, 0);
+        int length = s.length();
+        if (length == 0) {
+            return new String[] { trimMatches ? s.trim() : s };
+        }
+
+        int pos = s.indexOf(delim, 0);
+        if (pos < 0) {
+            return new String[] { trimMatches ? s.trim() : s };
+        }
+
+        List<String> matchList = new ArrayList<>();
+        int prevPos = 0;
+        do {
+            matchList.add(trimMatches ? s.substring(prevPos, pos).trim() : s.substring(prevPos, pos));
+            prevPos = pos + 1;
+            pos = prevPos < length ? s.indexOf(delim, prevPos) : -1;
+        } while (pos >= 0);
+        if (prevPos <= length) {
+            matchList.add(trimMatches ? s.substring(prevPos).trim() : s.substring(prevPos));
+        }
+        return matchList.toArray(new String[matchList.size()]);
     }
 
-    private static final Pattern P_SPLIT_AMP = Pattern.compile("&");
+    // private static final Pattern P_SPLIT_AMP = Pattern.compile("&");
 
     /**
      * Splits given string by ampersands <code>'&'</code>.
@@ -551,10 +588,7 @@ public class Strings {
      * @return The split string
      */
     public static String[] splitByAmps(final String s) {
-        if (null == s) {
-            return null;
-        }
-        return P_SPLIT_AMP.split(s, 0);
+        return splitBy(s, '&', false);
     }
 
     private static final Pattern P_SPLIT_CRLF = Pattern.compile("\r?\n");
@@ -745,12 +779,15 @@ public class Strings {
         }
     }
 
-    private static final CharsetDecoder UTF8_CHARSET_DECODER;
-    static {
-        final CharsetDecoder utf8Decoder = Charsets.UTF_8.newDecoder();
-        utf8Decoder.onMalformedInput(CodingErrorAction.REPORT);
-        utf8Decoder.onUnmappableCharacter(CodingErrorAction.REPORT);
-        UTF8_CHARSET_DECODER = utf8Decoder;
+    /* In a holder class to defer initialization until needed. */
+    private static class Holder {
+        static final CharsetDecoder UTF8_CHARSET_DECODER;
+        static {
+            final CharsetDecoder utf8Decoder = Charsets.UTF_8.newDecoder();
+            utf8Decoder.onMalformedInput(CodingErrorAction.REPORT);
+            utf8Decoder.onUnmappableCharacter(CodingErrorAction.REPORT);
+            UTF8_CHARSET_DECODER = utf8Decoder;
+        }
     }
 
     /**
@@ -761,7 +798,7 @@ public class Strings {
      */
     public static boolean isUTF8Bytes(final byte[] bytes) {
         try {
-            UTF8_CHARSET_DECODER.decode(ByteBuffer.wrap(bytes));
+            Holder.UTF8_CHARSET_DECODER.decode(ByteBuffer.wrap(bytes));
             return true;
         } catch (final CharacterCodingException e) {
             return false;
@@ -779,15 +816,23 @@ public class Strings {
         if (coll == null) {
             return null;
         }
-        final int size = coll.size();
+
+        int size = coll.size();
         if (size == 0) {
             return "";
         }
-        final StringBuilder builder = new StringBuilder(size << 4);
-        for (final Object obj : coll) {
-            builder.append(obj == null ? "null" : obj.toString()).append(connector);
+
+        StringBuilder builder = new StringBuilder(size << 4);
+        Iterator<? extends Object> it = coll.iterator();
+        {
+            Object obj = it.next();
+            builder.append(obj == null ? "null" : obj.toString());
         }
-        return builder.substring(0, builder.length() - connector.length());
+        while (it.hasNext()) {
+            Object obj = it.next();
+            builder.append(connector).append(obj == null ? "null" : obj.toString());
+        }
+        return builder.toString();
     }
 
     /**
@@ -802,14 +847,21 @@ public class Strings {
         if (coll == null) {
             return;
         }
-        final int size = coll.size();
+
+        int size = coll.size();
         if (size == 0) {
             return;
         }
-        for (final Object obj : coll) {
-            builder.append(obj == null ? "null" : obj.toString()).append(connector);
+
+        Iterator<? extends Object> it = coll.iterator();
+        {
+            Object obj = it.next();
+            builder.append(obj == null ? "null" : obj.toString());
         }
-        builder.setLength(builder.length() - connector.length());
+        while (it.hasNext()) {
+            Object obj = it.next();
+            builder.append(connector).append(obj == null ? "null" : obj.toString());
+        }
     }
 
     /**
@@ -821,7 +873,7 @@ public class Strings {
      * @return connected strings or null if collection == null or empty string if collection is empty
      */
     public static void join(final int[] arr, final String connector, final StringBuilder builder) {
-        final List<Integer> list = new LinkedList<>();
+        final List<Integer> list = new LinkedList<Integer>();
         for (final int i : arr) {
             list.add(Autoboxing.I(i));
         }
@@ -833,7 +885,7 @@ public class Strings {
     }
 
     public static String join(final int[] arr, final String connector) {
-        final List<Integer> list = new LinkedList<>();
+        final List<Integer> list = new LinkedList<Integer>();
         for (final int i : arr) {
             list.add(Autoboxing.I(i));
         }
@@ -841,7 +893,7 @@ public class Strings {
     }
 
     public static String join(final byte[] arr, final String connector) {
-        final List<Byte> list = new LinkedList<>();
+        final List<Byte> list = new LinkedList<Byte>();
         for (final Byte i : arr) {
             list.add(i);
         }
@@ -1182,16 +1234,17 @@ public class Strings {
         if (Strings.isEmpty(separator)) {
             throw new IllegalArgumentException("Missing separator");
         }
-        ArrayList<String> trimmedSplits = new ArrayList<>();
+
         try {
             String[] splits = input.split(separator);
+            ArrayList<String> trimmedSplits = new ArrayList<String>(splits.length);
             for (String string : splits) {
                 trimmedSplits.add(string.trim());
             }
+            return trimmedSplits;
         } catch (PatternSyntaxException pse) {
-            throw new IllegalArgumentException("Illegal pattern syntax");
+            throw new IllegalArgumentException("Illegal pattern syntax", pse);
         }
-        return trimmedSplits;
     }
 
     /**
@@ -1496,6 +1549,78 @@ public class Strings {
         }
 
         return sb;
+    }
+
+    /**
+     *
+     * @param array
+     * @return
+     */
+    public static String toWhitespaceSeparatedList(String[] array) {
+        StringBuilder sb = new StringBuilder();
+        if (null != array && array.length > 0) {
+            for (String s : array) {
+                sb.append(s).append(" ");
+            }
+            sb.deleteCharAt(sb.length() - 1);
+        }
+        return sb.toString();
+    }
+
+    /**
+     *
+     * @param array
+     * @return
+     */
+    public static String toCommaSeparatedList(String[] array) {
+        StringBuilder sb = new StringBuilder();
+        if (null != array && array.length > 0) {
+            for (String s : array) {
+                sb.append(s).append(",");
+            }
+            sb.deleteCharAt(sb.length() - 1);
+        }
+        return sb.toString();
+    }
+
+    /**
+     * Parses a positive <code>int</code> value from passed {@link String} instance.
+     *
+     * @param s The string to parse
+     * @return The parsed positive <code>int</code> value or <code>-1</code> if parsing failed
+     */
+    public static final int parseUnsignedInt(String s) {
+        return Tools.getUnsignedInteger(s);
+    }
+
+    /**
+     * Parses a positive <code>int</code> value from passed {@link String} instance.
+     *
+     * @param s The string to parse
+     * @return The parsed positive <code>int</code> value or <code>-1</code> if parsing failed
+     */
+    public static final int getUnsignedInt(String s) {
+        return Tools.getUnsignedInteger(s);
+    }
+
+    /**
+     * Parses a positive <code>long</code> value from passed {@link String} instance.
+     *
+     * @param s The string to parse
+     * @return The parsed positive <code>long</code> value or <code>-1</code> if parsing failed
+     */
+    public static final long parseUnsignedLong(String s) {
+        return Tools.getUnsignedLong(s);
+    }
+
+    /**
+     * Parses a positive <code>long</code> value from passed {@link String} instance.
+     *
+     * @param s The string to parse
+     * @return The parsed positive <code>long</code> value or <code>-1</code> if parsing failed
+     */
+    public static final long getUnsignedLong(String s) {
+        return Tools.getUnsignedLong(s);
     }
 
 }
