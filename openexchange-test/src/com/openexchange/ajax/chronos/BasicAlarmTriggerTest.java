@@ -498,7 +498,7 @@ public class BasicAlarmTriggerTest extends AbstractUserTimezoneAlarmTriggerTest 
             long offset = timeZone.getOffset(cal.getTimeInMillis());
 
             // Create an floating event with an alarm 3 days earlier
-            DateTimeData startDate = DateTimeUtil.getDateTime("Europe/Berlin", cal.getTimeInMillis());
+            DateTimeData startDate = DateTimeUtil.getDateTime(null, cal.getTimeInMillis());
             DateTimeData endDate = DateTimeUtil.incrementDateTimeData(startDate, TimeUnit.HOURS.toMillis(1));
 
             EventData toCreate = EventFactory.createSingleEventWithSingleAlarm(defaultUserApi.getCalUser(), "testFloatingEventAlarmTriggerTime", startDate, endDate, AlarmFactory.createAlarm("-PT3D", RelatedEnum.START), folderId);
@@ -511,9 +511,14 @@ public class BasicAlarmTriggerTest extends AbstractUserTimezoneAlarmTriggerTest 
             from.add(Calendar.DAY_OF_MONTH, -5);
 
             AlarmTriggerData triggers = getAndCheckAlarmTrigger(from.getTimeInMillis() + TimeUnit.DAYS.toMillis(10), null, 1);
-            long triggerTime = cal.getTimeInMillis() - TimeUnit.DAYS.toMillis(3) - offset;
+            Calendar instance = Calendar.getInstance(TimeZone.getTimeZone("Europe/Berlin"));
+            instance.setTime(cal.getTime());
+            instance.add(Calendar.DAY_OF_MONTH, -3);
+
+            long triggerTime = instance.getTimeInMillis();
             checkAlarmTime(triggers.get(0), event.getId(), triggerTime);
 
+            // change timezone
             changeTimezone(TimeZone.getTimeZone("America/New_York"));
 
             AlarmTriggerData triggers2 = getAndCheckAlarmTrigger(from.getTimeInMillis() + TimeUnit.DAYS.toMillis(10), null, 1);
