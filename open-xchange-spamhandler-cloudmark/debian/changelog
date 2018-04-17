@@ -1,3 +1,9 @@
+open-xchange-spamhandler-cloudmark (7.6.3-37) stable; urgency=medium
+
+  * Build for patch 2018-04-23 (4667)
+
+ -- Wolfgang Rosenauer <wolfgang.rosenauer@open-xchange.com>  Tue, 17 Apr 2018 12:40:28 +0200
+
 open-xchange-spamhandler-cloudmark (7.6.3-36) stable; urgency=medium
 
   * Build for patch 2018-02-05 (4552)
