@@ -599,6 +599,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
 
             lock(contextId, con);
 
+            Set<String> changedAttributes = new HashSet<>();
             // ################## Update login2user table if USERNAME_CHANGEABLE=true ##################
             if (cache.getProperties().getUserProp(AdminProperties.User.USERNAME_CHANGEABLE, false) && usrdata.getName() != null && usrdata.getName().trim().length() > 0) {
                 if (cache.getProperties().getUserProp(AdminProperties.User.CHECK_NOT_ALLOWED_CHARS, true)) {
@@ -615,7 +616,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 stmt.setInt(3, userId);
                 stmt.executeUpdate();
                 stmt.close();
-
+                changedAttributes.add("username");
             }
             // #################################################################
 
@@ -627,6 +628,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 stmt.setInt(3, userId);
                 stmt.executeUpdate();
                 stmt.close();
+                changedAttributes.add("mail");
             }
 
             if (!isEmpty(usrdata.getLanguage())) {
@@ -636,6 +638,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 stmt.setInt(3, userId);
                 stmt.executeUpdate();
                 stmt.close();
+                changedAttributes.add("preferred language");
             }
 
             if (!isEmpty(usrdata.getTimezone())) {
@@ -645,6 +648,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 stmt.setInt(3, userId);
                 stmt.executeUpdate();
                 stmt.close();
+                changedAttributes.add("timezone");
             }
 
             if (usrdata.getMailenabled() != null) {
@@ -654,6 +658,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 stmt.setInt(3, userId);
                 stmt.executeUpdate();
                 stmt.close();
+                changedAttributes.add("mail enabled");
             }
 
             if (usrdata.getPassword_expired() != null) {
@@ -663,6 +668,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 stmt.setInt(3, userId);
                 stmt.executeUpdate();
                 stmt.close();
+                changedAttributes.add("shadow last change");
             }
 
             if (isEmpty(usrdata.getImapServerString()) && usrdata.isImapServerset()) {
@@ -672,6 +678,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 stmt.setInt(3, userId);
                 stmt.executeUpdate();
                 stmt.close();
+                changedAttributes.add("imap server");
             } else if (!isEmpty(usrdata.getImapServerString())) {
                 stmt = con.prepareStatement("UPDATE user SET imapserver = ? WHERE cid = ? AND id = ?");
                 // TODO: This should be fixed in the future so that we don't
@@ -681,6 +688,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 stmt.setInt(3, userId);
                 stmt.executeUpdate();
                 stmt.close();
+                changedAttributes.add("imap server");
             }
 
             if (isEmpty(usrdata.getImapLogin()) && usrdata.isImapLoginset()) {
@@ -690,6 +698,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 stmt.setInt(3, userId);
                 stmt.executeUpdate();
                 stmt.close();
+                changedAttributes.add("imap login");
             } else if (!isEmpty(usrdata.getImapLogin())) {
                 stmt = con.prepareStatement("UPDATE user SET imapLogin = ? WHERE cid = ? AND id = ?");
                 stmt.setString(1, usrdata.getImapLogin());
@@ -697,6 +706,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 stmt.setInt(3, userId);
                 stmt.executeUpdate();
                 stmt.close();
+                changedAttributes.add("imap login");
             }
 
             if (isEmpty(usrdata.getSmtpServerString()) && usrdata.isSmtpServerset()) {
@@ -706,6 +716,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 stmt.setInt(3, userId);
                 stmt.executeUpdate();
                 stmt.close();
+                changedAttributes.add("smtp server");
             } else if (!isEmpty(usrdata.getSmtpServerString())) {
                 stmt = con.prepareStatement("UPDATE user SET smtpserver = ? WHERE cid = ? AND id = ?");
                 // TODO: This should be fixed in the future so that we don't
@@ -715,6 +726,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 stmt.setInt(3, userId);
                 stmt.executeUpdate();
                 stmt.close();
+                changedAttributes.add("smtp server");
             }
 
             if (!isEmpty(usrdata.getPassword())) {
@@ -724,6 +736,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 stmt.setInt(3, userId);
                 stmt.executeUpdate();
                 stmt.close();
+                changedAttributes.add("password");
             }
 
             if (!isEmpty(usrdata.getPasswordMech())) {
@@ -733,6 +746,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 stmt.setInt(3, userId);
                 stmt.executeUpdate();
                 stmt.close();
+                changedAttributes.add("password mech");
             }
 
             // Change quota size
@@ -747,8 +761,10 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 Set<String> aliases = usrdata.getAliases();
                 if (null != aliases) {
                     aliasStorage.setAliases(con, contextId, userId, aliases);
+                    changedAttributes.add("aliases");
                 } else if (usrdata.isAliasesset()) {
                     aliasStorage.deleteAliases(con, contextId, userId);
+                    changedAttributes.add("aliases");
                 }
             }
 
@@ -782,6 +798,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                                 stmtinsertattribute.executeUpdate();
                                 stmtinsertattribute.addBatch();
                             }
+                            changedAttributes.add(name);
                         }
                     }
 
@@ -791,7 +808,6 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                     if (null != stmtinsertattribute) {
                         stmtinsertattribute.executeBatch();
                     }
-
                 } finally {
                     Databases.closeSQLStuff(stmtinsertattribute);
                     Databases.closeSQLStuff(stmtdelattribute);
@@ -827,6 +843,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             boolean prg_contacts_update_needed = false;
             boolean displayNameUpdate = false;
 
+            Set<String> contactAttributes = new HashSet<>();
             for (final MethodAndName methodandname : methodlist) {
                 // First we have to check which return value we have. We have to
                 // distinguish four types
@@ -851,6 +868,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                             returntypes.add(returntype);
                         }
                         prg_contacts_update_needed = true;
+                        contactAttributes.add(methodname);
                     }
                 } else if (returntype.equalsIgnoreCase("java.lang.Integer")) {
                     final int result = ((Integer) method.invoke(usrdata, (Object[]) null)).intValue();
@@ -860,6 +878,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                         methodlist2.add(method);
                         returntypes.add(returntype);
                         prg_contacts_update_needed = true;
+                        contactAttributes.add(methodname);
                     }
                 } else if (returntype.equalsIgnoreCase("java.lang.Boolean")) {
                     final Boolean result = (Boolean) method.invoke(usrdata, (Object[]) null);
@@ -869,6 +888,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                         methodlist2.add(method);
                         returntypes.add(returntype);
                         prg_contacts_update_needed = true;
+                        contactAttributes.add(methodname);
                     }
                 } else if (returntype.equalsIgnoreCase("java.util.Date")) {
                     final Date result = (Date) method.invoke(usrdata, (Object[]) null);
@@ -878,6 +898,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                         methodlist2.add(method);
                         returntypes.add(returntype);
                         prg_contacts_update_needed = true;
+                        contactAttributes.add(methodname);
                     }
                 } else if (returntype.equalsIgnoreCase("java.lang.Long")) {
                     final long result = ((Long) method.invoke(usrdata, (Object[]) null)).longValue();
@@ -887,8 +908,10 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                         methodlist2.add(method);
                         returntypes.add(returntype);
                         prg_contacts_update_needed = true;
+                        contactAttributes.add(methodname);
                     }
                 }
+                
             }
 
             // only if at least 1 field is set , execute update on contact table
@@ -962,7 +985,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 stmt.setInt(methodlist2.size() + 2, userId);
                 stmt.executeUpdate();
                 stmt.close();
-
+                changedAttributes.addAll(contactAttributes);
             }
 
             final Boolean spam_filter_enabled = usrdata.getGui_spam_filter_enabled();
@@ -970,8 +993,10 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 final OXToolStorageInterface tool = OXToolStorageInterface.getInstance();
                 if (spam_filter_enabled.booleanValue()) {
                     tool.setUserSettingMailBit(ctx, usrdata, UserSettingMail.INT_SPAM_ENABLED, con);
+                    changedAttributes.add("spam filter enabled");
                 } else {
                     tool.unsetUserSettingMailBit(ctx, usrdata, UserSettingMail.INT_SPAM_ENABLED, con);
+                    changedAttributes.add("spam filter disabled");
                 }
             }
 
@@ -990,6 +1015,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 folder_update.setInt(3, userId);
                 folder_update.executeUpdate();
                 folder_update.close();
+                changedAttributes.add("send e-mail address");
             }
             {
                 final String mailfolderdrafts = usrdata.getMail_folder_drafts_name();
@@ -1009,6 +1035,8 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                     folder_update.setInt(5, MailAccount.DEFAULT_ID);
                     folder_update.executeUpdate();
                     folder_update.close();
+
+                    changedAttributes.add("drafts folder");
                 }
             }
             {
@@ -1029,6 +1057,8 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                     folder_update.setInt(5, MailAccount.DEFAULT_ID);
                     folder_update.executeUpdate();
                     folder_update.close();
+
+                    changedAttributes.add("sent folder");
                 }
             }
             {
@@ -1049,6 +1079,8 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                     folder_update.setInt(5, MailAccount.DEFAULT_ID);
                     folder_update.executeUpdate();
                     folder_update.close();
+
+                    changedAttributes.add("spam folder");
                 }
             }
             {
@@ -1069,6 +1101,8 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                     folder_update.setInt(5, MailAccount.DEFAULT_ID);
                     folder_update.executeUpdate();
                     folder_update.close();
+
+                    changedAttributes.add("trash folder");
                 }
             }
             {
@@ -1082,6 +1116,8 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                     folder_update.setInt(5, MailAccount.DEFAULT_ID);
                     folder_update.executeUpdate();
                     folder_update.close();
+
+                    changedAttributes.add("archive name folder");
                 }
             }
             {
@@ -1102,6 +1138,8 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                     folder_update.setInt(5, MailAccount.DEFAULT_ID);
                     folder_update.executeUpdate();
                     folder_update.close();
+
+                    changedAttributes.add("confirmed ham folder");
                 }
             }
             {
@@ -1122,6 +1160,8 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                     folder_update.setInt(5, MailAccount.DEFAULT_ID);
                     folder_update.executeUpdate();
                     folder_update.close();
+
+                    changedAttributes.add("confirmed spam folder");
                 }
             }
             final Integer uploadFileSizeLimit = usrdata.getUploadFileSizeLimit();
@@ -1132,12 +1172,14 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 folder_update.setInt(3, userId);
                 folder_update.executeUpdate();
                 folder_update.close();
+                changedAttributes.add("upload quota");
             } else if (usrdata.isUploadFileSizeLimitset()) {
                 folder_update = con.prepareStatement("UPDATE user_setting_mail SET upload_quota = DEFAULT WHERE cid = ? AND user = ?");
                 folder_update.setInt(1, contextId);
                 folder_update.setInt(2, userId);
                 folder_update.executeUpdate();
                 folder_update.close();
+                changedAttributes.add("upload quota");
             }
             final Integer uploadFileSizeLimitPerFile = usrdata.getUploadFileSizeLimitPerFile();
             if (null != uploadFileSizeLimitPerFile) {
@@ -1147,12 +1189,14 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 folder_update.setInt(3, userId);
                 folder_update.executeUpdate();
                 folder_update.close();
+                changedAttributes.add("upload quota per file");
             } else if (usrdata.isUploadFileSizeLimitset()) {
                 folder_update = con.prepareStatement("UPDATE user_setting_mail SET upload_quota_per_file = DEFAULT WHERE cid = ? AND user = ?");
                 folder_update.setInt(1, contextId);
                 folder_update.setInt(2, userId);
                 folder_update.executeUpdate();
                 folder_update.close();
+                changedAttributes.add("upload quota per file");
             }
 
             if (folder_update != null) {
@@ -1265,7 +1309,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             }
             // End of JCS
 
-            log.info("User {} in context {} changed!", Integer.valueOf(userId), Integer.valueOf(contextId));
+            log.info("User {} in context {} changed! Changed attributes: {}", Integer.valueOf(userId), Integer.valueOf(contextId), toString(changedAttributes));
         } catch (final DataTruncation dt) {
             log.error(AdminCache.DATA_TRUNCATION_ERROR_MSG, dt);
             throw AdminCache.parseDataTruncation(dt);
@@ -1292,6 +1336,21 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             closeSQLStuff(stmt);
             releaseWriteContextConnection(con, ctx, cache);
         }
+    }
+
+    /**
+     * Converts the specified {@link Set} to string
+     * 
+     * @param set The {@link Set} to convert
+     * @return The string representation
+     */
+    private String toString(Set<String> set) {
+        StringBuilder builder = new StringBuilder();
+        for (String s : set) {
+            builder.append(s).append(", ");
+        }
+        builder.setLength(builder.length() - 2);
+        return builder.toString();
     }
 
     /**
