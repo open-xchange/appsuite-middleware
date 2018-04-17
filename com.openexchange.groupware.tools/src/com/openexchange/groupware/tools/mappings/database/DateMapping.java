@@ -54,9 +54,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.sql.Types;
-import java.util.Calendar;
 import java.util.Date;
-import com.openexchange.java.util.TimeZones;
 
 /**
  * {@link DateMapping} - Database mapping for <code>Types.DATE</code>.
@@ -73,7 +71,7 @@ public abstract class DateMapping<O> extends DefaultDbMapping<Date, O> {
 	@Override
 	public Date get(final ResultSet resultSet, String columnLabel) throws SQLException {
 	    try {
-            Timestamp timestamp = resultSet.getTimestamp(columnLabel, Calendar.getInstance(TimeZones.UTC));
+	        Timestamp timestamp = resultSet.getTimestamp(columnLabel);
 	        return null != timestamp ? new Date(timestamp.getTime()) : null;
 	    } catch (SQLException e) {
 	        if ("S1009".equals(e.getSQLState())) {
@@ -92,7 +90,7 @@ public abstract class DateMapping<O> extends DefaultDbMapping<Date, O> {
 		if (this.isSet(object)) {
 			final Date value = this.get(object);
 			if (null != value) {
-                statement.setTimestamp(parameterIndex, new Timestamp(value.getTime()), Calendar.getInstance(TimeZones.UTC));
+				statement.setTimestamp(parameterIndex, new Timestamp(value.getTime()));
 			} else {
 				statement.setNull(parameterIndex, this.getSqlType());
 			}

@@ -418,8 +418,6 @@ public class ResultTracker {
      * current session's user is neither creator, nor attendee of the event.</li>
      * <li>selecting the appropriate parent folder identifier for the specific user</li>
      * <li>generate and apply event flags</li>
-     * <li>apply <i>userized</i> versions of change- and delete-exception dates in the series master event based on the user's actual
-     * attendance</li>
      * <li>taking over the user's personal list of alarms for the event</li>
      * </ul>
      *
@@ -432,7 +430,32 @@ public class ResultTracker {
      * @see Utils#anonymizeIfNeeded
      */
     private Event userize(CalendarSession session, CalendarStorage storage, Event event, int forUser) throws OXException {
-        if (isSeriesMaster(event)) {
+        return userize(session, storage, event, forUser, false);
+    }
+
+    /**
+     * Creates a <i>userized</i> version of an event, representing a specific user's point of view on the event data. This includes
+     * <ul>
+     * <li><i>anonymization</i> of restricted event data in case the event it is not marked as {@link Classification#PUBLIC}, and the
+     * current session's user is neither creator, nor attendee of the event.</li>
+     * <li>selecting the appropriate parent folder identifier for the specific user</li>
+     * <li>generate and apply event flags</li>
+     * <li>optionally apply <i>userized</i> versions of change- and delete-exception dates in the series master event based on the user's actual
+     * attendance</li>
+     * <li>taking over the user's personal list of alarms for the event</li>
+     * </ul>
+     *
+     * @param storage The calendar storage to use
+     * @param session The calendar session
+     * @param event The event to userize
+     * @param forUser The identifier of the user in whose point of view the event should be adjusted
+     * @param applyExceptionDates <code>true</code> to apply individual exception dates for series master events, <code>false</code> if not needed
+     * @return The <i>userized</i> event
+     * @see Utils#applyExceptionDates
+     * @see Utils#anonymizeIfNeeded
+     */
+    private Event userize(CalendarSession session, CalendarStorage storage, Event event, int forUser, boolean applyExceptionDates) throws OXException {
+        if (applyExceptionDates && isSeriesMaster(event)) {
             event = applyExceptionDates(storage, event, forUser);
         }
         final List<Alarm> alarms = storage.getAlarmStorage().loadAlarms(event, forUser);

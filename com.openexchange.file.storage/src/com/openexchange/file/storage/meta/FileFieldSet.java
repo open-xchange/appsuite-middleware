@@ -240,7 +240,11 @@ public class FileFieldSet extends AbstractFileFieldSwitcher {
 
     @Override
     public Object origin(Object... args) {
-        md(args).setOrigin((FolderPath) args[1]);
+        if (args[1] instanceof FolderPath) {
+            md(args).setOrigin((FolderPath) args[1]);
+        } else {
+            md(args).setOrigin(FolderPath.parseFrom(args[1].toString()));
+        }
         return null;
     }
 
