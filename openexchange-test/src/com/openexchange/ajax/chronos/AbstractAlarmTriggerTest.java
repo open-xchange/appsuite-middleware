@@ -96,6 +96,12 @@ public abstract class AbstractAlarmTriggerTest extends AbstractAlarmTest {
         eventManager2 = new EventManager(user2, getDefaultFolder(user2.getSession(), client));
     }
 
+    @Override
+    public void tearDown() throws Exception {
+        super.tearDown();
+        eventManager2.cleanUp();
+    }
+
     /**
      * Retrieves alarm triggers with a trigger time lower than the given limit and checks if the response contains the correct amount of alarm trigger objects.
      * Its also possible to filter for specific actions.
