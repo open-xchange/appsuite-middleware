@@ -135,7 +135,7 @@ public abstract class ChronosAction extends AbstractChronosAction {
      * @param requestData The resuest data sent by the client
      * @return The timezone
      */
-    protected static TimeZone getTimeZone(AJAXRequestData requestData) throws OXException {
+    protected static TimeZone getTimeZone(AJAXRequestData requestData) {
         String timezoneId = requestData.getParameter("timezone");
         if (Strings.isEmpty(timezoneId)) {
             timezoneId = requestData.getSession().getUser().getTimeZone();

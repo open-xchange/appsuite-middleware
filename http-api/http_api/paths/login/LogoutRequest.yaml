@@ -8,5 +8,7 @@
     parameters:
       - $ref: "#/parameters/gblQueryParamSession"
     responses:
+      200:
+        description: A successfull logout
       403:
         description: FORBIDDEN. The server refuses to respond to the request.

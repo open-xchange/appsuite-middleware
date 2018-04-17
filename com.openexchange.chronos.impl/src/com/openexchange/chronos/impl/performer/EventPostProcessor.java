@@ -223,13 +223,17 @@ public class EventPostProcessor {
         event = anonymizeIfNeeded(session, event);
         if (isSeriesMaster(event)) {
             if (isResolveOccurrences(session)) {
+                /*
+                 * add resolved occurrences; no need to apply individual exception dates here, as a removed attendee can only occur in exceptions
+                 */
                 return events.addAll(resolveOccurrences(event));
-            } else {
-                return events.add(applyExceptionDates(storage, event, calendarUserId));
             }
-        } else {
-            return events.add(event);
+            /*
+             * add series master event with 'userized' exception dates
+             */
+            return events.add(applyExceptionDates(storage, event, calendarUserId));
         }
+        return events.add(event);
     }
 
     private void checkResultSizeNotExceeded() throws OXException {

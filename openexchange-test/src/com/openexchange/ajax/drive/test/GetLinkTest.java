@@ -91,6 +91,7 @@ public class GetLinkTest extends AbstractDriveShareTest {
     private DefaultFile file;
     private FolderObject folder2;
 
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
@@ -176,6 +177,7 @@ public class GetLinkTest extends AbstractDriveShareTest {
         assertTrue("Permission was not deleted", objectPermissions.isEmpty());
     }
 
+    @Override
     @After
     public void tearDown() throws Exception {
         try {

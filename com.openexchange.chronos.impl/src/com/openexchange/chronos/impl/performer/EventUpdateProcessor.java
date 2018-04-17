@@ -357,6 +357,14 @@ public class EventUpdateProcessor implements EventUpdate {
             case RECURRENCE_RULE:
                 Check.recurrenceRuleIsValid(session.getRecurrenceService(), updatedEvent);
                 /*
+                 * ignore a 'matching' recurrence rule
+                 */
+                if (null != updatedEvent.getRecurrenceRule() && null != originalEvent.getRecurrenceRule() &&
+                    initRecurrenceRule(updatedEvent.getRecurrenceRule()).toString().equals(initRecurrenceRule(originalEvent.getRecurrenceRule()).toString())) {
+                    updatedEvent.setRecurrenceRule(originalEvent.getRecurrenceRule());
+                    break;
+                }
+                /*
                  * deny update for change exceptions (but ignore if set to 'null')
                  */
                 if (isSeriesException(originalEvent)) {
