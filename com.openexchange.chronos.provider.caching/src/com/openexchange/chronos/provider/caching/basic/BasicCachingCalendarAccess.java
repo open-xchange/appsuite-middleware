@@ -62,7 +62,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Objects;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.concurrent.TimeUnit;
@@ -145,8 +144,6 @@ public abstract class BasicCachingCalendarAccess implements BasicCalendarAccess,
     protected Session session;
 
     private final List<OXException> warnings = new ArrayList<>();
-    private final JSONObject originInternalConfiguration;
-    private final JSONObject originUserConfiguration;
 
     /**
      * Initializes a new {@link BirthdaysCalendarAccess}.
@@ -159,8 +156,6 @@ public abstract class BasicCachingCalendarAccess implements BasicCalendarAccess,
         this.session = session;
         this.account = account;
         this.parameters = parameters;
-        this.originInternalConfiguration = account != null ? new JSONObject(account.getInternalConfiguration()) : null;
-        this.originUserConfiguration = account != null ? new JSONObject(account.getUserConfiguration()) : null;
     }
 
     public Session getSession() {
@@ -288,11 +283,11 @@ public abstract class BasicCachingCalendarAccess implements BasicCalendarAccess,
         try {
             if (holdsLock) {
                 executeUpdate();
-                saveConfig();
             }
         } finally {
             if (holdsLock) {
                 releaseUpdateLock();
+                saveConfig();
             }
         }
     }
@@ -347,6 +342,13 @@ public abstract class BasicCachingCalendarAccess implements BasicCalendarAccess,
             internalConfig.putSafe(CachingCalendarAccessConstants.CACHING, caching);
         }
         return caching;
+    }
+
+    private void releaseUpdateLock() {
+        JSONObject caching = getCachingConfiguration();
+        if (caching != null && caching.remove(CachingCalendarAccessConstants.LOCKED_FOR_UPDATE_UNTIL) != null) {
+            caching.remove(CachingCalendarAccessConstants.LOCKED_FOR_UPDATE_BY);
+        }
     }
 
     /**
@@ -555,21 +557,6 @@ public abstract class BasicCachingCalendarAccess implements BasicCalendarAccess,
         }
     }
 
-    /**
-     * Saves the current configuration for the account if it has been changed while processing
-     */
-    protected void saveConfig() {
-        if (Objects.equals(originInternalConfiguration, account.getInternalConfiguration()) && Objects.equals(originUserConfiguration, account.getUserConfiguration())) {
-            return;
-        }
-        try {
-            AdministrativeCalendarAccountService accountService = Services.getService(AdministrativeCalendarAccountService.class);
-            account = accountService.updateAccount(getSession().getContextId(), getSession().getUserId(), account.getAccountId(), account.getInternalConfiguration(), account.getUserConfiguration(), account.getLastModified().getTime());
-        } catch (OXException e) {
-            LOG.error("Unable to save configuration: {}", e.getMessage(), e);
-        }
-    }
-
     protected long getCascadedRefreshInterval() {
         try {
             long providerRefreshInterval = getRefreshInterval();
@@ -653,39 +640,25 @@ public abstract class BasicCachingCalendarAccess implements BasicCalendarAccess,
     }
 
     /**
-     * Releases a previously acquired lock for updating the account's cached calendar data.
-     *
-     * @return <code>true</code> if a lock was removed successfully, <code>false</code>, otherwise
+     * Persists changes made for the account and releases a previously acquired lock for updating the account's cached calendar data.
      */
-    private boolean releaseUpdateLock() throws OXException {
-        JSONObject internalConfig = account.getInternalConfiguration();
-
-        if (internalConfig != null) {
-            JSONObject caching = internalConfig.optJSONObject(CachingCalendarAccessConstants.CACHING);
-            if (caching != null && caching.remove(CachingCalendarAccessConstants.LOCKED_FOR_UPDATE_UNTIL) != null) {
-                caching.remove(CachingCalendarAccessConstants.LOCKED_FOR_UPDATE_BY);
+    private void saveConfig() throws OXException {
+        AdministrativeCalendarAccountService accountService = Services.getService(AdministrativeCalendarAccountService.class);
+        try {
+            account = accountService.updateAccount(session.getContextId(), session.getUserId(), account.getAccountId(), account.getInternalConfiguration(), account.getUserConfiguration(), account.getLastModified().getTime());
+            LOG.debug("Successfully released lock for account {}.", I(account.getAccountId()));
+            return;
+        } catch (OXException e) {
+            if (CalendarExceptionCodes.CONCURRENT_MODIFICATION.equals(e)) {
                 /*
-                 * update lock removed from config, update account config in storage
+                 * account updated in the meantime; refresh & don't update now
                  */
-                AdministrativeCalendarAccountService accountService = Services.getService(AdministrativeCalendarAccountService.class);
-                try {
-                    account = accountService.updateAccount(session.getContextId(), session.getUserId(), account.getAccountId(), internalConfig, null, account.getLastModified().getTime());
-                    LOG.debug("Successfully released lock for account {}.", I(account.getAccountId()));
-                    return true;
-                } catch (OXException e) {
-                    if (CalendarExceptionCodes.CONCURRENT_MODIFICATION.equals(e)) {
-                        /*
-                         * account updated in the meantime; refresh & don't update now
-                         */
-                        LOG.debug("Concurrent modification while attempting to release lock for account {}, aborting.", I(account.getAccountId()), e);
-                        account = Services.getService(CalendarAccountService.class).getAccount(session, account.getAccountId(), parameters);
-                        return false;
-                    }
-                    throw e;
-                }
+                LOG.debug("Concurrent modification while attempting to release lock for account {}, aborting.", I(account.getAccountId()), e);
+                account = Services.getService(CalendarAccountService.class).getAccount(session, account.getAccountId(), parameters);
+                return;
             }
+            throw e;
         }
-        return false;
     }
 
     private void cleanupEvents(List<Event> externalEvents) {
