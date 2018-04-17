@@ -175,6 +175,49 @@ public class Trigger {
 		this.dateTime = dateTime;
 	}
 
+    /**
+     * Matches the given object with this instance.
+     * In contrast to {@link #equals(Object)} this method considers standard values for
+     * specific fields
+     * 
+     * @param obj The {@link Object} to match
+     * @return <code>true</code> if the given object matches all criteria. It can be considered 'equal'.
+     *         <code> false otherwise
+     */
+    public boolean matches(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        Trigger other = (Trigger) obj;
+        if (dateTime == null) {
+            if (other.dateTime != null)
+                return false;
+        } else if (!dateTime.equals(other.dateTime))
+            return false;
+        if (duration == null) {
+            if (other.duration != null)
+                return false;
+        } else if (!duration.equals(other.duration))
+            return false;
+
+        // 'null' ~ Related.START
+        if (related == null) {
+            if (null != other.related && !Related.START.equals(other.related)) {
+                return false;
+            }
+        } else {
+            if (null != other.related) {
+                return related.equals(other.related);
+            }
+            return Related.START.equals(related);
+        }
+
+        return true;
+    }
+
     @Override
     public int hashCode() {
         final int prime = 31;

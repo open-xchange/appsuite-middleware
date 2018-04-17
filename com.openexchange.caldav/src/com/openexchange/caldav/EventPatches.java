@@ -381,7 +381,7 @@ public class EventPatches {
                     Iterator<Event> iterator = factory.requireService(RecurrenceService.class).iterateEventOccurrences(masterEvent, new Date(recurrenceId.getValue().getTimestamp()), null);
                     Event originalOccurrence = iterator.hasNext() ? iterator.next() : null;
                     if (null != originalOccurrence) {
-                        if (null != originalOccurrence.getAlarms() && 1 == originalOccurrence.getAlarms().size() && snoozedAlarm.getTrigger().equals(originalOccurrence.getAlarms().get(0).getTrigger())) {
+                        if (null != originalOccurrence.getAlarms() && 1 == originalOccurrence.getAlarms().size() && snoozedAlarm.getTrigger().matches(originalOccurrence.getAlarms().get(0).getTrigger())) {
                             Alarm originalAlarm = originalOccurrence.getAlarms().get(0);
                             originalOccurrence = exportAndImport(resource, originalOccurrence);
                             EventUpdate eventUpdate = DefaultEventUpdate.builder()
