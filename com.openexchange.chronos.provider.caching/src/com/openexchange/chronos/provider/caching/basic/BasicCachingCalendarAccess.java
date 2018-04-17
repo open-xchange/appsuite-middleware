@@ -273,7 +273,7 @@ public abstract class BasicCachingCalendarAccess implements BasicCalendarAccess,
         JSONObject caching = internalConfiguration.optJSONObject(CachingCalendarAccessConstants.CACHING);
         Number lastUpdate = (Number) caching.opt(CachingCalendarAccessConstants.LAST_UPDATE);
         long currentTimeMillis = System.currentTimeMillis();
-        if (lastUpdate == null || lastUpdate.longValue() <= 0 || (TimeUnit.MINUTES.toMillis(getCascadedRefreshInterval()) < currentTimeMillis - lastUpdate.longValue()) || (currentTimeMillis >= lastUpdate.longValue() && this.parameters.contains(CalendarParameters.PARAMETER_UPDATE_CACHE) && this.parameters.get(CalendarParameters.PARAMETER_UPDATE_CACHE, Boolean.class, Boolean.FALSE).booleanValue())) {
+        if (lastUpdate == null || lastUpdate.longValue() <= 0 || (TimeUnit.MINUTES.toMillis(getCascadedRefreshInterval()) < currentTimeMillis - lastUpdate.longValue() + TimeUnit.MINUTES.toMillis(1)) || (currentTimeMillis >= lastUpdate.longValue() + TimeUnit.MINUTES.toMillis(1) && this.parameters.contains(CalendarParameters.PARAMETER_UPDATE_CACHE) && this.parameters.get(CalendarParameters.PARAMETER_UPDATE_CACHE, Boolean.class, Boolean.FALSE).booleanValue())) {
             update();
         }
     }
@@ -307,7 +307,7 @@ public abstract class BasicCachingCalendarAccess implements BasicCalendarAccess,
                     }
                 }.executeUpdate();
             }
-            this.updateLastUpdated(System.currentTimeMillis() + TimeUnit.MINUTES.toMillis(1));
+            this.updateLastUpdated(System.currentTimeMillis());
             account.getInternalConfiguration().remove("lastError");
         } catch (OXException e) {
             LOG.info("Unable to update cache for account {}: {}", account.getAccountId(), e.getMessage(), e);
