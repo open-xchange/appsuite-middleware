@@ -526,20 +526,13 @@ public class CalendarServiceImpl implements CalendarService {
 
     private <T extends InternalCalendarResult> T notifyHandlers(T result, boolean trackAttendeeUsage) {
         Runnable notifyRunnable = () -> {
-            if (result != null && result.getCalendarEvent() != null) {
-                CalendarEvent calendarEvent = result.getCalendarEvent();
-                if (trackAttendeeUsage) {
-                    trackAttendeeUsage(result.getSession(), calendarEvent);
-                }
-                notifyHandlers(calendarEvent);
+            CalendarEvent calendarEvent = result.getCalendarEvent();
+            if (trackAttendeeUsage) {
+                trackAttendeeUsage(result.getSession(), calendarEvent);
             }
+            notifyHandlers(calendarEvent);
         };
-        final boolean ASYNC = true;
-        if (ASYNC) {
-            ThreadPools.submitElseExecute(ThreadPools.task(notifyRunnable));
-        } else {
-            notifyRunnable.run();
-        }
+        ThreadPools.submitElseExecute(ThreadPools.task(notifyRunnable));
         return result;
     }
 

@@ -94,7 +94,7 @@ public class ICalEventImportExportTest extends AbstractImportExportTest {
         addInfoItemExport(itemList, expectedEventData.getFolder(), expectedEventData.getId());
         eventData.add(expectedEventData);
 
-        Calendar start = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+        Calendar start = Calendar.getInstance(TimeZone.getTimeZone("Europe/Berlin"));
         start.setTimeInMillis(System.currentTimeMillis());
         Calendar end = Calendar.getInstance(TimeZone.getTimeZone("Europe/Berlin"));
         end.setTimeInMillis(System.currentTimeMillis() + TimeUnit.DAYS.toMillis(10));
