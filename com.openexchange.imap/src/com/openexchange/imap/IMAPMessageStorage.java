@@ -3433,7 +3433,12 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                     }
                 } catch (final MessagingException e) {
                     if (MimeMailException.isOverQuotaException(e)) {
-                        throw MailExceptionCode.COPY_TO_SENT_FOLDER_FAILED_QUOTA.create(e, new Object[0]);
+                        // Special handling for over-quota error
+                        String sentFullname = imapAccess.getFolderStorage().getSentFolder();
+                        if (null != sentFullname && sentFullname.equals(destFullName)) {
+                            throw MailExceptionCode.COPY_TO_SENT_FOLDER_FAILED_QUOTA.create(e, new Object[0]);
+                        }
+                        throw MimeMailException.handleMessagingException(e, imapConfig, session);
                     }
                     
                     OXException oxe = handleMessagingException(destFullName, e);
@@ -3635,7 +3640,12 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                     }
                 } catch (final MessagingException e) {
                     if (MimeMailException.isOverQuotaException(e)) {
-                        throw MailExceptionCode.COPY_TO_SENT_FOLDER_FAILED_QUOTA.create(e, new Object[0]);
+                        // Special handling for over-quota error
+                        String sentFullname = imapAccess.getFolderStorage().getSentFolder();
+                        if (null != sentFullname && sentFullname.equals(destFullName)) {
+                            throw MailExceptionCode.COPY_TO_SENT_FOLDER_FAILED_QUOTA.create(e, new Object[0]);
+                        }
+                        throw MimeMailException.handleMessagingException(e, imapConfig, session);
                     }
                     
                     OXException oxe = handleMessagingException(destFullName, e);
