@@ -746,7 +746,6 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 stmt.setInt(3, userId);
                 stmt.executeUpdate();
                 stmt.close();
-                changedAttributes.add("password mech");
             }
 
             // Change quota size
