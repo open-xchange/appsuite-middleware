@@ -10,7 +10,6 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Date;
-import java.util.List;
 import org.json.JSONException;
 import org.junit.Test;
 import org.xml.sax.SAXException;
@@ -72,16 +71,6 @@ public class UpdateTest extends InfostoreAJAXTest {
     }
 
     @Test
-    public void testConflict() throws Exception {
-        final String origId = Iterables.get(itm.getCreatedEntities(), 0).getId();
-        com.openexchange.file.storage.File file = itm.getAction(origId);
-        file.setTitle("test knowledge updated");
-        itm.updateAction(file, new com.openexchange.file.storage.File.Field[] { com.openexchange.file.storage.File.Field.TITLE }, new Date(file.getLastModified().getTime() - 2000));
-        AbstractAJAXResponse response = itm.getLastResponse();
-        assertTrue(response.hasError());
-    }
-
-    @Test
     public void testUpload() throws Exception {
         final File upload = new File(TestInit.getTestProperty("ajaxPropertiesFile"));
 
@@ -128,7 +117,7 @@ public class UpdateTest extends InfostoreAJAXTest {
         assertEquals("2", obj.getVersion());
         assertEquals("text/plain", obj.getFileMIMEType());
         assertEquals(emptyFile.getName(), obj.getFileName());
-        assertTrue(emptyFile.delete());
+        emptyFile.delete();
     }
 
     //Bug 4120
@@ -174,7 +163,7 @@ public class UpdateTest extends InfostoreAJAXTest {
         id2.setFileName("theFile.txt");
         itm.newAction(id2, upload);
 
-        com.openexchange.file.storage.File file = itm.getAction(id);
+        itm.getAction(id);
         org.setTitle("otherTitle");
         org.setVersion("1");
         itm.updateAction(org, new com.openexchange.file.storage.File.Field[] { com.openexchange.file.storage.File.Field.VERSION, com.openexchange.file.storage.File.Field.TITLE }, new Date(Long.MAX_VALUE));
@@ -210,7 +199,7 @@ public class UpdateTest extends InfostoreAJAXTest {
         com.openexchange.file.storage.File obj = itm.getAction(id);
         assertEquals("Version does not match.", "2", obj.getVersion());
 
-        List<com.openexchange.file.storage.File> versions = itm.versions(id, new int[] { Metadata.VERSION, Metadata.CURRENT_VERSION });
+        itm.versions(id, new int[] { Metadata.VERSION, Metadata.CURRENT_VERSION });
         assertFalse(itm.getLastResponse().hasError());
 
         VersionsTest.assureVersions(new Integer[] { 1, 2, 3, 4 }, itm.getLastResponse(), 2);

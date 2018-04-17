@@ -54,8 +54,11 @@ import static org.junit.Assert.assertFalse;
 import java.io.IOException;
 import java.util.Date;
 import org.json.JSONException;
+import org.junit.Before;
 import org.junit.Test;
 import org.xml.sax.SAXException;
+import com.openexchange.ajax.folder.actions.ClearRequest;
+import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.DefaultFile;
 import com.openexchange.file.storage.File;
@@ -73,6 +76,11 @@ public class Bug40142Test extends AbstractInfostoreTest {
 
     public Bug40142Test() {
         super();
+    }
+
+    @Before
+    public void setup() throws OXException, IOException, JSONException {
+        getClient().execute(new ClearRequest(EnumAPI.OX_OLD, getClient().getValues().getInfostoreTrashFolder()));
     }
 
     @Test
@@ -178,7 +186,7 @@ public class Bug40142Test extends AbstractInfostoreTest {
         }
         itm.copyAction(actual.getId(), folder.getObjectID() + "", actual);
         final String id = actual.getId();
-        
+
 
         actual = itm.getAction(id);
         assertEquals("Name should be the same", "name.name (1).txt.pgp", actual.getFileName());
@@ -188,6 +196,7 @@ public class Bug40142Test extends AbstractInfostoreTest {
     @SuppressWarnings("unchecked")
     @Test
     public void testDeleteFileWithExistingNameInTrash() throws OXException, IOException, SAXException, JSONException {
+
         final FolderObject folder = generateInfostoreFolder("InfostoreCreateDeleteTest Folder");
         ftm.insertFolderOnServer(folder);
         File actual;
