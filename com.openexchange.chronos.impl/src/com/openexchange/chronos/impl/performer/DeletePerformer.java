@@ -307,6 +307,7 @@ public class DeletePerformer extends AbstractUpdatePerformer {
             /*
              * update series master accordingly
              */
+            resultTracker.rememberOriginalEvent(originalMasterEvent);
             Event eventUpdate = new Event();
             eventUpdate.setId(originalMasterEvent.getId());
             eventUpdate.setDeleteExceptionDates(deleteExceptionDates);
