@@ -60,6 +60,7 @@ import com.openexchange.admin.rmi.dataobjects.User;
  * @since v7.10.0
  */
 public enum UserMailAttribute implements Attribute {
+
     SEND_ADDRESS("send_addr", (user) -> user.getDefaultSenderAddress(), String.class),
     STD_DRAFTS("std_drafts", (user) -> user.getMail_folder_drafts_name(), String.class),
     STD_SENT("std_sent", (user) -> user.getMail_folder_sent_name(), String.class),
@@ -74,6 +75,7 @@ public enum UserMailAttribute implements Attribute {
     private final String sqlFieldName;
     private final Function<User, String> getter;
     private final Class<?> originalType;
+    private static final String TABLE_NAME = "user_setting_mail";
 
     /**
      * 
@@ -95,6 +97,16 @@ public enum UserMailAttribute implements Attribute {
     @Override
     public String getSQLFieldName() {
         return sqlFieldName;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.Attribute#getSQLTableName()
+     */
+    @Override
+    public String getSQLTableName() {
+        return TABLE_NAME;
     }
 
     /*

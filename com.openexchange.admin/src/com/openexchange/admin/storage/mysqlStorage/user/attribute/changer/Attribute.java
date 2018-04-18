@@ -67,6 +67,13 @@ public interface Attribute {
     String getSQLFieldName();
 
     /**
+     * Gets the name of the table in which this attribute is stored
+     * 
+     * @return The table's name
+     */
+    String getSQLTableName();
+
+    /**
      * Retrieves the value of the attribute from the specified {@link T} object
      * 
      * @param user The {@link T} object

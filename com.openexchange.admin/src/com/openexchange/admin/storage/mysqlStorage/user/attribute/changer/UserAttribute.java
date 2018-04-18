@@ -106,6 +106,7 @@ public enum UserAttribute implements Attribute {
     private final String sqlFieldName;
     private final Function<User, String> getter;
     private final Class<?> originalType;
+    private static final String TABLE_NAME = "user";
 
     /**
      * 
@@ -127,6 +128,16 @@ public enum UserAttribute implements Attribute {
     @Override
     public String getSQLFieldName() {
         return sqlFieldName;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.Attribute#getSQLTableName()
+     */
+    @Override
+    public String getSQLTableName() {
+        return TABLE_NAME;
     }
 
     /*

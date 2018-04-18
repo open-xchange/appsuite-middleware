@@ -61,8 +61,7 @@ import java.sql.SQLException;
  */
 abstract class AbstractUserAttributeChanger extends AbstractAttributeChanger implements UserAttributeChanger {
 
-    static final String TOKEN = "<COLUMN>";
-    static final String SQL_STATEMENT_TEMPLATE = "UPDATE user SET " + TOKEN + " = ? WHERE cid = ? AND id = ?";
+    static final String SQL_STATEMENT_TEMPLATE = "UPDATE " + TABLE_TOKEN + " SET " + COLUMN_TOKEN + " = ? WHERE cid = ? AND id = ?";
 
     /**
      * Initialises a new {@link AbstractUserAttributeChanger}.
@@ -81,7 +80,7 @@ abstract class AbstractUserAttributeChanger extends AbstractAttributeChanger imp
     void fillSetStatement(PreparedStatement stmt, Setter setter, int userId, int contextId, Object value, Attribute attribute) throws SQLException {
         int parameterIndex = 1;
         setter.set(stmt, value, parameterIndex++);
-        appendUserContext(contextId, userId, stmt, parameterIndex);
+        appendContextUser(contextId, userId, stmt, parameterIndex);
     }
 
     /*
@@ -94,7 +93,7 @@ abstract class AbstractUserAttributeChanger extends AbstractAttributeChanger imp
     void fillUnsetStatement(PreparedStatement stmt, Unsetter unsetter, int userId, int contextId) throws SQLException {
         int parameterIndex = 1;
         unsetter.unset(stmt, parameterIndex++);
-        appendUserContext(contextId, userId, stmt, parameterIndex);
+        appendContextUser(contextId, userId, stmt, parameterIndex);
     }
 
     /*
@@ -104,24 +103,7 @@ abstract class AbstractUserAttributeChanger extends AbstractAttributeChanger imp
      */
     @Override
     PreparedStatement prepareStatement(Attribute attribute, Connection connection) throws SQLException {
-        String sqlStatement = SQL_STATEMENT_TEMPLATE.replaceAll(TOKEN, attribute.getSQLFieldName());
+        String sqlStatement = SQL_STATEMENT_TEMPLATE.replaceAll(TABLE_TOKEN, attribute.getSQLTableName()).replaceAll(COLUMN_TOKEN, attribute.getSQLFieldName());
         return connection.prepareStatement(sqlStatement);
-    }
-
-    ///////////////////////////////////// HELPERS ////////////////////////////////
-
-    /**
-     * Appends the user and context identifiers to the specified {@link PreparedStatement} in the specified positions
-     * 
-     * @param contextId the context identifier
-     * @param userId The user identifier
-     * @param stmt The {@link PreparedStatement}
-     * @param parameterIndex The position at which the user and context identifiers will be set
-     * 
-     * @throws SQLException if an SQL error is occurred
-     */
-    private void appendUserContext(int contextId, int userId, PreparedStatement stmt, int parameterIndex) throws SQLException {
-        stmt.setInt(parameterIndex++, contextId);
-        stmt.setInt(parameterIndex++, userId);
     }
 }

@@ -67,6 +67,9 @@ import com.openexchange.java.Strings;
  */
 abstract class AbstractAttributeChanger {
 
+    static final String TABLE_TOKEN = "<TABLE>";
+    static final String COLUMN_TOKEN = "<COLUMN>";
+
     final Map<Class<?>, Setter> setters;
     final Map<Class<?>, Unsetter> unsetters;
 
@@ -141,6 +144,22 @@ abstract class AbstractAttributeChanger {
     }
 
     /**
+     * Appends the context and user identifiers (in that order) to the specified {@link PreparedStatement} in the positions
+     * indicated by the parameter index.
+     * 
+     * @param contextId the context identifier
+     * @param userId The user identifier
+     * @param stmt The {@link PreparedStatement}
+     * @param parameterIndex The position at which the user and context identifiers will be set
+     * 
+     * @throws SQLException if an SQL error is occurred
+     */
+    void appendContextUser(int contextId, int userId, PreparedStatement stmt, int parameterIndex) throws SQLException {
+        stmt.setInt(parameterIndex++, contextId);
+        stmt.setInt(parameterIndex++, userId);
+    }
+
+    /**
      * Fills the specified {@link PreparedStatement} with the specified user id, context id and value for the specified {@link Attribute}
      * 
      * @param stmt The {@link PreparedStatement} to fill
@@ -165,6 +184,18 @@ abstract class AbstractAttributeChanger {
     abstract void fillUnsetStatement(PreparedStatement stmt, Unsetter unsetter, int userId, int contextId) throws SQLException;
 
     /**
+     * Creates a new {@link PreparedStatement} for the specified {@link Attribute}
+     * 
+     * @param attribute the {@link Attribute}
+     * @param connection The {@link Connection}
+     * @return The {@link PreparedStatement}
+     * @throws SQLException if an SQL error is occurred
+     */
+    abstract PreparedStatement prepareStatement(Attribute attribute, Connection connection) throws SQLException;
+
+    //////////////////////////////////// HELPERS //////////////////////////////////
+
+    /**
      * Executes the update
      * 
      * @param stmt The {@link PreparedStatement}
@@ -178,16 +209,6 @@ abstract class AbstractAttributeChanger {
             Databases.closeSQLStuff(stmt);
         }
     }
-
-    /**
-     * Creates a new {@link PreparedStatement} for the specified {@link Attribute}
-     * 
-     * @param attribute the {@link Attribute}
-     * @param connection The {@link Connection}
-     * @return The {@link PreparedStatement}
-     * @throws SQLException if an SQL error is occurred
-     */
-    abstract PreparedStatement prepareStatement(Attribute attribute, Connection connection) throws SQLException;
 
     //////////////////////////////// PRIVATE INTERFACES ///////////////////////////////
 
