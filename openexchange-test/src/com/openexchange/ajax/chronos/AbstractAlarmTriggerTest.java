@@ -70,7 +70,6 @@ import com.openexchange.testing.httpclient.modules.ChronosApi;
  */
 public abstract class AbstractAlarmTriggerTest extends AbstractAlarmTest {
 
-    protected String folderId;
     protected String folderId2;
     protected UserApi user2;
     protected EventManager eventManager2;
@@ -85,7 +84,6 @@ public abstract class AbstractAlarmTriggerTest extends AbstractAlarmTest {
     @Override
     public void setUp() throws Exception {
         super.setUp();
-        folderId = createAndRememberNewFolder(defaultUserApi, defaultUserApi.getSession(), getDefaultFolder(), defaultUserApi.getCalUser().intValue());
         ApiClient client = generateApiClient(testUser2);
         rememberClient(client);
         EnhancedApiClient enhancedClient = generateEnhancedClient(testUser2);
@@ -94,6 +92,12 @@ public abstract class AbstractAlarmTriggerTest extends AbstractAlarmTest {
         user2 = new UserApi(client, enhancedClient, testUser2);
         folderId2 = getDefaultFolder(user2.getSession(), client);
         eventManager2 = new EventManager(user2, getDefaultFolder(user2.getSession(), client));
+    }
+
+    @Override
+    public void tearDown() throws Exception {
+        super.tearDown();
+        eventManager2.cleanUp();
     }
 
     /**

@@ -100,7 +100,7 @@ public class BasicSelfProtectionTest extends AbstractChronosTest {
         Date until = new Date(now + TimeUnit.DAYS.toMillis(1012));
         String fromStr = DateTimeUtil.getZuluDateTime(from.getTime()).getValue();
         String untilStr = DateTimeUtil.getZuluDateTime(until.getTime()).getValue();
-        EventData toCreate = EventFactory.createSeriesEvent(defaultUserApi.getCalUser(), "testTooManyEvents", 1002);
+        EventData toCreate = EventFactory.createSeriesEvent(defaultUserApi.getCalUser(), "testTooManyEvents", 1002, folderId);
 
         // Try create with expand 'true'
         ChronosCalendarResultResponse createEvent = defaultUserApi.getChronosApi().createEvent(defaultUserApi.getSession(), folderId, toCreate, true, false, false, fromStr, untilStr, true);
@@ -109,7 +109,7 @@ public class BasicSelfProtectionTest extends AbstractChronosTest {
 
         // Create normally
         EventData expectedEventData = eventManager.createEvent(toCreate);
-        EventData actualEventData = eventManager.getEvent(expectedEventData.getId());
+        EventData actualEventData = eventManager.getEvent(folderId, expectedEventData.getId());
         AssertUtil.assertEventsEqual(expectedEventData, actualEventData);
         long timestamp = eventManager.getLastTimeStamp();
 
@@ -161,9 +161,9 @@ public class BasicSelfProtectionTest extends AbstractChronosTest {
 
 
         // Create normal and try to update
-        toCreate = EventFactory.createSingleTwoHourEvent(defaultUserApi.getCalUser(), "testTooManyAttendees");
+        toCreate = EventFactory.createSingleTwoHourEvent(defaultUserApi.getCalUser(), "testTooManyAttendees", folderId);
         EventData expectedEventData = eventManager.createEvent(toCreate);
-        EventData actualEventData = eventManager.getEvent(expectedEventData.getId());
+        EventData actualEventData = eventManager.getEvent(folderId, expectedEventData.getId());
         AssertUtil.assertEventsEqual(expectedEventData, actualEventData);
 
         for(int x=0; x<1005; x++){
@@ -203,7 +203,7 @@ public class BasicSelfProtectionTest extends AbstractChronosTest {
         // Create normal and try to update
         toCreate = EventFactory.createSingleTwoHourEvent(defaultUserApi.getCalUser(), "testTooManyAttendees");
         EventData expectedEventData = eventManager.createEvent(toCreate);
-        EventData actualEventData = eventManager.getEvent(expectedEventData.getId());
+        EventData actualEventData = eventManager.getEvent(folderId, expectedEventData.getId());
         AssertUtil.assertEventsEqual(expectedEventData, actualEventData);
 
         for(int x=0; x<105; x++){

@@ -94,7 +94,7 @@ public class AlarmHelper {
 
     private final ServiceLookup services;
     private final Context context;
-    private final CalendarAccount account;
+    final CalendarAccount account;
 
     /**
      * Initializes a new {@link AlarmHelper}.
@@ -291,7 +291,7 @@ public class AlarmHelper {
         }.executeUpdate();
     }
 
-    private boolean updateAlarms(CalendarStorage storage, Event event, List<Alarm> originalAlarms, List<Alarm> updatedAlarms) throws OXException {
+    boolean updateAlarms(CalendarStorage storage, Event event, List<Alarm> originalAlarms, List<Alarm> updatedAlarms) throws OXException {
         CollectionUpdate<Alarm, AlarmField> alarmUpdates = AlarmUtils.getAlarmUpdates(originalAlarms, updatedAlarms);
         if (alarmUpdates.isEmpty()) {
             return false;
@@ -338,7 +338,7 @@ public class AlarmHelper {
         return true;
     }
 
-    private int insertDefaultAlarms(CalendarStorage storage, List<Alarm> defaultAlarms, List<Event> birthdaySeriesList) throws OXException {
+    int insertDefaultAlarms(CalendarStorage storage, List<Alarm> defaultAlarms, List<Event> birthdaySeriesList) throws OXException {
         int count = 0;
         Map<String, Map<Integer, List<Alarm>>> alarmsByUserByEventId = new HashMap<String, Map<Integer, List<Alarm>>>(birthdaySeriesList.size());
         for (Event birthdaySeries : birthdaySeriesList) {
@@ -370,7 +370,7 @@ public class AlarmHelper {
      * @param alarms The alarms to apply
      * @return A delegating event with the alarms applied
      */
-    private static Event applyAlarms(Event event, final List<Alarm> alarms) {
+    static Event applyAlarms(Event event, final List<Alarm> alarms) {
         if (null == event || null == alarms && null == event.getAlarms()) {
             return event;
         }

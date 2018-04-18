@@ -143,7 +143,7 @@ public class BirthdaysCalendarAccess implements BasicCalendarAccess, SubscribeAw
      * @param account The underlying calendar account
      * @param parameters Additional calendar parameters
      */
-    public BirthdaysCalendarAccess(ServiceLookup services, ServerSession session, CalendarAccount account, CalendarParameters parameters) throws OXException {
+    public BirthdaysCalendarAccess(ServiceLookup services, ServerSession session, CalendarAccount account, CalendarParameters parameters) {
         super();
         this.account = account;
         this.services = services;

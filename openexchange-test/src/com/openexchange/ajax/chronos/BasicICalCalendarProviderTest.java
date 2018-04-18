@@ -117,7 +117,7 @@ public class BasicICalCalendarProviderTest extends AbstractExternalProviderChron
         return this.folderManager.createFolder(body);
     }
 
-    private long dateToMillis(String date) {
+    long dateToMillis(String date) {
         DateTimeFormatter formatter = DateTimeFormat.forPattern("yyyyMMdd'T'HHmmssZ");
         return formatter.parseDateTime(date).getMillis();
     }
@@ -589,7 +589,7 @@ public class BasicICalCalendarProviderTest extends AbstractExternalProviderChron
     }
 
     @Test
-    public void testGetSingleRecurrence_butNotAvailalbe() throws OXException, IOException, JSONException, ApiException, ChronosApiException {
+    public void testGetSingleRecurrence_butNotAvailalbe() throws OXException, IOException, JSONException, ApiException {
         String externalUri = "http://example.com/files/testGetSingleRecurrence_butNotAvailalbe.ics";
         mock(externalUri, BasicICalCalendarProviderTestConstants.GENERIC_RESPONSE, HttpStatus.SC_OK);
 
@@ -729,14 +729,14 @@ public class BasicICalCalendarProviderTest extends AbstractExternalProviderChron
             } else {
                 recurrence = event;
             }
-            
+
         }
         assertNotNull(master);
         assertNotNull(recurrence);
 
         String seriesId = master.getSeriesId();
         assertEquals(seriesId, recurrence.getSeriesId());
-        EventData reloadedRecurringEvent = eventManager.getRecurringEvent(recurrence.getId(), recurrence.getRecurrenceId(), newFolderId, false);
+        EventData reloadedRecurringEvent = eventManager.getRecurringEvent(newFolderId, recurrence.getId(), recurrence.getRecurrenceId(), false);
 
         assertEquals(recurrence.getRecurrenceId(), reloadedRecurringEvent.getRecurrenceId());
         assertEquals(recurrence.getStartDate().getValue(), reloadedRecurringEvent.getStartDate().getValue());

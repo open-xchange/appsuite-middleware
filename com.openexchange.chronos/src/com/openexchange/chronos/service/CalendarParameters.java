@@ -243,6 +243,23 @@ public interface CalendarParameters {
     static final String PARAMETER_TRACK_ATTENDEE_USAGE = "trackAttendeeUsage";
 
     /**
+     * {@link Boolean}
+     * <p/>
+     * Indicates whether forbidden changes in a scheduling object resource performed by an attendee should be ignored during update
+     * operations or not.
+     * <p/>
+     * If set to <code>true</code>, only changes in certain properties (as per
+     * <a href="https://tools.ietf.org/html/rfc6638#section-3.2.2.1">RFC 6638, section 3.2.2.1</a>) are considered when updating an
+     * attendee scheduling resource, while changes on properties that are under the control of the organizer are ignored implicitly (which
+     * may be suitable for updates performed by non-interactive synchronization clients). Defaults to <code>false</code>, so that an
+     * appropriate exception is thrown when forbidden changes are detected.
+     *
+     * @see CalendarExceptionCodes#NOT_ORGANIZER
+     * @see <a href="https://tools.ietf.org/html/rfc6638#section-3.2.2">RFC 6638, section 3.2.2</a>
+     */
+    static final String PARAMETER_IGNORE_FORBIDDEN_ATTENDEE_CHANGES = "ignoreForbiddenAttendeeChanges";
+
+    /**
      * {@link Integer}
      * <p/>
      * The principal id in an itip context
