@@ -110,10 +110,6 @@ abstract class AbstractAttributeChanger {
      * @throws SQLException if an SQL error is occurred
      */
     boolean setAttribute(int userId, int contextId, Attribute attribute, Object value, Connection connection) throws SQLException {
-        if (value == null || (value instanceof String && Strings.isEmpty((String) value))) {
-            return false;
-        }
-
         Setter setter = setters.get(attribute.getOriginalType());
         if (setter == null) {
             return false;

@@ -101,35 +101,55 @@ public class UserAttributeChangers {
 
             @Override
             public boolean changeAttribute(int userId, int contextId, User userData, Connection connection) throws SQLException {
-                return setAttribute(userId, contextId, UserAttribute.MAIL, userData.getPrimaryEmail(), connection);
+                String primaryEmail = userData.getPrimaryEmail();
+                if (Strings.isEmpty(primaryEmail)) {
+                    return false;
+                }
+                return setAttribute(userId, contextId, UserAttribute.MAIL, primaryEmail, connection);
             }
         });
         c.put(UserAttribute.PREFERRED_LANGUAGE, new AbstractSingleAttributeChanger() {
 
             @Override
             public boolean changeAttribute(int userId, int contextId, User userData, Connection connection) throws SQLException {
-                return setAttribute(userId, contextId, UserAttribute.PREFERRED_LANGUAGE, userData.getLanguage(), connection);
+                String language = userData.getLanguage();
+                if (Strings.isEmpty(language)) {
+                    return false;
+                }
+                return setAttribute(userId, contextId, UserAttribute.PREFERRED_LANGUAGE, language, connection);
             }
         });
         c.put(UserAttribute.TIMEZONE, new AbstractSingleAttributeChanger() {
 
             @Override
             public boolean changeAttribute(int userId, int contextId, User userData, Connection connection) throws SQLException {
-                return setAttribute(userId, contextId, UserAttribute.TIMEZONE, userData.getTimezone(), connection);
+                String timezone = userData.getTimezone();
+                if (Strings.isEmpty(timezone)) {
+                    return false;
+                }
+                return setAttribute(userId, contextId, UserAttribute.TIMEZONE, timezone, connection);
             }
         });
         c.put(UserAttribute.MAIL_ENABLED, new AbstractSingleAttributeChanger() {
 
             @Override
             public boolean changeAttribute(int userId, int contextId, User userData, Connection connection) throws SQLException {
-                return setAttribute(userId, contextId, UserAttribute.MAIL_ENABLED, userData.getMailenabled(), connection);
+                Boolean mailEnabled = userData.getMailenabled();
+                if (mailEnabled == null) {
+                    return false;
+                }
+                return setAttribute(userId, contextId, UserAttribute.MAIL_ENABLED, mailEnabled, connection);
             }
         });
         c.put(UserAttribute.SHADOW_LAST_CHANGE, new AbstractSingleAttributeChanger() {
 
             @Override
             public boolean changeAttribute(int userId, int contextId, User userData, Connection connection) throws SQLException {
-                return setAttribute(userId, contextId, UserAttribute.SHADOW_LAST_CHANGE, userData.getPassword_expired(), connection);
+                Boolean passwordExpired = userData.getPassword_expired();
+                if (passwordExpired == null) {
+                    return false;
+                }
+                return setAttribute(userId, contextId, UserAttribute.SHADOW_LAST_CHANGE, passwordExpired, connection);
             }
         });
         c.put(UserAttribute.IMAP_SERVER, new AbstractSingleAttributeChanger() {
@@ -195,7 +215,11 @@ public class UserAttributeChangers {
 
             @Override
             public boolean changeAttribute(int userId, int contextId, User userData, Connection connection) throws SQLException {
-                return setAttribute(userId, contextId, UserAttribute.PASSWORD_MECH, userData.getPasswordMech(), connection);
+                String passwordMech = userData.getPasswordMech();
+                if (Strings.isEmpty(passwordMech)) {
+                    return false;
+                }
+                return setAttribute(userId, contextId, UserAttribute.PASSWORD_MECH, passwordMech, connection);
             }
         });
         return Collections.unmodifiableMap(c);
