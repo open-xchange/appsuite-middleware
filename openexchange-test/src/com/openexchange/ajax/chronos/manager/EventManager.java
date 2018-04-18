@@ -234,6 +234,7 @@ public class EventManager extends AbstractManager {
         } else {
             assertNull(eventsResponse.getError());
         }
+        lastTimeStamp = eventsResponse.getTimestamp();
         return eventsResponse.getData();
     }
 

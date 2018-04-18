@@ -118,7 +118,7 @@ public class BasicFreeBusyTest extends AbstractChronosTest {
         folderId = createAndRememberNewFolder(defaultUserApi, defaultUserApi.getSession(), getDefaultFolder(), defaultUserApi.getCalUser());
 
         // prepare second user
-        user2 = new UserApi(generateApiClient(testUser2), generateEnhancedClient(testUser2), testUser2);
+        user2 = new UserApi(generateApiClient(testUser2), generateEnhancedClient(testUser2), testUser2, false);
         rememberClient(user2.getClient());
         rememberClient(user2.getEnhancedApiClient());
     }
