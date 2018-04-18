@@ -49,21 +49,50 @@
 
 package com.openexchange.admin.storage.mysqlStorage.user.attribute.changer;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.util.Map;
+import java.util.Set;
+import com.openexchange.admin.storage.mysqlStorage.user.attribute.Attribute;
+import com.openexchange.mailaccount.MailAccount;
+
 /**
- * {@link AbstractUserSettingMailAttributeChanger}
+ * {@link AbstractUserMailAccountAttributeChanger}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @since v7.10.1
  */
-abstract class AbstractUserSettingMailAttributeChanger extends AbstractAttributeChanger implements UserAttributeChanger {
-
-    static final String SQL_STATEMENT_TEMPLATE = "UPDATE " + TABLE_TOKEN + " SET " + COLUMN_TOKEN + " = ? WHERE cid = ? AND id = ?";
+abstract class AbstractUserMailAccountAttributeChanger extends AbstractMultiAttributeChanger {
 
     /**
-     * Initialises a new {@link AbstractUserSettingMailAttributeChanger}.
+     * Initialises a new {@link AbstractUserMailAccountAttributeChanger}.
      */
-    public AbstractUserSettingMailAttributeChanger() {
+    public AbstractUserMailAccountAttributeChanger() {
         super();
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.AbstractMultiAttributeChanger#fillSetStatement(java.sql.PreparedStatement, java.util.Map, java.util.Map, int, int)
+     */
+    @Override
+    int fillSetStatement(PreparedStatement stmt, Map<Attribute, Setter> setters, Map<Attribute, Object> attributes, int userId, int contextId) throws SQLException {
+        int parameterIndex = super.fillSetStatement(stmt, setters, attributes, userId, contextId);
+        stmt.setInt(parameterIndex++, MailAccount.DEFAULT_ID);
+        return parameterIndex;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.AbstractMultiAttributeChanger#prepareStatement(java.lang.String, java.util.Set, java.sql.Connection)
+     */
+    @Override
+    PreparedStatement prepareStatement(String table, Set<Attribute> attributes, Connection connection) throws SQLException {
+        String sqlStatement = SQL_STATEMENT_TEMPLATE.replaceAll(TABLE_TOKEN, table).replaceAll(COLUMN_TOKEN, prepareAttributes(attributes));
+        sqlStatement += " AND id = ?;";
+        return connection.prepareStatement(sqlStatement);
+    }
 }

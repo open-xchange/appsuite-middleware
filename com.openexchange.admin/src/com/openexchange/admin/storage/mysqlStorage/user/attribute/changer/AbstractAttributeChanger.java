@@ -132,6 +132,10 @@ abstract class AbstractAttributeChanger {
         return executeUpdate(stmt);
     }
 
+    boolean setAttributesDefault(int userId, int contextId, String table, Set<Attribute> attributes, Connection connection) {
+        return false;
+    }
+
     /**
      * Un-sets the specified {@link Attribute}s
      * 
@@ -171,9 +175,10 @@ abstract class AbstractAttributeChanger {
      * 
      * @throws SQLException if an SQL error is occurred
      */
-    void appendContextUser(int contextId, int userId, PreparedStatement stmt, int parameterIndex) throws SQLException {
+    int appendContextUser(int contextId, int userId, PreparedStatement stmt, int parameterIndex) throws SQLException {
         stmt.setInt(parameterIndex++, contextId);
         stmt.setInt(parameterIndex++, userId);
+        return parameterIndex;
     }
 
     /**
@@ -202,7 +207,7 @@ abstract class AbstractAttributeChanger {
      * @param attribute The {@link Attribute}
      * @throws SQLException if an SQL error is occurred
      */
-    abstract void fillSetStatement(PreparedStatement stmt, Map<Attribute, Setter> setters, Map<Attribute, Object> attributes, int userId, int contextId) throws SQLException;
+    abstract int fillSetStatement(PreparedStatement stmt, Map<Attribute, Setter> setters, Map<Attribute, Object> attributes, int userId, int contextId) throws SQLException;
 
     /**
      * Fills the specified {@link PreparedStatement} with the specified user id, context id and value for the specified {@link Attribute}
@@ -213,17 +218,28 @@ abstract class AbstractAttributeChanger {
      * @param contextId The context identifier
      * @throws SQLException if an SQL error is occurred
      */
-    abstract void fillUnsetStatement(PreparedStatement stmt, Map<Attribute, Unsetter> unsetters, Set<Attribute> attributes, int userId, int contextId) throws SQLException;
+    abstract int fillUnsetStatement(PreparedStatement stmt, Map<Attribute, Unsetter> unsetters, Set<Attribute> attributes, int userId, int contextId) throws SQLException;
 
     /**
-     * Creates a new {@link PreparedStatement} for the specified {@link Attribute}
+     * Creates a new {@link PreparedStatement} for the specified {@link Attribute}s
+     * 
+     * @param attributes the {@link Attribute}s
+     * @param connection The {@link Connection}
+     * @return The {@link PreparedStatement}
+     * @throws SQLException if an SQL error is occurred
+     */
+    abstract PreparedStatement prepareStatement(String table, Set<Attribute> attributes, Connection connection) throws SQLException;
+
+    /**
+     * Creates a new {@link PreparedStatement} for the specified {@link Attribute}s to set them
+     * to their 'DEFAULT' values
      * 
      * @param attribute the {@link Attribute}
      * @param connection The {@link Connection}
      * @return The {@link PreparedStatement}
      * @throws SQLException if an SQL error is occurred
      */
-    abstract PreparedStatement prepareStatement(String table, Set<Attribute> attributes, Connection connection) throws SQLException;
+    abstract PreparedStatement prepareDefaultStatement(String table, Set<Attribute> attributes, Connection connection) throws SQLException;
 
     //////////////////////////////////// HELPERS //////////////////////////////////
 

@@ -59,14 +59,17 @@ import com.openexchange.admin.storage.mysqlStorage.user.attribute.Attribute;
 
 /**
  * {@link AbstractMultiAttributeChanger} - Base stub class for providing the logic of
- * changing a single attribute for a user in a context.
+ * changing multiple attributes for a user in a context.
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @since v7.10.1
  */
 abstract class AbstractMultiAttributeChanger extends AbstractAttributeChanger implements UserAttributeChanger {
 
-    static final String SQL_STATEMENT_TEMPLATE = "UPDATE " + TABLE_TOKEN + " SET " + COLUMN_TOKEN + " = ? WHERE cid = ? AND id = ?";
+    /**
+     * Basic stub UPDATE SQL statement with table and column placeholders
+     */
+    static final String SQL_STATEMENT_TEMPLATE = "UPDATE " + TABLE_TOKEN + " SET " + COLUMN_TOKEN + " WHERE cid = ? AND id = ?"; // TODO: customise the WHERE predicate, maybe use c.o.sql.grammar
 
     /**
      * Initialises a new {@link AbstractMultiAttributeChanger}.
@@ -81,7 +84,7 @@ abstract class AbstractMultiAttributeChanger extends AbstractAttributeChanger im
      * @see com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.AbstractAttributeChanger#fillSetStatement(java.sql.PreparedStatement, java.util.Map, java.util.Map, int, int)
      */
     @Override
-    void fillSetStatement(PreparedStatement stmt, Map<Attribute, Setter> setters, Map<Attribute, Object> attributes, int userId, int contextId) throws SQLException {
+    int fillSetStatement(PreparedStatement stmt, Map<Attribute, Setter> setters, Map<Attribute, Object> attributes, int userId, int contextId) throws SQLException {
         int parameterIndex = 1;
         for (Entry<Attribute, Object> entry : attributes.entrySet()) {
             Setter setter = setters.get(entry.getKey());
@@ -90,7 +93,7 @@ abstract class AbstractMultiAttributeChanger extends AbstractAttributeChanger im
             }
             setter.set(stmt, entry.getValue(), parameterIndex++);
         }
-        appendContextUser(contextId, userId, stmt, parameterIndex);
+        return appendContextUser(contextId, userId, stmt, parameterIndex);
     }
 
     /*
@@ -99,7 +102,7 @@ abstract class AbstractMultiAttributeChanger extends AbstractAttributeChanger im
      * @see com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.AbstractAttributeChanger#fillUnsetStatement(java.sql.PreparedStatement, java.util.Map, java.util.Set, int, int)
      */
     @Override
-    void fillUnsetStatement(PreparedStatement stmt, Map<Attribute, Unsetter> unsetters, Set<Attribute> attributes, int userId, int contextId) throws SQLException {
+    int fillUnsetStatement(PreparedStatement stmt, Map<Attribute, Unsetter> unsetters, Set<Attribute> attributes, int userId, int contextId) throws SQLException {
         int parameterIndex = 1;
         for (Attribute attribute : attributes) {
             Unsetter unsetter = unsetters.get(attribute);
@@ -108,7 +111,7 @@ abstract class AbstractMultiAttributeChanger extends AbstractAttributeChanger im
             }
             unsetter.unset(stmt, parameterIndex++);
         }
-        appendContextUser(contextId, userId, stmt, parameterIndex);
+        return appendContextUser(contextId, userId, stmt, parameterIndex);
     }
 
     /*
@@ -119,6 +122,17 @@ abstract class AbstractMultiAttributeChanger extends AbstractAttributeChanger im
     @Override
     PreparedStatement prepareStatement(String table, Set<Attribute> attributes, Connection connection) throws SQLException {
         String sqlStatement = SQL_STATEMENT_TEMPLATE.replaceAll(TABLE_TOKEN, table).replaceAll(COLUMN_TOKEN, prepareAttributes(attributes));
+        return connection.prepareStatement(sqlStatement);
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.AbstractAttributeChanger#prepareDefaultStatement(java.lang.String, java.util.Set, java.sql.Connection)
+     */
+    @Override
+    PreparedStatement prepareDefaultStatement(String table, Set<Attribute> attributes, Connection connection) throws SQLException {
+        String sqlStatement = SQL_STATEMENT_TEMPLATE.replaceAll(TABLE_TOKEN, table).replaceAll(COLUMN_TOKEN, prepareAttributes(attributes).replaceAll("\\?", "DEFAULT"));
         return connection.prepareStatement(sqlStatement);
     }
 }

@@ -112,7 +112,11 @@ import com.openexchange.admin.services.AdminServiceRegistry;
 import com.openexchange.admin.storage.interfaces.OXToolStorageInterface;
 import com.openexchange.admin.storage.interfaces.OXUtilStorageInterface;
 import com.openexchange.admin.storage.mysqlStorage.user.attribute.UserAttribute;
+import com.openexchange.admin.storage.mysqlStorage.user.attribute.UserMailAccountAttribute;
+import com.openexchange.admin.storage.mysqlStorage.user.attribute.UserMailAttribute;
 import com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.UserAttributeChangers;
+import com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.UserMailAccountAttributeChangers;
+import com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.UserSettingMailAttributeChangers;
 import com.openexchange.admin.storage.sqlStorage.OXUserSQLStorage;
 import com.openexchange.admin.storage.utils.Filestore2UserUtil;
 import com.openexchange.admin.tools.AdminCache;
@@ -203,6 +207,8 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
     private final AdminCache cache;
     private final PropertyHandler prop;
     private final UserAttributeChangers userAttributeChangers;
+    private final UserSettingMailAttributeChangers userSettingMailAttributeChangers;
+    private final UserMailAccountAttributeChangers userMailAccountAttributeChangers;
 
     /**
      * Initializes a new {@link OXUserMySQLStorage}.
@@ -212,6 +218,8 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
         cache = ClientAdminThread.cache;
         prop = cache.getProperties();
         userAttributeChangers = new UserAttributeChangers(cache);
+        userSettingMailAttributeChangers = new UserSettingMailAttributeChangers();
+        userMailAccountAttributeChangers = new UserMailAccountAttributeChangers();
     }
 
     @Override
@@ -855,201 +863,207 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             }
 
             // update the user mail settings
-            final String send_addr = usrdata.getDefaultSenderAddress(); // see bug #10559
-            if (null != send_addr) {
-                folder_update = con.prepareStatement("UPDATE user_setting_mail SET send_addr = ? WHERE cid = ? AND user = ?");
-                folder_update.setString(1, send_addr);
-                folder_update.setInt(2, contextId);
-                folder_update.setInt(3, userId);
-                folder_update.executeUpdate();
-                folder_update.close();
-                changedAttributes.add("send e-mail address");
+            for (UserMailAttribute attribute : UserMailAttribute.values()) {
+                userSettingMailAttributeChangers.change(attribute, usrdata, userId, contextId, con);
             }
-            {
-                final String mailfolderdrafts = usrdata.getMail_folder_drafts_name();
-                if (null != mailfolderdrafts) {
-                    folder_update = con.prepareStatement("UPDATE user_setting_mail SET std_drafts = ? WHERE cid = ? AND user = ?");
-                    folder_update.setString(1, mailfolderdrafts);
-                    folder_update.setInt(2, contextId);
-                    folder_update.setInt(3, userId);
-                    folder_update.executeUpdate();
-                    folder_update.close();
-
-                    folder_update = con.prepareStatement("UPDATE user_mail_account SET drafts = ?, drafts_fullname = ? WHERE cid = ? AND user = ? AND id = ?");
-                    folder_update.setString(1, mailfolderdrafts);
-                    folder_update.setString(2, "");
-                    folder_update.setInt(3, contextId);
-                    folder_update.setInt(4, userId);
-                    folder_update.setInt(5, MailAccount.DEFAULT_ID);
-                    folder_update.executeUpdate();
-                    folder_update.close();
-
-                    changedAttributes.add("drafts folder");
-                }
+            for (UserMailAccountAttribute attribute : UserMailAccountAttribute.values()) {
+                userMailAccountAttributeChangers.change(attribute, usrdata, userId, contextId, con);
             }
-            {
-                final String mailfoldersent = usrdata.getMail_folder_sent_name();
-                if (null != mailfoldersent) {
-                    folder_update = con.prepareStatement("UPDATE user_setting_mail SET std_sent = ? WHERE cid = ? AND user = ?");
-                    folder_update.setString(1, mailfoldersent);
-                    folder_update.setInt(2, contextId);
-                    folder_update.setInt(3, userId);
-                    folder_update.executeUpdate();
-                    folder_update.close();
-
-                    folder_update = con.prepareStatement("UPDATE user_mail_account SET sent = ?, sent_fullname = ? WHERE cid = ? AND user = ? AND id = ?");
-                    folder_update.setString(1, mailfoldersent);
-                    folder_update.setString(2, "");
-                    folder_update.setInt(3, contextId);
-                    folder_update.setInt(4, userId);
-                    folder_update.setInt(5, MailAccount.DEFAULT_ID);
-                    folder_update.executeUpdate();
-                    folder_update.close();
-
-                    changedAttributes.add("sent folder");
-                }
-            }
-            {
-                final String mailfolderspam = usrdata.getMail_folder_spam_name();
-                if (null != mailfolderspam) {
-                    folder_update = con.prepareStatement("UPDATE user_setting_mail SET std_spam = ? WHERE cid = ? AND user = ?");
-                    folder_update.setString(1, mailfolderspam);
-                    folder_update.setInt(2, contextId);
-                    folder_update.setInt(3, userId);
-                    folder_update.executeUpdate();
-                    folder_update.close();
-
-                    folder_update = con.prepareStatement("UPDATE user_mail_account SET spam = ?, spam_fullname = ? WHERE cid = ? AND user = ? AND id = ?");
-                    folder_update.setString(1, mailfolderspam);
-                    folder_update.setString(2, "");
-                    folder_update.setInt(3, contextId);
-                    folder_update.setInt(4, userId);
-                    folder_update.setInt(5, MailAccount.DEFAULT_ID);
-                    folder_update.executeUpdate();
-                    folder_update.close();
-
-                    changedAttributes.add("spam folder");
-                }
-            }
-            {
-                final String mailfoldertrash = usrdata.getMail_folder_trash_name();
-                if (null != mailfoldertrash) {
-                    folder_update = con.prepareStatement("UPDATE user_setting_mail SET std_trash = ? WHERE cid = ? AND user = ?");
-                    folder_update.setString(1, mailfoldertrash);
-                    folder_update.setInt(2, contextId);
-                    folder_update.setInt(3, userId);
-                    folder_update.executeUpdate();
-                    folder_update.close();
-
-                    folder_update = con.prepareStatement("UPDATE user_mail_account SET trash = ?, trash_fullname = ? WHERE cid = ? AND user = ? AND id = ?");
-                    folder_update.setString(1, mailfoldertrash);
-                    folder_update.setString(2, "");
-                    folder_update.setInt(3, contextId);
-                    folder_update.setInt(4, userId);
-                    folder_update.setInt(5, MailAccount.DEFAULT_ID);
-                    folder_update.executeUpdate();
-                    folder_update.close();
-
-                    changedAttributes.add("trash folder");
-                }
-            }
-            {
-                final String archiveFullName = usrdata.getMail_folder_archive_full_name();
-                if (null != archiveFullName) {
-                    folder_update = con.prepareStatement("UPDATE user_mail_account SET archive_fullname = ?, archive = ? WHERE cid = ? AND user = ? AND id = ?");
-                    folder_update.setString(1, archiveFullName);
-                    folder_update.setString(2, "");
-                    folder_update.setInt(3, contextId);
-                    folder_update.setInt(4, userId);
-                    folder_update.setInt(5, MailAccount.DEFAULT_ID);
-                    folder_update.executeUpdate();
-                    folder_update.close();
-
-                    changedAttributes.add("archive name folder");
-                }
-            }
-            {
-                final String mailfolderconfirmedspam = usrdata.getMail_folder_confirmed_spam_name();
-                if (null != mailfolderconfirmedspam) {
-                    folder_update = con.prepareStatement("UPDATE user_setting_mail SET confirmed_spam = ? WHERE cid = ? AND user = ?");
-                    folder_update.setString(1, mailfolderconfirmedspam);
-                    folder_update.setInt(2, contextId);
-                    folder_update.setInt(3, userId);
-                    folder_update.executeUpdate();
-                    folder_update.close();
-
-                    folder_update = con.prepareStatement("UPDATE user_mail_account SET confirmed_spam = ?, confirmed_spam_fullname = ? WHERE cid = ? AND user = ? AND id = ?");
-                    folder_update.setString(1, mailfolderconfirmedspam);
-                    folder_update.setString(2, "");
-                    folder_update.setInt(3, contextId);
-                    folder_update.setInt(4, userId);
-                    folder_update.setInt(5, MailAccount.DEFAULT_ID);
-                    folder_update.executeUpdate();
-                    folder_update.close();
-
-                    changedAttributes.add("confirmed ham folder");
-                }
-            }
-            {
-                final String mailfolderconfirmedham = usrdata.getMail_folder_confirmed_ham_name();
-                if (null != mailfolderconfirmedham) {
-                    folder_update = con.prepareStatement("UPDATE user_setting_mail SET confirmed_ham = ? WHERE cid = ? AND user = ?");
-                    folder_update.setString(1, mailfolderconfirmedham);
-                    folder_update.setInt(2, contextId);
-                    folder_update.setInt(3, userId);
-                    folder_update.executeUpdate();
-                    folder_update.close();
-
-                    folder_update = con.prepareStatement("UPDATE user_mail_account SET confirmed_ham = ?, confirmed_ham_fullname = ? WHERE cid = ? AND user = ? AND id = ?");
-                    folder_update.setString(1, mailfolderconfirmedham);
-                    folder_update.setString(2, "");
-                    folder_update.setInt(3, contextId);
-                    folder_update.setInt(4, userId);
-                    folder_update.setInt(5, MailAccount.DEFAULT_ID);
-                    folder_update.executeUpdate();
-                    folder_update.close();
-
-                    changedAttributes.add("confirmed spam folder");
-                }
-            }
-            final Integer uploadFileSizeLimit = usrdata.getUploadFileSizeLimit();
-            if (null != uploadFileSizeLimit) {
-                folder_update = con.prepareStatement("UPDATE user_setting_mail SET upload_quota = ? WHERE cid = ? AND user = ?");
-                folder_update.setInt(1, uploadFileSizeLimit.intValue());
-                folder_update.setInt(2, contextId);
-                folder_update.setInt(3, userId);
-                folder_update.executeUpdate();
-                folder_update.close();
-                changedAttributes.add("upload quota");
-            } else if (usrdata.isUploadFileSizeLimitset()) {
-                folder_update = con.prepareStatement("UPDATE user_setting_mail SET upload_quota = DEFAULT WHERE cid = ? AND user = ?");
-                folder_update.setInt(1, contextId);
-                folder_update.setInt(2, userId);
-                folder_update.executeUpdate();
-                folder_update.close();
-                changedAttributes.add("upload quota");
-            }
-            final Integer uploadFileSizeLimitPerFile = usrdata.getUploadFileSizeLimitPerFile();
-            if (null != uploadFileSizeLimitPerFile) {
-                folder_update = con.prepareStatement("UPDATE user_setting_mail SET upload_quota_per_file = ? WHERE cid = ? AND user = ?");
-                folder_update.setInt(1, uploadFileSizeLimitPerFile.intValue());
-                folder_update.setInt(2, contextId);
-                folder_update.setInt(3, userId);
-                folder_update.executeUpdate();
-                folder_update.close();
-                changedAttributes.add("upload quota per file");
-            } else if (usrdata.isUploadFileSizeLimitset()) {
-                folder_update = con.prepareStatement("UPDATE user_setting_mail SET upload_quota_per_file = DEFAULT WHERE cid = ? AND user = ?");
-                folder_update.setInt(1, contextId);
-                folder_update.setInt(2, userId);
-                folder_update.executeUpdate();
-                folder_update.close();
-                changedAttributes.add("upload quota per file");
-            }
-
-            if (folder_update != null) {
-                folder_update.close();
-            }
+            //            final String send_addr = usrdata.getDefaultSenderAddress(); // see bug #10559
+            //            if (null != send_addr) {
+            //                folder_update = con.prepareStatement("UPDATE user_setting_mail SET send_addr = ? WHERE cid = ? AND user = ?");
+            //                folder_update.setString(1, send_addr);
+            //                folder_update.setInt(2, contextId);
+            //                folder_update.setInt(3, userId);
+            //                folder_update.executeUpdate();
+            //                folder_update.close();
+            //                changedAttributes.add("send e-mail address");
+            //            }
+            //            {
+            //                final String mailfolderdrafts = usrdata.getMail_folder_drafts_name();
+            //                if (null != mailfolderdrafts) {
+            //                    folder_update = con.prepareStatement("UPDATE user_setting_mail SET std_drafts = ? WHERE cid = ? AND user = ?");
+            //                    folder_update.setString(1, mailfolderdrafts);
+            //                    folder_update.setInt(2, contextId);
+            //                    folder_update.setInt(3, userId);
+            //                    folder_update.executeUpdate();
+            //                    folder_update.close();
+            //
+            //                    folder_update = con.prepareStatement("UPDATE user_mail_account SET drafts = ?, drafts_fullname = ? WHERE cid = ? AND user = ? AND id = ?");
+            //                    folder_update.setString(1, mailfolderdrafts);
+            //                    folder_update.setString(2, "");
+            //                    folder_update.setInt(3, contextId);
+            //                    folder_update.setInt(4, userId);
+            //                    folder_update.setInt(5, MailAccount.DEFAULT_ID);
+            //                    folder_update.executeUpdate();
+            //                    folder_update.close();
+            //
+            //                    changedAttributes.add("drafts folder");
+            //                }
+            //            }
+            //            {
+            //                final String mailfoldersent = usrdata.getMail_folder_sent_name();
+            //                if (null != mailfoldersent) {
+            //                    folder_update = con.prepareStatement("UPDATE user_setting_mail SET std_sent = ? WHERE cid = ? AND user = ?");
+            //                    folder_update.setString(1, mailfoldersent);
+            //                    folder_update.setInt(2, contextId);
+            //                    folder_update.setInt(3, userId);
+            //                    folder_update.executeUpdate();
+            //                    folder_update.close();
+            //
+            //                    folder_update = con.prepareStatement("UPDATE user_mail_account SET sent = ?, sent_fullname = ? WHERE cid = ? AND user = ? AND id = ?");
+            //                    folder_update.setString(1, mailfoldersent);
+            //                    folder_update.setString(2, "");
+            //                    folder_update.setInt(3, contextId);
+            //                    folder_update.setInt(4, userId);
+            //                    folder_update.setInt(5, MailAccount.DEFAULT_ID);
+            //                    folder_update.executeUpdate();
+            //                    folder_update.close();
+            //
+            //                    changedAttributes.add("sent folder");
+            //                }
+            //            }
+            //            {
+            //                final String mailfolderspam = usrdata.getMail_folder_spam_name();
+            //                if (null != mailfolderspam) {
+            //                    folder_update = con.prepareStatement("UPDATE user_setting_mail SET std_spam = ? WHERE cid = ? AND user = ?");
+            //                    folder_update.setString(1, mailfolderspam);
+            //                    folder_update.setInt(2, contextId);
+            //                    folder_update.setInt(3, userId);
+            //                    folder_update.executeUpdate();
+            //                    folder_update.close();
+            //
+            //                    folder_update = con.prepareStatement("UPDATE user_mail_account SET spam = ?, spam_fullname = ? WHERE cid = ? AND user = ? AND id = ?");
+            //                    folder_update.setString(1, mailfolderspam);
+            //                    folder_update.setString(2, "");
+            //                    folder_update.setInt(3, contextId);
+            //                    folder_update.setInt(4, userId);
+            //                    folder_update.setInt(5, MailAccount.DEFAULT_ID);
+            //                    folder_update.executeUpdate();
+            //                    folder_update.close();
+            //
+            //                    changedAttributes.add("spam folder");
+            //                }
+            //            }
+            //            {
+            //                final String mailfoldertrash = usrdata.getMail_folder_trash_name();
+            //                if (null != mailfoldertrash) {
+            //                    folder_update = con.prepareStatement("UPDATE user_setting_mail SET std_trash = ? WHERE cid = ? AND user = ?");
+            //                    folder_update.setString(1, mailfoldertrash);
+            //                    folder_update.setInt(2, contextId);
+            //                    folder_update.setInt(3, userId);
+            //                    folder_update.executeUpdate();
+            //                    folder_update.close();
+            //
+            //                    folder_update = con.prepareStatement("UPDATE user_mail_account SET trash = ?, trash_fullname = ? WHERE cid = ? AND user = ? AND id = ?");
+            //                    folder_update.setString(1, mailfoldertrash);
+            //                    folder_update.setString(2, "");
+            //                    folder_update.setInt(3, contextId);
+            //                    folder_update.setInt(4, userId);
+            //                    folder_update.setInt(5, MailAccount.DEFAULT_ID);
+            //                    folder_update.executeUpdate();
+            //                    folder_update.close();
+            //
+            //                    changedAttributes.add("trash folder");
+            //                }
+            //            }
+            //            {
+            //                final String archiveFullName = usrdata.getMail_folder_archive_full_name();
+            //                if (null != archiveFullName) {
+            //                    folder_update = con.prepareStatement("UPDATE user_mail_account SET archive_fullname = ?, archive = ? WHERE cid = ? AND user = ? AND id = ?");
+            //                    folder_update.setString(1, archiveFullName);
+            //                    folder_update.setString(2, "");
+            //                    folder_update.setInt(3, contextId);
+            //                    folder_update.setInt(4, userId);
+            //                    folder_update.setInt(5, MailAccount.DEFAULT_ID);
+            //                    folder_update.executeUpdate();
+            //                    folder_update.close();
+            //
+            //                    changedAttributes.add("archive name folder");
+            //                }
+            //            }
+            //            {
+            //                final String mailfolderconfirmedspam = usrdata.getMail_folder_confirmed_spam_name();
+            //                if (null != mailfolderconfirmedspam) {
+            //                    folder_update = con.prepareStatement("UPDATE user_setting_mail SET confirmed_spam = ? WHERE cid = ? AND user = ?");
+            //                    folder_update.setString(1, mailfolderconfirmedspam);
+            //                    folder_update.setInt(2, contextId);
+            //                    folder_update.setInt(3, userId);
+            //                    folder_update.executeUpdate();
+            //                    folder_update.close();
+            //
+            //                    folder_update = con.prepareStatement("UPDATE user_mail_account SET confirmed_spam = ?, confirmed_spam_fullname = ? WHERE cid = ? AND user = ? AND id = ?");
+            //                    folder_update.setString(1, mailfolderconfirmedspam);
+            //                    folder_update.setString(2, "");
+            //                    folder_update.setInt(3, contextId);
+            //                    folder_update.setInt(4, userId);
+            //                    folder_update.setInt(5, MailAccount.DEFAULT_ID);
+            //                    folder_update.executeUpdate();
+            //                    folder_update.close();
+            //
+            //                    changedAttributes.add("confirmed ham folder");
+            //                }
+            //            }
+            //            {
+            //                final String mailfolderconfirmedham = usrdata.getMail_folder_confirmed_ham_name();
+            //                if (null != mailfolderconfirmedham) {
+            //                    folder_update = con.prepareStatement("UPDATE user_setting_mail SET confirmed_ham = ? WHERE cid = ? AND user = ?");
+            //                    folder_update.setString(1, mailfolderconfirmedham);
+            //                    folder_update.setInt(2, contextId);
+            //                    folder_update.setInt(3, userId);
+            //                    folder_update.executeUpdate();
+            //                    folder_update.close();
+            //
+            //                    folder_update = con.prepareStatement("UPDATE user_mail_account SET confirmed_ham = ?, confirmed_ham_fullname = ? WHERE cid = ? AND user = ? AND id = ?");
+            //                    folder_update.setString(1, mailfolderconfirmedham);
+            //                    folder_update.setString(2, "");
+            //                    folder_update.setInt(3, contextId);
+            //                    folder_update.setInt(4, userId);
+            //                    folder_update.setInt(5, MailAccount.DEFAULT_ID);
+            //                    folder_update.executeUpdate();
+            //                    folder_update.close();
+            //
+            //                    changedAttributes.add("confirmed spam folder");
+            //                }
+            //            }
+            //            final Integer uploadFileSizeLimit = usrdata.getUploadFileSizeLimit();
+            //            if (null != uploadFileSizeLimit) {
+            //                folder_update = con.prepareStatement("UPDATE user_setting_mail SET upload_quota = ? WHERE cid = ? AND user = ?");
+            //                folder_update.setInt(1, uploadFileSizeLimit.intValue());
+            //                folder_update.setInt(2, contextId);
+            //                folder_update.setInt(3, userId);
+            //                folder_update.executeUpdate();
+            //                folder_update.close();
+            //                changedAttributes.add("upload quota");
+            //            } else if (usrdata.isUploadFileSizeLimitset()) {
+            //                folder_update = con.prepareStatement("UPDATE user_setting_mail SET upload_quota = DEFAULT WHERE cid = ? AND user = ?");
+            //                folder_update.setInt(1, contextId);
+            //                folder_update.setInt(2, userId);
+            //                folder_update.executeUpdate();
+            //                folder_update.close();
+            //                changedAttributes.add("upload quota");
+            //            }
+            //            final Integer uploadFileSizeLimitPerFile = usrdata.getUploadFileSizeLimitPerFile();
+            //            if (null != uploadFileSizeLimitPerFile) {
+            //                folder_update = con.prepareStatement("UPDATE user_setting_mail SET upload_quota_per_file = ? WHERE cid = ? AND user = ?");
+            //                folder_update.setInt(1, uploadFileSizeLimitPerFile.intValue());
+            //                folder_update.setInt(2, contextId);
+            //                folder_update.setInt(3, userId);
+            //                folder_update.executeUpdate();
+            //                folder_update.close();
+            //                changedAttributes.add("upload quota per file");
+            //            } else if (usrdata.isUploadFileSizeLimitset()) {
+            //                folder_update = con.prepareStatement("UPDATE user_setting_mail SET upload_quota_per_file = DEFAULT WHERE cid = ? AND user = ?");
+            //                folder_update.setInt(1, contextId);
+            //                folder_update.setInt(2, userId);
+            //                folder_update.executeUpdate();
+            //                folder_update.close();
+            //                changedAttributes.add("upload quota per file");
+            //            }
+            //
+            //            if (folder_update != null) {
+            //                folder_update.close();
+            //            }
 
             if (usrdata.getDisplay_name() != null) {
                 // update folder name via ox api if displayname was changed
