@@ -89,6 +89,7 @@ import com.openexchange.chronos.provider.basic.BasicCalendarAccess;
 import com.openexchange.chronos.provider.basic.CalendarSettings;
 import com.openexchange.chronos.provider.caching.DiffAwareExternalCalendarResult;
 import com.openexchange.chronos.provider.caching.ExternalCalendarResult;
+import com.openexchange.chronos.provider.caching.basic.exception.BasicCachingCalendarExceptionCodes;
 import com.openexchange.chronos.provider.caching.basic.handlers.SearchHandler;
 import com.openexchange.chronos.provider.caching.basic.handlers.SyncHandler;
 import com.openexchange.chronos.provider.caching.internal.CachingCalendarAccessConstants;
@@ -274,7 +275,10 @@ public abstract class BasicCachingCalendarAccess implements BasicCalendarAccess,
         JSONObject caching = internalConfiguration.optJSONObject(CachingCalendarAccessConstants.CACHING);
         Number lastUpdate = (Number) caching.opt(CachingCalendarAccessConstants.LAST_UPDATE);
         long currentTimeMillis = System.currentTimeMillis();
-        if (lastUpdate == null || lastUpdate.longValue() <= 0 || (TimeUnit.MINUTES.toMillis(getCascadedRefreshInterval()) < currentTimeMillis - lastUpdate.longValue() + TimeUnit.MINUTES.toMillis(1)) || (currentTimeMillis >= lastUpdate.longValue() + TimeUnit.MINUTES.toMillis(1) && this.parameters.contains(CalendarParameters.PARAMETER_UPDATE_CACHE) && this.parameters.get(CalendarParameters.PARAMETER_UPDATE_CACHE, Boolean.class, Boolean.FALSE).booleanValue())) {
+        if (lastUpdate == null || lastUpdate.longValue() <= 0 || (TimeUnit.MINUTES.toMillis(getCascadedRefreshInterval()) < currentTimeMillis - lastUpdate.longValue() + TimeUnit.MINUTES.toMillis(1)) || this.parameters.contains(CalendarParameters.PARAMETER_UPDATE_CACHE) && this.parameters.get(CalendarParameters.PARAMETER_UPDATE_CACHE, Boolean.class, Boolean.FALSE).booleanValue()) {
+            if (lastUpdate != null && lastUpdate.longValue() > 0 && lastUpdate.longValue() + TimeUnit.MINUTES.toMillis(1) > currentTimeMillis) {
+                throw BasicCachingCalendarExceptionCodes.ALREADY_UP_TO_DATE.create(I(account.getAccountId()), I(session.getUserId()), I(session.getContextId()));
+            }
             update();
         }
     }
