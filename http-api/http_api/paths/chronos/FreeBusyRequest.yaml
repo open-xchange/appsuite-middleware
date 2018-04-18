@@ -17,6 +17,12 @@
          The identifier of an existing event or event series to ignore when calculating free/busy information. 
          This is useful when a client wants to find a new timeslot for an existing event.
         required: false
+      - in: query
+        name: merge
+        type: boolean
+        description: |
+         Set to <code>true</code> to merge the resulting free/busy-times.
+        required: false
       - in: body
         name: body
         description: A JSON object containing the attendees' data.
