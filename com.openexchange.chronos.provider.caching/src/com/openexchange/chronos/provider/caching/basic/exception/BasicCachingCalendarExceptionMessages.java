@@ -60,7 +60,7 @@ import com.openexchange.i18n.LocalizableStrings;
  */
 public class BasicCachingCalendarExceptionMessages implements LocalizableStrings {
 
-    public static final String ALREADY_UP_TO_DATE_MSG = "The calendar is already up-to-date.";
+    public static final String ALREADY_UP_TO_DATE_MSG = "The calendar is already up-to-date. Try again later.";
 
     /**
      * Initializes a new {@link BasicCachingCalendarExceptionMessages}.

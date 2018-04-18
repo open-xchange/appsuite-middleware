@@ -69,7 +69,7 @@ public enum BasicCachingCalendarExceptionCodes implements DisplayableOXException
      * <li>The calendar is already up-to-date. Try again later.</li>
      * <li>The calendar with id %1$s for user %2$s in context %3$s is already up-to-date.</li>
      */
-    ALREADY_UP_TO_DATE("The calendar with id %1$s for user %2$s in context %3$s is already up-to-date. Try again later.", ALREADY_UP_TO_DATE_MSG, Category.CATEGORY_USER_INPUT, 4230),
+    ALREADY_UP_TO_DATE("The calendar with id %1$s for user %2$s in context %3$s is already up-to-date.", ALREADY_UP_TO_DATE_MSG, Category.CATEGORY_USER_INPUT, 4230),
 
     ;
 
