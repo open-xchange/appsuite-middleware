@@ -439,6 +439,7 @@ public interface IDBasedCalendarAccess extends TransactionAware, CalendarParamet
      * <li>{@link CalendarParameters#PARAMETER_CHECK_CONFLICTS}</li>
      * <li>{@link CalendarParameters#PARAMETER_NOTIFICATION}</li>
      * <li>{@link CalendarParameters#PARAMETER_TRACK_ATTENDEE_USAGE}</li>
+     * <li>{@link CalendarParameters#PARAMETER_IGNORE_FORBIDDEN_ATTENDEE_CHANGES}</li>
      * </ul>
      *
      * @param eventID The identifier of the event to update
