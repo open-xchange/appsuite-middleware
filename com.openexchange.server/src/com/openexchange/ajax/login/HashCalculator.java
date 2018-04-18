@@ -73,8 +73,6 @@ public class HashCalculator {
     private static final String USER_AGENT = LoginFields.USER_AGENT;
     private static final String CLIENT_PARAM = LoginFields.CLIENT_PARAM;
 
-    private static final Pattern PATTERN_NON_WORD_CHAR = Pattern.compile("\\W");
-
     // -------------------------------    SINGLETON    ------------------------------------------------ //
 
     private static final HashCalculator SINGLETON = new HashCalculator();

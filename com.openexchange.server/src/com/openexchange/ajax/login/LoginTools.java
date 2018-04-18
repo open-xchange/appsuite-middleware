@@ -159,7 +159,7 @@ public final class LoginTools {
         return parseParameter(req, APPSECRET);
     }
 
-    public static String parseRedirectUrl(HttpServletRequest req) throws OXException {
+    public static String parseRedirectUrl(HttpServletRequest req) {
         return parseParameter(req, REDIRECT_URL, "");
     }
 
