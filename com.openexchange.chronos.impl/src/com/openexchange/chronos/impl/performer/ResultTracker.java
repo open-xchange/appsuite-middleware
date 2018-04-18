@@ -418,13 +418,15 @@ public class ResultTracker {
     }
 
     private void rememberOriginalUserizedEvent(CalendarFolder folder, Event originalEvent) throws OXException {
-        Map<String, Event> userizedEventsById = originalUserizedEvents.get(folder);
-        if (null == userizedEventsById) {
-            userizedEventsById = new HashMap<String, Event>();
-            originalUserizedEvents.put(folder, userizedEventsById);
-        }
-        if (false == userizedEventsById.containsKey(originalEvent.getId())) {
-            userizedEventsById.put(originalEvent.getId(), userize(originalEvent, folder));
+        if (isInFolder(originalEvent, folder)) {
+            Map<String, Event> userizedEventsById = originalUserizedEvents.get(folder);
+            if (null == userizedEventsById) {
+                userizedEventsById = new HashMap<String, Event>();
+                originalUserizedEvents.put(folder, userizedEventsById);
+            }
+            if (false == userizedEventsById.containsKey(originalEvent.getId())) {
+                userizedEventsById.put(originalEvent.getId(), userize(originalEvent, folder));
+            }
         }
     }
 
