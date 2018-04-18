@@ -264,6 +264,7 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
         /*
          * delete event data from storage
          */
+        resultTracker.rememberOriginalEvent(originalEvent);
         String id = originalEvent.getId();
         Event tombstone = storage.getUtilities().getTombstone(originalEvent, timestamp, calendarUser);
         tombstone.setAttendees(storage.getUtilities().getTombstones(originalEvent.getAttendees()));
@@ -402,6 +403,7 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
         /*
          * add new change exception date in master
          */
+        resultTracker.rememberOriginalEvent(originalMasterEvent);
         addChangeExceptionDate(originalMasterEvent, recurrenceId);
         /*
          * track results

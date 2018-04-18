@@ -64,9 +64,11 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.EnumSet;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import com.openexchange.chronos.Alarm;
@@ -101,6 +103,7 @@ public class ResultTracker {
     private final long timestamp;
     private final InternalCalendarResult result;
     private final SelfProtection protection;
+    private final Map<CalendarFolder, Map<String, Event>> originalUserizedEvents;
 
     /**
      * Initializes a new {@link ResultTracker}.
@@ -117,6 +120,7 @@ public class ResultTracker {
         this.folder = folder;
         this.timestamp = timestamp;
         this.protection = protection;
+        this.originalUserizedEvents = new HashMap<CalendarFolder, Map<String, Event>>();
         this.result = new InternalCalendarResult(session, getCalendarUserId(folder), folder);
     }
 
@@ -127,6 +131,21 @@ public class ResultTracker {
      */
     public InternalCalendarResult getResult() {
         return result;
+    }
+
+    /**
+     * Remembers data of a an original event before it is updated to speed up the generation of <i>userized</i> event results afterwards.
+     *
+     * @param originalEvent The original event to remember
+     */
+    public void rememberOriginalEvent(Event originalEvent) throws OXException {
+        if (includeAllFolderViews(session)) {
+            for (CalendarFolder visibleFolder : getVisibleFolderViews(originalEvent)) {
+                rememberOriginalUserizedEvent(visibleFolder, originalEvent);
+            }
+        } else {
+            rememberOriginalUserizedEvent(folder, originalEvent);
+        }
     }
 
     /**
@@ -374,6 +393,10 @@ public class ResultTracker {
      * @return The original userized version of the event
      */
     private Event getOriginalUserizedEvent(Event event, CalendarFolder folder) throws OXException {
+        Event originalUserizedEvent = optOriginalUserizedEvent(folder, event.getId());
+        if (null != originalUserizedEvent) {
+            return originalUserizedEvent;
+        }
         Connection oldConnection = session.get(AbstractStorageOperation.PARAM_CONNECTION, Connection.class);
         session.set(AbstractStorageOperation.PARAM_CONNECTION, null);
         try {
@@ -389,6 +412,22 @@ public class ResultTracker {
         }
     }
 
+    private Event optOriginalUserizedEvent(CalendarFolder folder, String eventId) {
+        Map<String, Event> userizedEventsById = originalUserizedEvents.get(folder);
+        return null != userizedEventsById ? userizedEventsById.get(eventId) : null;
+    }
+
+    private void rememberOriginalUserizedEvent(CalendarFolder folder, Event originalEvent) throws OXException {
+        Map<String, Event> userizedEventsById = originalUserizedEvents.get(folder);
+        if (null == userizedEventsById) {
+            userizedEventsById = new HashMap<String, Event>();
+            originalUserizedEvents.put(folder, userizedEventsById);
+        }
+        if (false == userizedEventsById.containsKey(originalEvent.getId())) {
+            userizedEventsById.put(originalEvent.getId(), userize(originalEvent, folder));
+        }
+    }
+
     /**
      * Creates a <i>userized</i> version of an event, representing a specific user's point of view on the event data. This includes
      * <ul>
@@ -396,8 +435,6 @@ public class ResultTracker {
      * current session's user is neither creator, nor attendee of the event.</li>
      * <li>selecting the appropriate parent folder identifier for the specific user</li>
      * <li>generate and apply event flags</li>
-     * <li>apply <i>userized</i> versions of change- and delete-exception dates in the series master event based on the user's actual
-     * attendance</li>
      * <li>taking over the user's personal list of alarms for the event</li>
      * </ul>
      *
