@@ -55,13 +55,15 @@ import java.net.URISyntaxException;
 import java.security.NoSuchAlgorithmException;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import com.openexchange.admin.daemons.ClientAdminThread;
 import com.openexchange.admin.rmi.dataobjects.User;
 import com.openexchange.admin.rmi.exceptions.StorageException;
+import com.openexchange.admin.tools.AdminCache;
+import com.openexchange.java.Strings;
 import com.openexchange.tools.net.URIDefaults;
 import com.openexchange.tools.net.URIParser;
 
@@ -75,45 +77,61 @@ public class UserAttributeChangers {
 
     private static final Logger LOG = LoggerFactory.getLogger(UserAttributeChangers.class);
 
-    private static final Map<UserAttribute, UserAttributeChanger> changers;
-    static {
-        changers = new HashMap<>();
-        changers.put(UserAttribute.MAIL, new AbstractUserAttributeChanger() {
+    private final Map<UserAttribute, UserAttributeChanger> changers;
+    private final AdminCache adminCache;
+
+    /**
+     * Initialises a new {@link UserAttributeChangers}.
+     */
+    public UserAttributeChangers(AdminCache adminCache) {
+        super();
+        this.adminCache = adminCache;
+        changers = initialiseChangers();
+    }
+
+    /**
+     * Initialises the changers
+     * 
+     * @return a map with the changers
+     */
+    private Map<UserAttribute, UserAttributeChanger> initialiseChangers() {
+        Map<UserAttribute, UserAttributeChanger> c = new HashMap<>();
+        c.put(UserAttribute.MAIL, new AbstractUserAttributeChanger() {
 
             @Override
             public boolean changeAttribute(int userId, int contextId, User userData, Connection connection) throws SQLException {
                 return setAttribute(userId, contextId, UserAttribute.MAIL, userData.getPrimaryEmail(), connection);
             }
         });
-        changers.put(UserAttribute.PREFERRED_LANGUAGE, new AbstractUserAttributeChanger() {
+        c.put(UserAttribute.PREFERRED_LANGUAGE, new AbstractUserAttributeChanger() {
 
             @Override
             public boolean changeAttribute(int userId, int contextId, User userData, Connection connection) throws SQLException {
                 return setAttribute(userId, contextId, UserAttribute.PREFERRED_LANGUAGE, userData.getLanguage(), connection);
             }
         });
-        changers.put(UserAttribute.TIMEZONE, new AbstractUserAttributeChanger() {
+        c.put(UserAttribute.TIMEZONE, new AbstractUserAttributeChanger() {
 
             @Override
             public boolean changeAttribute(int userId, int contextId, User userData, Connection connection) throws SQLException {
                 return setAttribute(userId, contextId, UserAttribute.TIMEZONE, userData.getTimezone(), connection);
             }
         });
-        changers.put(UserAttribute.MAIL_ENABLED, new AbstractUserAttributeChanger() {
+        c.put(UserAttribute.MAIL_ENABLED, new AbstractUserAttributeChanger() {
 
             @Override
             public boolean changeAttribute(int userId, int contextId, User userData, Connection connection) throws SQLException {
                 return setAttribute(userId, contextId, UserAttribute.MAIL_ENABLED, userData.getMailenabled(), connection);
             }
         });
-        changers.put(UserAttribute.SHADOW_LAST_CHANGE, new AbstractUserAttributeChanger() {
+        c.put(UserAttribute.SHADOW_LAST_CHANGE, new AbstractUserAttributeChanger() {
 
             @Override
             public boolean changeAttribute(int userId, int contextId, User userData, Connection connection) throws SQLException {
                 return setAttribute(userId, contextId, UserAttribute.SHADOW_LAST_CHANGE, userData.getPassword_expired(), connection);
             }
         });
-        changers.put(UserAttribute.IMAP_SERVER, new AbstractUserAttributeChanger() {
+        c.put(UserAttribute.IMAP_SERVER, new AbstractUserAttributeChanger() {
 
             @Override
             public boolean changeAttribute(int userId, int contextId, User userData, Connection connection) throws SQLException {
@@ -129,7 +147,7 @@ public class UserAttributeChangers {
                 return false;
             }
         });
-        changers.put(UserAttribute.IMAP_LOGIN, new AbstractUserAttributeChanger() {
+        c.put(UserAttribute.IMAP_LOGIN, new AbstractUserAttributeChanger() {
 
             @Override
             public boolean changeAttribute(int userId, int contextId, User userData, Connection connection) throws SQLException {
@@ -141,7 +159,7 @@ public class UserAttributeChangers {
                 return false;
             }
         });
-        changers.put(UserAttribute.SMTP_SERVER, new AbstractUserAttributeChanger() {
+        c.put(UserAttribute.SMTP_SERVER, new AbstractUserAttributeChanger() {
 
             @Override
             public boolean changeAttribute(int userId, int contextId, User userData, Connection connection) throws SQLException {
@@ -157,25 +175,29 @@ public class UserAttributeChangers {
                 return false;
             }
         });
-        changers.put(UserAttribute.USER_PASSWORD, new AbstractUserAttributeChanger() {
+        c.put(UserAttribute.USER_PASSWORD, new AbstractUserAttributeChanger() {
 
             @Override
             public boolean changeAttribute(int userId, int contextId, User userData, Connection connection) throws SQLException {
+                if (Strings.isEmpty(userData.getPassword())) {
+                    return false;
+                }
                 try {
-                    return setAttribute(userId, contextId, UserAttribute.USER_PASSWORD, ClientAdminThread.cache.encryptPassword(userData), connection);
+                    return setAttribute(userId, contextId, UserAttribute.USER_PASSWORD, adminCache.encryptPassword(userData), connection);
                 } catch (NoSuchAlgorithmException | UnsupportedEncodingException | StorageException e) {
                     // TODO: throw storage exception?
                 }
                 return false;
             }
         });
-        changers.put(UserAttribute.PASSWORD_MECH, new AbstractUserAttributeChanger() {
+        c.put(UserAttribute.PASSWORD_MECH, new AbstractUserAttributeChanger() {
 
             @Override
             public boolean changeAttribute(int userId, int contextId, User userData, Connection connection) throws SQLException {
                 return setAttribute(userId, contextId, UserAttribute.PASSWORD_MECH, userData.getPasswordMech(), connection);
             }
         });
+        return Collections.unmodifiableMap(c);
     }
 
     /**
@@ -189,7 +211,7 @@ public class UserAttributeChangers {
      * @return <code>true</code> if the attribute was changed successfully; <code>false</code> otherwise
      * @throws SQLException if an SQL error is occurred
      */
-    public static boolean change(UserAttribute userAttribute, User userData, int userId, int contextId, Connection connection) throws SQLException {
+    public boolean change(UserAttribute userAttribute, User userData, int userId, int contextId, Connection connection) throws SQLException {
         UserAttributeChanger changer = changers.get(userAttribute);
         if (changer == null) {
             LOG.debug("No user attribute changer found for user attribute '{}'. The attribute will not be changed.", userAttribute.getSQLFieldName());

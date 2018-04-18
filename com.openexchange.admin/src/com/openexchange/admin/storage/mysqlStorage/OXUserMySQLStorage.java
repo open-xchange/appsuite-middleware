@@ -202,6 +202,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
 
     private final AdminCache cache;
     private final PropertyHandler prop;
+    private final UserAttributeChangers userAttributeChangers;
 
     /**
      * Initializes a new {@link OXUserMySQLStorage}.
@@ -210,6 +211,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
         super();
         cache = ClientAdminThread.cache;
         prop = cache.getProperties();
+        userAttributeChangers = new UserAttributeChangers(cache);
     }
 
     @Override
@@ -592,7 +594,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
 
             // Change common user attributes
             for (UserAttribute userAttribute : UserAttribute.values()) {
-                if (UserAttributeChangers.change(userAttribute, usrdata, userId, contextId, con)) {
+                if (userAttributeChangers.change(userAttribute, usrdata, userId, contextId, con)) {
                     changedAttributes.add(userAttribute.getSQLFieldName());
                 }
             }
