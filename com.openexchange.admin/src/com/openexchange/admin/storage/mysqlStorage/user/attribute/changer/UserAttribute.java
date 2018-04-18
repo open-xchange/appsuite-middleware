@@ -50,6 +50,7 @@
 package com.openexchange.admin.storage.mysqlStorage.user.attribute.changer;
 
 import java.util.function.Function;
+import com.openexchange.admin.rmi.dataobjects.ExtendableDataObject;
 import com.openexchange.admin.rmi.dataobjects.User;
 
 /**
@@ -58,7 +59,7 @@ import com.openexchange.admin.rmi.dataobjects.User;
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @since v7.10.1
  */
-public enum UserAttribute {
+public enum UserAttribute implements Attribute {
 
     /**
      * The 'primaryEmail' column
@@ -118,30 +119,32 @@ public enum UserAttribute {
         this.originalType = originalType;
     }
 
-    /**
-     * Gets the name
-     *
-     * @return The name
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.Attribute#getSQLFieldName()
      */
+    @Override
     public String getSQLFieldName() {
         return sqlFieldName;
     }
 
-    /**
-     * Retrieves the value of the attribute from the specified {@link User} object
+    /*
+     * (non-Javadoc)
      * 
-     * @param user The {@link User} object
-     * @return The value of this attribute
+     * @see com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.Attribute#getValue(com.openexchange.admin.rmi.dataobjects.ExtendableDataObject)
      */
-    public String getValue(User user) {
-        return getter.apply(user);
+    @Override
+    public <T extends ExtendableDataObject> String getValue(T object) {
+        return getter.apply((User) object);
     }
 
-    /**
-     * Gets the originalType
-     *
-     * @return The originalType
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.Attribute#getOriginalType()
      */
+    @Override
     public Class<?> getOriginalType() {
         return originalType;
     }

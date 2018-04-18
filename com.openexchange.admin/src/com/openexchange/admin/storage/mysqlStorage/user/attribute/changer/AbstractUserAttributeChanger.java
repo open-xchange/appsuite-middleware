@@ -68,7 +68,7 @@ import com.openexchange.java.Strings;
 abstract class AbstractUserAttributeChanger implements UserAttributeChanger {
 
     static final String TOKEN = "<COLUMN>";
-    static final String SQL_STATEMENT_TEMPLATE = "UPDATE user SET " + TOKEN + " = ? WHERE id = ? AND cid = ?";
+    static final String SQL_STATEMENT_TEMPLATE = "UPDATE user SET " + TOKEN + " = ? WHERE cid = ? AND id = ?";
     private final Map<Class<?>, Setter> setters;
     private final Map<Class<?>, Unsetter> unsetters;
 
@@ -120,7 +120,7 @@ abstract class AbstractUserAttributeChanger implements UserAttributeChanger {
         PreparedStatement stmt = prepareStatement(userAttribute, connection);
         int parameterIndex = 1;
         setter.set(stmt, value, parameterIndex++);
-        appendUserContext(userId, contextId, stmt, parameterIndex);
+        appendUserContext(contextId, userId, stmt, parameterIndex);
         return executeUpdate(stmt);
     }
 
@@ -143,7 +143,7 @@ abstract class AbstractUserAttributeChanger implements UserAttributeChanger {
 
         int parameterIndex = 1;
         unsetter.unset(stmt, parameterIndex++);
-        appendUserContext(userId, contextId, stmt, parameterIndex);
+        appendUserContext(contextId, userId, stmt, parameterIndex);
         return executeUpdate(stmt);
     }
 
@@ -180,15 +180,16 @@ abstract class AbstractUserAttributeChanger implements UserAttributeChanger {
     /**
      * Appends the user and context identifiers to the specified {@link PreparedStatement} in the specified positions
      * 
-     * @param userId The user identifier
      * @param contextId the context identifier
+     * @param userId The user identifier
      * @param stmt The {@link PreparedStatement}
      * @param parameterIndex The position at which the user and context identifiers will be set
+     * 
      * @throws SQLException if an SQL error is occurred
      */
-    private void appendUserContext(int userId, int contextId, PreparedStatement stmt, int parameterIndex) throws SQLException {
-        stmt.setInt(parameterIndex++, userId);
+    private void appendUserContext(int contextId, int userId, PreparedStatement stmt, int parameterIndex) throws SQLException {
         stmt.setInt(parameterIndex++, contextId);
+        stmt.setInt(parameterIndex++, userId);
     }
 
     //////////////////////////////// PRIVATE INTERFACES ///////////////////////////////

@@ -49,82 +49,35 @@
 
 package com.openexchange.admin.storage.mysqlStorage.user.attribute.changer;
 
-import java.util.function.Function;
-import com.openexchange.admin.rmi.dataobjects.User;
+import com.openexchange.admin.rmi.dataobjects.ExtendableDataObject;
 
 /**
- * {@link UserMailAccountAttribute}
+ * {@link Attribute}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
- * @since v7.10.1
+ * @since v7.10.0
  */
-public enum UserMailAccountAttribute {
-
-    DRAFTS("drafts", (user) -> user.getMail_folder_drafts_name(), String.class),
-    DRAFTS_FULLNAME("drafts_fullname", (user) -> "", String.class),
-
-    SENT("sent", (user) -> user.getMail_folder_sent_name(), String.class),
-    SENT_FULLNAME("sent_fullname", (user) -> "", String.class),
-
-    SPAM("spam", (user) -> user.getMail_folder_spam_name(), String.class),
-    SPAM_FULLNAME("spam_fullname", (user) -> "", String.class),
-
-    TRASH("trash", (user) -> user.getMail_folder_trash_name(), String.class),
-    TRASH_FULLNAME("trash_fullname", (user) -> "", String.class),
-
-    ARCHIVE_FULLNAME("archive_fullname", (user) -> user.getMail_folder_archive_full_name(), String.class),
-
-    CONFIRMED_HAM("confirmed_ham", (user) -> user.getMail_folder_confirmed_ham_name(), String.class),
-    CONFIRMED_HAM_FULLNAME("confirmed_ham_fullname)", (user) -> "", String.class),
-
-    CONFIRMED_SPAM("confirmed_spam", (user) -> user.getMail_folder_confirmed_spam_name(), String.class),
-    CONFIRMED_SPAM_FULLNAME("confirmed_spam_fullname)", (user) -> "", String.class),
-
-    UPLOAD_QUOTA("upload_quota", (user) -> Integer.toString(user.getUploadFileSizeLimit()), Integer.class),
-    UPLOAD_QUOTA_PER_FILE("upload_quota_per_file", (user) -> Integer.toString(user.getUploadFileSizeLimitPerFile()), Integer.class),
-    ;
-
-    private final String sqlFieldName;
-    private final Function<User, String> getter;
-    private final Class<?> originalType;
+public interface Attribute {
 
     /**
-     * 
-     * Initialises a new {@link UserMailAccountAttribute}.
-     * 
-     * @param sqlFieldName the names of the attribute
-     */
-    private UserMailAccountAttribute(String sqlFieldName, Function<User, String> getter, Class<?> originalType) {
-        this.sqlFieldName = sqlFieldName;
-        this.getter = getter;
-        this.originalType = originalType;
-    }
-
-    /**
-     * Gets the name
+     * Gets the name of the SQL field
      *
      * @return The name
      */
-    public String getSQLFieldName() {
-        return sqlFieldName;
-    }
+    String getSQLFieldName();
 
     /**
-     * Retrieves the value of the attribute from the specified {@link User} object
+     * Retrieves the value of the attribute from the specified {@link T} object
      * 
-     * @param user The {@link User} object
+     * @param user The {@link T} object
      * @return The value of this attribute
      */
-    public String getValue(User user) {
-        return getter.apply(user);
-    }
+    <T extends ExtendableDataObject> String getValue(T object);
 
     /**
-     * Gets the originalType
+     * Gets the original type of the attribute's value
      *
-     * @return The originalType
+     * @return The original type
      */
-    public Class<?> getOriginalType() {
-        return originalType;
-    }
+    Class<?> getOriginalType();
 }
