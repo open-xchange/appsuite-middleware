@@ -115,11 +115,6 @@ public class TestCachingCalendarAccessImpl extends BasicCachingCalendarAccess {
         return new ExternalCalendarResult(false, Collections.emptyList());
     }
 
-    @Override
-    protected void saveConfig() {
-        configSaved = true;
-    }
-
     public boolean isConfigSaved() {
         return configSaved;
     }

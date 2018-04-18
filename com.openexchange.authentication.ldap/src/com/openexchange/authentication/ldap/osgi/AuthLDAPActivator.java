@@ -47,10 +47,11 @@
  *
  */
 
-package com.openexchange.authentication.ldap;
+package com.openexchange.authentication.ldap.osgi;
 
 import java.util.Properties;
 import com.openexchange.authentication.AuthenticationService;
+import com.openexchange.authentication.ldap.LDAPAuthentication;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Reloadable;
 import com.openexchange.net.ssl.SSLSocketFactoryProvider;

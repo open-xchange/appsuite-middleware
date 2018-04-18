@@ -1344,6 +1344,9 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
      * @return The string representation
      */
     private String toString(Set<String> set) {
+        if (set.isEmpty()) {
+            return "No attributes changed";
+        }
         StringBuilder builder = new StringBuilder();
         for (String s : set) {
             builder.append(s).append(", ");

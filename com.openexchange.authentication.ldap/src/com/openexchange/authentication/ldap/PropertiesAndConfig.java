@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2017-2020 OX Software GmbH
+ *     Copyright (C) 2016-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,36 +47,31 @@
  *
  */
 
-package com.openexchange.ajax.chronos;
+package com.openexchange.authentication.ldap;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import com.openexchange.ajax.chronos.manager.ChronosApiException;
-import com.openexchange.ajax.chronos.util.AssertUtil;
-import com.openexchange.testing.httpclient.invoker.ApiException;
-import com.openexchange.testing.httpclient.models.EventData;
+import java.util.Properties;
 
 /**
- * {@link AbstractAlarmTest}
+ * {@link PropertiesAndConfig} - Simple wrapper for the properties for the JNDI context as well as the configuration for LDAP authentication.
  *
- * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.10.0
  */
-abstract class AbstractAlarmTest extends AbstractChronosTest {
+public class PropertiesAndConfig {
+
+    /** Properties for the JNDI context */
+    public final Properties props;
+
+    /** The configuration for LDAP authentication */
+    public final Config config;
 
     /**
-     * Gets and checks if the specified event exists and if it contains the expected amount of alarms
-     *
-     * @param expectedEventData The event to get and check
-     * @param amountOfExpectedAlarms The excepted amount of alarms
-     * @return The actual EventData
-     * @throws ApiException if an API error is occurred
-     * @throws ChronosApiException if a Chronos API error is occurred
+     * Initializes a new {@link PropertiesAndConfig}.
      */
-    EventData getAndAssertAlarms(EventData expectedEventData, int amountOfExpectedAlarms, String folderId) throws ApiException, ChronosApiException {
-        EventData actualEventData = eventManager.getEvent(folderId, expectedEventData.getId());
-        AssertUtil.assertEventsEqual(expectedEventData, actualEventData);
-        assertNotNull(actualEventData.getAlarms());
-        assertEquals(amountOfExpectedAlarms, actualEventData.getAlarms().size());
-        return actualEventData;
+    public PropertiesAndConfig(Properties props, Config config) {
+        super();
+        this.props = props;
+        this.config = config;
     }
+
 }
