@@ -80,6 +80,7 @@ public class UserAttributeChangers {
 
     private final Map<UserAttribute, UserAttributeChanger> changers;
     private final AdminCache adminCache;
+    private static final String TABLE = "user";
 
     /**
      * Initialises a new {@link UserAttributeChangers}.
@@ -97,7 +98,7 @@ public class UserAttributeChangers {
      */
     private Map<UserAttribute, UserAttributeChanger> initialiseChangers() {
         Map<UserAttribute, UserAttributeChanger> c = new HashMap<>();
-        c.put(UserAttribute.MAIL, new AbstractSingleAttributeChanger() {
+        c.put(UserAttribute.MAIL, new AbstractMultiAttributeChanger() {
 
             @Override
             public boolean changeAttribute(int userId, int contextId, User userData, Connection connection) throws SQLException {
@@ -105,10 +106,10 @@ public class UserAttributeChangers {
                 if (Strings.isEmpty(primaryEmail)) {
                     return false;
                 }
-                return setAttribute(userId, contextId, UserAttribute.MAIL, primaryEmail, connection);
+                return setAttributes(userId, contextId, TABLE, Collections.singletonMap(UserAttribute.MAIL, primaryEmail), connection);
             }
         });
-        c.put(UserAttribute.PREFERRED_LANGUAGE, new AbstractSingleAttributeChanger() {
+        c.put(UserAttribute.PREFERRED_LANGUAGE, new AbstractMultiAttributeChanger() {
 
             @Override
             public boolean changeAttribute(int userId, int contextId, User userData, Connection connection) throws SQLException {
@@ -116,10 +117,10 @@ public class UserAttributeChangers {
                 if (Strings.isEmpty(language)) {
                     return false;
                 }
-                return setAttribute(userId, contextId, UserAttribute.PREFERRED_LANGUAGE, language, connection);
+                return setAttributes(userId, contextId, TABLE, Collections.singletonMap(UserAttribute.PREFERRED_LANGUAGE, language), connection);
             }
         });
-        c.put(UserAttribute.TIMEZONE, new AbstractSingleAttributeChanger() {
+        c.put(UserAttribute.TIMEZONE, new AbstractMultiAttributeChanger() {
 
             @Override
             public boolean changeAttribute(int userId, int contextId, User userData, Connection connection) throws SQLException {
@@ -127,10 +128,10 @@ public class UserAttributeChangers {
                 if (Strings.isEmpty(timezone)) {
                     return false;
                 }
-                return setAttribute(userId, contextId, UserAttribute.TIMEZONE, timezone, connection);
+                return setAttributes(userId, contextId, TABLE, Collections.singletonMap(UserAttribute.TIMEZONE, timezone), connection);
             }
         });
-        c.put(UserAttribute.MAIL_ENABLED, new AbstractSingleAttributeChanger() {
+        c.put(UserAttribute.MAIL_ENABLED, new AbstractMultiAttributeChanger() {
 
             @Override
             public boolean changeAttribute(int userId, int contextId, User userData, Connection connection) throws SQLException {
@@ -138,10 +139,10 @@ public class UserAttributeChangers {
                 if (mailEnabled == null) {
                     return false;
                 }
-                return setAttribute(userId, contextId, UserAttribute.MAIL_ENABLED, mailEnabled, connection);
+                return setAttributes(userId, contextId, TABLE, Collections.singletonMap(UserAttribute.MAIL_ENABLED, mailEnabled), connection);
             }
         });
-        c.put(UserAttribute.SHADOW_LAST_CHANGE, new AbstractSingleAttributeChanger() {
+        c.put(UserAttribute.SHADOW_LAST_CHANGE, new AbstractMultiAttributeChanger() {
 
             @Override
             public boolean changeAttribute(int userId, int contextId, User userData, Connection connection) throws SQLException {
@@ -149,18 +150,18 @@ public class UserAttributeChangers {
                 if (passwordExpired == null) {
                     return false;
                 }
-                return setAttribute(userId, contextId, UserAttribute.SHADOW_LAST_CHANGE, passwordExpired, connection);
+                return setAttributes(userId, contextId, TABLE, Collections.singletonMap(UserAttribute.SHADOW_LAST_CHANGE, passwordExpired), connection);
             }
         });
-        c.put(UserAttribute.IMAP_SERVER, new AbstractSingleAttributeChanger() {
+        c.put(UserAttribute.IMAP_SERVER, new AbstractMultiAttributeChanger() {
 
             @Override
             public boolean changeAttribute(int userId, int contextId, User userData, Connection connection) throws SQLException {
                 if (isEmpty(userData.getImapServerString()) && userData.isImapServerset()) {
-                    return unsetAttribute(userId, contextId, UserAttribute.IMAP_SERVER, connection);
+                    return unsetAttributes(userId, contextId, TABLE, Collections.singleton(UserAttribute.IMAP_SERVER), connection);
                 } else if (!isEmpty(userData.getImapServerString())) {
                     try {
-                        return setAttribute(userId, contextId, UserAttribute.IMAP_SERVER, URIParser.parse(userData.getImapServerString(), URIDefaults.IMAP).toString(), connection);
+                        return setAttributes(userId, contextId, TABLE, Collections.singletonMap(UserAttribute.IMAP_SERVER, URIParser.parse(userData.getImapServerString(), URIDefaults.IMAP).toString()), connection);
                     } catch (URISyntaxException e) {
                         // TODO: throw storage exception?
                     }
@@ -168,27 +169,27 @@ public class UserAttributeChangers {
                 return false;
             }
         });
-        c.put(UserAttribute.IMAP_LOGIN, new AbstractSingleAttributeChanger() {
+        c.put(UserAttribute.IMAP_LOGIN, new AbstractMultiAttributeChanger() {
 
             @Override
             public boolean changeAttribute(int userId, int contextId, User userData, Connection connection) throws SQLException {
                 if (isEmpty(userData.getImapLogin()) && userData.isImapLoginset()) {
-                    return unsetAttribute(userId, contextId, UserAttribute.IMAP_LOGIN, connection);
+                    return unsetAttributes(userId, contextId, TABLE, Collections.singleton(UserAttribute.IMAP_LOGIN), connection);
                 } else if (!isEmpty(userData.getImapLogin())) {
-                    return setAttribute(userId, contextId, UserAttribute.IMAP_LOGIN, userData.getImapLogin(), connection);
+                    return setAttributes(userId, contextId, TABLE, Collections.singletonMap(UserAttribute.IMAP_LOGIN, userData.getImapLogin()), connection);
                 }
                 return false;
             }
         });
-        c.put(UserAttribute.SMTP_SERVER, new AbstractSingleAttributeChanger() {
+        c.put(UserAttribute.SMTP_SERVER, new AbstractMultiAttributeChanger() {
 
             @Override
             public boolean changeAttribute(int userId, int contextId, User userData, Connection connection) throws SQLException {
                 if (isEmpty(userData.getSmtpServerString()) && userData.isSmtpServerset()) {
-                    return unsetAttribute(userId, contextId, UserAttribute.SMTP_SERVER, connection);
+                    return unsetAttributes(userId, contextId, TABLE, Collections.singleton(UserAttribute.SMTP_SERVER), connection);
                 } else if (!isEmpty(userData.getSmtpServerString())) {
                     try {
-                        return setAttribute(userId, contextId, UserAttribute.SMTP_SERVER, URIParser.parse(userData.getSmtpServerString(), URIDefaults.IMAP).toString(), connection);
+                        return setAttributes(userId, contextId, TABLE, Collections.singletonMap(UserAttribute.SMTP_SERVER, URIParser.parse(userData.getSmtpServerString(), URIDefaults.IMAP).toString()), connection);
                     } catch (URISyntaxException e) {
                         // TODO: throw storage exception?
                     }
@@ -196,7 +197,7 @@ public class UserAttributeChangers {
                 return false;
             }
         });
-        c.put(UserAttribute.USER_PASSWORD, new AbstractSingleAttributeChanger() {
+        c.put(UserAttribute.USER_PASSWORD, new AbstractMultiAttributeChanger() {
 
             @Override
             public boolean changeAttribute(int userId, int contextId, User userData, Connection connection) throws SQLException {
@@ -204,14 +205,14 @@ public class UserAttributeChangers {
                     return false;
                 }
                 try {
-                    return setAttribute(userId, contextId, UserAttribute.USER_PASSWORD, adminCache.encryptPassword(userData), connection);
+                    return setAttributes(userId, contextId, TABLE, Collections.singletonMap(UserAttribute.USER_PASSWORD, adminCache.encryptPassword(userData)), connection);
                 } catch (NoSuchAlgorithmException | UnsupportedEncodingException | StorageException e) {
                     // TODO: throw storage exception?
                 }
                 return false;
             }
         });
-        c.put(UserAttribute.PASSWORD_MECH, new AbstractSingleAttributeChanger() {
+        c.put(UserAttribute.PASSWORD_MECH, new AbstractMultiAttributeChanger() {
 
             @Override
             public boolean changeAttribute(int userId, int contextId, User userData, Connection connection) throws SQLException {
@@ -219,7 +220,7 @@ public class UserAttributeChangers {
                 if (Strings.isEmpty(passwordMech)) {
                     return false;
                 }
-                return setAttribute(userId, contextId, UserAttribute.PASSWORD_MECH, passwordMech, connection);
+                return setAttributes(userId, contextId, TABLE, Collections.singletonMap(UserAttribute.PASSWORD_MECH, passwordMech), connection);
             }
         });
         return Collections.unmodifiableMap(c);

@@ -52,60 +52,73 @@ package com.openexchange.admin.storage.mysqlStorage.user.attribute.changer;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
 import com.openexchange.admin.storage.mysqlStorage.user.attribute.Attribute;
 
 /**
- * {@link AbstractSingleAttributeChanger} - Base stub class for providing the logic of
+ * {@link AbstractMultiAttributeChanger} - Base stub class for providing the logic of
  * changing a single attribute for a user in a context.
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @since v7.10.1
  */
-abstract class AbstractSingleAttributeChanger extends AbstractAttributeChanger implements UserAttributeChanger {
+abstract class AbstractMultiAttributeChanger extends AbstractAttributeChanger implements UserAttributeChanger {
 
     static final String SQL_STATEMENT_TEMPLATE = "UPDATE " + TABLE_TOKEN + " SET " + COLUMN_TOKEN + " = ? WHERE cid = ? AND id = ?";
 
     /**
-     * Initialises a new {@link AbstractSingleAttributeChanger}.
+     * Initialises a new {@link AbstractMultiAttributeChanger}.
      */
-    public AbstractSingleAttributeChanger() {
+    public AbstractMultiAttributeChanger() {
         super();
     }
 
     /*
      * (non-Javadoc)
      * 
-     * @see com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.AbstractAttributeChanger#fillSetStatement(java.sql.PreparedStatement, com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.AbstractAttributeChanger.Setter,
-     * int, int, java.lang.Object, com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.Attribute)
+     * @see com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.AbstractAttributeChanger#fillSetStatement(java.sql.PreparedStatement, java.util.Map, java.util.Map, int, int)
      */
     @Override
-    void fillSetStatement(PreparedStatement stmt, Setter setter, int userId, int contextId, Object value, Attribute attribute) throws SQLException {
+    void fillSetStatement(PreparedStatement stmt, Map<Attribute, Setter> setters, Map<Attribute, Object> attributes, int userId, int contextId) throws SQLException {
         int parameterIndex = 1;
-        setter.set(stmt, value, parameterIndex++);
+        for (Entry<Attribute, Object> entry : attributes.entrySet()) {
+            Setter setter = setters.get(entry.getKey());
+            if (setter == null) {
+                continue;
+            }
+            setter.set(stmt, entry.getValue(), parameterIndex++);
+        }
         appendContextUser(contextId, userId, stmt, parameterIndex);
     }
 
     /*
      * (non-Javadoc)
      * 
-     * @see com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.AbstractAttributeChanger#fillUnsetStatement(java.sql.PreparedStatement,
-     * com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.AbstractAttributeChanger.Unsetter, int, int)
+     * @see com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.AbstractAttributeChanger#fillUnsetStatement(java.sql.PreparedStatement, java.util.Map, java.util.Set, int, int)
      */
     @Override
-    void fillUnsetStatement(PreparedStatement stmt, Unsetter unsetter, int userId, int contextId) throws SQLException {
+    void fillUnsetStatement(PreparedStatement stmt, Map<Attribute, Unsetter> unsetters, Set<Attribute> attributes, int userId, int contextId) throws SQLException {
         int parameterIndex = 1;
-        unsetter.unset(stmt, parameterIndex++);
+        for (Attribute attribute : attributes) {
+            Unsetter unsetter = unsetters.get(attribute);
+            if (unsetter == null) {
+                continue;
+            }
+            unsetter.unset(stmt, parameterIndex++);
+        }
         appendContextUser(contextId, userId, stmt, parameterIndex);
     }
 
     /*
      * (non-Javadoc)
      * 
-     * @see com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.AbstractAttributeChanger#prepareStatement(com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.Attribute, java.sql.Connection)
+     * @see com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.AbstractAttributeChanger#prepareStatement(java.lang.String, java.util.Set, java.sql.Connection)
      */
     @Override
-    PreparedStatement prepareStatement(Attribute attribute, Connection connection) throws SQLException {
-        String sqlStatement = SQL_STATEMENT_TEMPLATE.replaceAll(TABLE_TOKEN, attribute.getSQLTableName()).replaceAll(COLUMN_TOKEN, attribute.getSQLFieldName());
+    PreparedStatement prepareStatement(String table, Set<Attribute> attributes, Connection connection) throws SQLException {
+        String sqlStatement = SQL_STATEMENT_TEMPLATE.replaceAll(TABLE_TOKEN, table).replaceAll(COLUMN_TOKEN, prepareAttributes(attributes));
         return connection.prepareStatement(sqlStatement);
     }
 }

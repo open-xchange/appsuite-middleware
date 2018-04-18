@@ -69,6 +69,8 @@ public class UserSettingMailAttributeChangers {
 
     private static final Logger LOG = LoggerFactory.getLogger(UserSettingMailAttributeChangers.class);
 
+    private static final String TABLE = "user_setting_mail";
+
     private final Map<UserMailAttribute, UserAttributeChanger> changers;
 
     /**
@@ -86,67 +88,67 @@ public class UserSettingMailAttributeChangers {
      */
     private Map<UserMailAttribute, UserAttributeChanger> initialiseChangers() {
         Map<UserMailAttribute, UserAttributeChanger> c = new HashMap<>();
-        c.put(UserMailAttribute.SEND_ADDRESS, new AbstractSingleAttributeChanger() {
+        c.put(UserMailAttribute.SEND_ADDRESS, new AbstractMultiAttributeChanger() {
 
             @Override
             public boolean changeAttribute(int userId, int contextId, User userData, Connection connection) throws SQLException {
-                return setAttribute(userId, contextId, UserMailAttribute.SEND_ADDRESS, userData.getDefaultSenderAddress(), connection);
+                return setAttributes(userId, contextId, TABLE, Collections.singletonMap(UserMailAttribute.SEND_ADDRESS, userData.getDefaultSenderAddress()), connection);
             }
         });
-        c.put(UserMailAttribute.STD_DRAFTS, new AbstractSingleAttributeChanger() {
+        c.put(UserMailAttribute.STD_DRAFTS, new AbstractMultiAttributeChanger() {
 
             @Override
             public boolean changeAttribute(int userId, int contextId, User userData, Connection connection) throws SQLException {
-                return setAttribute(userId, contextId, UserMailAttribute.STD_DRAFTS, userData.getMail_folder_drafts_name(), connection);
+                return setAttributes(userId, contextId, TABLE, Collections.singletonMap(UserMailAttribute.STD_DRAFTS, userData.getMail_folder_drafts_name()), connection);
             }
         });
-        c.put(UserMailAttribute.STD_SENT, new AbstractSingleAttributeChanger() {
+        c.put(UserMailAttribute.STD_SENT, new AbstractMultiAttributeChanger() {
 
             @Override
             public boolean changeAttribute(int userId, int contextId, User userData, Connection connection) throws SQLException {
-                return setAttribute(userId, contextId, UserMailAttribute.STD_SENT, userData.getMail_folder_sent_name(), connection);
+                return setAttributes(userId, contextId, TABLE, Collections.singletonMap(UserMailAttribute.STD_SENT, userData.getMail_folder_sent_name()), connection);
             }
         });
-        c.put(UserMailAttribute.STD_SPAM, new AbstractSingleAttributeChanger() {
+        c.put(UserMailAttribute.STD_SPAM, new AbstractMultiAttributeChanger() {
 
             @Override
             public boolean changeAttribute(int userId, int contextId, User userData, Connection connection) throws SQLException {
-                return setAttribute(userId, contextId, UserMailAttribute.STD_SPAM, userData.getMail_folder_spam_name(), connection);
+                return setAttributes(userId, contextId, TABLE, Collections.singletonMap(UserMailAttribute.STD_SPAM, userData.getMail_folder_spam_name()), connection);
             }
         });
-        c.put(UserMailAttribute.STD_TRASH, new AbstractSingleAttributeChanger() {
+        c.put(UserMailAttribute.STD_TRASH, new AbstractMultiAttributeChanger() {
 
             @Override
             public boolean changeAttribute(int userId, int contextId, User userData, Connection connection) throws SQLException {
-                return setAttribute(userId, contextId, UserMailAttribute.STD_TRASH, userData.getMail_folder_trash_name(), connection);
+                return setAttributes(userId, contextId, TABLE, Collections.singletonMap(UserMailAttribute.STD_TRASH, userData.getMail_folder_trash_name()), connection);
             }
         });
-        c.put(UserMailAttribute.CONFIRMED_HAM, new AbstractSingleAttributeChanger() {
+        c.put(UserMailAttribute.CONFIRMED_HAM, new AbstractMultiAttributeChanger() {
 
             @Override
             public boolean changeAttribute(int userId, int contextId, User userData, Connection connection) throws SQLException {
-                return setAttribute(userId, contextId, UserMailAttribute.CONFIRMED_HAM, userData.getMail_folder_confirmed_ham_name(), connection);
+                return setAttributes(userId, contextId, TABLE, Collections.singletonMap(UserMailAttribute.CONFIRMED_HAM, userData.getMail_folder_confirmed_ham_name()), connection);
             }
         });
-        c.put(UserMailAttribute.CONFIRMED_SPAM, new AbstractSingleAttributeChanger() {
+        c.put(UserMailAttribute.CONFIRMED_SPAM, new AbstractMultiAttributeChanger() {
 
             @Override
             public boolean changeAttribute(int userId, int contextId, User userData, Connection connection) throws SQLException {
-                return setAttribute(userId, contextId, UserMailAttribute.CONFIRMED_SPAM, userData.getMail_folder_confirmed_spam_name(), connection);
+                return setAttributes(userId, contextId, TABLE, Collections.singletonMap(UserMailAttribute.CONFIRMED_SPAM, userData.getMail_folder_confirmed_spam_name()), connection);
             }
         });
-        c.put(UserMailAttribute.UPLOAD_QUOTA, new AbstractSingleAttributeChanger() {
+        c.put(UserMailAttribute.UPLOAD_QUOTA, new AbstractMultiAttributeChanger() {
 
             @Override
             public boolean changeAttribute(int userId, int contextId, User userData, Connection connection) throws SQLException {
-                return setAttribute(userId, contextId, UserMailAttribute.UPLOAD_QUOTA, userData.getUploadFileSizeLimit(), connection);
+                return setAttributes(userId, contextId, TABLE, Collections.singletonMap(UserMailAttribute.UPLOAD_QUOTA, userData.getUploadFileSizeLimit()), connection);
             }
         });
-        c.put(UserMailAttribute.UPLOAD_QUOTA_PER_FILE, new AbstractSingleAttributeChanger() {
+        c.put(UserMailAttribute.UPLOAD_QUOTA_PER_FILE, new AbstractMultiAttributeChanger() {
 
             @Override
             public boolean changeAttribute(int userId, int contextId, User userData, Connection connection) throws SQLException {
-                return setAttribute(userId, contextId, UserMailAttribute.UPLOAD_QUOTA_PER_FILE, userData.getUploadFileSizeLimitPerFile(), connection);
+                return setAttributes(userId, contextId, TABLE, Collections.singletonMap(UserMailAttribute.UPLOAD_QUOTA_PER_FILE, userData.getUploadFileSizeLimitPerFile()), connection);
             }
         });
         return Collections.unmodifiableMap(c);
