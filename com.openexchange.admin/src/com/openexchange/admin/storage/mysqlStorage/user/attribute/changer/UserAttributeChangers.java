@@ -97,42 +97,42 @@ public class UserAttributeChangers {
      */
     private Map<UserAttribute, UserAttributeChanger> initialiseChangers() {
         Map<UserAttribute, UserAttributeChanger> c = new HashMap<>();
-        c.put(UserAttribute.MAIL, new AbstractUserAttributeChanger() {
+        c.put(UserAttribute.MAIL, new AbstractSingleAttributeChanger() {
 
             @Override
             public boolean changeAttribute(int userId, int contextId, User userData, Connection connection) throws SQLException {
                 return setAttribute(userId, contextId, UserAttribute.MAIL, userData.getPrimaryEmail(), connection);
             }
         });
-        c.put(UserAttribute.PREFERRED_LANGUAGE, new AbstractUserAttributeChanger() {
+        c.put(UserAttribute.PREFERRED_LANGUAGE, new AbstractSingleAttributeChanger() {
 
             @Override
             public boolean changeAttribute(int userId, int contextId, User userData, Connection connection) throws SQLException {
                 return setAttribute(userId, contextId, UserAttribute.PREFERRED_LANGUAGE, userData.getLanguage(), connection);
             }
         });
-        c.put(UserAttribute.TIMEZONE, new AbstractUserAttributeChanger() {
+        c.put(UserAttribute.TIMEZONE, new AbstractSingleAttributeChanger() {
 
             @Override
             public boolean changeAttribute(int userId, int contextId, User userData, Connection connection) throws SQLException {
                 return setAttribute(userId, contextId, UserAttribute.TIMEZONE, userData.getTimezone(), connection);
             }
         });
-        c.put(UserAttribute.MAIL_ENABLED, new AbstractUserAttributeChanger() {
+        c.put(UserAttribute.MAIL_ENABLED, new AbstractSingleAttributeChanger() {
 
             @Override
             public boolean changeAttribute(int userId, int contextId, User userData, Connection connection) throws SQLException {
                 return setAttribute(userId, contextId, UserAttribute.MAIL_ENABLED, userData.getMailenabled(), connection);
             }
         });
-        c.put(UserAttribute.SHADOW_LAST_CHANGE, new AbstractUserAttributeChanger() {
+        c.put(UserAttribute.SHADOW_LAST_CHANGE, new AbstractSingleAttributeChanger() {
 
             @Override
             public boolean changeAttribute(int userId, int contextId, User userData, Connection connection) throws SQLException {
                 return setAttribute(userId, contextId, UserAttribute.SHADOW_LAST_CHANGE, userData.getPassword_expired(), connection);
             }
         });
-        c.put(UserAttribute.IMAP_SERVER, new AbstractUserAttributeChanger() {
+        c.put(UserAttribute.IMAP_SERVER, new AbstractSingleAttributeChanger() {
 
             @Override
             public boolean changeAttribute(int userId, int contextId, User userData, Connection connection) throws SQLException {
@@ -148,7 +148,7 @@ public class UserAttributeChangers {
                 return false;
             }
         });
-        c.put(UserAttribute.IMAP_LOGIN, new AbstractUserAttributeChanger() {
+        c.put(UserAttribute.IMAP_LOGIN, new AbstractSingleAttributeChanger() {
 
             @Override
             public boolean changeAttribute(int userId, int contextId, User userData, Connection connection) throws SQLException {
@@ -160,7 +160,7 @@ public class UserAttributeChangers {
                 return false;
             }
         });
-        c.put(UserAttribute.SMTP_SERVER, new AbstractUserAttributeChanger() {
+        c.put(UserAttribute.SMTP_SERVER, new AbstractSingleAttributeChanger() {
 
             @Override
             public boolean changeAttribute(int userId, int contextId, User userData, Connection connection) throws SQLException {
@@ -176,7 +176,7 @@ public class UserAttributeChangers {
                 return false;
             }
         });
-        c.put(UserAttribute.USER_PASSWORD, new AbstractUserAttributeChanger() {
+        c.put(UserAttribute.USER_PASSWORD, new AbstractSingleAttributeChanger() {
 
             @Override
             public boolean changeAttribute(int userId, int contextId, User userData, Connection connection) throws SQLException {
@@ -191,7 +191,7 @@ public class UserAttributeChangers {
                 return false;
             }
         });
-        c.put(UserAttribute.PASSWORD_MECH, new AbstractUserAttributeChanger() {
+        c.put(UserAttribute.PASSWORD_MECH, new AbstractSingleAttributeChanger() {
 
             @Override
             public boolean changeAttribute(int userId, int contextId, User userData, Connection connection) throws SQLException {

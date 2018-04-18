@@ -55,19 +55,20 @@ import java.sql.SQLException;
 import com.openexchange.admin.storage.mysqlStorage.user.attribute.Attribute;
 
 /**
- * {@link AbstractUserAttributeChanger}
+ * {@link AbstractSingleAttributeChanger} - Base stub class for providing the logic of
+ * changing a single attribute for a user in a context.
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @since v7.10.1
  */
-abstract class AbstractUserAttributeChanger extends AbstractAttributeChanger implements UserAttributeChanger {
+abstract class AbstractSingleAttributeChanger extends AbstractAttributeChanger implements UserAttributeChanger {
 
     static final String SQL_STATEMENT_TEMPLATE = "UPDATE " + TABLE_TOKEN + " SET " + COLUMN_TOKEN + " = ? WHERE cid = ? AND id = ?";
 
     /**
-     * Initialises a new {@link AbstractUserAttributeChanger}.
+     * Initialises a new {@link AbstractSingleAttributeChanger}.
      */
-    public AbstractUserAttributeChanger() {
+    public AbstractSingleAttributeChanger() {
         super();
     }
 
