@@ -130,7 +130,7 @@ public class AbstractChronosTest extends AbstractEnhancedApiClientSession {
         Exception exception = null;
         try {
             if (eventIds != null) {
-                defaultUserApi.getChronosApi().deleteEvent(defaultUserApi.getSession(), null, new ArrayList<EventId>(eventIds), null, null, false, false);
+                defaultUserApi.getChronosApi().deleteEvent(defaultUserApi.getSession(), System.currentTimeMillis(), new ArrayList<EventId>(eventIds), null, null, false, false);
             }
         } catch (Exception e) {
             exception = e;
@@ -141,7 +141,7 @@ public class AbstractChronosTest extends AbstractEnhancedApiClientSession {
 
         try {
             if (folderToDelete != null) {
-                defaultUserApi.getFoldersApi().deleteFolders(defaultUserApi.getSession(), new ArrayList<>(folderToDelete), "0", null, "event", true, false, false);
+                defaultUserApi.getFoldersApi().deleteFolders(defaultUserApi.getSession(), new ArrayList<>(folderToDelete), "0", System.currentTimeMillis(), "event", true, false, false);
             }
         } catch (Exception e) {
             exception = e;
