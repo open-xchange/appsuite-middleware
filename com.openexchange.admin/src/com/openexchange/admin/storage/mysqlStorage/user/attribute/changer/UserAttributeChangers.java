@@ -58,10 +58,9 @@ import java.sql.SQLException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import com.openexchange.admin.rmi.dataobjects.User;
 import com.openexchange.admin.rmi.exceptions.StorageException;
+import com.openexchange.admin.storage.mysqlStorage.user.attribute.Attribute;
 import com.openexchange.admin.storage.mysqlStorage.user.attribute.UserAttribute;
 import com.openexchange.admin.tools.AdminCache;
 import com.openexchange.java.Strings;
@@ -74,11 +73,8 @@ import com.openexchange.tools.net.URIParser;
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @since v7.10.1
  */
-public class UserAttributeChangers {
+public class UserAttributeChangers extends AbstractUserAttributeChangers {
 
-    private static final Logger LOG = LoggerFactory.getLogger(UserAttributeChangers.class);
-
-    private final Map<UserAttribute, UserAttributeChanger> changers;
     private final AdminCache adminCache;
     private static final String TABLE = "user";
 
@@ -86,17 +82,17 @@ public class UserAttributeChangers {
      * Initialises a new {@link UserAttributeChangers}.
      */
     public UserAttributeChangers(AdminCache adminCache) {
-        super();
+        super(TABLE);
         this.adminCache = adminCache;
-        changers = initialiseChangers();
     }
 
-    /**
-     * Initialises the changers
+    /*
+     * (non-Javadoc)
      * 
-     * @return a map with the changers
+     * @see com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.AbstractUserAttributeChangers#initialiseChangers()
      */
-    private Map<UserAttribute, UserAttributeChanger> initialiseChangers() {
+    @Override
+    Map<Attribute, UserAttributeChanger> initialiseChangers() {
         Map<UserAttribute, UserAttributeChanger> c = new HashMap<>();
         c.put(UserAttribute.MAIL, new AbstractMultiAttributeChanger() {
 
@@ -224,25 +220,5 @@ public class UserAttributeChangers {
             }
         });
         return Collections.unmodifiableMap(c);
-    }
-
-    /**
-     * Changes the specified {@link UserAttribute}
-     * 
-     * @param userAttribute The {@link UserAttribute} to change
-     * @param userData The {@link User} data
-     * @param userId the user identifier
-     * @param contextId The context identifier
-     * @param connection The {@link Connection} to use
-     * @return <code>true</code> if the attribute was changed successfully; <code>false</code> otherwise
-     * @throws SQLException if an SQL error is occurred
-     */
-    public boolean change(UserAttribute userAttribute, User userData, int userId, int contextId, Connection connection) throws SQLException {
-        UserAttributeChanger changer = changers.get(userAttribute);
-        if (changer == null) {
-            LOG.debug("No user attribute changer found for user attribute '{}'. The attribute will not be changed.", userAttribute.getSQLFieldName());
-            return false;
-        }
-        return changer.changeAttribute(userId, contextId, userData, connection);
     }
 }

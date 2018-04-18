@@ -57,7 +57,7 @@ import com.openexchange.admin.rmi.dataobjects.User;
  * {@link UserMailAttribute}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
- * @since v7.10.0
+ * @since v7.10.1
  */
 public enum UserMailAttribute implements Attribute {
 

@@ -54,39 +54,34 @@ import java.sql.SQLException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import com.openexchange.admin.rmi.dataobjects.User;
+import com.openexchange.admin.storage.mysqlStorage.user.attribute.Attribute;
 import com.openexchange.admin.storage.mysqlStorage.user.attribute.UserMailAttribute;
 
 /**
  * {@link UserSettingMailAttributeChangers}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
- * @since v7.10.0
+ * @since v7.10.1
  */
-public class UserSettingMailAttributeChangers {
-
-    private static final Logger LOG = LoggerFactory.getLogger(UserSettingMailAttributeChangers.class);
+public class UserSettingMailAttributeChangers extends AbstractUserAttributeChangers {
 
     private static final String TABLE = "user_setting_mail";
-
-    private final Map<UserMailAttribute, UserAttributeChanger> changers;
 
     /**
      * Initialises a new {@link UserSettingMailAttributeChangers}.
      */
     public UserSettingMailAttributeChangers() {
-        super();
-        changers = initialiseChangers();
+        super(TABLE);
     }
 
-    /**
-     * Initialises the changers
+    /*
+     * (non-Javadoc)
      * 
-     * @return a map with the changers
+     * @see com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.AbstractUserAttributeChangers#initialiseChangers()
      */
-    private Map<UserMailAttribute, UserAttributeChanger> initialiseChangers() {
+    @Override
+    Map<Attribute, UserAttributeChanger> initialiseChangers() {
         Map<UserMailAttribute, UserAttributeChanger> c = new HashMap<>();
         c.put(UserMailAttribute.SEND_ADDRESS, new AbstractMultiAttributeChanger() {
 
@@ -152,25 +147,5 @@ public class UserSettingMailAttributeChangers {
             }
         });
         return Collections.unmodifiableMap(c);
-    }
-
-    /**
-     * Changes the specified {@link UserMailAttribute}
-     * 
-     * @param userAttribute The {@link UserMailAttribute} to change
-     * @param userData The {@link User} data
-     * @param userId the user identifier
-     * @param contextId The context identifier
-     * @param connection The {@link Connection} to use
-     * @return <code>true</code> if the attribute was changed successfully; <code>false</code> otherwise
-     * @throws SQLException if an SQL error is occurred
-     */
-    public boolean change(UserMailAttribute userAttribute, User userData, int userId, int contextId, Connection connection) throws SQLException {
-        UserAttributeChanger changer = changers.get(userAttribute);
-        if (changer == null) {
-            LOG.debug("No user attribute changer found for user mail attribute '{}'. The attribute will not be changed.", userAttribute.getSQLFieldName());
-            return false;
-        }
-        return changer.changeAttribute(userId, contextId, userData, connection);
     }
 }

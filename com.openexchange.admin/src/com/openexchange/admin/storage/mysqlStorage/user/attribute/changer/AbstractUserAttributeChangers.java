@@ -47,44 +47,63 @@
  *
  */
 
-package com.openexchange.admin.storage.mysqlStorage.user.attribute;
+package com.openexchange.admin.storage.mysqlStorage.user.attribute.changer;
 
-import com.openexchange.admin.rmi.dataobjects.ExtendableDataObject;
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.util.Map;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import com.openexchange.admin.rmi.dataobjects.User;
+import com.openexchange.admin.storage.mysqlStorage.user.attribute.Attribute;
+import com.openexchange.admin.storage.mysqlStorage.user.attribute.UserMailAttribute;
 
 /**
- * {@link Attribute}
+ * {@link AbstractUserAttributeChangers}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @since v7.10.1
  */
-public interface Attribute {
+abstract class AbstractUserAttributeChangers {
+
+    private static final Logger LOG = LoggerFactory.getLogger(UserSettingMailAttributeChangers.class);
+
+    private final Map<Attribute, UserAttributeChanger> changers;
+    private String table;
 
     /**
-     * Gets the name of the SQL field
-     *
-     * @return The name
+     * Initialises a new {@link AbstractUserAttributeChangers}.
      */
-    String getSQLFieldName();
+    public AbstractUserAttributeChangers(String table) {
+        super();
+        this.table = table;
+        changers = initialiseChangers();
+    }
 
     /**
-     * Gets the name of the table in which this attribute is stored
+     * Initialises the changers
      * 
-     * @return The table's name
+     * @return a map with the changers
      */
-    String getSQLTableName();
+    abstract Map<Attribute, UserAttributeChanger> initialiseChangers();
 
     /**
-     * Retrieves the value of the attribute from the specified {@link T} object
+     * Changes the specified {@link UserMailAttribute}
      * 
-     * @param user The {@link T} object
-     * @return The value of this attribute
+     * @param attribute The {@link UserMailAttribute} to change
+     * @param userData The {@link User} data
+     * @param userId the user identifier
+     * @param contextId The context identifier
+     * @param connection The {@link Connection} to use
+     * @return <code>true</code> if the attribute was changed successfully; <code>false</code> otherwise
+     * @throws SQLException if an SQL error is occurred
      */
-    <T extends ExtendableDataObject> String getValue(T object);
-
-    /**
-     * Gets the original type of the attribute's value
-     *
-     * @return The original type
-     */
-    Class<?> getOriginalType();
+    public boolean change(Attribute attribute, User userData, int userId, int contextId, Connection connection) throws SQLException {
+        UserAttributeChanger changer = changers.get(attribute);
+        if (changer == null) {
+            LOG.debug("No user attribute changer found for user attribute '{}' in table '{}'. The attribute will not be changed.", attribute.getSQLFieldName(), table);
+            return false;
+        }
+        return changer.changeAttribute(userId, contextId, userData, connection);
+    }
 }
