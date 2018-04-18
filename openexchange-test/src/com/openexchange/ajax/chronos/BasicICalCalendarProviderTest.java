@@ -89,7 +89,6 @@ import com.openexchange.testing.httpclient.models.ChronosFolderBody;
 import com.openexchange.testing.httpclient.models.EventData;
 import com.openexchange.testing.httpclient.models.EventId;
 import com.openexchange.testing.httpclient.models.EventsResponse;
-import com.openexchange.testing.httpclient.models.FolderBody;
 import com.openexchange.testing.httpclient.models.FolderData;
 import com.openexchange.testing.httpclient.models.FolderDataComOpenexchangeCalendarConfig;
 import com.openexchange.testing.httpclient.models.FolderDataComOpenexchangeCalendarExtendedProperties;
@@ -430,9 +429,6 @@ public class BasicICalCalendarProviderTest extends AbstractExternalProviderChron
         extendedProperties.setColor(color);
         folderData.setComOpenexchangeCalendarExtendedProperties(extendedProperties);
 
-        FolderBody body = new FolderBody();
-        body.setFolder(folderData);
-
         FolderUpdateResponse updateResponse = folderManager.updateFolder(folderData);
         assertNull(updateResponse.getError());
 
@@ -591,7 +587,7 @@ public class BasicICalCalendarProviderTest extends AbstractExternalProviderChron
     }
 
     @Test
-    public void testGetSingleRecurrence_butNotAvailalbe() throws OXException, IOException, JSONException, ApiException, ChronosApiException {
+    public void testGetSingleRecurrence_butNotAvailalbe() throws OXException, IOException, JSONException, ApiException {
         String externalUri = "http://example.com/files/" + UUID.randomUUID().toString() + ".ics";
         mock(externalUri, BasicICalCalendarProviderTestConstants.GENERIC_RESPONSE, HttpStatus.SC_OK);
 
