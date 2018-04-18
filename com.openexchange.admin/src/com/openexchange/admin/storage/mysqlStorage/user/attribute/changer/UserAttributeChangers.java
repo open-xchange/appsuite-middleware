@@ -62,6 +62,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.admin.rmi.dataobjects.User;
 import com.openexchange.admin.rmi.exceptions.StorageException;
+import com.openexchange.admin.storage.mysqlStorage.user.attribute.UserAttribute;
 import com.openexchange.admin.tools.AdminCache;
 import com.openexchange.java.Strings;
 import com.openexchange.tools.net.URIDefaults;

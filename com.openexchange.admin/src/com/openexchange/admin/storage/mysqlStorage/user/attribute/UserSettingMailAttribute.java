@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.admin.storage.mysqlStorage.user.attribute.changer;
+package com.openexchange.admin.storage.mysqlStorage.user.attribute;
 
 import java.util.function.Function;
 import com.openexchange.admin.rmi.dataobjects.User;

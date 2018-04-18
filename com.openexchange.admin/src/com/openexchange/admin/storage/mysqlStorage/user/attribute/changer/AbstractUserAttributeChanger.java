@@ -52,6 +52,7 @@ package com.openexchange.admin.storage.mysqlStorage.user.attribute.changer;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import com.openexchange.admin.storage.mysqlStorage.user.attribute.Attribute;
 
 /**
  * {@link AbstractUserAttributeChanger}

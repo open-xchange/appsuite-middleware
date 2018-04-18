@@ -111,7 +111,7 @@ import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.services.AdminServiceRegistry;
 import com.openexchange.admin.storage.interfaces.OXToolStorageInterface;
 import com.openexchange.admin.storage.interfaces.OXUtilStorageInterface;
-import com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.UserAttribute;
+import com.openexchange.admin.storage.mysqlStorage.user.attribute.UserAttribute;
 import com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.UserAttributeChangers;
 import com.openexchange.admin.storage.sqlStorage.OXUserSQLStorage;
 import com.openexchange.admin.storage.utils.Filestore2UserUtil;
@@ -855,9 +855,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             }
 
             // update the user mail settings
-            final String send_addr = usrdata.getDefaultSenderAddress(); // see
-            // bug
-            // #10559
+            final String send_addr = usrdata.getDefaultSenderAddress(); // see bug #10559
             if (null != send_addr) {
                 folder_update = con.prepareStatement("UPDATE user_setting_mail SET send_addr = ? WHERE cid = ? AND user = ?");
                 folder_update.setString(1, send_addr);

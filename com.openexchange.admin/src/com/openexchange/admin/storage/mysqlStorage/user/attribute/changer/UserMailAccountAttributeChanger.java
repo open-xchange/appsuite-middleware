@@ -49,22 +49,13 @@
 
 package com.openexchange.admin.storage.mysqlStorage.user.attribute.changer;
 
+
 /**
- * {@link AbstractUserSettingMailAttributeChanger}
+ * {@link UserMailAccountAttributeChanger}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @since v7.10.1
  */
-abstract class AbstractUserSettingMailAttributeChanger extends AbstractAttributeChanger implements UserAttributeChanger {
-
-    static final String SQL_STATEMENT_TEMPLATE = "UPDATE " + TABLE_TOKEN + " SET " + COLUMN_TOKEN + " = ? WHERE cid = ? AND id = ?";
-    
-    
-    /**
-     * Initialises a new {@link AbstractUserSettingMailAttributeChanger}.
-     */
-    public AbstractUserSettingMailAttributeChanger() {
-        super();
-    }
+abstract class UserMailAccountAttributeChanger extends AbstractAttributeChanger {
 
 }

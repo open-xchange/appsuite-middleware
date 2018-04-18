@@ -56,6 +56,7 @@ import java.sql.Types;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import com.openexchange.admin.storage.mysqlStorage.user.attribute.Attribute;
 import com.openexchange.database.Databases;
 import com.openexchange.java.Strings;
 
@@ -63,7 +64,7 @@ import com.openexchange.java.Strings;
  * {@link AbstractAttributeChanger}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
- * @since v7.10.0
+ * @since v7.10.1
  */
 abstract class AbstractAttributeChanger {
 

@@ -47,43 +47,74 @@
  *
  */
 
-package com.openexchange.admin.storage.mysqlStorage.user.attribute.changer;
+package com.openexchange.admin.storage.mysqlStorage.user.attribute;
 
 import java.util.function.Function;
 import com.openexchange.admin.rmi.dataobjects.ExtendableDataObject;
 import com.openexchange.admin.rmi.dataobjects.User;
 
 /**
- * {@link UserMailAttribute}
+ * {@link UserAttribute}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
- * @since v7.10.0
+ * @since v7.10.1
  */
-public enum UserMailAttribute implements Attribute {
+public enum UserAttribute implements Attribute {
 
-    SEND_ADDRESS("send_addr", (user) -> user.getDefaultSenderAddress(), String.class),
-    STD_DRAFTS("std_drafts", (user) -> user.getMail_folder_drafts_name(), String.class),
-    STD_SENT("std_sent", (user) -> user.getMail_folder_sent_name(), String.class),
-    STD_SPAM("std_spam", (user) -> user.getMail_folder_spam_name(), String.class),
-    STD_TRASH("std_trash", (user) -> user.getMail_folder_trash_name(), String.class),
-    CONFIRMED_SPAM("confirmed_spam", (user) -> user.getMail_folder_confirmed_spam_name(), String.class),
-    CONFIRMED_HAM("confirmed_ham", (user) -> user.getMail_folder_confirmed_ham_name(), String.class),
-    UPLOAD_QUOTA("upload_quota", (user) -> Integer.toString(user.getUploadFileSizeLimit()), Integer.class),
-    UPLOAD_QUOTA_PER_FILE("upload_quota_per_file", (user) -> Integer.toString(user.getUploadFileSizeLimitPerFile()), Integer.class),
+    /**
+     * The 'primaryEmail' column
+     */
+    MAIL("primaryEmail", (user) -> user.getPrimaryEmail(), String.class),
+    /**
+     * The 'preferredlanguage' column
+     */
+    PREFERRED_LANGUAGE("preferredlanguage", (user) -> user.getLanguage(), String.class),
+    /**
+     * The 'timezone' column
+     */
+    TIMEZONE("timezone", (user) -> user.getTimezone(), String.class),
+    /**
+     * The 'mailEnabled' column
+     */
+    MAIL_ENABLED("mailEnabled", (user) -> Boolean.toString(user.getMailenabled()), Boolean.class),
+    /**
+     * The 'shadowLastChange' column
+     */
+    SHADOW_LAST_CHANGE("shadowLastChange", (user) -> Boolean.toString(user.getPassword_expired()), Boolean.class),
+    /**
+     * The 'imapserver' column
+     */
+    IMAP_SERVER("imapserver", (user) -> user.getImapServerString(), String.class),
+    /**
+     * The 'imapLogin' column
+     */
+    IMAP_LOGIN("imapLogin", (user) -> user.getImapLogin(), String.class),
+    /**
+     * The 'smtpserver' column
+     */
+    SMTP_SERVER("smtpserver", (user) -> user.getSmtpServerString(), String.class),
+    /**
+     * The 'userPassword' column
+     */
+    USER_PASSWORD("userPassword", (user) -> user.getPassword(), String.class),
+    /**
+     * The 'passwordMech' column
+     */
+    PASSWORD_MECH("passwordMech", (user) -> user.getPasswordMech(), String.class),
     ;
 
     private final String sqlFieldName;
     private final Function<User, String> getter;
     private final Class<?> originalType;
-    private static final String TABLE_NAME = "user_setting_mail";
+    private static final String TABLE_NAME = "user";
 
     /**
      * 
-     * Initialises a new {@link UserMailAttribute}.
+     * Initialises a new {@link UserAttribute}.
      * 
-     * @param sqlFieldNames the names of the attribute
+     * @param sqlFieldName the name of the attribute
      */
-    private UserMailAttribute(String sqlFieldName, Function<User, String> getter, Class<?> originalType) {
+    private UserAttribute(String sqlFieldName, Function<User, String> getter, Class<?> originalType) {
         this.sqlFieldName = sqlFieldName;
         this.getter = getter;
         this.originalType = originalType;
