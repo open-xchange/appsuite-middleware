@@ -351,7 +351,7 @@ public interface IDBasedCalendarAccess extends TransactionAware, CalendarParamet
      * <p/>
      * <b>Note:</b> Only available for {@link SyncAware} calendar providers.
      * <p/>
-     * It is also possible that that only overridden instances of an event series are returned, which may be the case for <i>detached</i>
+     * It is also possible that only overridden instances of an event series are returned, which may be the case for <i>detached</i>
      * instances where the user has no access to the corresponding series master event.
      * <p/>
      * The following calendar parameters are evaluated:
@@ -365,6 +365,27 @@ public interface IDBasedCalendarAccess extends TransactionAware, CalendarParamet
      * @see <a href="https://tools.ietf.org/html/rfc4791#section-4.1">RFC 4791, section 4.1</a>
      */
     List<Event> resolveResource(String folderId, String resourceName) throws OXException;
+
+    /**
+     * Resolves multiple events (and any overridden instances or <i>change exceptions</i>) by their externally used resource name, which
+     * typically matches the event's UID or filename property. The lookup is performed within a specific folder in a case-sensitive way.
+     * If an event series with overridden instances is matched, the series master event will be the first event in the returned list of
+     * the corresponding events result.
+     * <p/>
+     * It is also possible that only overridden instances of an event series are returned, which may be the case for <i>detached</i>
+     * instances where the user has no access to the corresponding series master event.
+     * <p/>
+     * The following calendar parameters are evaluated:
+     * <ul>
+     * <li>{@link CalendarParameters#PARAMETER_FIELDS}</li>
+     * </ul>
+     *
+     * @param folderId The identifier of the folder to resolve the resource names in
+     * @param resourceNames The resource names to resolve
+     * @return The resolved event(s), mapped to their corresponding resource name
+     * @see <a href="https://tools.ietf.org/html/rfc4791#section-4.1">RFC 4791, section 4.1</a>
+     */
+    Map<String, EventsResult> resolveResources(String folderId, List<String> resourceNames) throws OXException;
 
     /**
      * Gets the sequence numbers of one or more calendar folders, which is the highest highest timestamp of all contained items. Distinct

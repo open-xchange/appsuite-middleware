@@ -107,6 +107,7 @@ import com.openexchange.chronos.service.CollectionUpdate;
 import com.openexchange.chronos.service.EventID;
 import com.openexchange.chronos.service.EventUpdate;
 import com.openexchange.chronos.service.EventUpdates;
+import com.openexchange.chronos.service.EventsResult;
 import com.openexchange.chronos.service.ItemUpdate;
 import com.openexchange.chronos.service.SearchFilter;
 import com.openexchange.chronos.service.UpdatesResult;
@@ -750,6 +751,12 @@ public abstract class BasicCachingCalendarAccess implements BasicCalendarAccess,
     public List<Event> resolveResource(String resourceName) throws OXException {
         updateCacheIfNeeded();
         return new SyncHandler(session, account, parameters).resolveResource(resourceName);
+    }
+
+    @Override
+    public Map<String, EventsResult> resolveResources(List<String> resourceNames) throws OXException {
+        updateCacheIfNeeded();
+        return new SyncHandler(session, account, parameters).resolveResources(resourceNames);
     }
 
     protected void create(CalendarStorage calendarStorage, List<Event> externalEvents) throws OXException {
