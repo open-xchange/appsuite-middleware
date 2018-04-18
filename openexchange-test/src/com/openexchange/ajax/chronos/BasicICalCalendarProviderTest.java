@@ -851,7 +851,7 @@ public class BasicICalCalendarProviderTest extends AbstractExternalProviderChron
         EventsResponse secondEventResponse = defaultUserApi.getChronosApi().getAllEvents(defaultUserApi.getSession(), DateTimeUtil.getZuluDateTime(new Date(dateToMillis("20000702T201500Z")).getTime()).getValue(), DateTimeUtil.getZuluDateTime(new Date(System.currentTimeMillis()).getTime()).getValue(), newFolderId, null, null, null, false, false, true);
 
         assertNotNull(secondEventResponse.getError());
-        assertEquals("CAL-CACHE-4040", secondEventResponse.getCode());
+        assertEquals("CAL-CACHE-4230", secondEventResponse.getCode());
     }
 
     @Test
@@ -921,7 +921,7 @@ public class BasicICalCalendarProviderTest extends AbstractExternalProviderChron
         EventsResponse secondEventResponse = defaultUserApi.getChronosApi().getAllEvents(defaultUserApi.getSession(), DateTimeUtil.getZuluDateTime(new Date(dateToMillis("20000702T201500Z")).getTime()).getValue(), DateTimeUtil.getZuluDateTime(new Date(System.currentTimeMillis()).getTime()).getValue(), newFolderId, null, null, null, false, false, true);
 
         assertNotNull(secondEventResponse.getError());
-        assertEquals(secondEventResponse.getError(), "CAL-CACHE-4040", secondEventResponse.getCode());
+        assertEquals(secondEventResponse.getError(), "CAL-CACHE-4230", secondEventResponse.getCode());
     }
 
     @Test
@@ -1066,7 +1066,7 @@ public class BasicICalCalendarProviderTest extends AbstractExternalProviderChron
 
         assertEquals(0, secondEventResponse.getData().get(0).getEvents().size());
         assertNotNull(secondResponseError.getError());
-        assertEquals(secondResponseError.getError(), "CAL-CACHE-4040", secondResponseError.getCode());
+        assertEquals(secondResponseError.getError(), "CAL-CACHE-4230", secondResponseError.getCode());
         assertNotNull(secondResponseError.getCode());
         assertNotNull(secondResponseError.getErrorId());
         assertNotNull(secondResponseError.getErrorDesc());
