@@ -65,7 +65,7 @@ public enum UserAttribute implements Attribute {
     /**
      * The 'primaryEmail' column
      */
-    MAIL("primaryEmail", (user) -> user.getPrimaryEmail(), String.class),
+    MAIL("mail", (user) -> user.getPrimaryEmail(), String.class),
     /**
      * The 'preferredlanguage' column
      */
