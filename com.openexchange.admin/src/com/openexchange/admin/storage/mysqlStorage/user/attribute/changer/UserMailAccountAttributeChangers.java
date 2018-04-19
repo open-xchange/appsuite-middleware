@@ -180,24 +180,6 @@ public class UserMailAccountAttributeChangers extends AbstractUserAttributeChang
                 return setAttributes(userId, contextId, TABLE, attributes, connection);
             }
         });
-
-        changers.put(UserMailAccountAttribute.UPLOAD_QUOTA, new AbstractMultiAttributeChanger() {
-
-            @Override
-            public boolean changeAttribute(int userId, int contextId, User userData, Connection connection) throws SQLException {
-                Integer uploadFileSizeLimit = userData.getUploadFileSizeLimit();
-                return uploadFileSizeLimit == null ? setAttributesDefault(userId, contextId, TABLE, Collections.singleton(UserMailAccountAttribute.UPLOAD_QUOTA), connection) : setAttributes(userId, contextId, TABLE, Collections.singletonMap(UserMailAccountAttribute.UPLOAD_QUOTA, uploadFileSizeLimit), connection);
-            }
-        });
-
-        changers.put(UserMailAccountAttribute.UPLOAD_QUOTA_PER_FILE, new AbstractMultiAttributeChanger() {
-
-            @Override
-            public boolean changeAttribute(int userId, int contextId, User userData, Connection connection) throws SQLException {
-                Integer uploadFileSizeLimitPerFile = userData.getUploadFileSizeLimitPerFile();
-                return uploadFileSizeLimitPerFile == null ? setAttributesDefault(userId, contextId, TABLE, Collections.singleton(UserMailAccountAttribute.UPLOAD_QUOTA), connection) : setAttributes(userId, contextId, TABLE, Collections.singletonMap(UserMailAccountAttribute.UPLOAD_QUOTA, uploadFileSizeLimitPerFile), connection);
-            }
-        });
         return Collections.unmodifiableMap(changers);
     }
 }

@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2018-2020 OX Software GmbH
+ *     Copyright (C) 2016-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -52,38 +52,24 @@ package com.openexchange.admin.storage.mysqlStorage.user.attribute.changer;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.util.Map;
 import java.util.Set;
 import com.openexchange.admin.storage.mysqlStorage.user.attribute.Attribute;
-import com.openexchange.mailaccount.MailAccount;
 
 /**
- * {@link AbstractUserMailAccountAttributeChanger}
+ * {@link AbstractUserSettingMailAttributeChanger}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @since v7.10.1
  */
-abstract class AbstractUserMailAccountAttributeChanger extends AbstractMultiAttributeChanger {
+abstract class AbstractUserSettingMailAttributeChanger extends AbstractMultiAttributeChanger {
 
-    static final String SQL_STATEMENT_TEMPLATE = "UPDATE " + TABLE_TOKEN + " SET " + COLUMN_TOKEN + " WHERE cid = ? AND user = ? AND id = ?";
+    static final String SQL_STATEMENT_TEMPLATE = "UPDATE " + TABLE_TOKEN + " SET " + COLUMN_TOKEN + " WHERE cid = ? AND user = ?";
 
     /**
-     * Initialises a new {@link AbstractUserMailAccountAttributeChanger}.
+     * Initialises a new {@link AbstractUserSettingMailAttributeChanger}.
      */
-    public AbstractUserMailAccountAttributeChanger() {
+    public AbstractUserSettingMailAttributeChanger() {
         super();
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.AbstractMultiAttributeChanger#fillSetStatement(java.sql.PreparedStatement, java.util.Map, java.util.Map, int, int)
-     */
-    @Override
-    int fillSetStatement(PreparedStatement stmt, Map<Attribute, Setter> setters, Map<Attribute, Object> attributes, int userId, int contextId) throws SQLException {
-        int parameterIndex = super.fillSetStatement(stmt, setters, attributes, userId, contextId);
-        stmt.setInt(parameterIndex++, MailAccount.DEFAULT_ID);
-        return parameterIndex;
     }
 
     /*

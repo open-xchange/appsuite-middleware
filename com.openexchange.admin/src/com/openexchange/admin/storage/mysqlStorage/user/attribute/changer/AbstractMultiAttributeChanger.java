@@ -49,7 +49,6 @@
 
 package com.openexchange.admin.storage.mysqlStorage.user.attribute.changer;
 
-import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.Map;
@@ -65,11 +64,6 @@ import com.openexchange.admin.storage.mysqlStorage.user.attribute.Attribute;
  * @since v7.10.1
  */
 abstract class AbstractMultiAttributeChanger extends AbstractAttributeChanger implements UserAttributeChanger {
-
-    /**
-     * Basic stub UPDATE SQL statement with table and column placeholders
-     */
-    static final String SQL_STATEMENT_TEMPLATE = "UPDATE " + TABLE_TOKEN + " SET " + COLUMN_TOKEN + " WHERE cid = ? AND id = ?"; // TODO: customise the WHERE predicate, maybe use c.o.sql.grammar
 
     /**
      * Initialises a new {@link AbstractMultiAttributeChanger}.
@@ -112,27 +106,5 @@ abstract class AbstractMultiAttributeChanger extends AbstractAttributeChanger im
             unsetter.unset(stmt, parameterIndex++);
         }
         return appendContextUser(contextId, userId, stmt, parameterIndex);
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.AbstractAttributeChanger#prepareStatement(java.lang.String, java.util.Set, java.sql.Connection)
-     */
-    @Override
-    PreparedStatement prepareStatement(String table, Set<Attribute> attributes, Connection connection) throws SQLException {
-        String sqlStatement = SQL_STATEMENT_TEMPLATE.replaceAll(TABLE_TOKEN, table).replaceAll(COLUMN_TOKEN, prepareAttributes(attributes));
-        return connection.prepareStatement(sqlStatement);
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.AbstractAttributeChanger#prepareDefaultStatement(java.lang.String, java.util.Set, java.sql.Connection)
-     */
-    @Override
-    PreparedStatement prepareDefaultStatement(String table, Set<Attribute> attributes, Connection connection) throws SQLException {
-        String sqlStatement = SQL_STATEMENT_TEMPLATE.replaceAll(TABLE_TOKEN, table).replaceAll(COLUMN_TOKEN, prepareAttributes(attributes).replaceAll("\\?", "DEFAULT"));
-        return connection.prepareStatement(sqlStatement);
     }
 }

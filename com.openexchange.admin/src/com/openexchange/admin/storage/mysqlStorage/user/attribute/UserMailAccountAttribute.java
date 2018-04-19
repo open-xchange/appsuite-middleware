@@ -81,9 +81,6 @@ public enum UserMailAccountAttribute implements Attribute {
 
     CONFIRMED_SPAM("confirmed_spam", (user) -> user.getMail_folder_confirmed_spam_name(), String.class),
     CONFIRMED_SPAM_FULLNAME("confirmed_spam_fullname)", (user) -> "", String.class),
-
-    UPLOAD_QUOTA("upload_quota", (user) -> Integer.toString(user.getUploadFileSizeLimit()), Integer.class),
-    UPLOAD_QUOTA_PER_FILE("upload_quota_per_file", (user) -> Integer.toString(user.getUploadFileSizeLimitPerFile()), Integer.class),
     ;
 
     private final String sqlFieldName;
