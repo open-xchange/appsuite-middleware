@@ -72,6 +72,7 @@ public class ICalProviderUtils {
         }
         try {
             URI uri = new URI(feedUrl);
+            check(uri);
             boolean denied = ICalCalendarProviderProperties.isDenied(uri);
 
             if (denied || !isValid(uri)) {
@@ -79,6 +80,12 @@ public class ICalProviderUtils {
             }
         } catch (URISyntaxException e) {
             throw ICalProviderExceptionCodes.BAD_FEED_URI.create(e, feedUrl);
+        }
+    }
+
+    private static void check(URI uri) throws OXException {
+        if (Strings.isEmpty(uri.getScheme())) {
+            throw com.openexchange.chronos.provider.ical.exception.ICalProviderExceptionCodes.BAD_FEED_URI.create(uri.toString());
         }
     }
 
