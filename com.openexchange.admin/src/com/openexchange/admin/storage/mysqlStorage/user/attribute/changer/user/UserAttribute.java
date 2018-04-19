@@ -63,59 +63,60 @@ import com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.Attrib
 public enum UserAttribute implements Attribute {
 
     /**
-     * The 'primaryEmail' column
+     * The 'mail' column
      */
-    MAIL("mail", (user) -> user.getPrimaryEmail(), String.class),
+    MAIL("primary-email", "mail", (user) -> user.getPrimaryEmail(), String.class),
     /**
      * The 'preferredlanguage' column
      */
-    PREFERRED_LANGUAGE("preferredlanguage", (user) -> user.getLanguage(), String.class),
+    PREFERRED_LANGUAGE("preferred-language", "preferredlanguage", (user) -> user.getLanguage(), String.class),
     /**
      * The 'timezone' column
      */
-    TIMEZONE("timezone", (user) -> user.getTimezone(), String.class),
+    TIMEZONE("timezone", "timezone", (user) -> user.getTimezone(), String.class),
     /**
      * The 'mailEnabled' column
      */
-    MAIL_ENABLED("mailEnabled", (user) -> Boolean.toString(user.getMailenabled()), Boolean.class),
+    MAIL_ENABLED("mail-enabled", "mailEnabled", (user) -> Boolean.toString(user.getMailenabled()), Boolean.class),
     /**
      * The 'shadowLastChange' column
      */
-    SHADOW_LAST_CHANGE("shadowLastChange", (user) -> Boolean.toString(user.getPassword_expired()), Boolean.class),
+    SHADOW_LAST_CHANGE("shadow-last-change", "shadowLastChange", (user) -> Boolean.toString(user.getPassword_expired()), Boolean.class),
     /**
      * The 'imapserver' column
      */
-    IMAP_SERVER("imapserver", (user) -> user.getImapServerString(), String.class),
+    IMAP_SERVER("imap-server", "imapserver", (user) -> user.getImapServerString(), String.class),
     /**
      * The 'imapLogin' column
      */
-    IMAP_LOGIN("imapLogin", (user) -> user.getImapLogin(), String.class),
+    IMAP_LOGIN("imap-login", "imapLogin", (user) -> user.getImapLogin(), String.class),
     /**
      * The 'smtpserver' column
      */
-    SMTP_SERVER("smtpserver", (user) -> user.getSmtpServerString(), String.class),
+    SMTP_SERVER("smtp-server", "smtpserver", (user) -> user.getSmtpServerString(), String.class),
     /**
      * The 'userPassword' column
      */
-    USER_PASSWORD("userPassword", (user) -> user.getPassword(), String.class),
+    USER_PASSWORD("user-password", "userPassword", (user) -> user.getPassword(), String.class),
     /**
      * The 'passwordMech' column
      */
-    PASSWORD_MECH("passwordMech", (user) -> user.getPasswordMech(), String.class),
+    PASSWORD_MECH("password-mechanism", "passwordMech", (user) -> user.getPasswordMech(), String.class),
     ;
 
     private final String sqlFieldName;
     private final Function<User, String> getter;
     private final Class<?> originalType;
     private static final String TABLE_NAME = "user";
+    private final String attributeName;
 
     /**
-     * 
      * Initialises a new {@link UserAttribute}.
      * 
      * @param sqlFieldName the name of the attribute
      */
-    private UserAttribute(String sqlFieldName, Function<User, String> getter, Class<?> originalType) {
+    private UserAttribute(String attributeName, String sqlFieldName, Function<User, String> getter, Class<?> originalType) {
+        this.attributeName = attributeName;
         this.sqlFieldName = sqlFieldName;
         this.getter = getter;
         this.originalType = originalType;
@@ -159,5 +160,15 @@ public enum UserAttribute implements Attribute {
     @Override
     public Class<?> getOriginalType() {
         return originalType;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.Attribute#getName()
+     */
+    @Override
+    public String getName() {
+        return attributeName;
     }
 }

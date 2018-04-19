@@ -609,7 +609,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 }
                 for (com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.Attribute attribute : attributeChanger.getAttributes()) {
                     if (acs.change(attribute, usrdata, userId, contextId, con)) {
-                        changedAttributes.add(attribute.getSQLFieldName());
+                        changedAttributes.add(attribute.getName());
                     }
                 }
             }

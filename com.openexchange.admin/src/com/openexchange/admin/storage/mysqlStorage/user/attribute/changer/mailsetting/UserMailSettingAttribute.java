@@ -62,21 +62,22 @@ import com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.Attrib
  */
 public enum UserMailSettingAttribute implements Attribute {
 
-    SEND_ADDRESS("send_addr", (user) -> user.getDefaultSenderAddress(), String.class),
-    STD_DRAFTS("std_drafts", (user) -> user.getMail_folder_drafts_name(), String.class),
-    STD_SENT("std_sent", (user) -> user.getMail_folder_sent_name(), String.class),
-    STD_SPAM("std_spam", (user) -> user.getMail_folder_spam_name(), String.class),
-    STD_TRASH("std_trash", (user) -> user.getMail_folder_trash_name(), String.class),
-    CONFIRMED_SPAM("confirmed_spam", (user) -> user.getMail_folder_confirmed_spam_name(), String.class),
-    CONFIRMED_HAM("confirmed_ham", (user) -> user.getMail_folder_confirmed_ham_name(), String.class),
-    UPLOAD_QUOTA("upload_quota", (user) -> Integer.toString(user.getUploadFileSizeLimit()), Integer.class),
-    UPLOAD_QUOTA_PER_FILE("upload_quota_per_file", (user) -> Integer.toString(user.getUploadFileSizeLimitPerFile()), Integer.class),
+    SEND_ADDRESS("default-sender-address", "send_addr", (user) -> user.getDefaultSenderAddress(), String.class),
+    STD_DRAFTS("standard-drafts-folder-name", "std_drafts", (user) -> user.getMail_folder_drafts_name(), String.class),
+    STD_SENT("standard-sent-folder-name", "std_sent", (user) -> user.getMail_folder_sent_name(), String.class),
+    STD_SPAM("standard-spam-folder-name", "std_spam", (user) -> user.getMail_folder_spam_name(), String.class),
+    STD_TRASH("standard-drafts-folder-name", "std_trash", (user) -> user.getMail_folder_trash_name(), String.class),
+    CONFIRMED_SPAM("standard-spam-folder-name", "confirmed_spam", (user) -> user.getMail_folder_confirmed_spam_name(), String.class),
+    CONFIRMED_HAM("standard-ham-folder-name", "confirmed_ham", (user) -> user.getMail_folder_confirmed_ham_name(), String.class),
+    UPLOAD_QUOTA("total-upload-file-size-limit", "upload_quota", (user) -> Integer.toString(user.getUploadFileSizeLimit()), Integer.class),
+    UPLOAD_QUOTA_PER_FILE("upload-file-size-limit-per-file", "upload_quota_per_file", (user) -> Integer.toString(user.getUploadFileSizeLimitPerFile()), Integer.class),
     ;
 
     private final String sqlFieldName;
     private final Function<User, String> getter;
     private final Class<?> originalType;
     private static final String TABLE_NAME = "user_setting_mail";
+    private final String attributeName;
 
     /**
      * 
@@ -84,7 +85,8 @@ public enum UserMailSettingAttribute implements Attribute {
      * 
      * @param sqlFieldNames the names of the attribute
      */
-    private UserMailSettingAttribute(String sqlFieldName, Function<User, String> getter, Class<?> originalType) {
+    private UserMailSettingAttribute(String attributeName, String sqlFieldName, Function<User, String> getter, Class<?> originalType) {
+        this.attributeName = attributeName;
         this.sqlFieldName = sqlFieldName;
         this.getter = getter;
         this.originalType = originalType;
@@ -128,5 +130,15 @@ public enum UserMailSettingAttribute implements Attribute {
     @Override
     public Class<?> getOriginalType() {
         return originalType;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.Attribute#getName()
+     */
+    @Override
+    public String getName() {
+        return attributeName;
     }
 }

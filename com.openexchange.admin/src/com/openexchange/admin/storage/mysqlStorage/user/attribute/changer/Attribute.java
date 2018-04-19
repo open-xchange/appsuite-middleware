@@ -87,4 +87,11 @@ public interface Attribute {
      * @return The original type
      */
     Class<?> getOriginalType();
+
+    /**
+     * Returns the attribute's name
+     * 
+     * @return the name of the attribute
+     */
+    String getName();
 }

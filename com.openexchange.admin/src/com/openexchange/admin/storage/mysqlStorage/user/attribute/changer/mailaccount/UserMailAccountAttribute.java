@@ -62,32 +62,33 @@ import com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.Attrib
  */
 public enum UserMailAccountAttribute implements Attribute {
 
-    DRAFTS("drafts", (user) -> user.getMail_folder_drafts_name(), String.class),
-    DRAFTS_FULLNAME("drafts_fullname", (user) -> "", String.class),
+    DRAFTS("standard-drafts-folder-name", "drafts", (user) -> user.getMail_folder_drafts_name(), String.class),
+    DRAFTS_FULLNAME("standard-drafts-folder-fullname", "drafts_fullname", (user) -> "", String.class),
 
-    SENT("sent", (user) -> user.getMail_folder_sent_name(), String.class),
-    SENT_FULLNAME("sent_fullname", (user) -> "", String.class),
+    SENT("standard-sent-folder-name", "sent", (user) -> user.getMail_folder_sent_name(), String.class),
+    SENT_FULLNAME("standard-sent-folder-fullname", "sent_fullname", (user) -> "", String.class),
 
-    SPAM("spam", (user) -> user.getMail_folder_spam_name(), String.class),
-    SPAM_FULLNAME("spam_fullname", (user) -> "", String.class),
+    SPAM("standard-spam-folder-name", "spam", (user) -> user.getMail_folder_spam_name(), String.class),
+    SPAM_FULLNAME("standard-spam-folder-name", "spam_fullname", (user) -> "", String.class),
 
-    TRASH("trash", (user) -> user.getMail_folder_trash_name(), String.class),
-    TRASH_FULLNAME("trash_fullname", (user) -> "", String.class),
+    TRASH("standard-trash-folder-name", "trash", (user) -> user.getMail_folder_trash_name(), String.class),
+    TRASH_FULLNAME("standard-trash-folder-fullname", "trash_fullname", (user) -> "", String.class),
 
-    ARCHIVE("archive", (user) -> "", String.class),
-    ARCHIVE_FULLNAME("archive_fullname", (user) -> user.getMail_folder_archive_full_name(), String.class),
+    ARCHIVE("standard-archive-folder-name", "archive", (user) -> "", String.class),
+    ARCHIVE_FULLNAME("standard-archive-folder-fullname", "archive_fullname", (user) -> user.getMail_folder_archive_full_name(), String.class),
 
-    CONFIRMED_HAM("confirmed_ham", (user) -> user.getMail_folder_confirmed_ham_name(), String.class),
-    CONFIRMED_HAM_FULLNAME("confirmed_ham_fullname", (user) -> "", String.class),
+    CONFIRMED_HAM("standard-confirmed-ham-folder-name", "confirmed_ham", (user) -> user.getMail_folder_confirmed_ham_name(), String.class),
+    CONFIRMED_HAM_FULLNAME("standard-confirmed-ham-folder-fullname", "confirmed_ham_fullname", (user) -> "", String.class),
 
-    CONFIRMED_SPAM("confirmed_spam", (user) -> user.getMail_folder_confirmed_spam_name(), String.class),
-    CONFIRMED_SPAM_FULLNAME("confirmed_spam_fullname", (user) -> "", String.class),
+    CONFIRMED_SPAM("standard-confirmed-spam-folder-name", "confirmed_spam", (user) -> user.getMail_folder_confirmed_spam_name(), String.class),
+    CONFIRMED_SPAM_FULLNAME("standard-confirmed-spam-folder-fullname", "confirmed_spam_fullname", (user) -> "", String.class),
     ;
 
     private final String sqlFieldName;
     private final Function<User, String> getter;
     private final Class<?> originalType;
     private static final String TABLE = "user_mail_account";
+    private final String attributeName;
 
     /**
      * 
@@ -95,7 +96,8 @@ public enum UserMailAccountAttribute implements Attribute {
      * 
      * @param sqlFieldName the names of the attribute
      */
-    private UserMailAccountAttribute(String sqlFieldName, Function<User, String> getter, Class<?> originalType) {
+    private UserMailAccountAttribute(String attributeName, String sqlFieldName, Function<User, String> getter, Class<?> originalType) {
+        this.attributeName = attributeName;
         this.sqlFieldName = sqlFieldName;
         this.getter = getter;
         this.originalType = originalType;
@@ -139,5 +141,15 @@ public enum UserMailAccountAttribute implements Attribute {
     @Override
     public <T extends ExtendableDataObject> String getValue(T object) {
         return getter.apply((User) object);
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.Attribute#getName()
+     */
+    @Override
+    public String getName() {
+        return attributeName;
     }
 }
