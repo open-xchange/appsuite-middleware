@@ -84,7 +84,7 @@ public class ICalProviderUtils {
     }
 
     private static void check(URI uri) throws OXException {
-        if (Strings.isEmpty(uri.getScheme())) {
+        if (Strings.isEmpty(uri.getScheme()) || Strings.containsSurrogatePairs(uri.toString())) {
             throw com.openexchange.chronos.provider.ical.exception.ICalProviderExceptionCodes.BAD_FEED_URI.create(uri.toString());
         }
     }
