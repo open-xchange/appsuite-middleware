@@ -47,74 +47,25 @@
  *
  */
 
-package com.openexchange.ajax.mail;
+package com.openexchange.chronos.provider.caching.basic.exception;
 
-import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
-import com.openexchange.test.concurrent.ParallelSuite;
+import com.openexchange.i18n.LocalizableStrings;
 
 /**
- * {@link MailTestSuite}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * {@link BasicCachingCalendarExceptionMessages}
+ *
+ * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
+ * @since v7.10.0
  */
-@RunWith(ParallelSuite.class)
-@Suite.SuiteClasses({
-    AllTest.class,
-    AttachmentTest.class,
-    ClearTest.class,
-    CopyMailTest.class,
-    CountMailTest.class,
-    ForwardMailTest.class,
-    GetTest.class,
-    ListTest.class,
-    MailSearchTest.class,
-    MoveMailTest.class,
-    NewMailTest.class,
-    MultipleAttachmentTest.class,
-    ReplyAllTest.class,
-    ReplyTest.class,
-    SearchTest.class,
-    SendTest.class,
-    Send2Test.class,
-    UpdateMailTest.class,
-    ViewTest.class,
-    AllAliasTest.class,
-    ListAliasTest.class,
-    GetStructureTest.class,
-    Base64Test.class,
-    AllSeenMailTest.class,
-    com.openexchange.ajax.mail.MultipleGetTest.class,
+public class BasicCachingCalendarExceptionMessages implements LocalizableStrings {
 
-    /* AlwaysTest.class, */
+    public static final String ALREADY_UP_TO_DATE_MSG = "The calendar is already up-to-date. Try again later.";
 
-    Bug12409Test.class,
-    Bug14234Test.class,
-    Bug15608Test.class,
-    Bug15777Test.class,
-    Bug15901Test.class,
-    Bug16087Test.class,
-    Bug16141Test.class,
-    Bug29865Test.class,
-    Bug19696Test.class,
-    Bug30703Test.class,
-    Bug30903Test.class,
-    Bug31855Test.class,
-    Bug32355Test.class,
-//    Bug27708Test.class,
-    Bug28913Test.class,
-    Bug29437Test.class,
-    Bug34254Test.class,
-    Bug36333Test.class,
-    Bug37247Test.class,
-
-    TestEstimateLength.class,
-
-    MaxMailSizeTest.class,
-    MSISDNAddressTest.class,
-    ExamineTest.class,
-
-})
-public final class MailTestSuite  {
-
+    /**
+     * Initializes a new {@link BasicCachingCalendarExceptionMessages}.
+     */
+    private BasicCachingCalendarExceptionMessages() {
+        super();
+    }
 }

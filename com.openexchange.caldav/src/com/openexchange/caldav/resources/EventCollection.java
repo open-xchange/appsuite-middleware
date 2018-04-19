@@ -89,6 +89,7 @@ import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.provider.CalendarFolderProperty;
 import com.openexchange.chronos.provider.composition.IDBasedCalendarAccess;
 import com.openexchange.chronos.service.CalendarParameters;
+import com.openexchange.chronos.service.EventsResult;
 import com.openexchange.chronos.service.SortOrder;
 import com.openexchange.chronos.service.UpdatesResult;
 import com.openexchange.dav.DAVProperty;
@@ -321,8 +322,19 @@ public class EventCollection extends FolderCollection<Event> implements Filterin
         }.execute(factory.getSession());
     }
 
+    public Map<String, EventsResult> resolveEvents(List<String> resourceNames) throws OXException {
+        return new CalendarAccessOperation<Map<String, EventsResult>>(factory) {
+
+            @Override
+            protected Map<String, EventsResult> perform(IDBasedCalendarAccess access) throws OXException {
+                access.set(CalendarParameters.PARAMETER_FIELDS, BASIC_FIELDS);
+                return access.resolveResources(folderID, resourceNames);
+            }
+        }.execute(factory.getSession());
+    }
+
     @Override
-    protected AbstractResource createResource(Event object, WebdavPath url) throws OXException {
+    public AbstractResource createResource(Event object, WebdavPath url) throws OXException {
         return new EventResource(this, object, url);
     }
 

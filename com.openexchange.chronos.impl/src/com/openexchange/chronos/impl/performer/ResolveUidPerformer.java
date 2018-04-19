@@ -50,13 +50,17 @@
 package com.openexchange.chronos.impl.performer;
 
 import static com.openexchange.chronos.common.SearchUtils.getSearchTerm;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.exception.OXException;
 import com.openexchange.search.CompositeSearchTerm;
 import com.openexchange.search.CompositeSearchTerm.CompositeOperation;
+import com.openexchange.search.SearchTerm;
 import com.openexchange.search.SingleSearchTerm.SingleOperation;
 import com.openexchange.search.internal.operands.ColumnFieldOperand;
 
@@ -84,7 +88,7 @@ public class ResolveUidPerformer {
      * Performs the operation.
      *
      * @param uid The unique identifier to resolve
-     * @return The identifier of the resolved event, or <code>0</code> if not found
+     * @return The identifier of the resolved event, or <code>null</code> if not found
      */
     public String perform(String uid) throws OXException {
         /*
@@ -107,6 +111,54 @@ public class ResolveUidPerformer {
             }
         }
         return null;
+    }
+
+    /**
+     * Performs the operation.
+     *
+     * @param uids The unique identifiers to resolve
+     * @return The identifiers of the resolved events, mapped to their corresponding uid
+     */
+    public Map<String, String> perform(List<String> uids) throws OXException {
+        if (null == uids || uids.isEmpty()) {
+            return Collections.emptyMap();
+        }
+        /*
+         * construct search term to find events by uid
+         */
+        SearchTerm<?> searchTerm;
+        if (1 == uids.size()) {
+            searchTerm = getSearchTerm(EventField.UID, SingleOperation.EQUALS, uids.get(0));
+        } else {
+            CompositeSearchTerm orTerm = new CompositeSearchTerm(CompositeOperation.OR);
+            for (String uid : uids) {
+                orTerm.addSearchTerm(getSearchTerm(EventField.UID, SingleOperation.EQUALS, uid));
+            }
+            searchTerm = orTerm;
+        }
+        /*
+         * don't include change exception events
+         */
+        searchTerm = new CompositeSearchTerm(CompositeOperation.AND)
+            .addSearchTerm(searchTerm)
+            .addSearchTerm(new CompositeSearchTerm(CompositeOperation.OR)
+                .addSearchTerm(getSearchTerm(EventField.SERIES_ID, SingleOperation.ISNULL))
+                .addSearchTerm(getSearchTerm(EventField.ID, SingleOperation.EQUALS, new ColumnFieldOperand<EventField>(EventField.SERIES_ID))
+        ));
+        /*
+         * search for events matching the UIDs & verify equality via String#equals
+         */
+        Map<String, String> eventIdsByUid = new HashMap<String, String>(uids.size());
+        List<Event> events = storage.getEventStorage().searchEvents(searchTerm, null, new EventField[] { EventField.ID, EventField.UID });
+        for (Event foundEvent : events) {
+            for (String uid : uids) {
+                if (uid.equals(foundEvent.getUid())) {
+                    eventIdsByUid.put(uid, foundEvent.getId());
+                    break;
+                }
+            }
+        }
+        return eventIdsByUid;
     }
 
 }

@@ -196,6 +196,16 @@ public abstract class FolderCollection<T> extends DAVCollection {
     }
 
     /**
+     * Gets the resource name from a filename, i.e. the resource name without the expected filename extension.
+     *
+     * @param filename The filename
+     * @return The resource name
+     */
+    public String extractResourceName(String filename) {
+        return Tools.extractResourceName(filename, getFileExtension());
+    }
+
+    /**
      * Gets a child resource from this collection by name. If the resource
      * does not yet exists, a placeholder resource is created.
      *

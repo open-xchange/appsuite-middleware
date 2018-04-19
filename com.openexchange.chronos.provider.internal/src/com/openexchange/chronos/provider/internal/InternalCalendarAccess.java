@@ -299,6 +299,11 @@ public class InternalCalendarAccess implements FolderCalendarAccess, SubscribeAw
     }
 
     @Override
+    public Map<String, EventsResult> resolveResources(String folderId, List<String> resourceNames) throws OXException {
+        return getCalendarService().getUtilities().resolveResources(session, folderId, resourceNames);
+    }
+
+    @Override
     public Map<String, EventsResult> searchEvents(List<String> folderIds, List<SearchFilter> filters, List<String> queries) throws OXException {
         return getCalendarService().searchEvents(session, folderIds, filters, queries);
     }
