@@ -57,6 +57,7 @@ import javax.security.sasl.Sasl;
 import javax.security.sasl.SaslClient;
 import javax.security.sasl.SaslException;
 import com.sun.mail.iap.Argument;
+import com.sun.mail.iap.ByteArray;
 import com.sun.mail.iap.ProtocolException;
 import com.sun.mail.iap.Response;
 import com.sun.mail.util.ASCIIUtility;
@@ -220,7 +221,8 @@ public class IMAPSaslAuthenticator implements SaslAuthenticator {
 	    	if (r.isContinuation()) {
 		    byte[] ba = null;
 		    if (!sc.isComplete()) {
-			ba = r.readByteArray().getNewBytes();
+			ByteArray readByteArray = r.readByteArray();
+            ba = null == readByteArray ? new byte[0] : readByteArray.getNewBytes();
 			if (ba.length > 0)
 			    ba = BASE64DecoderStream.decode(ba);
 			if (logger.isLoggable(Level.FINE))

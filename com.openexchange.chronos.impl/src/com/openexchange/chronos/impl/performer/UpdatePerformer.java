@@ -270,7 +270,7 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
          */
         EventField[] consideredFields;
         if (isAttendeeSchedulingResource(originalEvent, calendarUserId) &&
-            b(session.get(CalendarParameters.PARAMETER_IGNORE_FORBIDDEN_ATTENDEE_CHANGES, Boolean.class, Boolean.TRUE))) {
+            b(session.get(CalendarParameters.PARAMETER_IGNORE_FORBIDDEN_ATTENDEE_CHANGES, Boolean.class, Boolean.FALSE))) {
             consideredFields = new EventField[] {
                 EventField.ALARMS, EventField.ATTENDEES, EventField.TRANSP, EventField.DELETE_EXCEPTION_DATES, EventField.CREATED, EventField.TIMESTAMP, EventField.LAST_MODIFIED
             };

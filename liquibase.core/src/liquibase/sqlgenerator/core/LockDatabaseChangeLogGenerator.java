@@ -20,15 +20,20 @@ public class LockDatabaseChangeLogGenerator extends AbstractSqlGenerator<LockDat
         return new ValidationErrors();
     }
 
-    protected static String hostname;
-    protected static String hostaddress;
+    protected final static String hostname;
+    protected final static String hostaddress;
 
     static {
         InetAddress localHost;
         try {
             localHost = NetUtil.getLocalHost();
-            hostname = localHost.getHostName();
-            hostaddress = localHost.getHostAddress();
+            if (null == localHost) {
+                hostname = "localHost";
+                hostaddress = "127.0.0.1";
+            } else {
+                hostname = localHost.getHostName();
+                hostaddress = localHost.getHostAddress();
+            }
         } catch (Exception e) {
             throw new UnexpectedLiquibaseException(e);
         }

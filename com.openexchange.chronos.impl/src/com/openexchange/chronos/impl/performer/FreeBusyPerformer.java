@@ -74,6 +74,7 @@ import com.openexchange.chronos.BusyType;
 import com.openexchange.chronos.CalendarUserType;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
+import com.openexchange.chronos.EventStatus;
 import com.openexchange.chronos.FbType;
 import com.openexchange.chronos.FreeBusyTime;
 import com.openexchange.chronos.ParticipationStatus;
@@ -115,13 +116,13 @@ public class FreeBusyPerformer extends AbstractFreeBusyPerformer {
     private static final EventField[] FREEBUSY_FIELDS = {
         EventField.CREATED_BY, EventField.ID, EventField.SERIES_ID, EventField.FOLDER_ID, EventField.COLOR, EventField.CLASSIFICATION,
         EventField.SUMMARY, EventField.START_DATE, EventField.END_DATE, EventField.CATEGORIES, EventField.TRANSP, EventField.LOCATION,
-        EventField.RECURRENCE_ID, EventField.RECURRENCE_RULE
+        EventField.RECURRENCE_ID, EventField.RECURRENCE_RULE, EventField.STATUS
     };
 
     /** The restricted event fields returned in free/busy queries if the user has no access to the event */
     private static final EventField[] RESTRICTED_FREEBUSY_FIELDS = { EventField.CREATED_BY, EventField.ID, EventField.SERIES_ID,
         EventField.CLASSIFICATION, EventField.START_DATE, EventField.END_DATE, EventField.TRANSP, EventField.RECURRENCE_ID,
-        EventField.RECURRENCE_RULE
+        EventField.RECURRENCE_RULE, EventField.STATUS
     };
     //@formatter:on
 
@@ -722,7 +723,20 @@ public class FreeBusyPerformer extends AbstractFreeBusyPerformer {
                     return FbType.BUSY;
             }
         }
-        return Transp.TRANSPARENT.equals(transp.getValue()) ? FbType.FREE : FbType.BUSY;
+
+        if(Transp.TRANSPARENT.equals(transp.getValue())) {
+            return FbType.FREE;
+        }
+        if(event.getStatus() == null) {
+            return FbType.BUSY;
+        }
+        if(EventStatus.TENTATIVE.equals(event.getStatus())) {
+            return FbType.BUSY_TENTATIVE;
+        }
+        if(EventStatus.CANCELLED.equals(event.getStatus())) {
+            return FbType.FREE;
+        }
+        return FbType.BUSY;
     }
 
     /**
