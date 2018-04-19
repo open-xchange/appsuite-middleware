@@ -234,6 +234,7 @@ public class EventManager extends AbstractManager {
         } else {
             assertNull(eventsResponse.getError());
         }
+        lastTimeStamp = eventsResponse.getTimestamp();
         return eventsResponse.getData();
     }
 
@@ -350,7 +351,7 @@ public class EventManager extends AbstractManager {
      * @throws ApiException if an API error occurs
      */
     public List<EventData> getAllEvents(Date from, Date until) throws ApiException {
-        return getAllEvents(from, until, false);
+        return getAllEvents(defaultFolder, from, until, false);
     }
 
     /**
@@ -362,8 +363,8 @@ public class EventManager extends AbstractManager {
      * @return A {@link List} with {@link EventData}
      * @throws ApiException if an API error occurs
      */
-    public List<EventData> getAllEvents(Date from, Date until, boolean expand) throws ApiException {
-        return getAllEvents(from, until, expand, defaultFolder);
+    public List<EventData> getAllEvents(String folder, Date from, Date until, boolean expand) throws ApiException {
+        return getAllEvents(from, until, expand, folder==null ? defaultFolder : folder);
     }
 
     /**

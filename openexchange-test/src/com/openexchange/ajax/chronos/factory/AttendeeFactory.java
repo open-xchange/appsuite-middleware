@@ -70,6 +70,7 @@ public final class AttendeeFactory {
         Attendee attendee = new Attendee();
         attendee.entity(userId);
         attendee.cuType(cuType);
+        attendee.setMember(null); //set member explicitly to null
         return attendee;
     }
 

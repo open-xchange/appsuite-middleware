@@ -118,6 +118,7 @@ public class UpdateAlarmsPerformer extends AbstractUpdatePerformer {
         if (null != clientTimestamp) {
             requireUpToDateTimestamp(originalEvent, clientTimestamp.longValue());
         }
+        resultTracker.rememberOriginalEvent(originalEvent);
         List<Alarm> originalAlarms = storage.getAlarmStorage().loadAlarms(originalEvent, calendarUserId);
         /*
          * perform alarm update & track results

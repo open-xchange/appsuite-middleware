@@ -315,10 +315,11 @@ public class BasicAlarmTriggerTest extends AbstractUserTimezoneAlarmTriggerTest 
         toCreate.setAlarms(Collections.singletonList(AlarmFactory.createDisplayAlarm("-PT15M")));
         toCreate.setAttendees(atts);
 
+        Date time = Calendar.getInstance(TimeZone.getTimeZone("UTC")).getTime();
         EventData event = eventManager.createEvent(toCreate);
         getAndAssertAlarms(event, 1, folderId);
 
-        UpdatesResult updatesResult = eventManager2.getUpdates(new Date(0));
+        UpdatesResult updatesResult = eventManager2.getUpdates(time);
         assertEquals(1, updatesResult.getNewAndModified().size());
         EventData eventU2 = updatesResult.getNewAndModified().get(0);
 
@@ -349,6 +350,7 @@ public class BasicAlarmTriggerTest extends AbstractUserTimezoneAlarmTriggerTest 
          */
         AttendeeAndAlarm body = new AttendeeAndAlarm();
         attendee2.setPartStat("ACCEPTED");
+        attendee2.setMember(null);
         body.attendee(attendee2);
 
         body.addAlarmsItem(AlarmFactory.createAlarm("-PT20M", RelatedEnum.START));
@@ -398,7 +400,7 @@ public class BasicAlarmTriggerTest extends AbstractUserTimezoneAlarmTriggerTest 
         } else {
             removed = attendees.remove(0);
         }
-        eventManager.updateEvent(exceptionEvent);
+        EventData updateEvent = eventManager.updateEvent(exceptionEvent);
 
         // Check again if trigger times are correct
         triggers = getAndCheckAlarmTrigger(2); // The alarm of the series and the alarm for the exception
@@ -418,6 +420,7 @@ public class BasicAlarmTriggerTest extends AbstractUserTimezoneAlarmTriggerTest 
          * 5. Re-add user 2
          */
         attendees.add(removed);
+        exceptionEvent.setLastModified(updateEvent.getLastModified());
         eventManager.updateEvent(exceptionEvent);
         eventManager2.setLastTimeStamp(eventManager.getLastTimeStamp());
 

@@ -136,7 +136,7 @@ public class BasicSeriesEventTest extends AbstractChronosTest {
         eventId.setId(expectedEventData.getId());
         eventId.setFolder(expectedEventData.getFolder());
 
-        List<EventData> allEvents = eventManager.getAllEvents(today, nextWeek, true);
+        List<EventData> allEvents = eventManager.getAllEvents(folderId, today, nextWeek, true);
         assertEquals("Expected 3 occurrences", 3, allEvents.size());
         for (int x = 0; x < allEvents.size(); x++) {
             assertEquals(expectedEventData.getId(), allEvents.get(x).getId());
@@ -207,7 +207,7 @@ public class BasicSeriesEventTest extends AbstractChronosTest {
         masterId.setId(expectedEventData.getId());
         masterId.setFolder(expectedEventData.getFolder());
 
-        List<EventData> allEvents = eventManager.getAllEvents(today, nextWeek, true);
+        List<EventData> allEvents = eventManager.getAllEvents(folderId, today, nextWeek, true);
         assertEquals("Expected 3 occurrences", 3, allEvents.size());
         for (int x = 0; x < allEvents.size(); x++) {
             assertEquals(expectedEventData.getId(), allEvents.get(x).getId());
@@ -221,6 +221,7 @@ public class BasicSeriesEventTest extends AbstractChronosTest {
         EventData updatedData = new EventData();
         updatedData.setEndDate(DateTimeUtil.incrementDateTimeData(allEvents.get(2).getEndDate(), 5000));
         updatedData.setId(occurence.getId());
+        updatedData.setFolder(folderId);
 
         eventManager.updateOccurenceEvent(updatedData, occurence.getRecurrenceId());
 
@@ -258,7 +259,7 @@ public class BasicSeriesEventTest extends AbstractChronosTest {
         AssertUtil.assertEventsEqual(expectedEventData, actualEventData);
 
         // Get all events
-        List<EventData> allEvents = eventManager.getAllEvents(DateTimeUtil.parseZuluDateTime(today), DateTimeUtil.parseZuluDateTime(nextWeek), true);
+        List<EventData> allEvents = eventManager.getAllEvents(folderId, DateTimeUtil.parseZuluDateTime(today), DateTimeUtil.parseZuluDateTime(nextWeek), true);
         assertEquals("Expected 3 occurrences", 3, allEvents.size());
         for (int x = 0; x < allEvents.size(); x++) {
             assertEquals(expectedEventData.getId(), allEvents.get(x).getId());
@@ -301,7 +302,7 @@ public class BasicSeriesEventTest extends AbstractChronosTest {
         AssertUtil.assertEventsEqual(expectedEventData, actualEventData);
 
         // Get all events
-        List<EventData> allEvents = eventManager.getAllEvents(DateTimeUtil.parseZuluDateTime(today), DateTimeUtil.parseZuluDateTime(nextWeek), true);
+        List<EventData> allEvents = eventManager.getAllEvents(folderId, DateTimeUtil.parseZuluDateTime(today), DateTimeUtil.parseZuluDateTime(nextWeek), true);
         assertEquals("Expected 3 occurrences", 3, allEvents.size());
         for (int x = 0; x < allEvents.size(); x++) {
             assertEquals(expectedEventData.getId(), allEvents.get(x).getId());

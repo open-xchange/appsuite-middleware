@@ -231,6 +231,7 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
             /*
              * add change exception date to series master & track results
              */
+            resultTracker.rememberOriginalEvent(originalSeriesMaster);
             addChangeExceptionDate(originalSeriesMaster, recurrenceId);
             Event updatedMasterEvent = loadEventData(originalSeriesMaster.getId());
             resultTracker.trackUpdate(originalSeriesMaster, updatedMasterEvent);

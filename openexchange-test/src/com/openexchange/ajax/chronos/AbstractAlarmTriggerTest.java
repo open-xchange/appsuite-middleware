@@ -89,15 +89,9 @@ public abstract class AbstractAlarmTriggerTest extends AbstractAlarmTest {
         EnhancedApiClient enhancedClient = generateEnhancedClient(testUser2);
         rememberClient(enhancedClient);
 
-        user2 = new UserApi(client, enhancedClient, testUser2);
+        user2 = new UserApi(client, enhancedClient, testUser2, false);
         folderId2 = getDefaultFolder(user2.getSession(), client);
         eventManager2 = new EventManager(user2, getDefaultFolder(user2.getSession(), client));
-    }
-
-    @Override
-    public void tearDown() throws Exception {
-        super.tearDown();
-        eventManager2.cleanUp();
     }
 
     /**

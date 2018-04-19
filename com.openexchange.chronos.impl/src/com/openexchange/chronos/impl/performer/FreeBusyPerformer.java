@@ -133,7 +133,7 @@ public class FreeBusyPerformer extends AbstractFreeBusyPerformer {
      * @param storage The underlying calendar storage
      * @param session The calendar session
      */
-    public FreeBusyPerformer(CalendarSession session, CalendarStorage storage) throws OXException {
+    public FreeBusyPerformer(CalendarSession session, CalendarStorage storage) {
         super(session, storage);
     }
 
@@ -190,7 +190,7 @@ public class FreeBusyPerformer extends AbstractFreeBusyPerformer {
 
         TimeZone timeZone = Utils.getTimeZone(session);
         // Expand any recurring available instances
-        expandRecurringInstances(from, until, availabilityPerAttendee, timeZone);
+        expandRecurringInstances(until, availabilityPerAttendee, timeZone);
         // Adjust the intervals
         adjustIntervals(from, until, availabilityPerAttendee, timeZone);
 
@@ -356,7 +356,7 @@ public class FreeBusyPerformer extends AbstractFreeBusyPerformer {
 
         TimeZone timeZone = Utils.getTimeZone(session);
         // Expand any recurring available instances
-        expandRecurringInstances(from, until, availabilityPerAttendee, timeZone);
+        expandRecurringInstances(until, availabilityPerAttendee, timeZone);
         // Adjust the intervals
         adjustIntervals(from, until, availabilityPerAttendee, timeZone);
 
@@ -408,7 +408,7 @@ public class FreeBusyPerformer extends AbstractFreeBusyPerformer {
      * @param availableTimes The available times for the attendees
      * @param timeZone The {@link TimeZone} of the user
      */
-    private void expandRecurringInstances(Date from, Date until, Map<Attendee, Availability> availableTimes, TimeZone timeZone) throws OXException {
+    private void expandRecurringInstances(Date until, Map<Attendee, Availability> availableTimes, TimeZone timeZone) throws OXException {
         for (Availability calendarAvailability : availableTimes.values()) {
             List<Available> auxAvailable = new ArrayList<>();
             Date endTime = new Date(CalendarUtils.getDateInTimeZone(calendarAvailability.getEndTime(), timeZone));
@@ -494,7 +494,7 @@ public class FreeBusyPerformer extends AbstractFreeBusyPerformer {
      * @param timeZone The user's {@link TimeZone}
      * @return A {@link List} with {@link FreeBusyTime} slots
      */
-    private List<FreeBusyTime> calculateFreeBusyTimes(Availability availability, TimeZone timeZone) throws OXException {
+    private List<FreeBusyTime> calculateFreeBusyTimes(Availability availability, TimeZone timeZone) {
         List<FreeBusyTime> freeBusyTimes = new ArrayList<>();
         // Get the availability's start/end times
         Date availabilityStartTime = new Date(CalendarUtils.getDateInTimeZone(availability.getStartTime(), timeZone));

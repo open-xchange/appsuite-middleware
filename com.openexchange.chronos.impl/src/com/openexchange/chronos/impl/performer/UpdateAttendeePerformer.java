@@ -196,6 +196,7 @@ public class UpdateAttendeePerformer extends AbstractUpdatePerformer {
         /*
          * prepare update
          */
+        resultTracker.rememberOriginalEvent(originalEvent);
         Attendee attendeeUpdate = prepareAttendeeUpdate(originalEvent, originalAttendee, attendee);
         if (attendeeUpdate.containsFolderID()) {
             /*
@@ -216,6 +217,7 @@ public class UpdateAttendeePerformer extends AbstractUpdatePerformer {
              * also 'touch' the series master in case of an exception update
              */
             Event originalMasterEvent = loadEventData(originalEvent.getSeriesId());
+            resultTracker.rememberOriginalEvent(originalMasterEvent);
             touch(originalEvent.getSeriesId());
             Event updatedMasterEvent = loadEventData(originalEvent.getSeriesId());
             resultTracker.trackUpdate(originalMasterEvent, updatedMasterEvent);
@@ -252,6 +254,7 @@ public class UpdateAttendeePerformer extends AbstractUpdatePerformer {
                 /*
                  * perform the attendee update & add new change exception date to series master event
                  */
+                resultTracker.rememberOriginalEvent(newExceptionEvent);
                 Attendee attendeeUpdate = prepareAttendeeUpdate(newExceptionEvent, originalAttendee, attendee);
                 if (null != attendeeUpdate) {
                     storage.getAttendeeStorage().updateAttendee(newExceptionEvent.getId(), attendeeUpdate);
@@ -260,6 +263,7 @@ public class UpdateAttendeePerformer extends AbstractUpdatePerformer {
                 /*
                  * add change exception date to series master & track results
                  */
+                resultTracker.rememberOriginalEvent(originalSeriesMaster);
                 addChangeExceptionDate(originalSeriesMaster, recurrenceId);
                 Event updatedMasterEvent = loadEventData(originalSeriesMaster.getId());
                 resultTracker.trackUpdate(originalSeriesMaster, updatedMasterEvent);
