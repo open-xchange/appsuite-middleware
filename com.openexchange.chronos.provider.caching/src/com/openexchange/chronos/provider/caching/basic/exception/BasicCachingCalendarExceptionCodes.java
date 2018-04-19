@@ -66,7 +66,7 @@ import com.openexchange.exception.OXExceptionFactory;
 public enum BasicCachingCalendarExceptionCodes implements DisplayableOXExceptionCode {
 
     /**
-     * <li>The calendar is already up-to-date. Try again later.</li>
+     * <li>The calendar was refreshed less than a minute ago. Please try again later.</li>
      * <li>The calendar with id %1$s for user %2$s in context %3$s is already up-to-date.</li>
      */
     ALREADY_UP_TO_DATE("The calendar with id %1$s for user %2$s in context %3$s is already up-to-date.", ALREADY_UP_TO_DATE_MSG, Category.CATEGORY_USER_INPUT, 4230),
