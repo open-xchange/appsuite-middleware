@@ -667,7 +667,7 @@ public class Utils {
      * @param folder The folder where the event should appear in
      * @return <code>true</code> if the event <i>is</i> in the folder, <code>false</code>, otherwise
      */
-    public static boolean isInFolder(Event event, CalendarFolder folder) throws OXException {
+    public static boolean isInFolder(Event event, CalendarFolder folder) {
         if (PublicType.getInstance().equals(folder.getType()) || false == isGroupScheduled(event)) {
             return folder.getId().equals(event.getFolderId());
         } else {
