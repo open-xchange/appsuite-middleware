@@ -113,11 +113,8 @@ import com.openexchange.admin.storage.interfaces.OXToolStorageInterface;
 import com.openexchange.admin.storage.interfaces.OXUtilStorageInterface;
 import com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.AttributeChanger;
 import com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.AttributeChangers;
-import com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.mailaccount.UserMailAccountAttribute;
 import com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.mailaccount.UserMailAccountAttributeChangers;
-import com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.mailsetting.UserMailSettingAttribute;
 import com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.mailsetting.UserSettingMailAttributeChangers;
-import com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.user.UserAttribute;
 import com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.user.UserAttributeChangers;
 import com.openexchange.admin.storage.sqlStorage.OXUserSQLStorage;
 import com.openexchange.admin.storage.utils.Filestore2UserUtil;
@@ -602,7 +599,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             if (updateUsername(usrdata, contextId, userId, con)) {
                 changedAttributes.add("username");
             }
-            
+
             // Change attributes
             for (AttributeChanger attributeChanger : AttributeChanger.values()) {
                 AttributeChangers acs = attributeChangers.get(attributeChanger);
