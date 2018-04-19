@@ -30,9 +30,6 @@ public class UploadActionTest extends InfostoreApiClientTest {
 
     private static final byte[] megabyte = new byte[1000000];
 
-    private static final String MIME_TEXT_PLAIN = "text/plain";
-    private static final String MIME_IMAGE_JPG = "image/jpeg";
-
     /*
      * Create tests ---------------------------------------------------------------------------------------------------------------------
      */
