@@ -19,7 +19,7 @@ public class Bug17963Test_DateWithoutTime extends ManagedAppointmentTest {
             + "DTSTART;TZID=Europe/Rome:20100202T103000\n"
             + "DTEND;TZID=Europe/Rome:20100202T120000\n"
             + "RRULE:FREQ=WEEKLY;BYDAY=TU;UNTIL=20100705T210000Z\n"
-            + "EXDATE:20111128\n"
+            + "EXDATE:20100608\n"
             + "DTSTAMP:20110105T174810Z\n"
             + "SUMMARY:Team-Meeting\n"
             + "END:VEVENT\n";
