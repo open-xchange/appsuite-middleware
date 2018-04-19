@@ -752,7 +752,7 @@ public final class CSSMatcher {
             final Stringer cssElemsBuffer = new StringBuilderStringer(new StringBuilder(cssLength));
             final Matcher m = PATTERN_STYLE_STARTING_BLOCK.matcher(InterruptibleCharSequence.valueOf(css));
             if (!m.find()) {
-                return false;
+                return checkCSSElements(cssBuilder, styleMap, removeIfAbsent);
             }
             final Thread thread = Thread.currentThread();
             cssBuilder.setLength(0);
