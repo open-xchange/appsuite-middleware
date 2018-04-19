@@ -86,11 +86,11 @@ public class ICalProviderUtils {
         try {
             InetAddress inetAddress = InetAddress.getByName(uri.getHost());
             if (inetAddress.isAnyLocalAddress() || inetAddress.isSiteLocalAddress() || inetAddress.isLoopbackAddress() || inetAddress.isLinkLocalAddress()) {
-                org.slf4j.LoggerFactory.getLogger(ICalProviderUtils.class).info("Given feed URL \"" + uri.toString() + "\" with destination IP " + inetAddress.getHostAddress() + " appears not to be valid.");
+                org.slf4j.LoggerFactory.getLogger(ICalProviderUtils.class).debug("Given feed URL \"" + uri.toString() + "\" with destination IP " + inetAddress.getHostAddress() + " appears not to be valid.");
                 return false;
             }
         } catch (UnknownHostException e) {
-            org.slf4j.LoggerFactory.getLogger(ICalProviderUtils.class).info("Given feed URL \"" + uri.toString() + "\" appears not to be valid.", e);
+            org.slf4j.LoggerFactory.getLogger(ICalProviderUtils.class).debug("Given feed URL \"" + uri.toString() + "\" appears not to be valid.", e);
             return false;
         }
         return true;
