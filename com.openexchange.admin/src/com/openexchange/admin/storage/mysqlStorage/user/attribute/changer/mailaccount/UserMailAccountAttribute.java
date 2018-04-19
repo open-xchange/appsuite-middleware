@@ -78,10 +78,10 @@ public enum UserMailAccountAttribute implements Attribute {
     ARCHIVE_FULLNAME("archive_fullname", (user) -> user.getMail_folder_archive_full_name(), String.class),
 
     CONFIRMED_HAM("confirmed_ham", (user) -> user.getMail_folder_confirmed_ham_name(), String.class),
-    CONFIRMED_HAM_FULLNAME("confirmed_ham_fullname)", (user) -> "", String.class),
+    CONFIRMED_HAM_FULLNAME("confirmed_ham_fullname", (user) -> "", String.class),
 
     CONFIRMED_SPAM("confirmed_spam", (user) -> user.getMail_folder_confirmed_spam_name(), String.class),
-    CONFIRMED_SPAM_FULLNAME("confirmed_spam_fullname)", (user) -> "", String.class),
+    CONFIRMED_SPAM_FULLNAME("confirmed_spam_fullname", (user) -> "", String.class),
     ;
 
     private final String sqlFieldName;
