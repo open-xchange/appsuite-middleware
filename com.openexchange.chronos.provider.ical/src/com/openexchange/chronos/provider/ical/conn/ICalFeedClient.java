@@ -63,6 +63,7 @@ import org.apache.http.HttpEntity;
 import org.apache.http.HttpHeaders;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
+import org.apache.http.NoHttpResponseException;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -198,7 +199,7 @@ public class ICalFeedClient {
         } catch (ClientProtocolException e) {
             LOG.error("Error while processing the retrieved information:{}.", e.getMessage(), e);
             throw ICalProviderExceptionCodes.CLIENT_PROTOCOL_ERROR.create(e, e.getMessage());
-        } catch (UnknownHostException e) {
+        } catch (UnknownHostException | NoHttpResponseException e) {
             LOG.debug("Error while processing the retrieved information:{}.", e.getMessage(), e);
             throw ICalProviderExceptionCodes.NO_FEED.create(e, iCalFeedConfig.getFeedUrl());
         } catch (IOException e) {

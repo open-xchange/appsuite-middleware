@@ -81,7 +81,7 @@ public class ICalImportAccessTest extends AbstractImportExportTest {
         this.credentials = new Credentials(admin.getUser(), admin.getPassword());
         this.iface = (OXUserInterface) Naming.lookup("rmi://" + AJAXConfig.getProperty(Property.RMI_HOST) + ":1099/" + OXUserInterface.RMI_NAME);
         this.ctx = new Context();
-        this.ctx.setId(Integer.valueOf(defaultUserApi.getUser().getContext()));
+        this.ctx.setId(Integer.valueOf(getClient().getValues().getContextId()));
         setModuleAccess(false);
     }
 
