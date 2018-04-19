@@ -54,10 +54,8 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.Map;
 import java.util.Set;
-import com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.AbstractAttributeChanger;
 import com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.AbstractMultiAttributeChanger;
 import com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.Attribute;
-import com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.AbstractAttributeChanger.Setter;
 import com.openexchange.mailaccount.MailAccount;
 
 /**
