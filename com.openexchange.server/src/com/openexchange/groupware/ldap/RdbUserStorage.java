@@ -116,8 +116,6 @@ public class RdbUserStorage extends UserStorage {
 
     private static final String SELECT_CONTACT = "SELECT intfield01,field03,field02,field01 FROM prg_contacts WHERE cid=? AND intfield01 IN (";
 
-    private static final String SELECT_ID = "SELECT id FROM login2user WHERE cid=? AND uid=?";
-
     private static final String SELECT_LOGIN = "SELECT id,uid FROM login2user where cid=? AND id IN (";
 
     private static final String SELECT_IMAPLOGIN = "SELECT id FROM user WHERE cid=? AND imapLogin=?";
@@ -170,7 +168,7 @@ public class RdbUserStorage extends UserStorage {
         PreparedStatement stmt = null;
         ResultSet result = null;
         try {
-            stmt = con.prepareStatement(SELECT_ID);
+            stmt = con.prepareStatement("SELECT id FROM login2user WHERE cid=? AND uid=?");
             stmt.setInt(1, context.getContextId());
             stmt.setString(2, uid);
             result = stmt.executeQuery();

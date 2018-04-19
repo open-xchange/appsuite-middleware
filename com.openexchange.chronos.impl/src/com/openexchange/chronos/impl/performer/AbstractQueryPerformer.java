@@ -108,7 +108,7 @@ public abstract class AbstractQueryPerformer {
     protected SelfProtection getSelfProtection() throws OXException{
         if(selfProtection==null){
             LeanConfigurationService leanConfigurationService = Services.getService(LeanConfigurationService.class);
-            selfProtection = SelfProtectionFactory.createSelfProtection(session.getSession(), leanConfigurationService);
+            selfProtection = SelfProtectionFactory.createSelfProtection(leanConfigurationService);
         }
         return selfProtection;
     }

@@ -81,7 +81,7 @@ public class CalendarFolderManager extends AbstractManager {
     public static final String CALENDAR_MODULE = "calendar";
     public static final String EVENT_MODULE = "event";
 
-    private List<String> folderIds;
+    private final List<String> folderIds;
 
     private final FoldersApi foldersApi;
     private final UserApi userApi;
@@ -175,7 +175,7 @@ public class CalendarFolderManager extends AbstractManager {
             assertNotNull("An error was expected", response.getError());
             throw new ChronosApiException(response.getCode(), response.getError());
         }
-        return checkResponse(response.getError(), response.getErrorDesc(), response).getData();
+        return checkResponse(response.getError(), response.getErrorDesc(), response.getCategories(), response).getData();
     }
 
     /**
@@ -202,12 +202,12 @@ public class CalendarFolderManager extends AbstractManager {
         FolderBody body = new FolderBody();
         body.setFolder(folderData);
 
-        FolderUpdateResponse response = foldersApi.updateFolder(userApi.getSession(), folderData.getId(), folderData.getLastModified(), body, false, TREE_ID, CALENDAR_MODULE, true);
+        FolderUpdateResponse response = foldersApi.updateFolder(userApi.getSession(), folderData.getId(), folderData.getLastModifiedUtc(), body, false, TREE_ID, CALENDAR_MODULE, true);
         if (expectedException) {
             assertNotNull("An error was expected", response.getError());
             throw new ChronosApiException(response.getCode(), response.getError());
         }
-        return checkResponse(response.getError(), response.getErrorDesc(), response);
+        return checkResponse(response.getError(), response.getErrorDesc(), response.getCategories(), response);
     }
 
     /**
@@ -241,7 +241,7 @@ public class CalendarFolderManager extends AbstractManager {
      * @throws ApiException if an API error is occurred
      */
     private FolderUpdateResponse handleCreation(FolderUpdateResponse response) {
-        FolderUpdateResponse data = checkResponse(response.getError(), response.getErrorDesc(), response);
+        FolderUpdateResponse data = checkResponse(response.getError(), response.getErrorDesc(), response.getCategories(), response);
         folderIds.add(data.getData());
         return data;
     }

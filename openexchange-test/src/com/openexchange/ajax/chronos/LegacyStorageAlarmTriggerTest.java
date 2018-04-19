@@ -87,17 +87,17 @@ public class LegacyStorageAlarmTriggerTest extends AbstractAlarmTriggerTest {
     @Test
     public void testTimeShiftOfEventSeries() throws Exception {
         // Create an event series with a alarm
-        EventData eventSeries = EventFactory.createSeriesEvent(defaultUserApi.getCalUser(), "testTimeShiftOfEventSeries", 4);
+        EventData eventSeries = EventFactory.createSeriesEvent(defaultUserApi.getCalUser(), "testTimeShiftOfEventSeries", 4, folderId);
         eventSeries.setStartDate(DateTimeUtil.incrementDateTimeData(eventSeries.getStartDate(), TimeUnit.DAYS.toMillis(1)));
         eventSeries.setEndDate(DateTimeUtil.incrementDateTimeData(eventSeries.getEndDate(), TimeUnit.DAYS.toMillis(1)));
         eventSeries.setAlarms(Collections.singletonList(AlarmFactory.createDisplayAlarm("-PT60M")));
 
         EventData expectedEventData = eventManager.createEvent(eventSeries);
-        getAndAssertAlarms(expectedEventData, 1);
+        getAndAssertAlarms(expectedEventData, 1, folderId);
 
         AlarmTrigger firstTrigger = getAndCheckAlarmTrigger(1).get(0);
 
-        EventData event = getAndAssertAlarms(expectedEventData, 1);
+        EventData event = getAndAssertAlarms(expectedEventData, 1, folderId);
 
         // Create an exception by moving the next occurence to a different time slot
         String recurrence = firstTrigger.getRecurrenceId();

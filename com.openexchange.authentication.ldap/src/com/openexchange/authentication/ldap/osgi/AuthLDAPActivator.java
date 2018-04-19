@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2017-2020 OX Software GmbH
+ *     Copyright (C) 2016-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,36 +47,56 @@
  *
  */
 
-package com.openexchange.ajax.chronos;
+package com.openexchange.authentication.ldap.osgi;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import com.openexchange.ajax.chronos.manager.ChronosApiException;
-import com.openexchange.ajax.chronos.util.AssertUtil;
-import com.openexchange.testing.httpclient.invoker.ApiException;
-import com.openexchange.testing.httpclient.models.EventData;
+import java.util.Properties;
+import com.openexchange.authentication.AuthenticationService;
+import com.openexchange.authentication.ldap.LDAPAuthentication;
+import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.Reloadable;
+import com.openexchange.net.ssl.SSLSocketFactoryProvider;
+import com.openexchange.osgi.HousekeepingActivator;
 
 /**
- * {@link AbstractAlarmTest}
+ * {@link AuthLDAPActivator}
  *
- * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-abstract class AbstractAlarmTest extends AbstractChronosTest {
+public class AuthLDAPActivator extends HousekeepingActivator {
+
+	private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AuthLDAPActivator.class);
+
+	/**
+	 * Initializes a new {@link AuthLDAPActivator}.
+	 */
+	public AuthLDAPActivator() {
+	    super();
+	}
+
+    @Override
+    protected Class<?>[] getNeededServices() {
+        return new Class<?>[] { ConfigurationService.class, SSLSocketFactoryProvider.class };
+    }
 
     /**
-     * Gets and checks if the specified event exists and if it contains the expected amount of alarms
-     *
-     * @param expectedEventData The event to get and check
-     * @param amountOfExpectedAlarms The excepted amount of alarms
-     * @return The actual EventData
-     * @throws ApiException if an API error is occurred
-     * @throws ChronosApiException if a Chronos API error is occurred
+     * {@inheritDoc}
+     * @throws Exception if the authentication class can not be initialized.
      */
-    EventData getAndAssertAlarms(EventData expectedEventData, int amountOfExpectedAlarms, String folderId) throws ApiException, ChronosApiException {
-        EventData actualEventData = eventManager.getEvent(folderId, expectedEventData.getId());
-        AssertUtil.assertEventsEqual(expectedEventData, actualEventData);
-        assertNotNull(actualEventData.getAlarms());
-        assertEquals(amountOfExpectedAlarms, actualEventData.getAlarms().size());
-        return actualEventData;
+    @Override
+    protected void startBundle() throws Exception {
+        LOG.info("Starting ldap authentication service.");
+
+        final ConfigurationService config = getService(ConfigurationService.class);
+        final Properties props = config.getFile("ldapauth.properties");
+
+        LDAPAuthentication impl = new LDAPAuthentication(props, this);
+        registerService(AuthenticationService.class, impl, null);
+        registerService(Reloadable.class, impl, null);
+    }
+
+    @Override
+    protected void stopBundle() throws Exception {
+        LOG.info("Stopping ldap authentication service.");
+        super.stopBundle();
     }
 }

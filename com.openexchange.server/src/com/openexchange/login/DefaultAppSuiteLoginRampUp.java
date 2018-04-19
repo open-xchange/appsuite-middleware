@@ -331,7 +331,7 @@ public abstract class DefaultAppSuiteLoginRampUp implements LoginRampUpService {
                 Exception exc = null;
                 try {
                     JSONObject folderlist = new JSONObject(2);
-                    AJAXRequestData requestData = request().session(session).module("folders").action("list").params("parent", "1", "tree", "0", "altNames", "true", "timezone", "UTC", "columns", "1,2,3,4,5,6,20,23,300,301,302,304,305,306,307,308,309,310,311,312,313,314,315,316,317,318,319,3010,3020,3030,3050,3201,3203,3220,3204,3205").format("json").build(loginRequest);
+                    AJAXRequestData requestData = request().session(session).module("folders").action("list").params("parent", "1", "tree", "0", "altNames", "true", "timezone", "UTC", "columns", "1,2,3,4,5,6,20,23,300,301,302,304,305,306,307,308,309,310,311,312,313,314,315,316,317,318,319,3010,3020,3030,3050,3201,3203,3204,3205,3220").format("json").build(loginRequest);
                     requestResult = performDispatcherRequest(RampUpKey.FOLDER_LIST, null, requestData, session, ox, thresholdMillis);
                     folderlist.put("1", requestResult.getResultObject());
                     return folderlist;

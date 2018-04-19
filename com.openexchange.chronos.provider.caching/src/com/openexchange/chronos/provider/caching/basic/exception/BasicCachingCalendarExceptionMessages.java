@@ -47,55 +47,25 @@
  *
  */
 
-package com.openexchange.authentication.ldap;
+package com.openexchange.chronos.provider.caching.basic.exception;
 
-import java.util.Properties;
-import com.openexchange.authentication.AuthenticationService;
-import com.openexchange.config.ConfigurationService;
-import com.openexchange.config.Reloadable;
-import com.openexchange.net.ssl.SSLSocketFactoryProvider;
-import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.i18n.LocalizableStrings;
 
 /**
- * {@link AuthLDAPActivator}
  *
- * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ * {@link BasicCachingCalendarExceptionMessages}
+ *
+ * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
+ * @since v7.10.0
  */
-public class AuthLDAPActivator extends HousekeepingActivator {
+public class BasicCachingCalendarExceptionMessages implements LocalizableStrings {
 
-	private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AuthLDAPActivator.class);
-
-	/**
-	 * Initializes a new {@link AuthLDAPActivator}.
-	 */
-	public AuthLDAPActivator() {
-	    super();
-	}
-
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigurationService.class, SSLSocketFactoryProvider.class };
-    }
+    public static final String ALREADY_UP_TO_DATE_MSG = "The calendar was refreshed less than a minute ago. Please try again later.";
 
     /**
-     * {@inheritDoc}
-     * @throws Exception if the authentication class can not be initialized.
+     * Initializes a new {@link BasicCachingCalendarExceptionMessages}.
      */
-    @Override
-    protected void startBundle() throws Exception {
-        LOG.info("Starting ldap authentication service.");
-
-        final ConfigurationService config = getService(ConfigurationService.class);
-        final Properties props = config.getFile("ldapauth.properties");
-
-        LDAPAuthentication impl = new LDAPAuthentication(props, this);
-        registerService(AuthenticationService.class, impl, null);
-        registerService(Reloadable.class, impl, null);
-    }
-
-    @Override
-    protected void stopBundle() throws Exception {
-        LOG.info("Stopping ldap authentication service.");
-        super.stopBundle();
+    private BasicCachingCalendarExceptionMessages() {
+        super();
     }
 }

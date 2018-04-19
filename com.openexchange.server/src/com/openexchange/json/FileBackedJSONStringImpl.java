@@ -73,6 +73,8 @@ public class FileBackedJSONStringImpl implements FileBackedJSONString {
 
     private static final Charset UTF8 = Charsets.UTF_8;
 
+    private static final String PREFIX = "openexchange-jsonstring-" + com.openexchange.exception.OXException.getServerId() + "-";
+
     private final File tmpFile;
     private final OutputStreamWriter se;
     private long length;
@@ -84,7 +86,7 @@ public class FileBackedJSONStringImpl implements FileBackedJSONString {
      */
     public FileBackedJSONStringImpl() throws OXException {
         super();
-        tmpFile = com.openexchange.ajax.container.TmpFileFileHolder.newTempFile(true);
+        tmpFile = com.openexchange.ajax.container.TmpFileFileHolder.newTempFile(PREFIX, false);
         FileOutputStream fos = null;
         try {
             fos = new FileOutputStream(tmpFile);
@@ -95,6 +97,17 @@ public class FileBackedJSONStringImpl implements FileBackedJSONString {
         } finally {
             Streams.close(fos);
         }
+    }
+
+    @Override
+    protected void finalize() throws Throwable {
+        // Drop the file when this instance if garbage-collected
+        try {
+            tmpFile.delete();
+        } catch (Exception e) {
+            // Ignore
+        }
+        super.finalize();
     }
 
     @Override

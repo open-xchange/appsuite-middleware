@@ -63,6 +63,7 @@ import org.apache.http.HttpEntity;
 import org.apache.http.HttpHeaders;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
+import org.apache.http.NoHttpResponseException;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -198,7 +199,7 @@ public class ICalFeedClient {
         } catch (ClientProtocolException e) {
             LOG.error("Error while processing the retrieved information:{}.", e.getMessage(), e);
             throw ICalProviderExceptionCodes.CLIENT_PROTOCOL_ERROR.create(e, e.getMessage());
-        } catch (UnknownHostException e) {
+        } catch (UnknownHostException | NoHttpResponseException e) {
             LOG.debug("Error while processing the retrieved information:{}.", e.getMessage(), e);
             throw ICalProviderExceptionCodes.NO_FEED.create(e, iCalFeedConfig.getFeedUrl());
         } catch (IOException e) {
@@ -256,7 +257,7 @@ public class ICalFeedClient {
                 return statusCode;
         }
         if (statusCode >= 500 && statusCode <= 599) {
-            throw ICalProviderExceptionCodes.REMOTE_SERVER_ERROR.create(httpResponse.getStatusLine());
+            throw ICalProviderExceptionCodes.REMOTE_SERVER_ERROR.create(String.valueOf(httpResponse.getStatusLine()));
         }
         return statusCode;
     }
@@ -341,17 +342,17 @@ public class ICalFeedClient {
              * anonymous, password-protected share
              */
             if (hadCredentials) {
-                return ICalProviderExceptionCodes.PASSWORD_WRONG.create(feedUrl, response.getStatusLine(), realm);
+                return ICalProviderExceptionCodes.PASSWORD_WRONG.create(feedUrl, String.valueOf(response.getStatusLine()), realm);
             }
-            return ICalProviderExceptionCodes.PASSWORD_REQUIRED.create(feedUrl, response.getStatusLine(), realm);
+            return ICalProviderExceptionCodes.PASSWORD_REQUIRED.create(feedUrl, String.valueOf(response.getStatusLine()), realm);
         }
         /*
          * generic credentials required, otherwise
          */
         if (hadCredentials) {
-            return ICalProviderExceptionCodes.CREDENTIALS_WRONG.create(feedUrl, response.getStatusLine(), realm);
+            return ICalProviderExceptionCodes.CREDENTIALS_WRONG.create(feedUrl, String.valueOf(response.getStatusLine()), realm);
         }
-        return ICalProviderExceptionCodes.CREDENTIALS_REQUIRED.create(feedUrl, response.getStatusLine(), realm);
+        return ICalProviderExceptionCodes.CREDENTIALS_REQUIRED.create(feedUrl, String.valueOf(response.getStatusLine()), realm);
     }
 
     private static String getFirstHeaderElement(HttpResponse response, String headerName, String elementName) {
