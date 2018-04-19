@@ -111,6 +111,8 @@ import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.services.AdminServiceRegistry;
 import com.openexchange.admin.storage.interfaces.OXToolStorageInterface;
 import com.openexchange.admin.storage.interfaces.OXUtilStorageInterface;
+import com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.AttributeChanger;
+import com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.AttributeChangers;
 import com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.mailaccount.UserMailAccountAttribute;
 import com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.mailaccount.UserMailAccountAttributeChangers;
 import com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.mailsetting.UserMailSettingAttribute;
@@ -206,9 +208,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
 
     private final AdminCache cache;
     private final PropertyHandler prop;
-    private final UserAttributeChangers userAttributeChangers;
-    private final UserSettingMailAttributeChangers userSettingMailAttributeChangers;
-    private final UserMailAccountAttributeChangers userMailAccountAttributeChangers;
+    private final Map<AttributeChanger, AttributeChangers> attributeChangers;
 
     /**
      * Initializes a new {@link OXUserMySQLStorage}.
@@ -217,9 +217,12 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
         super();
         cache = ClientAdminThread.cache;
         prop = cache.getProperties();
-        userAttributeChangers = new UserAttributeChangers(cache);
-        userSettingMailAttributeChangers = new UserSettingMailAttributeChangers();
-        userMailAccountAttributeChangers = new UserMailAccountAttributeChangers();
+
+        Map<AttributeChanger, AttributeChangers> ac = new HashMap<>();
+        ac.put(AttributeChanger.USER, new UserAttributeChangers(cache));
+        ac.put(AttributeChanger.USER_SETTING_MAIL, new UserSettingMailAttributeChangers());
+        ac.put(AttributeChanger.USER_MAIL_ACCOUNT, new UserMailAccountAttributeChangers());
+        attributeChangers = Collections.unmodifiableMap(ac);
     }
 
     @Override
@@ -599,11 +602,18 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             if (updateUsername(usrdata, contextId, userId, con)) {
                 changedAttributes.add("username");
             }
-
-            // Change common user attributes
-            for (UserAttribute userAttribute : UserAttribute.values()) {
-                if (userAttributeChangers.change(userAttribute, usrdata, userId, contextId, con)) {
-                    changedAttributes.add(userAttribute.getSQLFieldName());
+            
+            // Change attributes
+            for (AttributeChanger attributeChanger : AttributeChanger.values()) {
+                AttributeChangers acs = attributeChangers.get(attributeChanger);
+                if (acs == null) {
+                    LOG.debug("No attribute changers found for '{}'", attributeChanger.name());
+                    continue;
+                }
+                for (com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.Attribute attribute : attributeChanger.getAttributes()) {
+                    if (acs.change(attribute, usrdata, userId, contextId, con)) {
+                        changedAttributes.add(attribute.getSQLFieldName());
+                    }
                 }
             }
 
@@ -860,18 +870,6 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
 
             if (usrdata.isConvertDriveUserFolders()) {
                 convertDriveUserFolders(ctx, usrdata, con);
-            }
-
-            // update the user mail settings
-            for (UserMailSettingAttribute attribute : UserMailSettingAttribute.values()) {
-                if (userSettingMailAttributeChangers.change(attribute, usrdata, userId, contextId, con)) {
-                    changedAttributes.add(attribute.getSQLFieldName());
-                }
-            }
-            for (UserMailAccountAttribute attribute : UserMailAccountAttribute.values()) {
-                if (userMailAccountAttributeChangers.change(attribute, usrdata, userId, contextId, con)) {
-                    changedAttributes.add(attribute.getSQLFieldName());
-                }
             }
 
             if (usrdata.getDisplay_name() != null) {

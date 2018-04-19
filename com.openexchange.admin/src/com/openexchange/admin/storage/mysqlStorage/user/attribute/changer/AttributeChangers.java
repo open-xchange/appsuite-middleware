@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2018-2020 OX Software GmbH
+ *     Copyright (C) 2016-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -51,54 +51,26 @@ package com.openexchange.admin.storage.mysqlStorage.user.attribute.changer;
 
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.Map;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import com.openexchange.admin.rmi.dataobjects.User;
-import com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.mailsetting.UserSettingMailAttributeChangers;
+import com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.mailsetting.UserMailSettingAttribute;
 
 /**
- * {@link AbstractUserAttributeChangers}
+ * {@link AttributeChangers}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
- * @since v7.10.1
  */
-public abstract class AbstractUserAttributeChangers implements AttributeChangers {
-
-    private static final Logger LOG = LoggerFactory.getLogger(UserSettingMailAttributeChangers.class);
-
-    private final Map<Attribute, UserAttributeChanger> changers;
-    private String table;
+public interface AttributeChangers {
 
     /**
-     * Initialises a new {@link AbstractUserAttributeChangers}.
-     */
-    public AbstractUserAttributeChangers(String table) {
-        super();
-        this.table = table;
-        changers = initialiseChangers();
-    }
-
-    /**
-     * Initialises the changers
+     * Changes the specified {@link UserMailSettingAttribute}
      * 
-     * @return a map with the changers
+     * @param attribute The {@link UserMailSettingAttribute} to change
+     * @param userData The {@link User} data
+     * @param userId the user identifier
+     * @param contextId The context identifier
+     * @param connection The {@link Connection} to use
+     * @return <code>true</code> if the attribute was changed successfully; <code>false</code> otherwise
+     * @throws SQLException if an SQL error is occurred
      */
-    protected abstract Map<Attribute, UserAttributeChanger> initialiseChangers();
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.AttributeChangers#change(com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.Attribute, com.openexchange.admin.rmi.dataobjects.User, int, int,
-     * java.sql.Connection)
-     */
-    @Override
-    public boolean change(Attribute attribute, User userData, int userId, int contextId, Connection connection) throws SQLException {
-        UserAttributeChanger changer = changers.get(attribute);
-        if (changer == null) {
-            LOG.debug("No user attribute changer found for user attribute '{}' in table '{}'. The attribute will not be changed.", attribute.getSQLFieldName(), table);
-            return false;
-        }
-        return changer.changeAttribute(userId, contextId, userData, connection);
-    }
+    boolean change(Attribute attribute, User userData, int userId, int contextId, Connection connection) throws SQLException;
 }

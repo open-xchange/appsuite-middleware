@@ -49,6 +49,10 @@
 
 package com.openexchange.admin.storage.mysqlStorage.user.attribute.changer;
 
+import java.util.EnumSet;
+import com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.mailaccount.UserMailAccountAttribute;
+import com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.mailsetting.UserMailSettingAttribute;
+import com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.user.UserAttribute;
 
 /**
  * {@link AttributeChanger}
@@ -56,6 +60,26 @@ package com.openexchange.admin.storage.mysqlStorage.user.attribute.changer;
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @since v7.10.0
  */
-public interface AttributeChanger {
+public enum AttributeChanger {
+    USER(EnumSet.allOf(UserAttribute.class)),
+    USER_SETTING_MAIL(EnumSet.allOf(UserMailSettingAttribute.class)),
+    USER_MAIL_ACCOUNT(EnumSet.allOf(UserMailAccountAttribute.class));
 
+    private final EnumSet<? extends Attribute> attributes;
+
+    /**
+     * Initialises a new {@link AttributeChanger}.
+     */
+    private AttributeChanger(EnumSet<? extends Attribute> attributes) {
+        this.attributes = attributes;
+    }
+
+    /**
+     * Gets the attributes
+     *
+     * @return The attributes
+     */
+    public EnumSet<? extends Attribute> getAttributes() {
+        return attributes;
+    }
 }
