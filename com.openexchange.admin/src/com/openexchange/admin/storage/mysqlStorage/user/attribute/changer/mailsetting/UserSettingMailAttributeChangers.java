@@ -166,10 +166,12 @@ public class UserSettingMailAttributeChangers extends AbstractUserAttributeChang
             @Override
             public boolean changeAttribute(int userId, int contextId, User userData, Connection connection) throws SQLException {
                 Integer value = userData.getUploadFileSizeLimit();
-                if (value == null) {
-                    return false;
+                if (value != null) {
+                    return setAttributes(userId, contextId, TABLE, Collections.singletonMap(UserMailSettingAttribute.UPLOAD_QUOTA, value), connection);
+                } else if (userData.isUploadFileSizeLimitset()) {
+                    return setAttributesDefault(userId, contextId, TABLE, Collections.singleton(UserMailSettingAttribute.UPLOAD_QUOTA), connection);
                 }
-                return setAttributes(userId, contextId, TABLE, Collections.singletonMap(UserMailSettingAttribute.UPLOAD_QUOTA, value), connection);
+                return false;
             }
         });
         c.put(UserMailSettingAttribute.UPLOAD_QUOTA_PER_FILE, new AbstractUserSettingMailAttributeChanger() {
@@ -177,10 +179,12 @@ public class UserSettingMailAttributeChangers extends AbstractUserAttributeChang
             @Override
             public boolean changeAttribute(int userId, int contextId, User userData, Connection connection) throws SQLException {
                 Integer value = userData.getUploadFileSizeLimitPerFile();
-                if (value == null) {
-                    return false;
+                if (value != null) {
+                    return setAttributes(userId, contextId, TABLE, Collections.singletonMap(UserMailSettingAttribute.UPLOAD_QUOTA_PER_FILE, value), connection);
+                } else if (userData.isUploadFileSizeLimitPerFileset()) {
+                    return setAttributesDefault(userId, contextId, TABLE, Collections.singleton(UserMailSettingAttribute.UPLOAD_QUOTA_PER_FILE), connection);
                 }
-                return setAttributes(userId, contextId, TABLE, Collections.singletonMap(UserMailSettingAttribute.UPLOAD_QUOTA_PER_FILE, value), connection);
+                return false;
             }
         });
         return Collections.unmodifiableMap(c);

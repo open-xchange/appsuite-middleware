@@ -131,8 +131,22 @@ public abstract class AbstractAttributeChanger {
         return executeUpdate(stmt);
     }
 
-    protected boolean setAttributesDefault(int userId, int contextId, String table, Set<Attribute> attributes, Connection connection) {
-        return false;
+    /**
+     * Resets the specified attributs to their default values
+     * 
+     * @param userId The user identifier
+     * @param contextId the context identifier
+     * @param table the table
+     * @param attributes The {@link Attribute} to reset
+     * @param connection the {@link Connection}
+     * @return <code>true</code> if the attributes was successfully reset; <code>false</code> otherwise
+     * @throws SQLException if an SQL error is occurred
+     */
+    protected boolean setAttributesDefault(int userId, int contextId, String table, Set<Attribute> attributes, Connection connection) throws SQLException {
+        PreparedStatement stmt = prepareDefaultStatement(table, attributes, connection);
+        int parameterIndex = 0;
+        appendContextUser(contextId, userId, stmt, parameterIndex);
+        return executeUpdate(stmt);
     }
 
     /**

@@ -61,6 +61,7 @@ import com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.user.U
  * @since v7.10.0
  */
 public enum AttributeChanger {
+
     USER(EnumSet.allOf(UserAttribute.class)),
     USER_SETTING_MAIL(EnumSet.allOf(UserMailSettingAttribute.class)),
     USER_MAIL_ACCOUNT(EnumSet.allOf(UserMailAccountAttribute.class));
