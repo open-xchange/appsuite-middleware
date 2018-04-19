@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.share.tests;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -105,8 +106,6 @@ public class GetLinkInheritanceWrongModuleTest extends AbstractAPIClientSession 
         C = folderManager.createFolder(B, "C_" + UUID.randomUUID(), MODULE);
         D = folderManager.createFolder(infostoreRoot, "D_" + UUID.randomUUID(), MODULE);
         E = folderManager.createFolder(D, "E_" + UUID.randomUUID(), MODULE);
-
-        System.out.println("test");
     }
 
     @Override
@@ -184,15 +183,15 @@ public class GetLinkInheritanceWrongModuleTest extends AbstractAPIClientSession 
      * Checks if folder contains the given amount of normal and extended permissions and optionally checks if the extended permissions contains an inherited permissions for the given guest ids.
      *
      * @param folderId The folder to check
-     * @param permSize The amount of normal permissions
-     * @param extendedPermSize The amount of extended permissions
+     * @param expectedPermSize The amount of normal permissions
+     * @param expectededExtendedPermSize The amount of extended permissions
      * @param optGuestIds The optional guest ids to check
      * @throws ApiException
      */
-    private void checkFolderPermissions(String folderId, int permSize, int extendedPermSize, Integer... optGuestIds) throws ApiException {
+    private void checkFolderPermissions(String folderId, int expectedPermSize, int expectededExtendedPermSize, Integer... optGuestIds) throws ApiException {
         FolderData folder = folderManager.getFolder(folderId);
-        assertTrue(folder.getPermissions().size() == permSize);
-        assertTrue(folder.getComOpenexchangeShareExtendedPermissions().size() == extendedPermSize);
+        assertEquals(expectedPermSize, folder.getPermissions().size());
+        assertEquals(expectededExtendedPermSize, folder.getComOpenexchangeShareExtendedPermissions().size());
         if (optGuestIds != null) {
             for (Integer guestId : optGuestIds) {
                 checkExtendedPermission(folder, guestId, true);
