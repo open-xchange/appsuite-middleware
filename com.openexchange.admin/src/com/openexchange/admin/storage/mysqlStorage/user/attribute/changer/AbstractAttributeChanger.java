@@ -59,7 +59,6 @@ import java.util.Map;
 import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import com.openexchange.admin.storage.mysqlStorage.user.attribute.Attribute;
 import com.openexchange.database.Databases;
 
 /**
@@ -68,15 +67,15 @@ import com.openexchange.database.Databases;
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @since v7.10.1
  */
-abstract class AbstractAttributeChanger {
+public abstract class AbstractAttributeChanger {
 
     private static final Logger LOG = LoggerFactory.getLogger(AbstractAttributeChanger.class);
 
-    static final String TABLE_TOKEN = "<TABLE>";
-    static final String COLUMN_TOKEN = "<COLUMN>";
+    protected static final String TABLE_TOKEN = "<TABLE>";
+    protected static final String COLUMN_TOKEN = "<COLUMN>";
 
-    final Map<Class<?>, Setter> setters;
-    final Map<Class<?>, Unsetter> unsetters;
+    protected final Map<Class<?>, Setter> setters;
+    protected final Map<Class<?>, Unsetter> unsetters;
 
     /**
      * Initialises a new {@link AbstractAttributeChanger}.
@@ -113,7 +112,7 @@ abstract class AbstractAttributeChanger {
      *         or empty.
      * @throws SQLException if an SQL error is occurred
      */
-    boolean setAttributes(int userId, int contextId, String table, Map<Attribute, Object> attributes, Connection connection) throws SQLException {
+    protected boolean setAttributes(int userId, int contextId, String table, Map<Attribute, Object> attributes, Connection connection) throws SQLException {
         Map<Attribute, Setter> settersMap = new HashMap<>();
         for (Attribute attribute : attributes.keySet()) {
             Setter setter = setters.get(attribute.getOriginalType());
@@ -132,7 +131,7 @@ abstract class AbstractAttributeChanger {
         return executeUpdate(stmt);
     }
 
-    boolean setAttributesDefault(int userId, int contextId, String table, Set<Attribute> attributes, Connection connection) {
+    protected boolean setAttributesDefault(int userId, int contextId, String table, Set<Attribute> attributes, Connection connection) {
         return false;
     }
 
@@ -146,7 +145,7 @@ abstract class AbstractAttributeChanger {
      * @return <code>true</code> if the attribute was successfully un-set; <code>false</code> otherwise
      * @throws SQLException if an SQL error is occurred
      */
-    boolean unsetAttributes(int userId, int contextId, String table, Set<Attribute> attributes, Connection connection) throws SQLException {
+    protected boolean unsetAttributes(int userId, int contextId, String table, Set<Attribute> attributes, Connection connection) throws SQLException {
         Map<Attribute, Unsetter> unsettersMap = new HashMap<>();
         for (Attribute attribute : attributes) {
             Unsetter setter = unsetters.get(attribute.getOriginalType());
@@ -175,7 +174,7 @@ abstract class AbstractAttributeChanger {
      * 
      * @throws SQLException if an SQL error is occurred
      */
-    int appendContextUser(int contextId, int userId, PreparedStatement stmt, int parameterIndex) throws SQLException {
+    protected int appendContextUser(int contextId, int userId, PreparedStatement stmt, int parameterIndex) throws SQLException {
         stmt.setInt(parameterIndex++, contextId);
         stmt.setInt(parameterIndex++, userId);
         return parameterIndex;
@@ -187,7 +186,7 @@ abstract class AbstractAttributeChanger {
      * @param attributes The {@link Attribute}s to prepare
      * @return A string with the prepared {@link Attribute}s
      */
-    String prepareAttributes(Set<Attribute> attributes) {
+    protected String prepareAttributes(Set<Attribute> attributes) {
         StringBuilder builder = new StringBuilder();
         for (Attribute attribute : attributes) {
             builder.append(attribute.getSQLFieldName()).append("=?,");
@@ -207,7 +206,7 @@ abstract class AbstractAttributeChanger {
      * @param attribute The {@link Attribute}
      * @throws SQLException if an SQL error is occurred
      */
-    abstract int fillSetStatement(PreparedStatement stmt, Map<Attribute, Setter> setters, Map<Attribute, Object> attributes, int userId, int contextId) throws SQLException;
+    protected abstract int fillSetStatement(PreparedStatement stmt, Map<Attribute, Setter> setters, Map<Attribute, Object> attributes, int userId, int contextId) throws SQLException;
 
     /**
      * Fills the specified {@link PreparedStatement} with the specified user id, context id and value for the specified {@link Attribute}
@@ -218,7 +217,7 @@ abstract class AbstractAttributeChanger {
      * @param contextId The context identifier
      * @throws SQLException if an SQL error is occurred
      */
-    abstract int fillUnsetStatement(PreparedStatement stmt, Map<Attribute, Unsetter> unsetters, Set<Attribute> attributes, int userId, int contextId) throws SQLException;
+    protected abstract int fillUnsetStatement(PreparedStatement stmt, Map<Attribute, Unsetter> unsetters, Set<Attribute> attributes, int userId, int contextId) throws SQLException;
 
     /**
      * Creates a new {@link PreparedStatement} for the specified {@link Attribute}s
@@ -228,7 +227,7 @@ abstract class AbstractAttributeChanger {
      * @return The {@link PreparedStatement}
      * @throws SQLException if an SQL error is occurred
      */
-    abstract PreparedStatement prepareStatement(String table, Set<Attribute> attributes, Connection connection) throws SQLException;
+    protected abstract PreparedStatement prepareStatement(String table, Set<Attribute> attributes, Connection connection) throws SQLException;
 
     /**
      * Creates a new {@link PreparedStatement} for the specified {@link Attribute}s to set them
@@ -239,7 +238,7 @@ abstract class AbstractAttributeChanger {
      * @return The {@link PreparedStatement}
      * @throws SQLException if an SQL error is occurred
      */
-    abstract PreparedStatement prepareDefaultStatement(String table, Set<Attribute> attributes, Connection connection) throws SQLException;
+    protected abstract PreparedStatement prepareDefaultStatement(String table, Set<Attribute> attributes, Connection connection) throws SQLException;
 
     //////////////////////////////////// HELPERS //////////////////////////////////
 
@@ -263,7 +262,7 @@ abstract class AbstractAttributeChanger {
     /**
      * {@link Setter} - Private functional Setter interface
      */
-    interface Setter {
+    public interface Setter {
 
         /**
          * Sets the specified value to the specified {@link PreparedStatement} at the specified position
@@ -279,7 +278,7 @@ abstract class AbstractAttributeChanger {
     /**
      * {@link Setter} - Private functional Unsetter interface
      */
-    interface Unsetter {
+    public interface Unsetter {
 
         /**
          * Un-sets the value from the specified {@link PreparedStatement} and the specified position

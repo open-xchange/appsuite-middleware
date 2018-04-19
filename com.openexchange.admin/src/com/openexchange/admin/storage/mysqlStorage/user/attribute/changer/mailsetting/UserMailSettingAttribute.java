@@ -47,54 +47,44 @@
  *
  */
 
-package com.openexchange.admin.storage.mysqlStorage.user.attribute;
+package com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.mailsetting;
 
 import java.util.function.Function;
 import com.openexchange.admin.rmi.dataobjects.ExtendableDataObject;
 import com.openexchange.admin.rmi.dataobjects.User;
+import com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.Attribute;
 
 /**
- * {@link UserMailAccountAttribute}
+ * {@link UserMailSettingAttribute}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @since v7.10.1
  */
-public enum UserMailAccountAttribute implements Attribute {
+public enum UserMailSettingAttribute implements Attribute {
 
-    DRAFTS("drafts", (user) -> user.getMail_folder_drafts_name(), String.class),
-    DRAFTS_FULLNAME("drafts_fullname", (user) -> "", String.class),
-
-    SENT("sent", (user) -> user.getMail_folder_sent_name(), String.class),
-    SENT_FULLNAME("sent_fullname", (user) -> "", String.class),
-
-    SPAM("spam", (user) -> user.getMail_folder_spam_name(), String.class),
-    SPAM_FULLNAME("spam_fullname", (user) -> "", String.class),
-
-    TRASH("trash", (user) -> user.getMail_folder_trash_name(), String.class),
-    TRASH_FULLNAME("trash_fullname", (user) -> "", String.class),
-
-    ARCHIVE("archive", (user) -> "", String.class),
-    ARCHIVE_FULLNAME("archive_fullname", (user) -> user.getMail_folder_archive_full_name(), String.class),
-
-    CONFIRMED_HAM("confirmed_ham", (user) -> user.getMail_folder_confirmed_ham_name(), String.class),
-    CONFIRMED_HAM_FULLNAME("confirmed_ham_fullname)", (user) -> "", String.class),
-
+    SEND_ADDRESS("send_addr", (user) -> user.getDefaultSenderAddress(), String.class),
+    STD_DRAFTS("std_drafts", (user) -> user.getMail_folder_drafts_name(), String.class),
+    STD_SENT("std_sent", (user) -> user.getMail_folder_sent_name(), String.class),
+    STD_SPAM("std_spam", (user) -> user.getMail_folder_spam_name(), String.class),
+    STD_TRASH("std_trash", (user) -> user.getMail_folder_trash_name(), String.class),
     CONFIRMED_SPAM("confirmed_spam", (user) -> user.getMail_folder_confirmed_spam_name(), String.class),
-    CONFIRMED_SPAM_FULLNAME("confirmed_spam_fullname)", (user) -> "", String.class),
+    CONFIRMED_HAM("confirmed_ham", (user) -> user.getMail_folder_confirmed_ham_name(), String.class),
+    UPLOAD_QUOTA("upload_quota", (user) -> Integer.toString(user.getUploadFileSizeLimit()), Integer.class),
+    UPLOAD_QUOTA_PER_FILE("upload_quota_per_file", (user) -> Integer.toString(user.getUploadFileSizeLimitPerFile()), Integer.class),
     ;
 
     private final String sqlFieldName;
     private final Function<User, String> getter;
     private final Class<?> originalType;
-    private static final String TABLE = "user_mail_account";
+    private static final String TABLE_NAME = "user_setting_mail";
 
     /**
      * 
-     * Initialises a new {@link UserMailAccountAttribute}.
+     * Initialises a new {@link UserMailSettingAttribute}.
      * 
-     * @param sqlFieldName the names of the attribute
+     * @param sqlFieldNames the names of the attribute
      */
-    private UserMailAccountAttribute(String sqlFieldName, Function<User, String> getter, Class<?> originalType) {
+    private UserMailSettingAttribute(String sqlFieldName, Function<User, String> getter, Class<?> originalType) {
         this.sqlFieldName = sqlFieldName;
         this.getter = getter;
         this.originalType = originalType;
@@ -103,7 +93,7 @@ public enum UserMailAccountAttribute implements Attribute {
     /*
      * (non-Javadoc)
      * 
-     * @see com.openexchange.admin.storage.mysqlStorage.user.attribute.Attribute#getSQLFieldName()
+     * @see com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.Attribute#getSQLFieldName()
      */
     @Override
     public String getSQLFieldName() {
@@ -113,30 +103,30 @@ public enum UserMailAccountAttribute implements Attribute {
     /*
      * (non-Javadoc)
      * 
-     * @see com.openexchange.admin.storage.mysqlStorage.user.attribute.Attribute#getOriginalType()
-     */
-    @Override
-    public Class<?> getOriginalType() {
-        return originalType;
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.admin.storage.mysqlStorage.user.attribute.Attribute#getSQLTableName()
+     * @see com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.Attribute#getSQLTableName()
      */
     @Override
     public String getSQLTableName() {
-        return TABLE;
+        return TABLE_NAME;
     }
 
     /*
      * (non-Javadoc)
      * 
-     * @see com.openexchange.admin.storage.mysqlStorage.user.attribute.Attribute#getValue(com.openexchange.admin.rmi.dataobjects.ExtendableDataObject)
+     * @see com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.Attribute#getValue(com.openexchange.admin.rmi.dataobjects.ExtendableDataObject)
      */
     @Override
     public <T extends ExtendableDataObject> String getValue(T object) {
         return getter.apply((User) object);
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.Attribute#getOriginalType()
+     */
+    @Override
+    public Class<?> getOriginalType() {
+        return originalType;
     }
 }

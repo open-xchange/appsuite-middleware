@@ -47,11 +47,12 @@
  *
  */
 
-package com.openexchange.admin.storage.mysqlStorage.user.attribute;
+package com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.user;
 
 import java.util.function.Function;
 import com.openexchange.admin.rmi.dataobjects.ExtendableDataObject;
 import com.openexchange.admin.rmi.dataobjects.User;
+import com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.Attribute;
 
 /**
  * {@link UserAttribute}

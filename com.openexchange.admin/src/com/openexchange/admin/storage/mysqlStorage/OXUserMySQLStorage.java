@@ -111,12 +111,12 @@ import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.services.AdminServiceRegistry;
 import com.openexchange.admin.storage.interfaces.OXToolStorageInterface;
 import com.openexchange.admin.storage.interfaces.OXUtilStorageInterface;
-import com.openexchange.admin.storage.mysqlStorage.user.attribute.UserAttribute;
-import com.openexchange.admin.storage.mysqlStorage.user.attribute.UserMailAccountAttribute;
-import com.openexchange.admin.storage.mysqlStorage.user.attribute.UserMailAttribute;
-import com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.UserAttributeChangers;
-import com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.UserMailAccountAttributeChangers;
-import com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.UserSettingMailAttributeChangers;
+import com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.mailaccount.UserMailAccountAttribute;
+import com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.mailaccount.UserMailAccountAttributeChangers;
+import com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.mailsetting.UserMailSettingAttribute;
+import com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.mailsetting.UserSettingMailAttributeChangers;
+import com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.user.UserAttribute;
+import com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.user.UserAttributeChangers;
 import com.openexchange.admin.storage.sqlStorage.OXUserSQLStorage;
 import com.openexchange.admin.storage.utils.Filestore2UserUtil;
 import com.openexchange.admin.tools.AdminCache;
@@ -863,7 +863,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             }
 
             // update the user mail settings
-            for (UserMailAttribute attribute : UserMailAttribute.values()) {
+            for (UserMailSettingAttribute attribute : UserMailSettingAttribute.values()) {
                 if (userSettingMailAttributeChangers.change(attribute, usrdata, userId, contextId, con)) {
                     changedAttributes.add(attribute.getSQLFieldName());
                 }

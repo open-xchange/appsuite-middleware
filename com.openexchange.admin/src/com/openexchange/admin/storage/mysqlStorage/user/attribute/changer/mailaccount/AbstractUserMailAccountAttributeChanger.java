@@ -47,14 +47,17 @@
  *
  */
 
-package com.openexchange.admin.storage.mysqlStorage.user.attribute.changer;
+package com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.mailaccount;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.Map;
 import java.util.Set;
-import com.openexchange.admin.storage.mysqlStorage.user.attribute.Attribute;
+import com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.AbstractAttributeChanger;
+import com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.AbstractMultiAttributeChanger;
+import com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.Attribute;
+import com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.AbstractAttributeChanger.Setter;
 import com.openexchange.mailaccount.MailAccount;
 
 /**
@@ -80,7 +83,7 @@ abstract class AbstractUserMailAccountAttributeChanger extends AbstractMultiAttr
      * @see com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.AbstractMultiAttributeChanger#fillSetStatement(java.sql.PreparedStatement, java.util.Map, java.util.Map, int, int)
      */
     @Override
-    int fillSetStatement(PreparedStatement stmt, Map<Attribute, Setter> setters, Map<Attribute, Object> attributes, int userId, int contextId) throws SQLException {
+    protected int fillSetStatement(PreparedStatement stmt, Map<Attribute, Setter> setters, Map<Attribute, Object> attributes, int userId, int contextId) throws SQLException {
         int parameterIndex = super.fillSetStatement(stmt, setters, attributes, userId, contextId);
         stmt.setInt(parameterIndex++, MailAccount.DEFAULT_ID);
         return parameterIndex;
@@ -92,7 +95,7 @@ abstract class AbstractUserMailAccountAttributeChanger extends AbstractMultiAttr
      * @see com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.AbstractMultiAttributeChanger#prepareStatement(java.lang.String, java.util.Set, java.sql.Connection)
      */
     @Override
-    PreparedStatement prepareStatement(String table, Set<Attribute> attributes, Connection connection) throws SQLException {
+    protected PreparedStatement prepareStatement(String table, Set<Attribute> attributes, Connection connection) throws SQLException {
         String sqlStatement = SQL_STATEMENT_TEMPLATE.replaceAll(TABLE_TOKEN, table).replaceAll(COLUMN_TOKEN, prepareAttributes(attributes));
         return connection.prepareStatement(sqlStatement);
     }
@@ -103,7 +106,7 @@ abstract class AbstractUserMailAccountAttributeChanger extends AbstractMultiAttr
      * @see com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.AbstractAttributeChanger#prepareDefaultStatement(java.lang.String, java.util.Set, java.sql.Connection)
      */
     @Override
-    PreparedStatement prepareDefaultStatement(String table, Set<Attribute> attributes, Connection connection) throws SQLException {
+    protected PreparedStatement prepareDefaultStatement(String table, Set<Attribute> attributes, Connection connection) throws SQLException {
         String sqlStatement = SQL_STATEMENT_TEMPLATE.replaceAll(TABLE_TOKEN, table).replaceAll(COLUMN_TOKEN, prepareAttributes(attributes).replaceAll("\\?", "DEFAULT"));
         return connection.prepareStatement(sqlStatement);
     }

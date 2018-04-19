@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.admin.storage.mysqlStorage.user.attribute;
+package com.openexchange.admin.storage.mysqlStorage.user.attribute.changer;
 
 import com.openexchange.admin.rmi.dataobjects.ExtendableDataObject;
 

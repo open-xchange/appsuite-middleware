@@ -55,8 +55,8 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.admin.rmi.dataobjects.User;
-import com.openexchange.admin.storage.mysqlStorage.user.attribute.Attribute;
-import com.openexchange.admin.storage.mysqlStorage.user.attribute.UserMailAttribute;
+import com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.mailsetting.UserMailSettingAttribute;
+import com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.mailsetting.UserSettingMailAttributeChangers;
 
 /**
  * {@link AbstractUserAttributeChangers}
@@ -64,7 +64,7 @@ import com.openexchange.admin.storage.mysqlStorage.user.attribute.UserMailAttrib
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @since v7.10.1
  */
-abstract class AbstractUserAttributeChangers {
+public abstract class AbstractUserAttributeChangers {
 
     private static final Logger LOG = LoggerFactory.getLogger(UserSettingMailAttributeChangers.class);
 
@@ -85,12 +85,12 @@ abstract class AbstractUserAttributeChangers {
      * 
      * @return a map with the changers
      */
-    abstract Map<Attribute, UserAttributeChanger> initialiseChangers();
+    protected abstract Map<Attribute, UserAttributeChanger> initialiseChangers();
 
     /**
-     * Changes the specified {@link UserMailAttribute}
+     * Changes the specified {@link UserMailSettingAttribute}
      * 
-     * @param attribute The {@link UserMailAttribute} to change
+     * @param attribute The {@link UserMailSettingAttribute} to change
      * @param userData The {@link User} data
      * @param userId the user identifier
      * @param contextId The context identifier

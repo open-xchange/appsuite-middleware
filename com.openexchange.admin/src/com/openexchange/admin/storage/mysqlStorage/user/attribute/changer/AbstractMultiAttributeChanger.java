@@ -54,7 +54,6 @@ import java.sql.SQLException;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-import com.openexchange.admin.storage.mysqlStorage.user.attribute.Attribute;
 
 /**
  * {@link AbstractMultiAttributeChanger} - Base stub class for providing the logic of
@@ -63,7 +62,7 @@ import com.openexchange.admin.storage.mysqlStorage.user.attribute.Attribute;
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @since v7.10.1
  */
-abstract class AbstractMultiAttributeChanger extends AbstractAttributeChanger implements UserAttributeChanger {
+public abstract class AbstractMultiAttributeChanger extends AbstractAttributeChanger implements UserAttributeChanger {
 
     /**
      * Initialises a new {@link AbstractMultiAttributeChanger}.
@@ -78,7 +77,7 @@ abstract class AbstractMultiAttributeChanger extends AbstractAttributeChanger im
      * @see com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.AbstractAttributeChanger#fillSetStatement(java.sql.PreparedStatement, java.util.Map, java.util.Map, int, int)
      */
     @Override
-    int fillSetStatement(PreparedStatement stmt, Map<Attribute, Setter> setters, Map<Attribute, Object> attributes, int userId, int contextId) throws SQLException {
+    protected int fillSetStatement(PreparedStatement stmt, Map<Attribute, Setter> setters, Map<Attribute, Object> attributes, int userId, int contextId) throws SQLException {
         int parameterIndex = 1;
         for (Entry<Attribute, Object> entry : attributes.entrySet()) {
             Setter setter = setters.get(entry.getKey());
@@ -96,7 +95,7 @@ abstract class AbstractMultiAttributeChanger extends AbstractAttributeChanger im
      * @see com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.AbstractAttributeChanger#fillUnsetStatement(java.sql.PreparedStatement, java.util.Map, java.util.Set, int, int)
      */
     @Override
-    int fillUnsetStatement(PreparedStatement stmt, Map<Attribute, Unsetter> unsetters, Set<Attribute> attributes, int userId, int contextId) throws SQLException {
+    protected int fillUnsetStatement(PreparedStatement stmt, Map<Attribute, Unsetter> unsetters, Set<Attribute> attributes, int userId, int contextId) throws SQLException {
         int parameterIndex = 1;
         for (Attribute attribute : attributes) {
             Unsetter unsetter = unsetters.get(attribute);

@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.admin.storage.mysqlStorage.user.attribute.changer;
+package com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.user;
 
 import static com.openexchange.admin.storage.mysqlStorage.OXUtilMySQLStorageCommon.isEmpty;
 import java.io.UnsupportedEncodingException;
@@ -60,8 +60,9 @@ import java.util.HashMap;
 import java.util.Map;
 import com.openexchange.admin.rmi.dataobjects.User;
 import com.openexchange.admin.rmi.exceptions.StorageException;
-import com.openexchange.admin.storage.mysqlStorage.user.attribute.Attribute;
-import com.openexchange.admin.storage.mysqlStorage.user.attribute.UserAttribute;
+import com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.AbstractUserAttributeChangers;
+import com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.Attribute;
+import com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.UserAttributeChanger;
 import com.openexchange.admin.tools.AdminCache;
 import com.openexchange.java.Strings;
 import com.openexchange.tools.net.URIDefaults;
@@ -92,7 +93,7 @@ public class UserAttributeChangers extends AbstractUserAttributeChangers {
      * @see com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.AbstractUserAttributeChangers#initialiseChangers()
      */
     @Override
-    Map<Attribute, UserAttributeChanger> initialiseChangers() {
+    protected Map<Attribute, UserAttributeChanger> initialiseChangers() {
         Map<UserAttribute, UserAttributeChanger> c = new HashMap<>();
         c.put(UserAttribute.MAIL, new AbstractUserAttributeChanger() {
 

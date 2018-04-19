@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.admin.storage.mysqlStorage.user.attribute.changer;
+package com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.mailsetting;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -55,8 +55,9 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import com.openexchange.admin.rmi.dataobjects.User;
-import com.openexchange.admin.storage.mysqlStorage.user.attribute.Attribute;
-import com.openexchange.admin.storage.mysqlStorage.user.attribute.UserMailAttribute;
+import com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.AbstractUserAttributeChangers;
+import com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.Attribute;
+import com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.UserAttributeChanger;
 
 /**
  * {@link UserSettingMailAttributeChangers}
@@ -81,9 +82,9 @@ public class UserSettingMailAttributeChangers extends AbstractUserAttributeChang
      * @see com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.AbstractUserAttributeChangers#initialiseChangers()
      */
     @Override
-    Map<Attribute, UserAttributeChanger> initialiseChangers() {
-        Map<UserMailAttribute, UserAttributeChanger> c = new HashMap<>();
-        c.put(UserMailAttribute.SEND_ADDRESS, new AbstractUserSettingMailAttributeChanger() {
+    protected Map<Attribute, UserAttributeChanger> initialiseChangers() {
+        Map<UserMailSettingAttribute, UserAttributeChanger> c = new HashMap<>();
+        c.put(UserMailSettingAttribute.SEND_ADDRESS, new AbstractUserSettingMailAttributeChanger() {
 
             @Override
             public boolean changeAttribute(int userId, int contextId, User userData, Connection connection) throws SQLException {
@@ -91,10 +92,10 @@ public class UserSettingMailAttributeChangers extends AbstractUserAttributeChang
                 if (defaultSenderAddress == null) {
                     return false;
                 }
-                return setAttributes(userId, contextId, TABLE, Collections.singletonMap(UserMailAttribute.SEND_ADDRESS, defaultSenderAddress), connection);
+                return setAttributes(userId, contextId, TABLE, Collections.singletonMap(UserMailSettingAttribute.SEND_ADDRESS, defaultSenderAddress), connection);
             }
         });
-        c.put(UserMailAttribute.STD_DRAFTS, new AbstractUserSettingMailAttributeChanger() {
+        c.put(UserMailSettingAttribute.STD_DRAFTS, new AbstractUserSettingMailAttributeChanger() {
 
             @Override
             public boolean changeAttribute(int userId, int contextId, User userData, Connection connection) throws SQLException {
@@ -102,10 +103,10 @@ public class UserSettingMailAttributeChangers extends AbstractUserAttributeChang
                 if (value == null) {
                     return false;
                 }
-                return setAttributes(userId, contextId, TABLE, Collections.singletonMap(UserMailAttribute.STD_DRAFTS, value), connection);
+                return setAttributes(userId, contextId, TABLE, Collections.singletonMap(UserMailSettingAttribute.STD_DRAFTS, value), connection);
             }
         });
-        c.put(UserMailAttribute.STD_SENT, new AbstractUserSettingMailAttributeChanger() {
+        c.put(UserMailSettingAttribute.STD_SENT, new AbstractUserSettingMailAttributeChanger() {
 
             @Override
             public boolean changeAttribute(int userId, int contextId, User userData, Connection connection) throws SQLException {
@@ -113,10 +114,10 @@ public class UserSettingMailAttributeChangers extends AbstractUserAttributeChang
                 if (value == null) {
                     return false;
                 }
-                return setAttributes(userId, contextId, TABLE, Collections.singletonMap(UserMailAttribute.STD_SENT, value), connection);
+                return setAttributes(userId, contextId, TABLE, Collections.singletonMap(UserMailSettingAttribute.STD_SENT, value), connection);
             }
         });
-        c.put(UserMailAttribute.STD_SPAM, new AbstractUserSettingMailAttributeChanger() {
+        c.put(UserMailSettingAttribute.STD_SPAM, new AbstractUserSettingMailAttributeChanger() {
 
             @Override
             public boolean changeAttribute(int userId, int contextId, User userData, Connection connection) throws SQLException {
@@ -124,10 +125,10 @@ public class UserSettingMailAttributeChangers extends AbstractUserAttributeChang
                 if (value == null) {
                     return false;
                 }
-                return setAttributes(userId, contextId, TABLE, Collections.singletonMap(UserMailAttribute.STD_SPAM, value), connection);
+                return setAttributes(userId, contextId, TABLE, Collections.singletonMap(UserMailSettingAttribute.STD_SPAM, value), connection);
             }
         });
-        c.put(UserMailAttribute.STD_TRASH, new AbstractUserSettingMailAttributeChanger() {
+        c.put(UserMailSettingAttribute.STD_TRASH, new AbstractUserSettingMailAttributeChanger() {
 
             @Override
             public boolean changeAttribute(int userId, int contextId, User userData, Connection connection) throws SQLException {
@@ -135,10 +136,10 @@ public class UserSettingMailAttributeChangers extends AbstractUserAttributeChang
                 if (value == null) {
                     return false;
                 }
-                return setAttributes(userId, contextId, TABLE, Collections.singletonMap(UserMailAttribute.STD_TRASH, value), connection);
+                return setAttributes(userId, contextId, TABLE, Collections.singletonMap(UserMailSettingAttribute.STD_TRASH, value), connection);
             }
         });
-        c.put(UserMailAttribute.CONFIRMED_HAM, new AbstractUserSettingMailAttributeChanger() {
+        c.put(UserMailSettingAttribute.CONFIRMED_HAM, new AbstractUserSettingMailAttributeChanger() {
 
             @Override
             public boolean changeAttribute(int userId, int contextId, User userData, Connection connection) throws SQLException {
@@ -146,10 +147,10 @@ public class UserSettingMailAttributeChangers extends AbstractUserAttributeChang
                 if (value == null) {
                     return false;
                 }
-                return setAttributes(userId, contextId, TABLE, Collections.singletonMap(UserMailAttribute.CONFIRMED_HAM, value), connection);
+                return setAttributes(userId, contextId, TABLE, Collections.singletonMap(UserMailSettingAttribute.CONFIRMED_HAM, value), connection);
             }
         });
-        c.put(UserMailAttribute.CONFIRMED_SPAM, new AbstractUserSettingMailAttributeChanger() {
+        c.put(UserMailSettingAttribute.CONFIRMED_SPAM, new AbstractUserSettingMailAttributeChanger() {
 
             @Override
             public boolean changeAttribute(int userId, int contextId, User userData, Connection connection) throws SQLException {
@@ -157,10 +158,10 @@ public class UserSettingMailAttributeChangers extends AbstractUserAttributeChang
                 if (value == null) {
                     return false;
                 }
-                return setAttributes(userId, contextId, TABLE, Collections.singletonMap(UserMailAttribute.CONFIRMED_SPAM, value), connection);
+                return setAttributes(userId, contextId, TABLE, Collections.singletonMap(UserMailSettingAttribute.CONFIRMED_SPAM, value), connection);
             }
         });
-        c.put(UserMailAttribute.UPLOAD_QUOTA, new AbstractUserSettingMailAttributeChanger() {
+        c.put(UserMailSettingAttribute.UPLOAD_QUOTA, new AbstractUserSettingMailAttributeChanger() {
 
             @Override
             public boolean changeAttribute(int userId, int contextId, User userData, Connection connection) throws SQLException {
@@ -168,10 +169,10 @@ public class UserSettingMailAttributeChangers extends AbstractUserAttributeChang
                 if (value == null) {
                     return false;
                 }
-                return setAttributes(userId, contextId, TABLE, Collections.singletonMap(UserMailAttribute.UPLOAD_QUOTA, value), connection);
+                return setAttributes(userId, contextId, TABLE, Collections.singletonMap(UserMailSettingAttribute.UPLOAD_QUOTA, value), connection);
             }
         });
-        c.put(UserMailAttribute.UPLOAD_QUOTA_PER_FILE, new AbstractUserSettingMailAttributeChanger() {
+        c.put(UserMailSettingAttribute.UPLOAD_QUOTA_PER_FILE, new AbstractUserSettingMailAttributeChanger() {
 
             @Override
             public boolean changeAttribute(int userId, int contextId, User userData, Connection connection) throws SQLException {
@@ -179,7 +180,7 @@ public class UserSettingMailAttributeChangers extends AbstractUserAttributeChang
                 if (value == null) {
                     return false;
                 }
-                return setAttributes(userId, contextId, TABLE, Collections.singletonMap(UserMailAttribute.UPLOAD_QUOTA_PER_FILE, value), connection);
+                return setAttributes(userId, contextId, TABLE, Collections.singletonMap(UserMailSettingAttribute.UPLOAD_QUOTA_PER_FILE, value), connection);
             }
         });
         return Collections.unmodifiableMap(c);

@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.admin.storage.mysqlStorage.user.attribute.changer;
+package com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.mailaccount;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -55,8 +55,9 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import com.openexchange.admin.rmi.dataobjects.User;
-import com.openexchange.admin.storage.mysqlStorage.user.attribute.Attribute;
-import com.openexchange.admin.storage.mysqlStorage.user.attribute.UserMailAccountAttribute;
+import com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.AbstractUserAttributeChangers;
+import com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.Attribute;
+import com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.UserAttributeChanger;
 
 /**
  * {@link UserMailAccountAttributeChangers}
@@ -81,7 +82,7 @@ public class UserMailAccountAttributeChangers extends AbstractUserAttributeChang
      * @see com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.AbstractUserAttributeChangers#initialiseChangers()
      */
     @Override
-    Map<Attribute, UserAttributeChanger> initialiseChangers() {
+    protected Map<Attribute, UserAttributeChanger> initialiseChangers() {
         Map<UserMailAccountAttribute, UserAttributeChanger> changers = new HashMap<>();
         changers.put(UserMailAccountAttribute.DRAFTS, new AbstractUserMailAccountAttributeChanger() {
 
