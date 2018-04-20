@@ -147,7 +147,6 @@ public class BasicICalCalendarProvider extends BasicCachingCalendarProvider {
             throw ICalProviderExceptionCodes.MISSING_FEED_URI.create();
         }
         String uri = config.optString(URI, null);
-        ICalProviderUtils.verifyURI(uri);
         /*
          * attempt to read and parse feed & take over extracted metadata as needed
          */

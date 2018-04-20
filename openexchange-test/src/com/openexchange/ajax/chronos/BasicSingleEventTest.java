@@ -156,9 +156,12 @@ public class BasicSingleEventTest extends AbstractChronosTest {
      */
     @Test
     public void testGetEvent() throws Exception {
-        Date date = new Date();
-        Date today = DateTimeUtil.incrementDateTimeData(TimeZone.getTimeZone("UTC"), date, 0);
-        Date tomorrow = DateTimeUtil.incrementDateTimeData(TimeZone.getTimeZone("UTC"), date, 1);
+        Calendar instance = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+        instance.setTimeInMillis(System.currentTimeMillis());
+        instance.add(Calendar.HOUR, -1);
+        Date from = instance.getTime();
+        instance.add(Calendar.DAY_OF_MONTH, 1);
+        Date until = instance.getTime();
 
         // Create a single event
         EventData event = eventManager.createEvent(EventFactory.createSingleTwoHourEvent(defaultUserApi.getCalUser(), "testGetEvent", folderId));
@@ -171,12 +174,12 @@ public class BasicSingleEventTest extends AbstractChronosTest {
         AssertUtil.assertEventsEqual(event, actualEvent);
 
         // Get all events
-        List<EventData> events = eventManager.getAllEvents(today, tomorrow, false, folderId, null, null, false);
+        List<EventData> events = eventManager.getAllEvents(from, until, false, folderId, null, null, false);
         assertEquals(1, events.size());
         AssertUtil.assertEventsEqual(event, events.get(0));
 
         // Get updates
-        UpdatesResult updatesResult = eventManager.getUpdates(date, false, folderId);
+        UpdatesResult updatesResult = eventManager.getUpdates(from, false, folderId);
         assertEquals(1, updatesResult.getNewAndModified().size());
         AssertUtil.assertEventsEqual(event, updatesResult.getNewAndModified().get(0));
 

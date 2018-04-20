@@ -123,6 +123,24 @@ public class BasicICalCalendarProviderTest extends AbstractExternalProviderChron
     }
 
     @Test
+    public void testProbe_noScheme_returnException() throws ApiException {
+        String externalUri = "example.com/files/test.ics";
+
+        CalendarAccountProbeData data = new CalendarAccountProbeData();
+        data.setComOpenexchangeCalendarProvider(CalendarFolderManager.ICAL_ACCOUNT_PROVIDER_ID);
+
+        CalendarAccountProbeDataComOpenexchangeCalendarConfig config = new CalendarAccountProbeDataComOpenexchangeCalendarConfig();
+        config.setUri(externalUri);
+        data.setComOpenexchangeCalendarConfig(config);
+        data.setComOpenexchangeCalendarExtendedProperties(new CalendarAccountProbeDataComOpenexchangeCalendarExtendedProperties());
+
+        CalendarAccountProbeResponse probe = defaultUserApi.getChronosApi().probe(defaultUserApi.getSession(), data);
+
+        assertNotNull(probe.getError());
+        assertEquals(probe.getError(), "ICAL-PROV-4041", probe.getCode());
+    }
+
+    @Test
     public void testProbe_noDescriptionAndFeedNameProvidedAndNotInICS_returnDefault() throws OXException, IOException, JSONException, ApiException {
         String uuid = UUID.randomUUID().toString();
         String externalUri = "http://example.com/files/" + uuid + ".ics";
@@ -786,7 +804,7 @@ public class BasicICalCalendarProviderTest extends AbstractExternalProviderChron
     @Test
     public void testGet_forbiddenButSecondRequestOk_removeExceptionFromResponse() throws ApiException, OXException, IOException, JSONException {
         String externalUri = "http://example.com/files/" + UUID.randomUUID().toString() + ".ics";
-//        clear(externalUri);
+        //        clear(externalUri);
         mock(externalUri, BasicICalCalendarProviderTestConstants.GENERIC_RESPONSE, HttpStatus.SC_FORBIDDEN);
 
         String newFolderId = createDefaultAccount(externalUri);
@@ -822,7 +840,7 @@ public class BasicICalCalendarProviderTest extends AbstractExternalProviderChron
     @Test
     public void testGet_forbiddenSecondRequestInBanTime_returnException() throws ApiException, OXException, IOException, JSONException {
         String externalUri = "http://example.com/files/" + UUID.randomUUID().toString() + ".ics";
-//        clear(externalUri);
+        //        clear(externalUri);
         mock(externalUri, BasicICalCalendarProviderTestConstants.GENERIC_RESPONSE, HttpStatus.SC_FORBIDDEN);
 
         String newFolderId = createDefaultAccount(externalUri);
@@ -853,7 +871,7 @@ public class BasicICalCalendarProviderTest extends AbstractExternalProviderChron
     @Test
     public void testGet_forbiddenAndSecondRequestNotFound_changeExceptionInResponse() throws ApiException, OXException, IOException, JSONException {
         String externalUri = "http://example.com/files/" + UUID.randomUUID().toString() + ".ics";
-//        clear(externalUri);
+        //        clear(externalUri);
         mock(externalUri, BasicICalCalendarProviderTestConstants.GENERIC_RESPONSE, HttpStatus.SC_FORBIDDEN);
 
         String newFolderId = createDefaultAccount(externalUri);
@@ -891,7 +909,7 @@ public class BasicICalCalendarProviderTest extends AbstractExternalProviderChron
     @Test
     public void testGet_forbiddenAndSecondRequestInBanTime_returnException() throws ApiException, OXException, IOException, JSONException {
         String externalUri = "http://example.com/files/" + UUID.randomUUID().toString() + ".ics";
-//        clear(externalUri);
+        //        clear(externalUri);
         mock(externalUri, BasicICalCalendarProviderTestConstants.GENERIC_RESPONSE, HttpStatus.SC_FORBIDDEN);
 
         String newFolderId = createDefaultAccount(externalUri);
@@ -948,7 +966,7 @@ public class BasicICalCalendarProviderTest extends AbstractExternalProviderChron
     @Test
     public void testMultipleGet_forbiddenButSecondRequestOk_removeExceptionFromResponse() throws ApiException, OXException, IOException, JSONException {
         String externalUri = "http://example.com/files/" + UUID.randomUUID().toString() + ".ics";
-//        clear(externalUri);
+        //        clear(externalUri);
         mock(externalUri, BasicICalCalendarProviderTestConstants.GENERIC_RESPONSE, HttpStatus.SC_FORBIDDEN);
 
         String newFolderId = createDefaultAccount(externalUri);
@@ -984,7 +1002,7 @@ public class BasicICalCalendarProviderTest extends AbstractExternalProviderChron
     @Test
     public void testMultipleGet_forbiddenAndSecondRequestNotFound_changeExceptionInResponse() throws ApiException, OXException, IOException, JSONException {
         String externalUri = "http://example.com/files/" + UUID.randomUUID().toString() + ".ics";
-//        clear(externalUri);
+        //        clear(externalUri);
         mock(externalUri, BasicICalCalendarProviderTestConstants.GENERIC_RESPONSE, HttpStatus.SC_FORBIDDEN);
 
         String newFolderId = createDefaultAccount(externalUri);
@@ -1030,7 +1048,7 @@ public class BasicICalCalendarProviderTest extends AbstractExternalProviderChron
     @Test
     public void testMultipleGet_forbiddenAndSecondRequestInBanTime_returnException() throws ApiException, OXException, IOException, JSONException {
         String externalUri = "http://example.com/files/" + UUID.randomUUID().toString() + ".ics";
-//        clear(externalUri);
+        //        clear(externalUri);
         mock(externalUri, BasicICalCalendarProviderTestConstants.GENERIC_RESPONSE, HttpStatus.SC_FORBIDDEN);
 
         String newFolderId = createDefaultAccount(externalUri);
@@ -1072,7 +1090,6 @@ public class BasicICalCalendarProviderTest extends AbstractExternalProviderChron
         assertNotEquals(initialResponseError.getErrorId(), secondResponseError.getErrorId());
         assertNotEquals(initialResponseError.getErrorDesc(), secondResponseError.getErrorDesc());
     }
-
 
     private List<EventId> createEventIDs(List<EventData> allEvents, int maxEvents, String folder) {
         List<EventId> ids = new ArrayList<>();

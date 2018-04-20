@@ -49,6 +49,7 @@
 
 package com.openexchange.mail.authenticity.test;
 
+import static org.mockito.Mockito.when;
 import java.util.Arrays;
 import java.util.List;
 import javax.mail.internet.AddressException;
@@ -56,9 +57,9 @@ import javax.mail.internet.InternetAddress;
 import org.junit.Test;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.authenticity.AllowedAuthServId;
+import com.openexchange.mail.authenticity.MailAuthenticityProperty;
 import com.openexchange.mail.authenticity.MailAuthenticityStatus;
 import com.openexchange.mail.authenticity.impl.core.AuthenticationResultsValidator;
-import com.openexchange.mail.authenticity.impl.core.StandardAuthenticationResultsValidator;
 import com.openexchange.mail.dataobjects.MailAuthenticityResult;
 import com.openexchange.mail.mime.QuotedInternetAddress;
 
@@ -78,7 +79,7 @@ public class StandardAuthenticationResultsValidatorTest extends AbstractTestMail
 
     @Test
     public void testCorrectOverallResult() throws Exception {
-        AuthenticationResultsValidator validator = StandardAuthenticationResultsValidator.getInstance();
+        AuthenticationResultsValidator validator = handler.getValidator();
 
         //@formatter:off
         List<String> authHeaders = Arrays.asList(
@@ -97,7 +98,7 @@ public class StandardAuthenticationResultsValidatorTest extends AbstractTestMail
 
     @Test
     public void testCorrectOverallResult2() throws Exception {
-        AuthenticationResultsValidator validator = StandardAuthenticationResultsValidator.getInstance();
+        AuthenticationResultsValidator validator = handler.getValidator();
         //@formatter:off
         List<String> authHeaders = Arrays.asList(
             "open-xchange.com; spf=none (mailfrom) smtp.mailfrom=barfoo.org (client-ip=168.135.221.145; helo=hydra.barfoo.org; envelope-from=opensuse-buildservice+bounces-25693-marcus.klein=open-xchange.com@barfoo.org; receiver=<UNKNOWN>)",
@@ -114,7 +115,7 @@ public class StandardAuthenticationResultsValidatorTest extends AbstractTestMail
 
     @Test
     public void testCorrectOverallResult3() throws Exception {
-        AuthenticationResultsValidator validator = StandardAuthenticationResultsValidator.getInstance();
+        AuthenticationResultsValidator validator = handler.getValidator();
 
         //@formatter:off
         List<String> authHeaders = Arrays.asList(
@@ -133,19 +134,55 @@ public class StandardAuthenticationResultsValidatorTest extends AbstractTestMail
 
     @Test
     public void testCorrectOverallResult4() throws OXException, AddressException {
-        AuthenticationResultsValidator validator = StandardAuthenticationResultsValidator.getInstance();
+        AuthenticationResultsValidator validator = handler.getValidator();
 
         //@formatter:off
         List<String> authHeaders = Arrays.asList(
-            "open-xchange.com; dkim=fail reason=\"key not found in DNS\" (0-bit key; unprotected) header.d=cvcmail.onmicrosoft.com header.i=@cvcmail.onmicrosoft.com header.b=\"XCGeafBf\";dkim-atps=neutral",
-            "open-xchange.com; spf=pass (mailfrom) smtp.mailfrom=alticeusa.com (client-ip=104.47.42.101; helo=nam03-by2-obe.outbound.protection.outlook.com; envelope-from=frances.breckon@alticeusa.com; receiver=<UNKNOWN>)",
-            "open-xchange.com; dmarc=none (p=none dis=none) header.from=AlticeUSA.com"
+            "open-xchange.com; dkim=fail reason=\"key not found in DNS\" (0-bit key; unprotected) header.d=cvcmail.onmicrosoft.com header.i=@mail.foobar.com header.b=\"XCGeafBf\";dkim-atps=neutral",
+            "open-xchange.com; spf=pass (mailfrom) smtp.mailfrom=foobar.com (client-ip=104.47.42.101; helo=some.host.blah.com; envelope-from=john.doe@foobar.com; receiver=<UNKNOWN>)",
+            "open-xchange.com; dmarc=none (p=none dis=none) header.from=fooBAR.com"
         );
         //@formatter:on
 
         List<AllowedAuthServId> allowedAuthServIds = AllowedAuthServId.allowedAuthServIdsFor("open-xchange.com");
-        InternetAddress from = new QuotedInternetAddress("Frances Breckon <Frances.Breckon@AlticeUSA.com>");
+        InternetAddress from = new QuotedInternetAddress("John Doe <John.Doe@fooBAR.com>");
 
+        MailAuthenticityResult result = validator.parseHeaders(authHeaders, from, allowedAuthServIds);
+        assertStatus(MailAuthenticityStatus.NEUTRAL, result.getStatus());
+    }
+
+    @Test
+    public void testConsiderDMARCPolicy1() throws Exception {
+        when(leanConfig.getBooleanProperty(MailAuthenticityProperty.CONSIDER_DMARC_POLICY)).thenReturn(true);
+
+        //@formatter:off
+        List<String> authHeaders = Arrays.asList(
+            "open-xchange.com; dmarc=fail (p=none dis=none) header.from=foobar.com",
+            "open-xchange.com; spf=none smtp.helo=mx2.foobar.com"
+        );
+        //@formatter:on
+        List<AllowedAuthServId> allowedAuthServIds = AllowedAuthServId.allowedAuthServIdsFor("open-xchange.com");
+        InternetAddress from = new QuotedInternetAddress("MAILER-DAEMON@foobar.com (Mail Delivery System)");
+
+        AuthenticationResultsValidator validator = handler.getValidator();
+        MailAuthenticityResult result = validator.parseHeaders(authHeaders, from, allowedAuthServIds);
+        assertStatus(MailAuthenticityStatus.NEUTRAL, result.getStatus());
+    }
+    
+    @Test
+    public void testConsiderDMARCPolicy2() throws Exception {
+        when(leanConfig.getBooleanProperty(MailAuthenticityProperty.CONSIDER_DMARC_POLICY)).thenReturn(true);
+
+        //@formatter:off
+        List<String> authHeaders = Arrays.asList(
+            "open-xchange.com; dmarc=fail (p=none dis=none) header.from=open-xchange.com",
+            "open-xchange.com; spf=none smtp.mailfrom=mailop-bounces@foobar.com"
+        );
+        //@formatter:on
+        List<AllowedAuthServId> allowedAuthServIds = AllowedAuthServId.allowedAuthServIdsFor("open-xchange.com");
+        InternetAddress from = new QuotedInternetAddress("Jane Doe <jane.doe@open-xchange.com>");
+
+        AuthenticationResultsValidator validator = handler.getValidator();
         MailAuthenticityResult result = validator.parseHeaders(authHeaders, from, allowedAuthServIds);
         assertStatus(MailAuthenticityStatus.NEUTRAL, result.getStatus());
     }

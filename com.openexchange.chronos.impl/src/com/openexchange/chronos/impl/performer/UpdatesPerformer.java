@@ -62,7 +62,11 @@ import static com.openexchange.folderstorage.Permission.READ_FOLDER;
 import static com.openexchange.folderstorage.Permission.READ_OWN_OBJECTS;
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.L;
+import static com.openexchange.java.Autoboxing.i;
+import static com.openexchange.tools.arrays.Collections.isNullOrEmpty;
+import java.util.Date;
 import java.util.List;
+import java.util.ListIterator;
 import com.openexchange.chronos.AttendeeField;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
@@ -71,6 +75,7 @@ import com.openexchange.chronos.impl.CalendarFolder;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.SearchOptions;
+import com.openexchange.chronos.service.SortOrder;
 import com.openexchange.chronos.service.UpdatesResult;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.exception.OXException;
@@ -162,17 +167,18 @@ public class UpdatesPerformer extends AbstractQueryPerformer {
         /*
          * perform search & userize the results based on the requested folder
          */
+        SearchOptions searchOptions = prepareSearchOptions(session);
         String[] ignore = session.get(CalendarParameters.PARAMETER_IGNORE, String[].class);
         EventField[] fields = getFields(session, EventField.ATTENDEES, EventField.ORGANIZER);
         List<Event> newAndModifiedEvents = null;
         if (false == com.openexchange.tools.arrays.Arrays.contains(ignore, "changed")) {
-            List<Event> events = storage.getEventStorage().searchEvents(searchTerm, new SearchOptions(session), fields);
+            List<Event> events = storage.getEventStorage().searchEvents(searchTerm, searchOptions, fields);
             storage.getUtilities().loadAdditionalEventData(getCalendarUserId(folder), events, fields);
             newAndModifiedEvents = new EventPostProcessor(session, storage, isSkipClassifiedEvents(session)).process(events, folder).getEvents();
         }
         List<Event> deletedEvents = null;
         if (false == com.openexchange.tools.arrays.Arrays.contains(ignore, "deleted")) {
-            List<Event> events = storage.getEventStorage().searchEventTombstones(searchTerm, new SearchOptions(session), fields);
+            List<Event> events = storage.getEventStorage().searchEventTombstones(searchTerm, searchOptions, fields);
             storage.getUtilities().loadAdditionalEventTombstoneData(events, fields);
             Boolean oldExpandOccurrences = session.get(CalendarParameters.PARAMETER_EXPAND_OCCURRENCES, Boolean.class);
             try {
@@ -182,7 +188,100 @@ public class UpdatesPerformer extends AbstractQueryPerformer {
                 session.set(CalendarParameters.PARAMETER_EXPAND_OCCURRENCES, oldExpandOccurrences);
             }
         }
-        return new DefaultUpdatesResult(newAndModifiedEvents, deletedEvents);
+        /*
+         * limit returned results as requested
+         */
+        return getResult(newAndModifiedEvents, deletedEvents, 0 < searchOptions.getLimit() ? searchOptions.getLimit() - 1 : searchOptions.getLimit());
+    }
+
+    private static SearchOptions prepareSearchOptions(CalendarParameters parameters) {
+        SearchOptions searchOptions = new SearchOptions();
+        searchOptions.addOrder(SortOrder.getSortOrder(EventField.TIMESTAMP, SortOrder.Order.ASC));
+        Date from = parameters.get(CalendarParameters.PARAMETER_RANGE_START, Date.class);
+        Date until = parameters.get(CalendarParameters.PARAMETER_RANGE_END, Date.class);
+        searchOptions.setRange(from, until);
+        Integer leftHandLimit = parameters.get(CalendarParameters.PARAMETER_LEFT_HAND_LIMIT, Integer.class);
+        Integer rightHandLimit = parameters.get(CalendarParameters.PARAMETER_RIGHT_HAND_LIMIT, Integer.class);
+        searchOptions.setLimits(null != leftHandLimit ? i(leftHandLimit) : 0, null != rightHandLimit ? i(rightHandLimit) + 1 : -1);
+        return searchOptions;
+    }
+
+    protected static DefaultUpdatesResult getResult(List<Event> newAndModifiedEvents, List<Event> deletedEvents, int limit) {
+        if (0 >= limit || (isNullOrEmpty(deletedEvents) && isNullOrEmpty(newAndModifiedEvents))) {
+            /*
+             * not limited, so no truncation necessary
+             */
+            return new DefaultUpdatesResult(newAndModifiedEvents, deletedEvents);
+        }
+        if (isNullOrEmpty(deletedEvents)) {
+            /*
+             * truncate 'new and modified' event list if needed
+             */
+            boolean truncated;
+            if (newAndModifiedEvents.size() > limit) {
+                newAndModifiedEvents = newAndModifiedEvents.subList(0, limit);
+                truncated = true;
+            } else {
+                truncated = false;
+            }
+            long timestamp = newAndModifiedEvents.get(newAndModifiedEvents.size() - 1).getTimestamp();
+            return new DefaultUpdatesResult(newAndModifiedEvents, deletedEvents, timestamp, truncated);
+        }
+        if (isNullOrEmpty(newAndModifiedEvents)) {
+            /*
+             * truncate 'deleted' event list if needed
+             */
+            boolean truncated;
+            if (deletedEvents.size() > limit) {
+                deletedEvents = deletedEvents.subList(0, limit);
+                truncated = true;
+            } else {
+                truncated = false;
+            }
+            long timestamp = deletedEvents.get(deletedEvents.size() - 1).getTimestamp();
+            return new DefaultUpdatesResult(newAndModifiedEvents, deletedEvents, timestamp, truncated);
+        }
+        if (newAndModifiedEvents.size() + deletedEvents.size() <= limit) {
+            /*
+             * overall size within limit, so no truncation necessary
+             */
+            return new DefaultUpdatesResult(newAndModifiedEvents, deletedEvents);
+        }
+        /*
+         * overall size exceeds limit, so iterate through result lists until limit is reached & remember last timestamp
+         */
+        ListIterator<Event> newAndModifiedIterator = newAndModifiedEvents.listIterator();
+        ListIterator<Event> deletedIterator = deletedEvents.listIterator();
+        long lastTimestamp = 0L;
+        int count = 0;
+        while (count < limit && (newAndModifiedIterator.hasNext() || deletedIterator.hasNext())) {
+            if (false == newAndModifiedIterator.hasNext()) {
+                lastTimestamp = deletedIterator.next().getTimestamp();
+            } else if (false == deletedIterator.hasNext()) {
+                lastTimestamp = newAndModifiedIterator.next().getTimestamp();
+            } else {
+                Event nextNewAndModified = newAndModifiedIterator.next();
+                Event nextDeleted = deletedIterator.next();
+                if (nextNewAndModified.getTimestamp() <= nextDeleted.getTimestamp()) {
+                    lastTimestamp = nextNewAndModified.getTimestamp();
+                    deletedIterator.previous();
+                } else {
+                    lastTimestamp = nextDeleted.getTimestamp();
+                    newAndModifiedIterator.previous();
+                }
+            }
+            count++;
+        }
+        /*
+         * truncate resulting lists if there are remaining events
+         */
+        if (newAndModifiedIterator.hasNext()) {
+            newAndModifiedEvents = newAndModifiedEvents.subList(0, newAndModifiedIterator.nextIndex());
+        }
+        if (deletedIterator.hasNext()) {
+            deletedEvents = deletedEvents.subList(0, deletedIterator.nextIndex());
+        }
+        return new DefaultUpdatesResult(newAndModifiedEvents, deletedEvents, lastTimestamp, true);
     }
 
 }

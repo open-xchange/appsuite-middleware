@@ -47,76 +47,36 @@
  *
  */
 
-package com.openexchange.ajax.infostore.actions;
+package com.openexchange.html.vulntests;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-import com.openexchange.ajax.AJAXServlet;
-import com.openexchange.ajax.container.Response;
-import com.openexchange.ajax.framework.AbstractAJAXParser;
-
+import org.junit.Assert;
+import org.junit.Test;
+import com.openexchange.html.AbstractSanitizing;
+import com.openexchange.html.internal.css.CSSMatcher;
+import com.openexchange.html.internal.filtering.FilterMaps;
+import com.openexchange.java.StringBufferStringer;
+import com.openexchange.java.Stringer;
 
 /**
- * {@link RestoreRequest}
+ * {@link Bug57095VulTest}
  *
- * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
- * @since v7.10.0
+ * @author <a href="mailto:vitali.sjablow@open-xchange.com">Vitali Sjablow</a>
  */
-public class RestoreRequest extends AbstractInfostoreRequest<RestoreResponse> {
+public class Bug57095VulTest extends AbstractSanitizing {
 
-    private String folder;
-    private List<String> ids;
-    private boolean failOnError;
-
-    public RestoreRequest(List<String> ids, String folder, boolean failOnError) {
+    public Bug57095VulTest() {
         super();
-        this.ids = ids;
-        this.folder = folder;
-        this.failOnError = failOnError;
     }
 
-    public RestoreRequest(List<String> ids, String folder) {
-        this(ids, folder, true);
-    }
+    @Test
+    public void testDoCheckCss_bug57095() {
+        FilterMaps.loadWhitelist();
 
-    @Override
-    public Method getMethod() {
-        return Method.PUT;
-    }
-
-    @Override
-    public Parameter[] getParameters() throws IOException, JSONException {
-        List<Parameter> tmp = new ArrayList<>(2);
-        tmp.add(new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_RESTORE));
-        tmp.add(new Parameter(AJAXServlet.PARAMETER_FOLDERID, folder));
-        return tmp.toArray(new Parameter[tmp.size()]);
-    }
-
-    @Override
-    public Object getBody() throws IOException, JSONException {
-        JSONArray body = new JSONArray(ids.size());
-        for (String id: ids) {
-            JSONObject obj = new JSONObject();
-            obj.put("id", id);
-            body.add(0, obj);
-        }
-        return body;
-    }
-
-    @Override
-    public AbstractAJAXParser<? extends RestoreResponse> getParser() {
-        return new AbstractAJAXParser<RestoreResponse>(failOnError) {
-
-            @Override
-            protected RestoreResponse createResponse(Response response) throws JSONException {
-                return new RestoreResponse(response);
-            }
-
-        };
+        Stringer cssBld = new StringBufferStringer(new StringBuffer("font:\"'/{/onerror=alert(document.cookie)//"));
+        CSSMatcher.checkCSS(cssBld, FilterMaps.getStaticStyleMap(), true, true);
+        String content = "";
+        String convertedCss = cssBld.toString().trim();
+        Assert.assertEquals("Processed CSS does not match.", content, convertedCss);
     }
 
 }

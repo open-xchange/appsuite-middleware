@@ -165,7 +165,7 @@ public class ICalUtils {
         } catch (IOException e) {
             throw ICalExceptionCodes.IO_ERROR.create(e, e.getMessage());
         } catch (ParserException e) {
-            throw asOXException(e);
+            throw ICalExceptionCodes.INVALID_CALENDAR_CONTENT.create(e);
         }
         if (null == calendar) {
             throw ICalExceptionCodes.NO_CALENDAR.create();

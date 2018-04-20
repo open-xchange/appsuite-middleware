@@ -217,7 +217,7 @@ public class ICalFeedClient {
         if (entity == null) {
             return response;
         }
-        long contentLength = httpResponse.getEntity().getContentLength();
+        long contentLength = entity.getContentLength();
         String contentLength2 = response.getContentLength();
 
         long allowedFeedSize = ICalCalendarProviderProperties.allowedFeedSize();

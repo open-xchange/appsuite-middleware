@@ -44,6 +44,18 @@ properties:
       file: mailAuthenticity.properties
       packageName: open-xchange-mail-authenticity
       tags: ["Mail Authenticity","Mail"]
+    - key: com.openexchange.mail.authenticity.considerDMARCPolicy
+      description: |
+        Defines whether the policy of the DMARC mechanism will be considered when determining the overall result. 
+        If this property is enabled, then in case the DMARC mechanism defines a policy and that policy is 'NONE', 
+        then the DMARC mechanism result will not be taken into consideration and will not influence the overall result.
+      defaultValue: false
+      version: 7.10.0
+      reloadable: true
+      configcascadeAware: false
+      file: mailAuthenticity.properties
+      packageName: open-xchange-mail-authenticity
+      tags: ["Mail Authenticity","Mail"]
     - key: com.openexchange.mail.authenticity.trusted.tenants
       description: |
         A comma separated list of tenants.
