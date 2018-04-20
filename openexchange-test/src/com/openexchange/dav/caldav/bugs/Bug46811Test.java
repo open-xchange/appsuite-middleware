@@ -86,6 +86,7 @@ public class Bug46811Test extends CalDAVTest {
 
     private CalendarTestManager manager2;
 
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
@@ -93,6 +94,7 @@ public class Bug46811Test extends CalDAVTest {
         manager2.setFailOnError(true);
     }
 
+    @Override
     @After
     public void tearDown() throws Exception {
         try {
@@ -150,6 +152,7 @@ public class Bug46811Test extends CalDAVTest {
         Appointment exception = new Appointment();
         exception.setTitle("Bug46811Test_edit");
         exception.setObjectID(appointment.getObjectID());
+        exception.setUid(appointment.getUid());
         exception.setStartDate(new Date(exceptionStart));
         exception.setEndDate(new Date(exceptionEnd));
         exception.setRecurrencePosition(6);

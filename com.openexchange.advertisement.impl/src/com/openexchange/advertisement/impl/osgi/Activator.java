@@ -63,6 +63,7 @@ import com.openexchange.advertisement.impl.services.GlobalAdvertisementConfigSer
 import com.openexchange.advertisement.impl.services.TaxonomyTypesAdvertisementConfigService;
 import com.openexchange.caching.CacheService;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.Reloadable;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.context.ContextService;
 import com.openexchange.database.DatabaseService;
@@ -114,6 +115,7 @@ public class Activator extends HousekeepingActivator {
         registerService(AdvertisementConfigService.class, AccessCombinationAdvertisementConfigService.getInstance());
         registerService(AdvertisementConfigService.class, GlobalAdvertisementConfigService.getInstance());
         registerService(AdvertisementConfigService.class, TaxonomyTypesAdvertisementConfigService.getInstance());
+        registerService(Reloadable.class, TaxonomyTypesAdvertisementConfigService.getInstance());
 
         // Register appropriate RMI stub
         {

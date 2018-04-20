@@ -64,6 +64,7 @@ public class DefaultUpdatesResult implements UpdatesResult {
     private final List<Event> newAndModifiedEvents;
     private final List<Event> deletedEvents;
     private final long timestamp;
+    private final boolean truncated;
 
     /**
      * Initializes a new {@link DefaultUpdatesResult}.
@@ -71,12 +72,14 @@ public class DefaultUpdatesResult implements UpdatesResult {
      * @param newAndModifiedEvents The list of new/modified events
      * @param deletedEvents The list of deleted events
      * @param timestamp The maximum timestamp of all events in the update result
+     * @param truncated <code>true</code> if the result is truncated, <code>false</code>, otherwise
      */
-    public DefaultUpdatesResult(List<Event> newAndModifiedEvents, List<Event> deletedEvents, long timestamp) {
+    public DefaultUpdatesResult(List<Event> newAndModifiedEvents, List<Event> deletedEvents, long timestamp, boolean truncated) {
         super();
         this.newAndModifiedEvents = newAndModifiedEvents;
         this.deletedEvents = deletedEvents;
         this.timestamp = timestamp;
+        this.truncated = truncated;
     }
 
     /**
@@ -86,7 +89,7 @@ public class DefaultUpdatesResult implements UpdatesResult {
      * @param deletedEvents The list of deleted events
      */
     public DefaultUpdatesResult(List<Event> newAndModifiedEvents, List<Event> deletedEvents) {
-        this(newAndModifiedEvents, deletedEvents, Math.max(getMaximumTimestamp(newAndModifiedEvents), getMaximumTimestamp(deletedEvents)));
+        this(newAndModifiedEvents, deletedEvents, Math.max(getMaximumTimestamp(newAndModifiedEvents), getMaximumTimestamp(deletedEvents)), false);
     }
 
     @Override
@@ -102,6 +105,11 @@ public class DefaultUpdatesResult implements UpdatesResult {
     @Override
     public long getTimestamp() {
         return timestamp;
+    }
+
+    @Override
+    public boolean isTruncated() {
+        return truncated;
     }
 
     @Override
