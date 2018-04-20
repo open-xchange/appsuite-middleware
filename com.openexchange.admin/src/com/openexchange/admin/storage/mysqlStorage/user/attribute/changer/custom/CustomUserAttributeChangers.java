@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2018-2020 OX Software GmbH
+ *     Copyright (C) 2016-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,42 +47,40 @@
  *
  */
 
-package com.openexchange.admin.storage.mysqlStorage.user.attribute.changer;
+package com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.custom;
 
-import java.util.EnumSet;
-import com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.custom.CustomUserAttribute;
-import com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.mailaccount.UserMailAccountAttribute;
-import com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.mailsetting.UserMailSettingAttribute;
-import com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.user.UserAttribute;
+import java.sql.Connection;
+import java.sql.SQLException;
+import com.openexchange.admin.rmi.dataobjects.User;
+import com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.Attribute;
+import com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.AttributeChangers;
 
 /**
- * {@link AttributeChanger}
+ * {@link CustomUserAttributeChangers}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
- * @since v7.10.0
  */
-public enum AttributeChanger {
+public class CustomUserAttributeChangers implements AttributeChangers {
 
-    USER(EnumSet.allOf(UserAttribute.class)),
-    USER_SETTING_MAIL(EnumSet.allOf(UserMailSettingAttribute.class)),
-    USER_MAIL_ACCOUNT(EnumSet.allOf(UserMailAccountAttribute.class)),
-    CUSTOM_USER_ATTRIBUTE(EnumSet.allOf(CustomUserAttribute.class));
-
-    private final EnumSet<? extends Attribute> attributes;
+    private final CustomUserAttributeChanger changer;
 
     /**
-     * Initialises a new {@link AttributeChanger}.
+     * Initialises a new {@link CustomUserAttributeChangers}.
      */
-    private AttributeChanger(EnumSet<? extends Attribute> attributes) {
-        this.attributes = attributes;
+    public CustomUserAttributeChangers() {
+        super();
+        changer = new CustomUserAttributeChanger();
     }
 
-    /**
-     * Gets the attributes
-     *
-     * @return The attributes
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.AttributeChangers#change(com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.Attribute, com.openexchange.admin.rmi.dataobjects.User, int, int,
+     * java.sql.Connection)
      */
-    public EnumSet<? extends Attribute> getAttributes() {
-        return attributes;
+    @Override
+    public boolean change(Attribute attribute, User userData, int userId, int contextId, Connection connection) throws SQLException {
+        return changer.changeAttribute(userId, contextId, userData, connection);
     }
+
 }

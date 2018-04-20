@@ -113,6 +113,7 @@ import com.openexchange.admin.storage.interfaces.OXToolStorageInterface;
 import com.openexchange.admin.storage.interfaces.OXUtilStorageInterface;
 import com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.AttributeChanger;
 import com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.AttributeChangers;
+import com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.custom.CustomUserAttributeChangers;
 import com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.mailaccount.UserMailAccountAttributeChangers;
 import com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.mailsetting.UserSettingMailAttributeChangers;
 import com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.user.UserAttributeChangers;
@@ -219,6 +220,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
         ac.put(AttributeChanger.USER, new UserAttributeChangers(cache));
         ac.put(AttributeChanger.USER_SETTING_MAIL, new UserSettingMailAttributeChangers());
         ac.put(AttributeChanger.USER_MAIL_ACCOUNT, new UserMailAccountAttributeChangers());
+        ac.put(AttributeChanger.CUSTOM_USER_ATTRIBUTE, new CustomUserAttributeChangers());
         attributeChangers = Collections.unmodifiableMap(ac);
     }
 
@@ -632,52 +634,6 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             }
 
             //////////////////////// vvvvvv WIP vvvvvv //////////////////////
-
-            if (usrdata.isUserAttributesset()) {
-                PreparedStatement stmtinsertattribute = null;
-                PreparedStatement stmtdelattribute = null;
-                try {
-                    for (Map.Entry<String, Map<String, String>> ns : usrdata.getUserAttributes().entrySet()) {
-                        String namespace = ns.getKey();
-                        for (Map.Entry<String, String> pair : ns.getValue().entrySet()) {
-                            String name = namespace + "/" + pair.getKey();
-                            String value = pair.getValue();
-                            if (value == null) {
-                                if (null == stmtdelattribute) {
-                                    stmtdelattribute = con.prepareStatement("DELETE FROM user_attribute WHERE cid=? AND id=? AND name=?");
-                                    stmtdelattribute.setInt(1, contextId);
-                                    stmtdelattribute.setInt(2, userId);
-                                }
-                                stmtdelattribute.setString(3, name);
-                                stmtdelattribute.addBatch();
-                            } else {
-                                if (null == stmtinsertattribute) {
-                                    stmtinsertattribute = con.prepareStatement("INSERT INTO user_attribute (cid, id, name, value, uuid) VALUES (?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE value=?");
-                                    stmtinsertattribute.setInt(1, contextId);
-                                    stmtinsertattribute.setInt(2, userId);
-                                }
-                                stmtinsertattribute.setString(3, name);
-                                stmtinsertattribute.setString(4, value);
-                                stmtinsertattribute.setBytes(5, UUIDs.toByteArray(UUID.randomUUID()));
-                                stmtinsertattribute.setString(6, value);
-                                stmtinsertattribute.executeUpdate();
-                                stmtinsertattribute.addBatch();
-                            }
-                            changedAttributes.add(name);
-                        }
-                    }
-
-                    if (null != stmtdelattribute) {
-                        stmtdelattribute.executeBatch();
-                    }
-                    if (null != stmtinsertattribute) {
-                        stmtinsertattribute.executeBatch();
-                    }
-                } finally {
-                    Databases.closeSQLStuff(stmtinsertattribute);
-                    Databases.closeSQLStuff(stmtdelattribute);
-                }
-            }
 
             // update prg_contacts ONLY if needed ( see
             // "prg_contacts_update_needed")

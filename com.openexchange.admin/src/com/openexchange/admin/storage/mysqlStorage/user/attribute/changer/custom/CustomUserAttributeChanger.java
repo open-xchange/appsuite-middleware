@@ -129,6 +129,7 @@ public class CustomUserAttributeChanger extends AbstractMultiAttributeChanger {
             Databases.closeSQLStuff(stmtInsertAttribute);
             Databases.closeSQLStuff(stmtDeleteAttribute);
         }
+        // TODO: notify callers of changed attributes, maybe use observer pattern?
         return changedAttributes;
     }
 
