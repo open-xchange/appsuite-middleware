@@ -313,7 +313,7 @@ public class OAuthServiceImpl implements OAuthService {
         account.setEnabledScopes(scopes);
 
         //Session session = (Session) arguments.get(OAuthConstants.ARGUMENT_SESSION);
-        String userIdentity = service.getUserIdentity(session, account.getToken(), account.getSecret());
+        String userIdentity = service.getUserIdentity(session, accountId, account.getToken(), account.getSecret());
         account.setUserIdentity(userIdentity);
 
         String actionHint = (String) arguments.get(OAuthConstants.ARGUMENT_ACTION_HINT);
@@ -372,10 +372,9 @@ public class OAuthServiceImpl implements OAuthService {
             HttpsURLConnection.setDefaultSSLSocketFactory(Services.getService(SSLSocketFactoryProvider.class).getDefault());
             obtainToken(type, arguments, account, scopes);
 
-            //Session session = (Session) arguments.get(OAuthConstants.ARGUMENT_SESSION);
             account.setEnabledScopes(scopes);
 
-            String userIdentity = service.getUserIdentity(session, account.getToken(), account.getSecret());
+            String userIdentity = service.getUserIdentity(session, -1, account.getToken(), account.getSecret());
             account.setUserIdentity(userIdentity);
 
             DefaultOAuthAccount existingAccount = (DefaultOAuthAccount) oauthAccountStorage.findByUserIdentity(session, userIdentity, serviceMetaData);
@@ -487,7 +486,7 @@ public class OAuthServiceImpl implements OAuthService {
         account.setEnabledScopes(scopes);
         // Lazy identity update
         if (!oauthAccountStorage.hasUserIdentity(session, accountId, serviceMetaData)) {
-            account.setUserIdentity(service.getUserIdentity(session, account.getToken(), account.getSecret()));
+            account.setUserIdentity(service.getUserIdentity(session, accountId, account.getToken(), account.getSecret()));
         }
         oauthAccountStorage.updateAccount(session, account);
         return account;

@@ -170,7 +170,7 @@ public abstract class AbstractScribeAwareOAuthServiceMetaData extends AbstractOA
      * @see com.openexchange.oauth.OAuthServiceMetaData#getUserIdentity(java.lang.String)
      */
     @Override
-    public String getUserIdentity(Session session, String accessToken, String accessSecret) throws OXException {
+    public String getUserIdentity(Session session, int accountId, String accessToken, String accessSecret) throws OXException {
         // Contact the OAuth provider and fetch the identity of the current logged in user
         OAuthService scribeService = new ServiceBuilder().provider(getScribeService()).apiKey(getAPIKey(session)).apiSecret(getAPISecret(session)).build();
         OAuthRequest request = new OAuthRequest(getIdentityHTTPMethod(), getIdentityURL(accessToken));
@@ -180,6 +180,9 @@ public abstract class AbstractScribeAwareOAuthServiceMetaData extends AbstractOA
 
         int responseCode = response.getCode();
         String body = response.getBody();
+        if (responseCode == 403) {
+            throw OAuthExceptionCodes.OAUTH_ACCESS_TOKEN_INVALID.create(getId(), accountId, session.getUserId(), session.getContextId());
+        }
         if (responseCode >= 400 && responseCode <= 499) {
             throw OAuthExceptionCodes.DENIED_BY_PROVIDER.create(body);
         }

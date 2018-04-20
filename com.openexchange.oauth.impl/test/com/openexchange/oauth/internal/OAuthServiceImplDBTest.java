@@ -143,7 +143,7 @@ public class OAuthServiceImplDBTest extends SQLTestCase {
              * @see com.openexchange.oauth.OAuthServiceMetaData#getUserIdentity(java.lang.String)
              */
             @Override
-            public String getUserIdentity(Session session, String accessToken, String accessSecret) throws OXException {
+            public String getUserIdentity(Session session, int accountId, String accessToken, String accessSecret) throws OXException {
                 return "someIdentity";
             }
         });

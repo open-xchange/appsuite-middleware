@@ -94,6 +94,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.FolderService;
 import com.openexchange.folderstorage.FolderServiceDecorator;
 import com.openexchange.java.Strings;
+import com.openexchange.oauth.OAuthExceptionCodes;
 import com.openexchange.session.Session;
 
 /**
@@ -128,11 +129,7 @@ public class GoogleCalendarAccess extends BasicCachingCalendarAccess {
         } catch (JSONException e) {
             throw CalendarExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
-        try {
-            init(checkConfig);
-        } catch (OXException e) {
-            // ignore exception for now
-        }
+        init(checkConfig);
     }
 
     private void init(boolean checkConfig) throws OXException {
@@ -145,6 +142,9 @@ public class GoogleCalendarAccess extends BasicCachingCalendarAccess {
                  * Initialization of the oauthAccess failed. Stopping initialization of the GoogleCalendarAccess.
                  * Set refreshInterval to minimum.
                  */
+                if (OAuthExceptionCodes.OAUTH_ACCESS_TOKEN_INVALID.equals(e)) {
+                    throw e;
+                }
                 throw GoogleExceptionCodes.OAUTH_INITIALIZATION_FAILED.create(e);
             }
 

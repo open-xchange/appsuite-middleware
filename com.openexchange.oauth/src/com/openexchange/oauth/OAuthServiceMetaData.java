@@ -246,10 +246,11 @@ public interface OAuthServiceMetaData {
      * Some providers need the 'profile user' scope enabled before they can return the user identity.
      * 
      * @param session The {@link Session}
+     * @param accountId The account's identifier
      * @param accessToken access token
      * @param accessSecret The access secret
      * @return the user's identity or <code>null</code> if none can be retrieved.
      * @throws OXException if an error is occurred
      */
-    String getUserIdentity(Session session, String accessToken, String accessSecret) throws OXException;
+    String getUserIdentity(Session session, int accountId, String accessToken, String accessSecret) throws OXException;
 }

@@ -132,7 +132,7 @@ public abstract class AbstractOAuthAccess implements OAuthAccess {
 
         // Verify if the account has the user identity set, lazy update
         if (Strings.isEmpty(account.getUserIdentity())) {
-            String userIdentity = account.getMetaData().getUserIdentity(session, account.getToken(), account.getSecret());
+            String userIdentity = account.getMetaData().getUserIdentity(session, account.getId(), account.getToken(), account.getSecret());
             ((DefaultOAuthAccount) account).setUserIdentity(userIdentity);
             oauthService.updateAccount(session, account.getId(), Collections.singletonMap(OAuthConstants.ARGUMENT_IDENTITY, userIdentity));
         }
