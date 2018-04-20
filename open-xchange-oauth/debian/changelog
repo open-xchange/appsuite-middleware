@@ -1,3 +1,9 @@
+open-xchange-oauth (7.8.4-28) stable; urgency=medium
+
+  * Build for patch 2018-04-23 (4670)
+
+ -- Steffen Templin <marcus.klein@open-xchange.com>  Fri, 20 Apr 2018 10:50:14 +0200
+
 open-xchange-oauth (7.8.4-27) stable; urgency=medium
 
   * Build for patch 2018-04-12 (4674)
