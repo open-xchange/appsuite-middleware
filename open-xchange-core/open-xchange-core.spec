@@ -526,6 +526,15 @@ EOF
     if [ "\"USM-EAS*\", \"USM-JSON*\", \"open-xchange-mailapp\"" = "${VALUE}" ]; then
         ox_set_property com.openexchange.push.allowedClients "${VALUE}, \"open-xchange-mobile-api-facade*\"" /opt/open-xchange/etc/mail-push.properties
     fi
+
+    # SoftwareChange_Request-160
+    whlipr=/opt/open-xchange/etc/whitelist.properties
+    ox_add_property html.style.webkit-box-sizing '""' ${whlipr}
+    ox_add_property html.style.moz-box-sizing '""' ${whlipr}
+    ox_add_property html.style.box-sizing '"border-box"' ${whlipr}
+    ox_add_property html.style.-webkit-box-sizing '"border-box"' ${whlipr}
+    ox_add_property html.style.-moz-box-sizing '"border-box"' ${whlipr}
+
 fi
 
 PROTECT=( autoconfig.properties configdb.properties hazelcast.properties jolokia.properties mail.properties mail-push.properties management.properties secret.properties secrets server.properties sessiond.properties share.properties tokenlogin-secrets )
