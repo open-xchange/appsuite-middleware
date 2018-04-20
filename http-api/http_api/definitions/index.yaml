@@ -362,6 +362,8 @@ InfoItemSharingNotificationResponse:
   $ref: ./infostore/InfoItemSharingNotificationResponse.yaml
 InfoItemSharingNotificationData:
   $ref: ./infostore/InfoItemSharingNotificationData.yaml
+InfoItemsRestoreResponseData:
+  $ref: ./infostore/InfoItemsRestoreResponseData.yaml
 InfoFolderPathData:
   $ref: ./infostore/FolderPathData.yaml
 # Module: attachments

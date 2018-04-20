@@ -152,7 +152,7 @@ import com.openexchange.tx.TransactionAwares;
  */
 public abstract class AbstractCompositingIDBasedFileAccess extends AbstractCompositingIDBasedAccess implements IDBasedFileAccess {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AbstractCompositingIDBasedFileAccess.class);
+    static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AbstractCompositingIDBasedFileAccess.class);
 
     /** The empty {@link TimedResult} */
     private static final TimedResult<File> EMPTY_TIMED_RESULT = Results.emptyTimedResult();
