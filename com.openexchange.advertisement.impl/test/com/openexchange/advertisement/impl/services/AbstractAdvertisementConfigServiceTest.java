@@ -61,6 +61,7 @@ import org.mockito.MockitoAnnotations;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
+import com.openexchange.advertisement.AdvertisementConfigService;
 import com.openexchange.advertisement.impl.osgi.Services;
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheKey;
@@ -69,7 +70,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.session.Session;
 
 /**
- * 
+ *
  * {@link AbstractAdvertisementConfigServiceTest}
  *
  * @author <a href="mailto:vitali.sjablow@open-xchange.com">Vitali Sjablow</a>
@@ -78,7 +79,7 @@ import com.openexchange.session.Session;
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({ Session.class, Services.class, CacheService.class, AbstractAdvertisementConfigService.class} )
 public class AbstractAdvertisementConfigServiceTest {
-    
+
     @Mock
     Session session;
     @Mock
@@ -87,34 +88,34 @@ public class AbstractAdvertisementConfigServiceTest {
     Cache userCache;
     @Mock
     CacheKey cacheKey;
-    
-    private int userId = 1;
-    private int contextId = 1;
-    
+
+    private final int userId = 1;
+    private final int contextId = 1;
+
     @Before
     public void setUp() throws Exception{
         MockitoAnnotations.initMocks(this);
         PowerMockito.mockStatic(Services.class);
         PowerMockito.when(session.getContextId()).thenReturn(contextId);
         PowerMockito.when(session.getUserId()).thenReturn(userId);
-        
+
         PowerMockito.when(Services.getService(CacheService.class)).thenReturn(cacheService);
-        PowerMockito.when(cacheService.getCache(configService.CACHING_REGION)).thenReturn(userCache);
+        PowerMockito.when(cacheService.getCache(AbstractAdvertisementConfigService.CACHING_REGION)).thenReturn(userCache);
     }
-    
-    private AbstractAdvertisementConfigService configService = new AbstractAdvertisementConfigService() {
-        
+
+    private final AbstractAdvertisementConfigService configService = new AbstractAdvertisementConfigService() {
+
         @Override
         public String getSchemeId() {
             // TODO Auto-generated method stub
             return null;
         }
-        
+
         @Override
         protected String getReseller(int contextId) throws OXException {
             return RESELLER_ALL;
         }
-        
+
         @Override
         protected String getPackage(Session session) throws OXException {
             return PACKAGE_ALL;
@@ -129,7 +130,7 @@ public class AbstractAdvertisementConfigServiceTest {
         JSONValue config = configService.getConfig(session);
         assertTrue(config != null);
     }
-    
+
     @Test
     public void getConfigTest_withoutCacheInternal() throws Exception {
         PowerMockito.when(Services.getService(CacheService.class)).thenReturn(null);
@@ -139,7 +140,7 @@ public class AbstractAdvertisementConfigServiceTest {
         JSONValue config = configService.getConfig(session);
         assertTrue(config != null);
     }
-    
+
     @Test
     public void getConfigTest_userCache() throws Exception {
         PowerMockito.when(userCache.newCacheKey(contextId, userId)).thenReturn(cacheKey);
@@ -148,7 +149,7 @@ public class AbstractAdvertisementConfigServiceTest {
         JSONValue config = configService.getConfig(session);
         assertTrue(config != null);
     }
-    
+
     @Test
     public void getConfigTest_fromDatabase() throws Exception {
         PowerMockito.when(userCache.newCacheKey(contextId, userId)).thenReturn(cacheKey);
@@ -158,11 +159,11 @@ public class AbstractAdvertisementConfigServiceTest {
         JSONValue config = configService.getConfig(session);
         assertTrue(config != null);
     }
-    
+
     @Test
     public void getConfigTest_normalCache() throws Exception {
         PowerMockito.when(userCache.newCacheKey(contextId, userId)).thenReturn(cacheKey);
-        PowerMockito.when(userCache.newCacheKey(-1, configService.RESELLER_ALL, configService.PACKAGE_ALL)).thenReturn(cacheKey);
+        PowerMockito.when(userCache.newCacheKey(-1, AdvertisementConfigService.RESELLER_ALL, AdvertisementConfigService.PACKAGE_ALL)).thenReturn(cacheKey);
         JSONValue result = new JSONObject();
         CacheKey cacheKey2 = Mockito.mock(CacheKey.class);
         PowerMockito.when(userCache.get(cacheKey)).thenReturn(null);
