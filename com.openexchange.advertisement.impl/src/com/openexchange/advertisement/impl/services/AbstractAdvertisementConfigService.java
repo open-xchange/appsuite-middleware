@@ -105,8 +105,6 @@ public abstract class AbstractAdvertisementConfigService implements Advertisemen
     private static final String SQL_DELETE_MAPPING = "DELETE FROM advertisement_mapping where configId=?;";
     private static final String SQL_SELECT_MAPPING_SIMPLE = "Select configId from advertisement_mapping where reseller=? AND package=?;";
     private static final String SQL_SELECT_CONFIG = "Select config from advertisement_config where configId=?;";
-    protected static final String PACKAGE_ALL = "default";
-    protected static final String RESELLER_ALL = "default";
     private static final String PREVIEW_CONFIG = "com.openexchange.advertisement.preview";
 
     /**
