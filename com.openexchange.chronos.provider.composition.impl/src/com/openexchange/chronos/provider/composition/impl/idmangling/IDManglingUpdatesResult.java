@@ -83,6 +83,11 @@ public class IDManglingUpdatesResult implements UpdatesResult {
     }
 
     @Override
+    public boolean isTruncated() {
+        return delegate.isTruncated();
+    }
+
+    @Override
     public List<Event> getNewAndModifiedEvents() {
         return withUniqueIDs(delegate.getNewAndModifiedEvents(), accountId);
     }

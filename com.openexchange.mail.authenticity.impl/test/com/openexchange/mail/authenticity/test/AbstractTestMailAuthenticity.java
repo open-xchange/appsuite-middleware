@@ -94,7 +94,7 @@ public abstract class AbstractTestMailAuthenticity {
     private HeaderCollection headerCollection;
     private ArgumentCaptor<MailAuthenticityResult> argumentCaptor;
     private Session session;
-    private LeanConfigurationService leanConfig;
+    protected LeanConfigurationService leanConfig;
     private MailAuthenticityMetricLogger metricsLogger;
 
     /**
@@ -229,14 +229,17 @@ public abstract class AbstractTestMailAuthenticity {
             public boolean getBooleanProperty(int userId, int contextId, Property property, Map<String, String> optionals) {
                 return false;
             }
+
             @Override
             public boolean getBooleanProperty(Property property, Map<String, String> optionals) {
                 return false;
             }
+
             @Override
             public boolean getBooleanProperty(int userId, int contextId, Property property) {
                 return false;
             }
+
             @Override
             public boolean getBooleanProperty(Property property) {
                 return false;
