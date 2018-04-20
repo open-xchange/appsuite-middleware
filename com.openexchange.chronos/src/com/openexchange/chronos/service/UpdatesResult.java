@@ -74,4 +74,14 @@ public interface UpdatesResult extends TimestampedResult {
      */
     List<Event> getDeletedEvents();
 
+    /**
+     * Gets a value indicating whether the result is truncated, i.e. there are even more new, modified or deleted events since the
+     * supplied client timestamp, but the limit was exceeded.
+     * <p/>
+     * If the result is truncated, clients should use the value from {@link #getTimestamp()} for consecutive calls.
+     *
+     * @return <code>true</code> if the result is truncated, <code>false</code>, otherwise
+     */
+    boolean isTruncated();
+
 }
