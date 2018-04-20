@@ -52,6 +52,7 @@ package com.openexchange.ajax.chronos;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.fail;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
@@ -286,15 +287,18 @@ public class BasicSeriesEventTest extends AbstractChronosTest {
      */
     @Test
     public void testFloatingSeries() throws Exception {
-        Date date = new Date();
-        int offset = TimeZone.getDefault().getOffset(date.getTime());
-        DateTimeData today = DateTimeUtil.getZuluDateTime(date.getTime() - offset);
-        DateTimeData nextWeek = DateTimeUtil.getZuluDateTime(DateTimeUtil.incrementDateTimeData(TimeZone.getTimeZone("UTC"), date, 7).getTime());
+        Calendar instance = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+        instance.setTimeInMillis(System.currentTimeMillis());
+        instance.add(Calendar.DAY_OF_MONTH, -1);
+        long yesterday = instance.getTimeInMillis();
+        DateTimeData today = DateTimeUtil.getZuluDateTime(yesterday);
+        DateTimeData nextWeek = DateTimeUtil.getZuluDateTime(DateTimeUtil.incrementDateTimeData(TimeZone.getTimeZone("UTC"), instance.getTime(), 7).getTime());
 
         // Create a series event
         EventData toCreate = EventFactory.createSeriesEvent(defaultUserApi.getCalUser(), "testFloatingSeries", 3, folderId);
-        toCreate.setStartDate(DateTimeUtil.getDateTime(null, System.currentTimeMillis()));
-        toCreate.setEndDate(DateTimeUtil.getDateTime(null, System.currentTimeMillis() + 5000));
+        instance.add(Calendar.DAY_OF_MONTH, 1);
+        toCreate.setStartDate(DateTimeUtil.getDateTime(null, instance.getTimeInMillis()));
+        toCreate.setEndDate(DateTimeUtil.getDateTime(null, instance.getTimeInMillis() + 5000));
         EventData expectedEventData = eventManager.createEvent(toCreate);
 
         // Get series master
@@ -312,11 +316,13 @@ public class BasicSeriesEventTest extends AbstractChronosTest {
         EventData recurringEvent = eventManager.getRecurringEvent(folderId, expectedEventData.getId(), allEvents.get(2).getRecurrenceId(), false);
         assertEquals(expectedEventData.getId(), recurringEvent.getId());
         assertNotEquals(expectedEventData.getRecurrenceId(), recurringEvent.getRecurrenceId());
-        DateTimeData expectedRecurrenceId = DateTimeUtil.getDateTime(null, DateTimeUtil.parseDateTime(expectedEventData.getStartDate()).getTime() + TimeUnit.DAYS.toMillis(2));
+        instance.add(Calendar.DAY_OF_MONTH, 2);
+        DateTimeData expectedRecurrenceId = DateTimeUtil.getDateTime(instance.getTimeInMillis());
+        assertEquals(expectedRecurrenceId.getValue(), recurringEvent.getStartDate().getValue());
         assertEquals(expectedRecurrenceId.getValue(), recurringEvent.getRecurrenceId());
 
         // Get updates
-        UpdatesResult updates = eventManager.getUpdates(date, true);
+        UpdatesResult updates = eventManager.getUpdates(new Date(yesterday), true);
         assertEquals(3, updates.getNewAndModified().size());
         for (int x = 0; x < updates.getNewAndModified().size(); x++) {
             assertEquals(expectedEventData.getId(), updates.getNewAndModified().get(x).getId());

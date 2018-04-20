@@ -193,7 +193,7 @@ public final class DateTimeUtil {
         Date date = new Date(millis);
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd'T'HHmmss");
         if(timezoneId != null) {
-            dateFormat.setTimeZone(timezoneId == null ? TimeZone.getDefault() : TimeZone.getTimeZone(timezoneId));
+            dateFormat.setTimeZone(TimeZone.getTimeZone(timezoneId));
         }
         result.setValue(dateFormat.format(date));
 
