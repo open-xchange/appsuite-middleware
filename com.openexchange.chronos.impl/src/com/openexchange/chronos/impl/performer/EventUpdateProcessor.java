@@ -741,16 +741,17 @@ public class EventUpdateProcessor implements EventUpdate {
 
     /**
      * Resets the participation status of all individual attendees - excluding the current calendar user - to
-     * {@link ParticipationStatus#NEEDS_ACTION} for a specific event.
+     * {@link ParticipationStatus#NEEDS_ACTION} for a specific event, including a previously set attendee comment.
      *
      * @param attendees The event's attendees
      */
     private void resetParticipationStatus(List<Attendee> attendees) {
         for (Attendee attendee : CalendarUtils.filter(attendees, null, CalendarUserType.INDIVIDUAL)) {
-            if (calendarUser.getEntity() == attendee.getEntity() || ParticipationStatus.NEEDS_ACTION.equals(attendee.getPartStat())) {
+            if (calendarUser.getEntity() != attendee.getEntity()) {
+                attendee.setPartStat(ParticipationStatus.NEEDS_ACTION); //TODO: or reset to initial partstat based on folder type?
+                attendee.setComment(null);
                 continue;
             }
-            attendee.setPartStat(ParticipationStatus.NEEDS_ACTION); //TODO: or reset to initial partstat based on folder type?
         }
     }
 
