@@ -396,7 +396,7 @@ public final class MailFilterServiceImpl implements MailFilterService, Reloadabl
                 for (int uid : uids) {
                     RuleAndPosition deletedrule = getRightRuleForUniqueId(rules, uid);
                     if (deletedrule == null) {
-                        throw MailFilterExceptionCode.BAD_POSITION.create(uid);
+                        throw MailFilterExceptionCode.NO_SUCH_ID.create(uid, credentials.getUserid(), credentials.getContextid());
                     }
                     rules.remove(deletedrule.rule);
                 }
