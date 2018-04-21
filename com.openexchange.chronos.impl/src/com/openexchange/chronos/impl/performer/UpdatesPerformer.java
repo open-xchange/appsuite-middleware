@@ -209,38 +209,32 @@ public class UpdatesPerformer extends AbstractQueryPerformer {
     protected static DefaultUpdatesResult getResult(List<Event> newAndModifiedEvents, List<Event> deletedEvents, int limit) {
         if (0 >= limit || (isNullOrEmpty(deletedEvents) && isNullOrEmpty(newAndModifiedEvents))) {
             /*
-             * not limited, so no truncation necessary
+             * not limited or no results, so no truncation necessary
              */
             return new DefaultUpdatesResult(newAndModifiedEvents, deletedEvents);
         }
-        if (isNullOrEmpty(deletedEvents)) {
+        /*
+         * truncate both results as needed
+         */
+        boolean newAndModifiedTruncated = truncateEvents(newAndModifiedEvents, limit);
+        boolean deletedTruncated = truncateEvents(deletedEvents, limit);
+        if (newAndModifiedTruncated) {
             /*
-             * truncate 'new and modified' event list if needed
+             * 'new and modified' list was truncated, ensure maximum timestamp of 'deleted' list is still in scope
              */
-            boolean truncated;
-            if (newAndModifiedEvents.size() > limit) {
-                newAndModifiedEvents = newAndModifiedEvents.subList(0, limit);
-                truncated = true;
-            } else {
-                truncated = false;
-            }
             long timestamp = newAndModifiedEvents.get(newAndModifiedEvents.size() - 1).getTimestamp();
-            return new DefaultUpdatesResult(newAndModifiedEvents, deletedEvents, timestamp, truncated);
+            deletedEvents = removeWithGreaterTimestamp(deletedEvents, timestamp);
+            return new DefaultUpdatesResult(newAndModifiedEvents, deletedEvents, timestamp, true);
         }
-        if (isNullOrEmpty(newAndModifiedEvents)) {
+        if (deletedTruncated) {
             /*
-             * truncate 'deleted' event list if needed
+             * 'deleted' list was truncated, ensure maximum timestamp of 'new and modified' list is still in scope
              */
-            boolean truncated;
-            if (deletedEvents.size() > limit) {
-                deletedEvents = deletedEvents.subList(0, limit);
-                truncated = true;
-            } else {
-                truncated = false;
-            }
             long timestamp = deletedEvents.get(deletedEvents.size() - 1).getTimestamp();
-            return new DefaultUpdatesResult(newAndModifiedEvents, deletedEvents, timestamp, truncated);
+            newAndModifiedEvents = removeWithGreaterTimestamp(newAndModifiedEvents, timestamp);
+            return new DefaultUpdatesResult(newAndModifiedEvents, deletedEvents, timestamp, true);
         }
+
         if (newAndModifiedEvents.size() + deletedEvents.size() <= limit) {
             /*
              * overall size within limit, so no truncation necessary
@@ -248,40 +242,42 @@ public class UpdatesPerformer extends AbstractQueryPerformer {
             return new DefaultUpdatesResult(newAndModifiedEvents, deletedEvents);
         }
         /*
-         * overall size exceeds limit, so iterate through result lists until limit is reached & remember last timestamp
+         * both results within limit, so no truncation necessary
          */
-        ListIterator<Event> newAndModifiedIterator = newAndModifiedEvents.listIterator();
-        ListIterator<Event> deletedIterator = deletedEvents.listIterator();
-        long lastTimestamp = 0L;
-        int count = 0;
-        while (count < limit && (newAndModifiedIterator.hasNext() || deletedIterator.hasNext())) {
-            if (false == newAndModifiedIterator.hasNext()) {
-                lastTimestamp = deletedIterator.next().getTimestamp();
-            } else if (false == deletedIterator.hasNext()) {
-                lastTimestamp = newAndModifiedIterator.next().getTimestamp();
-            } else {
-                Event nextNewAndModified = newAndModifiedIterator.next();
-                Event nextDeleted = deletedIterator.next();
-                if (nextNewAndModified.getTimestamp() <= nextDeleted.getTimestamp()) {
-                    lastTimestamp = nextNewAndModified.getTimestamp();
-                    deletedIterator.previous();
-                } else {
-                    lastTimestamp = nextDeleted.getTimestamp();
-                    newAndModifiedIterator.previous();
-                }
+        return new DefaultUpdatesResult(newAndModifiedEvents, deletedEvents);
+    }
+
+    protected static List<Event> removeWithGreaterTimestamp(List<Event> events, long maximumTimestamp) {
+        if (isNullOrEmpty(events)) {
+            return events;
+        }
+        for (ListIterator<Event> iterator = events.listIterator(events.size()); iterator.hasPrevious();) {
+            if (maximumTimestamp < iterator.previous().getTimestamp()) {
+                iterator.remove();
             }
-            count++;
+        }
+        return events;
+    }
+
+    protected static boolean truncateEvents(List<Event> events, int limit) {
+        if (isNullOrEmpty(events) || 0 >= limit || events.size() < limit) {
+            return false;
         }
         /*
-         * truncate resulting lists if there are remaining events
+         * resulting event list at limit or beyond, remove last events, and further events with equal timestamp at tail
+         * (as there could be more events with this timestamp in storage)
          */
-        if (newAndModifiedIterator.hasNext()) {
-            newAndModifiedEvents = newAndModifiedEvents.subList(0, newAndModifiedIterator.nextIndex());
+        long lastTimestamp = events.get(events.size() - 1).getTimestamp();
+        for (ListIterator<Event> iterator = events.listIterator(events.size()); iterator.hasPrevious();) {
+            long timestamp = iterator.previous().getTimestamp();
+            if (iterator.nextIndex() >= limit || lastTimestamp == timestamp) {
+                iterator.remove();
+                lastTimestamp = timestamp;
+            } else {
+                break;
+            }
         }
-        if (deletedIterator.hasNext()) {
-            deletedEvents = deletedEvents.subList(0, deletedIterator.nextIndex());
-        }
-        return new DefaultUpdatesResult(newAndModifiedEvents, deletedEvents, lastTimestamp, true);
+        return true;
     }
 
 }

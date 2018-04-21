@@ -51,17 +51,19 @@ package com.openexchange.chronos.impl.performer;
 
 import static com.openexchange.chronos.impl.performer.UpdatesPerformer.getResult;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.impl.AbstractCombineTest;
 import com.openexchange.chronos.service.UpdatesResult;
 import com.openexchange.exception.OXException;
-import com.openexchange.java.util.UUIDs;
 
 /**
  * {@link UpdatesPerformerTest}
@@ -78,21 +80,11 @@ public class UpdatesPerformerTest extends AbstractCombineTest {
     public void setup() throws OXException {
         deletedEvents = new ArrayList<Event>();
         for (int i = 1; i <= 100; i++) {
-            Event event = new Event();
-            event.setId(String.valueOf(i));
-            event.setFolderId("30");
-            event.setTimestamp(i);
-            event.setUid(UUIDs.getUnformattedStringFromRandom());
-            deletedEvents.add(event);
+            deletedEvents.add(event(i, 30, UUID.randomUUID().toString(), i));
         }
         newAndModifiedEvents = new ArrayList<Event>();
         for (int i = 1; i <= 100; i++) {
-            Event event = new Event();
-            event.setId(String.valueOf(i));
-            event.setFolderId("30");
-            event.setTimestamp(i);
-            event.setUid(UUIDs.getUnformattedStringFromRandom());
-            newAndModifiedEvents.add(event);
+            newAndModifiedEvents.add(event(i, 30, UUID.randomUUID().toString(), i));
         }
     }
 
@@ -123,22 +115,120 @@ public class UpdatesPerformerTest extends AbstractCombineTest {
 
     @Test
     public void testLimitedResults6() throws Exception {
-        assertUpdatesResult(getResult(newAndModifiedEvents, deletedEvents, 100), 50, 50, 50);
+        assertUpdatesResult(getResult(newAndModifiedEvents, deletedEvents, 100), 99, 99, 99);
     }
 
     @Test
     public void testLimitedResults7() throws Exception {
-        assertUpdatesResult(getResult(newAndModifiedEvents, deletedEvents, 25), 13, 12, 13);
+        assertUpdatesResult(getResult(newAndModifiedEvents, deletedEvents, 25), 25, 25, 25);
     }
 
     @Test
     public void testLimitedResults8() throws Exception {
-        assertUpdatesResult(getResult(newAndModifiedEvents, deletedEvents, 1), 1, 0, 1);
+        assertUpdatesResult(getResult(newAndModifiedEvents, deletedEvents, 1), 1, 1, 1);
     }
 
     @Test
     public void testLimitedResults9() throws Exception {
         assertUpdatesResult(getResult(newAndModifiedEvents, deletedEvents, 400), 100, 100, 100);
+    }
+
+    @Test
+    public void testLimitedResults10() throws Exception {
+        List<Event> newAndModifiedEvents = new ArrayList<Event>();
+        newAndModifiedEvents.add(event(1, 30, UUID.randomUUID().toString(), 9L));
+        newAndModifiedEvents.add(event(2, 30, UUID.randomUUID().toString(), 12L));
+        newAndModifiedEvents.add(event(3, 30, UUID.randomUUID().toString(), 16L));
+        newAndModifiedEvents.add(event(4, 30, UUID.randomUUID().toString(), 19L));
+        List<Event> deletedEvents = new ArrayList<Event>();
+        deletedEvents.add(event(5, 30, UUID.randomUUID().toString(), 9L));
+        deletedEvents.add(event(6, 30, UUID.randomUUID().toString(), 12L));
+        deletedEvents.add(event(7, 30, UUID.randomUUID().toString(), 16L));
+        deletedEvents.add(event(8, 30, UUID.randomUUID().toString(), 19L));
+        assertUpdatesResult(getResult(newAndModifiedEvents, deletedEvents, 3), 3, 3, 16L);
+    }
+
+    @Test
+    public void testLimitedResults11() throws Exception {
+        List<Event> newAndModifiedEvents = new ArrayList<Event>();
+        newAndModifiedEvents.add(event(1, 30, UUID.randomUUID().toString(), 9L));
+        newAndModifiedEvents.add(event(2, 30, UUID.randomUUID().toString(), 12L));
+        newAndModifiedEvents.add(event(3, 30, UUID.randomUUID().toString(), 19L));
+        newAndModifiedEvents.add(event(4, 30, UUID.randomUUID().toString(), 19L));
+        List<Event> deletedEvents = new ArrayList<Event>();
+        deletedEvents.add(event(5, 30, UUID.randomUUID().toString(), 9L));
+        deletedEvents.add(event(6, 30, UUID.randomUUID().toString(), 12L));
+        deletedEvents.add(event(7, 30, UUID.randomUUID().toString(), 16L));
+        deletedEvents.add(event(8, 30, UUID.randomUUID().toString(), 19L));
+        assertUpdatesResult(getResult(newAndModifiedEvents, deletedEvents, 3), 2, 2, 12L);
+    }
+
+    @Test
+    public void testLimitedResults12() throws Exception {
+        List<Event> newAndModifiedEvents = new ArrayList<Event>();
+        newAndModifiedEvents.add(event(1, 30, UUID.randomUUID().toString(), 9L));
+        newAndModifiedEvents.add(event(2, 30, UUID.randomUUID().toString(), 12L));
+        newAndModifiedEvents.add(event(3, 30, UUID.randomUUID().toString(), 16L));
+        List<Event> deletedEvents = new ArrayList<Event>();
+        deletedEvents.add(event(5, 30, UUID.randomUUID().toString(), 9L));
+        deletedEvents.add(event(6, 30, UUID.randomUUID().toString(), 9L));
+        deletedEvents.add(event(7, 30, UUID.randomUUID().toString(), 9L));
+        deletedEvents.add(event(8, 30, UUID.randomUUID().toString(), 19L));
+        assertUpdatesResult(getResult(newAndModifiedEvents, deletedEvents, 3), 2, 3, 12L);
+    }
+
+    @Test
+    public void testTruncateList1() throws Exception {
+        List<Event> events = new ArrayList<Event>();
+        events.add(event(1, 30, UUID.randomUUID().toString(), 9L));
+        events.add(event(1, 30, UUID.randomUUID().toString(), 12L));
+        events.add(event(1, 30, UUID.randomUUID().toString(), 16L));
+        assertTrue(UpdatesPerformer.truncateEvents(events, 3));
+        assertEquals(2, events.size());
+        assertEquals(12L, events.get(1).getTimestamp());
+    }
+
+    @Test
+    public void testTruncateList2() throws Exception {
+        List<Event> events = new ArrayList<Event>();
+        events.add(event(1, 30, UUID.randomUUID().toString(), 9L));
+        events.add(event(1, 30, UUID.randomUUID().toString(), 12L));
+        events.add(event(1, 30, UUID.randomUUID().toString(), 12L));
+        assertTrue(UpdatesPerformer.truncateEvents(events, 3));
+        assertEquals(1, events.size());
+        assertEquals(9L, events.get(0).getTimestamp());
+    }
+
+    @Test
+    public void testTruncateList3() throws Exception {
+        assertFalse(UpdatesPerformer.truncateEvents(null, 3));
+    }
+
+    @Test
+    public void testTruncateList4() throws Exception {
+        assertFalse(UpdatesPerformer.truncateEvents(new ArrayList<Event>(), 3));
+    }
+
+    @Test
+    public void testTruncateList5() throws Exception {
+        List<Event> events = new ArrayList<Event>();
+        events.add(event(1, 30, UUID.randomUUID().toString(), 9L));
+        events.add(event(1, 30, UUID.randomUUID().toString(), 12L));
+        events.add(event(1, 30, UUID.randomUUID().toString(), 12L));
+        assertTrue(UpdatesPerformer.truncateEvents(events, 2));
+        assertEquals(1, events.size());
+        assertEquals(9L, events.get(0).getTimestamp());
+    }
+
+    @Test
+    public void testTruncateList6() throws Exception {
+        List<Event> events = new ArrayList<Event>();
+        events.add(event(1, 30, UUID.randomUUID().toString(), 9L));
+        events.add(event(1, 30, UUID.randomUUID().toString(), 12L));
+        events.add(event(1, 30, UUID.randomUUID().toString(), 12L));
+        assertFalse(UpdatesPerformer.truncateEvents(events, 4));
+        assertEquals(3, events.size());
+        assertEquals(12L, events.get(2).getTimestamp());
     }
 
     private void assertUpdatesResult(UpdatesResult result, int expectedNewAndModifiedSize, int expectedDeletedSize, long expectedTimestamp) {
@@ -156,6 +246,15 @@ public class UpdatesPerformerTest extends AbstractCombineTest {
             assertEquals(expectedDeletedSize, result.getDeletedEvents().size());
         }
         assertEquals(expectedTimestamp, result.getTimestamp());
+    }
+
+    private static Event event(int id, int folderId, String uid, long timestamp) {
+        Event event = new Event();
+        event.setId(String.valueOf(id));
+        event.setFolderId(String.valueOf(folderId));
+        event.setTimestamp(timestamp);
+        event.setUid(uid);
+        return event;
     }
 
 }
