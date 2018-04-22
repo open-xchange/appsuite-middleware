@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2017-2020 OX Software GmbH
+ *     Copyright (C) 2016-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,32 +47,54 @@
  *
  */
 
-package com.openexchange.chronos.impl;
+package com.openexchange.chronos.provider.internal.config;
 
-import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
-import org.junit.runners.Suite.SuiteClasses;
-import com.openexchange.chronos.impl.performer.UpdatesPerformerTest;
+import static com.openexchange.chronos.provider.internal.Constants.PROVIDER_ID;
+import static com.openexchange.osgi.Tools.requireService;
+import org.json.JSONObject;
+import com.openexchange.chronos.exception.CalendarExceptionCodes;
+import com.openexchange.config.ConfigurationService;
+import com.openexchange.exception.OXException;
+import com.openexchange.server.ServiceLookup;
+import com.openexchange.session.Session;
+import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link ChronosTestSuite}
+ * {@link RestrictAllowedAttendeeChanges}
  *
- * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @since v7.10.0
  */
-@RunWith(Suite.class)
-@SuiteClasses({
-    //@formatter:off
-    CombineAvailabilitiesTest.class,
-    CalculateFreeBusyTimeTest.class,
-    UpdatesPerformerTest.class
-    //@formatter:on
-})
-public class ChronosTestSuite {
+public class RestrictAllowedAttendeeChanges extends ChronosJSlobEntry {
 
     /**
-     * Initialises a new {@link ChronosTestSuite}.
+     * Initializes a new {@link RestrictAllowedAttendeeChanges}.
+     *
+     * @param services A service lookup reference
      */
-    public ChronosTestSuite() {
-        super();
+    public RestrictAllowedAttendeeChanges(ServiceLookup services) {
+        super(services);
     }
+
+    @Override
+    public String getPath() {
+        return "chronos/restrictAllowedAttendeeChanges";
+    }
+
+    @Override
+    public boolean isWritable(Session session) throws OXException {
+        return false;
+    }
+
+    @Override
+    protected Object getValue(ServerSession session, JSONObject userConfig) throws OXException {
+        return Boolean.valueOf(requireService(ConfigurationService.class, services).getBoolProperty(
+            "com.openexchange.calendar.restrictAllowedAttendeeChanges", true));
+    }
+
+    @Override
+    protected void setValue(ServerSession session, JSONObject userConfig, Object value) throws OXException {
+        throw CalendarExceptionCodes.UNSUPPORTED_OPERATION_FOR_PROVIDER.create(PROVIDER_ID);
+    }
+
 }

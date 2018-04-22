@@ -147,4 +147,13 @@ public interface CalendarConfig {
      */
     boolean isSkipExternalAttendeeURIChecks();
 
+    /**
+     * Gets a value indicating whether attendee changes should be restricted according to
+     * <a href="https://tools.ietf.org/html/rfc6638#section-3.2.2.1">RFC 6638, section 3.2.2.1</a> or not, which effectively restricts
+     * any changes to the calendar scheduling resource to be performed by the organizer only.
+     *
+     * @return <code>true</code> if allowed attendee changes should be restricted, <code>false</code>, otherwise
+     */
+    boolean isRestrictAllowedAttendeeChanges();
+
 }
