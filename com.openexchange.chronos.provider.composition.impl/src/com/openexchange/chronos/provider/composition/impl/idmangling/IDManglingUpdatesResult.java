@@ -88,6 +88,11 @@ public class IDManglingUpdatesResult implements UpdatesResult {
     }
 
     @Override
+    public boolean isEmpty() {
+        return delegate.isEmpty();
+    }
+
+    @Override
     public List<Event> getNewAndModifiedEvents() {
         return withUniqueIDs(delegate.getNewAndModifiedEvents(), accountId);
     }
@@ -95,6 +100,11 @@ public class IDManglingUpdatesResult implements UpdatesResult {
     @Override
     public List<Event> getDeletedEvents() {
         return withUniqueIDs(delegate.getDeletedEvents(), accountId);
+    }
+
+    @Override
+    public String toString() {
+        return "IDManglingUpdatesResult [accountId=" + accountId + ", delegate=" + delegate + "]";
     }
 
 }
