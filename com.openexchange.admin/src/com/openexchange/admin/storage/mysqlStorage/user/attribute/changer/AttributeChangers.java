@@ -51,6 +51,7 @@ package com.openexchange.admin.storage.mysqlStorage.user.attribute.changer;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.Set;
 import com.openexchange.admin.rmi.dataobjects.User;
 import com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.mailsetting.UserMailSettingAttribute;
 
@@ -62,9 +63,9 @@ import com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.mailse
 public interface AttributeChangers {
 
     /**
-     * Changes the specified {@link UserMailSettingAttribute}
+     * Changes the specified {@link Attribute}
      * 
-     * @param attribute The {@link UserMailSettingAttribute} to change
+     * @param attribute The {@link Attribute} to change
      * @param userData The {@link User} data
      * @param userId the user identifier
      * @param contextId The context identifier
@@ -73,4 +74,17 @@ public interface AttributeChangers {
      * @throws SQLException if an SQL error is occurred
      */
     boolean change(Attribute attribute, User userData, int userId, int contextId, Connection connection) throws SQLException;
+
+    /**
+     * Changes the specified {@link UserMailSettingAttribute}
+     * 
+     * @param attributes A {@link Set} with {@link Attribute}s to change
+     * @param userData The {@link User} data
+     * @param userId the user identifier
+     * @param contextId The context identifier
+     * @param connection The {@link Connection} to use
+     * @return An unmodifiable {@link Set} with all successfully changed attributes
+     * @throws SQLException if an SQL error is occurred
+     */
+    Set<String> change(Set<Attribute> attributes, User userData, int userId, int contextId, Connection connection) throws SQLException;
 }

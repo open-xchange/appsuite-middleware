@@ -50,10 +50,18 @@
 package com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.custom;
 
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
 import com.openexchange.admin.rmi.dataobjects.User;
 import com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.Attribute;
 import com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.AttributeChangers;
+import com.openexchange.database.Databases;
+import com.openexchange.java.util.UUIDs;
 
 /**
  * {@link CustomUserAttributeChangers}
@@ -62,14 +70,14 @@ import com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.Attrib
  */
 public class CustomUserAttributeChangers implements AttributeChangers {
 
-    private final CustomUserAttributeChanger changer;
+    private static final String INSERT_STATEMENT = "INSERT INTO user_attribute (cid, id, name, value, uuid) VALUES (?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE value=?";
+    private static final String DELETE_STATEMENT = "DELETE FROM user_attribute WHERE cid=? AND id=? AND name=?";
 
     /**
      * Initialises a new {@link CustomUserAttributeChangers}.
      */
     public CustomUserAttributeChangers() {
         super();
-        changer = new CustomUserAttributeChanger();
     }
 
     /*
@@ -80,7 +88,63 @@ public class CustomUserAttributeChangers implements AttributeChangers {
      */
     @Override
     public boolean change(Attribute attribute, User userData, int userId, int contextId, Connection connection) throws SQLException {
-        return changer.changeAttribute(userId, contextId, userData, connection);
+        return change(Collections.singleton(attribute), userData, userId, contextId, connection).isEmpty();
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.AttributeChangers#change(java.util.Set, com.openexchange.admin.rmi.dataobjects.User, int, int, java.sql.Connection)
+     */
+    @Override
+    public Set<String> change(Set<Attribute> attributes, User userData, int userId, int contextId, Connection connection) throws SQLException {
+        if (!userData.isUserAttributesset()) {
+            return Collections.emptySet();
+        }
+        PreparedStatement stmtInsertAttribute = null;
+        PreparedStatement stmtDeleteAttribute = null;
+        Set<String> changedAttributes = new HashSet<>();
+        try {
+            for (Map.Entry<String, Map<String, String>> ns : userData.getUserAttributes().entrySet()) {
+                String namespace = ns.getKey();
+                for (Map.Entry<String, String> pair : ns.getValue().entrySet()) {
+                    String name = namespace + "/" + pair.getKey();
+                    String value = pair.getValue();
+                    if (value == null) {
+                        if (null == stmtDeleteAttribute) {
+                            stmtDeleteAttribute = connection.prepareStatement(DELETE_STATEMENT);
+                            stmtDeleteAttribute.setInt(1, contextId);
+                            stmtDeleteAttribute.setInt(2, userId);
+                        }
+                        stmtDeleteAttribute.setString(3, name);
+                        stmtDeleteAttribute.addBatch();
+                    } else {
+                        if (null == stmtInsertAttribute) {
+                            stmtInsertAttribute = connection.prepareStatement(INSERT_STATEMENT);
+                            stmtInsertAttribute.setInt(1, contextId);
+                            stmtInsertAttribute.setInt(2, userId);
+                        }
+                        stmtInsertAttribute.setString(3, name);
+                        stmtInsertAttribute.setString(4, value);
+                        stmtInsertAttribute.setBytes(5, UUIDs.toByteArray(UUID.randomUUID()));
+                        stmtInsertAttribute.setString(6, value);
+                        stmtInsertAttribute.executeUpdate();
+                        stmtInsertAttribute.addBatch();
+                    }
+                    changedAttributes.add(name);
+                }
+            }
+
+            if (null != stmtDeleteAttribute) {
+                stmtDeleteAttribute.executeBatch();
+            }
+            if (null != stmtInsertAttribute) {
+                stmtInsertAttribute.executeBatch();
+            }
+        } finally {
+            Databases.closeSQLStuff(stmtInsertAttribute);
+            Databases.closeSQLStuff(stmtDeleteAttribute);
+        }
+        return changedAttributes;
+    }
 }

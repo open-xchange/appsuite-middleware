@@ -51,7 +51,10 @@ package com.openexchange.admin.storage.mysqlStorage.user.attribute.changer;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.admin.rmi.dataobjects.User;
@@ -100,5 +103,21 @@ public abstract class AbstractUserAttributeChangers implements AttributeChangers
             return false;
         }
         return changer.changeAttribute(userId, contextId, userData, connection);
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.AttributeChangers#change(java.util.Set, com.openexchange.admin.rmi.dataobjects.User, int, int, java.sql.Connection)
+     */
+    @Override
+    public Set<String> change(Set<Attribute> attributes, User userData, int userId, int contextId, Connection connection) throws SQLException {
+        Set<String> changedAttributes = new HashSet<>();
+        for (Attribute attribute : attributes) {
+            if (change(attribute, userData, userId, contextId, connection)) {
+                changedAttributes.add(attribute.getName());
+            }
+        }
+        return Collections.unmodifiableSet(changedAttributes);
     }
 }

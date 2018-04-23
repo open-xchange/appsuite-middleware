@@ -609,11 +609,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                     LOG.debug("No attribute changers found for '{}'", attributeChanger.name());
                     continue;
                 }
-                for (com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.Attribute attribute : attributeChanger.getAttributes()) {
-                    if (acs.change(attribute, usrdata, userId, contextId, con)) {
-                        changedAttributes.add(attribute.getName());
-                    }
-                }
+                changedAttributes.addAll(acs.change(new HashSet<>(attributeChanger.getAttributes()), usrdata, userId, contextId, con));
             }
 
             // Change quota size
