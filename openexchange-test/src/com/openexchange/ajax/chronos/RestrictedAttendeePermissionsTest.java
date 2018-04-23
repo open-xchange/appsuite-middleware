@@ -155,8 +155,9 @@ public class RestrictedAttendeePermissionsTest extends AbstractAttendeeTest {
 
         assertNotNull(updatedEvent.getAttendees());
         assertEquals(2, updatedEvent.getAttendees().size());
-        assertEquals("ACCEPTED", updatedEvent.getAttendees().get(0).getPartStat());
-        assertEquals("TENTATIVE", updatedEvent.getAttendees().get(1).getPartStat());
+        int accepted = updatedEvent.getAttendees().get(0).getEntity() == defaultUserApi.getCalUser() ? 0 : 1;
+        assertEquals("ACCEPTED", updatedEvent.getAttendees().get(accepted).getPartStat());
+        assertEquals("TENTATIVE", updatedEvent.getAttendees().get(accepted == 0 ? 1 : 0).getPartStat());
     }
 
     @Test
