@@ -68,6 +68,9 @@ import com.openexchange.java.util.UUIDs;
  */
 public class CustomUserAttributeChanger extends AbstractMultiAttributeChanger {
 
+    private static final String INSERT_STATEMENT = "INSERT INTO user_attribute (cid, id, name, value, uuid) VALUES (?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE value=?";
+    private static final String DELETE_STATEMENT = "DELETE FROM user_attribute WHERE cid=? AND id=? AND name=?";
+
     /**
      * Initialises a new {@link CustomUserAttributeChanger}.
      */
@@ -96,17 +99,15 @@ public class CustomUserAttributeChanger extends AbstractMultiAttributeChanger {
                     String value = pair.getValue();
                     if (value == null) {
                         if (null == stmtDeleteAttribute) {
-                            stmtDeleteAttribute = connection.prepareStatement("DELETE FROM user_attribute WHERE cid=? AND id=? AND name=?");
-                            stmtDeleteAttribute.setInt(1, contextId);
-                            stmtDeleteAttribute.setInt(2, userId);
+                            stmtDeleteAttribute = connection.prepareStatement(DELETE_STATEMENT);
+                            appendContextUser(contextId, userId, stmtDeleteAttribute, 1);
                         }
                         stmtDeleteAttribute.setString(3, name);
                         stmtDeleteAttribute.addBatch();
                     } else {
                         if (null == stmtInsertAttribute) {
-                            stmtInsertAttribute = connection.prepareStatement("INSERT INTO user_attribute (cid, id, name, value, uuid) VALUES (?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE value=?");
-                            stmtInsertAttribute.setInt(1, contextId);
-                            stmtInsertAttribute.setInt(2, userId);
+                            stmtInsertAttribute = connection.prepareStatement(INSERT_STATEMENT);
+                            appendContextUser(contextId, userId, stmtDeleteAttribute, 1);
                         }
                         stmtInsertAttribute.setString(3, name);
                         stmtInsertAttribute.setString(4, value);
@@ -154,5 +155,4 @@ public class CustomUserAttributeChanger extends AbstractMultiAttributeChanger {
         // no-op
         return null;
     }
-
 }

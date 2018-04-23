@@ -127,12 +127,15 @@ public abstract class AbstractAttributeChanger {
         }
 
         PreparedStatement stmt = prepareStatement(table, attributes.keySet(), connection);
+        if (stmt == null) {
+            return false;
+        }
         fillSetStatement(stmt, settersMap, attributes, userId, contextId);
         return executeUpdate(stmt);
     }
 
     /**
-     * Resets the specified attributs to their default values
+     * Resets the specified attributes to their default values
      * 
      * @param userId The user identifier
      * @param contextId the context identifier
@@ -144,6 +147,9 @@ public abstract class AbstractAttributeChanger {
      */
     protected boolean setAttributesDefault(int userId, int contextId, String table, Set<Attribute> attributes, Connection connection) throws SQLException {
         PreparedStatement stmt = prepareDefaultStatement(table, attributes, connection);
+        if (stmt == null) {
+            return false;
+        }
         int parameterIndex = 0;
         appendContextUser(contextId, userId, stmt, parameterIndex);
         return executeUpdate(stmt);
@@ -173,6 +179,9 @@ public abstract class AbstractAttributeChanger {
             return false;
         }
         PreparedStatement stmt = prepareStatement(table, attributes, connection);
+        if (stmt == null) {
+            return false;
+        }
         fillUnsetStatement(stmt, unsettersMap, attributes, userId, contextId);
         return executeUpdate(stmt);
     }
@@ -253,7 +262,7 @@ public abstract class AbstractAttributeChanger {
      * @throws SQLException if an SQL error is occurred
      */
     protected abstract PreparedStatement prepareDefaultStatement(String table, Set<Attribute> attributes, Connection connection) throws SQLException;
-
+    
     //////////////////////////////////// HELPERS //////////////////////////////////
 
     /**
