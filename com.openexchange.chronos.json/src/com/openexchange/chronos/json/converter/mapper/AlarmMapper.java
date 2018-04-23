@@ -72,8 +72,8 @@ import com.openexchange.groupware.tools.mappings.json.DefaultJsonMapper;
 import com.openexchange.groupware.tools.mappings.json.DefaultJsonMapping;
 import com.openexchange.groupware.tools.mappings.json.IntegerMapping;
 import com.openexchange.groupware.tools.mappings.json.JsonMapping;
+import com.openexchange.groupware.tools.mappings.json.LongMapping;
 import com.openexchange.groupware.tools.mappings.json.StringMapping;
-import com.openexchange.groupware.tools.mappings.json.TimeMapping;
 import com.openexchange.java.Enums;
 import com.openexchange.session.Session;
 
@@ -215,7 +215,7 @@ public class AlarmMapper extends DefaultJsonMapper<Alarm, AlarmField> {
                 return jsonObject;
             }
         });
-        mappings.put(AlarmField.ACKNOWLEDGED, new TimeMapping<Alarm>(ChronosJsonFields.Alarm.ACK, null) {
+        mappings.put(AlarmField.ACKNOWLEDGED, new LongMapping<Alarm>(ChronosJsonFields.Alarm.ACK, null) {
 
             @Override
             public boolean isSet(Alarm object) {
@@ -223,13 +223,13 @@ public class AlarmMapper extends DefaultJsonMapper<Alarm, AlarmField> {
             }
 
             @Override
-            public void set(Alarm object, Date value) throws OXException {
-                object.setAcknowledged(value);
+            public void set(Alarm object, Long value) throws OXException {
+                object.setAcknowledged(new Date(value));
             }
 
             @Override
-            public Date get(Alarm object) {
-                return object.getAcknowledged();
+            public Long get(Alarm object) {
+                return object.getAcknowledged().getTime();
             }
 
             @Override

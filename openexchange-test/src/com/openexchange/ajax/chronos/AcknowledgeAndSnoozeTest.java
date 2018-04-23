@@ -57,6 +57,7 @@ import static org.junit.Assert.assertTrue;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
+import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -100,8 +101,9 @@ public class AcknowledgeAndSnoozeTest extends AbstractAlarmTriggerTest {
      */
     @Test
     public void testSimpleAcknowledge() throws Exception {
-        DateTimeData startDate = DateTimeUtil.getDateTime(System.currentTimeMillis() + TimeUnit.DAYS.toMillis(1));
-        DateTimeData endDate = DateTimeUtil.incrementDateTimeData(startDate, (System.currentTimeMillis() + TimeUnit.HOURS.toMillis(2)));
+        Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+        DateTimeData startDate = DateTimeUtil.getDateTime("UTC", cal.getTimeInMillis() + TimeUnit.DAYS.toMillis(1));
+        DateTimeData endDate = DateTimeUtil.incrementDateTimeData(startDate, (cal.getTimeInMillis() + TimeUnit.HOURS.toMillis(2)));
 
         // Create an event with alarm
         EventData toCreate = EventFactory.createSingleEvent(defaultUserApi.getCalUser(), "testSimpleAcknowledge", startDate, endDate, folderId);
@@ -123,7 +125,7 @@ public class AcknowledgeAndSnoozeTest extends AbstractAlarmTriggerTest {
         getEvent = getAndAssertAlarms(updated, 1, folderId);
         assertNotNull(getEvent.getAlarms().get(0).getAcknowledged());
         assertEquals(acknowledged, getEvent.getAlarms().get(0).getAcknowledged());
-        assertTrue("Acknowdledge time is not later than the creation date.", acknowledged.longValue() >= expectedEventData.getCreated().longValue());
+        assertTrue("Acknowdledge time (" + acknowledged.longValue() + ") is not later than the creation date (" + expectedEventData.getCreated().longValue() + ").", acknowledged.longValue() >= expectedEventData.getCreated().longValue());
     }
 
     /**
