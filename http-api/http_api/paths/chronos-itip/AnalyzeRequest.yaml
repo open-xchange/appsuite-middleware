@@ -1,0 +1,26 @@
+/chronos/itip?action=analyze:
+  put:
+    operationId: analyze
+    tags:
+      - Chronos
+    consumes:
+      - application/json
+    summary: Analyzes an itip message.
+    parameters:
+      - $ref: "#/parameters/gblQueryParamSession"
+      - in: query
+        name: dataSoure
+        type: string
+        description: The identifier of the data source. Currently only "com.openexchange.mail.ical" is valid.
+        required: true
+      - in: body
+        name: body
+        description: The data source object.
+        required: true
+        schema:
+          $ref: "#/definitions/ConversionDataSource"
+    responses:
+      200:
+        description: An analyze response describing what the ical intends to do and ahndling suggestions.
+        schema:
+          $ref: "#/definitions/AnalyzeResponse"
