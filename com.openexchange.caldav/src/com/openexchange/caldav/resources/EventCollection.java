@@ -90,7 +90,6 @@ import com.openexchange.chronos.provider.CalendarFolderProperty;
 import com.openexchange.chronos.provider.composition.IDBasedCalendarAccess;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.EventsResult;
-import com.openexchange.chronos.service.SortOrder;
 import com.openexchange.chronos.service.UpdatesResult;
 import com.openexchange.dav.DAVProperty;
 import com.openexchange.dav.DAVProtocol;
@@ -369,69 +368,30 @@ public class EventCollection extends FolderCollection<Event> implements Filterin
         return new EventResource(this, event, constructPathForChildResource(event));
     }
 
-    private SyncStatus<WebdavResource> getInitialSyncStatus() throws OXException {
-        SyncStatus<WebdavResource> syncStatus = new SyncStatus<WebdavResource>();
-        /*
-         * get all events within synchronized interval
-         */
-        int limit = getMaxResults();
-        List<Event> events = new CalendarAccessOperation<List<Event>>(factory) {
-
-            @Override
-            protected List<Event> perform(IDBasedCalendarAccess access) throws OXException {
-                access.set(CalendarParameters.PARAMETER_FIELDS, SYNC_STATUS_FIELDS);
-                access.set(CalendarParameters.PARAMETER_ORDER_BY, EventField.TIMESTAMP);
-                access.set(CalendarParameters.PARAMETER_ORDER, SortOrder.Order.ASC);
-                access.set(CalendarParameters.PARAMETER_RANGE_START, minDateTime.getMinDateTime());
-                access.set(CalendarParameters.PARAMETER_RANGE_END, maxDateTime.getMaxDateTime());
-                access.set(CalendarParameters.PARAMETER_RIGHT_HAND_LIMIT, I(limit));
-                return access.getEventsInFolder(folderID);
-            }
-        }.execute(factory.getSession());
-        /*
-         * add sync status for each event, grouped by UID as needed & determine maximum timestamp
-         */
-        long maxTimestamp = 0L;
-        for (List<Event> value : CalendarUtils.getEventsByUID(events, false).values()) {
-            EventResource resource = getEventResource(CalendarUtils.sortSeriesMasterFirst(value));
-            maxTimestamp = Math.max(maxTimestamp, resource.getEvent().getTimestamp());
-            syncStatus.addStatus(new WebdavStatusImpl<WebdavResource>(HttpServletResponse.SC_CREATED, resource.getUrl(), resource));
-        }
-        /*
-         * additionally add HTTP 507 status to indicate truncated results if required
-         */
-        if (limit <= events.size()) {
-            syncStatus.addStatus(new WebdavStatusImpl<WebdavResource>(DAVProtocol.SC_INSUFFICIENT_STORAGE, getUrl(), this));
-        }
-        /*
-         * set next sync token (as maximum timestamp) & return result
-         */
-        syncStatus.setToken(String.valueOf(maxTimestamp));
-        return syncStatus;
-    }
-
     @Override
     protected SyncStatus<WebdavResource> getSyncStatus(Date since) throws OXException {
-        if (null == since) {
-            return getInitialSyncStatus();
-        }
-        if (null != minDateTime.getMinDateTime() && minDateTime.getMinDateTime().after(since)) {
+        if (null != since && null != minDateTime.getMinDateTime() && minDateTime.getMinDateTime().after(since)) {
+            /*
+             * last token outside synchronized range; force a full sync
+             */
             throw new PreconditionException(DAVProtocol.DAV_NS.getURI(), "valid-sync-token", getUrl(), HttpServletResponse.SC_FORBIDDEN);
         }
         SyncStatus<WebdavResource> syncStatus = new SyncStatus<WebdavResource>();
         /*
          * get new, modified & deleted objects since client token within synchronized interval
          */
-        int limit = getMaxResults();
         UpdatesResult updates = new CalendarAccessOperation<UpdatesResult>(factory) {
 
             @Override
             protected UpdatesResult perform(IDBasedCalendarAccess access) throws OXException {
+                if (null == since) {
+                    access.set(CalendarParameters.PARAMETER_IGNORE, new String[] { "deleted" }); // exclude deleted events for initial sync
+                }
                 access.set(CalendarParameters.PARAMETER_FIELDS, SYNC_STATUS_FIELDS);
                 access.set(CalendarParameters.PARAMETER_RANGE_START, minDateTime.getMinDateTime());
                 access.set(CalendarParameters.PARAMETER_RANGE_END, maxDateTime.getMaxDateTime());
-                access.set(CalendarParameters.PARAMETER_RIGHT_HAND_LIMIT, I(limit));
-                return access.getUpdatedEventsInFolder(folderID, since.getTime());
+                access.set(CalendarParameters.PARAMETER_RIGHT_HAND_LIMIT, I(getMaxResults()));
+                return access.getUpdatedEventsInFolder(folderID, null == since ? 0L : since.getTime());
             }
         }.execute(factory.getSession());
         /*
@@ -440,14 +400,13 @@ public class EventCollection extends FolderCollection<Event> implements Filterin
         Map<String, List<Event>> newAndModifiedEventsByUID = CalendarUtils.getEventsByUID(updates.getNewAndModifiedEvents(), false);
         for (List<Event> value : newAndModifiedEventsByUID.values()) {
             EventResource resource = getEventResource(CalendarUtils.sortSeriesMasterFirst(value));
-            int status = null != resource.getCreationDate() && resource.getCreationDate().after(since) ? HttpServletResponse.SC_CREATED : HttpServletResponse.SC_OK;
+            int status = null == since || null != resource.getCreationDate() && resource.getCreationDate().after(since) ? HttpServletResponse.SC_CREATED : HttpServletResponse.SC_OK;
             syncStatus.addStatus(new WebdavStatusImpl<WebdavResource>(status, resource.getUrl(), resource));
         }
         /*
          * add sync status for each deleted event, grouped by UID as needed & determine maximum timestamp
          */
-        Map<String, List<Event>> deletedEventsByUID = CalendarUtils.getEventsByUID(updates.getDeletedEvents(), false);
-        for (Entry<String, List<Event>> entry : deletedEventsByUID.entrySet()) {
+        for (Entry<String, List<Event>> entry : CalendarUtils.getEventsByUID(updates.getDeletedEvents(), false).entrySet()) {
             if (newAndModifiedEventsByUID.keySet().contains(entry.getKey())) {
                 continue; // skip previously moved events
             }
@@ -463,7 +422,7 @@ public class EventCollection extends FolderCollection<Event> implements Filterin
         /*
          * set next sync token (as maximum timestamp) & return result
          */
-        syncStatus.setToken(String.valueOf(Math.max(since.getTime(), updates.getTimestamp())));
+        syncStatus.setToken(String.valueOf(updates.getTimestamp()));
         return syncStatus;
     }
 

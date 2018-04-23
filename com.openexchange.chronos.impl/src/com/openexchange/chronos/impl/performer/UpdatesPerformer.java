@@ -188,6 +188,12 @@ public class UpdatesPerformer extends AbstractQueryPerformer {
                 session.set(CalendarParameters.PARAMETER_EXPAND_OCCURRENCES, oldExpandOccurrences);
             }
         }
+        if (isNullOrEmpty(deletedEvents) && isNullOrEmpty(newAndModifiedEvents)) {
+            /*
+             * no changes, return empty result with client-supplied timestamp
+             */
+            return new DefaultUpdatesResult(newAndModifiedEvents, deletedEvents, since, false);
+        }
         /*
          * limit returned results as requested
          */
