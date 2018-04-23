@@ -234,13 +234,6 @@ public class UpdatesPerformer extends AbstractQueryPerformer {
             newAndModifiedEvents = removeWithGreaterTimestamp(newAndModifiedEvents, timestamp);
             return new DefaultUpdatesResult(newAndModifiedEvents, deletedEvents, timestamp, true);
         }
-
-        if (newAndModifiedEvents.size() + deletedEvents.size() <= limit) {
-            /*
-             * overall size within limit, so no truncation necessary
-             */
-            return new DefaultUpdatesResult(newAndModifiedEvents, deletedEvents);
-        }
         /*
          * both results within limit, so no truncation necessary
          */
