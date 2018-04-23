@@ -47,82 +47,54 @@
  *
  */
 
-package com.openexchange.ajax.mail.filter.tests.api;
+package com.openexchange.chronos.provider.internal.config;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-import java.util.ArrayList;
-import java.util.List;
-import org.junit.Before;
-import org.junit.Test;
-import com.openexchange.ajax.mail.filter.api.dao.Rule;
-import com.openexchange.ajax.mail.filter.api.dao.action.Keep;
-import com.openexchange.ajax.mail.filter.api.dao.action.Stop;
-import com.openexchange.ajax.mail.filter.api.dao.test.TrueTest;
-import com.openexchange.ajax.mail.filter.tests.AbstractMailFilterTest;
+import static com.openexchange.chronos.provider.internal.Constants.PROVIDER_ID;
+import static com.openexchange.osgi.Tools.requireService;
+import org.json.JSONObject;
+import com.openexchange.chronos.exception.CalendarExceptionCodes;
+import com.openexchange.config.ConfigurationService;
+import com.openexchange.exception.OXException;
+import com.openexchange.server.ServiceLookup;
+import com.openexchange.session.Session;
+import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link AuxiliaryAPITest}
+ * {@link RestrictAllowedAttendeeChanges}
  *
- * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @since v7.10.0
  */
-public class AuxiliaryAPITest extends AbstractMailFilterTest {
+public class RestrictAllowedAttendeeChanges extends ChronosJSlobEntry {
 
     /**
-     * Initialises a new {@link AuxiliaryAPITest}.
+     * Initializes a new {@link RestrictAllowedAttendeeChanges}.
      *
-     * @param name test case's name
+     * @param services A service lookup reference
      */
-    public AuxiliaryAPITest() {
-        super();
+    public RestrictAllowedAttendeeChanges(ServiceLookup services) {
+        super(services);
     }
 
     @Override
-    @Before
-    public void setUp() throws Exception {
-        super.setUp();
-
-        // Create 10 rules
-        List<Rule> expectedRules = new ArrayList<>();
-        for (int i = 0; i < 10; i++) {
-            Rule rule = new Rule();
-            rule.setName("testDeleteScript" + i);
-            rule.setActive(true);
-            rule.addAction(new Keep());
-            rule.addAction(new Stop());
-            rule.setTest(new TrueTest());
-
-            int id = mailFilterAPI.createRule(rule);
-            rememberRule(id);
-            rule.setId(id);
-            rule.setPosition(i);
-            expectedRules.add(rule);
-        }
-
-        // Get and assert
-        getAndAssert(expectedRules);
+    public String getPath() {
+        return "chronos/restrictAllowedAttendeeChanges";
     }
 
-    /**
-     * Tests the auxiliary API call 'deletescript'
-     */
-    @Test
-    public void testDeleteScript() throws Exception {
-        // Delete the entire script
-        mailFilterAPI.deleteScript();
-
-        // Assert that the rules were deleted
-        List<Rule> rules = mailFilterAPI.listRules();
-        assertTrue("The list of rules is not empty", rules.isEmpty());
-        forgetRules();
+    @Override
+    public boolean isWritable(Session session) throws OXException {
+        return false;
     }
 
-    /**
-     * Tests the auxiliary API call 'getscript'
-     */
-    @Test
-    public void testGetScript() throws Exception {
-        String script = mailFilterAPI.getScript();
-        assertFalse("The script is empty", script.isEmpty());
+    @Override
+    protected Object getValue(ServerSession session, JSONObject userConfig) throws OXException {
+        return Boolean.valueOf(requireService(ConfigurationService.class, services).getBoolProperty(
+            "com.openexchange.calendar.restrictAllowedAttendeeChanges", true));
     }
+
+    @Override
+    protected void setValue(ServerSession session, JSONObject userConfig, Object value) throws OXException {
+        throw CalendarExceptionCodes.UNSUPPORTED_OPERATION_FOR_PROVIDER.create(PROVIDER_ID);
+    }
+
 }
