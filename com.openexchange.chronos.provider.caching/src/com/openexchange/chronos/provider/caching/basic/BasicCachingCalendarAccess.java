@@ -314,6 +314,8 @@ public abstract class BasicCachingCalendarAccess implements BasicCalendarAccess,
             }
             this.updateLastUpdated(System.currentTimeMillis());
             account.getInternalConfiguration().remove("lastError");
+
+            LOG.debug("Updated cache for calendar account {} of user {} in context {}.", account.getAccountId(), session.getUserId(), session.getContextId());
         } catch (OXException e) {
             LOG.info("Unable to update cache for account {}: {}", account.getAccountId(), e.getMessage(), e);
             warnings.add(e);
