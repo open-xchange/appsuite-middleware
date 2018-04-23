@@ -88,7 +88,7 @@ public class CustomUserAttributeChangers implements AttributeChangers {
      */
     @Override
     public boolean change(Attribute attribute, User userData, int userId, int contextId, Connection connection) throws SQLException {
-        return change(Collections.singleton(attribute), userData, userId, contextId, connection).isEmpty();
+        return !change(Collections.singleton(attribute), userData, userId, contextId, connection).isEmpty();
     }
 
     /*
@@ -112,17 +112,13 @@ public class CustomUserAttributeChangers implements AttributeChangers {
                     String value = pair.getValue();
                     if (value == null) {
                         if (null == stmtDeleteAttribute) {
-                            stmtDeleteAttribute = connection.prepareStatement(DELETE_STATEMENT);
-                            stmtDeleteAttribute.setInt(1, contextId);
-                            stmtDeleteAttribute.setInt(2, userId);
+                            stmtDeleteAttribute = prepareStatement(DELETE_STATEMENT, contextId, userId, connection);
                         }
                         stmtDeleteAttribute.setString(3, name);
                         stmtDeleteAttribute.addBatch();
                     } else {
                         if (null == stmtInsertAttribute) {
-                            stmtInsertAttribute = connection.prepareStatement(INSERT_STATEMENT);
-                            stmtInsertAttribute.setInt(1, contextId);
-                            stmtInsertAttribute.setInt(2, userId);
+                            stmtInsertAttribute = prepareStatement(INSERT_STATEMENT, contextId, userId, connection);
                         }
                         stmtInsertAttribute.setString(3, name);
                         stmtInsertAttribute.setString(4, value);
@@ -146,5 +142,22 @@ public class CustomUserAttributeChangers implements AttributeChangers {
             Databases.closeSQLStuff(stmtDeleteAttribute);
         }
         return changedAttributes;
+    }
+
+    /**
+     * Prepare the specified statement with the context and user identifiers
+     * 
+     * @param sqlStatement The SQL statement to prepare
+     * @param contextId The context identifier
+     * @param userId The user identifier
+     * @param connection The {@link Connection}
+     * @return The {@link PreparedStatement}
+     * @throws SQLException if an SQL error is occurred
+     */
+    private PreparedStatement prepareStatement(String sqlStatement, int contextId, int userId, Connection connection) throws SQLException {
+        PreparedStatement preparedStatement = connection.prepareStatement(sqlStatement);
+        preparedStatement.setInt(1, contextId);
+        preparedStatement.setInt(2, userId);
+        return preparedStatement;
     }
 }

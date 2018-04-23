@@ -635,20 +635,20 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             // "prg_contacts_update_needed")
             final Class<? extends User> c = usrdata.getClass();
             final Method[] theMethods = c.getMethods();
-            final HashSet<String> notallowed = new HashSet<>(9);
-            // Define all those fields which are contained in the user table
-            notallowed.add("Id");
-            notallowed.add("Password");
-            notallowed.add("PasswordMech");
-            notallowed.add("PrimaryEmail");
-            notallowed.add("TimeZone");
-            notallowed.add("Enabled");
-            notallowed.add("ImapServer");
-            notallowed.add("ImapLogin");
-            notallowed.add("SmtpServer");
-            notallowed.add("Password_expired");
-            notallowed.add("Locale");
-            notallowed.add("Spam_filter_enabled");
+//            final HashSet<String> notallowed = new HashSet<>(9);
+//            // Define all those fields which are contained in the user table
+//            notallowed.add("Id");
+//            notallowed.add("Password");
+//            notallowed.add("PasswordMech");
+//            notallowed.add("PrimaryEmail");
+//            notallowed.add("TimeZone");
+//            notallowed.add("Enabled");
+//            notallowed.add("ImapServer");
+//            notallowed.add("ImapLogin");
+//            notallowed.add("SmtpServer");
+//            notallowed.add("Password_expired");
+//            notallowed.add("Locale");
+//            notallowed.add("Spam_filter_enabled");
 
             List<MethodAndName> methodlist = getGetters(theMethods);
 
