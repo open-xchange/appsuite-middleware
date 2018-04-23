@@ -58,6 +58,7 @@ import com.openexchange.chronos.provider.internal.InternalFreeBusyProvider;
 import com.openexchange.chronos.provider.internal.config.DefaultAlarmDate;
 import com.openexchange.chronos.provider.internal.config.DefaultAlarmDateTime;
 import com.openexchange.chronos.provider.internal.config.DefaultFolderId;
+import com.openexchange.chronos.provider.internal.config.RestrictAllowedAttendeeChanges;
 import com.openexchange.chronos.provider.internal.share.CalendarFolderHandlerModuleExtension;
 import com.openexchange.chronos.provider.internal.share.CalendarModuleAdjuster;
 import com.openexchange.chronos.service.CalendarService;
@@ -116,6 +117,7 @@ public class InternalCalendarProviderActivator extends HousekeepingActivator {
              * register JSlob entries
              */
             registerService(JSlobEntry.class, new DefaultFolderId(this));
+            registerService(JSlobEntry.class, new RestrictAllowedAttendeeChanges(this));
             registerService(JSlobEntry.class, new DefaultAlarmDate(this));
             registerService(JSlobEntry.class, new DefaultAlarmDateTime(this));
         } catch (Exception e) {

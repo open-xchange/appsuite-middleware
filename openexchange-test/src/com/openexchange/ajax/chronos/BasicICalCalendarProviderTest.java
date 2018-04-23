@@ -123,6 +123,40 @@ public class BasicICalCalendarProviderTest extends AbstractExternalProviderChron
     }
 
     @Test
+    public void testProbe_containsSurrogateChars_returnException() throws ApiException {
+        String externalUri = "http://example.com/files/test.\ud83d\udca9";
+
+        CalendarAccountProbeData data = new CalendarAccountProbeData();
+        data.setComOpenexchangeCalendarProvider(CalendarFolderManager.ICAL_ACCOUNT_PROVIDER_ID);
+
+        CalendarAccountProbeDataComOpenexchangeCalendarConfig config = new CalendarAccountProbeDataComOpenexchangeCalendarConfig();
+        config.setUri(externalUri);
+        data.setComOpenexchangeCalendarConfig(config);
+        data.setComOpenexchangeCalendarExtendedProperties(new CalendarAccountProbeDataComOpenexchangeCalendarExtendedProperties());
+
+        CalendarAccountProbeResponse probe = defaultUserApi.getChronosApi().probe(defaultUserApi.getSession(), data);
+
+        assertNotNull(probe.getError());
+        assertEquals(probe.getError(), "ICAL-PROV-4041", probe.getCode());
+    }
+
+    @Test
+    public void testCreate_containsSurrogateChars_returnException() throws ApiException {
+        String externalUri = "http://example.com/files/test.\ud83d\udca9";
+
+        FolderDataComOpenexchangeCalendarConfig config = new FolderDataComOpenexchangeCalendarConfig();
+        NewFolderBodyFolder folder = createFolder(externalUri, config);
+        addPermissions(folder);
+
+        NewFolderBody body = new NewFolderBody();
+        body.setFolder(folder);
+        FolderUpdateResponse response = foldersApi.createFolder(CalendarFolderManager.DEFAULT_FOLDER_ID, defaultUserApi.getSession(), body, CalendarFolderManager.TREE_ID, CalendarFolderManager.MODULE);
+
+        assertNotNull(response.getError());
+        assertEquals(response.getError(), "ICAL-PROV-4041", response.getCode());
+    }
+
+    @Test
     public void testProbe_noScheme_returnException() throws ApiException {
         String externalUri = "example.com/files/test.ics";
 
@@ -138,6 +172,22 @@ public class BasicICalCalendarProviderTest extends AbstractExternalProviderChron
 
         assertNotNull(probe.getError());
         assertEquals(probe.getError(), "ICAL-PROV-4041", probe.getCode());
+    }
+
+    @Test
+    public void testCreate_noScheme_returnException() throws ApiException {
+        String externalUri = "example.com/files/test.ics";
+
+        FolderDataComOpenexchangeCalendarConfig config = new FolderDataComOpenexchangeCalendarConfig();
+        NewFolderBodyFolder folder = createFolder(externalUri, config);
+        addPermissions(folder);
+
+        NewFolderBody body = new NewFolderBody();
+        body.setFolder(folder);
+        FolderUpdateResponse response = foldersApi.createFolder(CalendarFolderManager.DEFAULT_FOLDER_ID, defaultUserApi.getSession(), body, CalendarFolderManager.TREE_ID, CalendarFolderManager.MODULE);
+
+        assertNotNull(response.getError());
+        assertEquals(response.getError(), "ICAL-PROV-4041", response.getCode());
     }
 
     @Test
