@@ -350,12 +350,6 @@ public final class CSSMatcher {
     /** Matches a complete CSS block, but not appropriate for possible nested blocks */
     private static final Pattern PATTERN_STYLE_BLOCK = Pattern.compile("((?:\\*|#|\\.|[a-zA-Z])[^{]*?\\{)([^}/]+)\\}");
 
-    /** Matches a CR?LF plus indention */
-    protected static final Pattern CRLF = Pattern.compile("\r?\n( {2,})?");
-
-    /** Matches multiple white-spaces */
-    protected static final Pattern WS = Pattern.compile(" +");
-
     /**
      * Iterates over CSS contained in specified string argument and checks each found element/block against given style map
      *
@@ -437,12 +431,12 @@ public final class CSSMatcher {
      * @return <code>true</code> if modified; otherwise <code>false</code>
      */
     protected static boolean checkCSS(final Stringer cssBuilder, final Map<String, Set<String>> styleMap, final String cssPrefix, final boolean removeIfAbsent, final boolean internallyInvoked) {
-        if (cssBuilder.isEmpty()) {
+        if (cssBuilder.isEmpty() || (null == styleMap && Strings.isEmpty(cssPrefix))) {
             return false;
         }
 
         // Schedule separate task to monitor duration
-        // User StringBuffer-based invocation to honor concurrency
+        // Use StringBuffer-based invocation to honor concurrency
         final Stringer cssBld = new StringBufferStringer(new StringBuffer(cssBuilder.toString()));
         cssBuilder.setLength(0);
 
@@ -513,7 +507,7 @@ public final class CSSMatcher {
         if (cssBld.indexOf("{") < 0) {
             return checkCSSElements(cssBld, styleMap, removeIfAbsent);
         }
-        final String css = dropComments(WS.matcher(CRLF.matcher(cssBld).replaceAll(" ")).replaceAll(" "));
+        final String css = dropComments(replaceMultipleSpacesWithSpace(replaceCRLFsWithSpace(cssBld)));
         final int length = css.length();
         cssBld.setLength(0);
         final Stringer cssElemsBuffer = new StringBuilderStringer(new StringBuilder(length));
@@ -570,9 +564,65 @@ public final class CSSMatcher {
         return modified;
     }
 
+    private static String replaceCRLFsWithSpace(CharSequence s) {
+        StringBuilder sb = null;
+        for (int i = 0, length = s.length(), pos = -1; i < length; i++) {
+            char ch = s.charAt(i);
+            if ('\r' == ch || '\n' == ch) {
+                if (pos < 0) {
+                    pos = i;
+                    if (null == sb) {
+                        sb = new StringBuilder(length);
+                        if (i > 0) {
+                            sb.append(s, 0, i);
+                        }
+                    }
+                    sb.append(' ');
+                }
+            } else {
+                if (pos >= 0) {
+                    pos = -1;
+                }
+                if (null != sb) {
+                    sb.append(ch);
+                }
+            }
+        }
+        return null == sb ? s.toString() : sb.toString();
+    }
+
+    private static String replaceMultipleSpacesWithSpace(CharSequence s) {
+        StringBuilder sb = null;
+        for (int i = 0, length = s.length(), wspos = -1; i < length; i++) {
+            char ch = s.charAt(i);
+            if (' ' == ch) {
+                if (wspos < 0) {
+                    wspos = i;
+                    if (null != sb) {
+                        sb.append(ch);
+                    }
+                } else {
+                    if (null == sb) {
+                        sb = new StringBuilder(length);
+                        if (i > 0) {
+                            sb.append(s, 0, wspos + 1);
+                        }
+                    }
+                }
+            } else {
+                if (wspos >= 0) {
+                    wspos = -1;
+                }
+                if (null != sb) {
+                    sb.append(ch);
+                }
+            }
+        }
+        return null == sb ? s.toString() : sb.toString();
+    }
+
     private static final Pattern SPLIT_LINES = Pattern.compile("\r?\n");
     private static final Pattern SPLIT_WORDS = Pattern.compile("\\s+");
-    private static final Pattern SPLIT_COMMA = Pattern.compile(",");
 
     static String prefixBlock(final String match, final String cssPrefix) {
         if (isEmpty(match) || HtmlServices.containsEventHandler(match)) {
@@ -631,7 +681,7 @@ public final class CSSMatcher {
             builder.append(line);
             return;
         }
-        final String[] splits = SPLIT_COMMA.split(line, 0);
+        final String[] splits = Strings.splitBy(line, ',', false);
         if (1 == splits.length) {
             handleWords(line, cssPrefix, builder, helper);
         } else {
@@ -734,13 +784,13 @@ public final class CSSMatcher {
         if (cssBuilder.indexOf("{") < 0) {
             return checkCSSElements(cssBuilder, styleMap, removeIfAbsent);
         }
-        final String css = CRLF.matcher(cssBuilder).replaceAll(" ");
+        final String css = replaceCRLFsWithSpace(cssBuilder);
         try {
             final int cssLength = css.length();
             final Stringer cssElemsBuffer = new StringBuilderStringer(new StringBuilder(cssLength));
             final Matcher m = PATTERN_STYLE_STARTING_BLOCK.matcher(InterruptibleCharSequence.valueOf(css));
             if (!m.find()) {
-                return false;
+                return checkCSSElements(cssBuilder, styleMap, removeIfAbsent);
             }
             final Thread thread = Thread.currentThread();
             cssBuilder.setLength(0);
@@ -800,7 +850,7 @@ public final class CSSMatcher {
             if (cssBuilder.indexOf("{") < 0) {
                 return checkCSSElements(cssBuilder, styleMap, removeIfAbsent);
             }
-            final String css = CRLF.matcher(cssBuilder.toString()).replaceAll(" ");
+            final String css = replaceCRLFsWithSpace(cssBuilder);
             final Matcher m = PATTERN_STYLE_STARTING_BLOCK.matcher(InterruptibleCharSequence.valueOf(css));
             final MatcherReplacer mr = new MatcherReplacer(m, css);
             final Thread thread = Thread.currentThread();
@@ -1018,16 +1068,16 @@ public final class CSSMatcher {
             if (null != elementName) {
                 Set<String> allowedValuesSet = styleMap.get(toLowerCase(elementName));
                 if (null != allowedValuesSet) {
-                    elemBuilder.append(elementName).append(':').append(' ');
                     final String elementValues = m.group(2);
                     boolean hasValues = false;
                     if (matches(elementValues, allowedValuesSet)) {
                         /*
                          * Direct match
                          */
-                        if (HtmlServices.containsEventHandler(elementValues)) {
+                        if (HtmlServices.containsEventHandler(elementValues) || false == HtmlServices.isSafe(elementValues, elementValues)) {
                             modified = true;
                         } else {
+                            elemBuilder.append(elementName).append(':').append(' ');
                             elemBuilder.append(elementValues);
                             hasValues = true;
                         }
@@ -1035,10 +1085,11 @@ public final class CSSMatcher {
                         boolean first = true;
                         for (String token : splitToTokens(elementValues)) {
                             if (matches(token, allowedValuesSet)) {
-                                if (HtmlServices.containsEventHandler(token)) {
+                                if (HtmlServices.containsEventHandler(token) || false == HtmlServices.isSafe(elementValues, elementValues)) {
                                     modified = true;
                                 } else {
                                     if (first) {
+                                        elemBuilder.append(elementName).append(':').append(' ');
                                         first = false;
                                     } else {
                                         elemBuilder.append(' ');
@@ -1070,10 +1121,15 @@ public final class CSSMatcher {
                      */
                     modified = true;
                 } else {
-                    if (cssBuilder.length() > 0) {
-                        cssBuilder.append(' ');
+                    String elementValues = m.group(2);
+                    if ((elementValues.indexOf('<') >= 0 || elementValues.indexOf('>') >= 0) || HtmlServices.containsEventHandler(elementValues) || false == HtmlServices.isSafe(elementValues, elementValues)) {
+                        modified = true;
+                    } else {
+                        if (cssBuilder.length() > 0) {
+                            cssBuilder.append(' ');
+                        }
+                        cssBuilder.append(m.group());
                     }
-                    cssBuilder.append(m.group());
                 }
             }
         } while (!thread.isInterrupted() && m.find());

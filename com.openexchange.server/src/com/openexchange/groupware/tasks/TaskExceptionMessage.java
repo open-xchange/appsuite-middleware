@@ -64,7 +64,7 @@ public class TaskExceptionMessage implements LocalizableStrings {
 
     public static final String INSERT_FAILED_MSG = "Error while inserting task.";
 
-    public static final String NOT_TASK_FOLDER_MSG = "This is not a task folder.";
+    public static final String FOLDER_NOT_FOUND_MSG = "Folder cannot be found.";
 
     public static final String MODIFIED_MSG = "Edit conflict. Your change cannot be completed because somebody else has made a conflicting change to the same item. Please refresh or synchronize and try again.";
 

@@ -27,3 +27,32 @@ properties:
       file: filestorage.properties
       packageName: open-xchange-core
       tags: ["Filestorage"]
+    - key: com.openexchange.file.storage.zipFolderThreshold
+      description: |
+        Specifies the maximum size of a zipped folder in bytes. A value less than 0 deactivates the limit but is not recommended.
+      defaultValue: 1073741824
+      version: 
+      reloadable: true
+      configcascadeAware: false
+      related: 
+      file: filestorage.properties
+      packageName: open-xchange-core
+      tags: ["Filestorage", "Limit"]
+    - key: com.openexchange.infostore.zipDocumentsCompressionLevel
+      description: |
+        Configures the used compression level that is applied to .zip containers
+        when downloading multiple documents at once.  
+        Possible values are:
+        <ul>
+          <li><code>-1</code> - for the built-in default level</li>
+          <li><code>0</code> - for no compression</li>
+          <li>Any number between <code>1</code> (best speed) and <code>9</code> (best compression)</li>
+        </ul>
+      defaultValue: -1
+      version: 
+      reloadable: true
+      configcascadeAware: false
+      related: 
+      file: filestorage.properties
+      packageName: open-xchange-core
+      tags: ["Filestorage"]

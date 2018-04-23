@@ -375,7 +375,18 @@ public class CSSMatcherTest {
         String convertedCss = cssBld.toString().trim();
         Assert.assertEquals("Processed CSS does not match.", content, convertedCss);
     }
+    
+    @Test
+    public void testDoCheckCss_bug57095() {
+        FilterMaps.loadWhitelist();
 
+        Stringer cssBld = new StringBufferStringer(new StringBuffer("font:\"'/{/onerror=alert(document.cookie)//"));
+        CSSMatcher.checkCSS(cssBld, FilterMaps.getStaticStyleMap(), true, true);
+        String content = "";
+        String convertedCss = cssBld.toString().trim();
+        Assert.assertEquals("Processed CSS does not match.", content, convertedCss);
+    }
+    
      @Test
      public void testCheckCss_threadpoolAvailableAndNotInternallyInvoked_createAdditionalThread() throws InterruptedException, ExecutionException, TimeoutException {
         PowerMockito.mockStatic(ThreadPools.class);

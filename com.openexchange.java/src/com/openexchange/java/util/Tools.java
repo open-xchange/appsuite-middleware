@@ -63,10 +63,10 @@ public final class Tools {
         super();
     }
 
-    /**
-     * The radix for base <code>10</code>.
-     */
+    /** The radix for base <code>10</code>. */
     private static final int RADIX = 10;
+    private static final int INT_LIMIT = -Integer.MAX_VALUE;
+    private static final int INT_MULTMIN = INT_LIMIT / RADIX;
 
     /**
      * Parses a positive <code>int</code> value from passed {@link String} instance.
@@ -91,30 +91,72 @@ public final class Tools {
         int result = 0;
         int i = 0;
 
-        final int limit = -Integer.MAX_VALUE;
-        final int multmin = limit / RADIX;
-        int digit;
-
-        if (i < max) {
-            digit = digit(s.charAt(i++));
-            if (digit < 0) {
-                return -1;
-            }
-            result = -digit;
+        int digit = digit(s.charAt(i++));
+        if (digit < 0) {
+            return -1;
         }
+        result = -digit;
+
         while (i < max) {
-            /*
-             * Accumulating negatively avoids surprises near MAX_VALUE
-             */
+            // Accumulating negatively avoids surprises near MAX_VALUE
             digit = digit(s.charAt(i++));
             if (digit < 0) {
                 return -1;
             }
-            if (result < multmin) {
+            if (result < INT_MULTMIN) {
                 return -1;
             }
             result *= RADIX;
-            if (result < limit + digit) {
+            if (result < INT_LIMIT + digit) {
+                return -1;
+            }
+            result -= digit;
+        }
+        return -result;
+    }
+
+    private static final long LONG_LIMIT = -Long.MAX_VALUE;
+    private static final long LONG_MULTMIN = LONG_LIMIT / RADIX;
+
+    /**
+     * Parses a positive <code>long</code> value from passed {@link String} instance.
+     * <p>
+     * Note that neither the character <code>L</code> (<code>'&#92;u004C'</code>) nor <code>l</code> (<code>'&#92;u006C'</code>) is
+     * permitted to appear at the end of the string as a type indicator, as would be permitted in Java programming language source code.
+     *
+     * @param s The string to parse
+     * @return The parsed positive <code>long</code> value or <code>-1</code> if parsing failed
+     */
+    public static long getUnsignedLong(final String s) {
+        if (s == null) {
+            return -1;
+        }
+
+        int max = s.length();
+        if (max <= 0 || s.charAt(0) == '-') {
+            return -1;
+        }
+
+        long result = 0;
+        int i = 0;
+
+        int digit = digit(s.charAt(i++));
+        if (digit < 0) {
+            return -1;
+        }
+        result = -digit;
+
+        while (i < max) {
+            // Accumulating negatively avoids surprises near MAX_VALUE
+            digit = digit(s.charAt(i++));
+            if (digit < 0) {
+                return -1;
+            }
+            if (result < LONG_MULTMIN) {
+                return -1;
+            }
+            result *= RADIX;
+            if (result < LONG_LIMIT + digit) {
                 return -1;
             }
             result -= digit;
