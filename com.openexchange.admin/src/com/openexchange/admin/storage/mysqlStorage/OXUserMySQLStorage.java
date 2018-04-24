@@ -106,7 +106,6 @@ import com.openexchange.admin.rmi.dataobjects.Filestore;
 import com.openexchange.admin.rmi.dataobjects.Group;
 import com.openexchange.admin.rmi.dataobjects.User;
 import com.openexchange.admin.rmi.dataobjects.UserModuleAccess;
-import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.services.AdminServiceRegistry;
 import com.openexchange.admin.storage.interfaces.OXToolStorageInterface;
@@ -120,6 +119,7 @@ import com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.mailac
 import com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.mailsetting.UserSettingMailAttributeChangers;
 import com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.spamfilter.SpamFilterUserAttributeChangers;
 import com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.user.UserAttributeChangers;
+import com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.user.username.UserNameUserAttributeChangers;
 import com.openexchange.admin.storage.sqlStorage.OXUserSQLStorage;
 import com.openexchange.admin.storage.utils.Filestore2UserUtil;
 import com.openexchange.admin.tools.AdminCache;
@@ -227,6 +227,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
         ac.put(AttributeChanger.CONTACT_USER_ATTRIBUTE, new ContactUserAttributeChangers());
         ac.put(AttributeChanger.SPAM_FILTER, new SpamFilterUserAttributeChangers());
         ac.put(AttributeChanger.GUI_PREFERENCE, new GuiPreferenceUserAttributeChangers());
+        ac.put(AttributeChanger.USERNAME_ATTRIBUTE, new UserNameUserAttributeChangers(cache));
         attributeChangers = Collections.unmodifiableMap(ac);
     }
 
@@ -601,14 +602,8 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
 
             lock(contextId, con);
 
-            Set<String> changedAttributes = new HashSet<>();
-
-            // Change the username if changeable
-            if (updateUsername(usrdata, contextId, userId, con)) {
-                changedAttributes.add("username");
-            }
-
             // Change attributes
+            Set<String> changedAttributes = new HashSet<>();
             for (AttributeChanger attributeChanger : AttributeChanger.values()) {
                 AttributeChangers acs = attributeChangers.get(attributeChanger);
                 if (acs == null) {
@@ -638,8 +633,6 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 changedAttributes.add("aliases");
             }
 
-            //////////////////////// vvvvvv WIP vvvvvv //////////////////////
-
             if (usrdata.isConvertDriveUserFolders()) {
                 convertDriveUserFolders(ctx, usrdata, con);
             }
@@ -650,28 +643,6 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
 
                 OXFolderAdminHelper.propagateUserModification(userId, changedfields, System.currentTimeMillis(), con, con, contextId);
             }
-
-            // if administrator sets GUI configuration existing GUI configuration is overwritten
-//            final SettingStorage settStor = SettingStorage.getInstance(contextId, userId);
-//            final Map<String, String> guiPreferences = usrdata.getGuiPreferences();
-//            if (guiPreferences != null) {
-//                final Iterator<Entry<String, String>> iter = guiPreferences.entrySet().iterator();
-//                while (iter.hasNext()) {
-//                    final Entry<String, String> entry = iter.next();
-//                    final String key = entry.getKey();
-//                    final String value = entry.getValue();
-//                    if (null != key && null != value) {
-//                        try {
-//                            final Setting setting = ConfigTree.getInstance().getSettingByPath(key);
-//                            setting.setSingleValue(value);
-//                            settStor.save(con, setting);
-//                        } catch (final OXException e) {
-//                            LOG.error("Problem while storing GUI preferences.", e);
-//                        }
-//                    }
-//                }
-//            }
-            //////////////////////// ^^^^^ WIP ^^^^^^ //////////////////////
 
             changePrimaryMailAccount(ctx, con, usrdata, userId);
             storeFolderTree(ctx, con, usrdata, userId);
@@ -695,7 +666,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
         } catch (final ServiceException e) {
             LOG.error("Required service is missing.", e);
             throw new StorageException(e);
-        } catch (final IllegalArgumentException | SecurityException | OXException | InvalidDataException e) {
+        } catch (final IllegalArgumentException | SecurityException | OXException e) {
             LOG.error("Error", e);
             throw new StorageException(e);
         } catch (final RuntimeException e) {
@@ -806,40 +777,6 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             } else if (usrdata.isAliasesset()) {
                 aliasStorage.deleteAliases(con, contextId, userId);
                 return true;
-            }
-        }
-        return false;
-    }
-
-    /**
-     * Updates the username in <code>login2user</code> table only if the if USERNAME_CHANGEABLE is set to <code>true</code>
-     * 
-     * @param usrdata the {@link User} data
-     * @param contextId The context identifier
-     * @param userId The user identifier
-     * @param con The connection
-     * @return <code>true</code> if the username was changed successfully; <code>false</code> otherwise
-     * @throws InvalidDataException in case the username is invalid
-     * @throws SQLException if an SQL error is occurred
-     */
-    private boolean updateUsername(final User usrdata, int contextId, int userId, Connection con) throws InvalidDataException, SQLException {
-        if (cache.getProperties().getUserProp(AdminProperties.User.USERNAME_CHANGEABLE, false) && usrdata.getName() != null && usrdata.getName().trim().length() > 0) {
-            if (cache.getProperties().getUserProp(AdminProperties.User.CHECK_NOT_ALLOWED_CHARS, true)) {
-                OXToolStorageInterface.getInstance().validateUserName(usrdata.getName());
-            }
-
-            if (cache.getProperties().getUserProp(AdminProperties.User.AUTO_LOWERCASE, false)) {
-                usrdata.setName(usrdata.getName().toLowerCase());
-            }
-
-            PreparedStatement stmt = con.prepareStatement("UPDATE login2user SET uid=? WHERE cid=? AND id=?");
-            try {
-                stmt.setString(1, usrdata.getName().trim());
-                stmt.setInt(2, contextId);
-                stmt.setInt(3, userId);
-                return stmt.executeUpdate() == 1;
-            } finally {
-                stmt.close();
             }
         }
         return false;

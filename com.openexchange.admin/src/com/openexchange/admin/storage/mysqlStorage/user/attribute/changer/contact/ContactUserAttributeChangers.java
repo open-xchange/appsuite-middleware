@@ -233,7 +233,7 @@ public class ContactUserAttributeChangers extends AbstractAttributeChangers {
      */
     private Set<String> changeAttributes(User userData, int userId, int contextId, Connection connection, StringBuilder query, List<MethodMetadata> collectedMethods) throws StorageException {
         if (collectedMethods.isEmpty()) {
-            return Collections.emptySet();
+            return EMPTY_SET;
         }
 
         Set<String> changedAttributes = new HashSet<>();

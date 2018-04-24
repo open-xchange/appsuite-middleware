@@ -57,6 +57,7 @@ import com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.mailac
 import com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.mailsetting.UserMailSettingAttribute;
 import com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.spamfilter.SpamFilterUserAttribute;
 import com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.user.UserAttribute;
+import com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.user.username.UserNameUserAttribute;
 
 /**
  * {@link AttributeChanger}
@@ -72,7 +73,8 @@ public enum AttributeChanger {
     CUSTOM_USER_ATTRIBUTE(EnumSet.allOf(CustomUserAttribute.class)),
     CONTACT_USER_ATTRIBUTE(EnumSet.allOf(ContactUserAttribute.class)),
     SPAM_FILTER(EnumSet.allOf(SpamFilterUserAttribute.class)),
-    GUI_PREFERENCE(EnumSet.allOf(GuiPreferencesUserAttribute.class));
+    GUI_PREFERENCE(EnumSet.allOf(GuiPreferencesUserAttribute.class)),
+    USERNAME_ATTRIBUTE(EnumSet.allOf(UserNameUserAttribute.class))
     ;
 
     private final EnumSet<? extends Attribute> attributes;

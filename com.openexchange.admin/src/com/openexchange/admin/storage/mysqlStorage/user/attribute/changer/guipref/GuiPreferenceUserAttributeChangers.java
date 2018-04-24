@@ -50,7 +50,6 @@
 package com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.guipref;
 
 import java.sql.Connection;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
@@ -94,7 +93,7 @@ public class GuiPreferenceUserAttributeChangers extends AbstractAttributeChanger
         SettingStorage settStor = SettingStorage.getInstance(contextId, userId);
         Map<String, String> guiPreferences = userData.getGuiPreferences();
         if (guiPreferences == null) {
-            return Collections.emptySet();
+            return EMPTY_SET;
         }
 
         // If administrator sets GUI configuration existing GUI configuration is overwritten

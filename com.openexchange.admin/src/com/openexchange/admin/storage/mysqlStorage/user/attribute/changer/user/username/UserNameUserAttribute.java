@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2018-2020 OX Software GmbH
+ *     Copyright (C) 2016-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,39 +47,69 @@
  *
  */
 
-package com.openexchange.admin.storage.mysqlStorage.user.attribute.changer;
+package com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.user.username;
 
-import java.sql.Connection;
-import java.util.Collections;
-import java.util.Set;
-import com.openexchange.admin.rmi.dataobjects.User;
-import com.openexchange.admin.rmi.exceptions.StorageException;
+import com.openexchange.admin.rmi.dataobjects.ExtendableDataObject;
+import com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.Attribute;
 
 /**
- * {@link AbstractAttributeChangers}
+ * {@link UserNameUserAttribute}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
- * @since v7.10.1
  */
-public abstract class AbstractAttributeChangers implements AttributeChangers {
+public enum UserNameUserAttribute implements Attribute {
+    // Mark attribute, no real value
+    USERNAME_ATTRIBUTE;
 
-    protected static final Set<String> EMPTY_SET = Collections.emptySet();
+    private static final String USERNAME_ATTRIBUTE_NAME = "login2user";
 
-    /**
-     * Initialises a new {@link AbstractAttributeChangers}.
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.Attribute#getOriginalType()
      */
-    public AbstractAttributeChangers() {
-        super();
+    @Override
+    public Class<?> getOriginalType() {
+        return String.class;
     }
 
     /*
      * (non-Javadoc)
      * 
-     * @see com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.AttributeChangers#change(com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.Attribute, com.openexchange.admin.rmi.dataobjects.User, int, int,
-     * java.sql.Connection)
+     * @see com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.Attribute#getSQLFieldName()
      */
     @Override
-    public boolean change(Attribute attribute, User userData, int userId, int contextId, Connection connection) throws StorageException {
-        return !change(Collections.singleton(attribute), userData, userId, contextId, connection).isEmpty();
+    public String getSQLFieldName() {
+        return USERNAME_ATTRIBUTE_NAME;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.Attribute#getSQLTableName()
+     */
+    @Override
+    public String getSQLTableName() {
+        return USERNAME_ATTRIBUTE_NAME;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.Attribute#getValue(com.openexchange.admin.rmi.dataobjects.ExtendableDataObject)
+     */
+    @Override
+    public <T extends ExtendableDataObject> String getValue(T object) {
+        return USERNAME_ATTRIBUTE_NAME;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.Attribute#getName()
+     */
+    @Override
+    public String getName() {
+        return USERNAME_ATTRIBUTE_NAME;
     }
 }

@@ -84,7 +84,7 @@ public class SpamFilterUserAttributeChangers extends AbstractAttributeChangers {
     public Set<String> change(Set<Attribute> attributes, User userData, int userId, int contextId, Connection connection) throws StorageException {
         Boolean spam_filter_enabled = userData.getGui_spam_filter_enabled();
         if (null == spam_filter_enabled) {
-            return Collections.emptySet();
+            return EMPTY_SET;
         }
 
         OXToolStorageInterface tool = OXToolStorageInterface.getInstance();

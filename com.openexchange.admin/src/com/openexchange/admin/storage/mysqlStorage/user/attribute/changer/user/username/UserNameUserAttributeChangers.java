@@ -47,39 +47,75 @@
  *
  */
 
-package com.openexchange.admin.storage.mysqlStorage.user.attribute.changer;
+package com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.user.username;
 
 import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.util.Collections;
 import java.util.Set;
+import com.openexchange.admin.properties.AdminProperties;
 import com.openexchange.admin.rmi.dataobjects.User;
+import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
+import com.openexchange.admin.storage.interfaces.OXToolStorageInterface;
+import com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.AbstractAttributeChangers;
+import com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.Attribute;
+import com.openexchange.admin.tools.AdminCache;
 
 /**
- * {@link AbstractAttributeChangers}
+ * {@link UserNameUserAttributeChangers}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @since v7.10.1
  */
-public abstract class AbstractAttributeChangers implements AttributeChangers {
+public class UserNameUserAttributeChangers extends AbstractAttributeChangers {
 
-    protected static final Set<String> EMPTY_SET = Collections.emptySet();
+    private AdminCache adminCache;
 
     /**
-     * Initialises a new {@link AbstractAttributeChangers}.
+     * Initialises a new {@link UserNameUserAttributeChangers}.
      */
-    public AbstractAttributeChangers() {
+    public UserNameUserAttributeChangers(AdminCache adminCache) {
         super();
+        this.adminCache = adminCache;
     }
 
     /*
      * (non-Javadoc)
      * 
-     * @see com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.AttributeChangers#change(com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.Attribute, com.openexchange.admin.rmi.dataobjects.User, int, int,
-     * java.sql.Connection)
+     * @see com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.AttributeChangers#change(java.util.Set, com.openexchange.admin.rmi.dataobjects.User, int, int, java.sql.Connection)
      */
     @Override
-    public boolean change(Attribute attribute, User userData, int userId, int contextId, Connection connection) throws StorageException {
-        return !change(Collections.singleton(attribute), userData, userId, contextId, connection).isEmpty();
+    public Set<String> change(Set<Attribute> attributes, User userData, int userId, int contextId, Connection connection) throws StorageException {
+        // Updates the username in 'login2user' table only if the if 'USERNAME_CHANGEABLE' is set to 'true'
+        if (!adminCache.getProperties().getUserProp(AdminProperties.User.USERNAME_CHANGEABLE, false)) {
+            return EMPTY_SET;
+        }
+        if (userData.getName() == null) {
+            return EMPTY_SET;
+        }
+        if (userData.getName().trim().length() <= 0) {
+            return EMPTY_SET;
+        }
+        if (adminCache.getProperties().getUserProp(AdminProperties.User.CHECK_NOT_ALLOWED_CHARS, true)) {
+            try {
+                OXToolStorageInterface.getInstance().validateUserName(userData.getName());
+            } catch (InvalidDataException e) {
+                throw new StorageException(e);
+            }
+        }
+
+        if (adminCache.getProperties().getUserProp(AdminProperties.User.AUTO_LOWERCASE, false)) {
+            userData.setName(userData.getName().toLowerCase());
+        }
+        try (PreparedStatement stmt = connection.prepareStatement("UPDATE login2user SET uid=? WHERE cid=? AND id=?")) {
+            stmt.setString(1, userData.getName().trim());
+            stmt.setInt(2, contextId);
+            stmt.setInt(3, userId);
+            return stmt.executeUpdate() == 1 ? Collections.singleton("username") : EMPTY_SET;
+        } catch (SQLException e) {
+            throw new StorageException(e);
+        }
     }
 }
