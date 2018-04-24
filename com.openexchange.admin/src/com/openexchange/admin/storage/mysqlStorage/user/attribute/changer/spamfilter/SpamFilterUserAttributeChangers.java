@@ -56,8 +56,8 @@ import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.User;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.storage.interfaces.OXToolStorageInterface;
+import com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.AbstractAttributeChangers;
 import com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.Attribute;
-import com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.AttributeChangers;
 import com.openexchange.mail.usersetting.UserSettingMail;
 
 /**
@@ -66,24 +66,13 @@ import com.openexchange.mail.usersetting.UserSettingMail;
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @since v7.10.1
  */
-public class SpamFilterUserAttributeChangers implements AttributeChangers {
+public class SpamFilterUserAttributeChangers extends AbstractAttributeChangers {
 
     /**
      * Initialises a new {@link SpamFilterUserAttributeChangers}.
      */
     public SpamFilterUserAttributeChangers() {
         super();
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.AttributeChangers#change(com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.Attribute, com.openexchange.admin.rmi.dataobjects.User, int, int,
-     * java.sql.Connection)
-     */
-    @Override
-    public boolean change(Attribute attribute, User userData, int userId, int contextId, Connection connection) throws StorageException {
-        return !change(Collections.singleton(attribute), userData, userId, contextId, connection).isEmpty();
     }
 
     /*

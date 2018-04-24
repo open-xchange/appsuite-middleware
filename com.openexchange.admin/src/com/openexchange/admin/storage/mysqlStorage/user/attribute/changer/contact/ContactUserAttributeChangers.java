@@ -67,8 +67,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.admin.rmi.dataobjects.User;
 import com.openexchange.admin.rmi.exceptions.StorageException;
+import com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.AbstractAttributeChangers;
 import com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.Attribute;
-import com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.AttributeChangers;
 import com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.MethodMetadata;
 import com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.ReturnType;
 import com.openexchange.admin.storage.sqlStorage.OXUserSQLStorage.Mapper;
@@ -79,7 +79,7 @@ import com.openexchange.admin.storage.sqlStorage.OXUserSQLStorage.Mapper;
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @since v7.10.1
  */
-public class ContactUserAttributeChangers implements AttributeChangers {
+public class ContactUserAttributeChangers extends AbstractAttributeChangers {
 
     private static final Logger LOG = LoggerFactory.getLogger(ContactUserAttributeChangers.class);
 
@@ -169,17 +169,6 @@ public class ContactUserAttributeChangers implements AttributeChangers {
                 appendToQuery(methodMetadata, query, setMethods);
             }
         });
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.AttributeChangers#change(com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.Attribute, com.openexchange.admin.rmi.dataobjects.User, int, int,
-     * java.sql.Connection)
-     */
-    @Override
-    public boolean change(Attribute attribute, User userData, int userId, int contextId, Connection connection) throws StorageException {
-        return !change(Collections.singleton(attribute), userData, userId, contextId, connection).isEmpty();
     }
 
     /*

@@ -67,7 +67,7 @@ import com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.mailse
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @since v7.10.1
  */
-public abstract class AbstractUserAttributeChangers implements AttributeChangers {
+public abstract class AbstractUserAttributeChangers extends AbstractAttributeChangers {
 
     private static final Logger LOG = LoggerFactory.getLogger(UserSettingMailAttributeChangers.class);
 

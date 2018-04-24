@@ -615,7 +615,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 }
                 changedAttributes.addAll(acs.change(new HashSet<>(attributeChanger.getAttributes()), usrdata, userId, contextId, con));
             }
-            
+
             // Hint for the cache when updating display name
             boolean displayNameUpdate = changedAttributes.contains("Display_name");
 
@@ -680,11 +680,8 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             con.commit();
             rollback = false;
 
-            // Invalidate alias cache
-            UserAliasStorage aliasStorage = AdminServiceRegistry.getInstance().getService(UserAliasStorage.class);
-            aliasStorage.invalidateAliases(contextId, userId);
-            // Update JCS Cache
-            updateJCSCache(ctx, usrdata, contextId, userId, con, quotaAffectedUserIDs, displayNameUpdate);
+            // Update JCS Caches
+            updateJCSCaches(ctx, usrdata, contextId, userId, con, quotaAffectedUserIDs, displayNameUpdate);
 
             LOG.info("User {} in context {} changed! Changed attributes: {}", Integer.valueOf(userId), Integer.valueOf(contextId), toString(changedAttributes));
         } catch (final DataTruncation dt) {
@@ -713,6 +710,10 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
     }
 
     /**
+     * Updates the JCS caches for:
+     * <ul>
+     * <li>TBD</li> TODO
+     * </ul>
      * 
      * @param ctx
      * @param usrdata
@@ -721,58 +722,65 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
      * @param con
      * @param quotaAffectedUserIDs
      * @param displayNameUpdate
+     * @throws OXException
      */
-    private void updateJCSCache(final Context ctx, final User usrdata, int contextId, int userId, Connection con, Set<Integer> quotaAffectedUserIDs, boolean displayNameUpdate) {
+    private void updateJCSCaches(final Context ctx, final User usrdata, int contextId, int userId, Connection con, Set<Integer> quotaAffectedUserIDs, boolean displayNameUpdate) throws OXException {
+        // Invalidate alias cache
+        UserAliasStorage aliasStorage = AdminServiceRegistry.getInstance().getService(UserAliasStorage.class);
+        aliasStorage.invalidateAliases(ctx.getId(), userId);
+
         CacheService cacheService = AdminServiceRegistry.getInstance().getService(CacheService.class);
-        if (null != cacheService) {
-            try {
-                CacheKey key = cacheService.newCacheKey(contextId, userId);
-                Cache cache = cacheService.getCache("User");
-                cache.remove(key);
-                if (null != quotaAffectedUserIDs) {
-                    List<Serializable> keys = new ArrayList<>(quotaAffectedUserIDs.size());
-                    for (Integer userID : quotaAffectedUserIDs) {
-                        keys.add(cacheService.newCacheKey(contextId, userID.intValue()));
-                    }
-                    cache.remove(keys);
-                }
-                cache = cacheService.getCache("UserPermissionBits");
-                cache.remove(key);
-                cache = cacheService.getCache("UserConfiguration");
-                cache.remove(key);
-                cache = cacheService.getCache("UserSettingMail");
-                cache.remove(key);
-                cache = cacheService.getCache("Capabilities");
-                cache.removeFromGroup(Integer.valueOf(userId), ctx.getId().toString());
+        if (null == cacheService) {
+            return;
+        }
 
-                {
-                    MailAccountStorageService mass = AdminServiceRegistry.getInstance().getService(MailAccountStorageService.class);
-                    if (null != mass) {
-                        mass.invalidateMailAccount(0, userId, contextId);
-                    } else {
-                        cache = cacheService.getCache("MailAccount");
-                        cache.remove(cacheService.newCacheKey(ctx.getId().intValue(), Integer.toString(0), Integer.toString(userId)));
-                        cache.remove(cacheService.newCacheKey(ctx.getId().intValue(), Integer.toString(userId)));
-                        cache.invalidateGroup(ctx.getId().toString());
-                    }
+        try {
+            CacheKey key = cacheService.newCacheKey(contextId, userId);
+            Cache cache = cacheService.getCache("User");
+            cache.remove(key);
+            if (null != quotaAffectedUserIDs) {
+                List<Serializable> keys = new ArrayList<>(quotaAffectedUserIDs.size());
+                for (Integer userID : quotaAffectedUserIDs) {
+                    keys.add(cacheService.newCacheKey(contextId, userID.intValue()));
                 }
-
-                cache = cacheService.getCache("QuotaFileStorages");
-                cache.invalidateGroup(Integer.toString(contextId));
-                if (displayNameUpdate) {
-                    final int fuid = getDefaultInfoStoreFolder(usrdata, ctx, con);
-                    if (fuid > 0) {
-                        cache = cacheService.getCache("OXFolderCache");
-                        key = cacheService.newCacheKey(contextId, fuid);
-                        cache.remove(key);
-                        cache = cacheService.getCache("GlobalFolderCache");
-                        key = cacheService.newCacheKey(1, "0", Integer.toString(fuid));
-                        cache.removeFromGroup(key, Integer.toString(contextId));
-                    }
-                }
-            } catch (final OXException e) {
-                LOG.error("", e);
+                cache.remove(keys);
             }
+            cache = cacheService.getCache("UserPermissionBits");
+            cache.remove(key);
+            cache = cacheService.getCache("UserConfiguration");
+            cache.remove(key);
+            cache = cacheService.getCache("UserSettingMail");
+            cache.remove(key);
+            cache = cacheService.getCache("Capabilities");
+            cache.removeFromGroup(Integer.valueOf(userId), ctx.getId().toString());
+
+            {
+                MailAccountStorageService mass = AdminServiceRegistry.getInstance().getService(MailAccountStorageService.class);
+                if (null != mass) {
+                    mass.invalidateMailAccount(0, userId, contextId);
+                } else {
+                    cache = cacheService.getCache("MailAccount");
+                    cache.remove(cacheService.newCacheKey(ctx.getId().intValue(), Integer.toString(0), Integer.toString(userId)));
+                    cache.remove(cacheService.newCacheKey(ctx.getId().intValue(), Integer.toString(userId)));
+                    cache.invalidateGroup(ctx.getId().toString());
+                }
+            }
+
+            cache = cacheService.getCache("QuotaFileStorages");
+            cache.invalidateGroup(Integer.toString(contextId));
+            if (displayNameUpdate) {
+                final int fuid = getDefaultInfoStoreFolder(usrdata, ctx, con);
+                if (fuid > 0) {
+                    cache = cacheService.getCache("OXFolderCache");
+                    key = cacheService.newCacheKey(contextId, fuid);
+                    cache.remove(key);
+                    cache = cacheService.getCache("GlobalFolderCache");
+                    key = cacheService.newCacheKey(1, "0", Integer.toString(fuid));
+                    cache.removeFromGroup(key, Integer.toString(contextId));
+                }
+            }
+        } catch (final OXException e) {
+            LOG.error("", e);
         }
     }
 
