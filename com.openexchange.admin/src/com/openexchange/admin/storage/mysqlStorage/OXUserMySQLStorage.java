@@ -613,6 +613,9 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 }
                 changedAttributes.addAll(acs.change(new HashSet<>(attributeChanger.getAttributes()), usrdata, userId, contextId, con));
             }
+            
+            // Hint for the cache when updating display name
+            boolean displayNameUpdate = changedAttributes.contains("Display_name");
 
             // Change quota size
             Set<Integer> quotaAffectedUserIDs = changeQuotaForUser(usrdata, ctx, con);
@@ -632,7 +635,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             }
 
             //////////////////////// vvvvvv WIP vvvvvv //////////////////////
-            boolean displayNameUpdate = false;
+
             // update prg_contacts ONLY if needed ( see
             // "prg_contacts_update_needed")
 //            final Class<? extends User> c = usrdata.getClass();
