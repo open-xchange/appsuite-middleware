@@ -117,6 +117,7 @@ import com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.contac
 import com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.custom.CustomUserAttributeChangers;
 import com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.mailaccount.UserMailAccountAttributeChangers;
 import com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.mailsetting.UserSettingMailAttributeChangers;
+import com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.spamfilter.SpamFilterUserAttributeChangers;
 import com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.user.UserAttributeChangers;
 import com.openexchange.admin.storage.sqlStorage.OXUserSQLStorage;
 import com.openexchange.admin.storage.utils.Filestore2UserUtil;
@@ -223,6 +224,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
         ac.put(AttributeChanger.USER_MAIL_ACCOUNT, new UserMailAccountAttributeChangers());
         ac.put(AttributeChanger.CUSTOM_USER_ATTRIBUTE, new CustomUserAttributeChangers());
         ac.put(AttributeChanger.CONTACT_USER_ATTRIBUTE, new ContactUserAttributeChangers());
+        ac.put(AttributeChanger.SPAM_FILTER, new SpamFilterUserAttributeChangers());
         attributeChangers = Collections.unmodifiableMap(ac);
     }
 
@@ -635,18 +637,6 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             }
 
             //////////////////////// vvvvvv WIP vvvvvv //////////////////////
-
-            final Boolean spam_filter_enabled = usrdata.getGui_spam_filter_enabled();
-            if (null != spam_filter_enabled) {
-                final OXToolStorageInterface tool = OXToolStorageInterface.getInstance();
-                if (spam_filter_enabled.booleanValue()) {
-                    tool.setUserSettingMailBit(ctx, usrdata, UserSettingMail.INT_SPAM_ENABLED, con);
-                    changedAttributes.add("spam filter enabled");
-                } else {
-                    tool.unsetUserSettingMailBit(ctx, usrdata, UserSettingMail.INT_SPAM_ENABLED, con);
-                    changedAttributes.add("spam filter disabled");
-                }
-            }
 
             if (usrdata.isConvertDriveUserFolders()) {
                 convertDriveUserFolders(ctx, usrdata, con);
