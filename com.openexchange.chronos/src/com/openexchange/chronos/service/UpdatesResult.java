@@ -84,4 +84,12 @@ public interface UpdatesResult extends TimestampedResult {
      */
     boolean isTruncated();
 
+    /**
+     * Gets a value indicating whether the result is empty, i.e. there are no new, modified or deleted events since the supplied client
+     * timestamp.
+     *
+     * @return <code>true</code> if the result is empty, <code>false</code>, otherwise
+     */
+    boolean isEmpty();
+
 }

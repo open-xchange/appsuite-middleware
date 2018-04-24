@@ -51,17 +51,6 @@ properties:
       file: folder.properties
       packageName: open-xchange-core
       tags: ["Folder","Permission"]
-    - key: com.openexchange.folderstorage.inheritParentPermissions
-      description: |
-        Specifies if permissions of new parent folder should be applied when moving a folder into the public folder tree.
-      defaultValue: false
-      version: 7.8.4
-      reloadable: false
-      configcascadeAware: false
-      related: 
-      file: folder.properties
-      packageName: open-xchange-core
-      tags: ["Folder","Permission"]
     - key: ENABLE_DB_GROUPING
       description: |
         Define where to perform folder grouping.
