@@ -66,6 +66,7 @@ import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.admin.rmi.dataobjects.User;
+import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.Attribute;
 import com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.AttributeChangers;
 import com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.MethodMetadata;
@@ -138,7 +139,6 @@ public class ContactUserAttributeChangers implements AttributeChangers {
             if (result != null || isAttributeSet(methodMetadata.getMethod(), userData)) {
                 appendToQuery(methodMetadata, query, setMethods);
                 if ("field01".equals(Mapper.method2field.get(methodMetadata.getName()))) {
-                    //TODO: hint for the cache when updating display name?
                     query.append("field90");
                     query.append("=?, ");
                     setMethods.add(methodMetadata);
@@ -178,7 +178,7 @@ public class ContactUserAttributeChangers implements AttributeChangers {
      * java.sql.Connection)
      */
     @Override
-    public boolean change(Attribute attribute, User userData, int userId, int contextId, Connection connection) throws SQLException {
+    public boolean change(Attribute attribute, User userData, int userId, int contextId, Connection connection) throws StorageException {
         return !change(Collections.singleton(attribute), userData, userId, contextId, connection).isEmpty();
     }
 
@@ -188,7 +188,7 @@ public class ContactUserAttributeChangers implements AttributeChangers {
      * @see com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.AttributeChangers#change(java.util.Set, com.openexchange.admin.rmi.dataobjects.User, int, int, java.sql.Connection)
      */
     @Override
-    public Set<String> change(Set<Attribute> attributes, User userData, int userId, int contextId, Connection connection) throws SQLException {
+    public Set<String> change(Set<Attribute> attributes, User userData, int userId, int contextId, Connection connection) throws StorageException {
         StringBuilder query = new StringBuilder("UPDATE prg_contacts SET ");
 
         // First we have to check which return value we have. We have to distinguish the return types
@@ -198,15 +198,17 @@ public class ContactUserAttributeChangers implements AttributeChangers {
         return changeAttributes(userData, userId, contextId, connection, query, methods);
     }
 
+    ///////////////////////////////////// HELPERS /////////////////////////////////
+
     /**
      * Collect all methods that have set values
      * 
      * @param userData The {@link User} data
      * @param query The SQL query builder
      * @return A {@link List} with all methods that have set values
-     * @throws SQLException If an SQL error is occurred
+     * @throws StorageException If an SQL error is occurred
      */
-    private List<MethodMetadata> collectMethods(User userData, StringBuilder query) throws SQLException {
+    private List<MethodMetadata> collectMethods(User userData, StringBuilder query) throws StorageException {
         List<MethodMetadata> setMethods = new ArrayList<>();
         for (MethodMetadata methodMetadata : getGetters(userData.getClass().getMethods())) {
             ReturnType returnType = methodMetadata.getReturnType();
@@ -221,8 +223,7 @@ public class ContactUserAttributeChangers implements AttributeChangers {
             try {
                 appender.append(userData, methodMetadata, query, setMethods);
             } catch (NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
-                // TODO: maybe throw StorageException instead?
-                throw new SQLException(e);
+                throw new StorageException(e);
             }
         }
 
@@ -239,9 +240,9 @@ public class ContactUserAttributeChangers implements AttributeChangers {
      * @param query The SQL query builder
      * @param collectedMethods The collected methods
      * @return A {@link Set} with all changed attributes
-     * @throws SQLException If an SQL error is occurred
+     * @throws StorageException If an SQL error is occurred
      */
-    private Set<String> changeAttributes(User userData, int userId, int contextId, Connection connection, StringBuilder query, List<MethodMetadata> collectedMethods) throws SQLException {
+    private Set<String> changeAttributes(User userData, int userId, int contextId, Connection connection, StringBuilder query, List<MethodMetadata> collectedMethods) throws StorageException {
         if (collectedMethods.isEmpty()) {
             return Collections.emptySet();
         }
@@ -258,17 +259,14 @@ public class ContactUserAttributeChangers implements AttributeChangers {
                 if (valueSetter == null) {
                     continue;
                 }
-                try {
-                    valueSetter.set(userData, methodMetadata.getMethod(), statement, parameterIndex++);
-                    changedAttributes.add(methodMetadata.getName());
-                } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException e) {
-                    // TODO: maybe throw StorageException instead?
-                    throw new SQLException(e);
-                }
+                valueSetter.set(userData, methodMetadata.getMethod(), statement, parameterIndex++);
+                changedAttributes.add(methodMetadata.getName());
             }
             statement.setInt(collectedMethods.size() + 1, contextId);
             statement.setInt(collectedMethods.size() + 2, userId);
             statement.executeUpdate();
+        } catch (SQLException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException e) {
+            throw new StorageException(e);
         }
 
         return changedAttributes;
@@ -339,6 +337,8 @@ public class ContactUserAttributeChangers implements AttributeChangers {
         query.append(" = ?, ");
         collectedMethods.add(methodMetadata);
     }
+
+    //////////////////////////////// PRIVATE INTERFACES ///////////////////////////////
 
     /**
      * {@link Appender}

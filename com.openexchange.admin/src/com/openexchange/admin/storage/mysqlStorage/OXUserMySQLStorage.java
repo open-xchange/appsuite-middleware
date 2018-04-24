@@ -659,9 +659,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 OXFolderAdminHelper.propagateUserModification(userId, changedfields, System.currentTimeMillis(), con, con, contextId);
             }
 
-            // if administrator sets GUI configuration existing GUI
-            // configuration
-            // is overwritten
+            // if administrator sets GUI configuration existing GUI configuration is overwritten
             final SettingStorage settStor = SettingStorage.getInstance(contextId, userId);
             final Map<String, String> guiPreferences = usrdata.getGuiPreferences();
             if (guiPreferences != null) {

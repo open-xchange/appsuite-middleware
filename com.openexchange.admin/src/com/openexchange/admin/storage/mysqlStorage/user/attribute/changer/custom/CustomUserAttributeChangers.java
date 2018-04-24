@@ -58,6 +58,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import com.openexchange.admin.rmi.dataobjects.User;
+import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.Attribute;
 import com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.AttributeChangers;
 import com.openexchange.database.Databases;
@@ -87,7 +88,7 @@ public class CustomUserAttributeChangers implements AttributeChangers {
      * java.sql.Connection)
      */
     @Override
-    public boolean change(Attribute attribute, User userData, int userId, int contextId, Connection connection) throws SQLException {
+    public boolean change(Attribute attribute, User userData, int userId, int contextId, Connection connection) throws StorageException {
         return !change(Collections.singleton(attribute), userData, userId, contextId, connection).isEmpty();
     }
 
@@ -97,7 +98,7 @@ public class CustomUserAttributeChangers implements AttributeChangers {
      * @see com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.AttributeChangers#change(java.util.Set, com.openexchange.admin.rmi.dataobjects.User, int, int, java.sql.Connection)
      */
     @Override
-    public Set<String> change(Set<Attribute> attributes, User userData, int userId, int contextId, Connection connection) throws SQLException {
+    public Set<String> change(Set<Attribute> attributes, User userData, int userId, int contextId, Connection connection) throws StorageException {
         if (!userData.isUserAttributesset()) {
             return Collections.emptySet();
         }
@@ -137,6 +138,8 @@ public class CustomUserAttributeChangers implements AttributeChangers {
             if (null != stmtInsertAttribute) {
                 stmtInsertAttribute.executeBatch();
             }
+        } catch (SQLException e) {
+            throw new StorageException(e);
         } finally {
             Databases.closeSQLStuff(stmtInsertAttribute);
             Databases.closeSQLStuff(stmtDeleteAttribute);

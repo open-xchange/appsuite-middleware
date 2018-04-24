@@ -58,6 +58,7 @@ import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.admin.rmi.dataobjects.User;
+import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.mailsetting.UserSettingMailAttributeChangers;
 
 /**
@@ -96,13 +97,17 @@ public abstract class AbstractUserAttributeChangers implements AttributeChangers
      * java.sql.Connection)
      */
     @Override
-    public boolean change(Attribute attribute, User userData, int userId, int contextId, Connection connection) throws SQLException {
+    public boolean change(Attribute attribute, User userData, int userId, int contextId, Connection connection) throws StorageException {
         UserAttributeChanger changer = changers.get(attribute);
         if (changer == null) {
             LOG.debug("No user attribute changer found for user attribute '{}' in table '{}'. The attribute will not be changed.", attribute.getSQLFieldName(), table);
             return false;
         }
-        return changer.changeAttribute(userId, contextId, userData, connection);
+        try {
+            return changer.changeAttribute(userId, contextId, userData, connection);
+        } catch (SQLException e) {
+            throw new StorageException(e);
+        }
     }
 
     /*
@@ -111,7 +116,7 @@ public abstract class AbstractUserAttributeChangers implements AttributeChangers
      * @see com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.AttributeChangers#change(java.util.Set, com.openexchange.admin.rmi.dataobjects.User, int, int, java.sql.Connection)
      */
     @Override
-    public Set<String> change(Set<Attribute> attributes, User userData, int userId, int contextId, Connection connection) throws SQLException {
+    public Set<String> change(Set<Attribute> attributes, User userData, int userId, int contextId, Connection connection) throws StorageException {
         Set<String> changedAttributes = new HashSet<>();
         for (Attribute attribute : attributes) {
             if (change(attribute, userData, userId, contextId, connection)) {

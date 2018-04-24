@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2016-2020 OX Software GmbH
+ *     Copyright (C) 2018-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,44 +47,64 @@
  *
  */
 
-package com.openexchange.admin.storage.mysqlStorage.user.attribute.changer;
+package com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.spamfilter;
 
 import java.sql.Connection;
+import java.util.Collections;
 import java.util.Set;
+import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.User;
 import com.openexchange.admin.rmi.exceptions.StorageException;
-import com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.mailsetting.UserMailSettingAttribute;
+import com.openexchange.admin.storage.interfaces.OXToolStorageInterface;
+import com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.Attribute;
+import com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.AttributeChangers;
+import com.openexchange.mail.usersetting.UserSettingMail;
 
 /**
- * {@link AttributeChangers}
+ * {@link SpamFilterUserAttributeChangers}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @since v7.10.1
  */
-public interface AttributeChangers {
+public class SpamFilterUserAttributeChangers implements AttributeChangers {
 
     /**
-     * Changes the specified {@link Attribute}
-     * 
-     * @param attribute The {@link Attribute} to change
-     * @param userData The {@link User} data
-     * @param userId the user identifier
-     * @param contextId The context identifier
-     * @param connection The {@link Connection} to use
-     * @return <code>true</code> if the attribute was changed successfully; <code>false</code> otherwise
-     * @throws StorageException if an SQL error or any other error is occurred
+     * Initialises a new {@link SpamFilterUserAttributeChangers}.
      */
-    boolean change(Attribute attribute, User userData, int userId, int contextId, Connection connection) throws StorageException;
+    public SpamFilterUserAttributeChangers() {
+        super();
+    }
 
-    /**
-     * Changes the specified {@link UserMailSettingAttribute}
+    /*
+     * (non-Javadoc)
      * 
-     * @param attributes A {@link Set} with {@link Attribute}s to change
-     * @param userData The {@link User} data
-     * @param userId the user identifier
-     * @param contextId The context identifier
-     * @param connection The {@link Connection} to use
-     * @return An unmodifiable {@link Set} with all successfully changed attributes
-     * @throws StorageException if an SQL error or any other error is occurred
+     * @see com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.AttributeChangers#change(com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.Attribute, com.openexchange.admin.rmi.dataobjects.User, int, int,
+     * java.sql.Connection)
      */
-    Set<String> change(Set<Attribute> attributes, User userData, int userId, int contextId, Connection connection) throws StorageException;
+    @Override
+    public boolean change(Attribute attribute, User userData, int userId, int contextId, Connection connection) throws StorageException {
+        return !change(Collections.singleton(attribute), userData, userId, contextId, connection).isEmpty();
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.AttributeChangers#change(java.util.Set, com.openexchange.admin.rmi.dataobjects.User, int, int, java.sql.Connection)
+     */
+    @Override
+    public Set<String> change(Set<Attribute> attributes, User userData, int userId, int contextId, Connection connection) throws StorageException {
+        Boolean spam_filter_enabled = userData.getGui_spam_filter_enabled();
+        if (null == spam_filter_enabled) {
+            return Collections.emptySet();
+        }
+
+        OXToolStorageInterface tool = OXToolStorageInterface.getInstance();
+        Context ctx = new Context(contextId);
+        if (spam_filter_enabled.booleanValue()) {
+            tool.setUserSettingMailBit(ctx, userData, UserSettingMail.INT_SPAM_ENABLED, connection);
+            return Collections.singleton("spam filter enabled");
+        }
+        tool.unsetUserSettingMailBit(ctx, userData, UserSettingMail.INT_SPAM_ENABLED, connection);
+        return Collections.singleton("spam filter disabled");
+    }
 }
