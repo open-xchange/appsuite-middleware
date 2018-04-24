@@ -52,7 +52,9 @@ package com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.conta
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -94,12 +96,51 @@ public class ContactUserAttributeChangers implements AttributeChangers {
     }
 
     private final Map<ReturnType, Appender> appenders;
+    private final Map<ReturnType, ValueSetter> valueSetters;
 
     /**
      * Initialises a new {@link ContactUserAttributeChangers}.
      */
     public ContactUserAttributeChangers() {
         super();
+        valueSetters = new HashMap<>();
+        valueSetters.put(ReturnType.STRING, (userData, method, preparedStatement, parameterIndex) -> {
+            String result = (java.lang.String) method.invoke(userData, (Object[]) null);
+            if (null != result) {
+                preparedStatement.setString(parameterIndex, result);
+            } else if (isAttributeSet(method, userData)) {
+                preparedStatement.setNull(parameterIndex, java.sql.Types.VARCHAR);
+            }
+        });
+        valueSetters.put(ReturnType.INTEGER, (userData, method, preparedStatement, parameterIndex) -> {
+            int result = ((Integer) method.invoke(userData, (Object[]) null)).intValue();
+            if (-1 != result) {
+                preparedStatement.setInt(parameterIndex, result);
+            } else if (isAttributeSet(method, userData)) {
+                preparedStatement.setNull(parameterIndex, java.sql.Types.INTEGER);
+            }
+        });
+        valueSetters.put(ReturnType.BOOLEAN, (userData, method, preparedStatement, parameterIndex) -> {
+            boolean result = (Boolean) method.invoke(userData, (Object[]) null);
+            preparedStatement.setBoolean(parameterIndex, result);
+        });
+        valueSetters.put(ReturnType.DATE, (userData, method, preparedStatement, parameterIndex) -> {
+            Date result = (Date) method.invoke(userData, (Object[]) null);
+            if (null != result) {
+                preparedStatement.setTimestamp(parameterIndex, new Timestamp(result.getTime()));
+            } else if (isAttributeSet(method, userData)) {
+                preparedStatement.setNull(parameterIndex, java.sql.Types.DATE);
+            }
+        });
+        valueSetters.put(ReturnType.LONG, (userData, method, preparedStatement, parameterIndex) -> {
+            long result = ((Long) method.invoke(userData, (Object[]) null)).longValue();
+            if (-1 != result) {
+                preparedStatement.setLong(parameterIndex, result);
+            } else if (isAttributeSet(method, userData)) {
+                preparedStatement.setNull(parameterIndex, java.sql.Types.BIGINT);
+            }
+        });
+
         appenders = new HashMap<>();
         appenders.put(ReturnType.STRING, (userData, methodMetadata, query, setMethods) -> {
             String result = (String) methodMetadata.getMethod().invoke(userData, (Object[]) null);
@@ -125,13 +166,13 @@ public class ContactUserAttributeChangers implements AttributeChangers {
                 appendToQuery(methodMetadata, query, setMethods);
             }
         });
-        appenders.put(ReturnType.INTEGER, (userData, methodMetadata, query, setMethods) -> {
+        appenders.put(ReturnType.DATE, (userData, methodMetadata, query, setMethods) -> {
             Date result = (Date) methodMetadata.getMethod().invoke(userData, (Object[]) null);
             if (result != null || isAttributeSet(methodMetadata.getMethod(), userData)) {
                 appendToQuery(methodMetadata, query, setMethods);
             }
         });
-        appenders.put(ReturnType.INTEGER, (userData, methodMetadata, query, setMethods) -> {
+        appenders.put(ReturnType.LONG, (userData, methodMetadata, query, setMethods) -> {
             long result = ((Long) methodMetadata.getMethod().invoke(userData, (Object[]) null)).longValue();
             if (result != -1 || isAttributeSet(methodMetadata.getMethod(), userData)) {
                 appendToQuery(methodMetadata, query, setMethods);
@@ -159,13 +200,14 @@ public class ContactUserAttributeChangers implements AttributeChangers {
     public Set<String> change(Set<Attribute> attributes, User userData, int userId, int contextId, Connection connection) throws SQLException {
         StringBuilder query = new StringBuilder("UPDATE prg_contacts SET ");
         List<MethodMetadata> setMethods = new ArrayList<>();
+
         // First we have to check which return value we have. We have to distinguish the return types
         for (MethodMetadata methodMetadata : getGetters(userData.getClass().getMethods())) {
             ReturnType returnType = methodMetadata.getReturnType();
             if (returnType == null) {
                 continue;
             }
-            // TODO: construct query
+            // Construct query
             Appender appender = appenders.get(returnType);
             if (appender == null) {
                 continue;
@@ -177,10 +219,35 @@ public class ContactUserAttributeChangers implements AttributeChangers {
                 throw new SQLException(e);
             }
         }
-        if (!setMethods.isEmpty()) {
-            // TODO: prepare statements and execute
-        }
+
+        // Prepare statement and execute
         Set<String> changedAttributes = new HashSet<>();
+        if (!setMethods.isEmpty()) {
+            query.delete(query.length() - 2, query.length() - 1);
+            query.append(" WHERE cid = ? AND userid = ?");
+
+            PreparedStatement statement = connection.prepareStatement(query.toString());
+
+            int parameterIndex = 1;
+            for (MethodMetadata methodMetadata : setMethods) {
+                ValueSetter valueSetter = valueSetters.get(methodMetadata.getReturnType());
+                if (valueSetter == null) {
+                    continue;
+                }
+                try {
+                    valueSetter.set(userData, methodMetadata.getMethod(), statement, parameterIndex++);
+                    changedAttributes.add(methodMetadata.getName());
+                } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException e) {
+                    // TODO: maybe throw StorageException instead?
+                    throw new SQLException(e);
+                }
+            }
+            statement.setInt(setMethods.size() + 1, contextId);
+            statement.setInt(setMethods.size() + 2, userId);
+            statement.executeUpdate();
+            statement.close();
+        }
+
         return changedAttributes;
     }
 
@@ -261,5 +328,10 @@ public class ContactUserAttributeChangers implements AttributeChangers {
     private interface Appender {
 
         void append(User userData, MethodMetadata method, StringBuilder query, List<MethodMetadata> setMethods) throws NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException;
+    }
+
+    private interface ValueSetter {
+
+        void set(User userData, Method method, PreparedStatement preparedStatement, int parameterIndex) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException, SQLException, NoSuchMethodException, SecurityException;
     }
 }

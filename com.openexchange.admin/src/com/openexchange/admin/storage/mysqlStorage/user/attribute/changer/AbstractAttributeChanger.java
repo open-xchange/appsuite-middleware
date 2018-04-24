@@ -52,8 +52,10 @@ package com.openexchange.admin.storage.mysqlStorage.user.attribute.changer;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.sql.Types;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -88,12 +90,14 @@ public abstract class AbstractAttributeChanger {
         s.put(Boolean.class, (stmt, x, parameterIndex) -> stmt.setBoolean(parameterIndex, (Boolean) x));
         s.put(Integer.class, (stmt, x, parameterIndex) -> stmt.setInt(parameterIndex, (Integer) x));
         s.put(Long.class, (stmt, x, parameterIndex) -> stmt.setLong(parameterIndex, (Long) x));
+        s.put(Date.class, (stmt, x, parameterIndex) -> stmt.setTimestamp(parameterIndex, new Timestamp((long) x)));
 
         Map<Class<?>, Unsetter> u = new HashMap<>();
         u.put(String.class, (stmt, parameterIndex) -> stmt.setNull(parameterIndex, Types.VARCHAR));
         u.put(Boolean.class, (stmt, parameterIndex) -> stmt.setNull(parameterIndex, Types.BOOLEAN));
         u.put(Integer.class, (stmt, parameterIndex) -> stmt.setNull(parameterIndex, Types.INTEGER));
         u.put(Long.class, (stmt, parameterIndex) -> stmt.setNull(parameterIndex, Types.BIGINT));
+        u.put(Date.class, (stmt, parameterIndex) -> stmt.setNull(parameterIndex, Types.DATE));
 
         setters = Collections.unmodifiableMap(s);
         unsetters = Collections.unmodifiableMap(u);
@@ -262,7 +266,7 @@ public abstract class AbstractAttributeChanger {
      * @throws SQLException if an SQL error is occurred
      */
     protected abstract PreparedStatement prepareDefaultStatement(String table, Set<Attribute> attributes, Connection connection) throws SQLException;
-    
+
     //////////////////////////////////// HELPERS //////////////////////////////////
 
     /**
