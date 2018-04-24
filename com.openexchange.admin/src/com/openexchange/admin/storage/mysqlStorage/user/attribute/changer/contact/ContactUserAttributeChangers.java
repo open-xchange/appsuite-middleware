@@ -190,9 +190,24 @@ public class ContactUserAttributeChangers implements AttributeChangers {
     @Override
     public Set<String> change(Set<Attribute> attributes, User userData, int userId, int contextId, Connection connection) throws SQLException {
         StringBuilder query = new StringBuilder("UPDATE prg_contacts SET ");
-        List<MethodMetadata> setMethods = new ArrayList<>();
 
         // First we have to check which return value we have. We have to distinguish the return types
+        List<MethodMetadata> methods = collectMethods(userData, query);
+
+        // Prepare statement and execute
+        return changeAttributes(userData, userId, contextId, connection, query, methods);
+    }
+
+    /**
+     * Collect all methods that have set values
+     * 
+     * @param userData The {@link User} data
+     * @param query The SQL query builder
+     * @return A {@link List} with all methods that have set values
+     * @throws SQLException If an SQL error is occurred
+     */
+    private List<MethodMetadata> collectMethods(User userData, StringBuilder query) throws SQLException {
+        List<MethodMetadata> setMethods = new ArrayList<>();
         for (MethodMetadata methodMetadata : getGetters(userData.getClass().getMethods())) {
             ReturnType returnType = methodMetadata.getReturnType();
             if (returnType == null) {
@@ -211,16 +226,34 @@ public class ContactUserAttributeChangers implements AttributeChangers {
             }
         }
 
-        // Prepare statement and execute
-        Set<String> changedAttributes = new HashSet<>();
-        if (!setMethods.isEmpty()) {
-            query.delete(query.length() - 2, query.length() - 1);
-            query.append(" WHERE cid = ? AND userid = ?");
+        return setMethods;
+    }
 
-            PreparedStatement statement = connection.prepareStatement(query.toString());
+    /**
+     * Prepares the statement and executes the update
+     * 
+     * @param userData The {@link User} data
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @param connection The {@link Connection}
+     * @param query The SQL query builder
+     * @param collectedMethods The collected methods
+     * @return A {@link Set} with all changed attributes
+     * @throws SQLException If an SQL error is occurred
+     */
+    private Set<String> changeAttributes(User userData, int userId, int contextId, Connection connection, StringBuilder query, List<MethodMetadata> collectedMethods) throws SQLException {
+        if (collectedMethods.isEmpty()) {
+            return Collections.emptySet();
+        }
+
+        Set<String> changedAttributes = new HashSet<>();
+        query.delete(query.length() - 2, query.length() - 1);
+        query.append(" WHERE cid = ? AND userid = ?");
+
+        try (PreparedStatement statement = connection.prepareStatement(query.toString())) {
 
             int parameterIndex = 1;
-            for (MethodMetadata methodMetadata : setMethods) {
+            for (MethodMetadata methodMetadata : collectedMethods) {
                 ValueSetter valueSetter = valueSetters.get(methodMetadata.getReturnType());
                 if (valueSetter == null) {
                     continue;
@@ -233,10 +266,9 @@ public class ContactUserAttributeChangers implements AttributeChangers {
                     throw new SQLException(e);
                 }
             }
-            statement.setInt(setMethods.size() + 1, contextId);
-            statement.setInt(setMethods.size() + 2, userId);
+            statement.setInt(collectedMethods.size() + 1, contextId);
+            statement.setInt(collectedMethods.size() + 2, userId);
             statement.executeUpdate();
-            statement.close();
         }
 
         return changedAttributes;
@@ -278,10 +310,11 @@ public class ContactUserAttributeChangers implements AttributeChangers {
     }
 
     /**
+     * Checks whether an attribute is set by invoking it's respective {@link Method}
      * 
-     * @param method
-     * @param userData
-     * @return
+     * @param method The {@link Method} to invoke
+     * @param userData The {@link User} data object which contains the {@link Method}
+     * @return <code>true</code> if the attribute by the denoted {@link Method} is set; <code>false</code> otherwise
      * @throws NoSuchMethodException
      * @throws SecurityException
      * @throws IllegalAccessException
@@ -294,19 +327,60 @@ public class ContactUserAttributeChangers implements AttributeChangers {
         return ((Boolean) retVal.invoke(userData, (Object[]) null)).booleanValue();
     }
 
-    private void appendToQuery(MethodMetadata methodMetadata, StringBuilder query, List<MethodMetadata> setMethods) {
+    /**
+     * Appends to the query and to collected methods the {@link Method} from the specified {@link MethodMetadata}
+     * 
+     * @param methodMetadata The {@link MethodMetadata}
+     * @param query The SQL query builder
+     * @param collectedMethods The collected {@link Method}s so far
+     */
+    private void appendToQuery(MethodMetadata methodMetadata, StringBuilder query, List<MethodMetadata> collectedMethods) {
         query.append(Mapper.method2field.get(methodMetadata.getName()));
         query.append(" = ?, ");
-        setMethods.add(methodMetadata);
+        collectedMethods.add(methodMetadata);
     }
 
+    /**
+     * {@link Appender}
+     */
     private interface Appender {
 
-        void append(User userData, MethodMetadata method, StringBuilder query, List<MethodMetadata> setMethods) throws NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException;
+        /**
+         * Appends the specified {@link Method} to the query if it's invocation yields any data
+         * 
+         * @param userData The {@link User} data
+         * @param method The {@link MethodMetadata} containing the {@link Method} to invoke
+         * @param query The SQL query builder
+         * @param collectedMethods The connected methods so far
+         * @throws NoSuchMethodException
+         * @throws SecurityException
+         * @throws IllegalAccessException
+         * @throws IllegalArgumentException
+         * @throws InvocationTargetException
+         */
+        void append(User userData, MethodMetadata method, StringBuilder query, List<MethodMetadata> collectedMethods) throws NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException;
     }
 
+    /**
+     * {@link ValueSetter}
+     */
     private interface ValueSetter {
 
+        /**
+         * Sets the value of the attribute denoted by the {@link Method} to the specified {@link PreparedStatement}.
+         * The parameter index is NOT increased.
+         * 
+         * @param userData The {@link User} data
+         * @param method The {@link Method} to invoke for fetching the value
+         * @param preparedStatement The {@link PreparedStatement}
+         * @param parameterIndex The current parameter index
+         * @throws IllegalAccessException
+         * @throws IllegalArgumentException
+         * @throws InvocationTargetException
+         * @throws SQLException
+         * @throws NoSuchMethodException
+         * @throws SecurityException
+         */
         void set(User userData, Method method, PreparedStatement preparedStatement, int parameterIndex) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException, SQLException, NoSuchMethodException, SecurityException;
     }
 }
