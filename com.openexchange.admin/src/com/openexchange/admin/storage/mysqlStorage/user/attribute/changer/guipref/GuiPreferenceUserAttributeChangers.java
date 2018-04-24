@@ -50,11 +50,22 @@
 package com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.guipref;
 
 import java.sql.Connection;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.openexchange.admin.rmi.dataobjects.User;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.AbstractAttributeChangers;
 import com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.Attribute;
+import com.openexchange.exception.OXException;
+import com.openexchange.groupware.settings.Setting;
+import com.openexchange.groupware.settings.impl.ConfigTree;
+import com.openexchange.groupware.settings.impl.SettingStorage;
 
 /**
  * {@link GuiPreferenceUserAttributeChangers}
@@ -63,6 +74,8 @@ import com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.Attrib
  * @since v7.10.1
  */
 public class GuiPreferenceUserAttributeChangers extends AbstractAttributeChangers {
+
+    private static final Logger LOG = LoggerFactory.getLogger(GuiPreferenceUserAttributeChangers.class);
 
     /**
      * Initialises a new {@link GuiPreferenceUserAttributeChangers}.
@@ -78,8 +91,30 @@ public class GuiPreferenceUserAttributeChangers extends AbstractAttributeChanger
      */
     @Override
     public Set<String> change(Set<Attribute> attributes, User userData, int userId, int contextId, Connection connection) throws StorageException {
-        // TODO Auto-generated method stub
-        return null;
-    }
+        SettingStorage settStor = SettingStorage.getInstance(contextId, userId);
+        Map<String, String> guiPreferences = userData.getGuiPreferences();
+        if (guiPreferences == null) {
+            return Collections.emptySet();
+        }
 
+        // If administrator sets GUI configuration existing GUI configuration is overwritten
+        Set<String> changedAttributes = new HashSet<>();
+        Iterator<Entry<String, String>> iter = guiPreferences.entrySet().iterator();
+        while (iter.hasNext()) {
+            Entry<String, String> entry = iter.next();
+            String key = entry.getKey();
+            String value = entry.getValue();
+            if (null != key && null != value) {
+                try {
+                    Setting setting = ConfigTree.getInstance().getSettingByPath(key);
+                    setting.setSingleValue(value);
+                    settStor.save(connection, setting);
+                    changedAttributes.add(key);
+                } catch (OXException e) {
+                    LOG.error("Problem while storing GUI preferences.", e);
+                }
+            }
+        }
+        return changedAttributes;
+    }
 }

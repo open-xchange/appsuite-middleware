@@ -115,6 +115,7 @@ import com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.Attrib
 import com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.AttributeChangers;
 import com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.contact.ContactUserAttributeChangers;
 import com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.custom.CustomUserAttributeChangers;
+import com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.guipref.GuiPreferenceUserAttributeChangers;
 import com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.mailaccount.UserMailAccountAttributeChangers;
 import com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.mailsetting.UserSettingMailAttributeChangers;
 import com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.spamfilter.SpamFilterUserAttributeChangers;
@@ -225,6 +226,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
         ac.put(AttributeChanger.CUSTOM_USER_ATTRIBUTE, new CustomUserAttributeChangers());
         ac.put(AttributeChanger.CONTACT_USER_ATTRIBUTE, new ContactUserAttributeChangers());
         ac.put(AttributeChanger.SPAM_FILTER, new SpamFilterUserAttributeChangers());
+        ac.put(AttributeChanger.GUI_PREFERENCE, new GuiPreferenceUserAttributeChangers());
         attributeChangers = Collections.unmodifiableMap(ac);
     }
 
@@ -650,25 +652,25 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             }
 
             // if administrator sets GUI configuration existing GUI configuration is overwritten
-            final SettingStorage settStor = SettingStorage.getInstance(contextId, userId);
-            final Map<String, String> guiPreferences = usrdata.getGuiPreferences();
-            if (guiPreferences != null) {
-                final Iterator<Entry<String, String>> iter = guiPreferences.entrySet().iterator();
-                while (iter.hasNext()) {
-                    final Entry<String, String> entry = iter.next();
-                    final String key = entry.getKey();
-                    final String value = entry.getValue();
-                    if (null != key && null != value) {
-                        try {
-                            final Setting setting = ConfigTree.getInstance().getSettingByPath(key);
-                            setting.setSingleValue(value);
-                            settStor.save(con, setting);
-                        } catch (final OXException e) {
-                            LOG.error("Problem while storing GUI preferences.", e);
-                        }
-                    }
-                }
-            }
+//            final SettingStorage settStor = SettingStorage.getInstance(contextId, userId);
+//            final Map<String, String> guiPreferences = usrdata.getGuiPreferences();
+//            if (guiPreferences != null) {
+//                final Iterator<Entry<String, String>> iter = guiPreferences.entrySet().iterator();
+//                while (iter.hasNext()) {
+//                    final Entry<String, String> entry = iter.next();
+//                    final String key = entry.getKey();
+//                    final String value = entry.getValue();
+//                    if (null != key && null != value) {
+//                        try {
+//                            final Setting setting = ConfigTree.getInstance().getSettingByPath(key);
+//                            setting.setSingleValue(value);
+//                            settStor.save(con, setting);
+//                        } catch (final OXException e) {
+//                            LOG.error("Problem while storing GUI preferences.", e);
+//                        }
+//                    }
+//                }
+//            }
             //////////////////////// ^^^^^ WIP ^^^^^^ //////////////////////
 
             changePrimaryMailAccount(ctx, con, usrdata, userId);
