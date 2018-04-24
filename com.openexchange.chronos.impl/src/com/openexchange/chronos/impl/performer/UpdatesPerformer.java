@@ -188,6 +188,12 @@ public class UpdatesPerformer extends AbstractQueryPerformer {
                 session.set(CalendarParameters.PARAMETER_EXPAND_OCCURRENCES, oldExpandOccurrences);
             }
         }
+        if (isNullOrEmpty(deletedEvents) && isNullOrEmpty(newAndModifiedEvents)) {
+            /*
+             * no changes, return empty result with client-supplied timestamp
+             */
+            return new DefaultUpdatesResult(newAndModifiedEvents, deletedEvents, since, false);
+        }
         /*
          * limit returned results as requested
          */
@@ -233,13 +239,6 @@ public class UpdatesPerformer extends AbstractQueryPerformer {
             long timestamp = deletedEvents.get(deletedEvents.size() - 1).getTimestamp();
             newAndModifiedEvents = removeWithGreaterTimestamp(newAndModifiedEvents, timestamp);
             return new DefaultUpdatesResult(newAndModifiedEvents, deletedEvents, timestamp, true);
-        }
-
-        if (newAndModifiedEvents.size() + deletedEvents.size() <= limit) {
-            /*
-             * overall size within limit, so no truncation necessary
-             */
-            return new DefaultUpdatesResult(newAndModifiedEvents, deletedEvents);
         }
         /*
          * both results within limit, so no truncation necessary

@@ -49,6 +49,7 @@
 
 package com.openexchange.chronos.common;
 
+import static com.openexchange.tools.arrays.Collections.isNullOrEmpty;
 import java.util.List;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.service.UpdatesResult;
@@ -110,6 +111,11 @@ public class DefaultUpdatesResult implements UpdatesResult {
     @Override
     public boolean isTruncated() {
         return truncated;
+    }
+
+    @Override
+    public boolean isEmpty() {
+        return isNullOrEmpty(deletedEvents) && isNullOrEmpty(newAndModifiedEvents);
     }
 
     @Override
