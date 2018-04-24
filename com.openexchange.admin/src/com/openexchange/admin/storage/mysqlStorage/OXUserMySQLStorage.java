@@ -708,7 +708,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
         } catch (final ServiceException e) {
             LOG.error("Required service is missing.", e);
             throw new StorageException(e);
-        } catch (final IllegalArgumentException | SecurityException | /*IllegalAccessException | InvocationTargetException | NoSuchMethodException | */ OXException | InvalidDataException e) {
+        } catch (final IllegalArgumentException | SecurityException | OXException | InvalidDataException e) {
             LOG.error("Error", e);
             throw new StorageException(e);
         } catch (final RuntimeException e) {
