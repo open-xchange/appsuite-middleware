@@ -467,8 +467,9 @@ public class RdbAlarmTriggerStorage extends RdbStorage implements AlarmTriggerSt
                 int index = 1;
                 TimeZone oldTimeZone = trigger.getTimezone();
                 TimeZone newTimeZone = resolver.getTimeZone(userId);
-                int offsetOld = oldTimeZone.getOffset(trigger.getRelatedTime());
-                int offsetNew = newTimeZone.getOffset(trigger.getRelatedTime());
+                long relatedTime = trigger.getRelatedTime() == null ? trigger.getTime() : trigger.getRelatedTime();
+                int offsetOld = oldTimeZone.getOffset(relatedTime);
+                int offsetNew = newTimeZone.getOffset(relatedTime);
                 int dif = offsetOld - offsetNew;
                 long newTriggerTime = trigger.getTime() + dif;
                 stmt.setLong(index++, newTriggerTime);
