@@ -93,7 +93,6 @@ public class TasksSQLImpl implements TasksSQLInterface {
     public SearchIterator<Task> getTaskList(final int folderId, final int from,
         final int until, final int orderBy, final Order order,
         final int[] columns) throws OXException {
-        boolean onlyOwn;
         final Context ctx;
         final int userId = session.getUserId();
         final User user;
@@ -110,11 +109,7 @@ public class TasksSQLImpl implements TasksSQLInterface {
             }
             throw e;
         }
-        try {
-            onlyOwn = Permission.canReadInFolder(ctx, user, permissionBits, folder);
-        } catch (final OXException e) {
-            throw e;
-        }
+        boolean onlyOwn = Permission.canReadInFolder(ctx, user, permissionBits, folder);
         final boolean noPrivate = Tools.isFolderShared(folder, user);
         try {
             return TaskStorage.getInstance().list(ctx, folderId, from, until,
