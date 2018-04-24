@@ -49,6 +49,9 @@
 
 package com.openexchange.admin.storage.mysqlStorage.user.attribute.changer;
 
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 import com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.contact.ContactUserAttributeChangers;
 
 /**
@@ -66,6 +69,15 @@ public enum ReturnType {
 
     private static final String PREFIX = "java.lang.";
     private final String name;
+
+    private static final Map<String, ReturnType> RETURN_TYPES;
+    static {
+        Map<String, ReturnType> returnTypes = new HashMap<>(8);
+        for (ReturnType type : ReturnType.values()) {
+            returnTypes.put(type.getWithPrefix(), type);
+        }
+        RETURN_TYPES = Collections.unmodifiableMap(returnTypes);
+    }
 
     /**
      * Initialises a new {@link ContactUserAttributeChangers.ReturnType}.
@@ -90,5 +102,9 @@ public enum ReturnType {
      */
     public String getWithPrefix() {
         return PREFIX + getName();
+    }
+    
+    public static ReturnType getReturnType(String type) {
+        return RETURN_TYPES.get(type);
     }
 }

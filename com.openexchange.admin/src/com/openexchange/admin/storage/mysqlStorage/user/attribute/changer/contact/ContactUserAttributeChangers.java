@@ -82,15 +82,6 @@ public class ContactUserAttributeChangers implements AttributeChangers {
 
     private static final Logger LOG = LoggerFactory.getLogger(ContactUserAttributeChangers.class);
 
-    private static final Set<String> RETURN_TYPES;
-    static {
-        Set<String> returnTypes = new HashSet<>(8);
-        for (ReturnType type : ReturnType.values()) {
-            returnTypes.add(type.getWithPrefix());
-        }
-        RETURN_TYPES = Collections.unmodifiableSet(returnTypes);
-    }
-
     private enum MethodPrefix {
         get, is;
     }
@@ -262,7 +253,7 @@ public class ContactUserAttributeChangers implements AttributeChangers {
         for (final Method method : methods) {
             final String methodName = method.getName();
             for (MethodPrefix methodPrefix : MethodPrefix.values()) {
-                if (!methodName.contains(methodPrefix.name())) {
+                if (!methodName.startsWith(methodPrefix.name())) {
                     continue;
                 }
                 String methodNameWithoutPrefix = methodName.substring(methodPrefix.name().length());
@@ -275,31 +266,15 @@ public class ContactUserAttributeChangers implements AttributeChangers {
                     continue;
                 }
                 final String returnType = method.getReturnType().getName();
-                if (RETURN_TYPES.contains(returnType)) {
-                    ReturnType rt = getReturnType(returnType);
-                    if (rt == null) {
-                        LOG.debug("Unknown return type '{}'. Method '{}' will be ignored", returnType, methodName);
-                        continue;
-                    }
-                    methodMetadata.add(new MethodMetadata(method, methodNameWithoutPrefix, rt));
+                ReturnType rt = ReturnType.getReturnType(returnType);
+                if (rt == null) {
+                    LOG.debug("Unknown return type '{}'. Method '{}' will be ignored", rt, methodName);
+                    continue;
                 }
+                methodMetadata.add(new MethodMetadata(method, methodNameWithoutPrefix, rt));
             }
         }
         return methodMetadata;
-    }
-
-    /**
-     * Gets the return type of the specified method
-     * 
-     * @param returnTypeValue The return type as string
-     * @return The {@link ReturnType} or <code>null</code> if no such {@link ReturnType} exists
-     */
-    private ReturnType getReturnType(String returnTypeValue) {
-        try {
-            return ReturnType.valueOf(returnTypeValue);
-        } catch (IllegalArgumentException e) {
-            return null;
-        }
     }
 
     /**
