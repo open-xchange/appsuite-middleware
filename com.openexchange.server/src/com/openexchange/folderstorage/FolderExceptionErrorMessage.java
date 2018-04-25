@@ -344,6 +344,7 @@ public enum FolderExceptionErrorMessage implements DisplayableOXExceptionCode {
         switch (this) {
             case NOT_FOUND:
                 exc.setGeneric(Generic.NOT_FOUND);
+                break;
             default:
                 break;
         }

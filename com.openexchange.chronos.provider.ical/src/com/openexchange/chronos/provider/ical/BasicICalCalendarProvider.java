@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the Open-Xchange, Inc. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2020 Open-Xchange, Inc.
+ *     Copyright (C) 2016-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -235,9 +235,8 @@ public class BasicICalCalendarProvider extends BasicCachingCalendarProvider {
         }
         if (config.hasAndNotNull(ICalCalendarConstants.REFRESH_INTERVAL)) {
             Object opt = config.opt(ICalCalendarConstants.REFRESH_INTERVAL);
-            try {
-                Number refreshInterval = (Number) opt;
-            } catch (ClassCastException e) {
+
+            if(opt!=null && !(opt instanceof Number)){
                 throw ICalProviderExceptionCodes.BAD_PARAMETER.create(ICalCalendarConstants.REFRESH_INTERVAL, opt);
             }
         }
