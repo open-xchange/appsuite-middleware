@@ -87,6 +87,9 @@ public class AlarmTriggerConsistencyTask extends UpdateTaskAdapter {
             }
 
             int executeUpdate = con.prepareStatement(REPAIR_INVALID_TIMZONE).executeUpdate();
+            if(!con.getAutoCommit()) {
+                con.commit();
+            }
             LOG.info("Fixed {} alarm triggers.", executeUpdate);
 
         } catch (SQLException e) {
