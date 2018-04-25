@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2016-2020 OX Software GmbH
+ *     Copyright (C) 2018-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,53 +47,62 @@
  *
  */
 
-package com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.user;
+package com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.filestore;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.util.Set;
-import com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.AbstractMultiAttributeChanger;
-import com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.Attribute;
+import com.openexchange.admin.rmi.dataobjects.Filestore;
+import com.openexchange.admin.rmi.dataobjects.User;
+import com.openexchange.admin.rmi.exceptions.StorageException;
+import com.openexchange.admin.storage.interfaces.OXUtilStorageInterface;
+import com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.user.AbstractUserAttributeChanger;
 
 /**
- * {@link AbstractUserAttributeChanger}
+ * {@link FilestoreIdAttributeChanger}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @since v7.10.1
  */
-public abstract class AbstractUserAttributeChanger extends AbstractMultiAttributeChanger {
+public class FilestoreIdAttributeChanger extends AbstractUserAttributeChanger {
 
     /**
-     * Basic stub UPDATE SQL statement with table and column placeholders
+     * Initialises a new {@link FilestoreIdAttributeChanger}.
      */
-    static final String SQL_STATEMENT_TEMPLATE = "UPDATE " + TABLE_TOKEN + " SET " + COLUMN_TOKEN + " WHERE cid = ? AND id = ?";
-
-    /**
-     * Initialises a new {@link AbstractUserAttributeChanger}.
-     */
-    public AbstractUserAttributeChanger() {
+    public FilestoreIdAttributeChanger() {
         super();
     }
 
     /*
      * (non-Javadoc)
      * 
-     * @see com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.AbstractAttributeChanger#prepareStatement(java.lang.String, java.util.Set, java.sql.Connection)
+     * @see com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.UserAttributeChanger#changeAttribute(int, int, com.openexchange.admin.rmi.dataobjects.User, java.sql.Connection)
      */
     @Override
-    protected PreparedStatement prepareStatement(String table, Set<Attribute> attributes, Connection connection) throws SQLException {
-        String sqlStatement = SQL_STATEMENT_TEMPLATE.replaceAll(TABLE_TOKEN, table).replaceAll(COLUMN_TOKEN, prepareAttributes(attributes));
-        return connection.prepareStatement(sqlStatement);
-    }
+    public boolean changeAttribute(int userId, int contextId, User userData, Connection connection) throws SQLException {
+        Integer filestoreId = userData.getFilestoreId();
+        if (filestoreId == null) {
+            return false;
+        }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.AbstractAttributeChanger#prepareDefaultStatement(java.lang.String, java.util.Set, java.sql.Connection)
-     */
-    @Override
-    protected PreparedStatement prepareDefaultStatement(String table, Set<Attribute> attributes, Connection connection) throws SQLException {
-        String sqlStatement = SQL_STATEMENT_TEMPLATE.replaceAll(TABLE_TOKEN, table).replaceAll(COLUMN_TOKEN, prepareAttributes(attributes).replaceAll("\\?", "DEFAULT"));
-        return connection.prepareStatement(sqlStatement);
+        Filestore filestore;
+        try {
+            OXUtilStorageInterface oxutil = OXUtilStorageInterface.getInstance();
+            filestore = oxutil.getFilestore(filestoreId.intValue(), false);
+        } catch (StorageException e) {
+            // TODO: Throw as SQL?
+            return false;
+        }
+
+        if (filestore.getId() != null && -1 != filestore.getId().intValue()) {
+            try (PreparedStatement prep = connection.prepareStatement("UPDATE user SET filestore_id = ? WHERE cid = ? AND id = ? AND filestore_id <> ?")) {
+                prep.setInt(1, filestore.getId().intValue());
+                prep.setInt(2, contextId);
+                prep.setInt(3, userId);
+                prep.setInt(4, filestore.getId().intValue());
+                return prep.executeUpdate() > 0;
+            }
+        }
+        return false;
     }
 }

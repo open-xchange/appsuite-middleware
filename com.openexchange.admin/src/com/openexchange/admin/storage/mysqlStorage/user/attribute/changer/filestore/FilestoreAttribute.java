@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2016-2020 OX Software GmbH
+ *     Copyright (C) 2018-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,53 +47,92 @@
  *
  */
 
-package com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.user;
+package com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.filestore;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
-import java.util.Set;
-import com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.AbstractMultiAttributeChanger;
+import java.util.function.Function;
+import com.openexchange.admin.rmi.dataobjects.ExtendableDataObject;
+import com.openexchange.admin.rmi.dataobjects.User;
 import com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.Attribute;
 
 /**
- * {@link AbstractUserAttributeChanger}
+ * {@link FilestoreAttribute}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @since v7.10.1
  */
-public abstract class AbstractUserAttributeChanger extends AbstractMultiAttributeChanger {
+public enum FilestoreAttribute implements Attribute {
+
+    ID("filestore-id", "filestore_id", (user) -> Integer.toString(user.getId().intValue()), Integer.class),
+    OWNER("filestore-owner", "filestore_owner", (user) -> Integer.toString(user.getFilestoreOwner()), Integer.class),
+    NAME("filestore-name", "filestore_name", (user) -> user.getFilestore_name(), Integer.class),
+    ;
+
+    private final String sqlFieldName;
+    private final Function<User, String> getter;
+    private final Class<?> originalType;
+    private static final String TABLE = "user";
+    private final String attributeName;
 
     /**
-     * Basic stub UPDATE SQL statement with table and column placeholders
+     * 
+     * Initialises a new {@link FilestoreAttribute}.
+     * 
+     * @param sqlFieldName the names of the attribute
      */
-    static final String SQL_STATEMENT_TEMPLATE = "UPDATE " + TABLE_TOKEN + " SET " + COLUMN_TOKEN + " WHERE cid = ? AND id = ?";
-
-    /**
-     * Initialises a new {@link AbstractUserAttributeChanger}.
-     */
-    public AbstractUserAttributeChanger() {
-        super();
+    private FilestoreAttribute(String attributeName, String sqlFieldName, Function<User, String> getter, Class<?> originalType) {
+        this.attributeName = attributeName;
+        this.sqlFieldName = sqlFieldName;
+        this.getter = getter;
+        this.originalType = originalType;
     }
 
     /*
      * (non-Javadoc)
      * 
-     * @see com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.AbstractAttributeChanger#prepareStatement(java.lang.String, java.util.Set, java.sql.Connection)
+     * @see com.openexchange.admin.storage.mysqlStorage.user.attribute.Attribute#getSQLFieldName()
      */
     @Override
-    protected PreparedStatement prepareStatement(String table, Set<Attribute> attributes, Connection connection) throws SQLException {
-        String sqlStatement = SQL_STATEMENT_TEMPLATE.replaceAll(TABLE_TOKEN, table).replaceAll(COLUMN_TOKEN, prepareAttributes(attributes));
-        return connection.prepareStatement(sqlStatement);
+    public String getSQLFieldName() {
+        return sqlFieldName;
     }
 
     /*
      * (non-Javadoc)
      * 
-     * @see com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.AbstractAttributeChanger#prepareDefaultStatement(java.lang.String, java.util.Set, java.sql.Connection)
+     * @see com.openexchange.admin.storage.mysqlStorage.user.attribute.Attribute#getOriginalType()
      */
     @Override
-    protected PreparedStatement prepareDefaultStatement(String table, Set<Attribute> attributes, Connection connection) throws SQLException {
-        String sqlStatement = SQL_STATEMENT_TEMPLATE.replaceAll(TABLE_TOKEN, table).replaceAll(COLUMN_TOKEN, prepareAttributes(attributes).replaceAll("\\?", "DEFAULT"));
-        return connection.prepareStatement(sqlStatement);
+    public Class<?> getOriginalType() {
+        return originalType;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.admin.storage.mysqlStorage.user.attribute.Attribute#getSQLTableName()
+     */
+    @Override
+    public String getSQLTableName() {
+        return TABLE;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.admin.storage.mysqlStorage.user.attribute.Attribute#getValue(com.openexchange.admin.rmi.dataobjects.ExtendableDataObject)
+     */
+    @Override
+    public <T extends ExtendableDataObject> String getValue(T object) {
+        return getter.apply((User) object);
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.Attribute#getName()
+     */
+    @Override
+    public String getName() {
+        return attributeName;
     }
 }
