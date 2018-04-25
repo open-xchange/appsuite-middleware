@@ -87,6 +87,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
@@ -766,7 +767,14 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
         {
             Set<String> aliases = usrdata.getAliases();
             if (null != aliases) {
-                aliasStorage.setAliases(con, contextId, userId, aliases);
+                Set<String> aliasesToSet = new LinkedHashSet<>(aliases.size());
+                for (String alias : aliases) {
+                    if (false == Strings.isEmpty(alias)) {
+                        alias = alias.trim();
+                        aliasesToSet.add(alias);
+                    }
+                }
+                aliasStorage.setAliases(con, contextId, userId, aliasesToSet);
                 return true;
             } else if (usrdata.isAliasesset()) {
                 aliasStorage.deleteAliases(con, contextId, userId);
@@ -778,7 +786,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
 
     /**
      * Converts the specified {@link Set} to string
-     * 
+     *
      * @param set The {@link Set} to convert
      * @return The string representation
      */

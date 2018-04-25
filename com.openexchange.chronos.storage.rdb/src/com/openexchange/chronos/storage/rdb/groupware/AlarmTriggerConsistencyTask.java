@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,58 +47,50 @@
  *
  */
 
-package com.sun.mail.smtp;
+package com.openexchange.chronos.storage.rdb.groupware;
 
-import java.io.OutputStream;
-import javax.mail.MessagingException;
-import javax.mail.Session;
-import javax.mail.URLName;
+import java.sql.Connection;
+import java.sql.SQLException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import com.openexchange.exception.OXException;
+import com.openexchange.groupware.update.PerformParameters;
+import com.openexchange.groupware.update.UpdateExceptionCodes;
+import com.openexchange.groupware.update.UpdateTaskAdapter;
+import com.openexchange.tools.update.Tools;
 
 /**
- * {@link JavaSMTPTransport}
  *
- * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
+ * {@link AlarmTriggerConsistencyTask} fixes corrupted alarm trigger data caused by an insufficient floating check.
+ *
+ * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+ * @since v7.10.0
  */
-public class JavaSMTPTransport extends SMTPTransport {
+public class AlarmTriggerConsistencyTask extends UpdateTaskAdapter {
 
-    /**
-     * Initializes a new {@link JavaSMTPTransport}.
-     *
-     * @param   session the Session
-     * @param   urlname the URLName of this transport
-     * @param   name    the protocol name of this transport
-     * @param   isSSL   use SSL to connect?
-     */
-    public JavaSMTPTransport(Session session, URLName urlname, String name, boolean isSSL) {
-        super(session, urlname, name, isSSL);
-    }
 
-    /**
-     * Initializes a new {@link JavaSMTPTransport}.
-     *
-     * @param   session the Session
-     * @param   urlname the URLName of this transport
-     */
-    public JavaSMTPTransport(Session session, URLName urlname) {
-        super(session, urlname);
+    private static final Logger LOG = LoggerFactory.getLogger(AlarmTriggerConsistencyTask.class);
+    private static final String REPAIR_INVALID_TIMZONE = "UPDATE calendar_alarm_trigger SET floatingTimezone = NULL WHERE floatingTimezone IS NOT NULL AND relatedTime IS NULL";
+
+
+    @Override
+    public String[] getDependencies() {
+        return new String[] { "com.openexchange.chronos.storage.rdb.migration.ChronosStorageMigrationTask"};
     }
 
     @Override
-    protected OutputStream data() throws MessagingException {
-        OutputStream data = super.data();
-
-        String sMaxMailSize = session.getProperty("com.openexchange.mail.maxMailSize");
-        if (sMaxMailSize != null) {
-            try {
-                long maxMailSize = Long.parseLong(sMaxMailSize);
-                if (maxMailSize > 0) {
-                    data = new CountingOutputStream(data, maxMailSize);
-                }
-            } catch (NumberFormatException e) {
-                // Not a parseable number...
+    public void perform(PerformParameters params) throws OXException {
+        Connection con = params.getConnection();
+        try {
+            if (!Tools.tableExists(con, "calendar_alarm_trigger")) {
+                return;
             }
-        }
 
-        return data;
+            int executeUpdate = con.prepareStatement(REPAIR_INVALID_TIMZONE).executeUpdate();
+            LOG.info("Fixed {} alarm triggers.", executeUpdate);
+
+        } catch (SQLException e) {
+            throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
+        }
     }
 }
