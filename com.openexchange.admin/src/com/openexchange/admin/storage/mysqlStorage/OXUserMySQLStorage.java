@@ -590,13 +590,9 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
         int userId = usrdata.getId().intValue();
 
         Connection con = leaseConnectionForContext(contextId, cache);
-        PreparedStatement stmt = null;
-        PreparedStatement folder_update = null;
 
         boolean rollback = false;
-
         try {
-            // first fill the user_data hash to update user table
             con.setAutoCommit(false);
             rollback = true;
 
@@ -638,7 +634,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             }
 
             if (usrdata.getDisplay_name() != null) {
-                // update folder name via ox api if displayname was changed
+                // update folder name via ox api if 'display name' was changed
                 final int[] changedfields = new int[] { Contact.DISPLAY_NAME };
 
                 OXFolderAdminHelper.propagateUserModification(userId, changedfields, System.currentTimeMillis(), con, con, contextId);
@@ -676,8 +672,6 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             if (rollback) {
                 rollback(con);
             }
-            closeSQLStuff(folder_update);
-            closeSQLStuff(stmt);
             releaseWriteContextConnection(con, ctx, cache);
         }
     }
