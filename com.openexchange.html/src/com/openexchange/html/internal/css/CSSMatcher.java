@@ -778,6 +778,7 @@ public final class CSSMatcher {
      */
     public static boolean checkCSS(final Stringer cssBuilder, final Map<String, Set<String>> styleMap, final boolean removeIfAbsent) {
         boolean modified = false;
+        boolean prefixModified = false;
         /*
          * Feed matcher with buffer's content and reset
          */
@@ -799,6 +800,7 @@ public final class CSSMatcher {
                 // Check prefix part
                 cssElemsBuffer.append(css.substring(lastPos, m.start()));
                 modified |= checkCSSElements(cssElemsBuffer, styleMap, removeIfAbsent);
+                prefixModified = modified;
                 final String prefix = cssElemsBuffer.toString();
                 cssElemsBuffer.setLength(0);
                 // Check block part
@@ -810,7 +812,12 @@ public final class CSSMatcher {
                     lastPos = i + 1;
                 }
                 modified |= checkCSSElements(cssElemsBuffer, styleMap, removeIfAbsent);
-                cssElemsBuffer.insert(0, m.group()).append('}').append('\n'); // Surround with block definition
+                String group = m.group();
+                if (prefixModified) { // dont't take the unmodified string
+                    group = prefix;
+                }
+                cssElemsBuffer.insert(0, group).append('}').append('\n'); // Surround with block definition
+
                 // Add to main builder
                 cssBuilder.append(prefix);
                 cssBuilder.append(cssElemsBuffer);
