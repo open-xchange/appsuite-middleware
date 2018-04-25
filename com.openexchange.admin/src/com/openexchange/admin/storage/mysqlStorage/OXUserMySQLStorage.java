@@ -220,7 +220,15 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
         super();
         cache = ClientAdminThread.cache;
         prop = cache.getProperties();
+        attributeChangers = initialiseAttributeChangers();
+    }
 
+    /**
+     * Initialises the {@link AttributeChangers}
+     * 
+     * @return An unmodifiable {@link Map} with the initialised {@link AttributeChangers}
+     */
+    private Map<AttributeChanger, AttributeChangers> initialiseAttributeChangers() {
         Map<AttributeChanger, AttributeChangers> ac = new HashMap<>();
         ac.put(AttributeChanger.USER, new UserAttributeChangers(cache));
         ac.put(AttributeChanger.USER_SETTING_MAIL, new UserSettingMailAttributeChangers());
@@ -231,7 +239,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
         ac.put(AttributeChanger.GUI_PREFERENCE, new GuiPreferenceUserAttributeChangers());
         ac.put(AttributeChanger.USERNAME_ATTRIBUTE, new UserNameUserAttributeChangers(cache));
         ac.put(AttributeChanger.ALIAS_ATTRIBUTE, new AliasUserAttributeChangers());
-        attributeChangers = Collections.unmodifiableMap(ac);
+        return Collections.unmodifiableMap(ac);
     }
 
     @Override
@@ -690,7 +698,6 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
         } finally {
             Databases.closeSQLStuff(result, stmt);
         }
-
     }
 
     /**
