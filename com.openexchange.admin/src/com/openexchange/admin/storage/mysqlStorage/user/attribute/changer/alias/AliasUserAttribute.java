@@ -47,53 +47,71 @@
  *
  */
 
-package com.openexchange.admin.storage.mysqlStorage.user.attribute.changer;
+package com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.alias;
 
-import java.util.EnumSet;
-import com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.alias.AliasUserAttribute;
-import com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.contact.ContactUserAttribute;
-import com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.custom.CustomUserAttribute;
-import com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.guipref.GuiPreferencesUserAttribute;
-import com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.mailaccount.UserMailAccountAttribute;
-import com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.mailsetting.UserMailSettingAttribute;
-import com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.spamfilter.SpamFilterUserAttribute;
-import com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.user.UserAttribute;
-import com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.user.username.UserNameUserAttribute;
+import com.openexchange.admin.rmi.dataobjects.ExtendableDataObject;
+import com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.Attribute;
 
 /**
- * {@link AttributeChanger}
+ * {@link AliasUserAttribute}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @since v7.10.1
  */
-public enum AttributeChanger {
+public enum AliasUserAttribute implements Attribute {
+    // Mark attribute, no real value
+    ALIAS_ATTRIBUTE;
 
-    USER(EnumSet.allOf(UserAttribute.class)),
-    USER_SETTING_MAIL(EnumSet.allOf(UserMailSettingAttribute.class)),
-    USER_MAIL_ACCOUNT(EnumSet.allOf(UserMailAccountAttribute.class)),
-    CUSTOM_USER_ATTRIBUTE(EnumSet.allOf(CustomUserAttribute.class)),
-    CONTACT_USER_ATTRIBUTE(EnumSet.allOf(ContactUserAttribute.class)),
-    SPAM_FILTER(EnumSet.allOf(SpamFilterUserAttribute.class)),
-    GUI_PREFERENCE(EnumSet.allOf(GuiPreferencesUserAttribute.class)),
-    USERNAME_ATTRIBUTE(EnumSet.allOf(UserNameUserAttribute.class)),
-    ALIAS_ATTRIBUTE(EnumSet.allOf(AliasUserAttribute.class)),
-    ;
+    private static final String ALIAS_ATTRIBUTE_NAME = "user_alias";
 
-    private final EnumSet<? extends Attribute> attributes;
-
-    /**
-     * Initialises a new {@link AttributeChanger}.
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.Attribute#getOriginalType()
      */
-    private AttributeChanger(EnumSet<? extends Attribute> attributes) {
-        this.attributes = attributes;
+    @Override
+    public Class<?> getOriginalType() {
+        return String.class;
     }
 
-    /**
-     * Gets the attributes
-     *
-     * @return The attributes
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.Attribute#getSQLFieldName()
      */
-    public EnumSet<? extends Attribute> getAttributes() {
-        return attributes;
+    @Override
+    public String getSQLFieldName() {
+        return ALIAS_ATTRIBUTE_NAME;
     }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.Attribute#getSQLTableName()
+     */
+    @Override
+    public String getSQLTableName() {
+        return ALIAS_ATTRIBUTE_NAME;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.Attribute#getValue(com.openexchange.admin.rmi.dataobjects.ExtendableDataObject)
+     */
+    @Override
+    public <T extends ExtendableDataObject> String getValue(T object) {
+        return ALIAS_ATTRIBUTE_NAME;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.Attribute#getName()
+     */
+    @Override
+    public String getName() {
+        return ALIAS_ATTRIBUTE_NAME;
+    }
+
 }

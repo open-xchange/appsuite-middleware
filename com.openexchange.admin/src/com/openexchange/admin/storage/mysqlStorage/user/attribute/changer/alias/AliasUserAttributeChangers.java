@@ -47,53 +47,65 @@
  *
  */
 
-package com.openexchange.admin.storage.mysqlStorage.user.attribute.changer;
+package com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.alias;
 
-import java.util.EnumSet;
-import com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.alias.AliasUserAttribute;
-import com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.contact.ContactUserAttribute;
-import com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.custom.CustomUserAttribute;
-import com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.guipref.GuiPreferencesUserAttribute;
-import com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.mailaccount.UserMailAccountAttribute;
-import com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.mailsetting.UserMailSettingAttribute;
-import com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.spamfilter.SpamFilterUserAttribute;
-import com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.user.UserAttribute;
-import com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.user.username.UserNameUserAttribute;
+import java.sql.Connection;
+import java.util.Collections;
+import java.util.LinkedHashSet;
+import java.util.Set;
+import com.openexchange.admin.rmi.dataobjects.User;
+import com.openexchange.admin.rmi.exceptions.StorageException;
+import com.openexchange.admin.services.AdminServiceRegistry;
+import com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.AbstractAttributeChangers;
+import com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.Attribute;
+import com.openexchange.exception.OXException;
+import com.openexchange.groupware.alias.UserAliasStorage;
+import com.openexchange.java.Strings;
 
 /**
- * {@link AttributeChanger}
+ * {@link AliasUserAttributeChangers}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @since v7.10.1
  */
-public enum AttributeChanger {
-
-    USER(EnumSet.allOf(UserAttribute.class)),
-    USER_SETTING_MAIL(EnumSet.allOf(UserMailSettingAttribute.class)),
-    USER_MAIL_ACCOUNT(EnumSet.allOf(UserMailAccountAttribute.class)),
-    CUSTOM_USER_ATTRIBUTE(EnumSet.allOf(CustomUserAttribute.class)),
-    CONTACT_USER_ATTRIBUTE(EnumSet.allOf(ContactUserAttribute.class)),
-    SPAM_FILTER(EnumSet.allOf(SpamFilterUserAttribute.class)),
-    GUI_PREFERENCE(EnumSet.allOf(GuiPreferencesUserAttribute.class)),
-    USERNAME_ATTRIBUTE(EnumSet.allOf(UserNameUserAttribute.class)),
-    ALIAS_ATTRIBUTE(EnumSet.allOf(AliasUserAttribute.class)),
-    ;
-
-    private final EnumSet<? extends Attribute> attributes;
+public class AliasUserAttributeChangers extends AbstractAttributeChangers {
 
     /**
-     * Initialises a new {@link AttributeChanger}.
+     * Initialises a new {@link AliasUserAttributeChangers}.
      */
-    private AttributeChanger(EnumSet<? extends Attribute> attributes) {
-        this.attributes = attributes;
+    public AliasUserAttributeChangers() {
+        super();
     }
 
-    /**
-     * Gets the attributes
-     *
-     * @return The attributes
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.AttributeChangers#change(java.util.Set, com.openexchange.admin.rmi.dataobjects.User, int, int, java.sql.Connection)
      */
-    public EnumSet<? extends Attribute> getAttributes() {
-        return attributes;
+    @Override
+    public Set<String> change(Set<Attribute> attributes, User userData, int userId, int contextId, Connection connection) throws StorageException {
+        UserAliasStorage aliasStorage = AdminServiceRegistry.getInstance().getService(UserAliasStorage.class);
+        Set<String> aliases = userData.getAliases();
+        try {
+            if (null == aliases) {
+                if (userData.isAliasesset()) {
+                    aliasStorage.deleteAliases(connection, contextId, userId);
+                    return Collections.singleton("removed all user alias addresses");
+                }
+                return EMPTY_SET;
+            }
+
+            Set<String> aliasesToSet = new LinkedHashSet<>(aliases.size());
+            for (String alias : aliases) {
+                if (false == Strings.isEmpty(alias)) {
+                    alias = alias.trim();
+                    aliasesToSet.add(alias);
+                }
+            }
+            aliasStorage.setAliases(connection, contextId, userId, aliasesToSet);
+            return Collections.singleton("aliases: " + aliasesToSet.toString());
+        } catch (OXException e) {
+            throw new StorageException(e);
+        }
     }
 }

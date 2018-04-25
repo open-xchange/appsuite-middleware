@@ -113,6 +113,7 @@ import com.openexchange.admin.storage.interfaces.OXToolStorageInterface;
 import com.openexchange.admin.storage.interfaces.OXUtilStorageInterface;
 import com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.AttributeChanger;
 import com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.AttributeChangers;
+import com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.alias.AliasUserAttributeChangers;
 import com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.contact.ContactUserAttributeChangers;
 import com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.custom.CustomUserAttributeChangers;
 import com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.guipref.GuiPreferenceUserAttributeChangers;
@@ -229,6 +230,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
         ac.put(AttributeChanger.SPAM_FILTER, new SpamFilterUserAttributeChangers());
         ac.put(AttributeChanger.GUI_PREFERENCE, new GuiPreferenceUserAttributeChangers());
         ac.put(AttributeChanger.USERNAME_ATTRIBUTE, new UserNameUserAttributeChangers(cache));
+        ac.put(AttributeChanger.ALIAS_ATTRIBUTE, new AliasUserAttributeChangers());
         attributeChangers = Collections.unmodifiableMap(ac);
     }
 
@@ -622,12 +624,6 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             // Change storage data
             if (changeStorageData(usrdata, ctx, con)) {
                 changedAttributes.add("filestore");
-            }
-
-            // Update user's E-Mail aliases
-            if (updateAliases(usrdata, contextId, userId, con)) {
-                // TODO: maybe keep track of what exactly was changed?
-                changedAttributes.add("aliases");
             }
 
             if (usrdata.isConvertDriveUserFolders()) {
