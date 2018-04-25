@@ -78,7 +78,7 @@ public class UIDSet {
     public static UIDSet[] createUIDSets(long[] uids) {
 	if (uids == null)
 	    return null;
-	List<UIDSet> v = new ArrayList<>();
+	List<UIDSet> v = new ArrayList<>(uids.length);
 	int i,j;
 
 	for (i=0; i < uids.length; i++) {
@@ -94,8 +94,7 @@ public class UIDSet {
 	    v.add(ms);
 	    i = j-1; // i gets incremented @ top of the loop
 	}
-	UIDSet[] uidset = new UIDSet[v.size()];	
-	return v.toArray(uidset);
+	return v.toArray(new UIDSet[v.size()]);
     }
 
     /**
