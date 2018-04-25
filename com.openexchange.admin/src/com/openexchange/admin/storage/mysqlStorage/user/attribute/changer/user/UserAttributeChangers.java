@@ -220,6 +220,23 @@ public class UserAttributeChangers extends AbstractUserAttributeChangers {
                 return setAttributes(userId, contextId, TABLE, Collections.singletonMap(UserAttribute.PASSWORD_MECH, passwordMech), connection);
             }
         });
+        c.put(UserAttribute.QUOTA, new AbstractUserAttributeChanger() {
+
+            @Override
+            public boolean changeAttribute(int userId, int contextId, User userData, Connection connection) throws SQLException {
+                // Check if max quota is set for user
+                Long maxQuota = userData.getMaxQuota();
+                if (maxQuota == null) {
+                    return false;
+                }
+                long quota_max_temp = maxQuota.longValue();
+                if (quota_max_temp != -1) {
+                    quota_max_temp = quota_max_temp << 20;
+                }
+
+                return setAttributes(userId, contextId, TABLE, Collections.singletonMap(UserAttribute.QUOTA, quota_max_temp), connection);
+            }
+        });
         return Collections.unmodifiableMap(c);
     }
 }

@@ -102,6 +102,10 @@ public enum UserAttribute implements Attribute {
      * The 'passwordMech' column
      */
     PASSWORD_MECH("password-mechanism", "passwordMech", (user) -> user.getPasswordMech(), String.class),
+    /**
+     * The quota column
+     */
+    QUOTA("user-maximum-quota", "quota_max", (user) -> Long.toString(user.getMaxQuota()), Long.class),
     ;
 
     private final String sqlFieldName;

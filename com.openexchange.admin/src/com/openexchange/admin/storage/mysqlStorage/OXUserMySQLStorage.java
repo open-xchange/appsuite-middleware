@@ -87,7 +87,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
@@ -120,6 +119,7 @@ import com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.guipre
 import com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.mailaccount.UserMailAccountAttributeChangers;
 import com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.mailsetting.UserSettingMailAttributeChangers;
 import com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.spamfilter.SpamFilterUserAttributeChangers;
+import com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.user.UserAttribute;
 import com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.user.UserAttributeChangers;
 import com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.user.username.UserNameUserAttributeChangers;
 import com.openexchange.admin.storage.sqlStorage.OXUserSQLStorage;
@@ -614,17 +614,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
 
             // Hint for the cache when updating display name
             boolean displayNameUpdate = changedAttributes.contains("Display_name");
-
-            // Change quota size
-            Set<Integer> quotaAffectedUserIDs = changeQuotaForUser(usrdata, ctx, con);
-            if (quotaAffectedUserIDs != null && !quotaAffectedUserIDs.isEmpty()) {
-                changedAttributes.add("user-quota");
-            }
-
-            // Change storage data
-            if (changeStorageData(usrdata, ctx, con)) {
-                changedAttributes.add("filestore");
-            }
+            Set<Integer> quotaAffectedUserIDs = changedAttributes.contains(UserAttribute.QUOTA.getName()) ? getQuotaAffectedUserIds(contextId, userId, con) : Collections.emptySet();
 
             if (usrdata.isConvertDriveUserFolders()) {
                 convertDriveUserFolders(ctx, usrdata, con);
@@ -671,6 +661,36 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             }
             releaseWriteContextConnection(con, ctx, cache);
         }
+    }
+
+    /**
+     * If the quota was changed for a user owned filestore then get all affected user ids
+     * 
+     * @param contextId The context identifier
+     * @param userId The user identifier (the filestore owner)
+     * @param connection The {@link Connection}
+     * @return A {@link Set} with all affected user ids, or an empty {@link Set} if no user was affected.
+     * @throws StorageException if a storage error is occurred
+     */
+    private Set<Integer> getQuotaAffectedUserIds(int contextId, int userId, Connection connection) throws StorageException {
+        ResultSet result = null;
+        PreparedStatement stmt = null;
+        try {
+            Set<Integer> affectedUserIDs = new HashSet<>();
+            stmt = connection.prepareStatement("SELECT id FROM user WHERE cid=? AND filestore_owner=?;");
+            stmt.setInt(1, contextId);
+            stmt.setInt(2, userId);
+            result = stmt.executeQuery();
+            while (result.next()) {
+                affectedUserIDs.add(Integer.valueOf(result.getInt(1)));
+            }
+            return affectedUserIDs;
+        } catch (SQLException e) {
+            throw new StorageException(e);
+        } finally {
+            Databases.closeSQLStuff(result, stmt);
+        }
+
     }
 
     /**
@@ -746,38 +766,6 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
         } catch (final OXException e) {
             LOG.error("", e);
         }
-    }
-
-    /**
-     * Update the aliases of the user
-     * 
-     * @param usrdata The {@link User} data
-     * @param contextId The context identifier
-     * @param userId The user identifier
-     * @param con the {@link Connection}
-     * @return <code>true</code> if the aliases were changed successfully; <code>false</code> otherwise
-     * @throws OXException if an error is occurred
-     */
-    private boolean updateAliases(final User usrdata, int contextId, int userId, Connection con) throws OXException {
-        UserAliasStorage aliasStorage = AdminServiceRegistry.getInstance().getService(UserAliasStorage.class);
-        {
-            Set<String> aliases = usrdata.getAliases();
-            if (null != aliases) {
-                Set<String> aliasesToSet = new LinkedHashSet<>(aliases.size());
-                for (String alias : aliases) {
-                    if (false == Strings.isEmpty(alias)) {
-                        alias = alias.trim();
-                        aliasesToSet.add(alias);
-                    }
-                }
-                aliasStorage.setAliases(con, contextId, userId, aliasesToSet);
-                return true;
-            } else if (usrdata.isAliasesset()) {
-                aliasStorage.deleteAliases(con, contextId, userId);
-                return true;
-            }
-        }
-        return false;
     }
 
     /**
@@ -902,112 +890,6 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             LOG.error("Problem storing the primary mail account.", e);
             throw new StorageException(e.toString());
         }
-    }
-
-    private Set<Integer> changeQuotaForUser(User user, Context ctx, Connection con) throws SQLException {
-        // check if max quota is set for user
-        Long maxQuota = user.getMaxQuota();
-        if (maxQuota == null) {
-            return null; //FIXME: Consider returning an empty set instead
-        }
-        long quota_max_temp = maxQuota.longValue();
-        if (quota_max_temp != -1) {
-            quota_max_temp = quota_max_temp << 20;
-        }
-
-        int updated;
-        PreparedStatement prep = null;
-        try {
-            prep = con.prepareStatement("UPDATE user SET quota_max=? WHERE cid=? AND id=?");
-            prep.setLong(1, quota_max_temp);
-            prep.setInt(2, ctx.getId().intValue());
-            prep.setInt(3, user.getId().intValue());
-            updated = prep.executeUpdate();
-            prep.close();
-        } finally {
-            Databases.closeSQLStuff(prep);
-        }
-        if (0 < updated) {
-            Set<Integer> affectedUserIDs = new HashSet<>();
-            ResultSet result = null;
-            PreparedStatement stmt = null;
-            try {
-                stmt = con.prepareStatement("SELECT id FROM user WHERE cid=? AND filestore_owner=?;");
-                stmt.setInt(1, ctx.getId().intValue());
-                stmt.setInt(2, user.getId().intValue());
-                result = stmt.executeQuery();
-                while (result.next()) {
-                    affectedUserIDs.add(Integer.valueOf(result.getInt(1)));
-                }
-            } finally {
-                Databases.closeSQLStuff(result, stmt);
-            }
-            return affectedUserIDs;
-        }
-        return null; //FIXME: Consider returning an empty set instead
-    }
-
-    private boolean changeStorageData(User user, Context ctx, Connection con) throws SQLException, StorageException {
-        Integer filestoreId = user.getFilestoreId();
-        if (filestoreId == null) {
-            return false;
-        }
-
-        boolean changed = false;
-        OXUtilStorageInterface oxutil = OXUtilStorageInterface.getInstance();
-        Filestore filestore = oxutil.getFilestore(filestoreId.intValue(), false);
-        PreparedStatement prep = null;
-        int context_id = ctx.getId().intValue();
-        try {
-            if (filestore.getId() != null && -1 != filestore.getId().intValue()) {
-                prep = con.prepareStatement("UPDATE user SET filestore_id = ? WHERE cid = ? AND id = ? AND filestore_id <> ?");
-                prep.setInt(1, filestore.getId().intValue());
-                prep.setInt(2, context_id);
-                prep.setInt(3, user.getId().intValue());
-                prep.setInt(4, filestore.getId().intValue());
-                changed = prep.executeUpdate() > 0;
-                prep.close();
-            }
-
-            if (changed) {
-                Integer filestoreOwner = user.getFilestoreOwner();
-                if (filestoreOwner != null && -1 != filestoreOwner.intValue()) {
-                    prep = con.prepareStatement("UPDATE user SET filestore_owner = ? WHERE cid = ? AND id = ?");
-                    prep.setInt(1, filestoreOwner.intValue());
-                    prep.setInt(2, context_id);
-                    prep.setInt(3, user.getId().intValue());
-                    prep.executeUpdate();
-                    prep.close();
-                } else {
-                    prep = con.prepareStatement("UPDATE user SET filestore_owner = ? WHERE cid = ? AND id = ?");
-                    prep.setInt(1, 0);
-                    prep.setInt(2, context_id);
-                    prep.setInt(3, user.getId().intValue());
-                    prep.executeUpdate();
-                    prep.close();
-                }
-
-                String filestore_name = user.getFilestore_name();
-                if (null != filestore_name) {
-                    prep = con.prepareStatement("UPDATE user SET filestore_name = ? WHERE cid = ? AND id = ?");
-                    prep.setString(1, filestore_name);
-                    prep.setInt(2, context_id);
-                    prep.setInt(3, user.getId().intValue());
-                    prep.executeUpdate();
-                    prep.close();
-                } else {
-                    prep = con.prepareStatement("UPDATE user SET filestore_name = ? WHERE cid = ? AND id = ?");
-                    prep.setString(1, FileStorages.getNameForUser(user.getId().intValue(), context_id));
-                    prep.setInt(2, context_id);
-                    prep.setInt(3, user.getId().intValue());
-                    prep.executeUpdate();
-                    prep.close();
-                }
-            }
-        } finally {
-            Databases.closeSQLStuff(prep);
-        }
-        return changed;
     }
 
     @Override
