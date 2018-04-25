@@ -1619,13 +1619,11 @@ abstract class AbstractSMTPTransport extends MailTransport implements MimeSuppor
         @Override
         public void messageNotDelivered(TransportEvent e) {
             fillAddressesFromEvent(e);
-
         }
 
         @Override
         public void messageDelivered(TransportEvent e) {
             fillAddressesFromEvent(e);
-
         }
 
         private void fillAddressesFromEvent(TransportEvent e) {

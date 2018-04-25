@@ -479,7 +479,7 @@ public class MimeMailException extends OXException {
                 }
                 return MimeMailExceptionCode.SOCKET_ERROR.create(e, new Object[0]);
             } else if (nextException instanceof java.net.UnknownHostException) {
-                return MimeMailExceptionCode.UNKNOWN_HOST.create(e, appendInfo(e.getMessage(), folder));
+                return MimeMailExceptionCode.UNKNOWN_HOST.create(e, appendInfo(null == mailConfig ? e.getMessage() : mailConfig.getServer(), folder));
             } else if (nextException instanceof java.net.SocketTimeoutException) {
                 mailInterfaceMonitor.changeNumBrokenConnections(true);
                 return MimeMailExceptionCode.READ_TIMEOUT.create(

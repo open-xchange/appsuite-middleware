@@ -73,9 +73,17 @@ public interface ContactService {
      * list, even if the current session's user has no sufficient access
      * permissions for that folder.
      */
-    public static final ContactField[] LIMITED_USER_FIELDS = new ContactField[] { ContactField.DISPLAY_NAME, ContactField.GIVEN_NAME,
+    static final ContactField[] LIMITED_USER_FIELDS = new ContactField[] { ContactField.DISPLAY_NAME, ContactField.GIVEN_NAME,
         ContactField.SUR_NAME, ContactField.MIDDLE_NAME, ContactField.SUFFIX, ContactField.LAST_MODIFIED,
-        ContactField.INTERNAL_USERID, ContactField.OBJECT_ID, ContactField.FOLDER_ID, ContactField.UID, ContactField.EMAIL1 };
+        ContactField.INTERNAL_USERID, ContactField.OBJECT_ID, ContactField.FOLDER_ID, ContactField.UID, ContactField.EMAIL1
+    };
+
+    /**
+     * Contact fields that may be queried from contacts of the global address
+     * list, even if the current session's user has no sufficient access
+     * permissions for that folder, and the user has no 'webmail' module access.
+     */
+    static final ContactField[] LIMITED_USER_FIELDS_NO_MAIL = com.openexchange.tools.arrays.Arrays.remove(LIMITED_USER_FIELDS, ContactField.EMAIL1);
 
     /**
      * Gets a contact with all fields.

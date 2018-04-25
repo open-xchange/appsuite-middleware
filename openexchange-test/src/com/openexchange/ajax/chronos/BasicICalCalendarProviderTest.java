@@ -842,6 +842,7 @@ public class BasicICalCalendarProviderTest extends AbstractExternalProviderChron
         EventsResponse initialAllEventResponse = defaultUserApi.getChronosApi().getAllEvents(defaultUserApi.getSession(), DateTimeUtil.getZuluDateTime(new Date(dateToMillis("20000702T201500Z")).getTime()).getValue(), DateTimeUtil.getZuluDateTime(new Date(System.currentTimeMillis()).getTime()).getValue(), newFolderId, null, null, null, false, false, false);
         EventsResponse secondEventResponse = defaultUserApi.getChronosApi().getAllEvents(defaultUserApi.getSession(), DateTimeUtil.getZuluDateTime(new Date(dateToMillis("20000702T201500Z")).getTime()).getValue(), DateTimeUtil.getZuluDateTime(new Date(System.currentTimeMillis()).getTime()).getValue(), newFolderId, null, null, null, false, false, false);
 
+        assertEquals(initialAllEventResponse.getError(), "ICAL-PROV-5001", initialAllEventResponse.getCode());
         assertEquals(initialAllEventResponse.getError(), secondEventResponse.getError());
         assertEquals(initialAllEventResponse.getData(), secondEventResponse.getData());
         assertEquals(initialAllEventResponse.getCode(), secondEventResponse.getCode());
@@ -862,6 +863,7 @@ public class BasicICalCalendarProviderTest extends AbstractExternalProviderChron
         clear(externalUri);
 
         assertNotNull(initialAllEventResponse.getError());
+        assertEquals(initialAllEventResponse.getError(), "ICAL-PROV-5001", initialAllEventResponse.getCode());
         assertNotNull(initialAllEventResponse.getData());
         assertNotNull(initialAllEventResponse.getCode());
         assertNotNull(initialAllEventResponse.getErrorId());
@@ -898,6 +900,7 @@ public class BasicICalCalendarProviderTest extends AbstractExternalProviderChron
         clear(externalUri);
 
         assertNotNull(initialAllEventResponse.getError());
+        assertEquals(initialAllEventResponse.getError(), "ICAL-PROV-5001", initialAllEventResponse.getCode());
         assertNotNull(initialAllEventResponse.getData());
         assertNotNull(initialAllEventResponse.getCode());
         assertNotNull(initialAllEventResponse.getErrorId());
@@ -929,13 +932,13 @@ public class BasicICalCalendarProviderTest extends AbstractExternalProviderChron
         clear(externalUri);
 
         assertNotNull(initialAllEventResponse.getError());
+        assertEquals(initialAllEventResponse.getError(), "ICAL-PROV-5001", initialAllEventResponse.getCode());
         assertNotNull(initialAllEventResponse.getData());
         assertNotNull(initialAllEventResponse.getCode());
         assertNotNull(initialAllEventResponse.getErrorId());
         assertNotNull(initialAllEventResponse.getErrorDesc());
         assertNotNull(initialAllEventResponse.getCategory());
         assertNotNull(initialAllEventResponse.getCategories());
-        assertEquals(initialAllEventResponse.getError(), "ICAL-PROV-5001", initialAllEventResponse.getCode());
 
         try {
             Thread.sleep(TimeUnit.MINUTES.toMillis(1) + 5000);
@@ -1004,6 +1007,7 @@ public class BasicICalCalendarProviderTest extends AbstractExternalProviderChron
 
         MultipleEventDataError initialResponseError = initialAllEventResponse.getData().get(0).getError();
         MultipleEventDataError secondResponseError = secondEventResponse.getData().get(0).getError();
+        assertEquals("ICAL-PROV-5001", initialResponseError.getCode().toString());
         assertEquals(initialResponseError.getCode(), secondResponseError.getCode());
         assertEquals(initialResponseError.getErrorId(), secondResponseError.getErrorId());
         assertEquals(initialResponseError.getErrorDesc(), secondResponseError.getErrorDesc());
@@ -1028,6 +1032,7 @@ public class BasicICalCalendarProviderTest extends AbstractExternalProviderChron
         MultipleEventDataError initialResponseError = initialAllEventResponse.getData().get(0).getError();
 
         assertNotNull(initialResponseError.getError());
+        assertEquals(initialResponseError.getError(), "ICAL-PROV-5001", initialResponseError.getCode());
         assertNotNull(initialResponseError.getCode());
         assertNotNull(initialResponseError.getErrorId());
         assertNotNull(initialResponseError.getErrorDesc());
@@ -1065,6 +1070,7 @@ public class BasicICalCalendarProviderTest extends AbstractExternalProviderChron
 
         assertEquals(0, initialAllEventResponse.getData().get(0).getEvents().size());
         assertNotNull(initialResponseError.getError());
+        assertEquals(initialResponseError.getError(), "ICAL-PROV-5001", initialResponseError.getCode());
         assertNotNull(initialResponseError.getCode());
         assertNotNull(initialResponseError.getErrorId());
         assertNotNull(initialResponseError.getErrorDesc());

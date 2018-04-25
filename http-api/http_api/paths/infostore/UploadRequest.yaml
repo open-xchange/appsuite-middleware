@@ -104,7 +104,8 @@
         format: int64
         description: |
          Optionally sets the start offset in bytes where to append the data to the document, must be equal to the actual document's length. 
-         Only available if the underlying File storage account supports the "RANDOM_FILE_ACCESS" capability.
+         Only available if the underlying File storage account supports the "RANDOM_FILE_ACCESS" capability. 
+         If set the id parameter must also be set to the id previously recieved from the first/starting request.
         required: false
       - in: body
         description: The binary file
