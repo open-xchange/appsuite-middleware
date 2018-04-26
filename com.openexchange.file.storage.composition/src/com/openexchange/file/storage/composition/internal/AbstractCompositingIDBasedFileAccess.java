@@ -988,18 +988,19 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractCompo
         }
 
         /*
-         * Update without move
+         * update without move, perform save operation (using service-relative identifiers) & return resulting composite identifier
          */
-        document.setFolderId(targetFolderID.getFolderId());
-        document.setId(sourceFileID.getFileId());
-        SaveResult result = saveDelegation.call(getFileAccess(serviceID, accountID));
+        document.setFolderId(sourceIDTuple.getFolder());
+        document.setId(sourceIDTuple.getId());
+        SaveResult result = saveDelegation.call(fileAccess);
         IDTuple idTuple = result.getIDTuple();
-        FileID newFileID = new FileID(serviceID, accountID, idTuple.getFolder(), idTuple.getId());
+        FileID newID = new FileID(serviceID, accountID, idTuple.getFolder(), idTuple.getId());
         FolderID newFolderID = new FolderID(serviceID, accountID, idTuple.getFolder());
-        String newId = newFileID.toUniqueID();
+        document.setId(newID.toUniqueID());
+        document.setFolderId(newFolderID.toUniqueID());
         postEvent(FileStorageEventHelper.buildUpdateEvent(
-            session, serviceID, accountID, newFolderID.toUniqueID(), newId, document.getFileName()));
-        return newId;
+            session, serviceID, accountID, newFolderID.toUniqueID(), newID.toUniqueID(), document.getFileName()));
+        return newID.toUniqueID();
     }
 
     /**

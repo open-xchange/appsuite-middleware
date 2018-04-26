@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the Open-Xchange, Inc. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2020 Open-Xchange, Inc.
+ *     Copyright (C) 2016-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -141,7 +141,7 @@ public class Trigger {
 
     /**
      * Gets the <i>related</i> attribute indicating the relationship to the parent calendar component of the trigger.
-     * 
+     *
      * @return The <i>related</i> attribute, or <code>null</code> if not set
      */
 	public Related getRelated() {
@@ -150,7 +150,7 @@ public class Trigger {
 
     /**
      * Sets the <i>related</i> attribute indicating the relationship to the parent calendar component of the trigger.
-     * 
+     *
      * @param related The {@link Related} attribute
      */
 	public void setRelated(Related related) {
@@ -159,7 +159,7 @@ public class Trigger {
 
     /**
      * Gets the fixed date-time of the trigger.
-     * 
+     *
      * @return The date-time, or <code>null</code> if no set
      */
 	public Date getDateTime() {
@@ -168,7 +168,7 @@ public class Trigger {
 
     /**
      * Sets the fixed date-time of the trigger.
-     * 
+     *
      * @param dateTime The {@link Date} to set
      */
 	public void setDateTime(Date dateTime) {
@@ -179,29 +179,36 @@ public class Trigger {
      * Matches the given object with this instance.
      * In contrast to {@link #equals(Object)} this method considers standard values for
      * specific fields
-     * 
+     *
      * @param obj The {@link Object} to match
      * @return <code>true</code> if the given object matches all criteria. It can be considered 'equal'.
      *         <code> false otherwise
      */
     public boolean matches(Object obj) {
-        if (this == obj)
+        if (this == obj) {
             return true;
-        if (obj == null)
+        }
+        if (obj == null) {
             return false;
-        if (getClass() != obj.getClass())
+        }
+        if (getClass() != obj.getClass()) {
             return false;
+        }
         Trigger other = (Trigger) obj;
         if (dateTime == null) {
-            if (other.dateTime != null)
+            if (other.dateTime != null) {
                 return false;
-        } else if (!dateTime.equals(other.dateTime))
+            }
+        } else if (!dateTime.equals(other.dateTime)) {
             return false;
+        }
         if (duration == null) {
-            if (other.duration != null)
+            if (other.duration != null) {
                 return false;
-        } else if (!duration.equals(other.duration))
+            }
+        } else if (!duration.equals(other.duration)) {
             return false;
+        }
 
         // 'null' ~ Related.START
         if (related == null) {
@@ -230,25 +237,33 @@ public class Trigger {
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj)
+        if (this == obj) {
             return true;
-        if (obj == null)
+        }
+        if (obj == null) {
             return false;
-        if (getClass() != obj.getClass())
+        }
+        if (getClass() != obj.getClass()) {
             return false;
+        }
         Trigger other = (Trigger) obj;
         if (dateTime == null) {
-            if (other.dateTime != null)
+            if (other.dateTime != null) {
                 return false;
-        } else if (!dateTime.equals(other.dateTime))
+            }
+        } else if (!dateTime.equals(other.dateTime)) {
             return false;
+        }
         if (duration == null) {
-            if (other.duration != null)
+            if (other.duration != null) {
                 return false;
-        } else if (!duration.equals(other.duration))
+            }
+        } else if (!duration.equals(other.duration)) {
             return false;
-        if (related != other.related)
+        }
+        if (related != other.related) {
             return false;
+        }
         return true;
     }
 

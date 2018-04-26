@@ -172,8 +172,6 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
 
     private final int criteriaType = Types.INTEGER;
 
-    // private Object criteriaMatch = null;
-
     private final OXContextMySQLStorageCommon contextCommon;
 
     private final PropertyHandlerExtended prop;
@@ -1911,6 +1909,12 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                         for (int userId : OXUserStorageInterface.getInstance().getAll(ctx, oxCon)) {
                             lCache.remove(cacheService.newCacheKey(contextId, userId));
                         }
+                    } catch (final Exception e) {
+                        LOG.error("", e);
+                    }
+                    try {
+                        final Cache jcs = cacheService.getCache("Capabilities");
+                        jcs.invalidateGroup(ctx.getId().toString());
                     } catch (final Exception e) {
                         LOG.error("", e);
                     }
