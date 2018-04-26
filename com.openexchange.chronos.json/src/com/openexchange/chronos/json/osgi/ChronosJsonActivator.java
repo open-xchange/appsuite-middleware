@@ -90,6 +90,7 @@ import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.contact.ContactService;
 import com.openexchange.conversion.ConversionService;
 import com.openexchange.conversion.DataHandler;
+import com.openexchange.group.GroupService;
 import com.openexchange.groupware.userconfiguration.Permission;
 import com.openexchange.oauth.provider.resourceserver.scope.AbstractScopeProvider;
 import com.openexchange.oauth.provider.resourceserver.scope.OAuthScopeProvider;
@@ -107,7 +108,9 @@ public class ChronosJsonActivator extends AJAXModuleActivator {
     @Override
     protected Class<?>[] getNeededServices() {
         return new Class<?>[] {
-            IDBasedCalendarAccessFactory.class, CalendarUtilities.class, CalendarService.class, LeanConfigurationService.class, CalendarAccountService.class, ConversionService.class, ITipActionPerformerFactoryService.class, ContactService.class, ResourceService.class
+            IDBasedCalendarAccessFactory.class, CalendarUtilities.class, CalendarService.class, LeanConfigurationService.class, 
+            CalendarAccountService.class, ConversionService.class, ITipActionPerformerFactoryService.class, 
+            ContactService.class, ResourceService.class, GroupService.class
         };
     }
 

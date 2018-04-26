@@ -281,6 +281,10 @@ public class ChronosJsonFields {
          * The resource of the attendee.
          */
         public static final String RESOURCE = "resource";
+        /**
+         * The group of the attendee.
+         */
+        public static final String GROUP = "group";
 
     }
 
