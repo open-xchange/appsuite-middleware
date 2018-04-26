@@ -594,7 +594,6 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
         }
     }
 
-    // FIXME: Consider a more dynamic, interface-based construct for changing the individual attributes
     @Override
     public void change(final Context ctx, final User usrdata) throws StorageException {
         int contextId = ctx.getId().intValue();

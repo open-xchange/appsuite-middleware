@@ -371,24 +371,6 @@ public class PrimaryMailAccountAttributeChangers extends AbstractAttributeChange
 
     ///////////////////// vvv REFACTOR AND CONSOLIDATE vvv ///////////////////////
 
-    /**
-     * Checks whether an attribute is set by invoking it's respective {@link Method}
-     * 
-     * @param method The {@link Method} to invoke
-     * @param userData The {@link User} data object which contains the {@link Method}
-     * @return <code>true</code> if the attribute by the denoted {@link Method} is set; <code>false</code> otherwise
-     * @throws NoSuchMethodException
-     * @throws SecurityException
-     * @throws IllegalAccessException
-     * @throws IllegalArgumentException
-     * @throws InvocationTargetException
-     */
-    private boolean isAttributeSet(Method method, User userData) throws NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
-        String methodName = "is" + method.getName().substring(3) + "set";
-        Method retVal = User.class.getMethod(methodName);
-        return ((Boolean) retVal.invoke(userData, (Object[]) null)).booleanValue();
-    }
-
     private enum MethodPrefix {
         get, is;
     }
