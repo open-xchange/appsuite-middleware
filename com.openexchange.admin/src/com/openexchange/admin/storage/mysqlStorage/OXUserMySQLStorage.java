@@ -117,6 +117,7 @@ import com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.contac
 import com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.custom.CustomUserAttributeChangers;
 import com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.guipref.GuiPreferenceUserAttributeChangers;
 import com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.mailaccount.UserMailAccountAttributeChangers;
+import com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.mailaccount.primary.PrimaryMailAccountAttributeChangers;
 import com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.mailsetting.UserSettingMailAttributeChangers;
 import com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.spamfilter.SpamFilterUserAttributeChangers;
 import com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.user.UserAttribute;
@@ -163,11 +164,9 @@ import com.openexchange.java.util.Pair;
 import com.openexchange.java.util.UUIDs;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.usersetting.UserSettingMail;
-import com.openexchange.mailaccount.Attribute;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountDescription;
 import com.openexchange.mailaccount.MailAccountStorageService;
-import com.openexchange.mailaccount.UpdateProperties;
 import com.openexchange.preferences.ServerUserSetting;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.spamhandler.SpamHandler;
@@ -239,6 +238,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
         ac.put(AttributeChanger.GUI_PREFERENCE, new GuiPreferenceUserAttributeChangers());
         ac.put(AttributeChanger.USERNAME_ATTRIBUTE, new UserNameUserAttributeChangers(cache));
         ac.put(AttributeChanger.ALIAS_ATTRIBUTE, new AliasUserAttributeChangers());
+        ac.put(AttributeChanger.PRIMARY_MAIL_ACCOUT_ATTRIBUTE, new PrimaryMailAccountAttributeChangers());
         return Collections.unmodifiableMap(ac);
     }
 
@@ -635,7 +635,6 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 OXFolderAdminHelper.propagateUserModification(userId, changedfields, System.currentTimeMillis(), con, con, contextId);
             }
 
-            changePrimaryMailAccount(ctx, con, usrdata, userId);
             storeFolderTree(ctx, con, usrdata, userId);
             // update last modified column
             changeLastModified(userId, ctx, con);
@@ -808,94 +807,6 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             return -1;
         } finally {
             Databases.closeSQLStuff(rs, stmt);
-        }
-    }
-
-    private void changePrimaryMailAccount(final Context ctx, final Connection con, final User user, final int userId) throws StorageException, OXException {
-        // Loading a context is not possible if here the primary mail account for the admin is created.
-        final int contextId = ctx.getId().intValue();
-        final MailAccountStorageService mass = AdminServiceRegistry.getInstance().getService(MailAccountStorageService.class, true);
-        final MailAccountDescription account = new MailAccountDescription();
-        final Set<Attribute> changed = new HashSet<>();
-        account.setDefaultFlag(true);
-        account.setId(0);
-        if (user.isPrimaryAccountNameSet()) {
-            account.setName(Strings.isEmpty(user.getPrimaryAccountName()) ? MailFolder.DEFAULT_FOLDER_NAME : user.getPrimaryAccountName());
-            changed.add(Attribute.NAME_LITERAL);
-        } else {
-            account.setName(MailFolder.DEFAULT_FOLDER_NAME);
-        }
-        if (user.isImapServerset() || null != user.getImapServerString()) {
-            changed.add(Attribute.MAIL_URL_LITERAL);
-            String imapServer = user.getImapServerString();
-            if (null == imapServer) {
-                imapServer = DEFAULT_IMAP_SERVER_CREATE;
-            }
-            try {
-                account.setMailServer(URIParser.parse(imapServer, URIDefaults.IMAP));
-            } catch (final URISyntaxException e) {
-                LOG.error("Problem storing the primary mail account.", e);
-                throw new StorageException(e.toString());
-            }
-        }
-        if (user.isImapLoginset() || null != user.getImapLogin()) {
-            changed.add(Attribute.LOGIN_LITERAL);
-            changed.add(Attribute.TRANSPORT_LOGIN_LITERAL);
-            account.setLogin(null == user.getImapLogin() ? "" : user.getImapLogin());
-        }
-        if (null != user.getPrimaryEmail()) {
-            changed.add(Attribute.PRIMARY_ADDRESS_LITERAL);
-            account.setPrimaryAddress(user.getPrimaryEmail());
-        }
-        if (null != user.getMail_folder_drafts_name()) {
-            changed.add(Attribute.DRAFTS_LITERAL);
-            account.setDrafts(user.getMail_folder_drafts_name());
-        }
-        if (null != user.getMail_folder_sent_name()) {
-            changed.add(Attribute.SENT_LITERAL);
-            account.setSent(user.getMail_folder_sent_name());
-        }
-        if (null != user.getMail_folder_spam_name()) {
-            changed.add(Attribute.SPAM_LITERAL);
-            account.setSpam(user.getMail_folder_spam_name());
-        }
-        if (null != user.getMail_folder_trash_name()) {
-            changed.add(Attribute.TRASH_LITERAL);
-            account.setTrash(user.getMail_folder_trash_name());
-        }
-        if (null != user.getMail_folder_archive_full_name()) {
-            changed.add(Attribute.ARCHIVE_FULLNAME_LITERAL);
-            account.setArchiveFullname(user.getMail_folder_archive_full_name());
-        }
-        if (null != user.getMail_folder_confirmed_ham_name()) {
-            changed.add(Attribute.CONFIRMED_HAM_LITERAL);
-            account.setConfirmedHam(user.getMail_folder_confirmed_ham_name());
-        }
-        if (null != user.getMail_folder_confirmed_spam_name()) {
-            changed.add(Attribute.CONFIRMED_SPAM_LITERAL);
-            account.setConfirmedSpam(user.getMail_folder_confirmed_spam_name());
-        }
-        if (user.isSmtpServerset() || null != user.getSmtpServerString()) {
-            changed.add(Attribute.TRANSPORT_URL_LITERAL);
-            String smtpServer = user.getSmtpServerString();
-            if (null == smtpServer) {
-                smtpServer = DEFAULT_SMTP_SERVER_CREATE;
-            }
-            try {
-                account.setTransportServer(URIParser.parse(smtpServer, URIDefaults.SMTP));
-            } catch (final URISyntaxException e) {
-                LOG.error("Problem storing the primary mail account.", e);
-                throw new StorageException(e.toString());
-            }
-        }
-        try {
-            if (!changed.isEmpty()) {
-                UpdateProperties updateProperties = new UpdateProperties.Builder().setChangePrimary(true).setChangeProtocol(true).setCon(con).setSession(null).build();
-                mass.updateMailAccount(account, changed, userId, contextId, updateProperties);
-            }
-        } catch (final OXException e) {
-            LOG.error("Problem storing the primary mail account.", e);
-            throw new StorageException(e.toString());
         }
     }
 

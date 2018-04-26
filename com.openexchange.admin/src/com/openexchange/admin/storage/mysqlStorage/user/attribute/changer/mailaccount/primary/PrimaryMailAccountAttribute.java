@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2018-2020 OX Software GmbH
+ *     Copyright (C) 2016-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,55 +47,80 @@
  *
  */
 
-package com.openexchange.admin.storage.mysqlStorage.user.attribute.changer;
+package com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.mailaccount.primary;
 
-import java.util.EnumSet;
-import com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.alias.AliasUserAttribute;
-import com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.contact.ContactUserAttribute;
-import com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.custom.CustomUserAttribute;
-import com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.guipref.GuiPreferencesUserAttribute;
+import com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.Attribute;
 import com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.mailaccount.UserMailAccountAttribute;
-import com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.mailaccount.primary.PrimaryMailAccountAttribute;
-import com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.mailsetting.UserMailSettingAttribute;
-import com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.spamfilter.SpamFilterUserAttribute;
-import com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.user.UserAttribute;
-import com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.user.username.UserNameUserAttribute;
 
 /**
- * {@link AttributeChanger}
+ * {@link PrimaryMailAccountAttribute}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
- * @since v7.10.1
  */
-public enum AttributeChanger {
-
-    USER(EnumSet.allOf(UserAttribute.class)),
-    USER_SETTING_MAIL(EnumSet.allOf(UserMailSettingAttribute.class)),
-    USER_MAIL_ACCOUNT(EnumSet.allOf(UserMailAccountAttribute.class)),
-    CUSTOM_USER_ATTRIBUTE(EnumSet.allOf(CustomUserAttribute.class)),
-    CONTACT_USER_ATTRIBUTE(EnumSet.allOf(ContactUserAttribute.class)),
-    SPAM_FILTER(EnumSet.allOf(SpamFilterUserAttribute.class)),
-    GUI_PREFERENCE(EnumSet.allOf(GuiPreferencesUserAttribute.class)),
-    USERNAME_ATTRIBUTE(EnumSet.allOf(UserNameUserAttribute.class)),
-    ALIAS_ATTRIBUTE(EnumSet.allOf(AliasUserAttribute.class)),
-    PRIMARY_MAIL_ACCOUT_ATTRIBUTE(EnumSet.allOf(PrimaryMailAccountAttribute.class)),
+public enum PrimaryMailAccountAttribute implements Attribute {
+    ACCOUNT_NAME("account-name", "name", String.class),
+    DRAFTS("standard-drafts-folder-name", "drafts", String.class),
+    SENT("standard-sent-folder-name", "sent", String.class),
+    SPAM("standard-spam-folder-name", "spam", String.class),
+    TRASH("standard-trash-folder-name", "trash", String.class),
+    ARCHIVE_FULLNAME("standard-archive-folder-fullname", "archive_fullname", String.class),
+    CONFIRMED_HAM("standard-confirmed-ham-folder-name", "confirmed_ham", String.class),
+    CONFIRMED_SPAM("standard-confirmed-spam-folder-name", "confirmed_spam", String.class),
     ;
 
-    private final EnumSet<? extends Attribute> attributes;
+    private final String sqlFieldName;
+    private final Class<?> originalType;
+    private static final String TABLE = "user_mail_account";
+    private final String attributeName;
 
     /**
-     * Initialises a new {@link AttributeChanger}.
+     * 
+     * Initialises a new {@link UserMailAccountAttribute}.
+     * 
+     * @param sqlFieldName the names of the attribute
      */
-    private AttributeChanger(EnumSet<? extends Attribute> attributes) {
-        this.attributes = attributes;
+    private PrimaryMailAccountAttribute(String attributeName, String sqlFieldName, Class<?> originalType) {
+        this.attributeName = attributeName;
+        this.sqlFieldName = sqlFieldName;
+        this.originalType = originalType;
     }
 
-    /**
-     * Gets the attributes
-     *
-     * @return The attributes
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.admin.storage.mysqlStorage.user.attribute.Attribute#getSQLFieldName()
      */
-    public EnumSet<? extends Attribute> getAttributes() {
-        return attributes;
+    @Override
+    public String getSQLFieldName() {
+        return sqlFieldName;
     }
-}
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.admin.storage.mysqlStorage.user.attribute.Attribute#getOriginalType()
+     */
+    @Override
+    public Class<?> getOriginalType() {
+        return originalType;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.admin.storage.mysqlStorage.user.attribute.Attribute#getSQLTableName()
+     */
+    @Override
+    public String getSQLTableName() {
+        return TABLE;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.Attribute#getName()
+     */
+    @Override
+    public String getName() {
+        return attributeName;
+    }}
