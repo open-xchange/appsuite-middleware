@@ -721,7 +721,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             CacheKey key = cacheService.newCacheKey(contextId, userId);
             Cache cache = cacheService.getCache("User");
             cache.remove(key);
-            if (null != quotaAffectedUserIDs) {
+            if (null != quotaAffectedUserIDs || false == quotaAffectedUserIDs.isEmpty()) {
                 List<Serializable> keys = new ArrayList<>(quotaAffectedUserIDs.size());
                 for (Integer userID : quotaAffectedUserIDs) {
                     keys.add(cacheService.newCacheKey(contextId, userID.intValue()));
