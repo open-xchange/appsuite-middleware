@@ -65,7 +65,6 @@ public interface AttributeChangers {
     /**
      * Changes the specified {@link UserMailSettingAttribute}
      * 
-     * @param attributes A {@link Set} with {@link Attribute}s to change
      * @param userData The {@link User} data
      * @param userId the user identifier
      * @param contextId The context identifier
