@@ -695,17 +695,26 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
     /**
      * Updates the JCS caches for:
      * <ul>
-     * <li>TBD</li> TODO
+     * <li>Aliases</li>
+     * <li>User</li>
+     * <li>UserPermissionBits</li>
+     * <li>UserConfiguration</li>
+     * <li>UserSettingMail</li>
+     * <li>Capabilities</li>
+     * <li>MailAccount</li>
+     * <li>QuotaFileStorages</li>
+     * <li>OXFolderCache</li>
+     * <li>GlobalFolderCache</li>
      * </ul>
      * 
-     * @param ctx
-     * @param usrdata
-     * @param contextId
-     * @param userId
-     * @param con
-     * @param quotaAffectedUserIDs
-     * @param displayNameUpdate
-     * @throws OXException
+     * @param ctx The {@link Context}
+     * @param usrdata The {@link User} data
+     * @param contextId The context identifier
+     * @param userId The user identifier
+     * @param con the {@link Connection}
+     * @param quotaAffectedUserIDs The optional affected user ids after a quota change
+     * @param displayNameUpdate whether the display name was updated
+     * @throws OXException if an error is occurred
      */
     private void updateJCSCaches(final Context ctx, final User usrdata, int contextId, int userId, Connection con, Set<Integer> quotaAffectedUserIDs, boolean displayNameUpdate) throws OXException {
         // Invalidate alias cache
@@ -721,7 +730,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             CacheKey key = cacheService.newCacheKey(contextId, userId);
             Cache cache = cacheService.getCache("User");
             cache.remove(key);
-            if (null != quotaAffectedUserIDs || false == quotaAffectedUserIDs.isEmpty()) {
+            if (null != quotaAffectedUserIDs && false == quotaAffectedUserIDs.isEmpty()) {
                 List<Serializable> keys = new ArrayList<>(quotaAffectedUserIDs.size());
                 for (Integer userID : quotaAffectedUserIDs) {
                     keys.add(cacheService.newCacheKey(contextId, userID.intValue()));
