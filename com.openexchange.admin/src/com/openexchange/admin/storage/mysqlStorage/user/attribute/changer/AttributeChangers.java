@@ -63,19 +63,6 @@ import com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.mailse
 public interface AttributeChangers {
 
     /**
-     * Changes the specified {@link Attribute}
-     * 
-     * @param attribute The {@link Attribute} to change
-     * @param userData The {@link User} data
-     * @param userId the user identifier
-     * @param contextId The context identifier
-     * @param connection The {@link Connection} to use
-     * @return <code>true</code> if the attribute was changed successfully; <code>false</code> otherwise
-     * @throws StorageException if an SQL error or any other error is occurred
-     */
-    boolean change(Attribute attribute, User userData, int userId, int contextId, Connection connection) throws StorageException;
-
-    /**
      * Changes the specified {@link UserMailSettingAttribute}
      * 
      * @param attributes A {@link Set} with {@link Attribute}s to change

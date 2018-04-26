@@ -53,7 +53,6 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.Collections;
-import java.util.EnumSet;
 import java.util.Set;
 import com.openexchange.admin.properties.AdminProperties;
 import com.openexchange.admin.rmi.dataobjects.User;
@@ -61,7 +60,6 @@ import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.storage.interfaces.OXToolStorageInterface;
 import com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.AbstractAttributeChangers;
-import com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.EmptyAttribute;
 import com.openexchange.admin.tools.AdminCache;
 
 /**

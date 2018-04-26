@@ -94,26 +94,6 @@ public abstract class AbstractUserAttributeChangers extends AbstractAttributeCha
     /*
      * (non-Javadoc)
      * 
-     * @see com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.AttributeChangers#change(com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.Attribute, com.openexchange.admin.rmi.dataobjects.User, int, int,
-     * java.sql.Connection)
-     */
-    @Override
-    public boolean change(Attribute attribute, User userData, int userId, int contextId, Connection connection) throws StorageException {
-        UserAttributeChanger changer = changers.get(attribute);
-        if (changer == null) {
-            LOG.debug("No user attribute changer found for user attribute '{}' in table '{}'. The attribute will not be changed.", attribute.getSQLFieldName(), table);
-            return false;
-        }
-        try {
-            return changer.changeAttribute(userId, contextId, userData, connection);
-        } catch (SQLException e) {
-            throw new StorageException(e);
-        }
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
      * @see com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.AttributeChangers#change(java.util.Set, com.openexchange.admin.rmi.dataobjects.User, int, int, java.sql.Connection)
      */
     @Override
@@ -125,5 +105,29 @@ public abstract class AbstractUserAttributeChangers extends AbstractAttributeCha
             }
         }
         return Collections.unmodifiableSet(changedAttributes);
+    }
+
+    /**
+     * Changes the specified {@link Attribute}
+     * 
+     * @param attribute The {@link Attribute} to change
+     * @param userData The {@link User} data
+     * @param userId the user identifier
+     * @param contextId The context identifier
+     * @param connection The {@link Connection} to use
+     * @return <code>true</code> if the attribute was changed successfully; <code>false</code> otherwise
+     * @throws StorageException if an SQL error or any other error is occurred
+     */
+    private boolean change(Attribute attribute, User userData, int userId, int contextId, Connection connection) throws StorageException {
+        UserAttributeChanger changer = changers.get(attribute);
+        if (changer == null) {
+            LOG.debug("No user attribute changer found for user attribute '{}' in table '{}'. The attribute will not be changed.", attribute.getSQLFieldName(), table);
+            return false;
+        }
+        try {
+            return changer.changeAttribute(userId, contextId, userData, connection);
+        } catch (SQLException e) {
+            throw new StorageException(e);
+        }
     }
 }
