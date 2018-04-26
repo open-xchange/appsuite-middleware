@@ -50,6 +50,7 @@
 package com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.guipref;
 
 import java.sql.Connection;
+import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
@@ -60,7 +61,7 @@ import org.slf4j.LoggerFactory;
 import com.openexchange.admin.rmi.dataobjects.User;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.AbstractAttributeChangers;
-import com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.Attribute;
+import com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.EmptyAttribute;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.settings.Setting;
 import com.openexchange.groupware.settings.impl.ConfigTree;
@@ -80,7 +81,7 @@ public class GuiPreferenceUserAttributeChangers extends AbstractAttributeChanger
      * Initialises a new {@link GuiPreferenceUserAttributeChangers}.
      */
     public GuiPreferenceUserAttributeChangers() {
-        super();
+        super(EnumSet.noneOf(EmptyAttribute.class));
     }
 
     /*
@@ -89,7 +90,7 @@ public class GuiPreferenceUserAttributeChangers extends AbstractAttributeChanger
      * @see com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.AttributeChangers#change(java.util.Set, com.openexchange.admin.rmi.dataobjects.User, int, int, java.sql.Connection)
      */
     @Override
-    public Set<String> change(Set<Attribute> attributes, User userData, int userId, int contextId, Connection connection) throws StorageException {
+    public Set<String> change(User userData, int userId, int contextId, Connection connection) throws StorageException {
         SettingStorage settStor = SettingStorage.getInstance(contextId, userId);
         Map<String, String> guiPreferences = userData.getGuiPreferences();
         if (guiPreferences == null) {

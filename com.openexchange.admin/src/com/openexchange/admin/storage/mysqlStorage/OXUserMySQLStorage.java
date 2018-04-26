@@ -110,7 +110,6 @@ import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.services.AdminServiceRegistry;
 import com.openexchange.admin.storage.interfaces.OXToolStorageInterface;
 import com.openexchange.admin.storage.interfaces.OXUtilStorageInterface;
-import com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.AttributeChanger;
 import com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.AttributeChangers;
 import com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.alias.AliasUserAttributeChangers;
 import com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.contact.ContactUserAttributeChangers;
@@ -210,7 +209,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
 
     private final AdminCache cache;
     private final PropertyHandler prop;
-    private final Map<AttributeChanger, AttributeChangers> attributeChangers;
+    private final List<AttributeChangers> attributeChangers;
 
     /**
      * Initializes a new {@link OXUserMySQLStorage}.
@@ -225,21 +224,21 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
     /**
      * Initialises the {@link AttributeChangers}
      * 
-     * @return An unmodifiable {@link Map} with the initialised {@link AttributeChangers}
+     * @return An unmodifiable {@link List} with the initialised {@link AttributeChangers}
      */
-    private Map<AttributeChanger, AttributeChangers> initialiseAttributeChangers() {
-        Map<AttributeChanger, AttributeChangers> ac = new HashMap<>();
-        ac.put(AttributeChanger.USER, new UserAttributeChangers(cache));
-        ac.put(AttributeChanger.USER_SETTING_MAIL, new UserSettingMailAttributeChangers());
-        ac.put(AttributeChanger.USER_MAIL_ACCOUNT, new UserMailAccountAttributeChangers());
-        ac.put(AttributeChanger.CUSTOM_USER_ATTRIBUTE, new CustomUserAttributeChangers());
-        ac.put(AttributeChanger.CONTACT_USER_ATTRIBUTE, new ContactUserAttributeChangers());
-        ac.put(AttributeChanger.SPAM_FILTER, new SpamFilterUserAttributeChangers());
-        ac.put(AttributeChanger.GUI_PREFERENCE, new GuiPreferenceUserAttributeChangers());
-        ac.put(AttributeChanger.USERNAME_ATTRIBUTE, new UserNameUserAttributeChangers(cache));
-        ac.put(AttributeChanger.ALIAS_ATTRIBUTE, new AliasUserAttributeChangers());
-        ac.put(AttributeChanger.PRIMARY_MAIL_ACCOUT_ATTRIBUTE, new PrimaryMailAccountAttributeChangers());
-        return Collections.unmodifiableMap(ac);
+    private List<AttributeChangers> initialiseAttributeChangers() {
+        List<AttributeChangers> ac = new ArrayList<>(12);
+        ac.add(new UserAttributeChangers(cache));
+        ac.add(new UserSettingMailAttributeChangers());
+        ac.add(new UserMailAccountAttributeChangers());
+        ac.add(new CustomUserAttributeChangers());
+        ac.add(new ContactUserAttributeChangers());
+        ac.add(new SpamFilterUserAttributeChangers());
+        ac.add(new GuiPreferenceUserAttributeChangers());
+        ac.add(new UserNameUserAttributeChangers(cache));
+        ac.add(new AliasUserAttributeChangers());
+        ac.add(new PrimaryMailAccountAttributeChangers());
+        return Collections.unmodifiableList(ac);
     }
 
     @Override
@@ -610,13 +609,8 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
 
             // Change attributes
             Set<String> changedAttributes = new HashSet<>();
-            for (AttributeChanger attributeChanger : AttributeChanger.values()) {
-                AttributeChangers acs = attributeChangers.get(attributeChanger);
-                if (acs == null) {
-                    LOG.debug("No attribute changers found for '{}'", attributeChanger.name());
-                    continue;
-                }
-                changedAttributes.addAll(acs.change(new HashSet<>(attributeChanger.getAttributes()), usrdata, userId, contextId, con));
+            for (AttributeChangers attributeChangers : attributeChangers) {
+                changedAttributes.addAll(attributeChangers.change(usrdata, userId, contextId, con));
             }
 
             // Hint for the cache when updating display name

@@ -67,7 +67,6 @@ import com.openexchange.admin.rmi.dataobjects.User;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.services.AdminServiceRegistry;
 import com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.AbstractAttributeChangers;
-import com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.Attribute;
 import com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.MethodMetadata;
 import com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.ReturnType;
 import com.openexchange.exception.OXException;
@@ -168,7 +167,7 @@ public class PrimaryMailAccountAttributeChangers extends AbstractAttributeChange
      * @see com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.AttributeChangers#change(java.util.Set, com.openexchange.admin.rmi.dataobjects.User, int, int, java.sql.Connection)
      */
     @Override
-    public Set<String> change(Set<Attribute> attributes, User userData, int userId, int contextId, Connection connection) throws StorageException {
+    public Set<String> change(User userData, int userId, int contextId, Connection connection) throws StorageException {
         MailAccountDescription account = new MailAccountDescription();
         Set<com.openexchange.mailaccount.Attribute> changed = new HashSet<>();
         account.setDefaultFlag(true);

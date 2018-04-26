@@ -57,7 +57,6 @@ import com.openexchange.admin.rmi.dataobjects.User;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.storage.interfaces.OXToolStorageInterface;
 import com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.AbstractAttributeChangers;
-import com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.Attribute;
 import com.openexchange.mail.usersetting.UserSettingMail;
 
 /**
@@ -81,7 +80,7 @@ public class SpamFilterUserAttributeChangers extends AbstractAttributeChangers {
      * @see com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.AttributeChangers#change(java.util.Set, com.openexchange.admin.rmi.dataobjects.User, int, int, java.sql.Connection)
      */
     @Override
-    public Set<String> change(Set<Attribute> attributes, User userData, int userId, int contextId, Connection connection) throws StorageException {
+    public Set<String> change(User userData, int userId, int contextId, Connection connection) throws StorageException {
         Boolean spam_filter_enabled = userData.getGui_spam_filter_enabled();
         if (null == spam_filter_enabled) {
             return EMPTY_SET;

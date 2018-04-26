@@ -86,5 +86,5 @@ public interface AttributeChangers {
      * @return An unmodifiable {@link Set} with all successfully changed attributes
      * @throws StorageException if an SQL error or any other error is occurred
      */
-    Set<String> change(Set<Attribute> attributes, User userData, int userId, int contextId, Connection connection) throws StorageException;
+    Set<String> change(User userData, int userId, int contextId, Connection connection) throws StorageException;
 }

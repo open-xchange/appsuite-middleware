@@ -52,6 +52,7 @@ package com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.maila
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Collections;
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Map;
 import com.openexchange.admin.rmi.dataobjects.User;
@@ -73,7 +74,7 @@ public class UserMailAccountAttributeChangers extends AbstractUserAttributeChang
      * Initialises a new {@link UserMailAccountAttributeChangers}.
      */
     public UserMailAccountAttributeChangers() {
-        super(TABLE);
+        super(TABLE, EnumSet.allOf(UserMailAccountAttribute.class));
     }
 
     /*

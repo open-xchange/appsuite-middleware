@@ -56,6 +56,7 @@ import java.security.NoSuchAlgorithmException;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Collections;
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Map;
 import com.openexchange.admin.rmi.dataobjects.User;
@@ -83,7 +84,7 @@ public class UserAttributeChangers extends AbstractUserAttributeChangers {
      * Initialises a new {@link UserAttributeChangers}.
      */
     public UserAttributeChangers(AdminCache adminCache) {
-        super(TABLE);
+        super(TABLE, EnumSet.allOf(UserAttribute.class));
         this.adminCache = adminCache;
     }
 

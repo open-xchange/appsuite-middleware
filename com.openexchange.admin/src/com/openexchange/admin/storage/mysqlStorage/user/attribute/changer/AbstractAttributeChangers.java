@@ -51,6 +51,7 @@ package com.openexchange.admin.storage.mysqlStorage.user.attribute.changer;
 
 import java.sql.Connection;
 import java.util.Collections;
+import java.util.EnumSet;
 import java.util.Set;
 import com.openexchange.admin.rmi.dataobjects.User;
 import com.openexchange.admin.rmi.exceptions.StorageException;
@@ -64,12 +65,21 @@ import com.openexchange.admin.rmi.exceptions.StorageException;
 public abstract class AbstractAttributeChangers implements AttributeChangers {
 
     protected static final Set<String> EMPTY_SET = Collections.emptySet();
+    private final EnumSet<? extends Attribute> attributes;
 
     /**
      * Initialises a new {@link AbstractAttributeChangers}.
      */
     public AbstractAttributeChangers() {
+        this(EnumSet.noneOf(EmptyAttribute.class));
+    }
+
+    /**
+     * Initialises a new {@link AbstractAttributeChangers}.
+     */
+    public AbstractAttributeChangers(EnumSet<? extends Attribute> attributes) {
         super();
+        this.attributes = attributes;
     }
 
     /*
@@ -80,6 +90,15 @@ public abstract class AbstractAttributeChangers implements AttributeChangers {
      */
     @Override
     public boolean change(Attribute attribute, User userData, int userId, int contextId, Connection connection) throws StorageException {
-        return !change(Collections.singleton(attribute), userData, userId, contextId, connection).isEmpty();
+        return !change(userData, userId, contextId, connection).isEmpty();
+    }
+
+    /**
+     * Gets the attributes
+     *
+     * @return The attributes
+     */
+    public EnumSet<? extends Attribute> getAttributes() {
+        return attributes;
     }
 }

@@ -99,5 +99,4 @@ public enum EmptyAttribute implements Attribute {
     public String getName() {
         return EMPTY;
     }
-
 }

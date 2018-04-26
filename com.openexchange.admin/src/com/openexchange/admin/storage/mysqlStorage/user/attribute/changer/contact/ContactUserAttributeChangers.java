@@ -57,6 +57,7 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -67,7 +68,7 @@ import org.slf4j.LoggerFactory;
 import com.openexchange.admin.rmi.dataobjects.User;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.AbstractAttributeChangers;
-import com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.Attribute;
+import com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.EmptyAttribute;
 import com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.MethodMetadata;
 import com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.ReturnType;
 import com.openexchange.admin.storage.sqlStorage.OXUserSQLStorage.Mapper;
@@ -176,7 +177,7 @@ public class ContactUserAttributeChangers extends AbstractAttributeChangers {
      * @see com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.AttributeChangers#change(java.util.Set, com.openexchange.admin.rmi.dataobjects.User, int, int, java.sql.Connection)
      */
     @Override
-    public Set<String> change(Set<Attribute> attributes, User userData, int userId, int contextId, Connection connection) throws StorageException {
+    public Set<String> change(User userData, int userId, int contextId, Connection connection) throws StorageException {
         StringBuilder query = new StringBuilder("UPDATE prg_contacts SET ");
 
         // First we have to check which return value we have. We have to distinguish the return types

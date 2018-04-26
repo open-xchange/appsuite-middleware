@@ -59,8 +59,7 @@ import java.util.Set;
 import java.util.UUID;
 import com.openexchange.admin.rmi.dataobjects.User;
 import com.openexchange.admin.rmi.exceptions.StorageException;
-import com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.Attribute;
-import com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.AttributeChangers;
+import com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.AbstractAttributeChangers;
 import com.openexchange.database.Databases;
 import com.openexchange.java.util.UUIDs;
 
@@ -69,7 +68,7 @@ import com.openexchange.java.util.UUIDs;
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class CustomUserAttributeChangers implements AttributeChangers {
+public class CustomUserAttributeChangers extends AbstractAttributeChangers {
 
     private static final String INSERT_STATEMENT = "INSERT INTO user_attribute (cid, id, name, value, uuid) VALUES (?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE value=?";
     private static final String DELETE_STATEMENT = "DELETE FROM user_attribute WHERE cid=? AND id=? AND name=?";
@@ -84,21 +83,10 @@ public class CustomUserAttributeChangers implements AttributeChangers {
     /*
      * (non-Javadoc)
      * 
-     * @see com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.AttributeChangers#change(com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.Attribute, com.openexchange.admin.rmi.dataobjects.User, int, int,
-     * java.sql.Connection)
-     */
-    @Override
-    public boolean change(Attribute attribute, User userData, int userId, int contextId, Connection connection) throws StorageException {
-        return !change(Collections.singleton(attribute), userData, userId, contextId, connection).isEmpty();
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
      * @see com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.AttributeChangers#change(java.util.Set, com.openexchange.admin.rmi.dataobjects.User, int, int, java.sql.Connection)
      */
     @Override
-    public Set<String> change(Set<Attribute> attributes, User userData, int userId, int contextId, Connection connection) throws StorageException {
+    public Set<String> change(User userData, int userId, int contextId, Connection connection) throws StorageException {
         if (!userData.isUserAttributesset()) {
             return Collections.emptySet();
         }

@@ -52,6 +52,7 @@ package com.openexchange.admin.storage.mysqlStorage.user.attribute.changer;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Collections;
+import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -77,8 +78,8 @@ public abstract class AbstractUserAttributeChangers extends AbstractAttributeCha
     /**
      * Initialises a new {@link AbstractUserAttributeChangers}.
      */
-    public AbstractUserAttributeChangers(String table) {
-        super();
+    public AbstractUserAttributeChangers(String table, EnumSet<? extends Attribute> attributes) {
+        super(attributes);
         this.table = table;
         changers = initialiseChangers();
     }
@@ -116,9 +117,9 @@ public abstract class AbstractUserAttributeChangers extends AbstractAttributeCha
      * @see com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.AttributeChangers#change(java.util.Set, com.openexchange.admin.rmi.dataobjects.User, int, int, java.sql.Connection)
      */
     @Override
-    public Set<String> change(Set<Attribute> attributes, User userData, int userId, int contextId, Connection connection) throws StorageException {
+    public Set<String> change(User userData, int userId, int contextId, Connection connection) throws StorageException {
         Set<String> changedAttributes = new HashSet<>();
-        for (Attribute attribute : attributes) {
+        for (Attribute attribute : getAttributes()) {
             if (change(attribute, userData, userId, contextId, connection)) {
                 changedAttributes.add(attribute.getName());
             }
