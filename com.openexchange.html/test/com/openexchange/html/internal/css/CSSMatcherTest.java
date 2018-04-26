@@ -371,16 +371,22 @@ public class CSSMatcherTest {
     public void testDoCheckCss_bug57095() {
     		FilterJerichoHandler.loadWhitelist();
 
-        Stringer cssBld = new StringBufferStringer(new StringBuffer("font:\"'/{/onerror=alert(document.cookie)//"));
-        CSSMatcher.checkCSS(cssBld, FilterJerichoHandler.getStaticStyleMap(), true, true);
+        Stringer cssBld = new StringBufferStringer(new StringBuffer("font:\"'/{/onerror=alert(document.cookie)"));
+        CSSMatcher.checkCSS(cssBld, FilterJerichoHandler.getStaticStyleMap(), true);
         String content = "";
         String convertedCss = cssBld.toString().trim();
+        Assert.assertEquals("Processed CSS does not match.", content, convertedCss);
+
+        cssBld = new StringBufferStringer(new StringBuffer("font:\"'href=javascript:alert(document.cookie)"));
+        CSSMatcher.checkCSS(cssBld, FilterJerichoHandler.getStaticStyleMap(), true);
+        content = "";
+        convertedCss = cssBld.toString().trim();
         Assert.assertEquals("Processed CSS does not match.", content, convertedCss);
     }
     
     @Test
     public void testDoCheckCss_bug58256() {
-    	FilterJerichoHandler.loadWhitelist();
+        FilterJerichoHandler.loadWhitelist();
 
         Stringer cssBld = new StringBufferStringer(new StringBuffer("font:\"'onerror='{font:alert(document.cookie)}"));
         CSSMatcher.checkCSSElements(cssBld, FilterJerichoHandler.getStaticStyleMap(), true);
