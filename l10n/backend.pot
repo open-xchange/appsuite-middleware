@@ -1073,6 +1073,12 @@ msgstr ""
 msgid "Authentication failed. Please enter your password and try again."
 msgstr ""
 
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.provider.ical/src/com/openexchange/chronos/provider/ical/exception/ICalProviderExceptionMessages.java:93
+msgid ""
+"Authentication failed due to a recent credentials change. Please remove the "
+"account and add it again with correct credentials."
+msgstr ""
+
 #. *
 #. * The name of the internal calendar provider.
 #.

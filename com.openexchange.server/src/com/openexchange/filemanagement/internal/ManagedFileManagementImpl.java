@@ -625,6 +625,7 @@ public final class ManagedFileManagementImpl implements ManagedFileManagement {
 
     @Override
     public void removeByID(final String id) {
+        LOG.debug("Remove managed file by id {}", id);
         final ManagedFile mf = files.get(id);
         if (null == mf) {
             removeByIDDistributed(id);

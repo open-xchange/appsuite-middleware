@@ -381,13 +381,13 @@ public class CSSMatcherTest {
         FilterMaps.loadWhitelist();
 
         Stringer cssBld = new StringBufferStringer(new StringBuffer("font:\"'/{/onerror=alert(document.cookie)"));
-        CSSMatcher.checkCSSElements(cssBld, FilterMaps.getStaticStyleMap(), true);
+        CSSMatcher.checkCSS(cssBld, FilterMaps.getStaticStyleMap(), true);
         String content = "";
         String convertedCss = cssBld.toString().trim();
         Assert.assertEquals("Processed CSS does not match.", content, convertedCss);
 
         cssBld = new StringBufferStringer(new StringBuffer("font:\"'href=javascript:alert(document.cookie)"));
-        CSSMatcher.checkCSSElements(cssBld, FilterMaps.getStaticStyleMap(), true);
+        CSSMatcher.checkCSS(cssBld, FilterMaps.getStaticStyleMap(), true);
         content = "";
         convertedCss = cssBld.toString().trim();
         Assert.assertEquals("Processed CSS does not match.", content, convertedCss);
@@ -398,13 +398,13 @@ public class CSSMatcherTest {
         FilterMaps.loadWhitelist();
 
         Stringer cssBld = new StringBufferStringer(new StringBuffer("font:\"'onerror='{font:alert(document.cookie)}"));
-        CSSMatcher.checkCSSElements(cssBld, FilterMaps.getStaticStyleMap(), true);
+        CSSMatcher.checkCSS(cssBld, FilterMaps.getStaticStyleMap(), true);
         String content = "";
         String convertedCss = cssBld.toString().trim();
         Assert.assertEquals("Processed CSS does not match.", content, convertedCss);
 
         cssBld = new StringBufferStringer(new StringBuffer("font:\"'onerror=alert(document.cookie),{"));
-        CSSMatcher.checkCSSElements(cssBld, FilterMaps.getStaticStyleMap(), true);
+        CSSMatcher.checkCSS(cssBld, FilterMaps.getStaticStyleMap(), true);
         content = "";
         convertedCss = cssBld.toString().trim();
         Assert.assertEquals("Processed CSS does not match.", content, convertedCss);

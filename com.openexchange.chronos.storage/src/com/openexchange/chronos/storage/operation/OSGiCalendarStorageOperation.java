@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the Open-Xchange, Inc. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2020 Open-Xchange, Inc.
+ *     Copyright (C) 2016-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -87,7 +87,7 @@ public abstract class OSGiCalendarStorageOperation<T> extends CalendarStorageOpe
      * @param contextId The context identifier
      * @param accountId The account identifier
      */
-    protected OSGiCalendarStorageOperation(ServiceLookup services, int contextId, int accountId) throws OXException {
+    protected OSGiCalendarStorageOperation(ServiceLookup services, int contextId, int accountId) {
         this(services, contextId, accountId, null);
     }
 
@@ -105,7 +105,7 @@ public abstract class OSGiCalendarStorageOperation<T> extends CalendarStorageOpe
      * @param accountId The account identifier
      * @param parameters Optional additional calendar parameters
      */
-    protected OSGiCalendarStorageOperation(ServiceLookup services, int contextId, int accountId, CalendarParameters parameters) throws OXException {
+    protected OSGiCalendarStorageOperation(ServiceLookup services, int contextId, int accountId, CalendarParameters parameters) {
         super(services.getService(DatabaseService.class), contextId, DEFAULT_RETRIES, optConnection(parameters));
         this.parameters = parameters;
         this.services = services;
