@@ -121,19 +121,10 @@ public class PrimaryMailAccountAttributeChangers extends AbstractAttributeChange
             }
         });
         s.put(UserMailAccountMapper.IMAP_SERVER, (account, user, setAttributes) -> {
-            if (user.isImapServerset() || null != user.getImapServerString()) {
-                setAttributes(setAttributes, UserMailAccountMapper.IMAP_SERVER);
-                String imapServer = user.getImapServerString();
-                if (null == imapServer) {
-                    imapServer = DEFAULT_IMAP_SERVER_CREATE;
-                }
-                try {
-                    account.setMailServer(URIParser.parse(imapServer, URIDefaults.IMAP));
-                } catch (final URISyntaxException e) {
-                    LOG.error("Problem storing the primary mail account.", e);
-                    throw new StorageException(e);
-                }
-            }
+            setServer(account, user, UserMailAccountMapper.IMAP_SERVER, DEFAULT_IMAP_SERVER_CREATE, URIDefaults.IMAP, setAttributes);
+        });
+        s.put(UserMailAccountMapper.SMTP_SERVER, (account, user, setAttributes) -> {
+            setServer(account, user, UserMailAccountMapper.SMTP_SERVER, DEFAULT_SMTP_SERVER_CREATE, URIDefaults.SMTP, setAttributes);
         });
         s.put(UserMailAccountMapper.IMAP_LOGIN, (account, user, setAttributes) -> {
             if (user.isImapLoginset() || null != user.getImapLogin()) {
@@ -141,44 +132,29 @@ public class PrimaryMailAccountAttributeChangers extends AbstractAttributeChange
                 setAttributes(setAttributes, UserMailAccountMapper.IMAP_LOGIN);
             }
         });
-        s.put(UserMailAccountMapper.SMTP_SERVER, (account, user, setAttributes) -> {
-            if (user.isSmtpServerset() || null != user.getSmtpServerString()) {
-                setAttributes(setAttributes, UserMailAccountMapper.SMTP_SERVER);
-                String smtpServer = user.getSmtpServerString();
-                if (null == smtpServer) {
-                    smtpServer = DEFAULT_SMTP_SERVER_CREATE;
-                }
-                try {
-                    account.setTransportServer(URIParser.parse(smtpServer, URIDefaults.SMTP));
-                } catch (final URISyntaxException e) {
-                    LOG.error("Problem storing the primary mail account.", e);
-                    throw new StorageException(e);
-                }
-            }
-        });
         s.put(UserMailAccountMapper.PRIMARY_EMAIL, (account, user, setAttributes) -> {
-            singleSet(user, account, UserMailAccountMapper.PRIMARY_EMAIL, setAttributes);
+            setSingle(user, account, UserMailAccountMapper.PRIMARY_EMAIL, setAttributes);
         });
         s.put(UserMailAccountMapper.DRAFTS, (account, user, setAttributes) -> {
-            singleSet(user, account, UserMailAccountMapper.DRAFTS, setAttributes);
+            setSingle(user, account, UserMailAccountMapper.DRAFTS, setAttributes);
         });
         s.put(UserMailAccountMapper.SENT, (account, user, setAttributes) -> {
-            singleSet(user, account, UserMailAccountMapper.SENT, setAttributes);
+            setSingle(user, account, UserMailAccountMapper.SENT, setAttributes);
         });
         s.put(UserMailAccountMapper.SPAM, (account, user, setAttributes) -> {
-            singleSet(user, account, UserMailAccountMapper.SPAM, setAttributes);
+            setSingle(user, account, UserMailAccountMapper.SPAM, setAttributes);
         });
         s.put(UserMailAccountMapper.TRASH, (account, user, setAttributes) -> {
-            singleSet(user, account, UserMailAccountMapper.TRASH, setAttributes);
+            setSingle(user, account, UserMailAccountMapper.TRASH, setAttributes);
         });
         s.put(UserMailAccountMapper.ARCHIVE, (account, user, setAttributes) -> {
-            singleSet(user, account, UserMailAccountMapper.ARCHIVE, setAttributes);
+            setSingle(user, account, UserMailAccountMapper.ARCHIVE, setAttributes);
         });
         s.put(UserMailAccountMapper.CONFIRMED_HAM, (account, user, setAttributes) -> {
-            singleSet(user, account, UserMailAccountMapper.CONFIRMED_HAM, setAttributes);
+            setSingle(user, account, UserMailAccountMapper.CONFIRMED_HAM, setAttributes);
         });
         s.put(UserMailAccountMapper.CONFIRMED_SPAM, (account, user, setAttributes) -> {
-            singleSet(user, account, UserMailAccountMapper.CONFIRMED_SPAM, setAttributes);
+            setSingle(user, account, UserMailAccountMapper.CONFIRMED_SPAM, setAttributes);
         });
 
         setters = Collections.unmodifiableMap(s);
@@ -222,6 +198,9 @@ public class PrimaryMailAccountAttributeChangers extends AbstractAttributeChange
         }
     }
 
+    /**
+     * {@link UserMailAccountMapper}
+     */
     private enum UserMailAccountMapper {
         PRIMARY_ACCOUNT_NAME("PrimaryAccountName", "Name", com.openexchange.mailaccount.Attribute.NAME_LITERAL),
         IMAP_SERVER("ImapServerString", "MailServer", com.openexchange.mailaccount.Attribute.MAIL_URL_LITERAL),
@@ -302,7 +281,15 @@ public class PrimaryMailAccountAttributeChangers extends AbstractAttributeChange
         return attributes;
     }
 
-    private void singleSet(User user, MailAccountDescription account, UserMailAccountMapper mapper, Set<com.openexchange.mailaccount.Attribute> setAttributes) throws StorageException {
+    /**
+     * 
+     * @param user
+     * @param account
+     * @param mapper
+     * @param setAttributes
+     * @throws StorageException
+     */
+    private void setSingle(User user, MailAccountDescription account, UserMailAccountMapper mapper, Set<com.openexchange.mailaccount.Attribute> setAttributes) throws StorageException {
         try {
             Method getter = User.class.getMethod("get" + mapper.getUserValueGetter());
             Method setter = MailAccountDescription.class.getMethod("set" + mapper.getMailAccountSetter(), String.class);
@@ -318,6 +305,48 @@ public class PrimaryMailAccountAttributeChangers extends AbstractAttributeChange
         }
     }
 
+    /**
+     * 
+     * @param account
+     * @param user
+     * @param mapper
+     * @param defaultValue
+     * @param uriDefault
+     * @param setAttributes
+     * @throws StorageException
+     */
+    private void setServer(MailAccountDescription account, User user, UserMailAccountMapper mapper, String defaultValue, URIDefaults uriDefault, Set<com.openexchange.mailaccount.Attribute> setAttributes) throws StorageException {
+        try {
+            Method getter = User.class.getMethod("get" + mapper.getUserValueGetter());
+            Object value = getter.invoke(user, (Object[]) null);
+            int index = mapper.getUserValueGetter().indexOf("String");
+            String getterName = mapper.getUserValueGetter();
+            if (index > 0) {
+                getterName = getterName.substring(0, index);
+            }
+            String methodName = "is" + getterName + "set";
+            Method retVal = User.class.getMethod(methodName);
+            boolean isSet = ((Boolean) retVal.invoke(user, (Object[]) null)).booleanValue();
+            if (isSet || null != value) {
+                String server = (String) value;
+                if (null == server) {
+                    server = defaultValue;
+                }
+                Method setter = MailAccountDescription.class.getMethod("set" + mapper.getMailAccountSetter(), String.class);
+                setter.invoke(account, URIParser.parse(server, uriDefault));
+                setAttributes(setAttributes, mapper);
+            }
+        } catch (final URISyntaxException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException e) {
+            LOG.error("Problem storing the primary mail account.", e);
+            throw new StorageException(e);
+        }
+    }
+
+    /**
+     * 
+     * @param setAttributes
+     * @param mapper
+     */
     private void setAttributes(Set<com.openexchange.mailaccount.Attribute> setAttributes, UserMailAccountMapper mapper) {
         for (com.openexchange.mailaccount.Attribute attribute : mapper.getAttributes()) {
             setAttributes.add(attribute);
