@@ -637,7 +637,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             rollback = false;
 
             // Update JCS Caches
-            updateJCSCaches(ctx, usrdata, contextId, userId, con, quotaAffectedUserIDs, displayNameUpdate);
+            updateJCSCaches(ctx, usrdata, con, quotaAffectedUserIDs, displayNameUpdate);
 
             LOG.info("User {} in context {} changed! Changed attributes: {}", Integer.valueOf(userId), Integer.valueOf(contextId), toString(changedAttributes));
         } catch (final DataTruncation dt) {
@@ -709,14 +709,15 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
      * 
      * @param ctx The {@link Context}
      * @param usrdata The {@link User} data
-     * @param contextId The context identifier
-     * @param userId The user identifier
-     * @param con the {@link Connection}
+     * @param connection the {@link Connection}
      * @param quotaAffectedUserIDs The optional affected user ids after a quota change
      * @param displayNameUpdate whether the display name was updated
      * @throws OXException if an error is occurred
      */
-    private void updateJCSCaches(final Context ctx, final User usrdata, int contextId, int userId, Connection con, Set<Integer> quotaAffectedUserIDs, boolean displayNameUpdate) throws OXException {
+    private void updateJCSCaches(final Context ctx, final User usrdata, Connection connection, Set<Integer> quotaAffectedUserIDs, boolean displayNameUpdate) throws OXException {
+        int contextId = ctx.getId().intValue();
+        int userId = usrdata.getId().intValue();
+
         // Invalidate alias cache
         UserAliasStorage aliasStorage = AdminServiceRegistry.getInstance().getService(UserAliasStorage.class);
         aliasStorage.invalidateAliases(ctx.getId(), userId);
@@ -761,7 +762,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             cache = cacheService.getCache("QuotaFileStorages");
             cache.invalidateGroup(Integer.toString(contextId));
             if (displayNameUpdate) {
-                final int fuid = getDefaultInfoStoreFolder(usrdata, ctx, con);
+                final int fuid = getDefaultInfoStoreFolder(usrdata, ctx, connection);
                 if (fuid > 0) {
                     cache = cacheService.getCache("OXFolderCache");
                     key = cacheService.newCacheKey(contextId, fuid);
