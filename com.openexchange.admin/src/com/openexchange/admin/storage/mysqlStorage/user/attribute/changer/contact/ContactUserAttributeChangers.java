@@ -203,7 +203,6 @@ public class ContactUserAttributeChangers extends AbstractAttributeChangers {
             if (returnType == null) {
                 continue;
             }
-            // Construct query
             Appender appender = appenders.get(returnType);
             if (appender == null) {
                 continue;

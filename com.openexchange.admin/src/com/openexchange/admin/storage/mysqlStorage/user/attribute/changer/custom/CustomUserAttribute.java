@@ -49,7 +49,6 @@
 
 package com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.custom;
 
-import com.openexchange.admin.rmi.dataobjects.ExtendableDataObject;
 import com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.Attribute;
 
 /**
@@ -90,16 +89,6 @@ public enum CustomUserAttribute implements Attribute {
      */
     @Override
     public String getSQLTableName() {
-        return USER_ATTRIBUTE_NAME;
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.Attribute#getValue(com.openexchange.admin.rmi.dataobjects.ExtendableDataObject)
-     */
-    @Override
-    public <T extends ExtendableDataObject> String getValue(T object) {
         return USER_ATTRIBUTE_NAME;
     }
 

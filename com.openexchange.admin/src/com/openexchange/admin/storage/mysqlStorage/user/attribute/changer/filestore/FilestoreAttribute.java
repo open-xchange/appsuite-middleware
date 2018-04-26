@@ -49,9 +49,6 @@
 
 package com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.filestore;
 
-import java.util.function.Function;
-import com.openexchange.admin.rmi.dataobjects.ExtendableDataObject;
-import com.openexchange.admin.rmi.dataobjects.User;
 import com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.Attribute;
 
 /**
@@ -62,13 +59,12 @@ import com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.Attrib
  */
 public enum FilestoreAttribute implements Attribute {
 
-    ID("filestore-id", "filestore_id", (user) -> Integer.toString(user.getId().intValue()), Integer.class),
-    OWNER("filestore-owner", "filestore_owner", (user) -> Integer.toString(user.getFilestoreOwner()), Integer.class),
-    NAME("filestore-name", "filestore_name", (user) -> user.getFilestore_name(), Integer.class),
+    ID("filestore-id", "filestore_id", Integer.class),
+    OWNER("filestore-owner", "filestore_owner", Integer.class),
+    NAME("filestore-name", "filestore_name", Integer.class),
     ;
 
     private final String sqlFieldName;
-    private final Function<User, String> getter;
     private final Class<?> originalType;
     private static final String TABLE = "user";
     private final String attributeName;
@@ -79,10 +75,9 @@ public enum FilestoreAttribute implements Attribute {
      * 
      * @param sqlFieldName the names of the attribute
      */
-    private FilestoreAttribute(String attributeName, String sqlFieldName, Function<User, String> getter, Class<?> originalType) {
+    private FilestoreAttribute(String attributeName, String sqlFieldName, Class<?> originalType) {
         this.attributeName = attributeName;
         this.sqlFieldName = sqlFieldName;
-        this.getter = getter;
         this.originalType = originalType;
     }
 
@@ -114,16 +109,6 @@ public enum FilestoreAttribute implements Attribute {
     @Override
     public String getSQLTableName() {
         return TABLE;
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.admin.storage.mysqlStorage.user.attribute.Attribute#getValue(com.openexchange.admin.rmi.dataobjects.ExtendableDataObject)
-     */
-    @Override
-    public <T extends ExtendableDataObject> String getValue(T object) {
-        return getter.apply((User) object);
     }
 
     /*

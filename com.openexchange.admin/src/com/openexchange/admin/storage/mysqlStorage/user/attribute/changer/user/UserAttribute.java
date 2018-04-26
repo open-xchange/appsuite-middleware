@@ -49,9 +49,6 @@
 
 package com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.user;
 
-import java.util.function.Function;
-import com.openexchange.admin.rmi.dataobjects.ExtendableDataObject;
-import com.openexchange.admin.rmi.dataobjects.User;
 import com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.Attribute;
 
 /**
@@ -65,51 +62,50 @@ public enum UserAttribute implements Attribute {
     /**
      * The 'mail' column
      */
-    MAIL("primary-email", "mail", (user) -> user.getPrimaryEmail(), String.class),
+    MAIL("primary-email", "mail", String.class),
     /**
      * The 'preferredlanguage' column
      */
-    PREFERRED_LANGUAGE("preferred-language", "preferredlanguage", (user) -> user.getLanguage(), String.class),
+    PREFERRED_LANGUAGE("preferred-language", "preferredlanguage", String.class),
     /**
      * The 'timezone' column
      */
-    TIMEZONE("timezone", "timezone", (user) -> user.getTimezone(), String.class),
+    TIMEZONE("timezone", "timezone", String.class),
     /**
      * The 'mailEnabled' column
      */
-    MAIL_ENABLED("mail-enabled", "mailEnabled", (user) -> Boolean.toString(user.getMailenabled()), Boolean.class),
+    MAIL_ENABLED("mail-enabled", "mailEnabled", Boolean.class),
     /**
      * The 'shadowLastChange' column
      */
-    SHADOW_LAST_CHANGE("shadow-last-change", "shadowLastChange", (user) -> Boolean.toString(user.getPassword_expired()), Boolean.class),
+    SHADOW_LAST_CHANGE("shadow-last-change", "shadowLastChange", Boolean.class),
     /**
      * The 'imapserver' column
      */
-    IMAP_SERVER("imap-server", "imapserver", (user) -> user.getImapServerString(), String.class),
+    IMAP_SERVER("imap-server", "imapserver", String.class),
     /**
      * The 'imapLogin' column
      */
-    IMAP_LOGIN("imap-login", "imapLogin", (user) -> user.getImapLogin(), String.class),
+    IMAP_LOGIN("imap-login", "imapLogin", String.class),
     /**
      * The 'smtpserver' column
      */
-    SMTP_SERVER("smtp-server", "smtpserver", (user) -> user.getSmtpServerString(), String.class),
+    SMTP_SERVER("smtp-server", "smtpserver", String.class),
     /**
      * The 'userPassword' column
      */
-    USER_PASSWORD("user-password", "userPassword", (user) -> user.getPassword(), String.class),
+    USER_PASSWORD("user-password", "userPassword", String.class),
     /**
      * The 'passwordMech' column
      */
-    PASSWORD_MECH("password-mechanism", "passwordMech", (user) -> user.getPasswordMech(), String.class),
+    PASSWORD_MECH("password-mechanism", "passwordMech", String.class),
     /**
      * The quota column
      */
-    QUOTA("user-maximum-quota", "quota_max", (user) -> Long.toString(user.getMaxQuota()), Long.class),
+    QUOTA("user-maximum-quota", "quota_max", Long.class),
     ;
 
     private final String sqlFieldName;
-    private final Function<User, String> getter;
     private final Class<?> originalType;
     private static final String TABLE_NAME = "user";
     private final String attributeName;
@@ -119,10 +115,9 @@ public enum UserAttribute implements Attribute {
      * 
      * @param sqlFieldName the name of the attribute
      */
-    private UserAttribute(String attributeName, String sqlFieldName, Function<User, String> getter, Class<?> originalType) {
+    private UserAttribute(String attributeName, String sqlFieldName, Class<?> originalType) {
         this.attributeName = attributeName;
         this.sqlFieldName = sqlFieldName;
-        this.getter = getter;
         this.originalType = originalType;
     }
 
@@ -144,16 +139,6 @@ public enum UserAttribute implements Attribute {
     @Override
     public String getSQLTableName() {
         return TABLE_NAME;
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.Attribute#getValue(com.openexchange.admin.rmi.dataobjects.ExtendableDataObject)
-     */
-    @Override
-    public <T extends ExtendableDataObject> String getValue(T object) {
-        return getter.apply((User) object);
     }
 
     /*

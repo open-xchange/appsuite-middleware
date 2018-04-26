@@ -49,7 +49,6 @@
 
 package com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.contact;
 
-import com.openexchange.admin.rmi.dataobjects.ExtendableDataObject;
 import com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.Attribute;
 
 /**
@@ -90,16 +89,6 @@ public enum ContactUserAttribute implements Attribute {
      */
     @Override
     public String getSQLTableName() {
-        return CONTACT_ATTRIBUTE_NAME;
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.Attribute#getValue(com.openexchange.admin.rmi.dataobjects.ExtendableDataObject)
-     */
-    @Override
-    public <T extends ExtendableDataObject> String getValue(T object) {
         return CONTACT_ATTRIBUTE_NAME;
     }
 

@@ -49,8 +49,6 @@
 
 package com.openexchange.admin.storage.mysqlStorage.user.attribute.changer;
 
-import com.openexchange.admin.rmi.dataobjects.ExtendableDataObject;
-
 /**
  * {@link Attribute}
  *
@@ -72,14 +70,6 @@ public interface Attribute {
      * @return The table's name
      */
     String getSQLTableName();
-
-    /**
-     * Retrieves the value of the attribute from the specified {@link T} object
-     * 
-     * @param user The {@link T} object
-     * @return The value of this attribute
-     */
-    <T extends ExtendableDataObject> String getValue(T object);
 
     /**
      * Gets the original type of the attribute's value
