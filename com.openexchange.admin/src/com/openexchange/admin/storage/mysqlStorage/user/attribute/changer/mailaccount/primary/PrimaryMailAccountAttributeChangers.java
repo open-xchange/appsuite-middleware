@@ -51,6 +51,7 @@ package com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.maila
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.net.URI;
 import java.net.URISyntaxException;
 import java.sql.Connection;
 import java.util.ArrayList;
@@ -203,7 +204,7 @@ public class PrimaryMailAccountAttributeChangers extends AbstractAttributeChange
      */
     private enum UserMailAccountMapper {
         PRIMARY_ACCOUNT_NAME("PrimaryAccountName", "Name", com.openexchange.mailaccount.Attribute.NAME_LITERAL),
-        IMAP_SERVER("ImapServerString", "MailServer", com.openexchange.mailaccount.Attribute.MAIL_URL_LITERAL),
+        IMAP_SERVER("ImapServerString", "MailServer", URI.class, com.openexchange.mailaccount.Attribute.MAIL_URL_LITERAL),
         IMAP_LOGIN("ImapLogin", "Login", com.openexchange.mailaccount.Attribute.LOGIN_LITERAL, com.openexchange.mailaccount.Attribute.TRANSPORT_LOGIN_LITERAL),
         PRIMARY_EMAIL("PrimaryEmail", "PrimaryAddress", com.openexchange.mailaccount.Attribute.PRIMARY_ADDRESS_LITERAL),
         DRAFTS("Mail_folder_drafts_name", "Drafts", com.openexchange.mailaccount.Attribute.DRAFTS_LITERAL),
@@ -213,7 +214,7 @@ public class PrimaryMailAccountAttributeChangers extends AbstractAttributeChange
         ARCHIVE("Mail_folder_archive_full_name", "ArchiveFullname", com.openexchange.mailaccount.Attribute.ARCHIVE_FULLNAME_LITERAL),
         CONFIRMED_HAM("Mail_folder_confirmed_ham_name", "ConfirmedHam", com.openexchange.mailaccount.Attribute.CONFIRMED_HAM_LITERAL),
         CONFIRMED_SPAM("Mail_folder_confirmed_spam_name", "ConfirmedSpam", com.openexchange.mailaccount.Attribute.CONFIRMED_SPAM_LITERAL),
-        SMTP_SERVER("SmtpServerString", "TransportServer", com.openexchange.mailaccount.Attribute.TRANSPORT_URL_LITERAL),
+        SMTP_SERVER("SmtpServerString", "TransportServer", URI.class, com.openexchange.mailaccount.Attribute.TRANSPORT_URL_LITERAL),
         ;
 
         private final String userValueGetter;
@@ -221,6 +222,7 @@ public class PrimaryMailAccountAttributeChangers extends AbstractAttributeChange
         private final com.openexchange.mailaccount.Attribute[] attributes;
 
         private static final Map<String, UserMailAccountMapper> entries;
+        private final Class<?> type;
         static {
             Map<String, UserMailAccountMapper> m = new HashMap<>();
             for (UserMailAccountMapper mapper : UserMailAccountMapper.values()) {
@@ -229,12 +231,17 @@ public class PrimaryMailAccountAttributeChangers extends AbstractAttributeChange
             entries = Collections.unmodifiableMap(m);
         }
 
+        private UserMailAccountMapper(String userValueGetter, String mailAccountSetter, com.openexchange.mailaccount.Attribute... attributes) {
+            this(userValueGetter, mailAccountSetter, String.class, attributes);
+        }
+
         /**
          * Initialises a new {@link PrimaryMailAccountAttributeChangers.UserMailAccountMapper}.
          */
-        private UserMailAccountMapper(String userValueGetter, String mailAccountSetter, com.openexchange.mailaccount.Attribute... attributes) {
+        private UserMailAccountMapper(String userValueGetter, String mailAccountSetter, Class<?> type, com.openexchange.mailaccount.Attribute... attributes) {
             this.userValueGetter = userValueGetter;
             this.mailAccountSetter = mailAccountSetter;
+            this.type = type;
             this.attributes = attributes;
         }
 
@@ -267,6 +274,15 @@ public class PrimaryMailAccountAttributeChangers extends AbstractAttributeChange
 
         public static UserMailAccountMapper getMapper(String getterName) {
             return entries.get(getterName);
+        }
+
+        /**
+         * Gets the type
+         *
+         * @return The type
+         */
+        public Class<?> getType() {
+            return type;
         }
     }
 
@@ -332,7 +348,7 @@ public class PrimaryMailAccountAttributeChangers extends AbstractAttributeChange
                 if (null == server) {
                     server = defaultValue;
                 }
-                Method setter = MailAccountDescription.class.getMethod("set" + mapper.getMailAccountSetter(), String.class);
+                Method setter = MailAccountDescription.class.getMethod("set" + mapper.getMailAccountSetter(), mapper.getType());
                 setter.invoke(account, URIParser.parse(server, uriDefault));
                 setAttributes(setAttributes, mapper);
             }
