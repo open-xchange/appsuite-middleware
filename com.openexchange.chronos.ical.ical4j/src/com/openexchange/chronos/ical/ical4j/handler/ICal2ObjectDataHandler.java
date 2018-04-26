@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the Open-Xchange, Inc. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2020 Open-Xchange, Inc.
+ *     Copyright (C) 2016-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -119,7 +119,7 @@ public abstract class ICal2ObjectDataHandler<O> implements DataHandler {
         } else if (String.class.isInstance(sourceData)) {
             return processData(new SimpleData<byte[]>(((String) sourceData).getBytes(Charsets.UTF_8)), dataArguments, session);
         } else if (InputStream.class.isInstance(sourceData)) {
-            result.setData(parse((InputStream) sourceData, getParameters(dataArguments, session)));
+            result.setData(parse((InputStream) sourceData, getParameters()));
         } else {
             throw DataExceptionCodes.TYPE_NOT_SUPPORTED.create(sourceData.getClass().toString());
         }
@@ -128,7 +128,7 @@ public abstract class ICal2ObjectDataHandler<O> implements DataHandler {
 
     protected abstract O parse(InputStream inputStream, ICalParameters parameters) throws OXException;
 
-    protected ICalParameters getParameters(DataArguments dataArguments, Session session) {
+    protected ICalParameters getParameters() {
         return getParametersOrDefault(null);
     }
 

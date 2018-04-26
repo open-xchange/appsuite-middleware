@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the Open-Xchange, Inc. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2020 Open-Xchange, Inc.
+ *     Copyright (C) 2016-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -74,7 +74,7 @@ public class ICalCalendarFeedConfig {
     private final long lastUpdated;
     private final AdvancedAuthInfo authInfo;
 
-    private ICalCalendarFeedConfig(String feedUrl, String etag, long lastUpdated, AdvancedAuthInfo authInfo) {
+    ICalCalendarFeedConfig(String feedUrl, String etag, long lastUpdated, AdvancedAuthInfo authInfo) {
         super();
         this.feedUrl = feedUrl;
         this.etag = etag;
@@ -132,7 +132,7 @@ public class ICalCalendarFeedConfig {
 
     public static class EncryptedBuilder extends Builder {
 
-        private AdvancedAuthInfo authInfo;
+        private final AdvancedAuthInfo authInfo;
 
         EncryptedBuilder(Session session, JSONObject userConfiguration, JSONObject icalConfig) throws OXException {
             super(userConfiguration, icalConfig);
@@ -147,7 +147,7 @@ public class ICalCalendarFeedConfig {
 
     public static class DecryptedBuilder extends Builder {
 
-        private AdvancedAuthInfo authInfo;
+        private final AdvancedAuthInfo authInfo;
 
         DecryptedBuilder(Session session, JSONObject userConfiguration, JSONObject icalConfig) throws OXException {
             super(userConfiguration, icalConfig);
@@ -162,7 +162,7 @@ public class ICalCalendarFeedConfig {
 
     /**
      * Returns whether the provided {@link ICalCalendarFeedConfig} differs in a way (endpoint, auth, ....) the whole feed has to be reloaded
-     * 
+     *
      * @param configToCompare the new {@link ICalCalendarFeedConfig}
      * @return <code>true</code> if the configuration is different in a way we have to update the previously persisted data; otherwise <code>false</code>
      */

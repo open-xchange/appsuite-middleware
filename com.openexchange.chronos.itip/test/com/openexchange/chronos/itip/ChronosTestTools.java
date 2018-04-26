@@ -85,7 +85,7 @@ import com.openexchange.session.Session;
 
 /**
  * {@link ChronosTestTools}
- * 
+ *
  * TODO move into fitting bundle/package
  *
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
@@ -95,7 +95,7 @@ public final class ChronosTestTools {
 
     /**
      * Create an {@link Attendee} with random data.
-     * 
+     *
      * @param contextId The identifier of the context
      * @param attendeeFields <code>null</code> to fill all fields, otherwise the desired {@link AttendeeField}s
      * @return An {@link Attendee}
@@ -148,18 +148,18 @@ public final class ChronosTestTools {
 
     /**
      * Get a {@link List} of random {@link Attendee}s with full set of {@link AttendeeField}s
-     * 
+     *
      * @param contextId The identifier of the context
      * @param size How many attendees should be created
      * @return The attendees
      */
     public static List<Attendee> getAttendees(int contextId, int size) {
-        return getAttendees(contextId, size, null);
+        return getAttendees(contextId, size, (AttendeeField[]) null);
     }
 
     /**
      * Create an {@link Attendee} with random data that is identified as external User.
-     * 
+     *
      * @param contextId The identifier of the context
      * @param attendeeFields <code>null</code> to fill all fields, otherwise the desired {@link AttendeeField}s
      * @return An {@link Attendee}
@@ -173,7 +173,7 @@ public final class ChronosTestTools {
 
     /**
      * Create an {@link Attendee} with random data that is identified as internal group
-     * 
+     *
      * @param contextId The identifier of the context
      * @param attendeeFields <code>null</code> to fill all fields, otherwise the desired {@link AttendeeField}s
      * @return An {@link Attendee}
@@ -187,7 +187,7 @@ public final class ChronosTestTools {
 
     /**
      * Create an {@link Attendee} with random data that is identified as resource
-     * 
+     *
      * @param contextId The identifier of the context
      * @param attendeeFields <code>null</code> to fill all fields, otherwise the desired {@link AttendeeField}s
      * @return An {@link Attendee}
@@ -200,7 +200,7 @@ public final class ChronosTestTools {
 
     /**
      * Get a {@link List} of random {@link Attendee}s
-     * 
+     *
      * @param contextId The identifier of the context
      * @param size How many attendees should be created
      * @param fields The desired {@link AttendeeField}s to load
@@ -219,7 +219,7 @@ public final class ChronosTestTools {
         int uid = randomInt();
         String uniqueId = String.valueOf(uid);
 
-        Attendee owner = createAttendee(contextId, null);
+        Attendee owner = createAttendee(contextId, (AttendeeField[]) null);
         Event event = new Event();
 
         if (null == eventFields || containsField(eventFields, EventField.ID)) {
@@ -271,7 +271,7 @@ public final class ChronosTestTools {
 
     /**
      * Converts {@link Attendee}s to {@link MockUser}s
-     * 
+     *
      * @param attendees The attendees to convert
      * @return A {@link List} of users with id and mail set
      */
@@ -288,7 +288,7 @@ public final class ChronosTestTools {
 
     /**
      * Converts {@link CalendarUser} to {@link MockUser}
-     * 
+     *
      * @param calendarUser The calendar user to convert
      * @return A user with id and mail set
      */
@@ -305,7 +305,7 @@ public final class ChronosTestTools {
 
     /**
      * Converts an attendee to a {@link Resource}
-     * 
+     *
      * @param resource The attendee to convert
      * @return a {@link Resource}
      */
@@ -411,19 +411,25 @@ public final class ChronosTestTools {
             }
 
             @Override
-            public void debug(String message, Exception e) {}
+            public void debug(String message, Exception e) {
+                // empty
+            }
 
             @Override
-            public void debug(String message) {}
+            public void debug(String message) {
+                // empty
+            }
 
             @Override
-            public void addWarning(OXException warning) {}
+            public void addWarning(OXException warning) {
+                // empty
+            }
         };
     }
 
     /**
      * Generates a random integer
-     * 
+     *
      * @return An integer
      */
     private static int randomInt() {
