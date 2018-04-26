@@ -50,16 +50,9 @@
 package com.openexchange.admin.storage.mysqlStorage.user.attribute.changer;
 
 import java.util.EnumSet;
-import com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.alias.AliasUserAttribute;
-import com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.contact.ContactUserAttribute;
-import com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.custom.CustomUserAttribute;
-import com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.guipref.GuiPreferencesUserAttribute;
 import com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.mailaccount.UserMailAccountAttribute;
-import com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.mailaccount.primary.PrimaryMailAccountAttribute;
 import com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.mailsetting.UserMailSettingAttribute;
-import com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.spamfilter.SpamFilterUserAttribute;
 import com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.user.UserAttribute;
-import com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.user.username.UserNameUserAttribute;
 
 /**
  * {@link AttributeChanger}
@@ -72,16 +65,23 @@ public enum AttributeChanger {
     USER(EnumSet.allOf(UserAttribute.class)),
     USER_SETTING_MAIL(EnumSet.allOf(UserMailSettingAttribute.class)),
     USER_MAIL_ACCOUNT(EnumSet.allOf(UserMailAccountAttribute.class)),
-    CUSTOM_USER_ATTRIBUTE(EnumSet.allOf(CustomUserAttribute.class)),
-    CONTACT_USER_ATTRIBUTE(EnumSet.allOf(ContactUserAttribute.class)),
-    SPAM_FILTER(EnumSet.allOf(SpamFilterUserAttribute.class)),
-    GUI_PREFERENCE(EnumSet.allOf(GuiPreferencesUserAttribute.class)),
-    USERNAME_ATTRIBUTE(EnumSet.allOf(UserNameUserAttribute.class)),
-    ALIAS_ATTRIBUTE(EnumSet.allOf(AliasUserAttribute.class)),
-    PRIMARY_MAIL_ACCOUT_ATTRIBUTE(EnumSet.allOf(PrimaryMailAccountAttribute.class)),
+    CUSTOM_USER_ATTRIBUTE,
+    CONTACT_USER_ATTRIBUTE,
+    SPAM_FILTER,
+    GUI_PREFERENCE,
+    USERNAME_ATTRIBUTE,
+    ALIAS_ATTRIBUTE,
+    PRIMARY_MAIL_ACCOUT_ATTRIBUTE,
     ;
 
     private final EnumSet<? extends Attribute> attributes;
+
+    /**
+     * Initialises a new {@link AttributeChanger}.
+     */
+    private AttributeChanger() {
+        this(EnumSet.noneOf(EmptyAttribute.class));
+    }
 
     /**
      * Initialises a new {@link AttributeChanger}.

@@ -47,20 +47,38 @@
  *
  */
 
-package com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.user.username;
-
-import com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.Attribute;
+package com.openexchange.admin.storage.mysqlStorage.user.attribute.changer;
 
 /**
- * {@link UserNameUserAttribute}
+ * {@link EmptyAttribute}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @since v7.10.1
  */
-public enum UserNameUserAttribute implements Attribute {
-    // Mark attribute, no real value
-    USERNAME_ATTRIBUTE;
+public enum EmptyAttribute implements Attribute {
+    ;
 
-    private static final String USERNAME_ATTRIBUTE_NAME = "login2user";
+    private static final String EMPTY = "";
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.Attribute#getSQLFieldName()
+     */
+    @Override
+    public String getSQLFieldName() {
+        return EMPTY;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.Attribute#getSQLTableName()
+     */
+    @Override
+    public String getSQLTableName() {
+        return EMPTY;
+    }
 
     /*
      * (non-Javadoc)
@@ -75,30 +93,11 @@ public enum UserNameUserAttribute implements Attribute {
     /*
      * (non-Javadoc)
      * 
-     * @see com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.Attribute#getSQLFieldName()
-     */
-    @Override
-    public String getSQLFieldName() {
-        return USERNAME_ATTRIBUTE_NAME;
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.Attribute#getSQLTableName()
-     */
-    @Override
-    public String getSQLTableName() {
-        return USERNAME_ATTRIBUTE_NAME;
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
      * @see com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.Attribute#getName()
      */
     @Override
     public String getName() {
-        return USERNAME_ATTRIBUTE_NAME;
+        return EMPTY;
     }
+
 }
