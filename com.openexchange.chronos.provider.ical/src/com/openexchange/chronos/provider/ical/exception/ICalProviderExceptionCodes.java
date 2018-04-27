@@ -51,6 +51,7 @@ package com.openexchange.chronos.provider.ical.exception;
 
 import static com.openexchange.chronos.provider.ical.exception.ICalProviderExceptionMessages.BAD_FEED_URI_MSG;
 import static com.openexchange.chronos.provider.ical.exception.ICalProviderExceptionMessages.BAD_PARAMETER_MSG;
+import static com.openexchange.chronos.provider.ical.exception.ICalProviderExceptionMessages.CREDENTIALS_CHANGED_MSG;
 import static com.openexchange.chronos.provider.ical.exception.ICalProviderExceptionMessages.CREDENTIALS_REQUIRED_MSG;
 import static com.openexchange.chronos.provider.ical.exception.ICalProviderExceptionMessages.CREDENTIALS_WRONG_MSG;
 import static com.openexchange.chronos.provider.ical.exception.ICalProviderExceptionMessages.FEED_SIZE_EXCEEDED_MSG;
@@ -161,6 +162,11 @@ public enum ICalProviderExceptionCodes implements DisplayableOXExceptionCode {
      * <li>Password required [url %1$s, status %2$s, realm %3$s]</li>
      */
     PASSWORD_WRONG("Password wrong [url %1$s, status %2$s, realm %3$s]", PASSWORD_WRONG_MSG, Category.CATEGORY_USER_INPUT, 4013),
+    /**
+     * <li>Authentication failed due to a recent credentials change. Please remove the account and add it again with correct credentials.</li>
+     * <li>Credentials changed [url %1$s, status %2$s, realm %3$s]</li>
+     */
+    CREDENTIALS_CHANGED("Credentials changed [url %1$s, status %2$s, realm %3$s]", CREDENTIALS_CHANGED_MSG, Category.CATEGORY_USER_INPUT, 4014),
 
     ;
 

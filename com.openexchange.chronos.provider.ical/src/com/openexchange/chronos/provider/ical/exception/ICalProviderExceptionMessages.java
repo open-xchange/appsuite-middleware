@@ -90,6 +90,8 @@ public class ICalProviderExceptionMessages implements LocalizableStrings {
 
     public static final String PASSWORD_WRONG_MSG = "Authentication failed. Please enter your password and try again.";
 
+    public static final String CREDENTIALS_CHANGED_MSG = "Authentication failed due to a recent credentials change. Please remove the account and add it again with correct credentials.";
+
     /**
      * Initializes a new {@link ICalProviderExceptionMessages}.
      */
