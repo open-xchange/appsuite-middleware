@@ -301,14 +301,16 @@ public class UpdateITipAnalyzer extends AbstractITipAnalyzer {
             return;
         }
 
+        List<Attendee> toAdd = new ArrayList<>();
         for (Attendee a : original.getAttendees()) {
             if (CalendarUserType.RESOURCE.equals(a.getCuType())) {
                 if (update.getAttendees() == null) {
                     update.setAttendees(new ArrayList<>());
                 }
-                update.getAttendees().add(a);
+                toAdd.add(a);
             }
         }
+        update.getAttendees().addAll(toAdd);
     }
 
     // TODO: redesign
