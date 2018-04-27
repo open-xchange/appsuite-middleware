@@ -223,7 +223,7 @@ public class GroupwareCaldavFactory extends DAVFactory {
             for (WebdavPath path : entry.getValue()) {
                 try {
                     WebdavResource resource = collection.getChild(path.name());
-                    if (resource.exists()) {
+                    if (null != resource && resource.exists()) {
                         multistatus.addStatus(new WebdavStatusImpl<WebdavResource>(HttpServletResponse.SC_OK, path, resource));
                     } else {
                         multistatus.addStatus(new WebdavStatusImpl<WebdavResource>(HttpServletResponse.SC_NOT_FOUND, path, null));
