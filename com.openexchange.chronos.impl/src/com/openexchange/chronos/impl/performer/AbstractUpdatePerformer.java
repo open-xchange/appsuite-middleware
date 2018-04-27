@@ -751,9 +751,16 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
         }
         Check.classificationAllowsUpdate(folder, originalEvent);
         if (isGroupScheduled(originalEvent) && false == isOrganizer(originalEvent, calendarUserId) && false == assumeExternalOrganizerUpdate) {
+            /*
+             * not allowed attendee change in group scheduled resource, throw error if configured
+             */
             OXException e = CalendarExceptionCodes.NOT_ORGANIZER.create(
                 folder.getId(), originalEvent.getId(), originalEvent.getOrganizer().getUri(), originalEvent.getOrganizer().getSentBy());
-            if (session.getConfig().isRestrictAllowedAttendeeChanges()) {
+            if (PublicType.getInstance().equals(folder.getType())) {
+                if (session.getConfig().isRestrictAllowedAttendeeChangesPublic()) {
+                    throw e;
+                }
+            } else if (session.getConfig().isRestrictAllowedAttendeeChanges()) {
                 throw e;
             }
             session.addWarning(e);

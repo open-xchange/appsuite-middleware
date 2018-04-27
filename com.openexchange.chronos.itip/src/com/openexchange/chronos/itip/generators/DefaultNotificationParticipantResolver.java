@@ -69,6 +69,7 @@ import com.openexchange.chronos.Event;
 import com.openexchange.chronos.Organizer;
 import com.openexchange.chronos.ParticipationStatus;
 import com.openexchange.chronos.common.CalendarUtils;
+import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.itip.ITipIntegrationUtility;
 import com.openexchange.chronos.itip.ITipRole;
 import com.openexchange.chronos.itip.osgi.Services;
@@ -201,7 +202,7 @@ public class DefaultNotificationParticipantResolver implements NotificationParti
             participant.setUser(u);
             participant.setContext(ctx);
 
-            String folderIdForUser = util.getFolderIdForUser(session, eventId, u.getId());
+            String folderIdForUser = getFolderIdForUser(update, ctx.getContextId(), u.getId());
             if (folderIdForUser == null) {
                 folderIdForUser = update.getFolderId();
             }
@@ -243,7 +244,7 @@ public class DefaultNotificationParticipantResolver implements NotificationParti
 
             participant.setUser(user);
             participant.setContext(ctx);
-            participant.setFolderId(util.getFolderIdForUser(session, eventId, user.getId()));
+            participant.setFolderId(getFolderIdForUser(update, ctx.getContextId(), user.getId()));
 
             final NotificationConfiguration configuration = defaultConfiguration.clone();
             configure(user, ctx, configuration, participant.hasRole(ITipRole.ORGANIZER));
@@ -278,7 +279,7 @@ public class DefaultNotificationParticipantResolver implements NotificationParti
 
             participant.setUser(onBehalfOf);
             participant.setContext(ctx);
-            participant.setFolderId(util.getFolderIdForUser(session, eventId, onBehalfOf.getId()));
+            participant.setFolderId(getFolderIdForUser(update, ctx.getContextId(), onBehalfOf.getId()));
 
             final NotificationConfiguration configuration = defaultConfiguration.clone();
             configure(onBehalfOf, ctx, configuration, participant.hasRole(ITipRole.ORGANIZER));
@@ -313,7 +314,7 @@ public class DefaultNotificationParticipantResolver implements NotificationParti
 
             participant.setUser(principalUser);
             participant.setContext(ctx);
-            participant.setFolderId(util.getFolderIdForUser(session, eventId, principalUser.getId()));
+            participant.setFolderId(getFolderIdForUser(update, ctx.getContextId(), principalUser.getId()));
 
             final NotificationConfiguration configuration = defaultConfiguration.clone();
             configure(principalUser, ctx, configuration, participant.hasRole(ITipRole.ORGANIZER));
@@ -525,6 +526,28 @@ public class DefaultNotificationParticipantResolver implements NotificationParti
             config.setSendITIP(false);
         }
 
+    }
+
+    private String getFolderIdForUser(Event event, int contextId, int userId) throws OXException {
+        /*
+         * get folder view from event data
+         */
+        if (null != event) {
+            if (false == event.containsAttendees()) {
+                throw new UnsupportedOperationException();
+            }
+            try {
+                return CalendarUtils.getFolderView(event, userId);
+            } catch (OXException e) {
+                if (false == CalendarExceptionCodes.ATTENDEE_NOT_FOUND.equals(e)) {
+                    throw e;
+                }
+            }
+        }
+        /*
+         * fall back to user's default calendar folder
+         */
+        return util.getPrivateCalendarFolderId(contextId, userId);
     }
 
 }
