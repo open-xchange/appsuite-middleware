@@ -443,14 +443,14 @@ public class SchemaStoreImpl extends SchemaStore {
             ResultSet result = null;
             try {
                 stmt = con.createStatement();
-                result = stmt.executeQuery("SELECT taskName,successful,lastModified FROM updateTask WHERE cid=0 FOR UPDATE");
+                result = stmt.executeQuery("SELECT taskName,successful,lastModified,uuid FROM updateTask WHERE cid=0 FOR UPDATE");
                 if (false == result.next()) {
                     return new ExecutedTask[0];
                 }
 
                 retval = new ArrayList<ExecutedTask>(512);
                 do {
-                    ExecutedTask task = new ExecutedTaskImpl(result.getString(1), result.getBoolean(2), new Date(result.getLong(3)));
+                    ExecutedTask task = new ExecutedTaskImpl(result.getString(1), result.getBoolean(2), new Date(result.getLong(3)), UUIDs.toUUID(result.getBytes(4)));
                     retval.add(task);
                 } while (result.next());
             } catch (final SQLException e) {
