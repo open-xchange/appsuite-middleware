@@ -168,6 +168,7 @@ public interface CustomPortable extends Portable {
      *   &bull; 210 --> com.openexchange.office.rt2.hazelcast.serialization.PortableNodeHealthPredicate
      *   &bull; 211 --> com.openexchange.office.rt2.hazelcast.serialization.PortableNodeDocsPredicate
      *   &bull; 212 --> com.openexchange.office.rt2.hazelcast.serialization.PortableNodeHealthStatePredicate
+     *   &bull; 213 --> com.openexchange.office.documents.hazelcast.serialization.PortableDocRequest
      *   &bull; 300 --> com.openexchange.saml.impl.hz.PortableAuthnRequestInfo
      *   &bull; 301 --> com.openexchange.saml.impl.hz.PortableLogoutRequestInfo
      *   &bull; 310 --> com.openexchange.oidc.hz.PortableAuthenticationRequest
