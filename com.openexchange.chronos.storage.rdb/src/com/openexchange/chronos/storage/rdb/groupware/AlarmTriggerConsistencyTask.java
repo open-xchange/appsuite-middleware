@@ -50,9 +50,11 @@
 package com.openexchange.chronos.storage.rdb.groupware;
 
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
@@ -80,17 +82,22 @@ public class AlarmTriggerConsistencyTask extends UpdateTaskAdapter {
 
     @Override
     public void perform(PerformParameters params) throws OXException {
-        Connection con = params.getConnection();
+        PreparedStatement stmt = null;
         try {
+            Connection con = params.getConnection();
             if (!Tools.tableExists(con, "calendar_alarm_trigger")) {
                 return;
             }
 
-            int executeUpdate = con.prepareStatement(REPAIR_INVALID_TIMZONE).executeUpdate();
+            stmt = con.prepareStatement(REPAIR_INVALID_TIMZONE);
+            int executeUpdate = stmt.executeUpdate();
             LOG.info("Fixed {} alarm triggers.", executeUpdate);
 
         } catch (SQLException e) {
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
+        } finally {
+            Databases.closeSQLStuff(stmt);
         }
     }
+
 }
