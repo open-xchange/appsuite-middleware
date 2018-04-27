@@ -277,15 +277,6 @@ public class MovePerformer extends AbstractUpdatePerformer {
         }
     }
 
-    private void updateAttendeeFolderId1(String eventId, Attendee originalAttendee, String folderId) throws OXException {
-        if ((null == folderId && null != originalAttendee.getFolderId()) || (null != folderId && false == folderId.equals(originalAttendee.getFolderId()))) {
-            Attendee attendeeUpdate = AttendeeMapper.getInstance().copy(originalAttendee, null, AttendeeField.ENTITY, AttendeeField.MEMBER, AttendeeField.CU_TYPE, AttendeeField.URI);
-            attendeeUpdate.setFolderId(folderId);
-            storage.getAttendeeStorage().insertAttendeeTombstone(eventId, storage.getUtilities().getTombstone(originalAttendee));
-            storage.getAttendeeStorage().updateAttendee(eventId, attendeeUpdate);
-        }
-    }
-
     private void updateAttendeeFolderId(Event originalEvent, Attendee originalAttendee, String folderId) throws OXException {
         if ((null == folderId && null != originalAttendee.getFolderId()) || (null != folderId && false == folderId.equals(originalAttendee.getFolderId()))) {
             storage.getEventStorage().insertEventTombstone(storage.getUtilities().getTombstone(originalEvent, timestamp, calendarUser));
