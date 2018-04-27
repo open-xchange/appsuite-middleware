@@ -57,31 +57,31 @@ import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link RestrictAllowedAttendeeChanges}
+ * {@link RestrictAllowedAttendeeChangesPublic}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public class RestrictAllowedAttendeeChanges extends ReadOnlyChronosJSlobEntry {
+public class RestrictAllowedAttendeeChangesPublic extends ReadOnlyChronosJSlobEntry {
 
     /**
-     * Initializes a new {@link RestrictAllowedAttendeeChanges}.
+     * Initializes a new {@link RestrictAllowedAttendeeChangesPublic}.
      *
      * @param services A service lookup reference
      */
-    public RestrictAllowedAttendeeChanges(ServiceLookup services) {
+    public RestrictAllowedAttendeeChangesPublic(ServiceLookup services) {
         super(services);
     }
 
     @Override
     public String getPath() {
-        return "chronos/restrictAllowedAttendeeChanges";
+        return "chronos/restrictAllowedAttendeeChangesPublic";
     }
 
     @Override
     protected Object getValue(ServerSession session, JSONObject userConfig) throws OXException {
         return Boolean.valueOf(requireService(ConfigurationService.class, services).getBoolProperty(
-            "com.openexchange.calendar.restrictAllowedAttendeeChanges", true));
+            "com.openexchange.calendar.restrictAllowedAttendeeChangesPublic", true));
     }
 
 }
