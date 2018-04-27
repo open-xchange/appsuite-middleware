@@ -728,9 +728,8 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
         }
 
         try {
-            CacheKey key = cacheService.newCacheKey(contextId, userId);
+            invalidateUserCaches(userId, contextId, cacheService);
             Cache cache = cacheService.getCache("User");
-            cache.remove(key);
             if (null != quotaAffectedUserIDs && false == quotaAffectedUserIDs.isEmpty()) {
                 List<Serializable> keys = new ArrayList<>(quotaAffectedUserIDs.size());
                 for (Integer userID : quotaAffectedUserIDs) {
@@ -738,34 +737,22 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 }
                 cache.remove(keys);
             }
-            cache = cacheService.getCache("UserPermissionBits");
-            cache.remove(key);
-            cache = cacheService.getCache("UserConfiguration");
-            cache.remove(key);
-            cache = cacheService.getCache("UserSettingMail");
-            cache.remove(key);
-            cache = cacheService.getCache("Capabilities");
-            cache.removeFromGroup(Integer.valueOf(userId), ctx.getId().toString());
 
-            {
-                MailAccountStorageService mass = AdminServiceRegistry.getInstance().getService(MailAccountStorageService.class);
-                if (null != mass) {
-                    mass.invalidateMailAccount(0, userId, contextId);
-                } else {
-                    cache = cacheService.getCache("MailAccount");
-                    cache.remove(cacheService.newCacheKey(ctx.getId().intValue(), Integer.toString(0), Integer.toString(userId)));
-                    cache.remove(cacheService.newCacheKey(ctx.getId().intValue(), Integer.toString(userId)));
-                    cache.invalidateGroup(ctx.getId().toString());
-                }
+            MailAccountStorageService mass = AdminServiceRegistry.getInstance().getService(MailAccountStorageService.class);
+            if (null != mass) {
+                mass.invalidateMailAccount(0, userId, contextId);
+            } else {
+                cache = cacheService.getCache("MailAccount");
+                cache.remove(cacheService.newCacheKey(ctx.getId().intValue(), Integer.toString(0), Integer.toString(userId)));
+                cache.remove(cacheService.newCacheKey(ctx.getId().intValue(), Integer.toString(userId)));
+                cache.invalidateGroup(ctx.getId().toString());
             }
 
-            cache = cacheService.getCache("QuotaFileStorages");
-            cache.invalidateGroup(Integer.toString(contextId));
             if (displayNameUpdate) {
                 final int fuid = getDefaultInfoStoreFolder(usrdata, ctx, connection);
                 if (fuid > 0) {
                     cache = cacheService.getCache("OXFolderCache");
-                    key = cacheService.newCacheKey(contextId, fuid);
+                    CacheKey key = cacheService.newCacheKey(contextId, fuid);
                     cache.remove(key);
                     cache = cacheService.getCache("GlobalFolderCache");
                     key = cacheService.newCacheKey(1, "0", Integer.toString(fuid));
@@ -2392,32 +2379,17 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             con.commit();
             rollback = false;
 
-            // JCS
-            {
-                CacheService cacheService = AdminServiceRegistry.getInstance().getService(CacheService.class);
-                if (null != cacheService) {
-                    try {
-                        for (int userId : userIds) {
-                            final CacheKey key = cacheService.newCacheKey(contextId, userId);
-                            Cache cache = cacheService.getCache("User");
-                            cache.remove(key);
-                            cache = cacheService.getCache("UserPermissionBits");
-                            cache.remove(key);
-                            cache = cacheService.getCache("UserConfiguration");
-                            cache.remove(key);
-                            cache = cacheService.getCache("UserSettingMail");
-                            cache.remove(key);
-                            cache = cacheService.getCache("Capabilities");
-                            cache.removeFromGroup(Integer.valueOf(userId), ctx.getId().toString());
-                            cache = cacheService.getCache("QuotaFileStorages");
-                            cache.invalidateGroup(Integer.toString(contextId));
-                        }
-                    } catch (final OXException e) {
-                        LOG.error("", e);
-                    }
-                }
+            CacheService cacheService = AdminServiceRegistry.getInstance().getService(CacheService.class);
+            if (null == cacheService) {
+                return;
             }
-            // End of JCS
+            try {
+                for (int userId : userIds) {
+                    invalidateUserCaches(userId, contextId, cacheService);
+                }
+            } catch (final OXException e) {
+                LOG.error("", e);
+            }
         } catch (final SQLException e) {
             LOG.error("SQL Error", e);
             throw new StorageException(e.toString());
@@ -2917,5 +2889,35 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
         } finally {
             releaseWriteContextConnection(con, ctx, cache);
         }
+    }
+
+    private static final String[] USER_CACHES = { "User", "UserPermissionBits", "UserConfiguration", "UserSettingMail" };
+
+    /**
+     * Invalidates the following user caches:
+     * <ul>
+     * <li>User</li>
+     * <li>UserPermissionBits</li>
+     * <li>UserConfiguration</li>
+     * <li>UserSettingMail</li>
+     * <li>Capabilities</li>
+     * <li>QuotaFileStorages</li>
+     * </ul>
+     * 
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @param cacheService the {@link CacheService}
+     * @throws OXException if an error is occurred
+     */
+    private void invalidateUserCaches(int userId, int contextId, CacheService cacheService) throws OXException {
+        for (String cacheName : USER_CACHES) {
+            Cache cache = cacheService.getCache(cacheName);
+            CacheKey key = cacheService.newCacheKey(contextId, userId);
+            cache.remove(key);
+        }
+        Cache cache = cacheService.getCache("Capabilities");
+        cache.removeFromGroup(Integer.valueOf(userId), Integer.toString(contextId));
+        cache = cacheService.getCache("QuotaFileStorages");
+        cache.invalidateGroup(Integer.toString(contextId));
     }
 }
