@@ -2392,15 +2392,6 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             con.commit();
             rollback = false;
 
-            /*-
-             *
-            try {
-                ClientAdminThread.cache.reinitAccessCombinations();
-            } catch (Exception e) {
-                log.error("", e);
-            }
-             *
-             */
             // JCS
             {
                 CacheService cacheService = AdminServiceRegistry.getInstance().getService(CacheService.class);
@@ -2764,13 +2755,6 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             }
         }
         return retlist;
-    }
-
-    private Method getMethodforbooleanparameter(final Method method) throws SecurityException, NoSuchMethodException {
-        final String methodname = method.getName();
-        final String boolmethodname = "is" + methodname.substring(3) + "set";
-        final Method retval = User.class.getMethod(boolmethodname);
-        return retval;
     }
 
     @Override
