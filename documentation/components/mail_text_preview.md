@@ -25,3 +25,7 @@ For `663` (`TEXT_PREVIEW`), the `"SNIPPET (FUZZY)"` fetch item is issued.
 ## App Suite UI
 
 To enable mail text previews in OX App Suite UI, the `io.ox/mail//features/textPreview` feature toggle is supposed to be enabled.
+
+## IMAP specification
+
+Please see [this Internet draft](https://tools.ietf.org/html/draft-slusarz-imap-fetch-snippet-00) for the formal IMAP specification, which the Open-Xchange Server is using

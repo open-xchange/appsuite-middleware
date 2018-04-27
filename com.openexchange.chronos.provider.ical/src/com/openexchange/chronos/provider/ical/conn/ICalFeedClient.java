@@ -240,7 +240,7 @@ public class ICalFeedClient {
         // Assert the 4xx codes
         switch (statusCode) {
             case HttpStatus.SC_UNAUTHORIZED:
-                throw unauthorizedException(httpResponse, iCalFeedConfig.getFeedUrl(), iCalFeedConfig.getAuthInfo());
+                throw unauthorizedException(httpResponse);
             case HttpStatus.SC_NOT_FOUND:
                 throw ICalProviderExceptionCodes.NO_FEED.create(iCalFeedConfig.getFeedUrl());
         }
@@ -330,11 +330,12 @@ public class ICalFeedClient {
      * Prepares an appropriate exception for a response with status <code>401 Unauthorized</code>.
      *
      * @param response The HTTP response to generate the exception for
-     * @param feedUrl The requested feed URL
-     * @param authInfo The authentication info used for the feed
      * @return An appropriate {@link OXException}
      */
-    private static OXException unauthorizedException(HttpResponse response, String feedUrl, AuthInfo authInfo) {
+    private OXException unauthorizedException(HttpResponse response) {
+        String feedUrl = iCalFeedConfig.getFeedUrl();
+        AuthInfo authInfo = iCalFeedConfig.getAuthInfo();
+        
         boolean hadCredentials = null != authInfo && (Strings.isNotEmpty(authInfo.getPassword()) || Strings.isNotEmpty(authInfo.getToken()));
         String realm = getFirstHeaderElement(response, HttpHeaders.WWW_AUTHENTICATE, "Basic realm");
         if (null != realm && realm.contains("Share/Anonymous/")) {
@@ -350,6 +351,9 @@ public class ICalFeedClient {
          * generic credentials required, otherwise
          */
         if (hadCredentials) {
+            if (iCalFeedConfig.getLastUpdated() > 0 || Strings.isNotEmpty(iCalFeedConfig.getEtag())) {
+                return ICalProviderExceptionCodes.CREDENTIALS_CHANGED.create(feedUrl, String.valueOf(response.getStatusLine()), realm);
+            }
             return ICalProviderExceptionCodes.CREDENTIALS_WRONG.create(feedUrl, String.valueOf(response.getStatusLine()), realm);
         }
         return ICalProviderExceptionCodes.CREDENTIALS_REQUIRED.create(feedUrl, String.valueOf(response.getStatusLine()), realm);
