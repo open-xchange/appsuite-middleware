@@ -438,7 +438,7 @@ public abstract class CommonObject extends FolderChildObject implements Cloneabl
     public void set(final int field, final Object value) {
         switch (field) {
         case COLOR_LABEL:
-            setLabel(((Integer) value).intValue());
+            setLabel(null == value ? 0 : ((Integer) value).intValue());
             break;
         case CATEGORIES:
             setCategories((String) value);
@@ -447,13 +447,13 @@ public abstract class CommonObject extends FolderChildObject implements Cloneabl
 //            setNumberOfLinks(((Integer) value).intValue());
 //            break;
         case NUMBER_OF_ATTACHMENTS:
-            setNumberOfAttachments(((Integer) value).intValue());
+            setNumberOfAttachments(null == value ? 0 : ((Integer) value).intValue());
             break;
         case LAST_MODIFIED_OF_NEWEST_ATTACHMENT:
             setLastModifiedOfNewestAttachment((Date) value);
             break;
         case PRIVATE_FLAG:
-            setPrivateFlag(((Boolean) value).booleanValue());
+            setPrivateFlag(null == value ? false : ((Boolean) value).booleanValue());
             break;
         case UID:
             setUid((String) value);
