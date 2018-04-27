@@ -243,16 +243,16 @@ public abstract class DataObject extends SystemObject {
             setLastModified((Date) value);
             break;
         case OBJECT_ID:
-            setObjectID(((Integer) value).intValue());
+            setObjectID(null == value ? 0 : ((Integer) value).intValue());
             break;
         case MODIFIED_BY:
-            setModifiedBy(((Integer) value).intValue());
+            setModifiedBy(null == value ? 0 : ((Integer) value).intValue());
             break;
         case CREATION_DATE:
             setCreationDate((Date) value);
             break;
         case CREATED_BY:
-            setCreatedBy(((Integer) value).intValue());
+            setCreatedBy(null == value ? 0 : ((Integer) value).intValue());
             break;
         default:
             throw new IllegalArgumentException("I don't know how to set " + field);
