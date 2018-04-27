@@ -118,6 +118,7 @@ public abstract class ComparedPermissions<P, GP extends P> {
 
     protected abstract boolean areEqual(P p1, P p2);
 
+    @SuppressWarnings("unchecked")
     protected void calc() throws OXException {
         if (newPermissions == null) {
             newGuests = Collections.emptyList();
