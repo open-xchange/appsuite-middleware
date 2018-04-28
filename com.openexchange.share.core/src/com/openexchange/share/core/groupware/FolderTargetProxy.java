@@ -228,7 +228,7 @@ public class FolderTargetProxy extends AbstractTargetProxy {
 
         @Override
         public TargetPermission convert(Permission permission) {
-            return new SubfolderAwareTargetPermission(permission.getEntity(), permission.isGroup(), getBits(permission), null != permission.getType() ? permission.getType().getTypeNumber() : FolderPermissionType.NORMAL.getTypeNumber(), permission.getPermissionLegator());
+            return new SubfolderAwareTargetPermission(permission.getEntity(), permission.isGroup(), getBits(permission), null != permission.getType() ? permission.getType().getTypeNumber() : FolderPermissionType.NORMAL.getTypeNumber(), permission.getPermissionLegator(), permission.getSystem());
         }
     };
 
