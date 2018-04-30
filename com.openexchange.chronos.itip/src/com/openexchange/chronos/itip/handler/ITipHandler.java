@@ -137,8 +137,12 @@ public class ITipHandler implements CalendarHandler {
             }
 
             if (updates.size() > 0) {
+                Set<UpdateResult> ignore = new HashSet<>();
                 for (UpdateResult update : updates) {
-                    handleUpdate(update, updates, event);
+                    if (ignore.contains(update)) {
+                        continue;
+                    }
+                    handleUpdate(update, updates, ignore, event);
                 }
             }
 
@@ -186,7 +190,7 @@ public class ITipHandler implements CalendarHandler {
         }
     }
 
-    private void handleUpdate(UpdateResult update, List<UpdateResult> updates, CalendarEvent event) throws OXException {
+    private void handleUpdate(UpdateResult update, List<UpdateResult> updates, Set<UpdateResult> ignore, CalendarEvent event) throws OXException {
         List<UpdateResult> exceptions = Collections.emptyList();
 
         if (CalendarUtils.isSeriesMaster(update.getUpdate()) && update.containsAnyChangeOf(EXCEPTION_DELETE)) {
@@ -219,7 +223,10 @@ public class ITipHandler implements CalendarHandler {
             // Check for series update
             // Get all events of the series
             String seriesId = update.getUpdate().getSeriesId();
-            List<UpdateResult> eventGroup = updates.stream().filter(u -> seriesId.equals(u.getUpdate().getSeriesId())).collect(Collectors.toList());
+            List<UpdateResult> eventGroup = updates.stream()
+                .filter(u -> !ignore.contains(u))
+                .filter(u -> seriesId.equals(u.getUpdate().getSeriesId()))
+                .collect(Collectors.toList());
 
             // Check if there is a group to handle
             if (eventGroup.size() > 1) {
@@ -229,7 +236,7 @@ public class ITipHandler implements CalendarHandler {
                     UpdateResult masterUpdate = master.get();
                     if (eventGroup.stream().filter(u -> u.containsAnyChangeOf(SERIES_UPDATE)).collect(Collectors.toList()).size() == eventGroup.size()) {
                         // Series update, remove those items from the update list and the master from the exceptions
-                        updates.removeAll(eventGroup);
+                        ignore.addAll(eventGroup);
                         eventGroup.remove(masterUpdate);
 
                         // Set for processing
@@ -241,7 +248,7 @@ public class ITipHandler implements CalendarHandler {
                         fields.remove(EventField.LAST_MODIFIED);
                         if (fields.isEmpty()) {
                             // Exception update, no update on master
-                            updates.remove(masterUpdate);
+                            ignore.add(masterUpdate);
                         }
                     }
                 }
