@@ -772,7 +772,7 @@ public class JSONObject extends AbstractJSONValue {
      * @return A JSONArray containing the key strings, or null if the JSONObject is empty.
      */
     public JSONArray names() {
-        final JSONArray ja = new JSONArray();
+        final JSONArray ja = new JSONArray(length());
         final Set<String> keys = keySet();
         for (final String name : keys) {
             ja.put(name);
