@@ -129,7 +129,7 @@ public class JSONObject extends AbstractJSONValue {
      */
     private static final class Null implements Cloneable {
 
-        public Null() {
+        Null() {
             super();
         }
 
@@ -772,12 +772,16 @@ public class JSONObject extends AbstractJSONValue {
      * @return A JSONArray containing the key strings, or null if the JSONObject is empty.
      */
     public JSONArray names() {
-        final JSONArray ja = new JSONArray(length());
-        final Set<String> keys = keySet();
-        for (final String name : keys) {
+        int length = length();
+        if (length <= 0) {
+            return null;
+        }
+
+        JSONArray ja = new JSONArray(length);
+        for (String name : keySet()) {
             ja.put(name);
         }
-        return ja.length() == 0 ? null : ja;
+        return ja;
     }
 
     /**
@@ -787,7 +791,7 @@ public class JSONObject extends AbstractJSONValue {
      * @return A String.
      * @throws JSONException If n is a non-finite number.
      */
-    static public final String numberToString(final Number n) throws JSONException {
+    public static final String numberToString(final Number n) throws JSONException {
         if (n == null) {
             throw new JSONException("Null pointer");
         }
