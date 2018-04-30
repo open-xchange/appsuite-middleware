@@ -72,6 +72,7 @@ import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.concurrent.TimeoutConcurrentMap;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
+import com.openexchange.folderstorage.FolderPermissionType;
 import com.openexchange.groupware.EnumComponent;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.server.osgi.ServerActivator;
@@ -237,6 +238,7 @@ public final class PermissionLoaderService implements Runnable {
         for (final int folderId : folderIds) {
             tmp.add(newPair(folderId, contextId));
         }
+
         queue.addAll(tmp);
     }
 
@@ -455,7 +457,7 @@ public final class PermissionLoaderService implements Runnable {
         }
     }
 
-    private static final String SQL_LOAD_P = "SELECT permission_id, fp, orp, owp, odp, admin_flag, group_flag, system, fuid FROM oxfolder_permissions WHERE cid = ? AND fuid IN ";
+    private static final String SQL_LOAD_P = "SELECT permission_id, fp, orp, owp, odp, admin_flag, group_flag, system, fuid, type, sharedParentFolder FROM oxfolder_permissions WHERE cid = ? AND fuid IN ";
 
     protected static void loadFolderPermissions(int[] folderIds, int cid, Connection con, TIntObjectMap<List<OCLPermission>> mapping) throws OXException, SQLException {
         PreparedStatement stmt = null;
@@ -485,6 +487,9 @@ public final class PermissionLoaderService implements Runnable {
                 p.setFolderAdmin(rs.getInt(6) > 0 ? true : false); // admin_flag
                 p.setGroupPermission(rs.getInt(7) > 0 ? true : false); // group_flag
                 p.setSystem(rs.getInt(8)); // system
+                p.setType(FolderPermissionType.getType(rs.getInt(10))); // type
+                int legator = rs.getInt(11);
+                p.setPermissionLegator(legator == 0 ? null : String.valueOf(legator)); // legator
                 permissions.add(p);
             } while (rs.next());
         } catch (SQLException e) {

@@ -47,59 +47,49 @@
  *
  */
 
-package com.openexchange.share.groupware;
+package com.openexchange.webdav;
+
+import java.io.IOException;
+import java.io.PrintWriter;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import com.openexchange.version.Version;
 
 /**
- * {@link SubfolderAwareTargetPermission}
+ * The WebDAV version servlet. OXtender needs this servlet to determine the version of the server that it communicates to.
  *
- * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
- * @since v7.10.0
+ * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  */
-public class SubfolderAwareTargetPermission extends TargetPermission {
+public final class version extends HttpServlet {
 
-    private final int type;
-    private final String legator;
-    private final int system;
+    private static final transient org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(version.class);
 
     /**
-     * Initializes a new {@link SubfolderAwareTargetPermission}.
-     * @param entityId
-     * @param isGroup
-     * @param permissionBits
-     * @param includeSubfolders
+     * For serialization.
      */
-    public SubfolderAwareTargetPermission(int entityId, boolean isGroup, int permissionBits, int type, String legator, int system) {
-        super(entityId, isGroup, permissionBits);
-        this.type = type;
-        this.legator = legator;
-        this.system = system;
+    private static final long serialVersionUID = -7246795219288838650L;
+
+    @Override
+    protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        // create a new HttpSession if it's missing
+        req.getSession(true);
+        super.service(req, resp);
     }
 
     /**
-     * Gets this folder permission's type.
-     *
-     * @return This folder permission's type.
+     * {@inheritDoc}
      */
-    public int getType() {
-        return type;
+    @Override
+    public void doGet(final HttpServletRequest req, final HttpServletResponse resp) {
+        try {
+            resp.setContentType("text/plain; charset=UTF-8");
+            final PrintWriter pw = resp.getWriter();
+            pw.println(Version.getInstance().getVersionString());
+            pw.flush();
+        } catch (final IOException e) {
+            LOG.error("", e);
+        }
     }
-
-    /**
-     * If this permission is handed down from a parent folder this method retrieves the sharing parent folder id.
-     *
-     * @return This sharing folder id
-     */
-    public String getPermissionLegator() {
-       return legator;
-    }
-
-    /**
-     * Gets the system
-     *
-     * @return The system
-     */
-    public int getSystem() {
-        return system;
-    }
-
 }

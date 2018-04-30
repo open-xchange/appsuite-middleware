@@ -405,11 +405,11 @@ public class DefaultShareService implements ShareService {
 
             boolean folderPermissionUpdate = false;
             if (shareInfo.isIncludeSubfolders() != linkUpdate.isIncludeSubfolders() && shareInfo.getTarget().getModule() == FolderObject.INFOSTORE) {
-                TargetPermission targetPermission = new SubfolderAwareTargetPermission(shareInfo.getGuest().getGuestID(), false, LINK_PERMISSION_BITS, FolderPermissionType.LEGATOR.getTypeNumber(), null);
+                TargetPermission targetPermission = new SubfolderAwareTargetPermission(shareInfo.getGuest().getGuestID(), false, LINK_PERMISSION_BITS, FolderPermissionType.LEGATOR.getTypeNumber(), null, 0);
                 if (shareInfo.isIncludeSubfolders()) {
                     // Remove permission in case includeSubfolders is changed from 'true' to 'false' so handed down permissions get removed as well
                     targetProxy.removePermissions(Collections.singletonList(targetPermission));
-                    targetPermission = new SubfolderAwareTargetPermission(shareInfo.getGuest().getGuestID(), false, LINK_PERMISSION_BITS, FolderPermissionType.NORMAL.getTypeNumber(), null);
+                    targetPermission = new SubfolderAwareTargetPermission(shareInfo.getGuest().getGuestID(), false, LINK_PERMISSION_BITS, FolderPermissionType.NORMAL.getTypeNumber(), null, 0);
                 }
                 // Re-apply the link permission
                 targetProxy.applyPermissions(Collections.singletonList(targetPermission));
@@ -500,6 +500,9 @@ public class DefaultShareService implements ShareService {
                 if (false == permission.isGroup() && LINK_PERMISSION_BITS == permission.getBits()) {
                     boolean includeSubfolders = false;
                     if(permission instanceof SubfolderAwareTargetPermission) {
+                        if (((SubfolderAwareTargetPermission) permission).getSystem() != 0) {
+                            continue;
+                        }
                         includeSubfolders = ((SubfolderAwareTargetPermission) permission).getType() == FolderPermissionType.LEGATOR.getTypeNumber();
                     }
                     entities.put(I(permission.getEntity()), includeSubfolders);
@@ -1215,7 +1218,7 @@ public class DefaultShareService implements ShareService {
             /*
              * apply new permission entity for this target
              */
-            TargetPermission targetPermission = new SubfolderAwareTargetPermission(shareInfo.getGuest().getGuestID(), false, recipient.getBits(), FolderPermissionType.LEGATOR.getTypeNumber(), null);
+            TargetPermission targetPermission = new SubfolderAwareTargetPermission(shareInfo.getGuest().getGuestID(), false, recipient.getBits(), FolderPermissionType.LEGATOR.getTypeNumber(), null, 0);
 
             targetProxy.applyPermissions(Collections.singletonList(targetPermission));
             /*

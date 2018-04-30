@@ -121,9 +121,7 @@ public class ITipHandler implements CalendarHandler {
 
     @Override
     public void handle(CalendarEvent event) {
-        if (event == null ||
-            event.getCalendarParameters() != null && event.getCalendarParameters().contains(CalendarParameters.PARAMETER_SUPPRESS_ITIP) && event.getCalendarParameters().get(CalendarParameters.PARAMETER_SUPPRESS_ITIP, Boolean.class).booleanValue() ||
-            event.getAccountId() != CalendarAccount.DEFAULT_ACCOUNT.getAccountId()) {
+        if (!shouldHandle(event)) {
             return;
         }
 
@@ -152,6 +150,24 @@ public class ITipHandler implements CalendarHandler {
         } catch (OXException oe) {
             LOG.error("Unable to handle CalendarEvent", oe);
         }
+    }
+
+    private boolean shouldHandle(CalendarEvent event) {
+        if (event == null || event.getAccountId() != CalendarAccount.DEFAULT_ACCOUNT.getAccountId()) {
+            return false;
+        }
+
+        if (event.getCalendarParameters() != null) {
+
+            if (event.getCalendarParameters().contains(CalendarParameters.PARAMETER_SUPPRESS_ITIP)) {
+                Boolean suppress = event.getCalendarParameters().get(CalendarParameters.PARAMETER_SUPPRESS_ITIP, Boolean.class);
+                if (suppress != null && suppress.booleanValue()) {
+                    return false;
+                }
+            }
+        }
+
+        return true;
     }
 
     private void handleCreate(CreateResult create, List<CreateResult> creations, List<UpdateResult> updates, CalendarEvent event) throws OXException {
