@@ -147,8 +147,12 @@ public class ITipHandler implements CalendarHandler {
             }
 
             if (deletions.size() > 0) {
+                Set<DeleteResult> ignore = new HashSet<>();
                 for (DeleteResult delete : deletions) {
-                    handleDelete(delete, deletions, event);
+                    if (ignore.contains(delete)) {
+                        continue;
+                    }
+                    handleDelete(delete, deletions, ignore, event);
                 }
             }
         } catch (OXException oe) {
@@ -259,14 +263,17 @@ public class ITipHandler implements CalendarHandler {
         handle(event, State.Type.MODIFIED, update.getOriginal(), update.getUpdate(), exceptions.stream().map(UpdateResult::getUpdate).collect(Collectors.toList()));
     }
 
-    private void handleDelete(DeleteResult delete, List<DeleteResult> deletions, CalendarEvent event) throws OXException {
+    private void handleDelete(DeleteResult delete, List<DeleteResult> deletions, Set<DeleteResult> ignore, CalendarEvent event) throws OXException {
         List<DeleteResult> exceptions = Collections.emptyList();
 
         // Check for series update
         if (delete.getOriginal().containsSeriesId()) {
             // Get all events of the series
             String seriesId = delete.getOriginal().getSeriesId();
-            List<DeleteResult> eventGroup = deletions.stream().filter(u -> seriesId.equals(u.getOriginal().getSeriesId())).collect(Collectors.toList());
+            List<DeleteResult> eventGroup = deletions.stream()
+                .filter(u -> !ignore.contains(u))
+                .filter(u -> seriesId.equals(u.getOriginal().getSeriesId()))
+                .collect(Collectors.toList());
 
             // Check if there is a group to handle
             if (eventGroup.size() > 1) {
@@ -274,7 +281,7 @@ public class ITipHandler implements CalendarHandler {
                 Optional<DeleteResult> master = eventGroup.stream().filter(u -> seriesId.equals(u.getOriginal().getId())).findFirst();
                 if (master.isPresent() && CalendarUtils.isSeriesMaster(master.get().getOriginal())) {
                     // Series update, remove those items from the update list and the master from the exceptions
-                    deletions.removeAll(eventGroup);
+                    ignore.addAll(eventGroup);
                     eventGroup.remove(master.get());
 
                     // Set for processing
