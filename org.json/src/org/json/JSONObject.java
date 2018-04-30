@@ -926,6 +926,17 @@ public class JSONObject extends AbstractJSONValue {
     }
 
     /**
+     * Get an optional JSONValue associated with a key. It returns null if there is no such key, or if its value is not a JSONValue.
+     *
+     * @param key A key string.
+     * @return A JSONValue which is the value.
+     */
+    public JSONValue optJSONValue(final String key) {
+        final Object o = opt(key);
+        return o instanceof JSONValue ? (JSONValue) o : null;
+    }
+
+    /**
      * Get an optional JSONArray associated with a key. It returns null if there is no such key, or if its value is not a JSONArray.
      *
      * @param key A key string.
@@ -945,6 +956,17 @@ public class JSONObject extends AbstractJSONValue {
     public JSONObject optJSONObject(final String key) {
         final Object o = opt(key);
         return o instanceof JSONObject ? (JSONObject) o : null;
+    }
+
+    /**
+     * Get an optional Number associated with a key. It returns null if there is no such key, or if its value is not a Number.
+     *
+     * @param key A key string.
+     * @return A Number which is the value.
+     */
+    public Number optNumber(final String key) {
+        final Object o = opt(key);
+        return o instanceof Number ? (Number) o : null;
     }
 
     /**
