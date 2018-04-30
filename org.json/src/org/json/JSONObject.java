@@ -129,7 +129,7 @@ public class JSONObject extends AbstractJSONValue {
      */
     private static final class Null implements Cloneable {
 
-        public Null() {
+        Null() {
             super();
         }
 
@@ -178,7 +178,7 @@ public class JSONObject extends AbstractJSONValue {
     public static final Object NULL = new Null();
 
     /**
-     * Construct an empty JSONObject.
+     * Construct an empty JSONObject with the default initial capacity (16).
      */
     public JSONObject() {
         super();
@@ -186,7 +186,10 @@ public class JSONObject extends AbstractJSONValue {
     }
 
     /**
-     * Construct an empty JSONObject.
+     * Construct an empty JSONObject with given initial capacity.
+     *
+     * @param  initialCapacity The initial capacity
+     * @throws IllegalArgumentException If the initial capacity is negative
      */
     public JSONObject(final int initialCapacity) {
         super();
@@ -772,12 +775,16 @@ public class JSONObject extends AbstractJSONValue {
      * @return A JSONArray containing the key strings, or null if the JSONObject is empty.
      */
     public JSONArray names() {
-        final JSONArray ja = new JSONArray();
-        final Set<String> keys = keySet();
-        for (final String name : keys) {
+        int length = length();
+        if (length <= 0) {
+            return null;
+        }
+
+        JSONArray ja = new JSONArray(length);
+        for (String name : keySet()) {
             ja.put(name);
         }
-        return ja.length() == 0 ? null : ja;
+        return ja;
     }
 
     /**
@@ -787,7 +794,7 @@ public class JSONObject extends AbstractJSONValue {
      * @return A String.
      * @throws JSONException If n is a non-finite number.
      */
-    static public final String numberToString(final Number n) throws JSONException {
+    public static final String numberToString(final Number n) throws JSONException {
         if (n == null) {
             throw new JSONException("Null pointer");
         }
@@ -926,6 +933,17 @@ public class JSONObject extends AbstractJSONValue {
     }
 
     /**
+     * Get an optional JSONValue associated with a key. It returns null if there is no such key, or if its value is not a JSONValue.
+     *
+     * @param key A key string.
+     * @return A JSONValue which is the value.
+     */
+    public JSONValue optJSONValue(final String key) {
+        final Object o = opt(key);
+        return o instanceof JSONValue ? (JSONValue) o : null;
+    }
+
+    /**
      * Get an optional JSONArray associated with a key. It returns null if there is no such key, or if its value is not a JSONArray.
      *
      * @param key A key string.
@@ -945,6 +963,17 @@ public class JSONObject extends AbstractJSONValue {
     public JSONObject optJSONObject(final String key) {
         final Object o = opt(key);
         return o instanceof JSONObject ? (JSONObject) o : null;
+    }
+
+    /**
+     * Get an optional Number associated with a key. It returns null if there is no such key, or if its value is not a Number.
+     *
+     * @param key A key string.
+     * @return A Number which is the value.
+     */
+    public Number optNumber(final String key) {
+        final Object o = opt(key);
+        return o instanceof Number ? (Number) o : null;
     }
 
     /**

@@ -1362,6 +1362,10 @@ public final class CacheFolderStorage implements ReinitializableFolderStorage, F
      * @throws OXException
      */
     protected Folder getRefFromCache(String treeId, String folderId, StorageParameters params) throws OXException {
+        if (folderId == null) {
+            LOG.info("Unable to retrieve folder reference from cache as the folder identifier is 'null'.");
+            return null;
+        }
         int contextId = params.getContextId();
         /*
          * Try global cache key
