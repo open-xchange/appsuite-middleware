@@ -273,7 +273,7 @@ public abstract class BasicCachingCalendarAccess implements BasicCalendarAccess,
             return;
         }
         JSONObject caching = internalConfiguration.optJSONObject(CachingCalendarAccessConstants.CACHING);
-        Number lastUpdate = (Number) caching.opt(CachingCalendarAccessConstants.LAST_UPDATE);
+        Number lastUpdate = caching.optNumber(CachingCalendarAccessConstants.LAST_UPDATE);
         long currentTimeMillis = System.currentTimeMillis();
         if (lastUpdate == null || lastUpdate.longValue() <= 0 || (TimeUnit.MINUTES.toMillis(getCascadedRefreshInterval()) < currentTimeMillis - lastUpdate.longValue() + TimeUnit.MINUTES.toMillis(1)) || this.parameters.contains(CalendarParameters.PARAMETER_UPDATE_CACHE) && this.parameters.get(CalendarParameters.PARAMETER_UPDATE_CACHE, Boolean.class, Boolean.FALSE).booleanValue()) {
             if (lastUpdate != null && lastUpdate.longValue() > 0 && lastUpdate.longValue() + TimeUnit.MINUTES.toMillis(1) > currentTimeMillis) {

@@ -174,8 +174,8 @@ public abstract class AbstractITipAction implements AJAXActionService {
         final Object data = request.getData();
         if (data != null) {
             final JSONObject body = (JSONObject) data;
-            for (final String string : body.keySet()) {
-                dataArguments.put(string, body.opt(string).toString());
+            for (final Map.Entry<String, Object> entry : body.entrySet()) {
+                dataArguments.put(entry.getKey(), entry.getValue().toString());
             }
         } else {
             for (final Map.Entry<String, String> entry : request.getParameters().entrySet()) {

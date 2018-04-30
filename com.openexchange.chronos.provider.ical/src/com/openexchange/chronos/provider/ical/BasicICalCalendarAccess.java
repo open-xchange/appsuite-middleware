@@ -133,7 +133,7 @@ public class BasicICalCalendarAccess extends BasicCachingCalendarAccess {
         JSONObject userConfig = account.getUserConfiguration();
         if (userConfig != null && userConfig.hasAndNotNull(ICalCalendarConstants.REFRESH_INTERVAL)) {
             try {
-                Number userInterval = (Number) userConfig.opt(ICalCalendarConstants.REFRESH_INTERVAL);
+                Number userInterval = userConfig.optNumber(ICalCalendarConstants.REFRESH_INTERVAL);
                 if (userInterval != null && userInterval.longValue() > 0) {
                     return userInterval.longValue();
                 }
@@ -145,7 +145,7 @@ public class BasicICalCalendarAccess extends BasicCachingCalendarAccess {
         JSONObject iCalConfiguration = getICalConfiguration();
 
         if (iCalConfiguration != null && !iCalConfiguration.isEmpty()) {
-            Number calendarProviderInterval = (Number) iCalConfiguration.opt(ICalCalendarConstants.REFRESH_INTERVAL);
+            Number calendarProviderInterval = iCalConfiguration.optNumber(ICalCalendarConstants.REFRESH_INTERVAL);
             if (calendarProviderInterval != null && calendarProviderInterval.longValue() > 0) {
                 return calendarProviderInterval.longValue();
             }

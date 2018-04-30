@@ -514,7 +514,7 @@ public final class MIMEStructureHandler implements StructureHandler {
             // Dequeue
             mailJsonObjectQueue.removeLast();
             currentMailObject = mailJsonObjectQueue.getLast();
-            currentBodyObject = (JSONValue) currentMailObject.opt(BODY);
+            currentBodyObject = currentMailObject.optJSONValue(BODY);
         }
         return true;
     }

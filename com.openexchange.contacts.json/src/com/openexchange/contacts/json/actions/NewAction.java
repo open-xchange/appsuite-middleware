@@ -91,8 +91,8 @@ public class NewAction extends ContactAction {
         String imageBase64 = null;
         {
             Object imageObject = json.opt("image1");
-            if (imageObject instanceof String) {
-                imageBase64 = (String) imageObject;
+            if (imageObject instanceof CharSequence) {
+                imageBase64 = imageObject.toString();
                 if (Strings.isEmpty(imageBase64)) {
                     imageBase64 = null;
                 } else {
