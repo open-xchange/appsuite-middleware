@@ -343,7 +343,6 @@ public class OAuthServiceImpl implements OAuthService {
         // if found then update that account
         existingAccount.setToken(account.getToken());
         existingAccount.setSecret(account.getSecret());
-        existingAccount.setDisplayName(account.getDisplayName());
         for (OAuthScope scope : scopes) {
             existingAccount.addEnabledScope(scope);
         }
