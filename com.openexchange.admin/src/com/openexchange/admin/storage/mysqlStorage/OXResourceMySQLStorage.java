@@ -195,11 +195,7 @@ public class OXResourceMySQLStorage extends OXResourceSQLStorage implements OXMy
             con.commit();
             rollback = false;
 
-            if (null == resourceName) {
-                log.info("Resource changed!");
-            } else {
-                log.info("Resource {} changed!", resourceName);
-            }
+            log.info("Resource {} changed!", resourceName == null ? "" : resourceName);
         } catch (DataTruncation dt) {
             log.error(AdminCache.DATA_TRUNCATION_ERROR_MSG, dt);
             throw AdminCache.parseDataTruncation(dt);
