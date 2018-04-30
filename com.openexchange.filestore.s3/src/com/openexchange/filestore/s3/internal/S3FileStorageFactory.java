@@ -202,7 +202,7 @@ public class S3FileStorageFactory implements FileStorageProvider {
          * prepare credentials
          */
         String accessKey = requireProperty(filestoreID, "accessKey", nameBuilder, configService);
-        String secretKey = requireProperty(filestoreID, ".ecretKey", nameBuilder, configService);
+        String secretKey = requireProperty(filestoreID, "secretKey", nameBuilder, configService);
         BasicAWSCredentials credentials = new BasicAWSCredentials(accessKey, secretKey);
         /*
          * instantiate client
