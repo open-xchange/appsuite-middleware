@@ -63,7 +63,7 @@ public enum ContactProperty implements Property {
      * The department will only be shown for entries that are in the Global Address Book.
      * Default: <code>false</code>
      */
-    showDepartment(false);
+    showDepartments(false);
 
     private static final String PREFIX = "com.openexchange.contact.";
     private Object defaultValue;

@@ -80,4 +80,4 @@ properties:
      In case the parameter 'extendedEntities' is set to 'true' and the entity is a group
      then this field contains the data of this group.
     properties:
-      $ref: ../groups/GroupData.yaml
+      $ref: ../groups/GroupDataRaw.yaml

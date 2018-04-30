@@ -166,6 +166,10 @@ public abstract class DefaultAppSuiteLoginRampUp implements LoginRampUpService {
 
         @Override
         public Object getResult(ServerSession session, AJAXRequestData loginRequest) throws OXException {
+            if (false == isApplicable(session, loginRequest, ox)) {
+                return null;
+            }
+
             AJAXRequestResult requestResult = null;
             Exception exc = null;
             try {
@@ -184,6 +188,16 @@ public abstract class DefaultAppSuiteLoginRampUp implements LoginRampUpService {
                 Dispatchers.signalDone(requestResult, exc);
             }
         }
+
+        /**
+         * Checks if this contribution is applicable.
+         *
+         * @param session The session
+         * @param loginRequest The AJAX login request
+         * @param ox The dispatcher service
+         * @return <code>true</code> if applicable; otherwise <code>false</code>
+         */
+        protected abstract boolean isApplicable(ServerSession session, AJAXRequestData loginRequest, Dispatcher ox);
 
         /**
          * Gets the parameters to pass to dispatcher action

@@ -300,7 +300,8 @@ public class DiffToChangeLog {
             //Check to see if all edges are removed
             for (Node n : allNodes.values()) {
                 if (!n.inEdges.isEmpty()) {
-                    String message = "Could not resolve " + generatorType.getSimpleName() + " dependencies due to dependency cycle. Dependencies: \n";
+                    StringBuilder messageBuilder = new StringBuilder("Could not resolve ");
+                    messageBuilder.append(generatorType.getSimpleName()).append(" dependencies due to dependency cycle. Dependencies: \n");
                     for (Node node : allNodes.values()) {
                         SortedSet<String> fromTypes = new TreeSet<String>();
                         SortedSet<String> toTypes = new TreeSet<String>();
@@ -312,10 +313,11 @@ public class DiffToChangeLog {
                         }
                         String from = StringUtils.join(fromTypes, ",");
                         String to = StringUtils.join(toTypes, ",");
-                        message += "    ["+ from +"] -> "+ node.type.getSimpleName()+" -> [" + to +"]\n";
+                        messageBuilder.append("    [").append(from).append("] -> ");
+                        messageBuilder.append(node.type.getSimpleName()).append(" -> [").append(to).append("]\n");
                     }
 
-                    throw new UnexpectedLiquibaseException(message);
+                    throw new UnexpectedLiquibaseException(messageBuilder.toString());
                 }
             }
             List<Class<? extends DatabaseObject>> returnList = new ArrayList<Class<? extends DatabaseObject>>();
