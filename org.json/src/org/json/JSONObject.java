@@ -178,7 +178,7 @@ public class JSONObject extends AbstractJSONValue {
     public static final Object NULL = new Null();
 
     /**
-     * Construct an empty JSONObject.
+     * Construct an empty JSONObject with the default initial capacity (16).
      */
     public JSONObject() {
         super();
@@ -186,7 +186,10 @@ public class JSONObject extends AbstractJSONValue {
     }
 
     /**
-     * Construct an empty JSONObject.
+     * Construct an empty JSONObject with given initial capacity.
+     *
+     * @param  initialCapacity The initial capacity
+     * @throws IllegalArgumentException If the initial capacity is negative
      */
     public JSONObject(final int initialCapacity) {
         super();
