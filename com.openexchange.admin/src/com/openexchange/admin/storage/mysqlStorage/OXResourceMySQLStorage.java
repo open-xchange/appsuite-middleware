@@ -46,6 +46,7 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+
 package com.openexchange.admin.storage.mysqlStorage;
 
 import java.sql.Connection;
@@ -88,8 +89,7 @@ public class OXResourceMySQLStorage extends OXResourceSQLStorage implements OXMy
     }
 
     @Override
-    public void change(final Context ctx, final Resource res)
-            throws StorageException {
+    public void change(final Context ctx, final Resource res) throws StorageException {
         final int context_id = ctx.getId().intValue();
         final int resource_id = res.getId().intValue();
         Connection con = null;
@@ -123,7 +123,7 @@ public class OXResourceMySQLStorage extends OXResourceSQLStorage implements OXMy
                 editres.executeUpdate();
                 editres.close();
                 edited_the_resource++;
-            }else if(null != res.getDescription()){
+            } else if (null != res.getDescription()) {
                 editres = con.prepareStatement("UPDATE resource SET description = ? WHERE cid = ? AND id = ?");
                 editres.setString(1, res.getDescription());
                 editres.setInt(2, context_id);
@@ -223,8 +223,7 @@ public class OXResourceMySQLStorage extends OXResourceSQLStorage implements OXMy
     }
 
     @Override
-    public int create(final Context ctx, final Resource res)
-            throws StorageException {
+    public int create(final Context ctx, final Resource res) throws StorageException {
         final int context_ID = ctx.getId();
         Connection con = null;
         PreparedStatement prep_insert = null;
@@ -288,7 +287,7 @@ public class OXResourceMySQLStorage extends OXResourceSQLStorage implements OXMy
             rollback = false;
             log.info("Resource {} created!", resID);
             return resID;
-        }catch (final DataTruncation dt){
+        } catch (final DataTruncation dt) {
             log.error(AdminCache.DATA_TRUNCATION_ERROR_MSG, dt);
             throw AdminCache.parseDataTruncation(dt);
         } catch (final SQLException e) {
@@ -425,7 +424,7 @@ public class OXResourceMySQLStorage extends OXResourceSQLStorage implements OXMy
             final ResultSet rs = prep_list.executeQuery();
 
             if (!rs.next()) {
-               throw new StorageException("No such resource");
+                throw new StorageException("No such resource");
             }
             final int id = rs.getInt("id");
             final String ident = rs.getString("identifier");
@@ -486,8 +485,7 @@ public class OXResourceMySQLStorage extends OXResourceSQLStorage implements OXMy
     }
 
     @Override
-    public Resource[] list(final Context ctx, final String pattern)
-            throws StorageException {
+    public Resource[] list(final Context ctx, final String pattern) throws StorageException {
         Connection con = null;
         ResultSet rs = null;
         PreparedStatement prep_list = null;
@@ -596,18 +594,17 @@ public class OXResourceMySQLStorage extends OXResourceSQLStorage implements OXMy
     }
 
     @Override
-    public void createRecoveryData(final int resource_id, final Context ctx, final Connection con)
-            throws StorageException {
+    public void createRecoveryData(final int resource_id, final Context ctx, final Connection con) throws StorageException {
         // insert into del_resource table
         final int context_id = ctx.getId();
         PreparedStatement del_st = null;
         try {
-            del_st = con.prepareStatement("" + "INSERT " + "into del_resource " + "(id,cid,lastModified) " + "VALUES " + "(?,?,?)");
+            del_st = con.prepareStatement("INSERT into del_resource (id,cid,lastModified) VALUES (?,?,?)");
             del_st.setInt(1, resource_id);
             del_st.setInt(2, context_id);
             del_st.setLong(3, System.currentTimeMillis());
             del_st.executeUpdate();
-        }catch (final DataTruncation dt){
+        } catch (final DataTruncation dt) {
             log.error(AdminCache.DATA_TRUNCATION_ERROR_MSG, dt);
             throw AdminCache.parseDataTruncation(dt);
         } catch (final SQLException e) {
@@ -626,8 +623,7 @@ public class OXResourceMySQLStorage extends OXResourceSQLStorage implements OXMy
     }
 
     @Override
-    public void deleteAllRecoveryData(final Context ctx, final Connection con)
-            throws StorageException {
+    public void deleteAllRecoveryData(final Context ctx, final Connection con) throws StorageException {
         // delete from del_resource table
         final int context_id = ctx.getId();
         PreparedStatement del_st = null;
@@ -650,8 +646,7 @@ public class OXResourceMySQLStorage extends OXResourceSQLStorage implements OXMy
     }
 
     @Override
-    public void deleteRecoveryData(final int resource_id, final Context ctx, final Connection con)
-            throws StorageException {
+    public void deleteRecoveryData(final int resource_id, final Context ctx, final Connection con) throws StorageException {
         // delete from del_resource table
         final int context_id = ctx.getId();
         PreparedStatement del_st = null;
@@ -673,5 +668,4 @@ public class OXResourceMySQLStorage extends OXResourceSQLStorage implements OXMy
             }
         }
     }
-
 }
