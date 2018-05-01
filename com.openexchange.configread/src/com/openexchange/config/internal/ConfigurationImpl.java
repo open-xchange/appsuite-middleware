@@ -98,10 +98,8 @@ import com.openexchange.startup.StaticSignalStartedService.State;
  */
 public final class ConfigurationImpl implements ConfigurationService {
 
-    /**
-     * The logger constant.
-     */
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ConfigurationImpl.class);
+    /** The logger constant. */
+    static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ConfigurationImpl.class);
 
     private static final class PropertyFileFilter implements FileFilter {
 
@@ -116,7 +114,11 @@ public final class ConfigurationImpl implements ConfigurationService {
 
         @Override
         public boolean accept(final File pathname) {
-            return pathname.isDirectory() || pathname.getName().toLowerCase().endsWith(ext) || mpasswd.equals(pathname.getName());
+            if (pathname.isDirectory()) {
+                return true;
+            }
+            String name = pathname.getName();
+            return name.toLowerCase().endsWith(ext) || mpasswd.equals(name);
         }
 
     }
@@ -253,23 +255,29 @@ public final class ConfigurationImpl implements ConfigurationService {
             throw new IllegalArgumentException("Missing configuration directory path.");
         }
 
-        // First filter+processor pair
+        // First filter+processor pair for .properties files & sub-directories
         FileFilter fileFilter = new PropertyFileFilter();
         FileProcessor processor = new FileProcessor() {
 
+            private final boolean debug = LOG.isDebugEnabled();
+
             @Override
             public void processFile(final File file) {
-                processPropertiesFile(file);
+                processPropertiesFile(file, debug);
             }
 
         };
 
-        // Second filter+processor pair
+        // Second filter+processor pair for YAML files & sub-directories
         FileFilter fileFilter2 = new FileFilter() {
 
             @Override
             public boolean accept(final File pathname) {
-                return pathname.isDirectory() || pathname.getName().endsWith(".yml") || pathname.getName().endsWith(".yaml");
+                if (pathname.isDirectory()) {
+                    return true;
+                }
+                String name = pathname.getName();
+                return name.endsWith(".yml") || name.endsWith(".yaml");
             }
 
         };
@@ -286,7 +294,7 @@ public final class ConfigurationImpl implements ConfigurationService {
 
         };
 
-        // Third filter+processor pair
+        // Third filter+processor pair for XML files
         FileFilter fileFilter3 = new FileFilter() {
 
             @Override
@@ -352,16 +360,18 @@ public final class ConfigurationImpl implements ConfigurationService {
         }
     }
 
-    void processPropertiesFile(final File propFile) {
+    void processPropertiesFile(final File propFile, boolean debug) {
         try {
-            if (!propFile.exists() || !propFile.canRead()) {
+            if (!propFile.exists()) {
                 return;
+            }
+            if (!propFile.canRead()) {
+                throw new IOException("No read permission");
             }
             Properties tmp = ConfigurationServices.loadPropertiesFrom(propFile);
             propertiesByFile.put(propFile, tmp);
 
             String propFilePath = propFile.getPath();
-            boolean debug = LOG.isDebugEnabled();
             for (Map.Entry<Object, Object> e : tmp.entrySet()) {
                 String propName = e.getKey().toString().trim();
                 if (debug) {
