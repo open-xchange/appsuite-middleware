@@ -657,8 +657,11 @@ public final class InternalList {
 
         list.add(new com.openexchange.groupware.update.tasks.DropForeignKeyFromObjectUseCountTable());
 
-        // Add origin column to "del_infostore" table to be able to restore deleted files to origin 
+        // Add origin column to "del_infostore" table to be able to restore deleted files to origin
         list.add(new com.openexchange.groupware.update.tasks.AddOriginColumnToInfostoreDocumentTables());
+
+        // Drops aliases from non-existent users from database
+        list.add(new com.openexchange.groupware.update.tasks.DropAliasesFromNonExistentUsers());
 
         return list.toArray(new UpdateTaskV2[list.size()]);
     }
