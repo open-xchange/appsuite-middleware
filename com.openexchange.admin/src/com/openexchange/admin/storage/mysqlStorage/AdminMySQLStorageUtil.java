@@ -96,7 +96,7 @@ class AdminMySQLStorageUtil {
     static Connection leaseConnectionForContext(int contextId, AdminCache cache) throws StorageException {
         try {
             return cache.getConnectionForContext(contextId);
-        } catch (final PoolException e) {
+        } catch (PoolException e) {
             LOG.error("Pool Error", e);
             throw new StorageException(e);
         }
@@ -114,7 +114,7 @@ class AdminMySQLStorageUtil {
     static Connection leaseWriteContextConnectionWithoutTimeout(int contextId, AdminCache cache) throws StorageException {
         try {
             return cache.getConnectionForContextNoTimeout(contextId);
-        } catch (final PoolException e) {
+        } catch (PoolException e) {
             LOG.error("Pool Error", e);
             throw new StorageException(e);
         }
@@ -134,7 +134,7 @@ class AdminMySQLStorageUtil {
         }
         try {
             cache.pushReadConnectionForConfigDB(connection);
-        } catch (final Exception e) {
+        } catch (Exception e) {
             LOG.error("Error pushing configdb connection to pool!", e);
         }
     }
@@ -153,7 +153,7 @@ class AdminMySQLStorageUtil {
         int contextId = context.getId().intValue();
         try {
             cache.pushConnectionForContext(contextId, connection);
-        } catch (final PoolException e) {
+        } catch (PoolException e) {
             LOG.error("Error pushing write connection to pool for context {}!", contextId, e);
         }
     }
@@ -171,7 +171,7 @@ class AdminMySQLStorageUtil {
         }
         try {
             cache.pushConnectionForContextAfterReading(contextId, connection);
-        } catch (final PoolException exp) {
+        } catch (PoolException exp) {
             LOG.error("Pool Error pushing ox read connection to pool!", exp);
         }
     }
@@ -189,7 +189,7 @@ class AdminMySQLStorageUtil {
         }
         try {
             cache.pushConnectionForContextNoTimeout(contextId, connection);
-        } catch (final PoolException e) {
+        } catch (PoolException e) {
             LOG.error("Pool Error pushing ox write connection to pool!", e);
         }
     }
