@@ -102,15 +102,29 @@ public class AdminDaemon implements AdminDaemonService {
                 final int len = wildcard.length();
                 for (int i = 0; i < len; i++) {
                     final char c = wildcard.charAt(i);
-                    if (c == '*') {
-                        s.append(".*");
-                    } else if (c == '?') {
-                        s.append(".");
-                    } else if (c == '(' || c == ')' || c == '[' || c == ']' || c == '$' || c == '^' || c == '.' || c == '{' || c == '}' || c == '|' || c == '\\') {
-                        s.append('\\');
-                        s.append(c);
-                    } else {
-                        s.append(c);
+                    switch (c) {
+                        case '*':
+                            s.append(".*");
+                            break;
+                        case '?':
+                            s.append(".");
+                            break;
+                        case '(':
+                        case ')':
+                        case '[':
+                        case ']':
+                        case '$':
+                        case '^':
+                        case '.':
+                        case '{':
+                        case '}':
+                        case '|':
+                        case '\\':
+                            s.append('\\').append(c);
+                            break;
+                        default:
+                            s.append(c);
+                            break;
                     }
                 }
                 s.append('$');
