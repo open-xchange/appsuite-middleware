@@ -250,7 +250,7 @@ public final class HttpClients {
     private static CloseableHttpClient initializeHttpClientUsing(final ClientConfig config, HttpClientConnectionManager ccm) {
         HttpClientBuilder clientBuilder = org.apache.http.impl.client.HttpClients.custom()
             .setConnectionManager(ccm)
-            .setDefaultRequestConfig(RequestConfig.custom().setConnectTimeout(config.connectionTimeout).setSocketTimeout(config.socketReadTimeout).setProxy(config.proxy).build());
+            .setDefaultRequestConfig(RequestConfig.custom().setConnectTimeout(config.connectionTimeout).setSocketTimeout(config.socketReadTimeout).setProxy(config.proxy).setCookieSpec("lenient").build());
 
         if (config.keepAliveStrategy == null) {
             clientBuilder.setKeepAliveStrategy(new KeepAliveStrategy(config.keepAliveDuration));
