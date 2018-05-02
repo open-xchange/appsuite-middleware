@@ -96,6 +96,7 @@ public class AdminDaemon implements AdminDaemonService {
 
     static {
         class RegexHelper {
+
             Pattern wildcardPattern(final String wildcard) {
                 final StringBuilder s = new StringBuilder(wildcard.length());
                 s.append('^');
@@ -340,10 +341,10 @@ public class AdminDaemon implements AdminDaemonService {
      */
     public void initRMI(BundleContext context) {
         try {
-            final com.openexchange.admin.rmi.impl.OXUser oxuser_v2 = new com.openexchange.admin.rmi.impl.OXUser(context);
+            final com.openexchange.admin.rmi.impl.OXUser oxuser_v2 = new com.openexchange.admin.rmi.impl.OXUser();
             final com.openexchange.admin.rmi.impl.OXGroup oxgrp_v2 = new com.openexchange.admin.rmi.impl.OXGroup();
             final com.openexchange.admin.rmi.impl.OXResource oxres_v2 = new com.openexchange.admin.rmi.impl.OXResource();
-            final com.openexchange.admin.rmi.impl.OXLogin oxlogin_v2 = new com.openexchange.admin.rmi.impl.OXLogin(context);
+            final com.openexchange.admin.rmi.impl.OXLogin oxlogin_v2 = new com.openexchange.admin.rmi.impl.OXLogin();
             final com.openexchange.admin.rmi.impl.OXUtil oxutil_v2 = new com.openexchange.admin.rmi.impl.OXUtil();
             final OXAdminCoreImpl oxadmincore = new OXAdminCoreImpl();
             final OXTaskMgmtImpl oxtaskmgmt = new OXTaskMgmtImpl();
