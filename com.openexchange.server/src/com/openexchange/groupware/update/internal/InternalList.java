@@ -663,6 +663,9 @@ public final class InternalList {
         // Drops aliases from non-existent users from database
         list.add(new com.openexchange.groupware.update.tasks.DropAliasesFromNonExistentUsers());
 
+        // Removes any duplicate entries from the updateTask table
+        list.add(new com.openexchange.groupware.update.tasks.RemoveDuplicatesFromUpdateTaskTable());
+
         return list.toArray(new UpdateTaskV2[list.size()]);
     }
 
