@@ -72,6 +72,7 @@ import java.util.Hashtable;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -196,6 +197,10 @@ public class AdminCache {
      * The available password encrypters.
      */
     private final Map<String, Encrypter> encrypters;
+    /**
+     * The available password mechanisms.
+     */
+    private final Set<String> passwordMechanisms;
 
     /**
      * Initialises a new {@link AdminCache}.
@@ -203,6 +208,20 @@ public class AdminCache {
     public AdminCache() {
         super();
         encrypters = initialiseEncrypters();
+        passwordMechanisms = initialisePasswordMechanisms();
+    }
+
+    /**
+     * Initialises the available password mechanisms
+     * 
+     * @return An unmodifiable {@link Set} with all available password mechanisms
+     */
+    private Set<String> initialisePasswordMechanisms() {
+        Set<String> m = new HashSet<>(4);
+        m.add(PasswordMechObject.BCRYPT_MECH);
+        m.add(PasswordMechObject.CRYPT_MECH);
+        m.add(PasswordMechObject.SHA_MECH);
+        return Collections.unmodifiableSet(m);
     }
 
     /**
@@ -641,22 +660,20 @@ public class AdminCache {
         String passwordMech = user.getPasswordMech();
         if (com.openexchange.java.Strings.isEmpty(passwordMech) || "null".equals(com.openexchange.java.Strings.toLowerCase(passwordMech))) {
             String pwmech = getProperties().getUserProp(AdminProperties.User.DEFAULT_PASSWORD_MECHANISM, "SHA");
-            pwmech = "{" + pwmech + "}";
-            if (pwmech.equalsIgnoreCase(PasswordMechObject.CRYPT_MECH)) {
-                passwordMech = PasswordMechObject.CRYPT_MECH;
-            } else if (pwmech.equalsIgnoreCase(PasswordMechObject.SHA_MECH)) {
-                passwordMech = PasswordMechObject.SHA_MECH;
-            } else if (pwmech.equalsIgnoreCase(PasswordMechObject.BCRYPT_MECH)) {
-                passwordMech = PasswordMechObject.BCRYPT_MECH;
-            } else {
+            pwmech = "{" + pwmech.toUpperCase() + "}";
+            if (!passwordMechanisms.contains(pwmech)) {
                 log.warn("WARNING: unknown password mechanism {} using SHA", pwmech);
                 passwordMech = PasswordMechObject.SHA_MECH;
             }
-            user.setPasswordMech(passwordMech);
+            user.setPasswordMech(pwmech);
+            passwordMech = pwmech;
         }
         return passwordMech;
     }
 
+    /**
+     * Configures the authentication mechanisms
+     */
     private void configureAuthentication() {
         log.debug("Configuring authentication mechanisms ...");
 
