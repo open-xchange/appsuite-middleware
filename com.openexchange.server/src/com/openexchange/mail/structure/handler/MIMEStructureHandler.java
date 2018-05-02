@@ -545,7 +545,7 @@ public final class MIMEStructureHandler implements StructureHandler {
              * Inner parser
              */
             final MIMEStructureHandler inner = new MIMEStructureHandler(maxSize);
-            new StructureMailMessageParser().setParseTNEFParts(true).parseMailMessage(nestedMail, inner, id);
+            new StructureMailMessageParser().setParseTNEFParts(true).setParseUUEncodedParts(true).parseMailMessage(nestedMail, inner, id);
             /*
              * Apply to this handler
              */
