@@ -461,11 +461,12 @@ public class OXPublication extends OXCommonImpl implements OXPublicationInterfac
                     continue;
                 }
                 com.openexchange.publish.Publication currentPublication = publicationService.resolveUrl(oxCtx, url);
-                if (null != currentPublication) {
-                    String description = publicationService.getInformation(currentPublication);
-                    publicationService.delete(currentPublication);
-                    return parsePublication(currentPublication, description);
+                if (null == currentPublication) {
+                    continue;
                 }
+                String description = publicationService.getInformation(currentPublication);
+                publicationService.delete(currentPublication);
+                return parsePublication(currentPublication, description);
                 // Performer
             }
         } catch (OXException e) {
