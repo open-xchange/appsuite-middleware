@@ -41,20 +41,4 @@ public class DeleteTest extends TaskTest {
 
         deleteTask(webCon, objectId, taskFolderId, getHostURI(), login, password);
     }
-
-    @Test
-    public void testDeleteNotFound() throws Exception {
-        final Task appointmentObj = createTask("testUpdateTaskNotFound");
-        final int objectId = insertTask(webCon, appointmentObj, getHostURI(), login, password);
-
-        try {
-            deleteTask(webCon, (objectId + 1000), taskFolderId, getHostURI(), login, password);
-            fail("expected object not found exception!");
-        } catch (final OXException exc) {
-            assertExceptionMessage(exc.getDisplayMessage(Locale.ENGLISH), XmlServlet.OBJECT_NOT_FOUND_STATUS);
-        }
-
-        deleteTask(webCon, objectId, taskFolderId, getHostURI(), login, password);
-    }
-
 }

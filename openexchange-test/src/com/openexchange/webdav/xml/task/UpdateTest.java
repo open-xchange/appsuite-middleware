@@ -92,22 +92,4 @@ public class UpdateTest extends TaskTest {
         final int[][] objectIdAndFolderId = { { objectId, taskFolderId } };
         deleteTask(webCon, objectIdAndFolderId, getHostURI(), login, password);
     }
-
-    @Test
-    public void testUpdateNotFound() throws Exception {
-        Task taskObj = createTask("testUpdateTaskNotFound");
-        final int objectId = insertTask(webCon, taskObj, getHostURI(), login, password);
-
-        taskObj = createTask("testUpdateTaskNotFound2");
-
-        try {
-            updateTask(webCon, taskObj, (objectId + 1000), taskFolderId, new Date(0), getHostURI(), login, password);
-            fail("expected object not found exception!");
-        } catch (final OXException exc) {
-            assertExceptionMessage(exc.getDisplayMessage(Locale.ENGLISH), XmlServlet.OBJECT_NOT_FOUND_STATUS);
-        }
-
-        final int[][] objectIdAndFolderId = { { objectId, taskFolderId } };
-        deleteTask(webCon, objectIdAndFolderId, getHostURI(), login, password);
-    }
 }
