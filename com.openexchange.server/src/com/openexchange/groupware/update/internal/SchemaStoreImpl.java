@@ -524,28 +524,29 @@ public class SchemaStoreImpl extends SchemaStore {
     }
 
     private static void doAddExecutedTasks(Connection con, Collection<String> taskNames, boolean success, boolean withUUID) throws OXException {
-        String insertSQL;
-        if (withUUID) {
-            insertSQL = "INSERT INTO updateTask (cid,successful,lastModified,taskName,uuid) VALUES (0,?,?,?,?)";
-        } else {
-            insertSQL = "INSERT INTO updateTask (cid,successful,lastModified,taskName) VALUES (0,?,?,?)";
-        }
-        String updateSQL = "UPDATE updateTask SET successful=?,lastModified=? WHERE taskName=?";
         PreparedStatement insertStatement = null;
         PreparedStatement updateStatement = null;
         try {
-            insertStatement = con.prepareStatement(insertSQL);
-            updateStatement = con.prepareStatement(updateSQL);
             long now = System.currentTimeMillis();
             for (String taskName : taskNames) {
                 if (taskExists(con, taskName)) {
+                    if (null == updateStatement) {
+                        updateStatement = con.prepareStatement("UPDATE updateTask SET successful=?,lastModified=? WHERE taskName=?");
+                    }
                     updateTask(updateStatement, taskName, success, now);
                 } else {
+                    if (null == insertStatement) {
+                        insertStatement = con.prepareStatement(withUUID ? "INSERT INTO updateTask (cid,successful,lastModified,taskName,uuid) VALUES (0,?,?,?,?)" : "INSERT INTO updateTask (cid,successful,lastModified,taskName) VALUES (0,?,?,?)");
+                    }
                     insertTask(insertStatement, taskName, success, withUUID, now);
                 }
             }
-            insertStatement.executeBatch();
-            updateStatement.executeBatch();
+            if (null != insertStatement) {
+                insertStatement.executeBatch();
+            }
+            if (null != updateStatement) {
+                updateStatement.executeBatch();
+            }
         } catch (SQLException e) {
             throw SchemaExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } finally {
@@ -560,7 +561,7 @@ public class SchemaStoreImpl extends SchemaStore {
      * @param taskName the task's name
      * @param success whether the task was successful
      * @param withUUID Whether to generate and insert a UUID
-     * @param now The current timestamp
+     * @param now The current time stamp
      * @throws SQLException if an SQL error is occurred
      */
     private static void insertTask(PreparedStatement insertStatement, String taskName, boolean success, boolean withUUID, long now) throws SQLException {
