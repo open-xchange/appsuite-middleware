@@ -71,6 +71,17 @@ public class LegacyCalendarTablesUtf8Mb4UpdateTask extends SimpleConvertUtf8ToUt
         super(CalendarAddIndex2DatesMembersV2.class, "prg_dates", "del_dates", "prg_date_rights", "prg_dates_members", "del_date_rights", "del_dates_members");
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.groupware.update.SimpleConvertUtf8ToUtf8mb4UpdateTask#before(com.openexchange.groupware.update.PerformParameters, java.sql.Connection)
+     */
+    @Override
+    protected void before(PerformParameters params, Connection connection) throws SQLException {
+        recreateKey(connection, "prg_dates", "uidIndex", new String[] { "cid", "uid" }, new int[] { -1, 191 });
+        recreateKey(connection, "del_dates", "uidIndex", new String[] { "cid", "uid" }, new int[] { -1, 191 });
+    }
+
     @Override
     protected void after(PerformParameters params, Connection connection) throws SQLException {
         // Manually change dateExternal and delDateExternal
