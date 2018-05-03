@@ -114,10 +114,12 @@ public class SchemaStoreImpl extends SchemaStore {
     protected SchemaUpdateState getSchema(final int poolId, final String schemaName, final Connection con) throws OXException {
         final Cache cache = this.cache;
         return SerializedCachingLoader.fetch(cache, CACHE_REGION, null, cacheLock, new StorageLoader<SchemaUpdateState>() {
+
             @Override
             public Serializable getKey() {
                 return cache.newCacheKey(poolId, schemaName);
             }
+
             @Override
             public SchemaUpdateState load() throws OXException {
                 return loadSchema(poolId, schemaName, con);
@@ -522,37 +524,91 @@ public class SchemaStoreImpl extends SchemaStore {
     }
 
     private static void doAddExecutedTasks(Connection con, Collection<String> taskNames, boolean success, boolean withUUID) throws OXException {
-        String insertOnDuplicateUpdateSQL;
+        String insertSQL;
         if (withUUID) {
-            insertOnDuplicateUpdateSQL = "INSERT INTO updateTask (cid,successful,lastModified,taskName,uuid) VALUES (0,?,?,?,?) ON DUPLICATE KEY UPDATE successful=?, lastModified=?";
+            insertSQL = "INSERT INTO updateTask (cid,successful,lastModified,taskName,uuid) VALUES (0,?,?,?,?)";
         } else {
-            insertOnDuplicateUpdateSQL = "INSERT INTO updateTask (cid,successful,lastModified,taskName) VALUES (0,?,?,?) ON DUPLICATE KEY UPDATE successful=?, lastModified=?";
+            insertSQL = "INSERT INTO updateTask (cid,successful,lastModified,taskName) VALUES (0,?,?,?)";
         }
-
-        PreparedStatement stmt = null;
+        String updateSQL = "UPDATE updateTask SET successful=?,lastModified=? WHERE taskName=?";
+        PreparedStatement insertStatement = null;
+        PreparedStatement updateStatement = null;
         try {
-            stmt = con.prepareStatement(insertOnDuplicateUpdateSQL);
-
+            insertStatement = con.prepareStatement(insertSQL);
+            updateStatement = con.prepareStatement(updateSQL);
             long now = System.currentTimeMillis();
-            int pos;
             for (String taskName : taskNames) {
-                pos = 1;
-                stmt.setBoolean(pos++, success);
-                stmt.setLong(pos++, now);
-                stmt.setString(pos++, taskName);
-                if (withUUID) {
-                    stmt.setBytes(pos++, generateUUID());
+                if (taskExists(con, taskName)) {
+                    updateTask(updateStatement, taskName, success, now);
+                } else {
+                    insertTask(insertStatement, taskName, success, withUUID, now);
                 }
-                stmt.setBoolean(pos++, success);
-                stmt.setLong(pos++, now);
-                stmt.addBatch();
             }
-
-            stmt.executeBatch();
+            insertStatement.executeBatch();
+            updateStatement.executeBatch();
         } catch (SQLException e) {
             throw SchemaExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } finally {
-            closeSQLStuff(stmt);
+            closeSQLStuff(insertStatement, updateStatement);
+        }
+    }
+
+    /**
+     * Inserts an update task
+     * 
+     * @param insertStatement The {@link PreparedStatement} for the insert
+     * @param taskName the task's name
+     * @param success whether the task was successful
+     * @param withUUID Whether to generate and insert a UUID
+     * @param now The current timestamp
+     * @throws SQLException if an SQL error is occurred
+     */
+    private static void insertTask(PreparedStatement insertStatement, String taskName, boolean success, boolean withUUID, long now) throws SQLException {
+        int parameterIndex = 1;
+        insertStatement.setBoolean(parameterIndex++, success);
+        insertStatement.setLong(parameterIndex++, now);
+        insertStatement.setString(parameterIndex++, taskName);
+        if (withUUID) {
+            insertStatement.setBytes(parameterIndex++, generateUUID());
+        }
+        insertStatement.addBatch();
+    }
+
+    /**
+     * Updates the status and timestamp of the task with the specified name
+     * 
+     * @param updateStatement The {@link PreparedStatement} for the update
+     * @param taskName The task's name
+     * @param success Whether the task was successful
+     * @param now the current timestamp
+     * @throws SQLException if an SQL error is occurred
+     */
+    private static void updateTask(PreparedStatement updateStatement, String taskName, boolean success, long now) throws SQLException {
+        int parameterIndex = 1;
+        updateStatement.setBoolean(parameterIndex++, success);
+        updateStatement.setLong(parameterIndex++, now);
+        updateStatement.setString(parameterIndex, taskName);
+        updateStatement.addBatch();
+    }
+
+    /**
+     * Checks whether a task already exists in the table
+     * 
+     * @param con The {@link Connection}
+     * @param taskName The task's name
+     * @return <code>true</code> if another task already exists in the table; <code>false</code> otherwise
+     * @throws SQLException if an SQL error is occurred
+     */
+    private static boolean taskExists(Connection con, String taskName) throws SQLException {
+        PreparedStatement statement = null;
+        ResultSet result = null;
+        try {
+            statement = con.prepareStatement("SELECT 1 FROM updateTask WHERE cid=0 AND taskName=? FOR UPDATE");
+            statement.setString(1, taskName);
+            result = statement.executeQuery();
+            return result.next();
+        } finally {
+            closeSQLStuff(statement, result);
         }
     }
 

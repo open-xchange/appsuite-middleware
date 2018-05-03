@@ -79,28 +79,33 @@ public class OXPublication extends OXCommonImpl implements OXPublicationInterfac
 
     private final BasicAuthenticator basicauth;
 
+    /**
+     * Initialises a new {@link OXPublication}.
+     */
     public OXPublication() throws StorageException {
         super();
-        basicauth = new BasicAuthenticator();
+        basicauth = BasicAuthenticator.createNonPluginAwareAuthenticator();
     }
 
     @Override
-    public Publication getPublication(final Context ctx, final String url, Credentials credentials) throws RemoteException, NoSuchPublicationException, MissingServiceException {
+    public Publication getPublication(Context ctx, String url, Credentials credentials) throws RemoteException, NoSuchPublicationException, MissingServiceException {
         authenticate(ctx, credentials);
 
         try {
-            final com.openexchange.groupware.contexts.Context oxCtx = getOXContext(ctx);
+            com.openexchange.groupware.contexts.Context oxCtx = getOXContext(ctx);
             for (PublicationTarget pubTar : listTargets()) {
-                final PublicationService publicationService = pubTar.getPublicationService();
+                PublicationService publicationService = pubTar.getPublicationService();
 
                 // Performer
-                if (null != publicationService) {
-                    com.openexchange.publish.Publication currentPublication = publicationService.resolveUrl(oxCtx, url);
-                    if (null != currentPublication) {
-                        String description = publicationService.getInformation(currentPublication);
-                        return parsePublication(currentPublication, description);
-                    }
+                if (null == publicationService) {
+                    continue;
                 }
+                com.openexchange.publish.Publication currentPublication = publicationService.resolveUrl(oxCtx, url);
+                if (null == currentPublication) {
+                    continue;
+                }
+                String description = publicationService.getInformation(currentPublication);
+                return parsePublication(currentPublication, description);
                 // Performer
             }
         } catch (OXException e) {
@@ -120,17 +125,18 @@ public class OXPublication extends OXCommonImpl implements OXPublicationInterfac
 
         List<Publication> publications = new ArrayList<Publication>();
         try {
-            final com.openexchange.groupware.contexts.Context oxCtx = getOXContext(ctx);
+            com.openexchange.groupware.contexts.Context oxCtx = getOXContext(ctx);
             for (PublicationTarget pubTar : listTargets()) {
-                final PublicationService publicationService = pubTar.getPublicationService();
+                PublicationService publicationService = pubTar.getPublicationService();
 
                 // Performer
-                if (null != publicationService) {
-                    Collection<com.openexchange.publish.Publication> allPublications = publicationService.getAllPublications(oxCtx);
-                    for (com.openexchange.publish.Publication pub : allPublications) {
-                        String description = publicationService.getInformation(pub);
-                        publications.add(parsePublication(pub, description));
-                    }
+                if (null == publicationService) {
+                    continue;
+                }
+                Collection<com.openexchange.publish.Publication> allPublications = publicationService.getAllPublications(oxCtx);
+                for (com.openexchange.publish.Publication pub : allPublications) {
+                    String description = publicationService.getInformation(pub);
+                    publications.add(parsePublication(pub, description));
                 }
                 // Performer
             }
@@ -156,12 +162,13 @@ public class OXPublication extends OXCommonImpl implements OXPublicationInterfac
                 final PublicationService publicationService = pubTar.getPublicationService();
 
                 // Performer
-                if (null != publicationService) {
-                    Collection<com.openexchange.publish.Publication> allPublications = publicationService.getAllPublications(oxCtx, entityId);
-                    for (com.openexchange.publish.Publication pub : allPublications) {
-                        String description = publicationService.getInformation(pub);
-                        publications.add(parsePublication(pub, description));
-                    }
+                if (null == publicationService) {
+                    continue;
+                }
+                Collection<com.openexchange.publish.Publication> allPublications = publicationService.getAllPublications(oxCtx, entityId);
+                for (com.openexchange.publish.Publication pub : allPublications) {
+                    String description = publicationService.getInformation(pub);
+                    publications.add(parsePublication(pub, description));
                 }
                 // Performer
             }
@@ -188,12 +195,13 @@ public class OXPublication extends OXCommonImpl implements OXPublicationInterfac
                     final PublicationService publicationService = pubTar.getPublicationService();
 
                     // Performer
-                    if (null != publicationService) {
-                        Collection<com.openexchange.publish.Publication> allPublications = publicationService.getAllPublications(oxCtx, user, module);
-                        for (com.openexchange.publish.Publication pub : allPublications) {
-                            String description = publicationService.getInformation(pub);
-                            publications.add(parsePublication(pub, description));
-                        }
+                    if (null == publicationService) {
+                        continue;
+                    }
+                    Collection<com.openexchange.publish.Publication> allPublications = publicationService.getAllPublications(oxCtx, user, module);
+                    for (com.openexchange.publish.Publication pub : allPublications) {
+                        String description = publicationService.getInformation(pub);
+                        publications.add(parsePublication(pub, description));
                     }
                     // Performer
                 }
@@ -220,13 +228,14 @@ public class OXPublication extends OXCommonImpl implements OXPublicationInterfac
                 final PublicationService publicationService = pubTar.getPublicationService();
 
                 // Performer
-                if (null != publicationService) {
-                    Collection<com.openexchange.publish.Publication> allPublications = publicationService.getAllPublications(oxCtx);
-                    for (com.openexchange.publish.Publication pub : allPublications) {
-                        if (pub.getUserId() == user) {
-                            String description = publicationService.getInformation(pub);
-                            publications.add(parsePublication(pub, description));
-                        }
+                if (null == publicationService) {
+                    continue;
+                }
+                Collection<com.openexchange.publish.Publication> allPublications = publicationService.getAllPublications(oxCtx);
+                for (com.openexchange.publish.Publication pub : allPublications) {
+                    if (pub.getUserId() == user) {
+                        String description = publicationService.getInformation(pub);
+                        publications.add(parsePublication(pub, description));
                     }
                 }
                 // Performer
@@ -247,12 +256,13 @@ public class OXPublication extends OXCommonImpl implements OXPublicationInterfac
                 final PublicationService publicationService = pubTar.getPublicationService();
 
                 // Performer
-                if (null != publicationService) {
-                    com.openexchange.publish.Publication currentPublication = publicationService.resolveUrl(oxCtx, url);
-                    if (null != currentPublication) {
-                        publicationService.delete(currentPublication);
-                        return true;
-                    }
+                if (null == publicationService) {
+                    continue;
+                }
+                com.openexchange.publish.Publication currentPublication = publicationService.resolveUrl(oxCtx, url);
+                if (null != currentPublication) {
+                    publicationService.delete(currentPublication);
+                    return true;
                 }
                 // Performer
             }
@@ -278,14 +288,15 @@ public class OXPublication extends OXCommonImpl implements OXPublicationInterfac
                 final PublicationService publicationService = pubTar.getPublicationService();
 
                 // Performer
-                if (null != publicationService) {
-                    Collection<com.openexchange.publish.Publication> allPublications = publicationService.getAllPublications(oxCtx);
-                    for (com.openexchange.publish.Publication pub : allPublications) {
-                        if (pub.getUserId() == user) {
-                            publicationService.delete(pub);
-                            String description = publicationService.getInformation(pub);
-                            publications.add(parsePublication(pub, description));
-                        }
+                if (null == publicationService) {
+                    continue;
+                }
+                Collection<com.openexchange.publish.Publication> allPublications = publicationService.getAllPublications(oxCtx);
+                for (com.openexchange.publish.Publication pub : allPublications) {
+                    if (pub.getUserId() == user) {
+                        publicationService.delete(pub);
+                        String description = publicationService.getInformation(pub);
+                        publications.add(parsePublication(pub, description));
                     }
                 }
                 // Performer
@@ -311,14 +322,16 @@ public class OXPublication extends OXCommonImpl implements OXPublicationInterfac
                 final PublicationService publicationService = pubTar.getPublicationService();
 
                 // Performer
-                if (publicationService != null) {
-                    com.openexchange.publish.Publication publication = publicationService.load(oxCtx, publicationId);
-                    if (publication != null) {
-                        String description = publicationService.getInformation(publication);
-                        publicationService.delete(oxCtx, publicationId);
-                        return parsePublication(publication, description);
-                    }
+                if (null == publicationService) {
+                    continue;
                 }
+                com.openexchange.publish.Publication publication = publicationService.load(oxCtx, publicationId);
+                if (publication == null) {
+                    continue;
+                }
+                String description = publicationService.getInformation(publication);
+                publicationService.delete(oxCtx, publicationId);
+                return parsePublication(publication, description);
                 // Performer
             }
         } catch (OXException e) {
@@ -378,13 +391,14 @@ public class OXPublication extends OXCommonImpl implements OXPublicationInterfac
                     final PublicationService publicationService = pubTar.getPublicationService();
 
                     // Performer
-                    if (null != publicationService) {
-                        Collection<com.openexchange.publish.Publication> allPublications = publicationService.getAllPublications(oxCtx, user, module);
-                        for (com.openexchange.publish.Publication pub : allPublications) {
-                            String description = publicationService.getInformation(pub);
-                            publicationService.delete(pub);
-                            publications.add(parsePublication(pub, description));
-                        }
+                    if (null == publicationService) {
+                        continue;
+                    }
+                    Collection<com.openexchange.publish.Publication> allPublications = publicationService.getAllPublications(oxCtx, user, module);
+                    for (com.openexchange.publish.Publication pub : allPublications) {
+                        String description = publicationService.getInformation(pub);
+                        publicationService.delete(pub);
+                        publications.add(parsePublication(pub, description));
                     }
                     // Performer
                 }
@@ -411,13 +425,14 @@ public class OXPublication extends OXCommonImpl implements OXPublicationInterfac
                 final PublicationService publicationService = pubTar.getPublicationService();
 
                 // Performer
-                if (null != publicationService) {
-                    Collection<com.openexchange.publish.Publication> allPublications = publicationService.getAllPublications(oxCtx);
-                    for (com.openexchange.publish.Publication pub : allPublications) {
-                        String description = publicationService.getInformation(pub);
-                        publicationService.delete(pub);
-                        publications.add(parsePublication(pub, description));
-                    }
+                if (null == publicationService) {
+                    continue;
+                }
+                Collection<com.openexchange.publish.Publication> allPublications = publicationService.getAllPublications(oxCtx);
+                for (com.openexchange.publish.Publication pub : allPublications) {
+                    String description = publicationService.getInformation(pub);
+                    publicationService.delete(pub);
+                    publications.add(parsePublication(pub, description));
                 }
                 // Performer
             }
@@ -442,14 +457,16 @@ public class OXPublication extends OXCommonImpl implements OXPublicationInterfac
                 final PublicationService publicationService = pubTar.getPublicationService();
 
                 // Performer
-                if (null != publicationService) {
-                    com.openexchange.publish.Publication currentPublication = publicationService.resolveUrl(oxCtx, url);
-                    if (null != currentPublication) {
-                        String description = publicationService.getInformation(currentPublication);
-                        publicationService.delete(currentPublication);
-                        return parsePublication(currentPublication, description);
-                    }
+                if (null == publicationService) {
+                    continue;
                 }
+                com.openexchange.publish.Publication currentPublication = publicationService.resolveUrl(oxCtx, url);
+                if (null == currentPublication) {
+                    continue;
+                }
+                String description = publicationService.getInformation(currentPublication);
+                publicationService.delete(currentPublication);
+                return parsePublication(currentPublication, description);
                 // Performer
             }
         } catch (OXException e) {
@@ -484,11 +501,7 @@ public class OXPublication extends OXCommonImpl implements OXPublicationInterfac
         Credentials auth = credentials == null ? new Credentials("", "") : credentials;
         try {
             basicauth.doAuthentication(auth, context);
-        } catch (InvalidCredentialsException e) {
-            throw new RemoteException(e.getMessage());
-        } catch (StorageException e) {
-            throw new RemoteException(e.getMessage());
-        } catch (InvalidDataException e) {
+        } catch (InvalidCredentialsException | StorageException | InvalidDataException e) {
             throw new RemoteException(e.getMessage());
         }
     }
@@ -536,6 +549,5 @@ public class OXPublication extends OXCommonImpl implements OXPublicationInterfac
     private com.openexchange.groupware.contexts.Context getOXContext(Context ctx) throws MissingServiceException, OXException {
         ContextService contexts = getService(ContextService.class);
         return contexts.getContext(ctx.getId());
-
     }
 }

@@ -62,6 +62,7 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -175,7 +176,7 @@ public class TransportHandler {
         httpURLConnection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
 
         if ("true".equals(reportConfiguration.getUseProxy().trim()) && "true".equals(reportConfiguration.getProxyAuthRequired().trim())) {
-            final String proxyAutorizationProperty = "Basic " + Base64.encode((reportConfiguration.getProxyUsername().trim() + ":" + reportConfiguration.getProxyPassword().trim()).getBytes());
+            final String proxyAutorizationProperty = "Basic " + Base64.encode((reportConfiguration.getProxyUsername().trim() + ":" + reportConfiguration.getProxyPassword().trim()).getBytes(StandardCharsets.US_ASCII));
 
             Authenticator.setDefault(new ProxyAuthenticator(reportConfiguration.getProxyUsername().trim(), reportConfiguration.getProxyPassword().trim()));
 
