@@ -531,7 +531,7 @@ public class SchemaStoreImpl extends SchemaStore {
             for (String taskName : taskNames) {
                 if (taskExists(con, taskName)) {
                     if (null == updateStatement) {
-                        updateStatement = con.prepareStatement("UPDATE updateTask SET successful=?,lastModified=? WHERE taskName=?");
+                        updateStatement = con.prepareStatement("UPDATE updateTask SET successful=?,lastModified=? WHERE cid=0 AND taskName=?");
                     }
                     updateTask(updateStatement, taskName, success, now);
                 } else {
