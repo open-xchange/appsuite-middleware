@@ -49,7 +49,10 @@
 
 package com.openexchange.groupware.update.tasks;
 
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.Arrays;
+import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.SimpleConvertUtf8ToUtf8mb4UpdateTask;
 
 /**
@@ -64,6 +67,16 @@ public class AdminTablesUtf8Mb4UpdateTask extends SimpleConvertUtf8ToUtf8mb4Upda
      */
     public AdminTablesUtf8Mb4UpdateTask() {
         super(Arrays.asList("updateTask", "replicationMonitor", "quota_context"));
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.groupware.update.SimpleConvertUtf8ToUtf8mb4UpdateTask#before(com.openexchange.groupware.update.PerformParameters, java.sql.Connection)
+     */
+    @Override
+    protected void before(PerformParameters params, Connection connection) throws SQLException {
+        recreateKey(connection, "updateTask", "full", new String[] { "cid", "taskName" }, new int[] { -1, 191 });
     }
 
 }

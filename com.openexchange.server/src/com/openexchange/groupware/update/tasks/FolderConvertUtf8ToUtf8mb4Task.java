@@ -75,6 +75,20 @@ public class FolderConvertUtf8ToUtf8mb4Task extends SimpleConvertUtf8ToUtf8mb4Up
         //@formatter:on
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.groupware.update.SimpleConvertUtf8ToUtf8mb4UpdateTask#before(com.openexchange.groupware.update.PerformParameters, java.sql.Connection)
+     */
+    @Override
+    protected void before(PerformParameters params, Connection connection) throws SQLException {
+        recreateKey(connection, "virtualTree", "cid", new String[] { "cid", "tree", "user", "parentId" }, new int[] { -1, -1, -1, 191 });
+        recreateKey(connection, "virtualTree", "cid_2", new String[] { "cid", "tree", "user", "shadow" }, new int[] { -1, -1, -1, 191 });
+
+        recreateKey(connection, "virtualBackupTree", "cid", new String[] { "cid", "tree", "user", "parentId" }, new int[] { -1, -1, -1, 191 });
+        recreateKey(connection, "virtualBackupTree", "cid_2", new String[] { "cid", "tree", "user", "shadow" }, new int[] { -1, -1, -1, 191 });
+    }
+
     @Override
     protected void after(PerformParameters params, Connection connection) throws SQLException {
         String schema = params.getSchema().getSchema();

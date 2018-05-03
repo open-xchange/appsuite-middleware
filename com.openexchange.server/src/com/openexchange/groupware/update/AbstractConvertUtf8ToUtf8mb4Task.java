@@ -633,6 +633,21 @@ public abstract class AbstractConvertUtf8ToUtf8mb4Task extends UpdateTaskAdapter
     }
 
     /**
+     * Re-creates the specified key for the specified table.
+     * 
+     * @param connection The {@link Connection}
+     * @param table The table's name
+     * @param keyname the key name
+     * @param columnNames the column names
+     * @param columnSizes The column sizes (use -1 for full column length)
+     * @throws SQLException if an SQL error is occurred
+     */
+    protected void recreateKey(Connection connection, String table, String keyname, String[] columnNames, int[] columnSizes) throws SQLException {
+        Tools.dropKey(connection, table, keyname);
+        Tools.createKey(connection, table, columnNames, columnSizes, false, keyname);
+    }
+
+    /**
      * Gets the tables to convert.
      * <p>
      * Checks for explicit table and column charsets and (in case of utf8) converts them to utf8mb4. Converts collations accordingly.

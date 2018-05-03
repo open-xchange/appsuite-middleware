@@ -68,9 +68,20 @@ public class LdapConvertUtf8ToUtf8mb4Task extends SimpleConvertUtf8ToUtf8mb4Upda
      * Initializes a new {@link LdapConvertUtf8ToUtf8mb4Task}.
      */
     public LdapConvertUtf8ToUtf8mb4Task() {
+        //@formatter:off
         super(ImmutableList.of("groups", "del_groups", "user", "del_user", "groups_member",
-            "login2user", "user_attribute", "resource", "del_resource"),
-            ChangePrimaryKeyForUserAttribute.class.getName());
+            "login2user", "user_attribute", "resource", "del_resource"), ChangePrimaryKeyForUserAttribute.class.getName());
+        //@formatter:on
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.groupware.update.SimpleConvertUtf8ToUtf8mb4UpdateTask#before(com.openexchange.groupware.update.PerformParameters, java.sql.Connection)
+     */
+    @Override
+    protected void before(PerformParameters params, Connection connection) throws SQLException {
+        recreateKey(connection, "user", "mailIndex", new String[] { "cid", "mail" }, new int[] { -1, 191 });
     }
 
     @Override
