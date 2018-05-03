@@ -19,7 +19,7 @@ msgstr ""
 "Project-Id-Version: errors.de_DE\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2018-04-17 11:13+0200\n"
+"PO-Revision-Date: 2018-05-03 15:27+0200\n"
 "Last-Translator: \n"
 "Language-Team: German <kde-i18n-de@kde.org>\n"
 "Language: de_DE\n"
@@ -223,6 +223,14 @@ msgid ""
 msgstr ""
 "Aufgrund einer konfigurierten Begrenzung konnten nicht alle Objekte "
 "importiert werden"
+
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.ical/src/com/openexchange/chronos/ical/ICalExceptionMessages.java:72
+msgid ""
+"The given iCalendar source does not contain valid content and cannot be "
+"processed."
+msgstr ""
+"Die angegebene iCalendar-Quelle enthält keinen gültigen Inhalt und kann "
+"nicht verarbeitet werden."
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/HRRStrings.java:61
 msgid "No recurrence"
@@ -1058,6 +1066,13 @@ msgstr "* %1$s"
 msgid "???? %1$s (%2$d. birthday)"
 msgstr "???? %1$s (%2$d. Geburtstag)"
 
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.provider.caching/src/com/openexchange/chronos/provider/caching/basic/exception/BasicCachingCalendarExceptionMessages.java:63
+msgid ""
+"The calendar was refreshed less than a minute ago. Please try again later."
+msgstr ""
+"Der Kalender wurde vor weniger als einer Minute aktualisiert. Bitte "
+"versuchen Sie es später erneut."
+
 #. * The name of the ICal feed calendar provider.
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.provider.ical/src/com/openexchange/chronos/provider/ical/ICalCalendarStrings.java:64
 msgid "ICal Feed Calendar"
@@ -1068,23 +1083,24 @@ msgid "The feed URI is missing."
 msgstr "Die Feed-URL ist nicht vorhanden."
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.provider.ical/src/com/openexchange/chronos/provider/ical/exception/ICalProviderExceptionMessages.java:65
-msgid "The feed URI does not match the standard."
-msgstr "Der Feed-URI entspricht nicht dem Standard."
+msgid "The given feed URI is invalid. Please change it and try again."
+msgstr ""
+"Der angegebene Feed-URI ist ungültig. Bitte ändern Sie den URI und versuchen "
+"Sie es erneut."
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.provider.ical/src/com/openexchange/chronos/provider/ical/exception/ICalProviderExceptionMessages.java:67
-msgid ""
-"Cannot connect to feed with URL: %1$s. Please change the URL and try again."
+msgid "Cannot connect to feed with URI: %1$s. Please change it and try again."
 msgstr ""
-"Es kann keine Verbindung zum Feed mit der URL %1$s hergestellt werden. Bitte "
-"ändern Sie die URL und versuchen Sie es erneut."
+"Es kann keine Verbindung zum Feed mit dem URI %1$s hergestellt werden. Bitte "
+"ändern Sie den URI und versuchen Sie es erneut."
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.provider.ical/src/com/openexchange/chronos/provider/ical/exception/ICalProviderExceptionMessages.java:69
 msgid ""
-"The provided URL %1$s does not contain content as expected. Please change "
-"the URL and try again."
+"The provided URI %1$s does not contain content as expected. Please change it "
+"and try again."
 msgstr ""
-"Die angegebene URL %1$s enthält nicht den erwarteten Inhalt. Bitte ändern "
-"Sie die URL und versuchen Sie es erneut."
+"Der angegebene URI %1$s enthält nicht den erwarteten Inhalt. Bitte ändern "
+"Sie den URI und versuchen Sie es erneut."
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.provider.ical/src/com/openexchange/chronos/provider/ical/exception/ICalProviderExceptionMessages.java:71
 msgid "The field %1$s cannot be changed."
@@ -1103,9 +1119,9 @@ msgstr ""
 "abonniert werden."
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.provider.ical/src/com/openexchange/chronos/provider/ical/exception/ICalProviderExceptionMessages.java:77
-msgid "Unfortunately the given feed URL cannot be processed as expected."
+msgid "Unfortunately the given feed URI cannot be processed as expected."
 msgstr ""
-"Die angegebene Feed-URL kann leider nicht erwartungsgemäß ausgeführt werden."
+"Die angegebene Feed-URI kann leider nicht erwartungsgemäß ausgeführt werden."
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.provider.ical/src/com/openexchange/chronos/provider/ical/exception/ICalProviderExceptionMessages.java:79
 msgid ""
@@ -14340,6 +14356,28 @@ msgstr "UTC"
 #: /home/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:534
 msgid "Zulu"
 msgstr "Zulu"
+
+#~ msgid "The feed URI does not match the standard."
+#~ msgstr "Der Feed-URI entspricht nicht dem Standard."
+
+#~ msgid ""
+#~ "Cannot connect to feed with URL: %1$s. Please change the URL and try "
+#~ "again."
+#~ msgstr ""
+#~ "Es kann keine Verbindung zum Feed mit der URL %1$s hergestellt werden. "
+#~ "Bitte ändern Sie die URL und versuchen Sie es erneut."
+
+#~ msgid ""
+#~ "The provided URL %1$s does not contain content as expected. Please change "
+#~ "the URL and try again."
+#~ msgstr ""
+#~ "Die angegebene URL %1$s enthält nicht den erwarteten Inhalt. Bitte ändern "
+#~ "Sie die URL und versuchen Sie es erneut."
+
+#~ msgid "Unfortunately the given feed URL cannot be processed as expected."
+#~ msgstr ""
+#~ "Die angegebene Feed-URL kann leider nicht erwartungsgemäß ausgeführt "
+#~ "werden."
 
 #~ msgid "The value for \"%2$s\" is invalid and wasn't be applied."
 #~ msgstr "Der Wert für \"%2$s\" ist ungültig und wurde nicht angewendet."

@@ -7,8 +7,8 @@ msgstr ""
 "Project-Id-Version: backend\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2018-03-27 14:10+0100\n"
-"Last-Translator: Vincenzo Reale <vincenzo@workshop-chapina.com>\n"
+"PO-Revision-Date: 2018-04-19 16:56+0100\n"
+"Last-Translator: Vincenzo Reale <vincenzo@workshop-chapina.comm>\n"
 "Language-Team: Italian <it@workshop-chapina.com>\n"
 "Language: it_IT\n"
 "MIME-Version: 1.0\n"
@@ -129,13 +129,17 @@ msgstr "Tutto il giorno"
 msgid "Events"
 msgstr "Eventi"
 
+#. * The displayed name for the {@link EventField#LOCATION} property of an event
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.calendar.printing/src/com/openexchange/calendar/printing/CalendarPrintingStrings.java:69
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/CalendarStrings.java:69
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/calendar/CalendarFieldStrings.java:62
 msgid "Location"
 msgstr "Luogo"
 
+#. * The displayed name for the {@link EventField#ATTENDEES} property of an event
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.calendar.printing/src/com/openexchange/calendar/printing/CalendarPrintingStrings.java:71
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.calendar.printing/src/com/openexchange/calendar/printing/templating/Strings.java:67
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/CalendarStrings.java:84
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/calendar/CalendarFieldStrings.java:67
 msgid "Participants"
 msgstr "Partecipanti"
@@ -145,7 +149,7 @@ msgid "Comments"
 msgstr "Commenti"
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.calendar.printing/src/com/openexchange/calendar/printing/CalendarPrintingStrings.java:75
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:268
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:274
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.printing/src/com/openexchange/printing/Messages.java:62
 msgid "The entire day"
 msgstr "Tutto il giorno"
@@ -170,7 +174,7 @@ msgid "Undecided"
 msgstr "Indeciso"
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.calendar.printing/src/com/openexchange/calendar/printing/templating/Strings.java:66
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:266
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:272
 msgid "Resources"
 msgstr "Risorse"
 
@@ -851,68 +855,95 @@ msgstr ""
 "L'appuntamento è stato ripianificato. Data originale: %1$s. Nuova data: %2$s"
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:262
+msgid ""
+"The timezone of the appointment was changed. Original timezone: %1$s. New "
+"timezone: %2$s"
+msgstr ""
+"Il fuso orario dell'appuntamento è cambiato. Fuso orario originale: %1$s."
+" Nuovo "
+"fuso orario: %2$s"
+
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:264
+msgid ""
+"The timezone of the appointments start date was changed. Original timezone: "
+"%1$s. New timezone: %2$s"
+msgstr ""
+"Il fuso orario della data iniziale dell'appuntamento è cambiato. Fuso orario"
+" originale: "
+"%1$s. Nuovo fuso orario: %2$s"
+
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:266
+msgid ""
+"The timezone of the appointments end date was changed. Original timezone: "
+"%1$s. New timezone: %2$s"
+msgstr ""
+"Il fuso orario della data finale dell'appuntamento è cambiato. Fuso orario"
+" originale: "
+"%1$s. Nuovo fuso orario: %2$s"
+
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:268
 msgid "Reschedule the event. Original date: %1$s. New date: %2$s"
 msgstr ""
 "Esegui una nuova pianificazione dell'evento. Data originale: %1$s. Nuova "
 "data: %2$s"
 
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:264
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:270
 msgid "Reschedule the event. Original date/time: %1$s. New date/time: %2$s"
 msgstr ""
 "Pianifica nuovamente l'evento. Data/Ora originale: %1$s. Nuova data/ora: %2$s"
 
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:270
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:276
 msgid "New appointment: %1$s"
 msgstr "Nuovo appuntamento: %1$s"
 
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:272
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:278
 msgid "Appointment changed: %1$s"
 msgstr "Appuntamento modificato: %1$s"
 
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:274
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:280
 msgid "Appointment canceled: %1$s"
 msgstr "Appuntamento annullato: %1$s"
 
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:276
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:282
 msgid "Proposed changes for appointment: %1$s"
 msgstr "Modifiche proposte per l'appuntamento: %1$s"
 
 #. Used to indicate that a participant resetted his status to 'Waiting'; neither 'Accepted, 'Denied' nor 'Tentatively accepted'
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:279
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:285
 msgid "%1$s sets the status to 'none' for: %1$s"
 msgstr "%1$s imposta lo stato a 'nessuno' per: %1$s"
 
 #. Example: Subject: Doe, Jane accepted the invitation: My Appointment with Jane
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:282
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:288
 msgid "%1$s %2$s the invitation: %3$s"
 msgstr "%1$s %2$s l'invito: %3$s"
 
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:284
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:290
 msgid "Resend the invitation for: %1$s"
 msgstr "Invia nuovamente l'invito per: %1$s"
 
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:286
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:292
 msgid "Change not accepted for: %1$s"
 msgstr "Modifica non accettata per: %1$s"
 
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:288
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:294
 msgid "All times will be shown in the timezone %1$s"
 msgstr "Tutti gli orari verranno mostrati nel fuso orario %1$s"
 
 #. E.g. "Jane has accepted the appointment, but would like to make a counter proposal: "
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:291
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:297
 msgid ""
 "%1$s has %2$s the appointment, but would like to make a counter proposal: "
 msgstr "%1$s ha %2$s l'appuntamento, ma vorrebbe fare una controproposta: "
 
 #. TODO: Mah/Cisco, please describe what is meant with the wording 'chair'
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:294
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:300
 msgid ""
 "You have received this E-Mail because you are the chair for this appointment."
 msgstr ""
 "Hai ricevuto questo messaggio perché sei il titolare di questo appuntamento."
 
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:296
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:302
 msgid ""
 "You have received this E-Mail because you are the organizer of this "
 "appointment."
@@ -920,7 +951,7 @@ msgstr ""
 "Hai ricevuto questo messaggio perché sei l'organizzatore di questo "
 "appuntamento."
 
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:298
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:304
 msgid ""
 "You have received this E-Mail because this appointment contains the resource "
 "%1$s which is managed by you."
@@ -1094,7 +1125,8 @@ msgid ""
 "Access to this calendar is restricted. Please enter your credentials and try "
 "again."
 msgstr ""
-"L'accesso a questo calendario è limitato. Digita le tue credenziali e riprova."
+"L'accesso a questo calendario è limitato. Digita le tue credenziali e "
+"riprova."
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.provider.ical/src/com/openexchange/chronos/provider/ical/exception/ICalProviderExceptionMessages.java:87
 msgid "Authentication failed. Please enter your credentials and try again."
@@ -1124,6 +1156,71 @@ msgstr "Calendario interno"
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/common/CommonStrings.java:83
 msgid "Private"
 msgstr "Privata"
+
+#. * The displayed name for the {@link EventField#SUMMARY} property of an event
+#. Search in original mail subject
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/CalendarStrings.java:66
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.mail/src/com/openexchange/file/storage/mail/find/MailDriveStrings.java:73
+msgid "Subject"
+msgstr "Soggetto"
+
+#. * The displayed name for the {@link EventField#START_DATE} property of an event
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/CalendarStrings.java:72
+msgid "Starts on"
+msgstr "Inizia il"
+
+#. * The displayed name for the {@link EventField#END_DATE} property of an event
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/CalendarStrings.java:75
+msgid "Ends on"
+msgstr "Finisce il"
+
+#. * The displayed name for the {@link EventField#RECURRENCE_RULE} property of an event
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/CalendarStrings.java:78
+msgid "Repeat"
+msgstr "Ripeti"
+
+#. * The displayed name for the {@link EventField#DESCRIPTION} property of an event
+#. A document's description
+#. Task attribute name
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/CalendarStrings.java:81
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/infostore/InfostoreStrings.java:73
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/AttributeNames.java:84
+msgid "Description"
+msgstr "Descrizione"
+
+#. * The displayed name for the {@link EventField#ALARMS} property of an event
+#. -
+#. * MISC
+#.
+#. Reminder
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/CalendarStrings.java:87
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:636
+msgid "Reminder"
+msgstr "Promemoria"
+
+#. * The displayed name for the {@link EventField#CLASSIFICATION} property of an event
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/CalendarStrings.java:90
+msgid "Visibility"
+msgstr "Visibilità"
+
+#. * The displayed name for the {@link EventField#COLOR} property of an event
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/CalendarStrings.java:93
+msgid "Color"
+msgstr "Colore"
+
+#. * The displayed name for the {@link EventField#TRANSP} property of an event
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/CalendarStrings.java:96
+msgid "Show as"
+msgstr "Mostra come"
+
+#. * The displayed name for the {@link EventField#ATTACHMENTS} property of an event
+#. Has attachment
+#. The module attachments
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/CalendarStrings.java:99
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/mail/MailStrings.java:89
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/attach/impl/AttachmentStrings.java:62
+msgid "Attachments"
+msgstr "Allegati"
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:62
 msgid "The requested appointment was not found."
@@ -1230,8 +1327,8 @@ msgid ""
 "Appointments in non-personal folders must not be classified as \"private\" "
 "or \"secret\"."
 msgstr ""
-"Gli appuntamenti nelle cartelle non personali non possono essere classificati"
-" come \"privati\" o \"segreti\"."
+"Gli appuntamenti nelle cartelle non personali non possono essere "
+"classificati come \"privati\" o \"segreti\"."
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:98
 msgid "Appointments with resources must not be classified as \"secret\"."
@@ -1243,9 +1340,8 @@ msgid ""
 "Appointments classified as \"private\" or \"secret\" cannot be moved to this "
 "type of folder."
 msgstr ""
-"Gli appuntamenti classificati come \"privati\" o \"segreti\" non possono"
-" essere "
-"spostati in questo tipo di cartella."
+"Gli appuntamenti classificati come \"privati\" o \"segreti\" non possono "
+"essere spostati in questo tipo di cartella."
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:102
 msgid "Occurrences of appointment series must not be classified differently."
@@ -1371,18 +1467,22 @@ msgid "The maximum number of calendar subscriptions is exceeded."
 msgstr "Il numero massimo di sottoscrizioni di calendario è stato superato."
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:136
-msgid "The value for \"%2$s\" is invalid and wasn't be applied."
+msgid "The value for \"%2$s\" is invalid and wasn't applied."
 msgstr "Il valore per \"%2$s\" non è valido e non è stato applicato."
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:138
+msgid "The value for \"%2$s\" is not supported and wasn't applied."
+msgstr "Il valore per \"%2$s\" non è supportato e non è stato applicato."
+
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:140
 msgid "The '%1$s' is either not an internal user or does not exist."
 msgstr "'%1$s' non è un utente interno o non esiste."
 
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:140
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:142
 msgid "Authentication failed."
 msgstr "Autenticazione non riuscita."
 
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:142
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:144
 msgid ""
 "Unable to create account. There have been issues with the provided "
 "authentication."
@@ -1390,25 +1490,25 @@ msgstr ""
 "Impossibile creare l'account. Sono stati riscontrati problemi con "
 "l'autenticazione fornita."
 
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:144
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:146
 msgid "The quota for account '%1$s' in context '%2$s' exceeded the limit."
 msgstr "La quota per l'account '%1$s' nel contesto '%2$s' supera il limite."
 
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:146
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:148
 msgid "The requested attachment was not found."
 msgstr "L'allegato richiesto non è stato trovato."
 
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:148
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:150
 msgid "Too many appointments are queried. Please choose a shorter timeframe."
 msgstr ""
 "Sono stati interrogati troppi appuntamenti. Sceglie un periodo di tempo più "
 "breve."
 
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:150
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:152
 msgid "The appointment contains too many participants."
 msgstr "L'appuntamento contiene troppi partecipanti."
 
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:152
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:154
 msgid "The appointment contains too many reminders."
 msgstr "L'appuntamento contiene troppi promemoria."
 
@@ -2567,11 +2667,6 @@ msgstr "Da"
 msgid "To"
 msgstr "A"
 
-#. Search in original mail subject
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.mail/src/com/openexchange/file/storage/mail/find/MailDriveStrings.java:73
-msgid "Subject"
-msgstr "Soggetto"
-
 #. Search in file type.
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.mail/src/com/openexchange/file/storage/mail/find/MailDriveStrings.java:76
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:81
@@ -2621,20 +2716,6 @@ msgstr "nel destinatario A"
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/mail/MailStrings.java:67
 msgid "in subject"
 msgstr "nell'oggetto"
-
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.webdav/src/com/openexchange/file/storage/webdav/FormStrings.java:61
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.subscribe.crawler/src/com/openexchange/subscribe/crawler/internal/FormStrings.java:61
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.subscribe.dav/src/com/openexchange/subscribe/dav/FormStrings.java:61
-msgid "Login"
-msgstr "Nome utente"
-
-#. label of username input field
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.webdav/src/com/openexchange/file/storage/webdav/FormStrings.java:63
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.oauth.provider.impl/src/com/openexchange/oauth/provider/impl/servlets/OAuthProviderStrings.java:87
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.subscribe.crawler/src/com/openexchange/subscribe/crawler/internal/FormStrings.java:63
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.subscribe.dav/src/com/openexchange/subscribe/dav/FormStrings.java:63
-msgid "Password"
-msgstr "Password"
 
 #. The folder you requested does not exist.
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:65
@@ -3495,13 +3576,6 @@ msgstr "Da/A"
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/mail/MailStrings.java:86
 msgid "in attachment file names"
 msgstr "nei nomi dei file degli allegati"
-
-#. Has attachment
-#. The module attachments
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/mail/MailStrings.java:89
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/attach/impl/AttachmentStrings.java:62
-msgid "Attachments"
-msgstr "Allegati"
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/mail/MailStrings.java:91
 msgid "Has attachment"
@@ -4759,6 +4833,13 @@ msgstr "Nega"
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.oauth.provider.impl/src/com/openexchange/oauth/provider/impl/servlets/OAuthProviderStrings.java:84
 msgid "Allow"
 msgstr "Consenti"
+
+#. label of username input field
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.oauth.provider.impl/src/com/openexchange/oauth/provider/impl/servlets/OAuthProviderStrings.java:87
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.subscribe.crawler/src/com/openexchange/subscribe/crawler/internal/FormStrings.java:63
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.subscribe.dav/src/com/openexchange/subscribe/dav/FormStrings.java:63
+msgid "Password"
+msgstr "Password"
 
 #. label of password input field
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.oauth.provider.impl/src/com/openexchange/oauth/provider/impl/servlets/OAuthProviderStrings.java:90
@@ -7783,14 +7864,6 @@ msgstr "Attività (rifiutata)"
 msgid "Task (tentative)"
 msgstr "Attività (provvisoria)"
 
-#. -
-#. * MISC
-#.
-#. Reminder
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:636
-msgid "Reminder"
-msgstr "Promemoria"
-
 #. No resources have been scheduled.
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:639
 msgid "No resources have been scheduled."
@@ -8231,13 +8304,6 @@ msgstr ""
 msgid "Your search took too long in order to be accomplished."
 msgstr "L'esecuzione della tua ricerca ha richiesto troppo tempo."
 
-#. A document's description
-#. Task attribute name
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/infostore/InfostoreStrings.java:73
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/AttributeNames.java:84
-msgid "Description"
-msgstr "Descrizione"
-
 #. A document's version comment
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/infostore/InfostoreStrings.java:79
 msgid "Version comment"
@@ -8612,8 +8678,8 @@ msgid "Error while inserting task."
 msgstr "Errore durante l'inserimento dell'attività."
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:67
-msgid "This is not a task folder."
-msgstr "Non è una cartella di attività."
+msgid "Folder cannot be found."
+msgstr "La cartella non può essere trovata."
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:69
 msgid ""
@@ -11027,10 +11093,10 @@ msgstr ""
 #. * $username ($user_email) has shared folder $number folders with you. Please click the button below to view them.
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:147
 msgid ""
-"%1$s (%2$s) has shared %3$ folders with you. Please click the button below "
+"%1$s (%2$s) has shared %3$d folders with you. Please click the button below "
 "to view them."
 msgstr ""
-"%1$s (%2$s) ha condiviso %3$s cartelle con te. Fai clic sul pulsante qui "
+"%1$s (%2$s) ha condiviso %3$d cartelle con te. Fai clic sul pulsante qui "
 "sotto per vederle."
 
 #. * $username ($user_email) has shared calendar $folder with you. Please click the button below to view it.
@@ -11045,11 +11111,11 @@ msgstr ""
 #. * $username ($user_email) has shared $number calendars with you. Please click the button below to view them.
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:153
 msgid ""
-"%1$s (%2$s) has shared %3$ calendars with you. Please click the button below "
-"to view them."
+"%1$s (%2$s) has shared %3$d calendars with you. Please click the button "
+"below to view them."
 msgstr ""
-"%1$s (%2$s) ha condiviso %3$d calendari con te. Fai clic sul "
-"pulsante seguente per visualizzarli."
+"%1$s (%2$s) ha condiviso %3$d calendari con te. Fai clic sul pulsante qui "
+"sotto per vederli."
 
 #. * $username ($user_email) has shared file "$filename" with the group "Sales Dept.". Please click the button below to view it.
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:156
@@ -11117,10 +11183,10 @@ msgstr ""
 #. * $username ($user_email) has shared folder $number folders with the group "Sales Dept.". Please click the button below to view them.
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:177
 msgid ""
-"%1$s (%2$s) has shared %3$ folders with the group \"%4$s\". Please click the "
-"button below to view them."
+"%1$s (%2$s) has shared %3$d folders with the group \"%4$s\". Please click "
+"the button below to view them."
 msgstr ""
-"%1$s (%2$s) ha condiviso %3$s cartelle con il gruppo \"%4$s\". Fai clic sul "
+"%1$s (%2$s) ha condiviso %3$d cartelle con il gruppo \"%4$s\". Fai clic sul "
 "pulsante seguente per visualizzarle."
 
 #. * $username ($user_email) has shared the calendar $folder with the group "Sales Dept.". Please click the button below to view it.
@@ -11129,18 +11195,18 @@ msgid ""
 "%1$s (%2$s) has shared the calendar \"%3$s\" with the group \"%4$s\". Please "
 "click the button below to view it."
 msgstr ""
-"%1$s (%2$s) ha condiviso il calendario \"%3$s\" con il gruppo \"%4$s\". Fai"
-" clic sul "
-"pulsante seguente per visualizzarlo."
+"%1$s (%2$s) ha condiviso il calendario \"%3$s\" con il gruppo \"%4$s\". Fai "
+"clic sul pulsante seguente per visualizzarlo."
 
 #. * $username ($user_email) has shared $number calendars with the group "Sales Dept.". Please click the button below to view them.
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:183
 msgid ""
-"%1$s (%2$s) has shared %3$ calendars with the group \"%4$s\". Please click "
+"%1$s (%2$s) has shared %3$d calendars with the group \"%4$s\". Please click "
 "the button below to view them."
 msgstr ""
-"%1$s (%2$s) ha condiviso %3$s calendari con il gruppo \"%4$s\". Fai clic sul "
-"pulsante seguente per visualizzarli."
+"%1$s (%2$s) ha condiviso %3$d calendari con il gruppo \"%4$s\". Fai clic sul"
+" pulsante qui "
+"sotto per vederli."
 
 #. * $username ($user_email) has shared file "$filename" with you and left you a message:
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:186
@@ -11262,9 +11328,8 @@ msgid ""
 "%1$s (%2$s) has shared the calendar \"%3$s\" with the group \"%4$s\" and "
 "left a message:"
 msgstr ""
-"%1$s (%2$s) ha condiviso il calendario \"%3$s\" con il gruppo \"%4$s\" e ha"
-" lasciato "
-"un messaggio:"
+"%1$s (%2$s) ha condiviso il calendario \"%3$s\" con il gruppo \"%4$s\" e ha "
+"lasciato un messaggio:"
 
 #. * $username ($user_email) has shared item "$filename" with the group "Sales Dept." and left a message:
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:234
@@ -11298,9 +11363,8 @@ msgid ""
 "%1$s (%2$s) has shared %3$d calendars with the group \"%4$s\" and left a "
 "message:"
 msgstr ""
-"%1$s (%2$s) ha condiviso %3$d calendari con il gruppo \"%4$s\" e ha lasciato"
-" un "
-"messaggio:"
+"%1$s (%2$s) ha condiviso %3$d calendari con il gruppo \"%4$s\" e ha lasciato "
+"un messaggio:"
 
 #. button with label
 #. * View image
@@ -11513,6 +11577,11 @@ msgstr ""
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.snippet/src/com/openexchange/snippet/SnippetStrings.java:80
 msgid "You are not allowed to modify the signature"
 msgstr "Non ti è consentito modificare la firma"
+
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.subscribe.crawler/src/com/openexchange/subscribe/crawler/internal/FormStrings.java:61
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.subscribe.dav/src/com/openexchange/subscribe/dav/FormStrings.java:61
+msgid "Login"
+msgstr "Nome utente"
 
 #. The message displayed if the requested subscription cannot be found from the server.
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.subscribe.json/src/com/openexchange/subscribe/json/SubscriptionJSONExceptionMessage.java:69
@@ -14072,6 +14141,40 @@ msgstr "UTC"
 #: /home/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:534
 msgid "Zulu"
 msgstr "Zulu"
+
+#~ msgid "The value for \"%2$s\" is invalid and wasn't be applied."
+#~ msgstr "Il valore per \"%2$s\" non è valido e non è stato applicato."
+
+#~ msgid "This is not a task folder."
+#~ msgstr "Non è una cartella di attività."
+
+#~ msgid ""
+#~ "%1$s (%2$s) has shared %3$ folders with you. Please click the button "
+#~ "below to view them."
+#~ msgstr ""
+#~ "%1$s (%2$s) ha condiviso %3$s cartelle con te. Fai clic sul pulsante qui "
+#~ "sotto per vederle."
+
+#~ msgid ""
+#~ "%1$s (%2$s) has shared %3$ calendars with you. Please click the button "
+#~ "below to view them."
+#~ msgstr ""
+#~ "%1$s (%2$s) ha condiviso %3$d calendari con te. Fai clic sul pulsante "
+#~ "seguente per visualizzarli."
+
+#~ msgid ""
+#~ "%1$s (%2$s) has shared %3$ folders with the group \"%4$s\". Please click "
+#~ "the button below to view them."
+#~ msgstr ""
+#~ "%1$s (%2$s) ha condiviso %3$s cartelle con il gruppo \"%4$s\". Fai clic "
+#~ "sul pulsante seguente per visualizzarle."
+
+#~ msgid ""
+#~ "%1$s (%2$s) has shared %3$ calendars with the group \"%4$s\". Please "
+#~ "click the button below to view them."
+#~ msgstr ""
+#~ "%1$s (%2$s) ha condiviso %3$s calendari con il gruppo \"%4$s\". Fai clic "
+#~ "sul pulsante seguente per visualizzarli."
 
 #~ msgid "Read all your events."
 #~ msgstr "Leggi tutti i tuoi eventi."
