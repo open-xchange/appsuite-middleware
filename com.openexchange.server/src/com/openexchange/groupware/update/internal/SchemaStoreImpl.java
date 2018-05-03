@@ -413,7 +413,7 @@ public class SchemaStoreImpl extends SchemaStore {
     }
 
     private static ExecutedTask[] readUpdateTasks(final Connection con) throws OXException {
-        List<ExecutedTask> retval = null;
+        List<ExecutedTask> retval;
         {
             Statement stmt = null;
             ResultSet result = null;
