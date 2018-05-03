@@ -843,7 +843,7 @@ public class JSONObject extends AbstractJSONValue {
         if (null == value) {
             return null;
         }
-        return value instanceof JSONString ? ((JSONString) value).toJSONString() : value;
+        return value instanceof CharSequence ? value.toString() : value;
     }
 
     /**
@@ -873,7 +873,7 @@ public class JSONObject extends AbstractJSONValue {
         if (NULL == value) {
             return null;
         }
-        return value instanceof JSONString ? ((JSONString) value).toJSONString() : value;
+        return value instanceof CharSequence ? value.toString() : value;
     }
 
     /**
