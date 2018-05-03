@@ -1,51 +1,51 @@
- /*
- *
- *    OPEN-XCHANGE legal information
- *
- *    All intellectual property rights in the Software are protected by
- *    international copyright laws.
- *
- *
- *    In some countries OX, OX Open-Xchange, open xchange and OXtender
- *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
- *    The use of the Logos is not covered by the GNU General Public License.
- *    Instead, you are allowed to use these Logos according to the terms and
- *    conditions of the Creative Commons License, Version 2.5, Attribution,
- *    Non-commercial, ShareAlike, and the interpretation of the term
- *    Non-commercial applicable to the aforementioned license is published
- *    on the web site http://www.open-xchange.com/EN/legal/index.html.
- *
- *    Please make sure that third-party modules and libraries are used
- *    according to their respective licenses.
- *
- *    Any modifications to this package must retain all copyright notices
- *    of the original copyright holder(s) for the original code used.
- *
- *    After any such modifications, the original and derivative code shall remain
- *    under the copyright of the copyright holder(s) and/or original author(s)per
- *    the Attribution and Assignment Agreement that can be located at
- *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
- *    given Attribution for the derivative code and a license granting use.
- *
- *     Copyright (C) 2016-2020 OX Software GmbH
- *     Mail: info@open-xchange.com
- *
- *
- *     This program is free software; you can redistribute it and/or modify it
- *     under the terms of the GNU General Public License, Version 2 as published
- *     by the Free Software Foundation.
- *
- *     This program is distributed in the hope that it will be useful, but
- *     WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
- *     or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
- *     for more details.
- *
- *     You should have received a copy of the GNU General Public License along
- *     with this program; if not, write to the Free Software Foundation, Inc., 59
- *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
- *
- */
+/*
+*
+*    OPEN-XCHANGE legal information
+*
+*    All intellectual property rights in the Software are protected by
+*    international copyright laws.
+*
+*
+*    In some countries OX, OX Open-Xchange, open xchange and OXtender
+*    as well as the corresponding Logos OX Open-Xchange and OX are registered
+*    trademarks of the OX Software GmbH group of companies.
+*    The use of the Logos is not covered by the GNU General Public License.
+*    Instead, you are allowed to use these Logos according to the terms and
+*    conditions of the Creative Commons License, Version 2.5, Attribution,
+*    Non-commercial, ShareAlike, and the interpretation of the term
+*    Non-commercial applicable to the aforementioned license is published
+*    on the web site http://www.open-xchange.com/EN/legal/index.html.
+*
+*    Please make sure that third-party modules and libraries are used
+*    according to their respective licenses.
+*
+*    Any modifications to this package must retain all copyright notices
+*    of the original copyright holder(s) for the original code used.
+*
+*    After any such modifications, the original and derivative code shall remain
+*    under the copyright of the copyright holder(s) and/or original author(s)per
+*    the Attribution and Assignment Agreement that can be located at
+*    http://www.open-xchange.com/EN/developer/. The contributing author shall be
+*    given Attribution for the derivative code and a license granting use.
+*
+*     Copyright (C) 2016-2020 OX Software GmbH
+*     Mail: info@open-xchange.com
+*
+*
+*     This program is free software; you can redistribute it and/or modify it
+*     under the terms of the GNU General Public License, Version 2 as published
+*     by the Free Software Foundation.
+*
+*     This program is distributed in the hope that it will be useful, but
+*     WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+*     or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
+*     for more details.
+*
+*     You should have received a copy of the GNU General Public License along
+*     with this program; if not, write to the Free Software Foundation, Inc., 59
+*     Temple Place, Suite 330, Boston, MA 02111-1307 USA
+*
+*/
 
 package com.openexchange.admin.tools;
 
@@ -64,12 +64,15 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Hashtable;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -190,10 +193,56 @@ public class AdminCache {
 
     private HashMap<String, UserModuleAccess> named_access_combinations = null;
 
+    /**
+     * The available password encrypters.
+     */
+    private final Map<String, Encrypter> encrypters;
+    /**
+     * The available password mechanisms.
+     */
+    private final Set<String> passwordMechanisms;
+
+    /**
+     * Initialises a new {@link AdminCache}.
+     */
     public AdminCache() {
         super();
+        encrypters = initialiseEncrypters();
+        passwordMechanisms = initialisePasswordMechanisms();
     }
 
+    /**
+     * Initialises the available password mechanisms
+     * 
+     * @return An unmodifiable {@link Set} with all available password mechanisms
+     */
+    private Set<String> initialisePasswordMechanisms() {
+        Set<String> m = new HashSet<>(4);
+        m.add(PasswordMechObject.BCRYPT_MECH);
+        m.add(PasswordMechObject.CRYPT_MECH);
+        m.add(PasswordMechObject.SHA_MECH);
+        return Collections.unmodifiableSet(m);
+    }
+
+    /**
+     * Initialises the available encrypters
+     * 
+     * @return An unmodifiable {@link Map} with all the available encrypters
+     */
+    private Map<String, Encrypter> initialiseEncrypters() {
+        Map<String, Encrypter> e = new HashMap<>(4);
+        e.put(PasswordMechObject.BCRYPT_MECH, (password) -> BCrypt.hashpw(password, BCrypt.gensalt()));
+        e.put(PasswordMechObject.CRYPT_MECH, (password) -> UnixCrypt.crypt(password));
+        e.put(PasswordMechObject.SHA_MECH, (password) -> SHACrypt.makeSHAPasswd(password));
+        return Collections.unmodifiableMap(e);
+    }
+
+    /**
+     * Initialises the cache
+     * 
+     * @param service The {@link ConfigurationService}
+     * @throws OXGenericException if an error is occurred
+     */
     public void initCache(final ConfigurationService service) throws OXGenericException {
         this.prop = new PropertyHandler(System.getProperties());
         configureAuthentication(); // disabling authentication mechs
@@ -261,12 +310,12 @@ public class AdminCache {
         return null;
     }
 
-    public synchronized void reinitAccessCombinations() throws ClassNotFoundException, OXGenericException  {
+    public synchronized void reinitAccessCombinations() throws ClassNotFoundException, OXGenericException {
         named_access_combinations = null;
         initAccessCombinations();
     }
 
-    public synchronized void initAccessCombinations() throws ClassNotFoundException, OXGenericException  {
+    public synchronized void initAccessCombinations() throws ClassNotFoundException, OXGenericException {
         if (named_access_combinations == null) {
             try {
                 log.info("Processing access combinations...");
@@ -276,7 +325,7 @@ public class AdminCache {
                 log.error("Error loading access modules and methods!", e);
                 throw e;
             } catch (OXGenericException e) {
-                log.error("Error processing access combinations config file!!",e);
+                log.error("Error processing access combinations config file!!", e);
                 throw e;
             }
         }
@@ -399,14 +448,14 @@ public class AdminCache {
     }
 
     public boolean pushConnectionForContext(final int context_id, final Connection con) throws PoolException {
-        if(con == null) {
+        if (con == null) {
             return true;
         }
         return this.pool.pushConnectionForContext(context_id, con);
     }
 
     public boolean pushConnectionForContextAfterReading(final int context_id, final Connection con) throws PoolException {
-        if(con == null) {
+        if (con == null) {
             return true;
         }
         return this.pool.pushConnectionForContextAfterReading(context_id, con);
@@ -580,8 +629,7 @@ public class AdminCache {
     }
 
     /**
-     * Encrypts password of a {@link PasswordMechObject} using the mechanism given
-     * in <code>passwordMech</code>.
+     * Encrypts password of a {@link PasswordMechObject} using the mechanism given in <code>passwordMech</code>.
      * If <code>passwordMech</code> is <code>null</code>, the default mechanism as configured
      * in <code>User.properties</code> is used and set in the {@link PasswordMechObject} instance.
      *
@@ -592,36 +640,40 @@ public class AdminCache {
      * @throws UnsupportedEncodingException
      */
     public String encryptPassword(final PasswordMechObject user) throws StorageException, NoSuchAlgorithmException, UnsupportedEncodingException {
-        String passwordMech = user.getPasswordMech();
-        if (com.openexchange.java.Strings.isEmpty(passwordMech) || "null".equals(com.openexchange.java.Strings.toLowerCase(passwordMech))) {
-            String pwmech = getProperties().getUserProp(AdminProperties.User.DEFAULT_PASSWORD_MECHANISM, "SHA");
-            pwmech = "{" + pwmech + "}";
-            if (pwmech.equalsIgnoreCase(PasswordMechObject.CRYPT_MECH)) {
-                passwordMech = PasswordMechObject.CRYPT_MECH;
-            } else if (pwmech.equalsIgnoreCase(PasswordMechObject.SHA_MECH)) {
-                passwordMech = PasswordMechObject.SHA_MECH;
-            } else if (pwmech.equalsIgnoreCase(PasswordMechObject.BCRYPT_MECH)) {
-                passwordMech = PasswordMechObject.BCRYPT_MECH;
-            } else {
-                log.warn("WARNING: unknown password mechanism {} using SHA", pwmech);
-                passwordMech = PasswordMechObject.SHA_MECH;
-            }
-            user.setPasswordMech(passwordMech);
-        }
-        final String passwd;
-        if (PasswordMechObject.CRYPT_MECH.equals(passwordMech)) {
-            passwd = UnixCrypt.crypt(user.getPassword());
-        } else if (PasswordMechObject.SHA_MECH.equals(passwordMech)) {
-            passwd = SHACrypt.makeSHAPasswd(user.getPassword());
-        } else if (PasswordMechObject.BCRYPT_MECH.equals(passwordMech)) {
-            passwd = BCrypt.hashpw(user.getPassword(), BCrypt.gensalt());
-        } else {
+        String passwordMech = getPasswordMechanism(user);
+        Encrypter encrypter = encrypters.get(passwordMech);
+        if (encrypter == null) {
             log.error("unsupported password mechanism: {}", passwordMech);
             throw new StorageException("unsupported password mechanism: " + passwordMech);
         }
-        return passwd;
+        return encrypter.encrypt(user.getPassword());
     }
 
+    /**
+     * Gets the password mechanism.
+     * 
+     * @param user The {@link PasswordMechObject}
+     * @return The password mechanism. If the {@link PasswordMechObject} contains an unknown password mechanism, then
+     *         the <code>{SHA}</code> mechanism is returned.
+     */
+    private String getPasswordMechanism(final PasswordMechObject user) {
+        String passwordMech = user.getPasswordMech();
+        if (com.openexchange.java.Strings.isEmpty(passwordMech) || "null".equals(com.openexchange.java.Strings.toLowerCase(passwordMech))) {
+            String pwmech = getProperties().getUserProp(AdminProperties.User.DEFAULT_PASSWORD_MECHANISM, "SHA");
+            pwmech = "{" + pwmech.toUpperCase() + "}";
+            if (!passwordMechanisms.contains(pwmech)) {
+                log.warn("WARNING: unknown password mechanism {} using SHA", pwmech);
+                passwordMech = PasswordMechObject.SHA_MECH;
+            }
+            user.setPasswordMech(pwmech);
+            passwordMech = pwmech;
+        }
+        return passwordMech;
+    }
+
+    /**
+     * Configures the authentication mechanisms
+     */
     private void configureAuthentication() {
         log.debug("Configuring authentication mechanisms ...");
 
@@ -825,5 +877,24 @@ public class AdminCache {
 
     public boolean isAllowMasterOverride() {
         return allowMasterOverride;
+    }
+
+    /**
+     * {@link Encrypter} - Password encrypter interface
+     *
+     * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+     * @since v7.10.0
+     */
+    private interface Encrypter {
+
+        /**
+         * Encrypts the specified password and returns it
+         * 
+         * @param password The password to encrypt
+         * @return The encrypted password
+         * @throws UnsupportedEncodingException
+         * @throws NoSuchAlgorithmException
+         */
+        String encrypt(String password) throws UnsupportedEncodingException, NoSuchAlgorithmException;
     }
 }

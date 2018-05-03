@@ -292,6 +292,7 @@ public class RdbUserStorage extends UserStorage {
             /*
              * fetch required data of deleted user
              */
+            int contextId = context.getContextId();
             int contactId;
             int uidNumber;
             int gidNumber;
@@ -301,11 +302,11 @@ public class RdbUserStorage extends UserStorage {
             PreparedStatement stmt = null;
             try {
                 stmt = con.prepareStatement("SELECT mail,contactId,uidNumber,gidNumber,guestCreatedBy FROM user WHERE cid=? AND id=?;");
-                stmt.setInt(1, context.getContextId());
+                stmt.setInt(1, contextId);
                 stmt.setInt(2, userId);
                 result = stmt.executeQuery();
                 if (false == result.next()) {
-                    throw UserExceptionCode.USER_NOT_FOUND.create(I(userId), I(context.getContextId()));
+                    throw UserExceptionCode.USER_NOT_FOUND.create(I(userId), I(contextId));
                 }
                 mail = result.getString(1);
                 contactId = result.getInt(2);
@@ -331,7 +332,7 @@ public class RdbUserStorage extends UserStorage {
              */
             try {
                 stmt = con.prepareStatement("INSERT INTO del_user (cid,id,contactId,uidNumber,gidNumber,guestCreatedBy) VALUES (?,?,?,?,?,?)");
-                stmt.setInt(1, context.getContextId());
+                stmt.setInt(1, contextId);
                 stmt.setInt(2, userId);
                 stmt.setInt(3, contactId);
                 stmt.setInt(4, uidNumber);
@@ -347,7 +348,7 @@ public class RdbUserStorage extends UserStorage {
             if (0 < guestCreatedBy) {
                 try {
                     stmt = con.prepareStatement("DELETE FROM login2user WHERE cid=? AND id=?");
-                    stmt.setInt(1, context.getContextId());
+                    stmt.setInt(1, contextId);
                     stmt.setInt(2, userId);
                     stmt.executeUpdate();
                 } finally {
@@ -359,18 +360,25 @@ public class RdbUserStorage extends UserStorage {
              */
             try {
                 stmt = con.prepareStatement("DELETE FROM user_attribute WHERE cid=? AND id=?");
-                stmt.setInt(1, context.getContextId());
+                stmt.setInt(1, contextId);
                 stmt.setInt(2, userId);
                 stmt.executeUpdate();
             } finally {
                 closeSQLStuff(stmt);
             }
             /*
+             * remove all user aliases
+             */
+            UserAliasStorage aliasStorage = ServerServiceRegistry.getInstance().getService(UserAliasStorage.class);
+            if (null != aliasStorage) {
+                aliasStorage.deleteAliases(con, contextId, userId);
+            }
+            /*
              * delete user from user table
              */
             try {
                 stmt = con.prepareStatement("DELETE FROM user WHERE cid=? AND id=?");
-                stmt.setInt(1, context.getContextId());
+                stmt.setInt(1, contextId);
                 stmt.setInt(2, userId);
                 stmt.executeUpdate();
             } finally {
@@ -383,7 +391,7 @@ public class RdbUserStorage extends UserStorage {
                 List<Integer> guestUserIDs = new ArrayList<Integer>();
                 try {
                     stmt = con.prepareStatement("SELECT id FROM user WHERE cid=? AND guestCreatedBy=?");
-                    stmt.setInt(1, context.getContextId());
+                    stmt.setInt(1, contextId);
                     stmt.setInt(2, userId);
                     result = stmt.executeQuery();
                     while (result.next()) {
@@ -396,7 +404,7 @@ public class RdbUserStorage extends UserStorage {
                     int newGuestCreatedBy;
                     try {
                         stmt = con.prepareStatement("SELECT created_by FROM share WHERE cid=? AND guest=? AND created_by<>? ORDER BY created ASC LIMIT 1");
-                        stmt.setInt(1, context.getContextId());
+                        stmt.setInt(1, contextId);
                         stmt.setInt(2, guestUserID.intValue());
                         stmt.setInt(3, userId);
                         result = stmt.executeQuery();
@@ -407,7 +415,7 @@ public class RdbUserStorage extends UserStorage {
                     try {
                         stmt = con.prepareStatement("UPDATE user SET guestCreatedBy=? WHERE cid=? AND id=?");
                         stmt.setInt(1, newGuestCreatedBy);
-                        stmt.setInt(2, context.getContextId());
+                        stmt.setInt(2, contextId);
                         stmt.setInt(3, guestUserID.intValue());
                         stmt.executeUpdate();
                     } finally {
@@ -1379,7 +1387,7 @@ public class RdbUserStorage extends UserStorage {
             try {
                 if (userId < 0 && considerAliases) {
                     UserAliasStorage alias = ServerServiceRegistry.getInstance().getService(UserAliasStorage.class);
-                    int retUserId = alias.getUserId(context.getContextId(), pattern);
+                    int retUserId = alias.getUserId(context.getContextId(), email);
                     if (retUserId > 0) {
                         userId = retUserId;
                     }
@@ -1389,6 +1397,12 @@ public class RdbUserStorage extends UserStorage {
                     throw LdapExceptionCode.NO_USER_BY_MAIL.create(email).setPrefix("USR");
                 }
                 return getUser(context, con, new int[] { userId })[0];
+            } catch (OXException e) {
+                if (com.openexchange.groupware.ldap.UserExceptionCode.USER_NOT_FOUND.equals(e)) {
+                    //FIXME: javadoc claims to return null if not found...
+                    throw LdapExceptionCode.NO_USER_BY_MAIL.create(email).setPrefix("USR");
+                }
+                throw e;
             } finally {
                 closeSQLStuff(result, stmt);
             }

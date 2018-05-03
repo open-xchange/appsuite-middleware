@@ -64,27 +64,27 @@ import com.openexchange.mail.mime.QuotedInternetAddress;
  */
 public class GenericChecks {
 
-//    ftp://ftp.rfc-editor.org/in-notes/rfc2822.txt
-//
-//        3.2.4. Atom
-//
-//        atext           =       ALPHA / DIGIT / ; Any character except controls,
-//                                "!" / "#" /     ;  SP, and specials.
-//                                "$" / "%" /     ;  Used for atoms
-//                                "&" / "'" /
-//                                "*" / "+" /
-//                                "-" / "/" /
-//                                "=" / "?" /
-//                                "^" / "_" /
-//                                "`" / "{" /
-//                                "|" / "}" /
-//                                "~"
+    //    ftp://ftp.rfc-editor.org/in-notes/rfc2822.txt
+    //
+    //        3.2.4. Atom
+    //
+    //        atext           =       ALPHA / DIGIT / ; Any character except controls,
+    //                                "!" / "#" /     ;  SP, and specials.
+    //                                "$" / "%" /     ;  Used for atoms
+    //                                "&" / "'" /
+    //                                "*" / "+" /
+    //                                "-" / "/" /
+    //                                "=" / "?" /
+    //                                "^" / "_" /
+    //                                "`" / "{" /
+    //                                "|" / "}" /
+    //                                "~"
     /**
      * This method checks if an address contains invalid characters
      *
      * @param address The address string to check
      */
-    public final static boolean isValidMailAddress(final String address)  {
+    public final static boolean isValidMailAddress(final String address) {
         if (null != address) {
             try {
                 new QuotedInternetAddress(address);
@@ -123,7 +123,7 @@ public class GenericChecks {
      */
     public final static void checkChangeValidPasswordMech(final PasswordMechObject user) throws InvalidDataException {
         checkCreateValidPasswordMech(user);
-        if( user.getPasswordMech() != null && user.getPassword() == null ) {
+        if (user.getPasswordMech() != null && user.getPassword() == null) {
             throw new InvalidDataException("When changing password mechanism, the password string must also be supplied");
         }
     }
@@ -137,10 +137,9 @@ public class GenericChecks {
      */
     public final static void checkCreateValidPasswordMech(final PasswordMechObject user) throws InvalidDataException {
         final String mech = user.getPasswordMech();
-        if( mech != null ) {
-            if( ! mech.equalsIgnoreCase(PasswordMechObject.CRYPT_MECH) && ! mech.equalsIgnoreCase(PasswordMechObject.SHA_MECH) ) {
-                throw new InvalidDataException("Invalid PasswordMech: " + mech + ", Valid Mechs: " + PasswordMechObject.CRYPT_MECH +
-                        ":" + PasswordMechObject.SHA_MECH);
+        if (mech != null) {
+            if (!mech.equalsIgnoreCase(PasswordMechObject.CRYPT_MECH) && !mech.equalsIgnoreCase(PasswordMechObject.SHA_MECH)) {
+                throw new InvalidDataException("Invalid PasswordMech: " + mech + ", Valid Mechs: " + PasswordMechObject.CRYPT_MECH + ":" + PasswordMechObject.SHA_MECH);
             }
         }
     }
@@ -157,14 +156,18 @@ public class GenericChecks {
      * @throws UnsupportedEncodingException
      */
     public final static boolean authByMech(final String crypted, final String clear, final String mech) throws NoSuchAlgorithmException, UnsupportedEncodingException {
-        if("{CRYPT}".equals(mech)) {
-            return UnixCrypt.matches(crypted, clear);
-        } else if("{SHA}".equals(mech)) {
-            return SHACrypt.makeSHAPasswd(clear).equals(crypted);
-        } else if("{BCRYPT}".equals(mech)) {
-            return BCrypt.checkpw(clear, crypted);
-        } else {
+        if (mech == null) {
             return false;
+        }
+        switch (mech) {
+            case "{CRYPT}":
+                return UnixCrypt.matches(crypted, clear);
+            case "{SHA}":
+                return SHACrypt.makeSHAPasswd(clear).equals(crypted);
+            case "{BCRYPT}":
+                return BCrypt.checkpw(clear, crypted);
+            default:
+                return false;
         }
     }
 }

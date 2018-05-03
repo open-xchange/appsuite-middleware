@@ -30,6 +30,7 @@ import java.io.Reader;
 import java.io.Writer;
 import java.lang.reflect.Field;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -237,7 +238,7 @@ public class JSONObject extends AbstractJSONValue {
      * @param other A JSONObject to initialize the contents of the JSONObject.
      */
     public JSONObject(final JSONObject other) {
-        this(null == other ? null : other.myHashMap);
+        this(null == other ? Collections.emptyMap() : other.myHashMap);
     }
 
     /**
