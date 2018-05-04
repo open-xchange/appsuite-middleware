@@ -168,7 +168,10 @@ public final class ChangePrimaryKeyForUserAttribute extends UpdateTaskAdapter {
             // Put context identifiers into a light-weight list
             TIntList contextIds = new TIntArrayList(512);
             do {
-                contextIds.add(rs.getInt(1));
+                int value = rs.getInt(1);
+                if (!contextIds.contains(value)) {
+                    contextIds.add(value);
+                }
             } while (rs.next());
             Databases.closeSQLStuff(rs, stmt);
             rs = null;
