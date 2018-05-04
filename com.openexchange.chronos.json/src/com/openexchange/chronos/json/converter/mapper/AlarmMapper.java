@@ -123,8 +123,7 @@ public class AlarmMapper extends DefaultJsonMapper<Alarm, AlarmField> {
 
     @Override
     protected EnumMap<AlarmField, ? extends JsonMapping<? extends Object, Alarm>> createMappings() {
-        EnumMap<AlarmField, JsonMapping<? extends Object, Alarm>> mappings = new
-            EnumMap<AlarmField, JsonMapping<? extends Object, Alarm>>(AlarmField.class);
+        EnumMap<AlarmField, JsonMapping<? extends Object, Alarm>> mappings = new EnumMap<AlarmField, JsonMapping<? extends Object, Alarm>>(AlarmField.class);
         mappings.put(AlarmField.ID, new IntegerMapping<Alarm>(ChronosJsonFields.Alarm.ID, null) {
 
             @Override
@@ -229,7 +228,8 @@ public class AlarmMapper extends DefaultJsonMapper<Alarm, AlarmField> {
 
             @Override
             public Long get(Alarm object) {
-                return object.getAcknowledged().getTime();
+                Date acknowledged = object.getAcknowledged();
+                return acknowledged != null ? acknowledged.getTime() : null;
             }
 
             @Override

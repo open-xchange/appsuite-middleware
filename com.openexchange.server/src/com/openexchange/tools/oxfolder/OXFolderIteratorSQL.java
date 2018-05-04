@@ -60,6 +60,7 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.regex.Matcher;
@@ -87,6 +88,7 @@ import com.openexchange.tools.iterator.SearchIteratorExceptionCodes;
 import com.openexchange.tools.oxfolder.memory.Condition;
 import com.openexchange.tools.oxfolder.memory.ConditionTreeMap;
 import com.openexchange.tools.oxfolder.memory.ConditionTreeMapManagement;
+import gnu.trove.EmptyTIntSet;
 import gnu.trove.iterator.TIntIntIterator;
 import gnu.trove.list.TIntList;
 import gnu.trove.list.array.TIntArrayList;
@@ -334,14 +336,15 @@ public final class OXFolderIteratorSQL {
         /*
          * Finally, compose UNION statement
          */
+        Iterator<String> it = whereClauses.iterator();
         {
             sb.append(select);
-            sb.append(whereClauses.get(0));
+            sb.append(it.next());
         }
-        for (int i = 1; i < whereClauses.size(); i++) {
+        for (int i = whereClauses.size() - 1; i-- > 0;) {
             sb.append(" UNION ");
             sb.append(select);
-            sb.append(whereClauses.get(i));
+            sb.append(it.next());
         }
         if (null != preparedOrderBy) {
             sb.append(' ').append(preparedOrderBy);
@@ -1071,6 +1074,26 @@ public final class OXFolderIteratorSQL {
      * @throws OXException If module's visible public folders that are not visible in hierarchic tree-view cannot be determined
      */
     public static boolean hasVisibleFoldersNotSeenInTreeView(final int module, final int userId, final int[] groups, final UserPermissionBits permissionBits, final Context ctx, final Connection readCon) throws OXException {
+        return hasVisibleFoldersNotSeenInTreeView(new int[] {module}, userId, groups, permissionBits, ctx, readCon).contains(module);
+    }
+
+    /**
+     * Checks for non-tree-visible folder of specified modules.
+     *
+     * @param modules The modules
+     * @param userId The user ID
+     * @param groups The user's group IDs
+     * @param permissionBits The user permission bits
+     * @param ctx The context
+     * @param readCon An readable connection (optional: may be <code>null</code>)
+     * @return The set of contained modules
+     * @throws OXException If module's visible public folders that are not visible in hierarchic tree-view cannot be determined
+     */
+    public static TIntSet hasVisibleFoldersNotSeenInTreeView(final int[] modules, final int userId, final int[] groups, final UserPermissionBits permissionBits, final Context ctx, final Connection readCon) throws OXException {
+        if (null == modules || modules.length == 0) {
+            return EmptyTIntSet.getInstance();
+        }
+
         Connection rc = readCon;
         boolean closeReadCon = false;
         PreparedStatement stmt = null;
@@ -1084,7 +1107,8 @@ public final class OXFolderIteratorSQL {
             /*
              * Statement to select all user-visible public folders
              */
-            String condition = "AND (ot.type IN (" + PUBLIC + "," + TRASH + "))";
+            TIntSet modulesToCheck = new TIntHashSet(modules);
+            String condition = (modulesToCheck.contains(FolderObject.INFOSTORE) ? new StringBuilder("AND (ot.type IN (").append(PUBLIC).append(',').append(TRASH).append("))") : new StringBuilder("AND (ot.type = ").append(PUBLIC).append(')')).toString();
             stmt = rc.prepareStatement(getSQLUserVisibleFolders("ot.fuid, ot.parent, ot.module",
                 permissionIds(userId, groups, ctx), StringCollection.getSqlInString(permissionBits.getAccessibleModules()), condition, getSubfolderOrderBy(STR_OT)));
             int pos = 1;
@@ -1093,17 +1117,18 @@ public final class OXFolderIteratorSQL {
             stmt.setInt(pos++, userId);
             stmt.setInt(pos++, contextId);
             stmt.setInt(pos++, contextId);
-
             rs = executeQuery(stmt);
             if (!rs.next()) {
                 closeResources(rs, stmt, closeReadCon ? rc : null, true, ctx);
-                return false;
+                return EmptyTIntSet.getInstance();
             }
-            final TIntIntMap fuid2parent = new TIntIntHashMap(128);
-            final TIntIntMap fuid2module = new TIntIntHashMap(128);
-            final TIntSet fuids = new TIntHashSet(128);
+
+            TIntSet retval = new TIntHashSet(modules.length);
+            TIntIntMap fuid2parent = new TIntIntHashMap(128);
+            TIntIntMap fuid2module = new TIntIntHashMap(128);
+            TIntSet fuids = new TIntHashSet(128);
             do {
-                final int fuid = rs.getInt(1);
+                int fuid = rs.getInt(1);
                 fuid2parent.put(fuid, rs.getInt(2));
                 fuid2module.put(fuid, rs.getInt(3));
                 fuids.add(fuid);
@@ -1116,11 +1141,17 @@ public final class OXFolderIteratorSQL {
                 iterator.advance();
                 final int fuid = iterator.key();
                 final int parent = iterator.value();
-                if (parent >= MIN_FOLDER_ID && !fuids.contains(parent) && (module == fuid2module.get(fuid))) {
-                    return true;
+                if (parent >= MIN_FOLDER_ID && !fuids.contains(parent)) {
+                    int module = fuid2module.get(fuid);
+                    if (modulesToCheck.remove(module)) {
+                        retval.add(module);
+                        if (modulesToCheck.isEmpty()) {
+                            return retval;
+                        }
+                    }
                 }
             }
-            return false;
+            return retval;
         } catch (final SQLException e) {
             throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
         } catch (final RuntimeException t) {

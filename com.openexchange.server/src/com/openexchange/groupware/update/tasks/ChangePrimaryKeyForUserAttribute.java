@@ -73,6 +73,8 @@ import com.openexchange.java.util.UUIDs;
 import com.openexchange.tools.update.Tools;
 import gnu.trove.list.TIntList;
 import gnu.trove.list.array.TIntArrayList;
+import gnu.trove.set.TIntSet;
+import gnu.trove.set.hash.TIntHashSet;
 
 /**
  * {@link ChangePrimaryKeyForUserAttribute} - Changes the PRIMARY KEY of the <code>"user_attribute"</code> table from ("cid", "uuid") to ("cid", "id", "name").
@@ -158,7 +160,7 @@ public final class ChangePrimaryKeyForUserAttribute extends UpdateTaskAdapter {
         ResultSet rs = null;
         try {
             // Extract all distinct context identifiers
-            stmt = con.prepareStatement("SELECT DISTINCT cid FROM user_attribute");
+            stmt = con.prepareStatement("SELECT cid FROM user_attribute");
             rs = stmt.executeQuery();
             if (false == rs.next()) {
                 // No rows available in connection-associated schema
@@ -166,10 +168,15 @@ public final class ChangePrimaryKeyForUserAttribute extends UpdateTaskAdapter {
             }
 
             // Put context identifiers into a light-weight list
-            TIntList contextIds = new TIntArrayList(512);
-            do {
-                contextIds.add(rs.getInt(1));
-            } while (rs.next());
+            TIntList contextIds;
+            {
+                TIntSet tmp = new TIntHashSet(512);
+                do {
+                    int value = rs.getInt(1);
+                    tmp.add(value);
+                } while (rs.next());
+                contextIds = new TIntArrayList(tmp);
+            }
             Databases.closeSQLStuff(rs, stmt);
             rs = null;
             stmt = null;

@@ -19,7 +19,7 @@ msgstr ""
 "Project-Id-Version: errors.de_DE\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2018-05-03 15:27+0200\n"
+"PO-Revision-Date: 2018-05-04 13:47+0200\n"
 "Last-Translator: \n"
 "Language-Team: German <kde-i18n-de@kde.org>\n"
 "Language: de_DE\n"
@@ -1174,6 +1174,15 @@ msgid "Authentication failed. Please enter your password and try again."
 msgstr ""
 "Authentifizierung fehlgeschlagen. Bitte geben Sie Ihr Passwort ein und "
 "versuchen Sie es erneut."
+
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.provider.ical/src/com/openexchange/chronos/provider/ical/exception/ICalProviderExceptionMessages.java:93
+msgid ""
+"Authentication failed due to a recent credentials change. Please remove the "
+"account and add it again with correct credentials."
+msgstr ""
+"Die Authentifizierung ist aufgrund einer kürzlichen Änderung der "
+"Anmeldedaten fehlgeschlagen. Entfernen Sie bitte den Account und fügen Sie "
+"ihn mit den korrekten Anmeldedaten neu hinzu."
 
 #. *
 #. * The name of the internal calendar provider.
