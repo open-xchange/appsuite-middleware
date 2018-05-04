@@ -58,8 +58,10 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
@@ -233,7 +235,7 @@ public class OXFolderDependentDeleter {
         /*
          * build statement
          */
-        StringBuilder stringBuilder = new StringBuilder("SELECT DISTINCT id FROM user where cid=? AND id");
+        StringBuilder stringBuilder = new StringBuilder("SELECT id FROM user where cid=? AND id");
         if (1 == entityIDs.length) {
             stringBuilder.append("=?");
         } else {
@@ -258,7 +260,10 @@ public class OXFolderDependentDeleter {
             }
             rs = stmt.executeQuery();
             while (rs.next()) {
-                guestIDs.add(rs.getInt(1));
+                int i = rs.getInt(1);
+                if (!guestIDs.contains(i)) {
+                    guestIDs.add(i);
+                }
             }
         } catch (SQLException e) {
             throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
@@ -269,11 +274,11 @@ public class OXFolderDependentDeleter {
     }
 
     private static List<Integer> getObjectPermissionEntities(Connection con, Context context, int module, List<Integer> folderIDs, boolean includeGroups) throws OXException {
-        List<Integer> entityIDs = new ArrayList<Integer>();
+        Set<Integer> entityIDs = new LinkedHashSet<>();
         /*
          * prepare statement
          */
-        StringBuilder stringBuilder = new StringBuilder("SELECT DISTINCT permission_id FROM object_permission WHERE cid=? AND module=? AND folder_id");
+        StringBuilder stringBuilder = new StringBuilder("SELECT permission_id FROM object_permission WHERE cid=? AND module=? AND folder_id");
         if (1 == folderIDs.size()) {
             stringBuilder.append("=?");
         } else {
@@ -308,7 +313,7 @@ public class OXFolderDependentDeleter {
         } finally {
             Databases.closeSQLStuff(rs, stmt);
         }
-        return entityIDs;
+        return new ArrayList<>(entityIDs);
     }
 
     private static int deletePublications(Connection connection, int cid, String module, List<Integer> entities) throws SQLException {

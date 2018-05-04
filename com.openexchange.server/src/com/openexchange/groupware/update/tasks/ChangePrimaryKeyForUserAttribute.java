@@ -158,7 +158,7 @@ public final class ChangePrimaryKeyForUserAttribute extends UpdateTaskAdapter {
         ResultSet rs = null;
         try {
             // Extract all distinct context identifiers
-            stmt = con.prepareStatement("SELECT DISTINCT cid FROM user_attribute");
+            stmt = con.prepareStatement("SELECT cid FROM user_attribute");
             rs = stmt.executeQuery();
             if (false == rs.next()) {
                 // No rows available in connection-associated schema
