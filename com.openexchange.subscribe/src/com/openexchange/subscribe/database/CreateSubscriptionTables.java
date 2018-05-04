@@ -73,7 +73,7 @@ public class CreateSubscriptionTables extends AbstractCreateTableImpl {
             "created INT8 NOT NULL DEFAULT 0," +
             "lastModified INT8 NOT NULL DEFAULT 0," +
             "PRIMARY KEY (cid,id)," +
-            "INDEX `folderIndex` (`cid`, `folder_id`)," +
+            "INDEX `folderIndex` (`cid`, `folder_id`(191))," +
             "FOREIGN KEY(cid,user_id) REFERENCES user(cid,id)" +
             ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;",
 

@@ -79,8 +79,8 @@ public class CreateVirtualFolderTables extends AbstractCreateTableImpl {
         + "shadow VARCHAR(192) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,"
         + "sortNum INT4 unsigned DEFAULT NULL,"
         + "PRIMARY KEY (cid, tree, user, folderId),"
-        + "INDEX (cid, tree, user, parentId),"
-        + "INDEX (cid, tree, user, shadow),"
+        + "INDEX (cid, tree, user, parentId(191)),"
+        + "INDEX (cid, tree, user, shadow(191)),"
         + "INDEX (cid, user),"
         + "INDEX (cid, modifiedBy)"
         + ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;";
@@ -148,8 +148,8 @@ public class CreateVirtualFolderTables extends AbstractCreateTableImpl {
         + "shadow VARCHAR(192) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,"
         + "sortNum INT4 unsigned DEFAULT NULL,"
         + "PRIMARY KEY (cid, tree, user, folderId),"
-        + "INDEX (cid, tree, user, parentId),"
-        + "INDEX (cid, tree, user, shadow),"
+        + "INDEX (cid, tree, user, parentId(191)),"
+        + "INDEX (cid, tree, user, shadow(191)),"
         + "INDEX (cid, user),"
         + "INDEX (cid, modifiedBy)"
         + ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;";
