@@ -63,8 +63,10 @@ import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import org.json.JSONException;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
@@ -1251,7 +1253,7 @@ public final class OXFolderSQL {
         /*
          * build statement
          */
-        StringBuilder stringBuilder = new StringBuilder("SELECT DISTINCT permission_id FROM oxfolder_permissions WHERE cid=? AND fuid");
+        StringBuilder stringBuilder = new StringBuilder("SELECT permission_id FROM oxfolder_permissions WHERE cid=? AND fuid");
         if (1 == folderIDs.size()) {
             stringBuilder.append("=?");
         } else {
@@ -1264,7 +1266,7 @@ public final class OXFolderSQL {
         if (false == includeGroups) {
             stringBuilder.append(" AND group_flag=0");
         }
-        List<Integer> entityIDs = new ArrayList<Integer>();
+        Set<Integer> entityIDs = new LinkedHashSet<>();
         boolean closeReadConnection = false;
         PreparedStatement stmt = null;
         ResultSet rs = null;
@@ -1291,7 +1293,7 @@ public final class OXFolderSQL {
         } finally {
             closeResources(rs, stmt, closeReadConnection ? readConnection : null, true, context);
         }
-        return entityIDs;
+        return new ArrayList<>(entityIDs);
     }
 
     /**

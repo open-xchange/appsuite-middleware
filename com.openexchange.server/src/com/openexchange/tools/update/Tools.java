@@ -699,14 +699,14 @@ public final class Tools {
     public static List<Integer> getContextIDs(final Connection con) throws SQLException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
-        final List<Integer> contextIds = new LinkedList<Integer>();
+        final Set<Integer> contextIds = new LinkedHashSet<>();
         try {
-            stmt = con.prepareStatement("SELECT DISTINCT cid FROM user");
+            stmt = con.prepareStatement("SELECT cid FROM user");
             rs = stmt.executeQuery();
             while (rs.next()) {
                 contextIds.add(I(rs.getInt(1)));
             }
-            return contextIds;
+            return new ArrayList<>(contextIds);
         } finally {
             closeSQLStuff(rs, stmt);
         }
