@@ -81,15 +81,15 @@ public class ContactTablesUtf8Mb4UpdateTask extends SimpleConvertUtf8ToUtf8mb4Up
      */
     @Override
     protected void before(PerformParameters params, Connection connection) throws SQLException {
-        recreateKey(connection, "prg_contacts", "displayname", new String[] { "cid", "field01" }, new int[] { -1, 191 });
-        recreateKey(connection, "prg_contacts", "email1", new String[] { "cid", "field65" }, new int[] { -1, 191 });
-        recreateKey(connection, "prg_contacts", "email2", new String[] { "cid", "field66" }, new int[] { -1, 191 });
-        recreateKey(connection, "prg_contacts", "email3", new String[] { "cid", "field67" }, new int[] { -1, 191 });
-        
-        recreateKey(connection, "del_contacts", "displayname", new String[] { "cid", "field01" }, new int[] { -1, 191 });
-        recreateKey(connection, "del_contacts", "email1", new String[] { "cid", "field65" }, new int[] { -1, 191 });
-        recreateKey(connection, "del_contacts", "email2", new String[] { "cid", "field66" }, new int[] { -1, 191 });
-        recreateKey(connection, "del_contacts", "email3", new String[] { "cid", "field67" }, new int[] { -1, 191 });
+        recreateKey(connection, "prg_contacts", new String[] { "cid", "field01" }, new int[] { -1, 191 });
+        recreateKey(connection, "prg_contacts", new String[] { "cid", "field65" }, new int[] { -1, 191 });
+        recreateKey(connection, "prg_contacts", new String[] { "cid", "field66" }, new int[] { -1, 191 });
+        recreateKey(connection, "prg_contacts", new String[] { "cid", "field67" }, new int[] { -1, 191 });
+
+        recreateKey(connection, "del_contacts", new String[] { "cid", "field01" }, new int[] { -1, 191 });
+        recreateKey(connection, "del_contacts", new String[] { "cid", "field65" }, new int[] { -1, 191 });
+        recreateKey(connection, "del_contacts", new String[] { "cid", "field66" }, new int[] { -1, 191 });
+        recreateKey(connection, "del_contacts", new String[] { "cid", "field67" }, new int[] { -1, 191 });
 
         Column column = new Column("field17", "TEXT COLLATE utf8mb4_unicode_ci NULL");
         String schema = params.getSchema().getSchema();

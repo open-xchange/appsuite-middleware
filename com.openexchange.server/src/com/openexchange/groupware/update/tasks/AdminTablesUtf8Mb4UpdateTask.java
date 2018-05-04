@@ -76,7 +76,7 @@ public class AdminTablesUtf8Mb4UpdateTask extends SimpleConvertUtf8ToUtf8mb4Upda
      */
     @Override
     protected void before(PerformParameters params, Connection connection) throws SQLException {
-        recreateKey(connection, "updateTask", "full", new String[] { "cid", "taskName" }, new int[] { -1, 191 });
+        recreateKey(connection, "updateTask", new String[] { "cid", "taskName" }, new int[] { -1, 191 });
     }
 
 }

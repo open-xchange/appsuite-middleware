@@ -76,7 +76,6 @@ public class SubscriptionsTablesUtf8Mb4UpdateTask extends SimpleConvertUtf8ToUtf
      */
     @Override
     protected void before(PerformParameters params, Connection connection) throws SQLException {
-        recreateKey(connection, "subscriptions", "cid_2", new String[] { "cid", "folder_id" }, new int[] { -1, 191 });
-        recreateKey(connection, "subscriptions", "folderIndex", new String[] { "cid", "folder_id" }, new int[] { -1, 191 });
+        recreateKey(connection, "subscriptions", new String[] { "cid", "folder_id" }, new int[] { -1, 191 });
     }
 }

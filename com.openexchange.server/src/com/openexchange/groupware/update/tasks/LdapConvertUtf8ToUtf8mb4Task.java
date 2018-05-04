@@ -81,7 +81,7 @@ public class LdapConvertUtf8ToUtf8mb4Task extends SimpleConvertUtf8ToUtf8mb4Upda
      */
     @Override
     protected void before(PerformParameters params, Connection connection) throws SQLException {
-        recreateKey(connection, "user", "mailIndex", new String[] { "cid", "mail" }, new int[] { -1, 191 });
+        recreateKey(connection, "user", new String[] { "cid", "mail" }, new int[] { -1, 191 });
     }
 
     @Override

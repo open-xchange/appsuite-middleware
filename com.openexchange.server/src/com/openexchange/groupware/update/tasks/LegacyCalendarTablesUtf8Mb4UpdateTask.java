@@ -78,8 +78,8 @@ public class LegacyCalendarTablesUtf8Mb4UpdateTask extends SimpleConvertUtf8ToUt
      */
     @Override
     protected void before(PerformParameters params, Connection connection) throws SQLException {
-        recreateKey(connection, "prg_dates", "uidIndex", new String[] { "cid", "uid" }, new int[] { -1, 191 });
-        recreateKey(connection, "del_dates", "uidIndex", new String[] { "cid", "uid" }, new int[] { -1, 191 });
+        recreateKey(connection, "prg_dates", new String[] { "cid", "uid" }, new int[] { -1, 191 });
+        recreateKey(connection, "del_dates", new String[] { "cid", "uid" }, new int[] { -1, 191 });
     }
 
     @Override

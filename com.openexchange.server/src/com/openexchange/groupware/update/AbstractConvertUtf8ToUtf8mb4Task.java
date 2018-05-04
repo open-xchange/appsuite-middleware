@@ -49,6 +49,7 @@
 
 package com.openexchange.groupware.update;
 
+import static com.openexchange.tools.update.Tools.existsIndex;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -637,14 +638,16 @@ public abstract class AbstractConvertUtf8ToUtf8mb4Task extends UpdateTaskAdapter
      * 
      * @param connection The {@link Connection}
      * @param table The table's name
-     * @param keyname the key name
      * @param columnNames the column names
      * @param columnSizes The column sizes (use -1 for full column length)
      * @throws SQLException if an SQL error is occurred
      */
-    protected void recreateKey(Connection connection, String table, String keyname, String[] columnNames, int[] columnSizes) throws SQLException {
-        Tools.dropKey(connection, table, keyname);
-        Tools.createKey(connection, table, columnNames, columnSizes, false, keyname);
+    protected void recreateKey(Connection connection, String table, String[] columnNames, int[] columnSizes) throws SQLException {
+        String indexName = existsIndex(connection, table, columnNames);
+        if (Strings.isNotEmpty(indexName)) {
+            Tools.dropKey(connection, table, indexName);
+        }
+        Tools.createKey(connection, table, columnNames, columnSizes, false, indexName);
     }
 
     /**
