@@ -331,7 +331,7 @@ public final class Tools {
     }
 
     /**
-     * Drops the key with the specified name if it exists. Beware, this method is vulnerable to SQL injection because table and key name can
+     * Drops the key with the specified name. Beware, this method is vulnerable to SQL injection because table and key name can
      * not be set through a {@link PreparedStatement}.
      * 
      * @param con writable database connection.
@@ -340,7 +340,7 @@ public final class Tools {
      * @throws SQLException if some SQL problem occurs.
      */
     public static final void dropKey(Connection con, String table, String key) throws SQLException {
-        String sql = "ALTER TABLE `" + table + "` DROP KEY IF EXISTS `" + key + "`";
+        String sql = "ALTER TABLE `" + table + "` DROP KEY `" + key + "`";
         Statement stmt = null;
         try {
             stmt = con.createStatement();
