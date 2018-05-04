@@ -160,13 +160,13 @@ public class ResourceTestManager implements TestManager {
         return response.getResources();
     }
 
-    public List<Resource> list(int[] ids) throws JSONException {
+    public List<Resource> list(int[] ids) throws JSONException, OXException {
         ResourceListResponse response = execute(new ResourceListRequest(ids));
         extractInfo(response);
         return Arrays.asList(response.getResources());
     }
 
-    public Resource get(int id) throws JSONException {
+    public Resource get(int id) throws JSONException, OXException {
         ResourceGetResponse response = execute(new ResourceGetRequest(id, false));
         extractInfo(response);
         return response.getResource();

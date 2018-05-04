@@ -59,6 +59,7 @@ import com.openexchange.ajax.resource.actions.ResourceNewRequest;
 import com.openexchange.ajax.resource.actions.ResourceNewResponse;
 import com.openexchange.exception.OXException;
 import com.openexchange.resource.Resource;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
 /**
  * {@link ResourceNewAJAXTest} - Tests the NEW request on resource servlet
@@ -104,7 +105,14 @@ public final class ResourceNewAJAXTest extends AbstractResourceTest {
         } finally {
             deleteResource(id);
         }
+    }
 
+    @Test
+    public void testNew_noBody_returnException() throws OXException, JSONException, IOException {
+        final ResourceNewResponse newResponse = Executor.execute(getSession(), new ResourceNewRequest(null, false));
+
+        assertTrue(newResponse.hasError());
+        assertTrue(AjaxExceptionCodes.MISSING_REQUEST_BODY.equals(newResponse.getException()));
     }
 
 }

@@ -69,7 +69,12 @@ import com.openexchange.groupware.update.UpdateTaskAdapter;
  */
 public class RemoveAliasInUserAttributesTable extends UpdateTaskAdapter {
 
-    private static final String DELETE_ALIAS_STMT = "DELETE FROM user_attribute WHERE name='alias'";
+    /**
+     * Initializes a new {@link RemoveAliasInUserAttributesTable}.
+     */
+    public RemoveAliasInUserAttributesTable() {
+        super();
+    }
 
     @Override
     public void perform(PerformParameters params) throws OXException {
@@ -81,7 +86,7 @@ public class RemoveAliasInUserAttributesTable extends UpdateTaskAdapter {
             rollback = true;
 
             stmt = con.createStatement();
-            stmt.execute(DELETE_ALIAS_STMT);
+            stmt.execute("DELETE FROM user_attribute WHERE name='alias'");
 
             con.commit();
             rollback = false;

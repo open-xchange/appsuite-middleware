@@ -1131,7 +1131,7 @@ public class Spamc {
         try {
             out = socket.getOutputStream();
             in = new BufferedReader(new InputStreamReader(socket.getInputStream(), StandardCharsets.UTF_8));
-            out.write(query.getBytes());
+            out.write(query.getBytes(StandardCharsets.UTF_8));
             out.flush();
             socket.shutdownOutput();
             String s;

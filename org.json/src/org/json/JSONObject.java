@@ -30,6 +30,7 @@ import java.io.Reader;
 import java.io.Writer;
 import java.lang.reflect.Field;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -237,7 +238,7 @@ public class JSONObject extends AbstractJSONValue {
      * @param other A JSONObject to initialize the contents of the JSONObject.
      */
     public JSONObject(final JSONObject other) {
-        this(null == other ? null : other.myHashMap);
+        this(null == other ? Collections.emptyMap() : other.myHashMap);
     }
 
     /**
@@ -559,6 +560,21 @@ public class JSONObject extends AbstractJSONValue {
     }
 
     /**
+     * Get the raw value object associated with a key.
+     *
+     * @param key A key string.
+     * @return The raw value associated with the key.
+     * @throws JSONException if the key is not found.
+     */
+    public Object getRaw(final String key) throws JSONException {
+        final Object o = optRaw(key);
+        if (o == null) {
+            throw new JSONException("JSONObject[" + quote(key) + "] not found.");
+        }
+        return o;
+    }
+
+    /**
      * Get the boolean value associated with a key.
      *
      * @param key A key string.
@@ -820,6 +836,23 @@ public class JSONObject extends AbstractJSONValue {
      * @return An object which is the value, or null if there is no value.
      */
     public Object opt(final String key) {
+        if (key == null) {
+            return null;
+        }
+        Object value = this.myHashMap.get(key);
+        if (null == value) {
+            return null;
+        }
+        return value instanceof CharSequence ? value.toString() : value;
+    }
+
+    /**
+     * Get the raw optional value associated with a key.
+     *
+     * @param key A key string.
+     * @return An object which is the value, or <code>null</code> if there is no such value.
+     */
+    public Object optRaw(final String key) {
         return key == null ? null : this.myHashMap.get(key);
     }
 
@@ -833,8 +866,14 @@ public class JSONObject extends AbstractJSONValue {
         if (key == null) {
             return null;
         }
-        Object object = this.myHashMap.get(key);
-        return NULL == object ? null : object;
+        Object value = this.myHashMap.get(key);
+        if (null == value) {
+            return null;
+        }
+        if (NULL == value) {
+            return null;
+        }
+        return value instanceof CharSequence ? value.toString() : value;
     }
 
     /**

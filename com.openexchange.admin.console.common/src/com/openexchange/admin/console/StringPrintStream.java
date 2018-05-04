@@ -104,7 +104,7 @@ public class StringPrintStream extends PrintStream {
 
         @Override()
         public void write(final byte[] b) {
-            builder.append(new String(b));
+            builder.append(new String(b, StandardCharsets.UTF_8));
         }
 
         @Override()

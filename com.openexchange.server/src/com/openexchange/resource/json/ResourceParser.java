@@ -51,7 +51,9 @@ package com.openexchange.resource.json;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+import com.openexchange.exception.OXException;
 import com.openexchange.resource.Resource;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
 /**
  * {@link ResourceParser} - Parses a {@link Resource resource} out of a JSON object
@@ -72,29 +74,35 @@ public final class ResourceParser {
      *
      * @param jsonResource The JSON object containing the resource's data
      * @return The parsed {@link Resource resource}
-     * @throws JSONException If reading from JSON object fails
+     * @throws OXException If data is null or reading from JSON object fails
      */
-    public static Resource parseResource(final JSONObject jsonResource) throws JSONException {
-        final Resource retval = new Resource();
-        if (jsonResource.has(ResourceFields.ID) && !jsonResource.isNull(ResourceFields.ID)) {
-            retval.setIdentifier(jsonResource.getInt(ResourceFields.ID));
+    public static Resource parseResource(final JSONObject jsonResource) throws OXException {
+        if (jsonResource == null) {
+            throw AjaxExceptionCodes.MISSING_REQUEST_BODY.create();
         }
-        if (jsonResource.has(ResourceFields.NAME) && !jsonResource.isNull(ResourceFields.NAME)) {
-            retval.setSimpleName(jsonResource.getString(ResourceFields.NAME));
+        try {
+            final Resource retval = new Resource();
+            if (jsonResource.has(ResourceFields.ID) && !jsonResource.isNull(ResourceFields.ID)) {
+                retval.setIdentifier(jsonResource.getInt(ResourceFields.ID));
+            }
+            if (jsonResource.has(ResourceFields.NAME) && !jsonResource.isNull(ResourceFields.NAME)) {
+                retval.setSimpleName(jsonResource.getString(ResourceFields.NAME));
+            }
+            if (jsonResource.has(ResourceFields.DISPLAY_NAME) && !jsonResource.isNull(ResourceFields.DISPLAY_NAME)) {
+                retval.setDisplayName(jsonResource.getString(ResourceFields.DISPLAY_NAME));
+            }
+            if (jsonResource.has(ResourceFields.MAIL) && !jsonResource.isNull(ResourceFields.MAIL)) {
+                retval.setMail(jsonResource.getString(ResourceFields.MAIL));
+            }
+            if (jsonResource.has(ResourceFields.AVAILABILITY) && !jsonResource.isNull(ResourceFields.AVAILABILITY)) {
+                retval.setAvailable(jsonResource.getBoolean(ResourceFields.AVAILABILITY));
+            }
+            if (jsonResource.has(ResourceFields.DESCRIPTION) && !jsonResource.isNull(ResourceFields.DESCRIPTION)) {
+                retval.setDescription(jsonResource.getString(ResourceFields.DESCRIPTION));
+            }
+            return retval;
+        } catch (JSONException e) {
+            throw AjaxExceptionCodes.INVALID_JSON_REQUEST_BODY.create(e);
         }
-        if (jsonResource.has(ResourceFields.DISPLAY_NAME) && !jsonResource.isNull(ResourceFields.DISPLAY_NAME)) {
-            retval.setDisplayName(jsonResource.getString(ResourceFields.DISPLAY_NAME));
-        }
-        if (jsonResource.has(ResourceFields.MAIL) && !jsonResource.isNull(ResourceFields.MAIL)) {
-            retval.setMail(jsonResource.getString(ResourceFields.MAIL));
-        }
-        if (jsonResource.has(ResourceFields.AVAILABILITY) && !jsonResource.isNull(ResourceFields.AVAILABILITY)) {
-            retval.setAvailable(jsonResource.getBoolean(ResourceFields.AVAILABILITY));
-        }
-        if (jsonResource.has(ResourceFields.DESCRIPTION) && !jsonResource.isNull(ResourceFields.DESCRIPTION)) {
-            retval.setDescription(jsonResource.getString(ResourceFields.DESCRIPTION));
-        }
-        return retval;
     }
-
 }

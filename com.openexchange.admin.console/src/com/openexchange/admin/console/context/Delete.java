@@ -65,12 +65,13 @@ import com.openexchange.admin.rmi.exceptions.StorageException;
 
 public class Delete extends DeleteCore {
 
-    private Delete() {
+    public Delete(String args[]) {
         super();
+        commonfunctions(new AdminParser("deletecontext"), args);
     }
 
     public static void main(final String args[]) {
-        new Delete().commonfunctions(new AdminParser("deletecontext"), args);
+        new Delete(args);
     }
 
     @Override
