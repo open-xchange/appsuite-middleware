@@ -182,5 +182,8 @@
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.passwordchange.history"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.admin.rest.passwordchange.history"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.cluster.timer.impl"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.net"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.net.ssl.management"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.rest.client"/>
 	<classpathentry kind="output" path="build"/>
 </classpath>
