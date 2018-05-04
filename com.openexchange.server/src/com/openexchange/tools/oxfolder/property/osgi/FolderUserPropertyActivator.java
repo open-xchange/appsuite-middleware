@@ -49,8 +49,10 @@
 
 package com.openexchange.tools.oxfolder.property.osgi;
 
+import java.io.ByteArrayInputStream;
 import java.util.Arrays;
 import java.util.Collection;
+import com.openexchange.caching.CacheService;
 import com.openexchange.database.CreateTableService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.groupware.update.UpdateTaskProviderService;
@@ -58,7 +60,8 @@ import com.openexchange.groupware.update.UpdateTaskV2;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.tools.oxfolder.property.FolderUserPropertyStorage;
-import com.openexchange.tools.oxfolder.property.impl.FolderUserPropertyStorageImpl;
+import com.openexchange.tools.oxfolder.property.impl.CachingFolderUserPropertyStorage;
+import com.openexchange.tools.oxfolder.property.impl.RdbFolderUserPropertyStorage;
 import com.openexchange.tools.oxfolder.property.sql.CreateFolderUserPropertyTable;
 import com.openexchange.tools.oxfolder.property.sql.CreateFolderUserPropertyTask;
 
@@ -72,7 +75,7 @@ public class FolderUserPropertyActivator extends HousekeepingActivator {
 
     /**
      * Initializes a new {@link FolderUserPropertyActivator}.
-     * 
+     *
      */
     public FolderUserPropertyActivator() {
         super();
@@ -80,7 +83,7 @@ public class FolderUserPropertyActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { DatabaseService.class };
+        return new Class<?>[] { DatabaseService.class, CacheService.class };
     }
 
     @Override
@@ -102,8 +105,28 @@ public class FolderUserPropertyActivator extends HousekeepingActivator {
         });
         registerService(CreateTableService.class, new CreateFolderUserPropertyTable());
 
-        // Register FolderUserPropertyStorage 
-        registerService(FolderUserPropertyStorage.class, new FolderUserPropertyStorageImpl(this));
+        // Initialize cache region
+        {
+            String regionName = CachingFolderUserPropertyStorage.getRegionName();
+            byte[] ccf = ("jcs.region."+regionName+"=LTCP\n" +
+                "jcs.region."+regionName+".cacheattributes=org.apache.jcs.engine.CompositeCacheAttributes\n" +
+                "jcs.region."+regionName+".cacheattributes.MaxObjects=1000000\n" +
+                "jcs.region."+regionName+".cacheattributes.MemoryCacheName=org.apache.jcs.engine.memory.lru.LRUMemoryCache\n" +
+                "jcs.region."+regionName+".cacheattributes.UseMemoryShrinker=true\n" +
+                "jcs.region."+regionName+".cacheattributes.MaxMemoryIdleTimeSeconds=360\n" +
+                "jcs.region."+regionName+".cacheattributes.ShrinkerIntervalSeconds=60\n" +
+                "jcs.region."+regionName+".elementattributes=org.apache.jcs.engine.ElementAttributes\n" +
+                "jcs.region."+regionName+".elementattributes.IsEternal=false\n" +
+                "jcs.region."+regionName+".elementattributes.MaxLifeSeconds=-1\n" +
+                "jcs.region."+regionName+".elementattributes.IdleTime=360\n" +
+                "jcs.region."+regionName+".elementattributes.IsSpool=false\n" +
+                "jcs.region."+regionName+".elementattributes.IsRemote=false\n" +
+                "jcs.region."+regionName+".elementattributes.IsLateral=false\n").getBytes();
+            getService(CacheService.class).loadConfiguration(new ByteArrayInputStream(ccf));
+        }
+
+        // Register FolderUserPropertyStorage
+        registerService(FolderUserPropertyStorage.class, new CachingFolderUserPropertyStorage(new RdbFolderUserPropertyStorage(this)));
     }
 
 }

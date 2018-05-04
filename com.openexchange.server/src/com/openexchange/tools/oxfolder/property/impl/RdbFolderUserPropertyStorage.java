@@ -56,7 +56,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -70,32 +69,29 @@ import com.openexchange.tools.oxfolder.OXFolderExceptionCode;
 import com.openexchange.tools.oxfolder.property.FolderUserPropertyStorage;
 
 /**
- * {@link FolderUserPropertyStorageImpl}
+ * {@link RdbFolderUserPropertyStorage}
  *
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  * @since v7.10.0
  */
+public class RdbFolderUserPropertyStorage implements FolderUserPropertyStorage {
 
-public class FolderUserPropertyStorageImpl implements FolderUserPropertyStorage {
-
-    private static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(FolderUserPropertyStorageImpl.class);
+    private static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(RdbFolderUserPropertyStorage.class);
 
     private final static String DELETE      = "DELETE FROM " + TABLE_NAME + " WHERE cid=? AND fuid=? AND userid=?";
     private final static String DELETE_PROP = "DELETE FROM " + TABLE_NAME + " WHERE cid=? AND fuid=? AND userid=? AND name=?";
     private final static String EXIST       = "SELECT EXISTS(SELECT 1 FROM " + TABLE_NAME + " WHERE cid=? AND fuid=? AND userid=? LIMIT 1)";
     private final static String GET         = "SELECT name, value FROM " + TABLE_NAME + " WHERE cid=? AND fuid=? AND userid=?";
     private final static String GET_PROP    = "SELECT value FROM " + TABLE_NAME + " WHERE cid=? AND fuid=? AND userid=? AND name=? LIMIT 1";
-    private final static String INSERT      = "INSERT INTO " + TABLE_NAME + " (cid,fuid,userid,name,value) VALUES (?,?,?,?,?)";
     private final static String SET         = "INSERT INTO " + TABLE_NAME + " (cid,fuid,userid,name,value) VALUES (?,?,?,?,?) ON DUPLICATE KEY UPDATE value=?";
     private final static String UPDATE      = "UPDATE " + TABLE_NAME + " SET value=? WHERE cid=? AND fuid=? AND userid=? AND name=?";
 
     private final ServiceLookup services;
 
     /**
-     * Initializes a new {@link FolderUserPropertyStorageImpl}.
-     *
+     * Initializes a new {@link RdbFolderUserPropertyStorage}.
      */
-    public FolderUserPropertyStorageImpl(ServiceLookup service) {
+    public RdbFolderUserPropertyStorage(ServiceLookup service) {
         super();
         this.services = service;
     }
@@ -109,7 +105,7 @@ public class FolderUserPropertyStorageImpl implements FolderUserPropertyStorage 
         boolean modified = false;
 
         // Acquire write connection
-        dbService = getService(DatabaseService.class);
+        dbService = getDatabaseServiceService();
         connection = dbService.getWritable(contextId);
 
         try {
@@ -161,15 +157,14 @@ public class FolderUserPropertyStorageImpl implements FolderUserPropertyStorage 
             } else {
                 // Prepare statement for every property
                 stmt = connection.prepareStatement(DELETE_PROP);
+                stmt.setInt(1, contextId);
+                stmt.setInt(2, folderId);
+                stmt.setInt(3, userId);
                 for (String key : propertyKeys) {
-                    stmt.setInt(1, contextId);
-                    stmt.setInt(2, folderId);
-                    stmt.setInt(3, userId);
                     stmt.setString(4, key);
-
                     stmt.addBatch();
                 }
-                //Execute
+                // Execute batch
                 stmt.executeBatch();
             }
         } catch (SQLException e) {
@@ -186,9 +181,9 @@ public class FolderUserPropertyStorageImpl implements FolderUserPropertyStorage 
 
     @Override
     public void deleteFolderProperty(int contextId, int folderId, int userId, String key, Connection connection) throws OXException {
-        Set<String> keys = new HashSet<>(1);
-        keys.add(key);
-        deleteFolderProperties(folderId, contextId, userId, keys, connection);
+        if (null != key) {
+            deleteFolderProperties(folderId, contextId, userId, Collections.singleton(key), connection);
+        }
     }
 
     @Override
@@ -197,7 +192,7 @@ public class FolderUserPropertyStorageImpl implements FolderUserPropertyStorage 
         DatabaseService dbService = null;
 
         // Acquire read connection
-        dbService = getService(DatabaseService.class);
+        dbService = getDatabaseServiceService();
         connection = dbService.getReadOnly(contextId);
         try {
             return exists(contextId, folderId, userId, connection);
@@ -238,13 +233,9 @@ public class FolderUserPropertyStorageImpl implements FolderUserPropertyStorage 
 
     @Override
     public Map<String, String> getFolderProperties(int contextId, int folderId, int userId) throws OXException {
-        Connection connection = null;
-        DatabaseService dbService = null;
-
         // Acquire connection
-        dbService = getService(DatabaseService.class);
-        connection = dbService.getReadOnly(contextId);
-
+        DatabaseService dbService = getDatabaseServiceService();
+        Connection connection = dbService.getReadOnly(contextId);
         try {
             return getFolderProperties(contextId, folderId, userId, connection);
         } finally {
@@ -258,9 +249,9 @@ public class FolderUserPropertyStorageImpl implements FolderUserPropertyStorage 
             // Get connection an re-call this function
             return getFolderProperties(contextId, folderId, userId);
         }
+
         PreparedStatement stmt = null;
         ResultSet rs = null;
-
         try {
             // Prepare statement
             stmt = connection.prepareStatement(GET);
@@ -270,10 +261,14 @@ public class FolderUserPropertyStorageImpl implements FolderUserPropertyStorage 
 
             // Execute & convert result
             rs = stmt.executeQuery();
-            Map<String, String> properties = new HashMap<>();
-            while (rs.next()) {
-                properties.put(rs.getString(1), rs.getString(2));
+            if (false == rs.next()) {
+                return Collections.emptyMap();
             }
+
+            Map<String, String> properties = new HashMap<>();
+            do {
+                properties.put(rs.getString(1), rs.getString(2));
+            } while (rs.next());
             return properties;
         } catch (SQLException e) {
             throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
@@ -289,13 +284,8 @@ public class FolderUserPropertyStorageImpl implements FolderUserPropertyStorage 
             return Collections.emptyMap();
         }
 
-        Connection connection = null;
-        DatabaseService dbService = null;
-
-        // Acquire connection
-        dbService = getService(DatabaseService.class);
-        connection = dbService.getReadOnly(contextId);
-
+        DatabaseService dbService = getDatabaseServiceService();
+        Connection connection = dbService.getReadOnly(contextId);
         try {
             return getFolderProperties(contextId, folderIds, userId, connection);
         } finally {
@@ -325,13 +315,12 @@ public class FolderUserPropertyStorageImpl implements FolderUserPropertyStorage 
 
     @Override
     public String getFolderProperty(int contextId, int folderId, int userId, String key) throws OXException {
-        Connection connection = null;
-        DatabaseService dbService = null;
+        if (null == key) {
+            return null;
+        }
 
-        // Acquire connection
-        dbService = getService(DatabaseService.class);
-        connection = dbService.getReadOnly(contextId);
-
+        DatabaseService dbService = getDatabaseServiceService();
+        Connection connection = dbService.getReadOnly(contextId);
         try {
             return getFolderProperty(contextId, folderId, userId, key, connection);
         } finally {
@@ -341,6 +330,10 @@ public class FolderUserPropertyStorageImpl implements FolderUserPropertyStorage 
 
     @Override
     public String getFolderProperty(int contextId, int folderId, int userId, String key, Connection connection) throws OXException {
+        if (null == key) {
+            return null;
+        }
+
         if (null == connection) {
             // Get connection an re-call this function
             return getFolderProperty(contextId, folderId, userId, key);
@@ -348,7 +341,6 @@ public class FolderUserPropertyStorageImpl implements FolderUserPropertyStorage 
 
         PreparedStatement stmt = null;
         ResultSet rs = null;
-
         try {
             // Prepare statement
             stmt = connection.prepareStatement(GET_PROP);
@@ -378,33 +370,28 @@ public class FolderUserPropertyStorageImpl implements FolderUserPropertyStorage 
             throw OXFolderExceptionCode.RUNTIME_ERROR.create(e, String.valueOf(contextId));
         }
 
-        Connection connection = null;
-        DatabaseService dbService = null;
-
-        boolean autocommit = false;
-        boolean rollback = false;
+        int rollback = 0;
         boolean modified = false;
 
         // Acquire connection
-        dbService = getService(DatabaseService.class);
-        connection = dbService.getWritable(contextId);
+        DatabaseService dbService = getDatabaseServiceService();
+        Connection connection = dbService.getWritable(contextId);
         try {
             Databases.startTransaction(connection);
-            autocommit = true;
-            rollback = true;
+            rollback = 1;
 
             insertFolderProperties(contextId, folderId, userId, properties, connection);
             modified = true;
 
             connection.commit();
-            rollback = false;
+            rollback = 2;
         } catch (SQLException e) {
             throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
         } finally {
-            if (rollback) {
-                Databases.rollback(connection);
-            }
-            if (autocommit) {
+            if (rollback > 0) {
+                if (rollback == 1) {
+                    Databases.rollback(connection);
+                }
                 Databases.autocommit(connection);
             }
             if (modified) {
@@ -418,9 +405,10 @@ public class FolderUserPropertyStorageImpl implements FolderUserPropertyStorage 
     @Override
     public void insertFolderProperties(int contextId, int folderId, int userId, Map<String, String> properties, Connection connection) throws OXException {
         if (null == properties || properties.isEmpty()) {
-            IllegalArgumentException e = new IllegalArgumentException("User properties for folder missing!");
-            throw OXFolderExceptionCode.RUNTIME_ERROR.create(e, String.valueOf(contextId));
+            // Nothing to insert
+            return;
         }
+
         if (null == connection) {
             // Get connection an re-call this function
             insertFolderProperties(contextId, folderId, userId, properties);
@@ -429,19 +417,20 @@ public class FolderUserPropertyStorageImpl implements FolderUserPropertyStorage 
 
         PreparedStatement stmt = null;
         try {
-            for (Entry<String, String> propertyName : properties.entrySet()) {
+            stmt = connection.prepareStatement(SET);
+            stmt.setInt(1, contextId);
+            stmt.setInt(2, folderId);
+            stmt.setInt(3, userId);
+            for (Map.Entry<String, String> propertyName : properties.entrySet()) {
                 // New entry
-                stmt = connection.prepareStatement(INSERT);
-                stmt.setInt(1, contextId);
-                stmt.setInt(2, folderId);
-                stmt.setInt(3, userId);
                 stmt.setString(4, propertyName.getKey());
                 stmt.setString(5, propertyName.getValue());
-
-                // Execute & close
-                stmt.executeUpdate();
-                Databases.closeSQLStuff(stmt);
+                stmt.setString(6, propertyName.getValue());
+                stmt.addBatch();
             }
+
+            // Execute & close
+            stmt.executeBatch();
         } catch (SQLException e) {
             throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
         } finally {
@@ -457,9 +446,9 @@ public class FolderUserPropertyStorageImpl implements FolderUserPropertyStorage 
     @Override
     public void insertFolderProperty(int contextId, int folderId, int userId, String key, String value, Connection connection) throws OXException {
         if (null == key || null == value) {
-            IllegalArgumentException e = new IllegalArgumentException("Flawed key-value-pair! Can't add user property to folder");
-            throw OXFolderExceptionCode.RUNTIME_ERROR.create(e, String.valueOf(contextId));
+            return;
         }
+
         Map<String, String> map = new HashMap<>(1);
         map.put(key, value);
         insertFolderProperties(contextId, folderId, userId, map, connection);
@@ -472,33 +461,28 @@ public class FolderUserPropertyStorageImpl implements FolderUserPropertyStorage 
             throw OXFolderExceptionCode.RUNTIME_ERROR.create(e, String.valueOf(contextId));
         }
 
-        Connection connection = null;
-        DatabaseService dbService = null;
-
-        boolean autocommit = false;
-        boolean rollback = false;
+        int rollback = 0;
         boolean modified = false;
 
         // Acquire connection
-        dbService = getService(DatabaseService.class);
-        connection = dbService.getWritable(contextId);
+        DatabaseService dbService = getDatabaseServiceService();
+        Connection connection = dbService.getWritable(contextId);
         try {
             Databases.startTransaction(connection);
-            autocommit = true;
-            rollback = true;
+            rollback = 1;
 
             setFolderProperties(contextId, folderId, userId, properties, connection);
             modified = true;
 
             connection.commit();
-            rollback = false;
+            rollback = 2;
         } catch (SQLException e) {
             throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
         } finally {
-            if (rollback) {
-                Databases.rollback(connection);
-            }
-            if (autocommit) {
+            if (rollback > 0) {
+                if (rollback == 1) {
+                    Databases.rollback(connection);
+                }
                 Databases.autocommit(connection);
             }
             if (modified) {
@@ -512,9 +496,9 @@ public class FolderUserPropertyStorageImpl implements FolderUserPropertyStorage 
     @Override
     public void setFolderProperties(int contextId, int folderId, int userId, Map<String, String> properties, Connection connection) throws OXException {
         if (null == properties || properties.isEmpty()) {
-            IllegalArgumentException e = new IllegalArgumentException("User properties for folder missing!");
-            throw OXFolderExceptionCode.RUNTIME_ERROR.create(e, String.valueOf(contextId));
+            return;
         }
+
         if (null == connection) {
             // Get connection an re-call this function
             setFolderProperties(contextId, folderId, userId, properties);
@@ -524,11 +508,11 @@ public class FolderUserPropertyStorageImpl implements FolderUserPropertyStorage 
         PreparedStatement stmt = null;
         try {
             stmt = connection.prepareStatement(SET);
+            stmt.setInt(1, contextId);
+            stmt.setInt(2, folderId);
+            stmt.setInt(3, userId);
             for (Entry<String, String> entry : properties.entrySet()) {
                 // Update entry
-                stmt.setInt(1, contextId);
-                stmt.setInt(2, folderId);
-                stmt.setInt(3, userId);
                 stmt.setString(4, entry.getKey());
                 stmt.setString(5, entry.getValue());
                 stmt.setString(6, entry.getValue());
@@ -549,35 +533,29 @@ public class FolderUserPropertyStorageImpl implements FolderUserPropertyStorage 
             LOGGER.debug("Properties missing!");
             return;
         }
-        Connection connection = null;
-        DatabaseService dbService = null;
 
-        // Acquire connection
-        dbService = getService(DatabaseService.class);
-        connection = dbService.getWritable(contextId);
-
-        boolean autocommit = false;
-        boolean rollback = false;
+        int rollback = 0;
         boolean modified = false;
 
+        // Acquire connection
+        DatabaseService dbService = getDatabaseServiceService();
+        Connection connection = dbService.getWritable(contextId);
         try {
             Databases.startTransaction(connection);
-            autocommit = true;
-            rollback = true;
+            rollback = 1;
 
             updateFolderProperties(contextId, folderId, userId, properties, connection);
             modified = true;
 
             connection.commit();
-            rollback = false;
-
+            rollback = 2;
         } catch (SQLException e) {
             throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
         } finally {
-            if (rollback) {
-                Databases.rollback(connection);
-            }
-            if (autocommit) {
+            if (rollback > 0) {
+                if (rollback == 1) {
+                    Databases.rollback(connection);
+                }
                 Databases.autocommit(connection);
             }
             if (modified) {
@@ -603,12 +581,12 @@ public class FolderUserPropertyStorageImpl implements FolderUserPropertyStorage 
         PreparedStatement stmt = null;
         try {
             stmt = connection.prepareStatement(UPDATE);
+            stmt.setInt(2, contextId);
+            stmt.setInt(3, folderId);
+            stmt.setInt(4, userId);
             for (Entry<String, String> propertyName : properties.entrySet()) {
                 // Update entry
                 stmt.setString(1, propertyName.getValue());
-                stmt.setInt(2, contextId);
-                stmt.setInt(3, folderId);
-                stmt.setInt(4, userId);
                 stmt.setString(5, propertyName.getKey());
 
                 // Execute
@@ -638,11 +616,12 @@ public class FolderUserPropertyStorageImpl implements FolderUserPropertyStorage 
         updateFolderProperties(folderId, contextId, userId, map, connection);
     }
 
-    private <T> T getService(Class<T> clazz) throws OXException {
-        T service = this.services.getService(clazz);
+    private DatabaseService getDatabaseServiceService() throws OXException {
+        DatabaseService service = this.services.getService(DatabaseService.class);
         if (null == service) {
-            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(clazz.getName());
+            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(DatabaseService.class.getName());
         }
         return service;
     }
+
 }
