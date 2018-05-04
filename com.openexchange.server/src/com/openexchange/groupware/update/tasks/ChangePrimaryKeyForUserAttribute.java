@@ -73,6 +73,8 @@ import com.openexchange.java.util.UUIDs;
 import com.openexchange.tools.update.Tools;
 import gnu.trove.list.TIntList;
 import gnu.trove.list.array.TIntArrayList;
+import gnu.trove.set.TIntSet;
+import gnu.trove.set.hash.TIntHashSet;
 
 /**
  * {@link ChangePrimaryKeyForUserAttribute} - Changes the PRIMARY KEY of the <code>"user_attribute"</code> table from ("cid", "uuid") to ("cid", "id", "name").
@@ -166,13 +168,15 @@ public final class ChangePrimaryKeyForUserAttribute extends UpdateTaskAdapter {
             }
 
             // Put context identifiers into a light-weight list
-            TIntList contextIds = new TIntArrayList(512);
-            do {
-                int value = rs.getInt(1);
-                if (!contextIds.contains(value)) {
-                    contextIds.add(value);
-                }
-            } while (rs.next());
+            TIntList contextIds;
+            {
+                TIntSet tmp = new TIntHashSet(512);
+                do {
+                    int value = rs.getInt(1);
+                    tmp.add(value);
+                } while (rs.next());
+                contextIds = new TIntArrayList(tmp);
+            }
             Databases.closeSQLStuff(rs, stmt);
             rs = null;
             stmt = null;
