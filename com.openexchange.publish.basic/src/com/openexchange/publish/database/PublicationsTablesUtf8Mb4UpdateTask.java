@@ -72,6 +72,7 @@ public class PublicationsTablesUtf8Mb4UpdateTask extends SimpleConvertUtf8ToUtf8
     @Override
     protected void before(PerformParameters params, Connection connection) throws SQLException {
         recreateKey(connection, "publications", "cid_2", new String[] { "cid", "module", "entity" }, new int[] { -1, 191, -1 });
+        recreateKey(connection, "publications", "entity", new String[] { "cid", "module", "entity" }, new int[] { -1, 191, -1 });
         changeTable(connection, params.getSchema().getSchema(), "publication_users", Collections.singletonList("name"));
     }
 }

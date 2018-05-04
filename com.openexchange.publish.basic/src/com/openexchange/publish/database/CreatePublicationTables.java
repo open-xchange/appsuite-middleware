@@ -86,7 +86,7 @@ public class CreatePublicationTables extends AbstractCreateTableImpl {
             + "lastModified INT8 NOT NULL DEFAULT 0,"
             + "PRIMARY KEY (cid,id),"
             + "FOREIGN KEY(cid,user_id) REFERENCES user(cid,id),"
-            + "KEY (cid,module,entity)"
+            + "KEY `entity` (cid,module,entity)"
             + ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci",
 
             "CREATE TABLE sequence_publications ("
