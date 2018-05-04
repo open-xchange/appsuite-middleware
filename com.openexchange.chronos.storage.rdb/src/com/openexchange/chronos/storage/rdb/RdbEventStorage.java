@@ -65,6 +65,7 @@ import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 import org.dmfs.rfc5545.DateTime;
@@ -570,7 +571,7 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
         EventField[] mappedFields = MAPPER.getMappedFields(fields);
         SearchAdapter adapter = new SearchAdapter(context.getContextId(), null, "e.", "a.").append(searchTerm).append(filters);
         StringBuilder stringBuilder = new StringBuilder()
-            .append("SELECT DISTINCT ").append(MAPPER.getColumns(mappedFields, "e."))
+            .append("SELECT ").append(MAPPER.getColumns(mappedFields, "e."))
             .append(" FROM ").append(deleted ? "calendar_event_tombstone" : "calendar_event").append(" AS e ")
         ;
         if (adapter.usesAttendees()) {
@@ -585,7 +586,7 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
             stringBuilder.append(" AND e.rangeFrom<?");
         }
         stringBuilder.append(" AND ").append(adapter.getClause()).append(getSortOptions(MAPPER, searchOptions, "e.")).append(';');
-        List<Event> events = new ArrayList<Event>();
+        Set<Event> events = new LinkedHashSet<>();
         try (PreparedStatement stmt = connection.prepareStatement(stringBuilder.toString())) {
             int parameterIndex = 1;
             stmt.setInt(parameterIndex++, context.getContextId());
@@ -603,7 +604,7 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
                 }
             }
         }
-        return events;
+        return new ArrayList<>(events);
     }
 
     private long countEvents(Connection connection, boolean deleted, SearchTerm<?> searchTerm) throws SQLException, OXException {
@@ -660,7 +661,7 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
     private List<Event> selectOverlappingEvents(Connection connection, int[] entities, boolean includeTransparent, SearchOptions searchOptions, EventField[] fields) throws SQLException, OXException {
         EventField[] mappedFields = MAPPER.getMappedFields(fields);
         StringBuilder stringBuilder = new StringBuilder()
-            .append("SELECT DISTINCT ").append(MAPPER.getColumns(mappedFields, "e."))
+            .append("SELECT ").append(MAPPER.getColumns(mappedFields, "e."))
             .append(" FROM calendar_event AS e")
         ;
         if (null != entities && 0 < entities.length) {
@@ -685,7 +686,7 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
             }
         }
         stringBuilder.append(getSortOptions(MAPPER, searchOptions, "e.")).append(';');
-        List<Event> events = new ArrayList<Event>();
+        Set<Event> events = new LinkedHashSet<>();
         try (PreparedStatement stmt = connection.prepareStatement(stringBuilder.toString())) {
             int parameterIndex = 1;
             stmt.setInt(parameterIndex++, context.getContextId());
@@ -710,7 +711,7 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
                 }
             }
         }
-        return events;
+        return new ArrayList<>(events);
     }
 
     private Event readEvent(ResultSet resultSet, EventField[] fields, String columnLabelPrefix) throws SQLException, OXException {
