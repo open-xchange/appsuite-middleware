@@ -75,7 +75,6 @@ import com.openexchange.tools.session.ServerSessionAdapter;
 import gnu.trove.iterator.TIntIterator;
 import gnu.trove.iterator.TIntObjectIterator;
 import gnu.trove.list.TIntList;
-import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.list.linked.TIntLinkedList;
 import gnu.trove.map.TIntObjectMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
@@ -231,7 +230,7 @@ public class OXFolderDependentDeleter {
         if (0 == entityIDs.length) {
             return entityIDs;
         }
-        TIntList guestIDs = new TIntArrayList(entityIDs.length);
+        TIntSet guestIDs = new TIntHashSet(entityIDs.length);
         /*
          * build statement
          */
@@ -260,10 +259,7 @@ public class OXFolderDependentDeleter {
             }
             rs = stmt.executeQuery();
             while (rs.next()) {
-                int i = rs.getInt(1);
-                if (!guestIDs.contains(i)) {
-                    guestIDs.add(i);
-                }
+                guestIDs.add(rs.getInt(1));
             }
         } catch (SQLException e) {
             throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());

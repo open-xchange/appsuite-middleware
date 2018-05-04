@@ -706,7 +706,7 @@ public final class Tools {
             while (rs.next()) {
                 contextIds.add(I(rs.getInt(1)));
             }
-            return new LinkedList<>(contextIds);
+            return new ArrayList<>(contextIds);
         } finally {
             closeSQLStuff(rs, stmt);
         }
