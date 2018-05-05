@@ -76,6 +76,7 @@ import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.CookieStore;
 import org.apache.http.client.CredentialsProvider;
 import org.apache.http.client.HttpClient;
+import org.apache.http.client.config.CookieSpecs;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.client.protocol.HttpClientContext;
@@ -294,8 +295,10 @@ public final class HttpClients {
         PublicSuffixMatcher publicSuffixMatcher = PublicSuffixMatcherLoader.getDefault();
         clientBuilder.setPublicSuffixMatcher(publicSuffixMatcher);
         {
+            LenientCookieSpecProvider lenientCookieSpecProvider = new LenientCookieSpecProvider();
             RegistryBuilder<CookieSpecProvider> builder = CookieSpecRegistries.createDefaultBuilder(publicSuffixMatcher);
-            builder.register("lenient", new LenientCookieSpecProvider());
+            builder.register(CookieSpecs.DEFAULT, lenientCookieSpecProvider);
+            builder.register("lenient", lenientCookieSpecProvider);
             clientBuilder.setDefaultCookieSpecRegistry(builder.build());
         }
 
