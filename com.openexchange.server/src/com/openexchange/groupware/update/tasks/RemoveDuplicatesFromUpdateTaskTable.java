@@ -55,6 +55,8 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.UUID;
 import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
@@ -80,7 +82,7 @@ public class RemoveDuplicatesFromUpdateTaskTable extends UpdateTaskAdapter {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.groupware.update.UpdateTaskV2#perform(com.openexchange.groupware.update.PerformParameters)
      */
     @Override
@@ -106,7 +108,7 @@ public class RemoveDuplicatesFromUpdateTaskTable extends UpdateTaskAdapter {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.groupware.update.UpdateTaskV2#getDependencies()
      */
     @Override
@@ -116,36 +118,55 @@ public class RemoveDuplicatesFromUpdateTaskTable extends UpdateTaskAdapter {
 
     /**
      * Removes any duplicate entries from the <code>updateTask</code> table.
-     * 
+     *
      * @param connection the {@link Connection} to use
      * @throws SQLException if an SQL error is occurred.
      */
     private void removeDuplicates(Connection connection) throws SQLException {
-        PreparedStatement selectStatement = null;
         PreparedStatement selectDuplicates = null;
-        PreparedStatement delete = null;
         ResultSet rs = null;
-        ResultSet duplicatesResultSet = null;
         try {
             selectDuplicates = connection.prepareStatement("SELECT taskName, COUNT(*) c FROM updateTask GROUP BY taskName HAVING c > 1;");
             rs = selectDuplicates.executeQuery();
-            while (rs.next()) {
-                String duplicateTaskName = rs.getString(1);
-                selectStatement = connection.prepareStatement("SELECT lastModified,uuid FROM updateTask WHERE taskName=? ORDER BY lastModified DESC LIMIT 1;");
-                selectStatement.setString(1, duplicateTaskName);
-                duplicatesResultSet = selectStatement.executeQuery();
-                if (duplicatesResultSet.next()) {
-                    removeDuplicates(connection, duplicateTaskName, UUIDs.toUUID(duplicatesResultSet.getBytes(2)));
-                }
+            if (false == rs.next()) {
+                // No duplicates found
+                return;
+            }
+
+            List<String> names = new LinkedList<>();
+            do {
+                names.add(rs.getString(1));
+            } while (rs.next());
+            Databases.closeSQLStuff(rs, selectDuplicates);
+            rs = null;
+            selectDuplicates = null;
+
+            for (String duplicateTaskName : names) {
+                handleDuplicateName(duplicateTaskName, connection);
             }
         } finally {
-            Databases.closeSQLStuff(rs, duplicatesResultSet, selectStatement, selectDuplicates, delete);
+            Databases.closeSQLStuff(rs, selectDuplicates);
+        }
+    }
+
+    private void handleDuplicateName(String duplicateTaskName, Connection connection) throws SQLException {
+        PreparedStatement selectStatement = null;
+        ResultSet duplicatesResultSet = null;
+        try {
+            selectStatement = connection.prepareStatement("SELECT lastModified,uuid FROM updateTask WHERE taskName=? ORDER BY lastModified DESC LIMIT 1;");
+            selectStatement.setString(1, duplicateTaskName);
+            duplicatesResultSet = selectStatement.executeQuery();
+            if (duplicatesResultSet.next()) {
+                removeDuplicates(connection, duplicateTaskName, UUIDs.toUUID(duplicatesResultSet.getBytes(2)));
+            }
+        } finally {
+            Databases.closeSQLStuff(duplicatesResultSet, selectStatement);
         }
     }
 
     /**
      * Removes all duplicate entries from the <code>updateTask</code> table except the update task with the specified UUID.
-     * 
+     *
      * @param connection The {@link Connection}
      * @param taskName The task's name
      * @param retained The UUID of the update task to retain
