@@ -75,6 +75,7 @@ import org.apache.james.mime4j.parser.MimeStreamParser;
 import org.apache.james.mime4j.stream.BodyDescriptor;
 import org.apache.james.mime4j.stream.Field;
 import org.apache.james.mime4j.stream.MimeConfig;
+import org.apache.james.mime4j.stream.MimeConfig.Builder;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -316,11 +317,12 @@ public final class ImportAction extends AbstractMailAction {
     }
 
     private void validateRfc822Message(File rfc822File) throws IOException, OXException {
-        MimeConfig config = new MimeConfig();
-        config.setMaxLineLen(-1);
-        config.setMaxHeaderLen(-1);
-        config.setMaxHeaderCount(250);
-        config.setStrictParsing(true);
+        MimeConfig config = new Builder()
+            .setStrictParsing(true)
+            .setMaxLineLen(-1)
+            .setMaxHeaderLen(-1)
+            .setMaxHeaderCount(250)
+            .build();
 
         MimeStreamParser parser = new MimeStreamParser(config);
         parser.setContentHandler(DO_NOTHING_HANDLER);
