@@ -69,8 +69,6 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.regex.Matcher;
-import javax.activation.DataHandler;
 import javax.mail.Address;
 import javax.mail.Message.RecipientType;
 import javax.mail.MessagingException;
@@ -123,7 +121,6 @@ import com.openexchange.mail.mime.MimeMailException;
 import com.openexchange.mail.mime.MimeMailExceptionCode;
 import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.mail.mime.converters.MimeMessageConverter;
-import com.openexchange.mail.mime.datasource.MimeMessageDataSource;
 import com.openexchange.mail.mime.utils.MimeMessageUtility;
 import com.openexchange.mail.transport.MailTransport;
 import com.openexchange.mail.transport.MimeSupport;
@@ -1007,16 +1004,7 @@ abstract class AbstractSMTPTransport extends MailTransport implements MimeSuppor
             } catch (MessagingException e) {
                 exception = e;
                 Exception nextException = e.getNextException();
-                if (nextException instanceof javax.activation.UnsupportedDataTypeException) {
-                    // Check for "no object DCH for MIME type xxxxx/yyyy"
-                    final String message = nextException.getMessage();
-                    if (message.toLowerCase().indexOf("no object dch") >= 0) {
-                        // Not able to recover from JAF's "no object DCH for MIME type xxxxx/yyyy" error
-                        // Perform the alternative transport with custom JAF DataHandler
-                        LOG.warn(message.replaceFirst("[dD][cC][hH]", Matcher.quoteReplacement("javax.activation.DataContentHandler")));
-                        return transportAlt(messageToSend, recipients, transport, smtpConfig);
-                    }
-                } else if (nextException instanceof IOException) {
+                if (nextException instanceof IOException) {
                     if (nextException.getMessage().equals("Maximum message size is exceeded.")) {
                         throw MailExceptionCode.MAX_MESSAGE_SIZE_EXCEEDED.create(getSize(getMaxMailSize(), 0, false, true));
                     }
@@ -1409,32 +1397,6 @@ abstract class AbstractSMTPTransport extends MailTransport implements MimeSuppor
         }
 
         return userId;
-    }
-
-    private MimeMessage transportAlt(final MimeMessage smtpMessage, final Address[] recipients, final Transport transport, final SMTPConfig smtpConfig) throws OXException {
-        try {
-            final MimeMessageDataSource dataSource = new MimeMessageDataSource(smtpMessage, smtpConfig, smtpConfig.getSession());
-            smtpMessage.setDataHandler(new DataHandler(dataSource));
-            if (!transport.isConnected()) {
-                connectTransport(transport, smtpConfig);
-            }
-            doTransport(smtpMessage, recipients, transport);
-            logMessageTransport(smtpMessage, smtpConfig);
-            invokeLater(new Runnable() {
-
-                @Override
-                public void run() {
-                    try {
-                        dataSource.cleanUp();
-                    } catch (final Exception e) {
-                        // Ignore
-                    }
-                }
-            });
-            return smtpMessage;
-        } catch (final MessagingException me) {
-            throw handleMessagingException(me, smtpConfig);
-        }
     }
 
     private String authEncode(final String s) throws OXException {

@@ -663,10 +663,10 @@ public class AdminCache {
             pwmech = "{" + pwmech.toUpperCase() + "}";
             if (!passwordMechanisms.contains(pwmech)) {
                 log.warn("WARNING: unknown password mechanism {} using SHA", pwmech);
-                passwordMech = PasswordMechObject.SHA_MECH;
+                pwmech = PasswordMechObject.SHA_MECH;
             }
             user.setPasswordMech(pwmech);
-            passwordMech = pwmech;
+            return pwmech;
         }
         return passwordMech;
     }
