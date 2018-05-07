@@ -34,20 +34,9 @@ The following diagram describes the whole code flow login process. The current i
 
 
 ## Autologin with check for a valid OP session
-![Autologin via OP](openid/Autologin via OP.png "Autologin via OP")
+![Autologin via OP](01_openid/Autologin via OP.png "Autologin via OP")
 
 If no valid session is present on side of the OP, the user is asked to login first. The handling on side of the Relying party is untouched by this scenario. 
-Additionally there is an example implementation of the verification dialog in the `examples/backend-samples` repository which should work with a connect2ID OpenID server. 
-The according project is `com.openexchange.sample.c2id-logout-page-jsp`. The example is called with the following parameters:
-
-
-  id_token_hint:eyJraWQiOiJDWHVwIiwiYWxn...
-  post_logout_redirect_uri:https://192.168.33.109//appsuite/api/oidc/logout
-  state:di26WOr8iZyVFReDvgsNwueDolfgwuB1rpjbo3t99Wo
-
-* `id_token_hint`: The users id token, to acquire the correct session.
-* `post_logout_redirect`: Where should the user be redirected after the confirmation.
-* `state`: A generated state property, to verify the response later.
 
 ## Autologin directly in Appsuite
 ![Autologin direct](01_openid/Autologin direct.png "Autologin direct")
@@ -57,7 +46,19 @@ If no OIDC cookie exists, the standard login procedure is triggered.
 ## Logout with redirect to OP and termination of session
 ![Logout via OP](01_openid/Logout via OP.png "Logout via OP")
 
-If an error occurs during the logout process, like an invalid response from the OP, the RP session is terminated anyways.
+If an error occurs during the logout process, like an invalid response from the OP, the RP session is terminated anyways. Additionally there is an example implementation of the verification dialog in the `examples/backend-samples` repository which should work with a connect2ID OpenID server. 
+The according project is `com.openexchange.sample.c2id-logout-page-jsp`. The example is called with the following parameters:
+
+```
+  id_token_hint:eyJraWQiOiJDWHVwIiwiYWxn...
+  post_logout_redirect_uri:https://192.168.33.109//appsuite/api/oidc/logout
+  state:di26WOr8iZyVFReDvgsNwueDolfgwuB1rpjbo3t99Wo
+```
+
+* `id_token_hint`: The users id token, to acquire the correct session.
+* `post_logout_redirect`: Where should the user be redirected after the confirmation.
+* `state`: A generated state property, to verify the response later.
+
 
 ## Direct Logout from Appsuite
 ![Logout direct](01_openid/Logout direct.png "Logout direct")
@@ -78,7 +79,8 @@ The `com.openexchange.oidc.tools.OIDCTools` provide a set of useful functions an
 ## The used Cookies
 
 The OpenID cookie for autologin features will always start with `open-xchange-oidc-`, followed by a calculated hash value. The cookie will be deleted when the session is terminated or the web browser is closed. 
-The other cookies are the `open-xchange-public-session-`, `open-xchange-secret-` and `open-xchange-session-` cookie.
+The other cookies are the `open-xchange-public-session-`, `open-xchange-secret-` and `open-xchange-session-` cookie. 
+The custom OpenId cookie is needed, because the standard autologin mechanism has to be disabled and a user to session allocation can not be made otherwise.
 
 ## Tokens
 
@@ -97,6 +99,10 @@ Like mentioned before, it is recomended to extend the core implementation of tho
 
 If you don't specify a distinct UI web path for your backend, via `com.openexchange.oidc.uiWebPath`, you have to configure the default path of the web UI, which is used in several places, via `/opt/open-xchange/etc/server.properties`. 
 If you haven't already (because of other requirements), set [com.openexchange.UIWebPath](https://documentation.open-xchange.com/components/middleware/config/{{ site.baseurl }}/index.html#com.openexchange.UIWebPath) to `/appsuite/`.
+
+### Autologin configuration
+
+If you want to use the OpenId login feature, you have to make sure that the regular autologin mechanism is disabled by setting the assosiated Sessiond property to false `com.openexchange.sessiond.autologin=false`. This is a crucial precondition for any of the provided autologin mechanisms. 
 
 ### Frontend Configuration
 

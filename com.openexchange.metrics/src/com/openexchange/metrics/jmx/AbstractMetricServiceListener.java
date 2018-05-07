@@ -103,14 +103,13 @@ public abstract class AbstractMetricServiceListener implements MetricServiceList
         c.put(MetricType.METER, (metric, metricDescriptor) -> mbeanFactory.meter((Meter) metric, metricDescriptor));
         c.put(MetricType.HISTOGRAM, (metric, metricDescriptor) -> mbeanFactory.histogram((Histogram) metric, metricDescriptor));
         c.put(MetricType.GAUGE, (metric, metricDescriptor) -> mbeanFactory.gauge((Gauge<?>) metric, metricDescriptor));
-        //c.put(MetricType.RATIO_GAUGE, (metric, metricDescriptor) -> mbeanFactory.ratioGauge(metric));
         mbeanCreators = Collections.unmodifiableMap(c);
 
         registeredNames = Collections.synchronizedList(new LinkedList<>());
     }
 
     /**
-     * Unregisters all mbeans
+     * Unregisters all metric management beans
      */
     public void unregisterAll() {
         for (ObjectName name : registeredNames) {
@@ -125,10 +124,8 @@ public abstract class AbstractMetricServiceListener implements MetricServiceList
     /**
      * Creates and registers an MBean for the specified {@link Metric} under the specified component name
      *
-     * @param type The metric type
-     * @param name The metric's name
      * @param metric The {@link Metric} for which to create and register the MBean
-     * @param metricMetadata The {@link MetricMetadata} of the {@link Metric}
+     * @param metricDescriptor The {@link MetricDescriptor} of the {@link Metric}
      * @throws OXException if the MBean for the specified {@link Metric} cannot be registered
      */
     protected void registerMBean(Metric metric, MetricDescriptor metricDescriptor) {
@@ -146,6 +143,12 @@ public abstract class AbstractMetricServiceListener implements MetricServiceList
         }
     }
 
+    /**
+     * Unregisters an MBean with the specified name
+     *
+     * @param name The metric's name
+     * @throws OXException if the MBean for the specified {@link Metric} cannot be unregistered
+     */
     protected void unregisterMBean(String name) {
         try {
             managementService.unregisterMBean(getObjectName(name));
@@ -155,11 +158,9 @@ public abstract class AbstractMetricServiceListener implements MetricServiceList
     }
 
     /**
-     * Unregisters an MBean with the specified component name
+     * Unregisters an MBean with the specified metric descriptor
      *
-     * @param type the metric type
-     * @param name The metric's name
-     * @param metricMetadata The {@link MetricMetadata} of the {@link Metric}
+     * @param metricDescriptor The {@link MetricDescriptor} of the {@link Metric}
      * @throws OXException if the MBean for the specified {@link Metric} cannot be unregistered
      */
     protected void unregisterMBean(MetricDescriptor metricDescriptor) {
@@ -173,8 +174,7 @@ public abstract class AbstractMetricServiceListener implements MetricServiceList
     /**
      * Gets the {@link ObjectName} for the specified component and metric
      *
-     * @param type the metric type
-     * @param name the metric name
+     * @param metricDescriptor The {@link MetricDescriptor} of the {@link Metric}
      * @return The created {@link ObjectName}
      * @throws MalformedObjectNameException if the string passed as a parameter does not have the right format.
      */

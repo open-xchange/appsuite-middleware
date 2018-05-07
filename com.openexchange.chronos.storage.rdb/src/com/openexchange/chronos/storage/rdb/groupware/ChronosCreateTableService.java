@@ -120,6 +120,7 @@ public class ChronosCreateTableService extends AbstractCreateTableImpl {
                 "endTimezone VARCHAR(255) DEFAULT NULL," +
                 "allDay BOOLEAN DEFAULT NULL," +
                 "rrule VARCHAR(255) DEFAULT NULL," +
+                "rDate TEXT DEFAULT NULL," +
                 "exDate TEXT DEFAULT NULL," +
                 "overriddenDate TEXT DEFAULT NULL," +
                 "recurrence VARCHAR(32) COLLATE utf8mb4_bin DEFAULT NULL," +
@@ -169,6 +170,7 @@ public class ChronosCreateTableService extends AbstractCreateTableImpl {
                 "endTimezone VARCHAR(255) DEFAULT NULL," +
                 "allDay BOOLEAN DEFAULT NULL," +
                 "rrule VARCHAR(255) DEFAULT NULL," +
+                "rDate TEXT DEFAULT NULL," +
                 "exDate TEXT DEFAULT NULL," +
                 "overriddenDate TEXT DEFAULT NULL," +
                 "recurrence VARCHAR(32) COLLATE utf8mb4_bin DEFAULT NULL," +

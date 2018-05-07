@@ -51,6 +51,7 @@ package com.openexchange.chronos.provider.ical.exception;
 
 import static com.openexchange.chronos.provider.ical.exception.ICalProviderExceptionMessages.BAD_FEED_URI_MSG;
 import static com.openexchange.chronos.provider.ical.exception.ICalProviderExceptionMessages.BAD_PARAMETER_MSG;
+import static com.openexchange.chronos.provider.ical.exception.ICalProviderExceptionMessages.CREDENTIALS_CHANGED_MSG;
 import static com.openexchange.chronos.provider.ical.exception.ICalProviderExceptionMessages.CREDENTIALS_REQUIRED_MSG;
 import static com.openexchange.chronos.provider.ical.exception.ICalProviderExceptionMessages.CREDENTIALS_WRONG_MSG;
 import static com.openexchange.chronos.provider.ical.exception.ICalProviderExceptionMessages.FEED_SIZE_EXCEEDED_MSG;
@@ -78,26 +79,26 @@ public enum ICalProviderExceptionCodes implements DisplayableOXExceptionCode {
 
     /**
      * <li>The feed URI is missing.</li>
-     * <li>The feed URI for account %1$s in context %2$s is missing</li>
+     * <li>The feed URI is missing.</li>
      */
     MISSING_FEED_URI("The feed URI is missing.", MISSING_FEED_URI_MSG, Category.CATEGORY_USER_INPUT, 4040),
     /**
-     * <li>The feed URI does not match the standard.</li>
+     * <li>The given feed URI is invalid. Please change it and try again.</li>
      * <li>The requested feed with URI %1$s does not match the standard.</li>
      */
     BAD_FEED_URI("The requested feed with URI %1$s does not match the standard.", BAD_FEED_URI_MSG, Category.CATEGORY_USER_INPUT, 4041),
     /**
-     * <li>Cannot connect to feed with URL: %1$s. Please change URL and try again.</li>
+     * <li>Cannot connect to feed with URI: %1$s. Please change it and try again.</li>
      * <li>The feed URI %1$s is not allowed due to configuration</li>
      */
     FEED_URI_NOT_ALLOWED("The feed URI %1$s is not allowed due to configuration.", FEED_URI_NOT_ALLOWED_MSG, Category.CATEGORY_USER_INPUT, 4042),
     /**
-     * <li>Cannot connect to feed with URL: %1$s. Please change URL and try again.</li>
+     * <li>The provided URI %1$s does not contain content as expected. Please change it and try again.</li>
      * <li>The provided URI %1$s does not contain an ICal feed</li>
      */
     NO_FEED("The provided URI %1$s does not contain an ICal feed.", NO_FEED_MSG, Category.CATEGORY_USER_INPUT, 4043),
     /**
-     * <li>Cannot connect to feed with URL: %1$s. Please change URL and try again.</li>
+     * <li>The field %1$s cannot be changed.</li>
      * <li>The field %1$s cannot be changed.</li>
      */
     NOT_ALLOWED_CHANGE("The field %1$s cannot be changed.", NOT_ALLOWED_CHANGE_MSG, Category.CATEGORY_USER_INPUT, 4044),
@@ -112,7 +113,7 @@ public enum ICalProviderExceptionCodes implements DisplayableOXExceptionCode {
      */
     FEED_SIZE_EXCEEDED("The requested feed with URI %1$s does exceed the configured maximum size. Allowed %2$s bytes but was %3$s bytes.", FEED_SIZE_EXCEEDED_MSG, Category.CATEGORY_CONFIGURATION, 4001),
     /**
-     * <li>Unfortunately the given feed URL cannot be processed as expected.</li>
+     * <li>Unfortunately the given feed URI cannot be processed as expected.</li>
      * <li>An error occurred while retrieving the desired feed URI '%1$s': %2$s</li>
      */
     UNEXPECTED_FEED_ERROR("An error occurred while retrieving the desired feed URI '%1$s': %2$s", UNEXPECTED_FEED_ERROR_MSG, Category.CATEGORY_ERROR, 5001),
@@ -161,6 +162,11 @@ public enum ICalProviderExceptionCodes implements DisplayableOXExceptionCode {
      * <li>Password required [url %1$s, status %2$s, realm %3$s]</li>
      */
     PASSWORD_WRONG("Password wrong [url %1$s, status %2$s, realm %3$s]", PASSWORD_WRONG_MSG, Category.CATEGORY_USER_INPUT, 4013),
+    /**
+     * <li>Authentication failed due to a recent credentials change. Please remove the account and add it again with correct credentials.</li>
+     * <li>Credentials changed [url %1$s, status %2$s, realm %3$s]</li>
+     */
+    CREDENTIALS_CHANGED("Credentials changed [url %1$s, status %2$s, realm %3$s]", CREDENTIALS_CHANGED_MSG, Category.CATEGORY_USER_INPUT, 4014),
 
     ;
 

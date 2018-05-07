@@ -52,6 +52,7 @@ package com.openexchange.ajax.find.contacts;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import java.util.Collections;
 import java.util.HashMap;
@@ -62,11 +63,12 @@ import java.util.Set;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.Test;
-import com.openexchange.ajax.framework.AbstractAPIClientSession;
+import com.openexchange.ajax.framework.AbstractConfigAwareAPIClientSession;
 import com.openexchange.ajax.tools.JSONCoercion;
 import com.openexchange.test.pool.TestUser;
 import com.openexchange.testing.httpclient.invoker.ApiClient;
 import com.openexchange.testing.httpclient.invoker.ApiException;
+import com.openexchange.testing.httpclient.models.CommonResponse;
 import com.openexchange.testing.httpclient.models.FindAutoCompleteBody;
 import com.openexchange.testing.httpclient.models.FindAutoCompleteData;
 import com.openexchange.testing.httpclient.models.FindAutoCompleteResponse;
@@ -85,7 +87,7 @@ import com.openexchange.testing.httpclient.modules.UserApi;
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class AutoCompleteShowDepartmentsTest extends AbstractAPIClientSession {
+public class AutoCompleteShowDepartmentsTest extends AbstractConfigAwareAPIClientSession {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AutoCompleteShowDepartmentsTest.class);
 
@@ -117,9 +119,6 @@ public class AutoCompleteShowDepartmentsTest extends AbstractAPIClientSession {
         clients = new HashMap<>();
         randomUsers = new HashSet<>();
 
-        // Login clients
-        apiClient.login(testUser.getLogin(), testUser.getPassword());
-
         for (int i = 0; i < AMOUNT_OF_TEST_USERS; i++) {
             TestUser testUser = testContext.acquireUser();
             if (testUser == null) {
@@ -129,7 +128,6 @@ public class AutoCompleteShowDepartmentsTest extends AbstractAPIClientSession {
             LOG.info("Acquired user '{}'", testUser);
 
             ApiClient client = generateApiClient(testUser);
-            client.login(testUser.getLogin(), testUser.getPassword());
             rememberClient(client);
             testUsers.put(testUser.getUser(), testUser);
             clients.put(testUser.getUser(), client);
@@ -138,11 +136,13 @@ public class AutoCompleteShowDepartmentsTest extends AbstractAPIClientSession {
         // Prepare users
         prepareUser(pickRandomUser(), "Department A");
         prepareUser(pickRandomUser(), "Department B");
+        CONFIG.put("com.openexchange.contact.showDepartments", Boolean.TRUE.toString());
+        super.setUpConfiguration();
     }
 
     /**
      * Picks a random user from the registry
-     * 
+     *
      * @return The random {@link TestUser}
      */
     private TestUser pickRandomUser() {
@@ -159,14 +159,15 @@ public class AutoCompleteShowDepartmentsTest extends AbstractAPIClientSession {
 
     /**
      * Prepares the specified {@link TestUser}
-     * 
+     *
      * @param testUser The {@link TestUser} to prepare
      * @param department The department to set
      */
     private void prepareUser(TestUser testUser, String department) throws ApiException {
         ApiClient client = clients.get(testUser.getUser());
         UserApi userApi = new UserApi(client);
-        userApi.updateUser(client.getSession(), Integer.toString(client.getUserId()), System.currentTimeMillis(), createUpdateBody(department));
+        CommonResponse response = userApi.updateUser(client.getSession(), Integer.toString(client.getUserId()), System.currentTimeMillis(), createUpdateBody(department));
+        assertNull(response.getErrorDesc(), response.getError());
     }
 
     /**
@@ -237,11 +238,12 @@ public class AutoCompleteShowDepartmentsTest extends AbstractAPIClientSession {
 
         JSONObject tree = (JSONObject) JSONCoercion.coerceToJSON(obj);
         assertTrue("The '" + SHOW_DEPARTMENT_JSLOB + "' slob is missing from the tree", tree.hasAndNotNull(SHOW_DEPARTMENT_JSLOB));
+        assertTrue("The '" + SHOW_DEPARTMENT_JSLOB + "' slob is set to 'false'.", Boolean.valueOf(tree.get(SHOW_DEPARTMENT_JSLOB).toString()));
     }
 
     /**
      * Checks if the specified item name is contained within the randomUsers set
-     * 
+     *
      * @param itemName The item name to check
      * @return <code>true</code> if it is contained, <code>false</code> otherwise
      */
@@ -256,7 +258,7 @@ public class AutoCompleteShowDepartmentsTest extends AbstractAPIClientSession {
 
     /**
      * Creates the update body with the specified department string
-     * 
+     *
      * @param department The department string
      * @return The {@link UserData}
      */
@@ -274,5 +276,17 @@ public class AutoCompleteShowDepartmentsTest extends AbstractAPIClientSession {
         updateBody.setAliases(null);
 
         return updateBody;
+    }
+
+    private static final Map<String, String> CONFIG = new HashMap<String, String>();
+
+    @Override
+    protected Map<String, String> getNeededConfigurations() {
+        return CONFIG;
+    }
+
+    @Override
+    protected String getScope() {
+        return "user";
     }
 }

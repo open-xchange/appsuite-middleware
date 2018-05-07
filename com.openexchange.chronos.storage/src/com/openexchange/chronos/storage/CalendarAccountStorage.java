@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the Open-Xchange, Inc. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2020 Open-Xchange, Inc.
+ *     Copyright (C) 2016-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -76,31 +76,34 @@ public interface CalendarAccountStorage {
      * Inserts a new calendar account.
      *
      * @param account The account data to insert
+     * @return The newly created account
      */
-    void insertAccount(CalendarAccount account) throws OXException;
+    CalendarAccount insertAccount(CalendarAccount account) throws OXException;
 
     /**
      * Inserts a new calendar account.
      *
      * @param account The account data to insert
      * @param maxAccounts The maximum number of accounts allowed for this provider and user
+     * @return The newly created account
      */
-    void insertAccount(CalendarAccount account, int maxAccounts) throws OXException;
+    CalendarAccount insertAccount(CalendarAccount account, int maxAccounts) throws OXException;
 
     /**
      * Updates an existing calendar account.
      *
      * @param account The account data to update
-     * @param clientTimestamp The last timestamp known by the client to catch concurrent updates
+     * @param clientTimestamp The last time stamp known by the client to prevent from concurrent updates
+     * @return The updated account
      */
-    void updateAccount(CalendarAccount account, long clientTimestamp) throws OXException;
+    CalendarAccount updateAccount(CalendarAccount account, long clientTimestamp) throws OXException;
 
     /**
      * Deletes an existing calendar account.
      *
      * @param userId The identifier of the user to delete the account for
      * @param accountId The identifier of the account to delete
-     * @param clientTimestamp The last timestamp known by the client to catch concurrent updates
+     * @param clientTimestamp The last time stamp known by the client to prevent from concurrent updates
      */
     void deleteAccount(int userId, int accountId, long clientTimestamp) throws OXException;
 

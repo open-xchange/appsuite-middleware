@@ -73,3 +73,11 @@ properties:
      then this field contains the data of this resource.
     properties:
       $ref: ../resources/ResourceDataRaw.yaml
+  group:
+    type: object
+    title: group
+    description: |
+     In case the parameter 'extendedEntities' is set to 'true' and the entity is a group
+     then this field contains the data of this group.
+    properties:
+      $ref: ../groups/GroupDataRaw.yaml

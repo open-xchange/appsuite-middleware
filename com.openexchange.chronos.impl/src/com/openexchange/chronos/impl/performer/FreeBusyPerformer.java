@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the Open-Xchange, Inc. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2020 Open-Xchange, Inc.
+ *     Copyright (C) 2016-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -74,6 +74,7 @@ import com.openexchange.chronos.BusyType;
 import com.openexchange.chronos.CalendarUserType;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
+import com.openexchange.chronos.EventStatus;
 import com.openexchange.chronos.FbType;
 import com.openexchange.chronos.FreeBusyTime;
 import com.openexchange.chronos.ParticipationStatus;
@@ -115,13 +116,13 @@ public class FreeBusyPerformer extends AbstractFreeBusyPerformer {
     private static final EventField[] FREEBUSY_FIELDS = {
         EventField.CREATED_BY, EventField.ID, EventField.SERIES_ID, EventField.FOLDER_ID, EventField.COLOR, EventField.CLASSIFICATION,
         EventField.SUMMARY, EventField.START_DATE, EventField.END_DATE, EventField.CATEGORIES, EventField.TRANSP, EventField.LOCATION,
-        EventField.RECURRENCE_ID, EventField.RECURRENCE_RULE
+        EventField.RECURRENCE_ID, EventField.RECURRENCE_RULE, EventField.STATUS
     };
 
     /** The restricted event fields returned in free/busy queries if the user has no access to the event */
     private static final EventField[] RESTRICTED_FREEBUSY_FIELDS = { EventField.CREATED_BY, EventField.ID, EventField.SERIES_ID,
         EventField.CLASSIFICATION, EventField.START_DATE, EventField.END_DATE, EventField.TRANSP, EventField.RECURRENCE_ID,
-        EventField.RECURRENCE_RULE
+        EventField.RECURRENCE_RULE, EventField.STATUS
     };
     //@formatter:on
 
@@ -133,7 +134,7 @@ public class FreeBusyPerformer extends AbstractFreeBusyPerformer {
      * @param storage The underlying calendar storage
      * @param session The calendar session
      */
-    public FreeBusyPerformer(CalendarSession session, CalendarStorage storage) throws OXException {
+    public FreeBusyPerformer(CalendarSession session, CalendarStorage storage) {
         super(session, storage);
     }
 
@@ -190,7 +191,7 @@ public class FreeBusyPerformer extends AbstractFreeBusyPerformer {
 
         TimeZone timeZone = Utils.getTimeZone(session);
         // Expand any recurring available instances
-        expandRecurringInstances(from, until, availabilityPerAttendee, timeZone);
+        expandRecurringInstances(until, availabilityPerAttendee, timeZone);
         // Adjust the intervals
         adjustIntervals(from, until, availabilityPerAttendee, timeZone);
 
@@ -356,7 +357,7 @@ public class FreeBusyPerformer extends AbstractFreeBusyPerformer {
 
         TimeZone timeZone = Utils.getTimeZone(session);
         // Expand any recurring available instances
-        expandRecurringInstances(from, until, availabilityPerAttendee, timeZone);
+        expandRecurringInstances(until, availabilityPerAttendee, timeZone);
         // Adjust the intervals
         adjustIntervals(from, until, availabilityPerAttendee, timeZone);
 
@@ -408,7 +409,7 @@ public class FreeBusyPerformer extends AbstractFreeBusyPerformer {
      * @param availableTimes The available times for the attendees
      * @param timeZone The {@link TimeZone} of the user
      */
-    private void expandRecurringInstances(Date from, Date until, Map<Attendee, Availability> availableTimes, TimeZone timeZone) throws OXException {
+    private void expandRecurringInstances(Date until, Map<Attendee, Availability> availableTimes, TimeZone timeZone) throws OXException {
         for (Availability calendarAvailability : availableTimes.values()) {
             List<Available> auxAvailable = new ArrayList<>();
             Date endTime = new Date(CalendarUtils.getDateInTimeZone(calendarAvailability.getEndTime(), timeZone));
@@ -494,7 +495,7 @@ public class FreeBusyPerformer extends AbstractFreeBusyPerformer {
      * @param timeZone The user's {@link TimeZone}
      * @return A {@link List} with {@link FreeBusyTime} slots
      */
-    private List<FreeBusyTime> calculateFreeBusyTimes(Availability availability, TimeZone timeZone) throws OXException {
+    private List<FreeBusyTime> calculateFreeBusyTimes(Availability availability, TimeZone timeZone) {
         List<FreeBusyTime> freeBusyTimes = new ArrayList<>();
         // Get the availability's start/end times
         Date availabilityStartTime = new Date(CalendarUtils.getDateInTimeZone(availability.getStartTime(), timeZone));
@@ -722,7 +723,20 @@ public class FreeBusyPerformer extends AbstractFreeBusyPerformer {
                     return FbType.BUSY;
             }
         }
-        return Transp.TRANSPARENT.equals(transp.getValue()) ? FbType.FREE : FbType.BUSY;
+
+        if(Transp.TRANSPARENT.equals(transp.getValue())) {
+            return FbType.FREE;
+        }
+        if(event.getStatus() == null) {
+            return FbType.BUSY;
+        }
+        if(EventStatus.TENTATIVE.equals(event.getStatus())) {
+            return FbType.BUSY_TENTATIVE;
+        }
+        if(EventStatus.CANCELLED.equals(event.getStatus())) {
+            return FbType.FREE;
+        }
+        return FbType.BUSY;
     }
 
     /**

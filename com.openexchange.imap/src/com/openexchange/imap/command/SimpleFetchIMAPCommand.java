@@ -909,7 +909,6 @@ public final class SimpleFetchIMAPCommand extends AbstractIMAPCommand<TLongObjec
         builder.put(INTERNALDATE.class, INTERNALDATE_ITEM_HANDLER);
         builder.put(ENVELOPE.class, ENVELOPE_ITEM_HANDLER);
         builder.put(RFC822SIZE.class, SIZE_ITEM_HANDLER);
-        builder.put(INTERNALDATE.class, INTERNALDATE_ITEM_HANDLER);
         MAP = builder.build();
     }
 

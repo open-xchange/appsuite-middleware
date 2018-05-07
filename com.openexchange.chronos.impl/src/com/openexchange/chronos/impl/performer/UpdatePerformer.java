@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the Open-Xchange, Inc. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2020 Open-Xchange, Inc.
+ *     Copyright (C) 2016-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -56,10 +56,13 @@ import static com.openexchange.chronos.common.CalendarUtils.getExceptionDateUpda
 import static com.openexchange.chronos.common.CalendarUtils.getUserIDs;
 import static com.openexchange.chronos.common.CalendarUtils.hasExternalOrganizer;
 import static com.openexchange.chronos.common.CalendarUtils.isAllDay;
+import static com.openexchange.chronos.common.CalendarUtils.isAttendeeSchedulingResource;
 import static com.openexchange.chronos.common.CalendarUtils.isOpaqueTransparency;
+import static com.openexchange.chronos.common.CalendarUtils.isSeriesException;
 import static com.openexchange.chronos.common.CalendarUtils.isSeriesMaster;
 import static com.openexchange.chronos.common.CalendarUtils.matches;
 import static com.openexchange.chronos.impl.Check.requireUpToDateTimestamp;
+import static com.openexchange.java.Autoboxing.b;
 import static com.openexchange.java.Autoboxing.i;
 import static com.openexchange.tools.arrays.Collections.isNullOrEmpty;
 import java.util.ArrayList;
@@ -86,6 +89,7 @@ import com.openexchange.chronos.impl.Check;
 import com.openexchange.chronos.impl.InternalCalendarResult;
 import com.openexchange.chronos.impl.Role;
 import com.openexchange.chronos.impl.Utils;
+import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.CollectionUpdate;
 import com.openexchange.chronos.service.EventUpdate;
@@ -152,8 +156,14 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
         if (null == recurrenceId && updatedEventData.containsRecurrenceId()) {
             recurrenceId = updatedEventData.getRecurrenceId();
         }
-        if (isSeriesMaster(originalEvent) && null != recurrenceId) {
-            updateRecurrence(originalEvent, recurrenceId, updatedEventData);
+        if (null != recurrenceId) {
+            if (isSeriesMaster(originalEvent)) {
+                updateRecurrence(originalEvent, recurrenceId, updatedEventData);
+            } else if (isSeriesException(originalEvent) && recurrenceId.equals(originalEvent.getRecurrenceId())) {
+                updateEvent(originalEvent, updatedEventData);
+            } else {
+                throw CalendarExceptionCodes.INVALID_RECURRENCE_ID.create(String.valueOf(recurrenceId), null);
+            }
         } else {
             updateEvent(originalEvent, updatedEventData);
         }
@@ -201,6 +211,7 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
             /*
              * update for new change exception; prepare & insert a plain exception first, based on the original data from the master
              */
+            Map<Integer, List<Alarm>> alarms = storage.getAlarmStorage().loadAlarms(originalSeriesMaster);
             Event newExceptionEvent = prepareException(originalSeriesMaster, recurrenceId);
             Check.quotaNotExceeded(storage, session);
             storage.getEventStorage().insertEvent(newExceptionEvent);
@@ -220,11 +231,11 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
             /*
              * add change exception date to series master & track results
              */
+            resultTracker.rememberOriginalEvent(originalSeriesMaster);
             addChangeExceptionDate(originalSeriesMaster, recurrenceId);
             Event updatedMasterEvent = loadEventData(originalSeriesMaster.getId());
             resultTracker.trackUpdate(originalSeriesMaster, updatedMasterEvent);
 
-            Map<Integer, List<Alarm>> alarms = storage.getAlarmStorage().loadAlarms(updatedMasterEvent);
             storage.getAlarmTriggerStorage().deleteTriggers(originalSeriesMaster.getId());
             storage.getAlarmTriggerStorage().insertTriggers(updatedMasterEvent, alarms);
         }
@@ -257,9 +268,18 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
         /*
          * prepare event update & check conflicts as needed
          */
+        EventField[] consideredFields;
+        if (isAttendeeSchedulingResource(originalEvent, calendarUserId) &&
+            b(session.get(CalendarParameters.PARAMETER_IGNORE_FORBIDDEN_ATTENDEE_CHANGES, Boolean.class, Boolean.FALSE))) {
+            consideredFields = new EventField[] {
+                EventField.ALARMS, EventField.ATTENDEES, EventField.TRANSP, EventField.DELETE_EXCEPTION_DATES, EventField.CREATED, EventField.TIMESTAMP, EventField.LAST_MODIFIED
+            };
+        } else {
+            consideredFields = null;
+        }
         List<Event> originalChangeExceptions = isSeriesMaster(originalEvent) ? loadExceptionData(originalEvent.getId()) : null;
         EventUpdateProcessor eventUpdate = new EventUpdateProcessor(
-            session, folder, originalEvent, originalChangeExceptions, eventData, timestamp, Arrays.add(SKIPPED_FIELDS, ignoredFields));
+            session, folder, originalEvent, originalChangeExceptions, eventData, timestamp, consideredFields, Arrays.add(SKIPPED_FIELDS, ignoredFields));
         if (needsConflictCheck(eventUpdate)) {
             Check.noConflicts(storage, session, eventUpdate.getUpdate(), eventUpdate.getAttendeeUpdates().previewChanges());
         }
@@ -347,7 +367,7 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
      * @param attendeeHelper The attendee helper for the update
      * @return <code>true</code> if conflict checks should take place, <code>false</code>, otherwise
      */
-    private boolean needsConflictCheck(EventUpdate eventUpdate) throws OXException {
+    private boolean needsConflictCheck(EventUpdate eventUpdate) {
         if (eventUpdate.getUpdatedFields().contains(EventField.START_DATE) &&
             eventUpdate.getUpdate().getStartDate().before(eventUpdate.getOriginal().getStartDate())) {
             /*

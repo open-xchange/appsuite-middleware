@@ -72,6 +72,7 @@ import static org.xmlpull.v1.XmlPullParser.START_TAG;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -107,7 +108,7 @@ public class AutoconfigParser {
         ClientConfig clientConfig = new ClientConfig();
         XmlPullParser parser = new KXmlParser();
         try {
-            parser.setInput(new InputStreamReader(is));
+            parser.setInput(new InputStreamReader(is, StandardCharsets.UTF_8));
             parser.nextTag();
             parser.require(START_TAG, null, CLIENT_CONFIG);
             Collection<EmailProvider> emailProvider = new ArrayList<EmailProvider>();

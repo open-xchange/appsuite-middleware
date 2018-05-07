@@ -83,6 +83,7 @@ import com.openexchange.mailaccount.json.parser.DefaultMailAccountParser;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.net.URIDefaults;
 import com.openexchange.tools.net.URITools;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -107,6 +108,9 @@ public final class ValidateAction extends AbstractMailAccountTreeAction {
     protected AJAXRequestResult innerPerform(final AJAXRequestData requestData, final ServerSession session, final JSONValue jData) throws OXException, JSONException {
         if (!session.getUserPermissionBits().isMultipleMailAccounts()) {
             throw MailAccountExceptionCodes.NOT_ENABLED.create(Integer.valueOf(session.getUserId()), Integer.valueOf(session.getContextId()));
+        }
+        if (null == jData) {
+            throw AjaxExceptionCodes.MISSING_REQUEST_BODY.create();
         }
 
         MailAccountDescription accountDescription = new MailAccountDescription();

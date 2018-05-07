@@ -56,6 +56,11 @@ package com.openexchange.folderstorage;
  */
 public final class SystemContentType implements ContentType {
 
+    /**
+     * serialVersionUID
+     */
+    private static final long serialVersionUID = 1L;
+
     private static final SystemContentType instance = new SystemContentType();
 
     /**

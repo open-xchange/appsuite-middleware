@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the Open-Xchange, Inc. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2020 Open-Xchange, Inc.
+ *     Copyright (C) 2016-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -434,7 +434,7 @@ public class RdbAlarmStorage extends RdbStorage implements AlarmStorage {
         for (Alarm alarm : displayAlarms) {
             if (AlarmUtils.isSnoozed(alarm, displayAlarms)) {
                 snoozeAlarms.add(alarm);
-            } else if (0 <= getReminderMinutes(alarm.getTrigger(), event, timeZone)) {
+            } else if (0 <= getReminderMinutes(alarm.getTrigger(), event)) {
                 regularAlarms.add(alarm);
             } else {
                 addUnsupportedDataError(event.getId(), EventField.ALARMS, ProblemSeverity.NORMAL, "Can only store triggers prior start of event");
@@ -449,7 +449,7 @@ public class RdbAlarmStorage extends RdbStorage implements AlarmStorage {
             if (null != snoozedAlarm) {
                 Date nextTriggerTime = optNextTriggerTime(event, snoozeAlarm, timeZone, snoozedAlarm.getAcknowledged());
                 if (null != nextTriggerTime) {
-                    int reminderMinutes = getReminderMinutes(snoozedAlarm.getTrigger(), event, timeZone);
+                    int reminderMinutes = getReminderMinutes(snoozedAlarm.getTrigger(), event);
                     return new ReminderData(null != originalReminder ? originalReminder.id : 0, reminderMinutes, nextTriggerTime.getTime());
                 }
             }
@@ -464,7 +464,7 @@ public class RdbAlarmStorage extends RdbStorage implements AlarmStorage {
             if (null != regularAlarm) {
                 Date nextTriggerTime = optNextTriggerTime(event, regularAlarm, timeZone);
                 if (null != nextTriggerTime) {
-                    int reminderMinutes = getReminderMinutes(regularAlarm.getTrigger(), event, timeZone);
+                    int reminderMinutes = getReminderMinutes(regularAlarm.getTrigger(), event);
                     return new ReminderData(null != originalReminder ? originalReminder.id : 0, reminderMinutes, nextTriggerTime.getTime());
                 }
             }
@@ -472,12 +472,12 @@ public class RdbAlarmStorage extends RdbStorage implements AlarmStorage {
         return null;
     }
 
-    private int getReminderMinutes(Trigger trigger, Event event, TimeZone timeZone) throws OXException {
+    private int getReminderMinutes(Trigger trigger, Event event) throws OXException {
         String duration = AlarmUtils.getTriggerDuration(trigger, event, Services.getService(RecurrenceService.class));
         return null == duration ? 0 : -1 * (int) TimeUnit.MILLISECONDS.toMinutes(AlarmUtils.getTriggerDuration(duration));
     }
 
-    private static ReminderData selectReminder(Connection connection, int contextID, int eventID, int userID) throws SQLException, OXException {
+    private static ReminderData selectReminder(Connection connection, int contextID, int eventID, int userID) throws SQLException {
         String sql = new StringBuilder()
             .append("SELECT m.reminder,r.object_id,r.alarm,r.last_modified FROM prg_dates_members AS m ")
             .append("LEFT JOIN reminder AS r ON m.cid=r.cid AND m.member_uid=r.userid AND m.object_id=r.target_id ")
@@ -494,7 +494,7 @@ public class RdbAlarmStorage extends RdbStorage implements AlarmStorage {
         }
     }
 
-    private static Map<String, ReminderData> selectReminders(Connection connection, int contextID, Collection<String> eventIDs, int userID) throws SQLException, OXException {
+    private static Map<String, ReminderData> selectReminders(Connection connection, int contextID, Collection<String> eventIDs, int userID) throws SQLException {
         Map<String, ReminderData> remindersByID = new HashMap<String, ReminderData>(eventIDs.size());
         String sql = new StringBuilder()
             .append("SELECT m.object_id,m.reminder,r.object_id,r.alarm,r.last_modified FROM prg_dates_members AS m ")
@@ -521,7 +521,7 @@ public class RdbAlarmStorage extends RdbStorage implements AlarmStorage {
         return remindersByID;
     }
 
-    private static Map<String, Map<Integer, ReminderData>> selectReminders(Connection connection, int contextID, Collection<String> eventIDs) throws SQLException, OXException {
+    private static Map<String, Map<Integer, ReminderData>> selectReminders(Connection connection, int contextID, Collection<String> eventIDs) throws SQLException {
         /*
          * load reminder minutes from 'prg_dates_members'
          */
@@ -739,7 +739,7 @@ public class RdbAlarmStorage extends RdbStorage implements AlarmStorage {
      * @param resultSet The result set to read from
      * @return The reminder data, or <code>null</code> if not set
      */
-    private static ReminderData readReminder(ResultSet resultSet) throws SQLException, OXException {
+    private static ReminderData readReminder(ResultSet resultSet) throws SQLException {
         int reminderMinutes = resultSet.getInt("m.reminder");
         if (resultSet.wasNull()) {
             return null;
@@ -802,7 +802,7 @@ public class RdbAlarmStorage extends RdbStorage implements AlarmStorage {
      * @param timeZone The timezone to consider when evaluating the next trigger time of <i>floating</i> events
      * @return The next alarm, or <code>null</code> if there is none
      */
-    private Alarm chooseNextAlarm(Event event, ReminderData originalReminder, List<Alarm> alarms, TimeZone timeZone) throws OXException {
+    private Alarm chooseNextAlarm(Event event, ReminderData originalReminder, List<Alarm> alarms, TimeZone timeZone) {
         if (null == alarms || 0 == alarms.size()) {
             return null;
         }

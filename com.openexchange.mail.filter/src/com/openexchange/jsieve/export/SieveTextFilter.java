@@ -98,7 +98,7 @@ public final class SieveTextFilter {
      * @author d7
      *
      */
-    public class ClientRulesAndRequire {
+    public static class ClientRulesAndRequire {
 
         private Map<String, List<Rule>> flaggedRules;
 
@@ -145,7 +145,7 @@ public final class SieveTextFilter {
         }
     }
 
-    public class RuleListAndNextUid {
+    public static class RuleListAndNextUid {
 
         private final ArrayList<Rule> rulelist;
 

@@ -233,7 +233,8 @@ public class ContactResource extends CommonResource<Contact> {
     @Override
     public void delete() throws WebdavProtocolException {
         boolean deleted = false;
-        String vCardID = null != object ? object.getVCardId() : null;
+        Contact object = this.object;
+        String vCardID = null == object ? null : object.getVCardId();
         Session session = factory.getSession();
         try {
             if (false == exists()) {
@@ -242,16 +243,18 @@ public class ContactResource extends CommonResource<Contact> {
             /*
              * delete contact, trying again in case of recoverable errors
              */
-            for (int i = 0; i < MAX_RETRIES && false == deleted; i++) {
-                try {
-                    factory.requireService(ContactService.class).deleteContact(session,
-                        Integer.toString(object.getParentFolderID()), Integer.toString(object.getObjectID()), object.getLastModified());
-                    LOG.debug("{}: deleted.", getUrl());
-                    deleted = true;
-                    object = null;
-                } catch (OXException e) {
-                    if (false == handle(e)) {
-                        break;
+            if (null != object) {
+                for (int i = 0; i < MAX_RETRIES && false == deleted; i++) {
+                    try {
+                        factory.requireService(ContactService.class).deleteContact(session,
+                            Integer.toString(object.getParentFolderID()), Integer.toString(object.getObjectID()), object.getLastModified());
+                        LOG.debug("{}: deleted.", getUrl());
+                        deleted = true;
+                        this.object = null;
+                    } catch (OXException e) {
+                        if (false == handle(e)) {
+                            break;
+                        }
                     }
                 }
             }

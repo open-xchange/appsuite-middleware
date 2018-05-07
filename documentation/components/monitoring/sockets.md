@@ -68,7 +68,7 @@ Moreover, the ``com.openexchange.monitoring.sockets.tracing.keepIdleThreshold`` 
 To narrow down the recorded samples to relevant ones, the sample recording offers the following properties:
 
  - ``com.openexchange.monitoring.sockets.tracing.thresholdMillis`` (default is ``100``) specifies the threshold in milliseconds that is required to be exceeded to let a sample be added to recorded sample collection. Otherwise the sample is discarded. This allows to only collect those samples that exceed a quite long-running wait for a socket read.
- - ``com.openexchange.monitoring.sockets.tracing.filter.hostnames`` allows to define a filter based on host names, IP addresses or IP address ranges. That property allows to exclude socket samples for outer end-points and to only consider for internal ones. I.e ``com.openexchange.monitoring.sockets.tracing.filter.hostnames=192.168.0.1-192.168.255.255, 10.20.0.1/255, *.mydomain.org, special-service.internal.org``
+ - ``com.openexchange.monitoring.sockets.tracing.filter.hostnames`` allows to define a filter based on host names, IP addresses or IP address ranges. That property allows to exclude socket samples for outer end-points and to only consider internal ones. I.e ``192.168.0.1-192.168.255.255, 10.20.0.1/255, *.mydomain.org, special-service.internal.org``
  - ``com.openexchange.monitoring.sockets.tracing.filter.ports`` allows to defines a filter based on port numbers. That property allows to only consider socket samples for certain serves (e.g. ``143, 993`` for only IMAP).
 
 ## MBean/JMX access

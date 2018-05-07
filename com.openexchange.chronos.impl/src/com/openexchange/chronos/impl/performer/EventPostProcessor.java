@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the Open-Xchange, Inc. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2020 Open-Xchange, Inc.
+ *     Copyright (C) 2016-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -56,14 +56,19 @@ import static com.openexchange.chronos.common.CalendarUtils.sortEvents;
 import static com.openexchange.chronos.impl.Utils.anonymizeIfNeeded;
 import static com.openexchange.chronos.impl.Utils.applyExceptionDates;
 import static com.openexchange.chronos.impl.Utils.getCalendarUserId;
+import static com.openexchange.chronos.impl.Utils.getFrom;
+import static com.openexchange.chronos.impl.Utils.getUntil;
 import static com.openexchange.chronos.impl.Utils.isExcluded;
 import static com.openexchange.chronos.impl.Utils.isResolveOccurrences;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
+import java.util.TimeZone;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
+import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.common.DefaultEventsResult;
 import com.openexchange.chronos.common.SelfProtectionFactory;
 import com.openexchange.chronos.common.SelfProtectionFactory.SelfProtection;
@@ -223,13 +228,17 @@ public class EventPostProcessor {
         event = anonymizeIfNeeded(session, event);
         if (isSeriesMaster(event)) {
             if (isResolveOccurrences(session)) {
+                /*
+                 * add resolved occurrences; no need to apply individual exception dates here, as a removed attendee can only occur in exceptions
+                 */
                 return events.addAll(resolveOccurrences(event));
-            } else {
-                return events.add(applyExceptionDates(storage, event, calendarUserId));
             }
-        } else {
-            return events.add(event);
+            /*
+             * add series master event with 'userized' exception dates
+             */
+            return events.add(applyExceptionDates(storage, event, calendarUserId));
         }
+        return events.add(event);
     }
 
     private void checkResultSizeNotExceeded() throws OXException {
@@ -239,17 +248,23 @@ public class EventPostProcessor {
     private SelfProtection getSelfProtection() throws OXException {
         if (selfProtection == null) {
             LeanConfigurationService leanConfigurationService = Services.getService(LeanConfigurationService.class);
-            selfProtection = SelfProtectionFactory.createSelfProtection(session.getSession(), leanConfigurationService);
+            selfProtection = SelfProtectionFactory.createSelfProtection(leanConfigurationService);
         }
         return selfProtection;
     }
 
     private List<Event> resolveOccurrences(Event master) throws OXException {
+        Date from = getFrom(session);
+        Date until = getUntil(session);
+        TimeZone timeZone = session.getEntityResolver().getTimeZone(session.getUserId());
         Iterator<Event> itrerator = Utils.resolveOccurrences(session, master);
         List<Event> list = new ArrayList<Event>();
         while (itrerator.hasNext()) {
-            list.add(itrerator.next());
-            checkResultSizeNotExceeded();
+            Event event = itrerator.next();
+            if (CalendarUtils.isInRange(event, from, until, timeZone)) {
+                list.add(event);
+                checkResultSizeNotExceeded();
+            }
         }
         return list;
     }

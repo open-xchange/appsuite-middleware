@@ -101,6 +101,7 @@ public class EventsPerFolderResultConverter extends EventResultConverter {
         return Quality.GOOD;
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public void convert(AJAXRequestData requestData, AJAXRequestResult result, ServerSession session, Converter converter) throws OXException {
         /*

@@ -238,7 +238,7 @@ public class DispatcherServlet extends SessionServlet {
     /**
      * The default <code>AJAXRequestDataTools</code>.
      */
-    protected final AJAXRequestDataTools defaultRequestDataTools;
+    protected final transient AJAXRequestDataTools defaultRequestDataTools;
 
     /**
      * The line separator.

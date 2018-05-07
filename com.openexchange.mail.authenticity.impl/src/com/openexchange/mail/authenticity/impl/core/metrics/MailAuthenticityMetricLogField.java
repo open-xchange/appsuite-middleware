@@ -55,10 +55,12 @@ package com.openexchange.mail.authenticity.impl.core.metrics;
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 public enum MailAuthenticityMetricLogField {
-    mailId,
-    rawHeaders,
-    mechanismResults,
-    overallResult,
-    domainMismatch,
-    fromHeader,
+    mail_id,
+    raw_headers,
+    mechanism_results,
+    overall_result,
+    domain_mismatch,
+    from_header,
+    result,
+    mechanism;
 }

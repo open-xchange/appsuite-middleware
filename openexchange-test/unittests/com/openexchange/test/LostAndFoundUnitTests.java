@@ -62,10 +62,7 @@ import org.junit.runners.Suite;
 @RunWith(Suite.class)
 @Suite.SuiteClasses({
     com.openexchange.database.ConfigDBUniqueIDTest.class,
-    com.openexchange.groupware.importexport.Bug8475.class,
-    com.openexchange.groupware.importexport.Bug8654.class,
     com.openexchange.groupware.importexport.Bug8681forCSV.class,
-    com.openexchange.groupware.importexport.Bug8681forICAL.class,
     com.openexchange.groupware.importexport.Bug8681forVCard.class,
     com.openexchange.groupware.importexport.CSVContactExportTest.class,
     com.openexchange.groupware.importexport.CSVContactImportTest.class,

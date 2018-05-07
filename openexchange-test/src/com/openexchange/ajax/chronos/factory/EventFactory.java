@@ -79,6 +79,20 @@ public final class EventFactory {
      * @return The {@link EventData}
      */
     public static EventData createSingleEvent(int userId, String summary, DateTimeData startDate, DateTimeData endDate) {
+        return createSingleEvent(userId, summary, startDate, endDate, null);
+    }
+
+    /**
+     * Creates a single event for the specified user with in the specified interval.
+     *
+     * @param userId The user identifier
+     * @param summary The summary of the event
+     * @param startDate The start date
+     * @param endDate The end date
+     * @param folderId The folder id
+     * @return The {@link EventData}
+     */
+    public static EventData createSingleEvent(int userId, String summary, DateTimeData startDate, DateTimeData endDate, String folderId) {
         Attendee attendee = AttendeeFactory.createIndividual(userId);
 
         EventData singleEvent = new EventData();
@@ -88,6 +102,7 @@ public final class EventFactory {
         singleEvent.setEndDate(endDate);
         singleEvent.setTransp(TranspEnum.OPAQUE);
         singleEvent.setSummary(summary);
+        singleEvent.setFolder(folderId);
 
         return singleEvent;
     }
@@ -99,8 +114,8 @@ public final class EventFactory {
      * @param summary The summary of the event
      * @return The series {@link EventData}
      */
-    public static EventData createSeriesEvent(int userId, String summary, int occurences) {
-        EventData seriesEvent = createSingleTwoHourEvent(userId, summary);
+    public static EventData createSeriesEvent(int userId, String summary, int occurences, String folderId) {
+        EventData seriesEvent = createSingleTwoHourEvent(userId, summary, folderId);
         seriesEvent.setRrule("FREQ=DAILY;COUNT=" + occurences);
         return seriesEvent;
     }
@@ -116,7 +131,21 @@ public final class EventFactory {
      * @return The series {@link EventData}
      */
     public static EventData createSeriesEvent(int userId, String summary, DateTimeData startDate, DateTimeData endDate, int occurences) {
-        EventData seriesEvent = createSingleEvent(userId, summary, startDate, endDate);
+        return createSeriesEvent(userId, summary, startDate, endDate, occurences, null);
+    }
+
+    /**
+     * Creates a simple daily two hour event with the specified amount of occurrences
+     *
+     * @param userId The user identifier
+     * @param summary The summary of the event
+     * @param startDate The start date
+     * @param endDate The end date
+     * @param occurences The number of occurences
+     * @return The series {@link EventData}
+     */
+    public static EventData createSeriesEvent(int userId, String summary, DateTimeData startDate, DateTimeData endDate, int occurences, String folderId) {
+        EventData seriesEvent = createSingleEvent(userId, summary, startDate, endDate, folderId);
         seriesEvent.setRrule("FREQ=DAILY;COUNT=" + occurences);
         return seriesEvent;
     }
@@ -132,25 +161,43 @@ public final class EventFactory {
      * @return The {@link EventData}
      */
     public static EventData createSingleEventWithAttachment(int userId, String summary, Asset asset) {
-        return createSingleEventWithAttachments(userId, summary, Collections.singletonList(asset));
+        return createSingleEventWithAttachments(userId, summary, Collections.singletonList(asset), null);
     }
 
-    public static EventData createSingleEventWithAttachments(int userId, String summary, List<Asset> assets) {
-        EventData eventData = createSingleTwoHourEvent(userId, summary);
+    public static EventData createSingleEventWithAttachments(int userId, String summary, List<Asset> assets, String folderId) {
+        EventData eventData = createSingleTwoHourEvent(userId, summary, folderId);
         for (Asset asset : assets) {
             eventData.addAttachmentsItem(createAttachment(asset));
         }
         return eventData;
     }
 
-    public static EventData createSingleEventWithSingleAlarm(int userId, String summary, Alarm alarm) {
-        EventData eventData = createSingleTwoHourEvent(userId, summary);
+    /**
+     * Creates a single event with the specified start and end time and with the specified attachment.
+     *
+     * @param userId The user identifier
+     * @param summary The summary of the event
+     * @param startDate The start date
+     * @param endDate The end date
+     * @param asset The {@link Asset} to attach
+     * @return The {@link EventData}
+     */
+    public static EventData createSingleEventWithAttachment(int userId, String summary, Asset asset, String folderId) {
+        return createSingleEventWithAttachments(userId, summary, Collections.singletonList(asset), folderId);
+    }
+
+    public static EventData createSingleEventWithSingleAlarm(int userId, String summary, Alarm alarm, String folderId) {
+        EventData eventData = createSingleTwoHourEvent(userId, summary, folderId);
         eventData.setAlarms(Collections.singletonList(alarm));
         return eventData;
     }
 
     public static EventData createSingleEventWithSingleAlarm(int userId, String summary, DateTimeData startDate, DateTimeData endDate, Alarm alarm) {
-        EventData eventData = createSingleEvent(userId, summary, startDate, endDate);
+        return createSingleEventWithSingleAlarm(userId, summary, startDate, endDate, alarm, null);
+    }
+
+    public static EventData createSingleEventWithSingleAlarm(int userId, String summary, DateTimeData startDate, DateTimeData endDate, Alarm alarm, String folder) {
+        EventData eventData = createSingleEvent(userId, summary, startDate, endDate, folder);
         eventData.setAlarms(Collections.singletonList(alarm));
         return eventData;
     }
@@ -175,15 +222,27 @@ public final class EventFactory {
      *
      * @param userId The user identifier
      * @param summary The event's summary
+     * @param folder The folder to set
+     * @return The {@link EventData}
+     */
+    public static EventData createSingleTwoHourEvent(int userId, String summary, String folder) {
+        Calendar start = Calendar.getInstance();
+        Calendar end = Calendar.getInstance();
+        end.setTimeInMillis(end.getTimeInMillis() + TimeUnit.HOURS.toMillis(2));
+
+        EventData result = createSingleEvent(userId, summary, DateTimeUtil.getDateTime(start), DateTimeUtil.getDateTime(end));
+        result.setFolder(folder);
+        return result;
+    }
+
+    /**
+     * Creates a single event two-hour event
+     *
+     * @param userId The user identifier
+     * @param summary The event's summary
      * @return The {@link EventData}
      */
     public static EventData createSingleTwoHourEvent(int userId, String summary) {
-        Calendar start = Calendar.getInstance();
-        start.setTimeInMillis(System.currentTimeMillis());
-
-        Calendar end = Calendar.getInstance();
-        end.setTimeInMillis(System.currentTimeMillis() + TimeUnit.HOURS.toMillis(2));
-
-        return createSingleEvent(userId, summary, DateTimeUtil.getDateTime(start), DateTimeUtil.getDateTime(end));
+        return createSingleTwoHourEvent(userId, summary, null);
     }
 }

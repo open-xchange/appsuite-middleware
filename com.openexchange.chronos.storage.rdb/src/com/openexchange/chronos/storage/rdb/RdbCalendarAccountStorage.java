@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the Open-Xchange, Inc. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2020 Open-Xchange, Inc.
+ *     Copyright (C) 2016-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -50,6 +50,8 @@
 package com.openexchange.chronos.storage.rdb;
 
 import static com.openexchange.java.Autoboxing.I;
+import com.google.json.JsonSanitizer;
+import java.io.IOException;
 import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -107,7 +109,7 @@ public class RdbCalendarAccountStorage extends RdbStorage implements CalendarAcc
         return accountStorage;
     }
 
-    private static final int ID_GENERATOR_TYPE = Types.SUBSCRIPTION; //TODO own type
+    private static final int ID_GENERATOR_TYPE = Types.SUBSCRIPTION; // TODO own type
 
     /**
      * Initializes a new {@link RdbCalendarStorage}.
@@ -149,60 +151,74 @@ public class RdbCalendarAccountStorage extends RdbStorage implements CalendarAcc
     }
 
     @Override
-    public void insertAccount(CalendarAccount account) throws OXException {
-        int updated = 0;
+    public CalendarAccount insertAccount(CalendarAccount account) throws OXException {
+        CalendarAccount newAccount = null;
         Connection connection = null;
         try {
             connection = dbProvider.getWriteConnection(context);
             txPolicy.setAutoCommit(connection, false);
-            updated = insertAccount(connection, context.getContextId(), account);
+            newAccount = insertAccount(connection, context.getContextId(), account);
             txPolicy.commit(connection);
         } catch (SQLException e) {
             throw asOXException(e);
         } finally {
-            release(connection, updated);
+            release(connection, null == newAccount ? 0 : 1);
         }
+        return newAccount;
     }
 
     @Override
-    public void insertAccount(CalendarAccount account, int maxAccounts) throws OXException {
-        int updated = 0;
+    public CalendarAccount insertAccount(CalendarAccount account, int maxAccounts) throws OXException {
+        CalendarAccount newAccount = null;
         Connection connection = null;
         try {
             connection = dbProvider.getWriteConnection(context);
             txPolicy.setAutoCommit(connection, false);
-            updated = insertAccount(connection, context.getContextId(), account, maxAccounts);
+            newAccount = insertAccount(connection, context.getContextId(), account, maxAccounts);
             txPolicy.commit(connection);
         } catch (SQLException e) {
             throw asOXException(e);
         } finally {
-            release(connection, updated);
+            release(connection, null == newAccount ? 0 : 1);
         }
+        return newAccount;
     }
 
     @Override
-    public void updateAccount(CalendarAccount account, long clientTimestamp) throws OXException {
-        int updated = 0;
+    public CalendarAccount updateAccount(CalendarAccount account, long clientTimestamp) throws OXException {
+        CalendarAccount updatedAccount = null;
         Connection connection = null;
         try {
             connection = dbProvider.getWriteConnection(context);
             txPolicy.setAutoCommit(connection, false);
-            updated = updateAccount(connection, context.getContextId(), account, clientTimestamp);
-            if (0 == updated) {
-                CalendarAccount storedAccount = selectAccount(connection, context.getContextId(), account.getAccountId(), account.getUserId());
+
+            CalendarAccount storedAccount = selectAccount(connection, context.getContextId(), account.getAccountId(), account.getUserId());
+            if (null == storedAccount) {
+                throw CalendarExceptionCodes.ACCOUNT_NOT_FOUND.create(I(account.getAccountId()));
+            }
+            if (storedAccount.getLastModified().getTime() > clientTimestamp) {
+                throw CalendarExceptionCodes.CONCURRENT_MODIFICATION.create(String.valueOf(storedAccount.getAccountId()), clientTimestamp, storedAccount.getLastModified().getTime());
+            }
+            updatedAccount = updateAccount(connection, context.getContextId(), account, clientTimestamp, storedAccount);
+            if (null == updatedAccount) {
+                // Reload to check why update attempt failed
+                storedAccount = selectAccount(connection, context.getContextId(), account.getAccountId(), account.getUserId());
                 if (null == storedAccount) {
                     throw CalendarExceptionCodes.ACCOUNT_NOT_FOUND.create(I(account.getAccountId()));
                 }
                 if (storedAccount.getLastModified().getTime() > clientTimestamp) {
                     throw CalendarExceptionCodes.CONCURRENT_MODIFICATION.create(String.valueOf(storedAccount.getAccountId()), clientTimestamp, storedAccount.getLastModified().getTime());
                 }
+                throw CalendarExceptionCodes.UNEXPECTED_ERROR.create("Update failed for any reason");
             }
+
             txPolicy.commit(connection);
         } catch (SQLException e) {
             throw asOXException(e);
         } finally {
-            release(connection, updated);
+            release(connection, null == updatedAccount ? 0 : 1);
         }
+        return updatedAccount;
     }
 
     @Override
@@ -305,7 +321,7 @@ public class RdbCalendarAccountStorage extends RdbStorage implements CalendarAcc
         // no
     }
 
-    private static int insertAccount(Connection connection, int cid, CalendarAccount account) throws SQLException, OXException {
+    private static DefaultCalendarAccount insertAccount(Connection connection, int cid, CalendarAccount account) throws SQLException {
         String sql = "INSERT INTO calendar_account (cid,id,provider,user,modified,internalConfig,userConfig) VALUES (?,?,?,?,?,?,?);";
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
             InputStream internalConfigStream = null;
@@ -313,21 +329,26 @@ public class RdbCalendarAccountStorage extends RdbStorage implements CalendarAcc
             try {
                 internalConfigStream = serialize(account.getInternalConfiguration());
                 userConfigStream = serialize(account.getUserConfiguration());
+                long lastModified = null == account.getLastModified() ? System.currentTimeMillis() : account.getLastModified().getTime();
                 stmt.setInt(1, cid);
                 stmt.setInt(2, account.getAccountId());
                 stmt.setString(3, account.getProviderId());
                 stmt.setInt(4, account.getUserId());
-                stmt.setLong(5, System.currentTimeMillis());
+                stmt.setLong(5, lastModified);
                 stmt.setBinaryStream(6, internalConfigStream);
                 stmt.setBinaryStream(7, userConfigStream);
-                return logExecuteUpdate(stmt);
+                int updated = logExecuteUpdate(stmt);
+                if (updated > 0) {
+                    return new DefaultCalendarAccount(account.getProviderId(), account.getAccountId(), account.getUserId(), account.getInternalConfiguration(), account.getUserConfiguration(), new Date(lastModified));
+                }
+                return null;
             } finally {
                 Streams.close(internalConfigStream, userConfigStream);
             }
         }
     }
 
-    private static int insertAccount(Connection connection, int cid, CalendarAccount account, int maxAccounts) throws SQLException, OXException {
+    private static DefaultCalendarAccount insertAccount(Connection connection, int cid, CalendarAccount account, int maxAccounts) throws SQLException {
         StringBuilder stringBuilder = new StringBuilder()
             .append("INSERT INTO calendar_account (cid,id,provider,user,modified,internalConfig,userConfig) ")
         ;
@@ -343,11 +364,12 @@ public class RdbCalendarAccountStorage extends RdbStorage implements CalendarAcc
             try {
                 internalConfigStream = serialize(account.getInternalConfiguration());
                 userConfigStream = serialize(account.getUserConfiguration());
+                long lastModified = null == account.getLastModified() ? System.currentTimeMillis() : account.getLastModified().getTime();
                 stmt.setInt(1, cid);
                 stmt.setInt(2, account.getAccountId());
                 stmt.setString(3, account.getProviderId());
                 stmt.setInt(4, account.getUserId());
-                stmt.setLong(5, System.currentTimeMillis());
+                stmt.setLong(5, lastModified);
                 stmt.setBinaryStream(6, internalConfigStream);
                 stmt.setBinaryStream(7, userConfigStream);
                 if (0 < maxAccounts) {
@@ -356,14 +378,18 @@ public class RdbCalendarAccountStorage extends RdbStorage implements CalendarAcc
                     stmt.setInt(10, account.getUserId());
                     stmt.setString(11, account.getProviderId());
                 }
-                return logExecuteUpdate(stmt);
+                int updated = logExecuteUpdate(stmt);
+                if (updated > 0) {
+                    return new DefaultCalendarAccount(account.getProviderId(), account.getAccountId(), account.getUserId(), account.getInternalConfiguration(), account.getUserConfiguration(), new Date(lastModified));
+                }
+                return null;
             } finally {
                 Streams.close(internalConfigStream, userConfigStream);
             }
         }
     }
 
-    private static int updateAccount(Connection connection, int cid, CalendarAccount account, long clientTimestamp) throws SQLException, OXException {
+    private static DefaultCalendarAccount updateAccount(Connection connection, int cid, CalendarAccount account, long clientTimestamp, CalendarAccount storedAccount) throws SQLException {
         StringBuilder stringBuilder = new StringBuilder("UPDATE calendar_account SET modified=?");
         JSONObject internalConfig = account.getInternalConfiguration();
         JSONObject userConfig = account.getUserConfiguration();
@@ -381,7 +407,8 @@ public class RdbCalendarAccountStorage extends RdbStorage implements CalendarAcc
             try {
                 internalConfigStream = null != internalConfig ? serialize(internalConfig) : null;
                 userConfigStream = null != userConfig ? serialize(userConfig) : null;
-                stmt.setLong(parameterIndex++, System.currentTimeMillis());
+                long lastModified = System.currentTimeMillis();
+                stmt.setLong(parameterIndex++, lastModified);
                 if (null != internalConfigStream) {
                     stmt.setBinaryStream(parameterIndex++, internalConfigStream);
                 }
@@ -392,14 +419,18 @@ public class RdbCalendarAccountStorage extends RdbStorage implements CalendarAcc
                 stmt.setInt(parameterIndex++, account.getAccountId());
                 stmt.setInt(parameterIndex++, account.getUserId());
                 stmt.setLong(parameterIndex++, clientTimestamp);
-                return logExecuteUpdate(stmt);
+                int updated = logExecuteUpdate(stmt);
+                if (updated > 0) {
+                    return new DefaultCalendarAccount(account.getProviderId(), account.getAccountId(), account.getUserId(), null != internalConfig ? internalConfig : storedAccount.getInternalConfiguration(), null != userConfig ? userConfig : storedAccount.getUserConfiguration(), new Date(lastModified));
+                }
+                return null;
             } finally {
                 Streams.close(internalConfigStream, userConfigStream);
             }
         }
     }
 
-    private static int deleteAccount(Connection connection, int cid, int id, int user, long clientTimestamp) throws SQLException, OXException {
+    private static int deleteAccount(Connection connection, int cid, int id, int user, long clientTimestamp) throws SQLException {
         String sql = "DELETE FROM calendar_account WHERE cid=? AND id=? AND user=? AND modified<=?;";
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
             stmt.setInt(1, cid);
@@ -410,7 +441,7 @@ public class RdbCalendarAccountStorage extends RdbStorage implements CalendarAcc
         }
     }
 
-    private static List<CalendarAccount> selectAccounts(Connection connection, int cid, int user) throws SQLException, OXException {
+    private static List<CalendarAccount> selectAccounts(Connection connection, int cid, int user) throws SQLException {
         List<CalendarAccount> accounts = new ArrayList<CalendarAccount>();
         String sql = "SELECT id,user,provider,modified,internalConfig,userConfig FROM calendar_account WHERE cid=? AND user=?;";
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
@@ -425,7 +456,7 @@ public class RdbCalendarAccountStorage extends RdbStorage implements CalendarAcc
         return accounts;
     }
 
-    private static List<CalendarAccount> selectAccounts(Connection connection, int cid, String provider, int[] userIds) throws SQLException, OXException {
+    private static List<CalendarAccount> selectAccounts(Connection connection, int cid, String provider, int[] userIds) throws SQLException {
         String sql = new StringBuilder()
             .append("SELECT id,user,provider,modified,internalConfig,userConfig FROM calendar_account WHERE cid=? AND provider=? AND user")
             .append(getPlaceholders(userIds.length)).append(';')
@@ -447,7 +478,7 @@ public class RdbCalendarAccountStorage extends RdbStorage implements CalendarAcc
         return accounts;
     }
 
-    private static CalendarAccount selectAccount(Connection connection, int cid, int id, int user) throws SQLException, OXException {
+    private static CalendarAccount selectAccount(Connection connection, int cid, int id, int user) throws SQLException {
         String sql = "SELECT id,user,provider,modified,internalConfig,userConfig FROM calendar_account WHERE cid=? AND id=? AND user=?;";
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
             stmt.setInt(1, cid);
@@ -459,7 +490,7 @@ public class RdbCalendarAccountStorage extends RdbStorage implements CalendarAcc
         }
     }
 
-    private static CalendarAccount selectAccount(Connection connection, int cid, int user, String provider) throws SQLException, OXException {
+    private static CalendarAccount selectAccount(Connection connection, int cid, int user, String provider) throws SQLException {
         String sql = "SELECT id,user,provider,modified,internalConfig,userConfig FROM calendar_account WHERE cid=? AND user=? AND provider=?;";
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
             stmt.setInt(1, cid);
@@ -483,22 +514,38 @@ public class RdbCalendarAccountStorage extends RdbStorage implements CalendarAcc
         int user = resultSet.getInt("user");
         String provider = resultSet.getString("provider");
         long lastModified = resultSet.getLong("modified");
-        JSONObject internalConfig;
+        JSONObject internalConfig = readJSON("internalConfig", resultSet);
+        JSONObject userConfig = readJSON("userConfig", resultSet);
+        return new DefaultCalendarAccount(provider, id, user, internalConfig, userConfig, new Date(lastModified));
+    }
+
+    /**
+     * Reads the JSON content of the designated column in the current row of specified <code>ResultSet</code> object.
+     *
+     * @param columnName The column name
+     * @param resultSet The <code>ResultSet</code> object
+     * @return The JSON content or <code>null</code>
+     * @throws SQLException If JSON content cannot be read
+     */
+    private static JSONObject readJSON(String columnName, ResultSet resultSet) throws SQLException {
+        JSONObject retval;
         InputStream inputStream = null;
         try {
-            inputStream = resultSet.getBinaryStream("internalConfig");
-            internalConfig = deserialize(inputStream);
+            inputStream = resultSet.getBinaryStream(columnName);
+            retval = deserialize(inputStream);
+        } catch (SQLException e) {
+            if (false == JSONException.isParseException(e)) {
+                throw e;
+            }
+
+            // Try to sanitize corrupt input
+            Streams.close(inputStream);
+            inputStream = resultSet.getBinaryStream(columnName);
+            retval = deserialize(inputStream, true);
         } finally {
             Streams.close(inputStream);
         }
-        JSONObject userConfig;
-        try {
-            inputStream = resultSet.getBinaryStream("userConfig");
-            userConfig = deserialize(inputStream);
-        } finally {
-            Streams.close(inputStream);
-        }
-        return new DefaultCalendarAccount(provider, id, user, internalConfig, userConfig, new Date(lastModified));
+        return retval;
     }
 
     /**
@@ -508,12 +555,31 @@ public class RdbCalendarAccountStorage extends RdbStorage implements CalendarAcc
      * @return The deserialized JSON object
      */
     private static JSONObject deserialize(InputStream inputStream) throws SQLException {
+        return deserialize(inputStream, false);
+    }
+
+    /**
+     * Deserializes a JSON object (as used in an account's configuration) from the supplied input stream.
+     *
+     * @param inputStream The input stream to deserialize
+     * @param withSanitize <code>true</code> if JSON content provided by input stream is supposed to be sanitized; otherwise <code>false</code> to read as-is
+     * @return The deserialized JSON object
+     */
+    private static JSONObject deserialize(InputStream inputStream, boolean withSanitize) throws SQLException {
         if (null == inputStream) {
             return null;
         }
+
         try {
+            if (withSanitize) {
+                String jsonish = JsonSanitizer.sanitize(Streams.reader2string(new AsciiReader(inputStream)));
+                return new JSONObject(jsonish);
+            }
+
             return new JSONObject(new AsciiReader(inputStream));
         } catch (JSONException e) {
+            throw new SQLException(e);
+        } catch (IOException e) {
             throw new SQLException(e);
         }
     }

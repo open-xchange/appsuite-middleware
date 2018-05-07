@@ -50,6 +50,7 @@
 package com.openexchange.ajax.login;
 
 import static com.openexchange.java.Strings.isEmpty;
+import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.regex.Pattern;
@@ -71,8 +72,6 @@ public class HashCalculator {
 
     private static final String USER_AGENT = LoginFields.USER_AGENT;
     private static final String CLIENT_PARAM = LoginFields.CLIENT_PARAM;
-
-    private static final Pattern PATTERN_NON_WORD_CHAR = Pattern.compile("\\W");
 
     // -------------------------------    SINGLETON    ------------------------------------------------ //
 
@@ -107,7 +106,7 @@ public class HashCalculator {
         if (null != service) {
             final String fieldList = service.getProperty("com.openexchange.cookie.hash.fields", "");
             fields = Pattern.compile("\\s*,\\s*").split(fieldList, 0);
-            salt = service.getProperty("com.openexchange.cookie.hash.salt", "replaceMe1234567890").getBytes();
+            salt = service.getProperty("com.openexchange.cookie.hash.salt", "replaceMe1234567890").getBytes(StandardCharsets.UTF_8);
         }
     }
 

@@ -95,7 +95,7 @@ public class AdvertisementTest extends AbstractConfigAwareAjaxSession {
 
     private final String taxonomyTypes = "groupware_premium";
     private Context old;
-    private static final String reloadables = "AdvertisementPackageServiceImpl";
+    private static final String reloadables = "AdvertisementPackageServiceImpl, TaxonomyTypesAdvertisementConfigService";
     private static final String DEFAULT = "default";
 
     @Override

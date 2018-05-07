@@ -65,15 +65,15 @@ abstract class AbstractAlarmTest extends AbstractChronosTest {
 
     /**
      * Gets and checks if the specified event exists and if it contains the expected amount of alarms
-     * 
+     *
      * @param expectedEventData The event to get and check
      * @param amountOfExpectedAlarms The excepted amount of alarms
      * @return The actual EventData
      * @throws ApiException if an API error is occurred
      * @throws ChronosApiException if a Chronos API error is occurred
      */
-    EventData getAndAssertAlarms(EventData expectedEventData, int amountOfExpectedAlarms) throws ApiException, ChronosApiException {
-        EventData actualEventData = eventManager.getEvent(expectedEventData.getId());
+    EventData getAndAssertAlarms(EventData expectedEventData, int amountOfExpectedAlarms, String folderId) throws ApiException, ChronosApiException {
+        EventData actualEventData = eventManager.getEvent(folderId, expectedEventData.getId());
         AssertUtil.assertEventsEqual(expectedEventData, actualEventData);
         assertNotNull(actualEventData.getAlarms());
         assertEquals(amountOfExpectedAlarms, actualEventData.getAlarms().size());

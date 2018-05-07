@@ -135,7 +135,7 @@ public final class ShareServletUtils {
              */
             LoginServlet.addHeadersAndCookies(loginResult, response);
             response.addCookie(configureCookie(new Cookie(SECRET_PREFIX + session.getHash(), session.getSecret()), request, loginConfig));
-            if (loginConfig.isSessiondAutoLogin(request.getServerName())) {
+            if (loginConfig.isSessiondAutoLogin(request.getServerName(), session)) {
                 response.addCookie(configureCookie(new Cookie(LoginServlet.getShareCookieName(request), guest.getBaseToken()), request, loginConfig));
             }
             /*

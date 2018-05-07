@@ -98,9 +98,9 @@ public class BasicAlarmTriggerTest extends AbstractUserTimezoneAlarmTriggerTest 
         DateTimeData startDate = DateTimeUtil.getDateTime(System.currentTimeMillis() + TimeUnit.DAYS.toMillis(1));
         DateTimeData endDate = DateTimeUtil.getDateTime(System.currentTimeMillis() + TimeUnit.DAYS.toMillis(1) + TimeUnit.HOURS.toMillis(2));
 
-        EventData toCreate = EventFactory.createSingleEventWithSingleAlarm(defaultUserApi.getCalUser(), "testCreateSingleAlarmTrigger", startDate, endDate, AlarmFactory.createDisplayAlarm("-PT15M"));
+        EventData toCreate = EventFactory.createSingleEventWithSingleAlarm(defaultUserApi.getCalUser(), "testCreateSingleAlarmTrigger", startDate, endDate, AlarmFactory.createDisplayAlarm("-PT15M"), folderId);
         EventData event = eventManager.createEvent(toCreate);
-        getAndAssertAlarms(event, 1);
+        getAndAssertAlarms(event, 1, folderId);
 
         // Test alarm/until action with different time-slots
         // 1. Get alarms within the next hour
@@ -124,9 +124,9 @@ public class BasicAlarmTriggerTest extends AbstractUserTimezoneAlarmTriggerTest 
         DateTimeData endDate = DateTimeUtil.incrementDateTimeData(startDate, TimeUnit.HOURS.toMillis(1));
 
         // Create an event with alarm
-        EventData toCreate = EventFactory.createSingleEventWithSingleAlarm(defaultUserApi.getCalUser(), "testSingleEventAlarmTriggerTime", startDate, endDate, AlarmFactory.createDisplayAlarm("-PT15M"));
+        EventData toCreate = EventFactory.createSingleEventWithSingleAlarm(defaultUserApi.getCalUser(), "testSingleEventAlarmTriggerTime", startDate, endDate, AlarmFactory.createDisplayAlarm("-PT15M"), folderId);
         EventData event = eventManager.createEvent(toCreate);
-        getAndAssertAlarms(event, 1);
+        getAndAssertAlarms(event, 1, folderId);
 
         Calendar today = Calendar.getInstance(UTC);
         today.setTime(new Date());
@@ -147,9 +147,9 @@ public class BasicAlarmTriggerTest extends AbstractUserTimezoneAlarmTriggerTest 
         DateTimeData endDate = DateTimeUtil.incrementDateTimeData(startDate, TimeUnit.HOURS.toMillis(1));
 
         // Create an event with alarm
-        EventData toCreate = EventFactory.createSingleEventWithSingleAlarm(defaultUserApi.getCalUser(), "testSingleEventAlarmTriggerTimeAfterUpdate", startDate, endDate, AlarmFactory.createDisplayAlarm("-PT15M"));
+        EventData toCreate = EventFactory.createSingleEventWithSingleAlarm(defaultUserApi.getCalUser(), "testSingleEventAlarmTriggerTimeAfterUpdate", startDate, endDate, AlarmFactory.createDisplayAlarm("-PT15M"), folderId);
         EventData event = eventManager.createEvent(toCreate);
-        getAndAssertAlarms(event, 1);
+        getAndAssertAlarms(event, 1, folderId);
 
         Calendar today = Calendar.getInstance(UTC);
         today.setTime(new Date());
@@ -182,11 +182,11 @@ public class BasicAlarmTriggerTest extends AbstractUserTimezoneAlarmTriggerTest 
         DateTimeData endDate = DateTimeUtil.incrementDateTimeData(startDate, TimeUnit.HOURS.toMillis(1));
 
         // Create an event with alarm
-        EventData toCreate = EventFactory.createSeriesEvent(defaultUserApi.getCalUser(), "testSeriesAlarmTriggerTime", startDate, endDate, 4);
+        EventData toCreate = EventFactory.createSeriesEvent(defaultUserApi.getCalUser(), "testSeriesAlarmTriggerTime", startDate, endDate, 4, folderId);
         toCreate.setAlarms(Collections.singletonList(AlarmFactory.createDisplayAlarm("-PT15M")));
 
         EventData event = eventManager.createEvent(toCreate);
-        getAndAssertAlarms(event, 1);
+        getAndAssertAlarms(event, 1, folderId);
 
         // Check if next trigger is at correct time
         long currentTime = System.currentTimeMillis();
@@ -218,11 +218,11 @@ public class BasicAlarmTriggerTest extends AbstractUserTimezoneAlarmTriggerTest 
         DateTimeData endDate = DateTimeUtil.incrementDateTimeData(startDate, TimeUnit.HOURS.toMillis(1));
 
         // Create an event with alarm
-        EventData toCreate = EventFactory.createSeriesEvent(defaultUserApi.getCalUser(), "testSeriesAlarmTriggerTimeRoundtrip", startDate, endDate, 4);
+        EventData toCreate = EventFactory.createSeriesEvent(defaultUserApi.getCalUser(), "testSeriesAlarmTriggerTimeRoundtrip", startDate, endDate, 4, folderId);
         toCreate.setAlarms(Collections.singletonList(AlarmFactory.createDisplayAlarm("-PT15M")));
 
         EventData event = eventManager.createEvent(toCreate);
-        getAndAssertAlarms(event, 1);
+        getAndAssertAlarms(event, 1, folderId);
 
         // Check if next trigger is at correct time
         long currentTime = System.currentTimeMillis();
@@ -311,14 +311,15 @@ public class BasicAlarmTriggerTest extends AbstractUserTimezoneAlarmTriggerTest 
         atts.add(attendee2);
 
         // Create an event with alarm
-        EventData toCreate = EventFactory.createSeriesEvent(defaultUserApi.getCalUser(), "testSeriesAlarmTriggerTimeRoundtrip", startDate, endDate, 4);
+        EventData toCreate = EventFactory.createSeriesEvent(defaultUserApi.getCalUser(), "testSeriesAlarmTriggerTimeRoundtrip", startDate, endDate, 4, folderId);
         toCreate.setAlarms(Collections.singletonList(AlarmFactory.createDisplayAlarm("-PT15M")));
         toCreate.setAttendees(atts);
 
+        Date time = Calendar.getInstance(TimeZone.getTimeZone("UTC")).getTime();
         EventData event = eventManager.createEvent(toCreate);
-        getAndAssertAlarms(event, 1);
+        getAndAssertAlarms(event, 1, folderId);
 
-        UpdatesResult updatesResult = eventManager2.getUpdates(new Date(0));
+        UpdatesResult updatesResult = eventManager2.getUpdates(time);
         assertEquals(1, updatesResult.getNewAndModified().size());
         EventData eventU2 = updatesResult.getNewAndModified().get(0);
 
@@ -349,6 +350,7 @@ public class BasicAlarmTriggerTest extends AbstractUserTimezoneAlarmTriggerTest 
          */
         AttendeeAndAlarm body = new AttendeeAndAlarm();
         attendee2.setPartStat("ACCEPTED");
+        attendee2.setMember(null);
         body.attendee(attendee2);
 
         body.addAlarmsItem(AlarmFactory.createAlarm("-PT20M", RelatedEnum.START));
@@ -398,7 +400,7 @@ public class BasicAlarmTriggerTest extends AbstractUserTimezoneAlarmTriggerTest 
         } else {
             removed = attendees.remove(0);
         }
-        eventManager.updateEvent(exceptionEvent);
+        EventData updateEvent = eventManager.updateEvent(exceptionEvent);
 
         // Check again if trigger times are correct
         triggers = getAndCheckAlarmTrigger(2); // The alarm of the series and the alarm for the exception
@@ -418,6 +420,7 @@ public class BasicAlarmTriggerTest extends AbstractUserTimezoneAlarmTriggerTest 
          * 5. Re-add user 2
          */
         attendees.add(removed);
+        exceptionEvent.setLastModified(updateEvent.getLastModified());
         eventManager.updateEvent(exceptionEvent);
         eventManager2.setLastTimeStamp(eventManager.getLastTimeStamp());
 
@@ -501,9 +504,9 @@ public class BasicAlarmTriggerTest extends AbstractUserTimezoneAlarmTriggerTest 
             DateTimeData startDate = DateTimeUtil.getDateTime(null, cal.getTimeInMillis());
             DateTimeData endDate = DateTimeUtil.incrementDateTimeData(startDate, TimeUnit.HOURS.toMillis(1));
 
-            EventData toCreate = EventFactory.createSingleEventWithSingleAlarm(defaultUserApi.getCalUser(), "testFloatingEventAlarmTriggerTime", startDate, endDate, AlarmFactory.createAlarm("-PT3D", RelatedEnum.START));
+            EventData toCreate = EventFactory.createSingleEventWithSingleAlarm(defaultUserApi.getCalUser(), "testFloatingEventAlarmTriggerTime", startDate, endDate, AlarmFactory.createAlarm("-PT3D", RelatedEnum.START), folderId);
             EventData event = eventManager.createEvent(toCreate);
-            getAndAssertAlarms(event, 1);
+            getAndAssertAlarms(event, 1, folderId);
 
             // Check if next trigger is at correct time
             Calendar from = Calendar.getInstance(UTC);
@@ -511,9 +514,14 @@ public class BasicAlarmTriggerTest extends AbstractUserTimezoneAlarmTriggerTest 
             from.add(Calendar.DAY_OF_MONTH, -5);
 
             AlarmTriggerData triggers = getAndCheckAlarmTrigger(from.getTimeInMillis() + TimeUnit.DAYS.toMillis(10), null, 1);
-            long triggerTime = cal.getTimeInMillis() - TimeUnit.DAYS.toMillis(3) - offset;
+            Calendar instance = Calendar.getInstance(TimeZone.getTimeZone("Europe/Berlin"));
+            instance.setTime(cal.getTime());
+            instance.add(Calendar.DAY_OF_MONTH, -3);
+
+            long triggerTime = instance.getTimeInMillis();
             checkAlarmTime(triggers.get(0), event.getId(), triggerTime);
 
+            // change timezone
             changeTimezone(TimeZone.getTimeZone("America/New_York"));
 
             AlarmTriggerData triggers2 = getAndCheckAlarmTrigger(from.getTimeInMillis() + TimeUnit.DAYS.toMillis(10), null, 1);
@@ -539,9 +547,9 @@ public class BasicAlarmTriggerTest extends AbstractUserTimezoneAlarmTriggerTest 
         DateTimeData startDate = DateTimeUtil.getDateTime(cal);
         DateTimeData endDate = DateTimeUtil.incrementDateTimeData(startDate, TimeUnit.HOURS.toMillis(1));
 
-        EventData toCreate = EventFactory.createSingleEventWithSingleAlarm(defaultUserApi.getCalUser(), "testPositiveDurationTrigger", startDate, endDate, AlarmFactory.createAlarm("PT10M", RelatedEnum.START));
+        EventData toCreate = EventFactory.createSingleEventWithSingleAlarm(defaultUserApi.getCalUser(), "testPositiveDurationTrigger", startDate, endDate, AlarmFactory.createAlarm("PT10M", RelatedEnum.START), folderId);
         EventData event = eventManager.createEvent(toCreate);
-        getAndAssertAlarms(event, 1);
+        getAndAssertAlarms(event, 1, folderId);
 
         // Get alarms within the next two days
         AlarmTriggerData triggers = getAndCheckAlarmTrigger(1); // one trigger
@@ -559,9 +567,9 @@ public class BasicAlarmTriggerTest extends AbstractUserTimezoneAlarmTriggerTest 
         DateTimeData endDate = DateTimeUtil.incrementDateTimeData(startDate, TimeUnit.HOURS.toMillis(1));
 
         // Create an event with alarm
-        EventData toCreate = EventFactory.createSingleEventWithSingleAlarm(defaultUserApi.getCalUser(), "testPositiveDurationTrigger", startDate, endDate, AlarmFactory.createAlarm("-PT10M", RelatedEnum.END));
+        EventData toCreate = EventFactory.createSingleEventWithSingleAlarm(defaultUserApi.getCalUser(), "testPositiveDurationTrigger", startDate, endDate, AlarmFactory.createAlarm("-PT10M", RelatedEnum.END), folderId);
         EventData event = eventManager.createEvent(toCreate);
-        getAndAssertAlarms(event, 1);
+        getAndAssertAlarms(event, 1, folderId);
 
         // Get alarms within the next two days
         AlarmTriggerData triggers = getAndCheckAlarmTrigger(1); // one trigger

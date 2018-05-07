@@ -513,7 +513,7 @@ public final class ServerConfig implements Reloadable {
         /**
          * Enable/Disable SearchIterator's ResultSet prefetch.
          */
-        PrefetchEnabled("PrefetchEnabled", Boolean.FALSE.toString()),
+        PrefetchEnabled("PrefetchEnabled", Boolean.TRUE.toString()),
         /**
          * Default encoding.
          */

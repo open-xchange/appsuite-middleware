@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the Open-Xchange, Inc. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2020 Open-Xchange, Inc.
+ *     Copyright (C) 2016-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -196,6 +196,7 @@ public class UpdateAttendeePerformer extends AbstractUpdatePerformer {
         /*
          * prepare update
          */
+        resultTracker.rememberOriginalEvent(originalEvent);
         Attendee attendeeUpdate = prepareAttendeeUpdate(originalEvent, originalAttendee, attendee);
         if (attendeeUpdate.containsFolderID()) {
             /*
@@ -216,6 +217,7 @@ public class UpdateAttendeePerformer extends AbstractUpdatePerformer {
              * also 'touch' the series master in case of an exception update
              */
             Event originalMasterEvent = loadEventData(originalEvent.getSeriesId());
+            resultTracker.rememberOriginalEvent(originalMasterEvent);
             touch(originalEvent.getSeriesId());
             Event updatedMasterEvent = loadEventData(originalEvent.getSeriesId());
             resultTracker.trackUpdate(originalMasterEvent, updatedMasterEvent);
@@ -234,6 +236,8 @@ public class UpdateAttendeePerformer extends AbstractUpdatePerformer {
                 Attendee originalExceptionAttendee = Check.attendeeExists(originalExceptionEvent, attendee);
                 updateAttendee(originalExceptionEvent, originalExceptionAttendee, attendee);
             } else {
+
+                Map<Integer, List<Alarm>> alarms = storage.getAlarmStorage().loadAlarms(originalSeriesMaster);
                 /*
                  * update for new change exception; prepare & insert a plain exception first, based on the original data from the master
                  */
@@ -250,6 +254,7 @@ public class UpdateAttendeePerformer extends AbstractUpdatePerformer {
                 /*
                  * perform the attendee update & add new change exception date to series master event
                  */
+                resultTracker.rememberOriginalEvent(newExceptionEvent);
                 Attendee attendeeUpdate = prepareAttendeeUpdate(newExceptionEvent, originalAttendee, attendee);
                 if (null != attendeeUpdate) {
                     storage.getAttendeeStorage().updateAttendee(newExceptionEvent.getId(), attendeeUpdate);
@@ -258,11 +263,11 @@ public class UpdateAttendeePerformer extends AbstractUpdatePerformer {
                 /*
                  * add change exception date to series master & track results
                  */
+                resultTracker.rememberOriginalEvent(originalSeriesMaster);
                 addChangeExceptionDate(originalSeriesMaster, recurrenceId);
                 Event updatedMasterEvent = loadEventData(originalSeriesMaster.getId());
                 resultTracker.trackUpdate(originalSeriesMaster, updatedMasterEvent);
 
-                Map<Integer, List<Alarm>> alarms = storage.getAlarmStorage().loadAlarms(updatedMasterEvent);
                 storage.getAlarmTriggerStorage().deleteTriggers(originalSeriesMaster.getId());
                 storage.getAlarmTriggerStorage().insertTriggers(updatedMasterEvent, alarms);
             }

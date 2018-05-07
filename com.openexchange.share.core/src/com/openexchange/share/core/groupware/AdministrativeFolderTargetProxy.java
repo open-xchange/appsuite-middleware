@@ -268,7 +268,7 @@ public class AdministrativeFolderTargetProxy extends AbstractTargetProxy {
 
         @Override
         public TargetPermission convert(OCLPermission permission) {
-            return new SubfolderAwareTargetPermission(permission.getEntity(), permission.isGroupPermission(), getBits(permission), permission.getType().getTypeNumber(), permission.getPermissionLegator());
+            return new SubfolderAwareTargetPermission(permission.getEntity(), permission.isGroupPermission(), getBits(permission), permission.getType().getTypeNumber(), permission.getPermissionLegator(), permission.getSystem());
         }
 
     }

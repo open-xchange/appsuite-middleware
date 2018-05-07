@@ -76,30 +76,16 @@ public final class EmptyTIntSet implements TIntSet, Serializable {
         return INSTANCE;
     }
 
-    private final TIntIterator emptyIter;
+    // -------------------------------------------------------------------------------
+
+    private final transient EmptyTIntIterator emptyIter;
 
     /**
      * Initializes a new {@link EmptyTIntSet}.
      */
     private EmptyTIntSet() {
         super();
-        emptyIter = new TIntIterator() {
-
-            @Override
-            public void remove() {
-                //
-            }
-
-            @Override
-            public boolean hasNext() {
-                return false;
-            }
-
-            @Override
-            public int next() {
-                throw new NoSuchElementException();
-            }
-        };
+        emptyIter = new EmptyTIntIterator();
     }
 
     @Override
@@ -215,6 +201,30 @@ public final class EmptyTIntSet implements TIntSet, Serializable {
     @Override
     public boolean forEach(final TIntProcedure procedure) {
         return true;
+    }
+
+    private static class EmptyTIntIterator implements TIntIterator, Serializable {
+
+        private static final long serialVersionUID = 1L;
+
+        EmptyTIntIterator() {
+            super();
+        }
+
+        @Override
+        public void remove() {
+            // Nothing to do
+        }
+
+        @Override
+        public boolean hasNext() {
+            return false;
+        }
+
+        @Override
+        public int next() {
+            throw new NoSuchElementException();
+        }
     }
 
 }

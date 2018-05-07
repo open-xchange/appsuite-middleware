@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the Open-Xchange, Inc. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2020 Open-Xchange, Inc.
+ *     Copyright (C) 2016-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -107,6 +107,7 @@ import com.openexchange.chronos.provider.basic.BasicCalendarAccess;
 import com.openexchange.chronos.provider.basic.CalendarSettings;
 import com.openexchange.chronos.provider.composition.IDBasedCalendarAccess;
 import com.openexchange.chronos.provider.composition.impl.idmangling.IDManglingCalendarResult;
+import com.openexchange.chronos.provider.composition.impl.idmangling.IDManglingEventsResult;
 import com.openexchange.chronos.provider.composition.impl.idmangling.IDManglingImportResult;
 import com.openexchange.chronos.provider.composition.impl.idmangling.IDManglingUpdatesResult;
 import com.openexchange.chronos.provider.extensions.BasicSearchAware;
@@ -386,6 +387,33 @@ public class CompositingIDBasedCalendarAccess extends AbstractCompositingIDBased
         } catch (OXException e) {
             throw withUniqueIDs(e, account.getAccountId());
         }
+    }
+
+    @Override
+    public Map<String, EventsResult> resolveResources(String folderId, List<String> resourceNames) throws OXException {
+        CalendarAccount account = getAccount(getAccountId(folderId), true);
+        Map<String, EventsResult> eventsResults;
+        try {
+            CalendarAccess access = getAccess(account.getAccountId(), SyncAware.class);
+            if (FolderSyncAware.class.isInstance(access)) {
+                eventsResults = ((FolderSyncAware) access).resolveResources(getRelativeFolderId(folderId), resourceNames);
+            } else if (BasicSyncAware.class.isInstance(access)) {
+                Check.folderMatches(getRelativeFolderId(folderId), BasicCalendarAccess.FOLDER_ID);
+                eventsResults = ((BasicSyncAware) access).resolveResources(resourceNames);
+            } else {
+                throw CalendarExceptionCodes.UNSUPPORTED_OPERATION_FOR_PROVIDER.create(account.getProviderId());
+            }
+        } catch (OXException e) {
+            throw withUniqueIDs(e, account.getAccountId());
+        }
+        if (null == eventsResults || eventsResults.isEmpty()) {
+            return Collections.emptyMap();
+        }
+        Map<String, EventsResult> results = new HashMap<String, EventsResult>(eventsResults.size());
+        for (Map.Entry<String, EventsResult> entry : eventsResults.entrySet()) {
+            results.put(entry.getKey(), new IDManglingEventsResult(entry.getValue(), account.getAccountId()));
+        }
+        return results;
     }
 
     @Override
@@ -960,7 +988,7 @@ public class CompositingIDBasedCalendarAccess extends AbstractCompositingIDBased
     private SelfProtection getSelfProtection() throws OXException {
         if (protection == null) {
             LeanConfigurationService leanConfigurationService = services.getService(LeanConfigurationService.class);
-            protection = SelfProtectionFactory.createSelfProtection(getSession(), leanConfigurationService);
+            protection = SelfProtectionFactory.createSelfProtection(leanConfigurationService);
         }
         return protection;
     }

@@ -114,6 +114,7 @@ public class AuxiliaryAPITest extends AbstractMailFilterTest {
         // Assert that the rules were deleted
         List<Rule> rules = mailFilterAPI.listRules();
         assertTrue("The list of rules is not empty", rules.isEmpty());
+        forgetRules();
     }
 
     /**

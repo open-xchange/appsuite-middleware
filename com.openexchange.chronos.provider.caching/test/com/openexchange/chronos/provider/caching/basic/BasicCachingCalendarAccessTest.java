@@ -52,6 +52,7 @@ package com.openexchange.chronos.provider.caching.basic;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import java.sql.Connection;
 import java.sql.Date;
 import java.util.concurrent.TimeUnit;
@@ -68,6 +69,7 @@ import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import com.openexchange.chronos.provider.CalendarAccount;
 import com.openexchange.chronos.provider.DefaultCalendarAccount;
+import com.openexchange.chronos.provider.caching.basic.exception.BasicCachingCalendarExceptionCodes;
 import com.openexchange.chronos.provider.caching.impl.TestCachingCalendarAccessImpl;
 import com.openexchange.chronos.provider.caching.internal.CachingCalendarAccessConstants;
 import com.openexchange.chronos.provider.caching.internal.Services;
@@ -232,7 +234,7 @@ public class BasicCachingCalendarAccessTest {
     }
 
     @Test
-    public void testUpdateCacheIfNeeded_cacheUpdateRequestedButInBlockingTime_noUpdate() throws OXException {
+    public void testUpdateCacheIfNeeded_cacheUpdateRequestedButInBlockingTime_throwException() throws OXException {
         JSONObject lastUpdate = new JSONObject();
         lastUpdate.putSafe(CachingCalendarAccessConstants.LAST_UPDATE, System.currentTimeMillis() + TimeUnit.SECONDS.toMillis(60L));
         JSONObject internalConfig = new JSONObject();
@@ -240,10 +242,15 @@ public class BasicCachingCalendarAccessTest {
         account = new DefaultCalendarAccount("providerId", 1, 1, internalConfig, internalConfig, new Date(System.currentTimeMillis()));
         Mockito.when(parameters.contains(CalendarParameters.PARAMETER_UPDATE_CACHE)).thenReturn(Boolean.TRUE);
         Mockito.when(parameters.get(CalendarParameters.PARAMETER_UPDATE_CACHE, Boolean.class, Boolean.FALSE)).thenReturn(Boolean.TRUE);
- 
+
         cachingCalendarAccess = new TestCachingCalendarAccessImpl(session, account, parameters);
 
-        cachingCalendarAccess.updateCacheIfNeeded();
+        try {
+            cachingCalendarAccess.updateCacheIfNeeded();
+            fail();
+        } catch (OXException e) {
+            assertTrue(BasicCachingCalendarExceptionCodes.ALREADY_UP_TO_DATE.equals(e));
+        }
 
         assertFalse(cachingCalendarAccess.getCacheUpdated());
     }
@@ -261,7 +268,7 @@ public class BasicCachingCalendarAccessTest {
 
         assertFalse(cachingCalendarAccess.getCacheUpdated());
     }
-    
+
     @Test
     public void testUpdateCacheIfNeeded_refreshIntervalNotExceededButCacheRefreshForced_update() throws OXException {
         JSONObject lastUpdate = new JSONObject();

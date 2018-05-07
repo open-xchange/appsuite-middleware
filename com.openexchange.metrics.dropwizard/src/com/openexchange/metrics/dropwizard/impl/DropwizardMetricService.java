@@ -123,6 +123,7 @@ public class DropwizardMetricService extends AbstractMetricService {
      * @see com.openexchange.metrics.MetricService#getGauge(java.lang.String, java.lang.String, java.util.function.Supplier)
      */
     @Override
+    @SuppressWarnings("unchecked")
     public <T> Gauge<T> getGauge(MetricDescriptor descriptor) {
         return (Gauge<T>) registerOrGet(descriptor);
     }

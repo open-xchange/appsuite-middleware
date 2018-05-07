@@ -659,6 +659,12 @@ public final class InternalList {
         // Add origin column to "del_infostore" table to be able to restore deleted files to origin
         list.add(new com.openexchange.groupware.update.tasks.AddOriginColumnToInfostoreDocumentTables());
 
+        // Drops aliases from non-existent users from database
+        list.add(new com.openexchange.groupware.update.tasks.DropAliasesFromNonExistentUsers());
+
+        // Removes any duplicate entries from the updateTask table
+        list.add(new com.openexchange.groupware.update.tasks.RemoveDuplicatesFromUpdateTaskTable());
+
         // Converts mail account tables to utf8mb4
         list.add(new com.openexchange.groupware.update.tasks.MailAccountConvertUtf8ToUtf8mb4Task());
 

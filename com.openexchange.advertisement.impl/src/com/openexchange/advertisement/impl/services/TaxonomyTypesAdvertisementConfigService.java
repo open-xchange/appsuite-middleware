@@ -53,10 +53,17 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.openexchange.advertisement.AdvertisementConfigService;
 import com.openexchange.advertisement.impl.osgi.Services;
-import com.openexchange.config.cascade.ConfigView;
-import com.openexchange.config.cascade.ConfigViewFactory;
+import com.openexchange.caching.Cache;
+import com.openexchange.caching.CacheService;
+import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.Interests;
+import com.openexchange.config.Reloadable;
+import com.openexchange.config.Reloadables;
 import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
@@ -75,28 +82,57 @@ import com.openexchange.user.UserService;
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.8.3
  */
-public class TaxonomyTypesAdvertisementConfigService extends AbstractAdvertisementConfigService {
+public class TaxonomyTypesAdvertisementConfigService extends AbstractAdvertisementConfigService implements Reloadable {
+
+    private static final Logger LOG = LoggerFactory.getLogger(TaxonomyTypesAdvertisementConfigService.class);
 
     private static final String TAXONOMY_TYPES = "taxonomy/types";
     private static final String TAXONOMY_TYPES_CONFIG_CASCADE = "config/com.openexchange.config.cascade.types";
     private static final String TAXONOMY_TYPE_CONFIGURATION = ".taxonomy.types";
 
+    private static volatile TaxonomyTypesAdvertisementConfigService instance;
+
     /**
      * Gets the instance of {@code TaxonomyTypesAdvertisementConfigService}.
      *
      * @return The instance
+     * @throws OXException
      */
-    public static TaxonomyTypesAdvertisementConfigService getInstance() {
-        return new TaxonomyTypesAdvertisementConfigService();
+    public static TaxonomyTypesAdvertisementConfigService getInstance() throws OXException {
+        TaxonomyTypesAdvertisementConfigService tmp = instance;
+        if (null == tmp) {
+            synchronized (TaxonomyTypesAdvertisementConfigService.class) {
+                tmp = instance;
+                if (null == tmp) {
+                    tmp = new TaxonomyTypesAdvertisementConfigService();
+                    instance = tmp;
+                }
+            }
+        }
+        return tmp;
     }
+
+    private final Map<String, String[]> reseller2Types = new ConcurrentHashMap<>(1);
+
 
     // ------------------------------------------------------------------------------------------------------
 
     /**
      * Initializes a new {@link TaxonomyTypesAdvertisementConfigService}.
+     *
+     * @throws OXException
      */
-    private TaxonomyTypesAdvertisementConfigService() {
+    private TaxonomyTypesAdvertisementConfigService() throws OXException {
         super();
+        ConfigurationService configurationService = Services.getService(ConfigurationService.class);
+        ResellerService resellerService = Services.getService(ResellerService.class);
+        for (ResellerAdmin res : resellerService.getAll()) {
+            String typesString = configurationService.getProperty(AdvertisementConfigService.CONFIG_PREFIX + res.getName() + TAXONOMY_TYPE_CONFIGURATION);
+            if (typesString != null) {
+                String[] possibleTypes = Strings.splitByComma(typesString);
+                reseller2Types.put(res.getName(), possibleTypes);
+            }
+        }
     }
 
     @Override
@@ -109,19 +145,18 @@ public class TaxonomyTypesAdvertisementConfigService extends AbstractAdvertiseme
     @Override
     protected String getPackage(Session session) throws OXException {
         // Retrieve possible taxonomy types
-        ConfigViewFactory configurationService = Services.getService(ConfigViewFactory.class);
-        ConfigView view = configurationService.getView();
         String reseller = null;
         try {
             reseller = this.getReseller(session.getContextId());
         } catch (OXException e) {
             reseller = RESELLER_ALL;
         }
-        String typesString = view.get(AdvertisementConfigService.CONFIG_PREFIX + reseller + TAXONOMY_TYPE_CONFIGURATION, String.class);
-        if (Strings.isEmpty(typesString)) {
+
+        String[] possibleTypes = reseller2Types.get(reseller);
+
+        if (possibleTypes == null || possibleTypes.length == 0) {
             return PACKAGE_ALL;
         }
-        String[] possibleTypes = Strings.splitByComma(typesString);
 
         // check user taxonomy types
         UserService userService = Services.getService(UserService.class);
@@ -167,6 +202,48 @@ public class TaxonomyTypesAdvertisementConfigService extends AbstractAdvertiseme
     @Override
     public String getSchemeId() {
         return "TaxonomyTypes";
+    }
+
+    @Override
+    public void reloadConfiguration(ConfigurationService configService) {
+        reseller2Types.clear();
+        ResellerService resellerService = Services.getService(ResellerService.class);
+        try {
+            for (ResellerAdmin res : resellerService.getAll()) {
+                String typesString = configService.getProperty(AdvertisementConfigService.CONFIG_PREFIX + res.getName() + TAXONOMY_TYPE_CONFIGURATION);
+                if (typesString != null) {
+                    String[] possibleTypes = Strings.splitByComma(typesString);
+                    reseller2Types.put(res.getName(), possibleTypes);
+                }
+            }
+            // add default reseller
+            String typesString = configService.getProperty(AdvertisementConfigService.CONFIG_PREFIX + AdvertisementConfigService.RESELLER_ALL + TAXONOMY_TYPE_CONFIGURATION);
+            if (typesString != null) {
+                String[] possibleTypes = Strings.splitByComma(typesString);
+                reseller2Types.put(AdvertisementConfigService.RESELLER_ALL, possibleTypes);
+            }
+        } catch (OXException e) {
+            LOG.error("Unable to reload reseller types: " + e.getMessage(), e);
+            return;
+        }
+        CacheService cacheService = Services.getService(CacheService.class);
+        if (cacheService != null) {
+            Cache cache;
+            try {
+                cache = cacheService.getCache(AbstractAdvertisementConfigService.CACHING_REGION);
+                cache.clear();
+            } catch (OXException e) {
+                LOG.error("Unable to clear advertisement cache: " + e.getMessage(), e);
+                return;
+            }
+
+        }
+
+    }
+
+    @Override
+    public Interests getInterests() {
+        return Reloadables.getInterestsForAll();
     }
 
 }

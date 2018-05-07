@@ -64,10 +64,10 @@ public class JavaSMTPTransport extends SMTPTransport {
     /**
      * Initializes a new {@link JavaSMTPTransport}.
      *
-     * @param session
-     * @param urlname
-     * @param name
-     * @param isSSL
+     * @param   session the Session
+     * @param   urlname the URLName of this transport
+     * @param   name    the protocol name of this transport
+     * @param   isSSL   use SSL to connect?
      */
     public JavaSMTPTransport(Session session, URLName urlname, String name, boolean isSSL) {
         super(session, urlname, name, isSSL);
@@ -76,8 +76,8 @@ public class JavaSMTPTransport extends SMTPTransport {
     /**
      * Initializes a new {@link JavaSMTPTransport}.
      *
-     * @param session
-     * @param urlname
+     * @param   session the Session
+     * @param   urlname the URLName of this transport
      */
     public JavaSMTPTransport(Session session, URLName urlname) {
         super(session, urlname);
@@ -87,14 +87,16 @@ public class JavaSMTPTransport extends SMTPTransport {
     protected OutputStream data() throws MessagingException {
         OutputStream data = super.data();
 
-        long maxMailSize = -1L;
         String sMaxMailSize = session.getProperty("com.openexchange.mail.maxMailSize");
         if (sMaxMailSize != null) {
-            maxMailSize = Long.parseLong(sMaxMailSize);
-        }
-
-        if (maxMailSize > 0) {
-            return new CountingOutputStream(data, maxMailSize);
+            try {
+                long maxMailSize = Long.parseLong(sMaxMailSize);
+                if (maxMailSize > 0) {
+                    data = new CountingOutputStream(data, maxMailSize);
+                }
+            } catch (NumberFormatException e) {
+                // Not a parseable number...
+            }
         }
 
         return data;

@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the Open-Xchange, Inc. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2020 Open-Xchange, Inc.
+ *     Copyright (C) 2016-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -879,6 +879,34 @@ public class EventMapper extends DefaultMapper<Event, EventField> {
                 object.removeRecurrenceId();
             }
         });
+        mappings.put(EventField.RECURRENCE_DATES, new DefaultMapping<SortedSet<RecurrenceId>, Event>() {
+
+            @Override
+            public void copy(Event from, Event to) throws OXException {
+                SortedSet<RecurrenceId> value = get(from);
+                set(to, null == value ? null : new TreeSet<RecurrenceId>(value));
+            }
+
+            @Override
+            public boolean isSet(Event object) {
+                return object.containsRecurrenceDates();
+            }
+
+            @Override
+            public void set(Event object, SortedSet<RecurrenceId> value) throws OXException {
+                object.setRecurrenceDates(value);
+            }
+
+            @Override
+            public SortedSet<RecurrenceId> get(Event object) {
+                return object.getRecurrenceDates();
+            }
+
+            @Override
+            public void remove(Event object) {
+                object.removeRecurrenceDates();
+            }
+        });
         mappings.put(EventField.CHANGE_EXCEPTION_DATES, new DefaultMapping<SortedSet<RecurrenceId>, Event>() {
 
             @Override
@@ -1066,12 +1094,7 @@ public class EventMapper extends DefaultMapper<Event, EventField> {
 
             @Override
             public boolean equals(Event event1, Event event2) {
-                try {
-                    return AlarmUtils.getAlarmUpdates(event1.getAlarms(), event2.getAlarms()).isEmpty();
-                } catch (OXException e) {
-                    LoggerFactory.getLogger(EventMapper.class).warn("Unable to compare alarms from event with id {} and id {}.", event1.getId(), event2.getId(), e);
-                }
-                return false;
+                return AlarmUtils.getAlarmUpdates(event1.getAlarms(), event2.getAlarms()).isEmpty();
             }
 
             @Override

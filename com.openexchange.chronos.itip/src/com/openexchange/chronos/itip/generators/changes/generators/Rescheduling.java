@@ -211,24 +211,39 @@ public class Rescheduling implements ChangeDescriptionGenerator {
 
     private List<Sentence> handleChangedTimeZones(Event original, Event updated) {
         List<Sentence> sentences = new LinkedList<>();
-        String originalStartId = original.getStartDate().getTimeZone().getID();
-        String originalEndId = original.getEndDate().getTimeZone().getID();
-        String updatedStartId = updated.getStartDate().getTimeZone().getID();
-        String updatedEndId = updated.getEndDate().getTimeZone().getID();
 
-        // Both dates were the same and changed to the same?
-        if (originalStartId.equals(originalEndId) && updatedStartId.equals(updatedEndId)) {
-            sentences.add(new Sentence(Messages.HAS_RESCHEDULED_TIMEZONE).add(originalStartId, ArgumentType.ORIGINAL).add(updatedStartId, ArgumentType.UPDATED));
-        } else {
-            // Separate start and end date sentences
-            if (false == originalStartId.equals(updatedStartId)) {
-                sentences.add(new Sentence(Messages.HAS_RESCHEDULED_TIMEZONE_START_DATE).add(originalStartId, ArgumentType.ORIGINAL).add(updatedStartId, ArgumentType.UPDATED));
-            }
-            if (false == originalEndId.equals(updatedEndId)) {
-                sentences.add(new Sentence(Messages.HAS_RESCHEDULED_TIMEZONE_END_DATE).add(originalEndId, ArgumentType.ORIGINAL).add(updatedEndId, ArgumentType.UPDATED));
+        if (null != original) {
+            String defaultValue = "UTC";
+            String originalStartId = notNull(original, original.getStartDate(), original.getStartDate().getTimeZone()) ? original.getStartDate().getTimeZone().getID() : defaultValue;
+            String originalEndId = notNull(original, original.getEndDate(), original.getEndDate().getTimeZone()) ? original.getEndDate().getTimeZone().getID() : defaultValue;
+            String updatedStartId = notNull(updated, updated.getStartDate(), updated.getStartDate().getTimeZone()) ? updated.getStartDate().getTimeZone().getID() : defaultValue;
+            String updatedEndId = notNull(updated, updated.getEndDate(), updated.getEndDate().getTimeZone()) ? updated.getEndDate().getTimeZone().getID() : defaultValue;
+
+            // Both dates were the same and changed to the same?
+            if (originalStartId.equals(originalEndId) && updatedStartId.equals(updatedEndId)) {
+                if (false == originalStartId.equals(updatedStartId)) {
+                    sentences.add(new Sentence(Messages.HAS_RESCHEDULED_TIMEZONE).add(originalStartId, ArgumentType.ORIGINAL).add(updatedStartId, ArgumentType.UPDATED));
+                }
+            } else {
+                // Separate start and end date sentences
+                if (false == originalStartId.equals(updatedStartId)) {
+                    sentences.add(new Sentence(Messages.HAS_RESCHEDULED_TIMEZONE_START_DATE).add(originalStartId, ArgumentType.ORIGINAL).add(updatedStartId, ArgumentType.UPDATED));
+                }
+                if (false == originalEndId.equals(updatedEndId)) {
+                    sentences.add(new Sentence(Messages.HAS_RESCHEDULED_TIMEZONE_END_DATE).add(originalEndId, ArgumentType.ORIGINAL).add(updatedEndId, ArgumentType.UPDATED));
+                }
             }
         }
         return sentences;
+    }
+
+    private boolean notNull(Object... o) {
+        for (Object obj : o) {
+            if (null == obj) {
+                return false;
+            }
+        }
+        return true;
     }
 
     private boolean timeChanged(Event original, Event update) {

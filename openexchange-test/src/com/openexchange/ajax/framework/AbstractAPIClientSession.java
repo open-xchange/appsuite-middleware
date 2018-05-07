@@ -144,17 +144,17 @@ public abstract class AbstractAPIClientSession extends AbstractClientSession {
      * </p>
      *
      * @param client to logout
-     * @param loggin Whether to log an error or not
+     * @param logging Whether to log an error or not
      * @return <code>null</code> to prepare client for garbage collection
      */
-    protected final ApiClient logoutClient(ApiClient client, boolean loggin) {
+    protected final ApiClient logoutClient(ApiClient client, boolean logging) {
         try {
             if (client != null) {
                 client.logout();
                 LOG.info("Logout succesfull for user " + client.getUser());
             }
         } catch (Exception e) {
-            if (loggin) {
+            if (logging) {
                 LOG.error("Unable to correctly tear down test setup.", e);
             }
         }

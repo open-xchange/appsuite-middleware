@@ -89,7 +89,6 @@ import com.openexchange.groupware.tools.mappings.json.JsonMapping;
 import com.openexchange.groupware.tools.mappings.json.ListMapping;
 import com.openexchange.groupware.tools.mappings.json.LongMapping;
 import com.openexchange.groupware.tools.mappings.json.StringMapping;
-import com.openexchange.groupware.tools.mappings.json.TimeMapping;
 import com.openexchange.java.Enums;
 import com.openexchange.java.Strings;
 import com.openexchange.session.Session;
@@ -289,7 +288,7 @@ public class EventMapper extends DefaultJsonMapper<Event, EventField> {
                 object.removeSequence();
             }
         });
-        mappings.put(EventField.CREATED, new TimeMapping<Event>(ChronosJsonFields.CREATED, null) {
+        mappings.put(EventField.CREATED, new LongMapping<Event>(ChronosJsonFields.CREATED, null) {
 
             @Override
             public boolean isSet(Event object) {
@@ -297,13 +296,13 @@ public class EventMapper extends DefaultJsonMapper<Event, EventField> {
             }
 
             @Override
-            public void set(Event object, Date value) throws OXException {
-                object.setCreated(value);
+            public void set(Event object, Long value) throws OXException {
+                object.setCreated(new Date(value));
             }
 
             @Override
-            public Date get(Event object) {
-                return object.getCreated();
+            public Long get(Event object) {
+                return object.getCreated() != null ? object.getCreated().getTime() : 0l;
             }
 
             @Override
@@ -360,7 +359,7 @@ public class EventMapper extends DefaultJsonMapper<Event, EventField> {
                 object.removeCreatedBy();
             }
         });
-        mappings.put(EventField.LAST_MODIFIED, new TimeMapping<Event>(ChronosJsonFields.LAST_MODIFIED, null) {
+        mappings.put(EventField.LAST_MODIFIED, new LongMapping<Event>(ChronosJsonFields.LAST_MODIFIED, null) {
 
             @Override
             public boolean isSet(Event object) {
@@ -368,13 +367,13 @@ public class EventMapper extends DefaultJsonMapper<Event, EventField> {
             }
 
             @Override
-            public void set(Event object, Date value) throws OXException {
-                object.setLastModified(value);
+            public void set(Event object, Long value) throws OXException {
+                object.setLastModified(new Date(value));
             }
 
             @Override
-            public Date get(Event object) {
-                return object.getLastModified();
+            public Long get(Event object) {
+                return object.getLastModified() != null ? object.getLastModified().getTime() : 0l;
             }
 
             @Override
@@ -706,6 +705,49 @@ public class EventMapper extends DefaultJsonMapper<Event, EventField> {
             @Override
             public void remove(Event object) {
                 object.removeRecurrenceId();
+            }
+        });
+        mappings.put(EventField.RECURRENCE_DATES, new ListMapping<String, Event>(ChronosJsonFields.RECURRENCE_DATES, null) {
+
+            @Override
+            public boolean isSet(Event object) {
+                return object.containsRecurrenceDates();
+            }
+
+            @Override
+            public void set(Event object, List<String> value) throws OXException {
+                if (null == value) {
+                    object.setRecurrenceDates(null);
+                } else {
+                    SortedSet<RecurrenceId> recurrenceIds = new TreeSet<RecurrenceId>();
+                    for (String dateTimeString : value) {
+                        recurrenceIds.add(new DefaultRecurrenceId(dateTimeString));
+                    }
+                    object.setRecurrenceDates(recurrenceIds);
+                }
+            }
+
+            @Override
+            public List<String> get(Event object) {
+                SortedSet<RecurrenceId> recurrenceIds = object.getRecurrenceDates();
+                if (null == recurrenceIds) {
+                    return null;
+                }
+                List<String> value = new ArrayList<String>(recurrenceIds.size());
+                for (RecurrenceId recurrenceId : recurrenceIds) {
+                    value.add(recurrenceId.getValue().toString());
+                }
+                return value;
+            }
+
+            @Override
+            public void remove(Event object) {
+                object.removeRecurrenceDates();
+            }
+
+            @Override
+            protected String deserialize(JSONArray array, int index, TimeZone timeZone) throws JSONException, OXException {
+                return array.getString(index);
             }
         });
         mappings.put(EventField.CHANGE_EXCEPTION_DATES, new ListMapping<String, Event>(ChronosJsonFields.CHANGE_EXCEPTION_DATES, null) {

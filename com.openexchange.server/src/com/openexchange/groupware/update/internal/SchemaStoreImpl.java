@@ -65,22 +65,20 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import com.google.common.cache.CacheBuilder;
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheKey;
 import com.openexchange.caching.CacheService;
+import com.openexchange.database.Databases;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.ExecutedTask;
 import com.openexchange.groupware.update.Schema;
 import com.openexchange.groupware.update.SchemaStore;
 import com.openexchange.groupware.update.SchemaUpdateState;
-import com.openexchange.java.util.ImmutablePair;
 import com.openexchange.java.util.UUIDs;
 import com.openexchange.tools.caching.SerializedCachingLoader;
 import com.openexchange.tools.caching.StorageLoader;
@@ -99,8 +97,15 @@ public class SchemaStoreImpl extends SchemaStore {
     private static final String TABLE_NAME = "updateTask";
     private static final String LOCKED = "LOCKED";
     private static final String BACKGROUND = "BACKGROUND";
+    private static final byte[] UUID_LOCKED =     UUIDs.toByteArray(UUIDs.fromUnformattedString("8d8b93e559794baca39daef8f87087a1"));
+    private static final byte[] UUID_BACKGROUND = UUIDs.toByteArray(UUIDs.fromUnformattedString("5b7a2847985a49aa874c17df79af48b3"));
 
-    private final Lock cacheLock = new ReentrantLock();
+    private static final int MYSQL_DEADLOCK = 1213;
+    private static final int MYSQL_DUPLICATE = 1062;
+
+    // -------------------------------------------------------------------------------------------------------------------------------------------------
+
+    private final Lock cacheLock;
     private volatile Cache cache;
 
     /**
@@ -108,16 +113,19 @@ public class SchemaStoreImpl extends SchemaStore {
      */
     public SchemaStoreImpl() {
         super();
+        cacheLock = new ReentrantLock();
     }
 
     @Override
     protected SchemaUpdateState getSchema(final int poolId, final String schemaName, final Connection con) throws OXException {
         final Cache cache = this.cache;
         return SerializedCachingLoader.fetch(cache, CACHE_REGION, null, cacheLock, new StorageLoader<SchemaUpdateState>() {
+
             @Override
             public Serializable getKey() {
                 return cache.newCacheKey(poolId, schemaName);
             }
+
             @Override
             public SchemaUpdateState load() throws OXException {
                 return loadSchema(poolId, schemaName, con);
@@ -199,7 +207,11 @@ public class SchemaStoreImpl extends SchemaStore {
             con.setAutoCommit(false); // BEGIN
             rollback = true;
             // Insert lock
-            insertLock(con, schema, background ? BACKGROUND : LOCKED, schema.getPoolId());
+            if (background) {
+                insertLock(con, schema, BACKGROUND, UUID_BACKGROUND);
+            } else {
+                insertLock(con, schema, LOCKED, UUID_LOCKED);
+            }
             // Everything went fine. Schema is marked as locked
             con.commit();
             rollback = false;
@@ -216,46 +228,7 @@ public class SchemaStoreImpl extends SchemaStore {
         }
     }
 
-    private static final int MYSQL_DEADLOCK = 1213;
-
-    private static final int MYSQL_DUPLICATE = 1062;
-
-    private static void insertLock(Connection con, Schema schema, String idiom, int poolId) throws SQLException, OXException {
-        if (hasUUID(con, poolId, schema.getSchema())) {
-            insertLockUUID(con, schema, idiom);
-        } else {
-            insertLockNoUUID(con, schema, idiom);
-        }
-    }
-
-    private static void insertLockNoUUID(Connection con, Schema schema, String idiom) throws OXException {
-        // Check for existing lock exclusively
-        final ExecutedTask[] tasks = readUpdateTasks(con);
-        for (final ExecutedTask task : tasks) {
-            if (idiom.equals(task.getTaskName())) {
-                throw SchemaExceptionCodes.ALREADY_LOCKED.create(schema.getSchema());
-            }
-        }
-        // Insert lock
-        PreparedStatement stmt = null;
-        try {
-            stmt = con.prepareStatement("INSERT INTO updateTask (cid,taskName,successful,lastModified) VALUES (0,?,true,?)");
-            stmt.setString(1, idiom);
-            stmt.setLong(2, System.currentTimeMillis());
-            if (stmt.executeUpdate() == 0) {
-                throw SchemaExceptionCodes.LOCK_FAILED.create(schema.getSchema());
-            }
-        } catch (final SQLException e) {
-            if (MYSQL_DEADLOCK == e.getErrorCode() || MYSQL_DUPLICATE == e.getErrorCode()) {
-                throw SchemaExceptionCodes.ALREADY_LOCKED.create(e, schema.getSchema());
-            }
-            throw SchemaExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
-        } finally {
-            closeSQLStuff(stmt);
-        }
-    }
-
-    private static void insertLockUUID(Connection con, Schema schema, String idiom) throws OXException {
+    private static void insertLock(Connection con, Schema schema, String idiom, byte[] idiomUUID) throws OXException {
         // Check for existing lock exclusively
         final ExecutedTask[] tasks = readUpdateTasks(con);
         for (final ExecutedTask task : tasks) {
@@ -269,12 +242,12 @@ public class SchemaStoreImpl extends SchemaStore {
             stmt = con.prepareStatement("INSERT INTO updateTask (cid,taskName,successful,lastModified,uuid) VALUES (0,?,true,?,?)");
             stmt.setString(1, idiom);
             stmt.setLong(2, System.currentTimeMillis());
-            stmt.setBytes(3, generateUUID());
+            stmt.setBytes(3, idiomUUID);
             if (stmt.executeUpdate() == 0) {
                 throw SchemaExceptionCodes.LOCK_FAILED.create(schema.getSchema());
             }
         } catch (final SQLException e) {
-            if (MYSQL_DEADLOCK == e.getErrorCode() || MYSQL_DUPLICATE == e.getErrorCode()) {
+            if (MYSQL_DEADLOCK == e.getErrorCode() || MYSQL_DUPLICATE == e.getErrorCode() || Databases.isPrimaryKeyConflictInMySQL(e)) {
                 throw SchemaExceptionCodes.ALREADY_LOCKED.create(e, schema.getSchema());
             }
             throw SchemaExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
@@ -440,20 +413,20 @@ public class SchemaStoreImpl extends SchemaStore {
     }
 
     private static ExecutedTask[] readUpdateTasks(final Connection con) throws OXException {
-        List<ExecutedTask> retval = null;
+        List<ExecutedTask> retval;
         {
             Statement stmt = null;
             ResultSet result = null;
             try {
                 stmt = con.createStatement();
-                result = stmt.executeQuery("SELECT taskName,successful,lastModified FROM updateTask WHERE cid=0 FOR UPDATE");
+                result = stmt.executeQuery("SELECT taskName,successful,lastModified,uuid FROM updateTask WHERE cid=0 FOR UPDATE");
                 if (false == result.next()) {
                     return new ExecutedTask[0];
                 }
 
                 retval = new ArrayList<ExecutedTask>(512);
                 do {
-                    ExecutedTask task = new ExecutedTaskImpl(result.getString(1), result.getBoolean(2), new Date(result.getLong(3)));
+                    ExecutedTask task = new ExecutedTaskImpl(result.getString(1), result.getBoolean(2), new Date(result.getLong(3)), UUIDs.toUUID(result.getBytes(4)));
                     retval.add(task);
                 } while (result.next());
             } catch (final SQLException e) {
@@ -513,46 +486,93 @@ public class SchemaStoreImpl extends SchemaStore {
     }
 
     private static void doAddExecutedTasks(Connection con, Collection<String> taskNames, boolean success, int poolId, String schema) throws OXException {
-        try {
-            boolean hasUUID = hasUUID(con, poolId, schema);
-            doAddExecutedTasks(con, taskNames, success, hasUUID);
-        } catch (final SQLException e) {
-            throw SchemaExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
-        }
+        doAddExecutedTasks(con, taskNames, success);
     }
 
-    private static void doAddExecutedTasks(Connection con, Collection<String> taskNames, boolean success, boolean withUUID) throws OXException {
-        String insertOnDuplicateUpdateSQL;
-        if (withUUID) {
-            insertOnDuplicateUpdateSQL = "INSERT INTO updateTask (cid,successful,lastModified,taskName,uuid) VALUES (0,?,?,?,?) ON DUPLICATE KEY UPDATE successful=?, lastModified=?";
-        } else {
-            insertOnDuplicateUpdateSQL = "INSERT INTO updateTask (cid,successful,lastModified,taskName) VALUES (0,?,?,?) ON DUPLICATE KEY UPDATE successful=?, lastModified=?";
-        }
-
-        PreparedStatement stmt = null;
+    private static void doAddExecutedTasks(Connection con, Collection<String> taskNames, boolean success) throws OXException {
+        PreparedStatement insertStatement = null;
+        PreparedStatement updateStatement = null;
         try {
-            stmt = con.prepareStatement(insertOnDuplicateUpdateSQL);
-
             long now = System.currentTimeMillis();
-            int pos;
             for (String taskName : taskNames) {
-                pos = 1;
-                stmt.setBoolean(pos++, success);
-                stmt.setLong(pos++, now);
-                stmt.setString(pos++, taskName);
-                if (withUUID) {
-                    stmt.setBytes(pos++, generateUUID());
+                if (taskExists(con, taskName)) {
+                    if (null == updateStatement) {
+                        updateStatement = con.prepareStatement("UPDATE updateTask SET successful=?,lastModified=? WHERE cid=0 AND taskName=?");
+                    }
+                    updateTask(updateStatement, taskName, success, now);
+                } else {
+                    if (null == insertStatement) {
+                        insertStatement = con.prepareStatement("INSERT INTO updateTask (cid,successful,lastModified,taskName,uuid) VALUES (0,?,?,?,?)");
+                    }
+                    insertTask(insertStatement, taskName, success, now);
                 }
-                stmt.setBoolean(pos++, success);
-                stmt.setLong(pos++, now);
-                stmt.addBatch();
             }
-
-            stmt.executeBatch();
+            if (null != insertStatement) {
+                insertStatement.executeBatch();
+            }
+            if (null != updateStatement) {
+                updateStatement.executeBatch();
+            }
         } catch (SQLException e) {
             throw SchemaExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } finally {
-            closeSQLStuff(stmt);
+            closeSQLStuff(insertStatement, updateStatement);
+        }
+    }
+
+    /**
+     * Inserts an update task
+     *
+     * @param insertStatement The {@link PreparedStatement} for the insert
+     * @param taskName the task's name
+     * @param success whether the task was successful
+     * @param now The current time stamp
+     * @throws SQLException if an SQL error is occurred
+     */
+    private static void insertTask(PreparedStatement insertStatement, String taskName, boolean success, long now) throws SQLException {
+        int parameterIndex = 1;
+        insertStatement.setBoolean(parameterIndex++, success);
+        insertStatement.setLong(parameterIndex++, now);
+        insertStatement.setString(parameterIndex++, taskName);
+        insertStatement.setBytes(parameterIndex++, UUIDs.toByteArray(UUID.randomUUID()));
+        insertStatement.addBatch();
+    }
+
+    /**
+     * Updates the status and time stamp of the task with the specified name
+     *
+     * @param updateStatement The {@link PreparedStatement} for the update
+     * @param taskName The task's name
+     * @param success Whether the task was successful
+     * @param now the current time stamp
+     * @throws SQLException if an SQL error is occurred
+     */
+    private static void updateTask(PreparedStatement updateStatement, String taskName, boolean success, long now) throws SQLException {
+        int parameterIndex = 1;
+        updateStatement.setBoolean(parameterIndex++, success);
+        updateStatement.setLong(parameterIndex++, now);
+        updateStatement.setString(parameterIndex, taskName);
+        updateStatement.addBatch();
+    }
+
+    /**
+     * Checks whether a task already exists in the table
+     *
+     * @param con The {@link Connection}
+     * @param taskName The task's name
+     * @return <code>true</code> if another task already exists in the table; <code>false</code> otherwise
+     * @throws SQLException if an SQL error is occurred
+     */
+    private static boolean taskExists(Connection con, String taskName) throws SQLException {
+        PreparedStatement statement = null;
+        ResultSet result = null;
+        try {
+            statement = con.prepareStatement("SELECT 1 FROM updateTask WHERE cid=0 AND taskName=? FOR UPDATE");
+            statement.setString(1, taskName);
+            result = statement.executeQuery();
+            return result.next();
+        } finally {
+            closeSQLStuff(statement, result);
         }
     }
 
@@ -594,20 +614,4 @@ public class SchemaStoreImpl extends SchemaStore {
         }
     }
 
-    private static final com.google.common.cache.Cache<ImmutablePair<Integer, String>, Boolean> HAS_UUID_CACHE = CacheBuilder.newBuilder().maximumSize(65536).expireAfterAccess(30, TimeUnit.MINUTES).build();
-
-    private static boolean hasUUID(Connection con, int poolId, String schema) throws SQLException {
-        ImmutablePair<Integer, String> key = ImmutablePair.<Integer, String> builder().first(Integer.valueOf(poolId)).second(schema).build();
-        Boolean hasUUID = HAS_UUID_CACHE.getIfPresent(key);
-        if (null == hasUUID) {
-            boolean exists = Tools.columnExists(con, TABLE_NAME, "uuid");
-            hasUUID = Boolean.valueOf(exists);
-            HAS_UUID_CACHE.put(key, hasUUID);
-        }
-        return hasUUID.booleanValue();
-    }
-
-    private static byte[] generateUUID() {
-        return UUIDs.toByteArray(UUID.randomUUID());
-    }
 }

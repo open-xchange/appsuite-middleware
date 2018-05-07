@@ -106,6 +106,7 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
     private final Collection<MailField> requiredMailFields;
     private final Cache<UserAndContext, List<AllowedAuthServId>> authServIdsCache;
     private final CustomRuleChecker checker;
+    private final AuthenticationResultsValidator validator;
 
     /**
      * Initializes a new {@link MailAuthenticityHandlerImpl} with ranking of <code>0</code> (zero).
@@ -129,6 +130,7 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
         this.ranking = ranking;
         authServIdsCache = CacheBuilder.newBuilder().maximumSize(65536).expireAfterWrite(30, TimeUnit.MINUTES).build();
         requiredMailFields = ImmutableList.of(MailField.FROM);
+        validator = new StandardAuthenticationResultsValidator(services);
         this.checker = checker;
     }
 
@@ -144,8 +146,8 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
      *
      * @return The parser/validator instance
      */
-    protected AuthenticationResultsValidator getValidator() {
-        return StandardAuthenticationResultsValidator.getInstance();
+    public AuthenticationResultsValidator getValidator() {
+        return validator;
     }
 
     @Override

@@ -49,6 +49,8 @@
 
 package com.openexchange.chronos.schedjoules.osgi;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.openexchange.chronos.ical.ICalService;
 import com.openexchange.chronos.schedjoules.SchedJoulesService;
 import com.openexchange.chronos.schedjoules.impl.SchedJoulesServiceImpl;
@@ -88,11 +90,13 @@ public class SchedJoulesActivator extends HousekeepingActivator {
      */
     @Override
     protected void startBundle() throws Exception {
+        Logger log = LoggerFactory.getLogger(SchedJoulesActivator.class);
         Services.setServiceLookup(this);
 
         SchedJoulesService service = new SchedJoulesServiceImpl();
         registerService(SchedJoulesService.class, service);
         registerService(Reloadable.class, (Reloadable) service);
+        log.info("Registered SchedJoules Service.");
     }
 
     /*
@@ -104,6 +108,8 @@ public class SchedJoulesActivator extends HousekeepingActivator {
     protected void stopBundle() throws Exception {
         unregisterService(SchedJoulesService.class);
         Services.setServiceLookup(null);
+        Logger log = LoggerFactory.getLogger(SchedJoulesActivator.class);
+        log.info("Unregistered SchedJoules Service.");
         super.stopBundle();
     }
 }

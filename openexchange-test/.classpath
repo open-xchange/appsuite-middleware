@@ -192,5 +192,6 @@
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.chronos.provider"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.chronos.common"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.google.json"/>
+	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/commons-validator-1.6.jar"/>
 	<classpathentry kind="output" path="build"/>
 </classpath>

@@ -49,15 +49,25 @@
 
 package com.openexchange.caldav;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import javax.servlet.http.HttpServletResponse;
 import com.openexchange.api2.TasksSQLInterface;
 import com.openexchange.caldav.resources.CalDAVRootCollection;
+import com.openexchange.caldav.resources.EventCollection;
+import com.openexchange.chronos.Event;
+import com.openexchange.chronos.common.CalendarUtils;
+import com.openexchange.chronos.service.EventsResult;
 import com.openexchange.config.cascade.ComposedConfigProperty;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.data.conversion.ical.ICalEmitter;
 import com.openexchange.data.conversion.ical.ICalParser;
 import com.openexchange.dav.DAVFactory;
+import com.openexchange.dav.DAVProtocol;
 import com.openexchange.dav.resources.DAVCollection;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.FolderService;
@@ -66,10 +76,13 @@ import com.openexchange.groupware.tasks.TasksSQLImpl;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.session.SessionHolder;
 import com.openexchange.user.UserService;
+import com.openexchange.webdav.protocol.Multistatus;
 import com.openexchange.webdav.protocol.Protocol;
 import com.openexchange.webdav.protocol.WebdavPath;
 import com.openexchange.webdav.protocol.WebdavProtocolException;
 import com.openexchange.webdav.protocol.WebdavResource;
+import com.openexchange.webdav.protocol.WebdavStatusImpl;
+import com.openexchange.webdav.protocol.helpers.AbstractResource;
 
 /**
  * The {@link GroupwareCaldavFactory} holds access to all external groupware services and acts as the factory for CaldavResources and
@@ -130,6 +143,97 @@ public class GroupwareCaldavFactory extends DAVFactory {
             return mixin(new CalDAVRootCollection(this).getChild(path.parent().name()).getChild(path.name()));
         }
         throw WebdavProtocolException.generalError(url, HttpServletResponse.SC_NOT_FOUND);
+    }
+
+    public Multistatus<WebdavResource> resolveResources(List<WebdavPath> paths) throws WebdavProtocolException {
+        Multistatus<WebdavResource> multistatus = new Multistatus<WebdavResource>();
+        if (null == paths || 0 == paths.size()) {
+            return multistatus;
+        }
+        /*
+         * resolve & add root- and folder-collections, remember object resources per collection for later batch-retrieval
+         */
+        Map<String, List<WebdavPath>> pathsPerCollectionName = new HashMap<String, List<WebdavPath>>();
+        CalDAVRootCollection rootCollection = mixin(new CalDAVRootCollection(this));
+        for (WebdavPath path : paths) {
+            if (isRoot(path)) {
+                multistatus.addStatus(new WebdavStatusImpl<WebdavResource>(HttpServletResponse.SC_OK, path, rootCollection));
+            } else if (1 == path.size()) {
+                DAVCollection collection = rootCollection.getChild(path.name());
+                if (collection.exists()) {
+                    multistatus.addStatus(new WebdavStatusImpl<WebdavResource>(HttpServletResponse.SC_OK, path, collection));
+                } else {
+                    multistatus.addStatus(new WebdavStatusImpl<WebdavResource>(HttpServletResponse.SC_NOT_FOUND, path, null));
+                }
+            } else if (2 == path.size()) {
+                com.openexchange.tools.arrays.Collections.put(pathsPerCollectionName, path.parent().name(), path);
+            } else {
+                multistatus.addStatus(new WebdavStatusImpl<WebdavResource>(HttpServletResponse.SC_NOT_FOUND, path, null));
+            }
+        }
+        /*
+         * resolve & add any remembered object resources
+         */
+        for (Entry<String, List<WebdavPath>> entry : pathsPerCollectionName.entrySet()) {
+            DAVCollection collection = rootCollection.getChild(entry.getKey());
+            if (false == collection.exists()) {
+                /*
+                 * 404 for each requested resource in not existing collection
+                 */
+                for (WebdavPath path : entry.getValue()) {
+                    multistatus.addStatus(new WebdavStatusImpl<WebdavResource>(HttpServletResponse.SC_NOT_FOUND, path, null));
+                }
+                continue;
+            }
+            if (EventCollection.class.isInstance(collection)) {
+                /*
+                 * try to batch-resolve events
+                 */
+                EventCollection eventCollection = (EventCollection) collection;
+                List<String> resourceNames = new ArrayList<String>(entry.getValue().size());
+                for (WebdavPath path : entry.getValue()) {
+                    resourceNames.add(eventCollection.extractResourceName(path.name()));
+                }
+                try {
+                    Map<String, EventsResult> eventsPerResourceName = eventCollection.resolveEvents(resourceNames);
+                    for (WebdavPath path : entry.getValue()) {
+                        EventsResult resolvedEvent = eventsPerResourceName.get(eventCollection.extractResourceName(path.name()));
+                        if (null == resolvedEvent) {
+                            multistatus.addStatus(new WebdavStatusImpl<WebdavResource>(HttpServletResponse.SC_NOT_FOUND, path, null));
+                        } else if (null != resolvedEvent.getError()) {
+                            WebdavProtocolException e = DAVProtocol.protocolException(path, resolvedEvent.getError(), HttpServletResponse.SC_NOT_FOUND);
+                            multistatus.addStatus(new WebdavStatusImpl<WebdavResource>(e.getStatus(), path, null));
+                        } else if (null == resolvedEvent.getEvents() || resolvedEvent.getEvents().isEmpty()) {
+                            multistatus.addStatus(new WebdavStatusImpl<WebdavResource>(HttpServletResponse.SC_NOT_FOUND, path, null));
+                        } else {
+                            Event event = resolvedEvent.getEvents().get(0);
+                            event = CalendarUtils.isSeriesException(event) ? new PhantomMaster(resolvedEvent.getEvents()) : event;
+                            AbstractResource resource = eventCollection.createResource(event, path);
+                            multistatus.addStatus(new WebdavStatusImpl<WebdavResource>(HttpServletResponse.SC_OK, path, resource));
+                        }
+                    }
+                    return multistatus;
+                } catch (OXException e) {
+                    // fall through
+                }
+            }
+            /*
+             * resolve each resource one by one
+             */
+            for (WebdavPath path : entry.getValue()) {
+                try {
+                    WebdavResource resource = collection.getChild(path.name());
+                    if (null != resource && resource.exists()) {
+                        multistatus.addStatus(new WebdavStatusImpl<WebdavResource>(HttpServletResponse.SC_OK, path, resource));
+                    } else {
+                        multistatus.addStatus(new WebdavStatusImpl<WebdavResource>(HttpServletResponse.SC_NOT_FOUND, path, null));
+                    }
+                } catch (WebdavProtocolException e) {
+                    multistatus.addStatus(new WebdavStatusImpl<WebdavResource>(e.getStatus(), path, null));
+                }
+            }
+        }
+        return multistatus;
     }
 
     /**
