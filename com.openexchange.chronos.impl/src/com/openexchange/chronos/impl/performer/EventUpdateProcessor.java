@@ -80,6 +80,8 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 import org.dmfs.rfc5545.DateTime;
 import org.dmfs.rfc5545.recur.RecurrenceRule;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.AlarmField;
 import com.openexchange.chronos.Attachment;
@@ -135,6 +137,8 @@ public class EventUpdateProcessor implements EventUpdate {
     private final ItemUpdate<Event, EventField> eventUpdate;
     private final Event deltaEvent;
     private final CollectionUpdate<Event, EventField> exceptionUpdates;
+
+    private static final Logger LOG = LoggerFactory.getLogger(EventUpdateProcessor.class);
 
     /**
      * Initializes a new {@link EventUpdateProcessor}.
@@ -358,7 +362,12 @@ public class EventUpdateProcessor implements EventUpdate {
                 Check.startAndEndDate(session, updatedEvent);
                 break;
             case RECURRENCE_RULE:
-                Check.recurrenceRuleIsValid(session.getRecurrenceService(), updatedEvent);
+                try {
+                    Check.recurrenceRuleIsValid(session.getRecurrenceService(), updatedEvent);
+                } catch (Exception e) {
+                    LOG.error("Invalid Recurrence Rule: {}, start: {}, end: {}", updatedEvent.getRecurrenceRule(), updatedEvent.getStartDate(), updatedEvent.getEndDate());
+                    throw CalendarExceptionCodes.FORBIDDEN_CHANGE.create(e, originalEvent.getId(), updatedField);
+                }
                 /*
                  * ignore a 'matching' recurrence rule
                  */

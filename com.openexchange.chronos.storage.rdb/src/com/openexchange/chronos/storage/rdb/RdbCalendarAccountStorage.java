@@ -50,6 +50,8 @@
 package com.openexchange.chronos.storage.rdb;
 
 import static com.openexchange.java.Autoboxing.I;
+import com.google.json.JsonSanitizer;
+import java.io.IOException;
 import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -512,22 +514,38 @@ public class RdbCalendarAccountStorage extends RdbStorage implements CalendarAcc
         int user = resultSet.getInt("user");
         String provider = resultSet.getString("provider");
         long lastModified = resultSet.getLong("modified");
-        JSONObject internalConfig;
+        JSONObject internalConfig = readJSON("internalConfig", resultSet);
+        JSONObject userConfig = readJSON("userConfig", resultSet);
+        return new DefaultCalendarAccount(provider, id, user, internalConfig, userConfig, new Date(lastModified));
+    }
+
+    /**
+     * Reads the JSON content of the designated column in the current row of specified <code>ResultSet</code> object.
+     *
+     * @param columnName The column name
+     * @param resultSet The <code>ResultSet</code> object
+     * @return The JSON content or <code>null</code>
+     * @throws SQLException If JSON content cannot be read
+     */
+    private static JSONObject readJSON(String columnName, ResultSet resultSet) throws SQLException {
+        JSONObject retval;
         InputStream inputStream = null;
         try {
-            inputStream = resultSet.getBinaryStream("internalConfig");
-            internalConfig = deserialize(inputStream);
+            inputStream = resultSet.getBinaryStream(columnName);
+            retval = deserialize(inputStream);
+        } catch (SQLException e) {
+            if (false == JSONException.isParseException(e)) {
+                throw e;
+            }
+
+            // Try to sanitize corrupt input
+            Streams.close(inputStream);
+            inputStream = resultSet.getBinaryStream(columnName);
+            retval = deserialize(inputStream, true);
         } finally {
             Streams.close(inputStream);
         }
-        JSONObject userConfig;
-        try {
-            inputStream = resultSet.getBinaryStream("userConfig");
-            userConfig = deserialize(inputStream);
-        } finally {
-            Streams.close(inputStream);
-        }
-        return new DefaultCalendarAccount(provider, id, user, internalConfig, userConfig, new Date(lastModified));
+        return retval;
     }
 
     /**
@@ -537,12 +555,31 @@ public class RdbCalendarAccountStorage extends RdbStorage implements CalendarAcc
      * @return The deserialized JSON object
      */
     private static JSONObject deserialize(InputStream inputStream) throws SQLException {
+        return deserialize(inputStream, false);
+    }
+
+    /**
+     * Deserializes a JSON object (as used in an account's configuration) from the supplied input stream.
+     *
+     * @param inputStream The input stream to deserialize
+     * @param withSanitize <code>true</code> if JSON content provided by input stream is supposed to be sanitized; otherwise <code>false</code> to read as-is
+     * @return The deserialized JSON object
+     */
+    private static JSONObject deserialize(InputStream inputStream, boolean withSanitize) throws SQLException {
         if (null == inputStream) {
             return null;
         }
+
         try {
+            if (withSanitize) {
+                String jsonish = JsonSanitizer.sanitize(Streams.reader2string(new AsciiReader(inputStream)));
+                return new JSONObject(jsonish);
+            }
+
             return new JSONObject(new AsciiReader(inputStream));
         } catch (JSONException e) {
+            throw new SQLException(e);
+        } catch (IOException e) {
             throw new SQLException(e);
         }
     }
