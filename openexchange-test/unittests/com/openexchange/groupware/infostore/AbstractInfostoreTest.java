@@ -54,8 +54,6 @@ import java.util.Collections;
 import java.util.List;
 import org.junit.After;
 import org.junit.Before;
-import org.junit.BeforeClass;
-import com.openexchange.ajax.framework.ProvisioningSetup;
 import com.openexchange.database.provider.DBPoolProvider;
 import com.openexchange.database.provider.DBProvider;
 import com.openexchange.exception.OXException;
@@ -109,11 +107,6 @@ public class AbstractInfostoreTest {
     protected List<FolderObject> cleanFolders = null;
 
     protected DBProvider provider = null;
-
-    @BeforeClass
-    public static void beforeClass() throws OXException {
-        ProvisioningSetup.init();
-    }
 
     @Before
     public void setUp() throws Exception {
