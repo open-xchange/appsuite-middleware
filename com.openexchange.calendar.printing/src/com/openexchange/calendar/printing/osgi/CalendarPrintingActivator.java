@@ -57,6 +57,7 @@ import com.openexchange.calendar.printing.templating.CalendarTemplateHelperFacto
 import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.dispatcher.DispatcherPrefixService;
+import com.openexchange.folder.FolderService;
 import com.openexchange.group.GroupService;
 import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
 import com.openexchange.groupware.calendar.CalendarCollectionService;
@@ -88,6 +89,7 @@ public class CalendarPrintingActivator extends AbstractSessionServletActivator {
         track(UserService.class, new RegistryCustomizer<UserService>(context, UserService.class, getInstance()));
         track(GroupService.class, new RegistryCustomizer<GroupService>(context, GroupService.class, getInstance()));
         track(ConfigViewFactory.class, new RegistryCustomizer<ConfigViewFactory>(context, ConfigViewFactory.class, getInstance()));
+        track(FolderService.class, new RegistryCustomizer<>(context, FolderService.class, getInstance()));
         openTrackers();
         register();
         registerService(PreferencesItemService.class, new CalendarPrintingEnabled());
@@ -122,6 +124,6 @@ public class CalendarPrintingActivator extends AbstractSessionServletActivator {
 
     @Override
     protected Class<?>[] getAdditionalNeededServices() {
-        return new Class<?>[] { TemplateService.class, AppointmentSqlFactoryService.class, CalendarCollectionService.class, DispatcherPrefixService.class, HtmlService.class, UserService.class, ResourceService.class };
+        return new Class<?>[] { TemplateService.class, AppointmentSqlFactoryService.class, CalendarCollectionService.class, DispatcherPrefixService.class, HtmlService.class, UserService.class, ResourceService.class, FolderService.class };
     }
 }

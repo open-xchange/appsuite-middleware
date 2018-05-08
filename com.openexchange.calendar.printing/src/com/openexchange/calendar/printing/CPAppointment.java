@@ -52,15 +52,19 @@ package com.openexchange.calendar.printing;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-
+import java.util.Map;
 import org.apache.commons.lang.StringEscapeUtils;
 import com.openexchange.calendar.printing.days.CalendarTools;
 import com.openexchange.exception.OXException;
+import com.openexchange.folder.FolderService;
 import com.openexchange.group.GroupService;
+import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.calendar.Constants;
 import com.openexchange.groupware.container.Appointment;
+import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.user.UserService;
 
 /**
@@ -104,13 +108,48 @@ public class CPAppointment {
         setStartDate(mother.getStartDate());
         setEndDate(mother.getEndDate());
         setOriginal(mother);
-        setColorLabel(mother.getLabel());
+        setColorLabel(loadColorLabel(mother, context));
+    }
+
+    private int loadColorLabel(Appointment mother, Context context) {
+        int appointmentColor = mother.getLabel();
+        if (appointmentColor == 0) {
+            if (null != context) {
+                appointmentColor = getColorFromFolder(mother.getParentFolderID(), context.getContextId());
+            } else if (CalendarDataObject.class.isInstance(mother)) {
+                appointmentColor = getColorFromFolder(mother.getParentFolderID(), ((CalendarDataObject) mother).getContextID());
+            }
+        } 
+        return appointmentColor;
+    }
+
+    private int getColorFromFolder(int parentFolderID, int contextId) {
+        int resultColor = 1;
+        try {
+            final FolderService folderService = CPServiceRegistry.getInstance().getService(FolderService.class, true);
+            FolderObject folderObject = folderService.getFolderObject(parentFolderID, contextId);
+            Map<String, Object> meta = folderObject.getMeta();
+            if (null != meta) {
+                Object metaColor = meta.get("color_label");
+                if (null != metaColor && Integer.class.isInstance(metaColor)) {
+                    resultColor = ((Integer) metaColor).intValue();
+                }
+            }
+        } catch (OXException e) {
+            if (e.getCode() == ServiceExceptionCode.SERVICE_UNAVAILABLE.getNumber()) {
+                LOG.error("", e);
+            } else {
+                LOG.error(String.format("Failed to load FolderObject for folderId: %1$s an contextId: %2$s", parentFolderID, contextId), e);
+            }
+            
+        }
+        return resultColor;
     }
 
     private void setColorLabel(int label) {
         this.colorLabel = label;
     }
-    
+
     public String getColorLabel() {
         return StringEscapeUtils.escapeHtml(Integer.toString(colorLabel));
     }
@@ -126,11 +165,11 @@ public class CPAppointment {
     }
 
     public String getDescription() {
-        return StringEscapeUtils.escapeHtml( description );
+        return StringEscapeUtils.escapeHtml(description);
     }
 
     public String getLocation() {
-        return StringEscapeUtils.escapeHtml( location );
+        return StringEscapeUtils.escapeHtml(location);
     }
 
     public Date getStartDate() {
@@ -177,31 +216,31 @@ public class CPAppointment {
         final List<String> retval = new ArrayList<String>();
         for (final Participant participant : original.getParticipants()) {
             switch (participant.getType()) {
-            case Participant.USER:
-                try {
-                    final UserService userService = CPServiceRegistry.getInstance().getService(UserService.class, true);
-                    retval.add(userService.getUser(participant.getIdentifier(), context).getDisplayName());
-                } catch (final OXException e) {
-                    LOG.error("", e);
-                }
-                break;
-            case Participant.GROUP:
-                try {
-                    final GroupService service = CPServiceRegistry.getInstance().getService(GroupService.class, true);
-                    retval.add(service.getGroup(context, participant.getIdentifier()).getDisplayName());
-                } catch (final OXException e) {
-                    LOG.error("", e);
-                }
-                break;
-            case Participant.EXTERNAL_USER:
-                if (null != participant.getDisplayName()) {
-                    retval.add(participant.getDisplayName());
-                } else {
-                    retval.add(participant.getEmailAddress());
-                }
-                break;
-            default:
-                break;
+                case Participant.USER:
+                    try {
+                        final UserService userService = CPServiceRegistry.getInstance().getService(UserService.class, true);
+                        retval.add(userService.getUser(participant.getIdentifier(), context).getDisplayName());
+                    } catch (final OXException e) {
+                        LOG.error("", e);
+                    }
+                    break;
+                case Participant.GROUP:
+                    try {
+                        final GroupService service = CPServiceRegistry.getInstance().getService(GroupService.class, true);
+                        retval.add(service.getGroup(context, participant.getIdentifier()).getDisplayName());
+                    } catch (final OXException e) {
+                        LOG.error("", e);
+                    }
+                    break;
+                case Participant.EXTERNAL_USER:
+                    if (null != participant.getDisplayName()) {
+                        retval.add(participant.getDisplayName());
+                    } else {
+                        retval.add(participant.getEmailAddress());
+                    }
+                    break;
+                default:
+                    break;
             }
         }
         return retval;
@@ -217,8 +256,7 @@ public class CPAppointment {
 
     @Override
     public String toString() {
-        return getStartDate() + " - " + getEndDate() +": " + getTitle();
+        return getStartDate() + " - " + getEndDate() + ": " + getTitle();
     }
-
 
 }

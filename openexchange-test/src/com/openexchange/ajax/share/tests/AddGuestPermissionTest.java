@@ -49,7 +49,8 @@
 
 package com.openexchange.ajax.share.tests;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -103,12 +104,6 @@ public class AddGuestPermissionTest extends ShareTest {
         for (FileStorageGuestObjectPermission guestPermission : TESTED_OBJECT_PERMISSIONS) {
             testUpdateSharedFile(randomFolderAPI(), guestPermission);
         }
-    }
-
-    @Test
-    public void testUpdateSharedFolderWithCascadingPermissionsRandomly() throws Exception {
-        int module = randomModule();
-        testUpdateSharedFolderWithCascadingPermissions(randomFolderAPI(), module, getDefaultFolder(module), randomGuestPermission(module));
     }
 
     public void noTestUpdateSharedFolderWithCascadingPermissionsExtensively() throws Exception {

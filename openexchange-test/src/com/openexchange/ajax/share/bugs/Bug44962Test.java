@@ -49,7 +49,9 @@
 
 package com.openexchange.ajax.share.bugs;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import java.rmi.Naming;
 import java.util.Collections;
 import java.util.HashMap;
@@ -57,6 +59,8 @@ import java.util.Map;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.BlockJUnit4ClassRunner;
 import com.openexchange.admin.rmi.OXUserInterface;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.dataobjects.UserModuleAccess;
@@ -79,6 +83,7 @@ import com.openexchange.server.impl.OCLPermission;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.8.1
  */
+@RunWith(BlockJUnit4ClassRunner.class)
 public class Bug44962Test extends ShareTest {
 
     private AJAXClient client2;

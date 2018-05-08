@@ -53,15 +53,11 @@ import static com.openexchange.java.Autoboxing.L;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 import java.math.BigDecimal;
 import java.util.Date;
-import java.util.Locale;
 import org.junit.Test;
-import com.openexchange.exception.OXException;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.webdav.xml.TaskTest;
-import com.openexchange.webdav.xml.XmlServlet;
 
 public class ListTest extends TaskTest {
 
@@ -113,22 +109,6 @@ public class ListTest extends TaskTest {
         final int objectId = insertTask(webCon, taskObj, getHostURI(), login, password);
 
         loadTask(webCon, objectId, taskFolderId, getHostURI(), login, password);
-    }
-
-    @Test
-    public void testObjectNotFound() throws Exception {
-        final Task taskObj = createTask("testObjectNotFound");
-        final int objectId = insertTask(webCon, taskObj, getHostURI(), login, password);
-
-        try {
-            loadTask(webCon, (objectId + 1000), taskFolderId, getHostURI(), login, password);
-            fail("object not found exception expected!");
-        } catch (final OXException exc) {
-            assertExceptionMessage(exc.getDisplayMessage(Locale.ENGLISH), XmlServlet.OBJECT_NOT_FOUND_STATUS);
-        }
-
-        final int[][] objectIdAndFolderId = { { objectId, taskFolderId } };
-        deleteTask(webCon, objectIdAndFolderId, getHostURI(), login, password);
     }
 
     @Test
