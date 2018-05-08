@@ -49,26 +49,27 @@
 
 package com.openexchange.tools.filename;
 
+import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 
 /**
- * {@link BugFileNameToolsTest}
+ * {@link Bug58052Test}
  *
- * Lost support for umlauts in file names with certain browsers on macOS
- *
- * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since v7.10.0
  */
-public class Bug55271Test extends AbstractFileNameToolsTest {
+public class Bug58052Test extends AbstractFileNameToolsTest {
 
     @Test
-    public void testDecomposedString() {
-        String[] strings = new String[] {
-            "\uff18\u6708\uff12\uff12\u65e5\u6295\u51fd.zip"
-        };
-        for (String string : strings) {
-            checkSanitizing(string, false);
-        }
+    public void testLeaveAllowedUnicodeChars() {
+        String fileName = "\u2460ab\u2461cd\u2462.zip";
+
+        String sanitizedString = FileNameTools.sanitizeFilename(fileName);
+
+        assertTrue("Characters wrongly sanitized " + sanitizedString, sanitizedString.contains("\u2460"));
+        assertTrue("Characters wrongly sanitized " + sanitizedString, sanitizedString.contains("\u2461"));
+        assertTrue("Characters wrongly sanitized " + sanitizedString, sanitizedString.contains("\u2462"));
+        assertTrue("Unexpected string after sanitizing", fileName.equalsIgnoreCase(sanitizedString));
     }
 
 }

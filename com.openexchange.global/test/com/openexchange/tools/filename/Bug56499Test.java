@@ -52,23 +52,18 @@ package com.openexchange.tools.filename;
 import org.junit.Test;
 
 /**
- * {@link BugFileNameToolsTest}
+ * {@link Bug56499Test}
  *
- * Lost support for umlauts in file names with certain browsers on macOS
+ * Lost support for '&#x3010;' (LEFT BLACK LENTICULAR BRACKET, U+3010) and '&#x3011;' (RIGHT BLACK LENTICULAR BRACKET, U+3011) in file names
  *
- * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.10.0
  */
-public class Bug55271Test extends AbstractFileNameToolsTest {
+public class Bug56499Test extends AbstractFileNameToolsTest {
 
     @Test
     public void testDecomposedString() {
-        String[] strings = new String[] {
-            "\uff18\u6708\uff12\uff12\u65e5\u6295\u51fd.zip"
-        };
-        for (String string : strings) {
-            checkSanitizing(string, false);
-        }
+        checkSanitizing("\u3010\u30c9\u30e9\u30d5\u30c8\u7248\u3011\u57fa\u76e4\u6280\u8853\u306e\u9ad8\u5ea6\u5316-20171011.zip", true);
     }
 
 }

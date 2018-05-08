@@ -49,25 +49,36 @@
 
 package com.openexchange.tools.filename;
 
-import org.junit.Test;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import com.openexchange.java.Strings;
 
 /**
- * {@link BugFileNameToolsTest}
+ * {@link AbstractFileNameToolsTest}
  *
- * Lost support for umlauts in file names with certain browsers on macOS
- *
- * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
- * @since v7.10.0
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.8.0
  */
-public class Bug55271Test extends AbstractFileNameToolsTest {
+public abstract class AbstractFileNameToolsTest {
 
-    @Test
-    public void testDecomposedString() {
-        String[] strings = new String[] {
-            "\uff18\u6708\uff12\uff12\u65e5\u6295\u51fd.zip"
-        };
-        for (String string : strings) {
-            checkSanitizing(string, false);
+    /**
+     * Initializes a new {@link AbstractFileNameToolsTest}.
+     */
+    protected AbstractFileNameToolsTest() {
+        super();
+    }
+
+    /**
+     * Checks if specified string "survives" sanitization through {@link FileNameTools#sanitizeFilename(String) sanitizeFilename()}.
+     *
+     * @param string The string to check
+     * @param checkNormalized <code>true</code> to also check if sanitization maintains noralized form, otherwise <code>false</code>
+     */
+    protected static void checkSanitizing(String string, boolean checkNormalized) {
+        String sanitizedString = FileNameTools.sanitizeFilename(string);
+        assertFalse("Sanitized characters in " + sanitizedString, sanitizedString.indexOf('_') >= 0);
+        if (checkNormalized) {
+            assertTrue("Unexpected string after sanitizing", Strings.equalsNormalized(string, sanitizedString));
         }
     }
 
