@@ -57,7 +57,6 @@ import java.sql.SQLException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 import org.slf4j.Logger;
 import com.openexchange.database.DatabaseService;
@@ -509,7 +508,7 @@ public class RdbFolderUserPropertyStorage implements FolderUserPropertyStorage {
             stmt.setInt(1, contextId);
             stmt.setInt(2, folderId);
             stmt.setInt(3, userId);
-            for (Entry<String, String> entry : properties.entrySet()) {
+            for (Map.Entry<String, String> entry : properties.entrySet()) {
                 // Update entry
                 stmt.setString(4, entry.getKey());
                 stmt.setString(5, entry.getValue());
@@ -582,7 +581,7 @@ public class RdbFolderUserPropertyStorage implements FolderUserPropertyStorage {
             stmt.setInt(2, contextId);
             stmt.setInt(3, folderId);
             stmt.setInt(4, userId);
-            for (Entry<String, String> propertyName : properties.entrySet()) {
+            for (Map.Entry<String, String> propertyName : properties.entrySet()) {
                 // Update entry
                 stmt.setString(1, propertyName.getValue());
                 stmt.setString(5, propertyName.getKey());
@@ -609,9 +608,8 @@ public class RdbFolderUserPropertyStorage implements FolderUserPropertyStorage {
             LOGGER.debug("Flawed key-value pair!");
             return;
         }
-        Map<String, String> map = new HashMap<>(1);
-        map.put(key, value);
-        updateFolderProperties(folderId, contextId, userId, map, connection);
+
+        updateFolderProperties(folderId, contextId, userId, Collections.singletonMap(key, value), connection);
     }
 
     private DatabaseService getDatabaseServiceService() throws OXException {
