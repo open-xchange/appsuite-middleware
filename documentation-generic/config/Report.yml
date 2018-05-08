@@ -1,42 +1,43 @@
-array:
-  - data:
-      Key: com.openexchange.report.appsuite.fileStorage
-      Description: >
-Reports filestorage directory for storage of report parts and composed data.
-      Default: /tmp
-      Version: 7.8.3
-      Reloadable: true
-      Configcascade_Aware: false
-      Related: 
-      File: reportserialization.properties
-  - data:
-      Key: com.openexchange.report.appsuite.maxChunkSize
-      Description: >
-Determines how many chunks of data can be kept in the report before saving them in the folder described in the 
-com.openexchange.report.client.fileStorage property
-      Default: 200
-      Version: 7.8.3
-      Reloadable: true
-      Configcascade_Aware: false
-      Related: 
-      File: reportserialization.properties
-- data:
-      Key: com.openexchange.report.appsuite.maxThreadPoolSize
-      Description: >
-Number of threads allowed to work on the report at the same time.
-      Default: 20
-      Version: 7.8.3
-      Reloadable: true
-      Configcascade_Aware: false
-      Related: 
-      File: reportserialization.properties
-- data:
-      Key: com.openexchange.report.appsuite.threadPriority
-      Description: >
-The priority that threads, working on the report have. Allowed value range is 1-10. 1 is the lowest, 10 the highest priority.
-      Default: 1
-      Version: 7.8.3
-      Reloadable: true
-      Configcascade_Aware: false
-      Related: 
-      File: reportserialization.properties                
+feature_name: Report
+properties:
+  - key: com.openexchange.report.appsuite.fileStorage
+    description: |
+      Reports filestorage directory for storage of report parts and composed data.
+    defaultValue: /tmp
+    version: 7.8.3
+    reloadable: true
+    configcascadeAware: false
+    related: 
+    file: reportserialization.properties
+    tags: ["Report"]
+  - key: com.openexchange.report.appsuite.maxChunkSize
+    description: |
+      Determines how many chunks of data can be kept in the report before saving them in the folder described in the 
+      com.openexchange.report.client.fileStorage property
+    defaultValue: 200
+    version: 7.8.3
+    reloadable: true
+    configcascadeAware: false
+    related: 
+    file: reportserialization.properties
+    tags: ["Report"]
+  - key: com.openexchange.report.appsuite.maxThreadPoolSize
+    description: |
+      Number of threads allowed to work on the report at the same time.
+    defaultValue: 20
+    version: 7.8.3
+    reloadable: true
+    configcascadeAware: false
+    related: 
+    file: reportserialization.properties
+    tags: ["Report"]
+  - key: com.openexchange.report.appsuite.threadPriority
+    description: |
+      The priority that threads, working on the report have. Allowed value range is 1-10. 1 is the lowest, 10 the highest priority.
+    defaultValue: 1
+    version: 7.8.3
+    reloadable: true
+    configcascadeAware: false
+    related: 
+    file: reportserialization.properties
+    tags: ["Report"]               

@@ -1,24 +1,29 @@
-array:
-  - data:
-      Key: c.o.some.property
-      Description: >
+feature_name: Feature XYZ
+feature_description: |
+  This pages describes feature XYZ
+properties:
+    - key: c.o.some.property
+      description: |
         line1
         line2
         line3
-      Default: true
-      Version: 7.8.3
-      Reloadable: true
-      Configcascade_Aware: false
-      Related: 
-      File:
-  - data:
-      Key: c.o.some.property2
-      Description: >
+      defaultValue: true
+      version: 7.8.3
+      reloadable: true
+      configcascadeAware: false
+      related: c.o.some.property
+      file:
+      packageName: open-xchange-core
+      tags: []
+    - key: c.o.some.property2
+      description: |
         line1
         line2
-      Default: true
-      Version: 7.8.0
-      Reloadable: true
-      Configcascade_Aware: true
-      Related: c.o.some.property
-      File: somefile.properties
+      defaultValue: true
+      version: 7.8.0
+      reloadable: true
+      configcascadeAware: true
+      related: ["c.o.some.property.1","c.o.some.property.2"]
+      file: somefile.properties
+      packageName: open-xchange-packageB
+      tags: ["tagA","tagB"]
