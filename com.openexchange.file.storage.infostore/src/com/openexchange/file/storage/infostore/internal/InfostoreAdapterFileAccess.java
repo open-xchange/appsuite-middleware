@@ -938,7 +938,7 @@ public class InfostoreAdapterFileAccess extends InfostoreAccess implements FileS
         if (size > 1) {
             SearchIterator<DocumentMetadata> iterator = null;
             try {
-                TimedResult<DocumentMetadata> documents = infostoreFacade.getDocuments(tuples, new Metadata[] { Metadata.ID_LITERAL, Metadata.ORIGIN_LITERAL}, session);
+                TimedResult<DocumentMetadata> documents = infostoreFacade.getDocuments(tuples, new Metadata[] { Metadata.ID_LITERAL, Metadata.ORIGIN_LITERAL, Metadata.FOLDER_ID_LITERAL }, session);
                 iterator = documents.results();
                 originPaths = new TIntObjectHashMap<>(size);
                 while (iterator.hasNext()) {
