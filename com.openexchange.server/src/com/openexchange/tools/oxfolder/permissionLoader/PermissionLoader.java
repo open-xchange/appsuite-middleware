@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -59,25 +59,17 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceReference;
-import org.osgi.util.tracker.ServiceTracker;
-import org.osgi.util.tracker.ServiceTrackerCustomizer;
-import com.openexchange.concurrent.TimeoutConcurrentMap;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.FolderPermissionType;
 import com.openexchange.groupware.EnumComponent;
 import com.openexchange.server.impl.OCLPermission;
-import com.openexchange.server.osgi.ServerActivator;
 import com.openexchange.threadpool.Task;
-import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.threadpool.ThreadPools;
 import com.openexchange.threadpool.ThreadRenamer;
 import com.openexchange.tools.StringCollection;
@@ -91,129 +83,38 @@ import gnu.trove.map.hash.TIntObjectHashMap;
 import gnu.trove.procedure.TObjectProcedure;
 
 /**
- * {@link PermissionLoaderService}
+ * {@link PermissionLoader}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.10.0
  */
-public final class PermissionLoaderService implements Runnable {
+public class PermissionLoader implements Runnable {
 
-    protected static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(PermissionLoaderService.class);
+    /** The logger constant */
+    static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(PermissionLoader.class);
 
-    private static volatile PermissionLoaderService instance;
+    /** The poison element to abort processing */
+    static final Pair POISON_PAIR = newPair(-1, -1);
 
-    /**
-     * Gets the {@link JobQueue} instance
-     *
-     * @return The {@link JobQueue} instance
-     */
-    public static PermissionLoaderService getInstance() {
-        PermissionLoaderService tmp = instance;
-        if (null == tmp) {
-            synchronized (PermissionLoaderService.class) {
-                tmp = instance;
-                if (null == tmp) {
-                    instance = tmp = new PermissionLoaderService();
-                }
-            }
-        }
-        return tmp;
-    }
+    private static final String THREAD_NAME = "PermissionLoader";
+
+    final BlockingQueue<Pair> pairsToLoad;
+    final ConcurrentMap<Pair, OCLPermission[]> permsMap;
+    private final AtomicBoolean started;
 
     /**
-     * Drops the {@link JobQueue} instance.
+     * Initializes a new {@link PermissionLoader}.
      */
-    public static void dropInstance() {
-        final PermissionLoaderService tmp = instance;
-        if (null != tmp) {
-            tmp.shutDown();
-            instance = null;
-        }
-    }
-
-    /**
-     * The poison element.
-     */
-    private static final Pair POISON = newPair(-1, -1);
-
-    private final BlockingQueue<Pair> queue;
-    private final AtomicBoolean keepgoing;
-    private final String simpleName;
-    private final Gate gate;
-
-    private volatile TimeoutConcurrentMap<Pair, OCLPermission[]> permsMap;
-    private volatile Future<Object> future;
-    private volatile ServiceTracker<ThreadPoolService, ThreadPoolService> poolTracker;
-    protected volatile ThreadPoolService threadPool;
-
-    /**
-     * Initializes a new {@link PermissionLoaderService}.
-     */
-    public PermissionLoaderService() {
+    public PermissionLoader() {
         super();
-        keepgoing = new AtomicBoolean(true);
-        queue = new LinkedBlockingQueue<Pair>();
-        simpleName = getClass().getSimpleName();
-        gate = new Gate(-1);
+        permsMap = new ConcurrentHashMap<>(16, 0.9F, 1);
+        pairsToLoad = new LinkedBlockingQueue<Pair>();
+        started = new AtomicBoolean(false);
     }
 
-    /**
-     * Starts up this service.
-     *
-     * @throws OXException If start-up fails
-     */
-    public void startUp() throws OXException {
-        final BundleContext context = ServerActivator.getContext();
-        if(context == null){
-        	threadPool = ThreadPools.getThreadPool();
-        } else {
-	        final ServiceTrackerCustomizer<ThreadPoolService, ThreadPoolService> customizer = new ServiceTrackerCustomizer<ThreadPoolService, ThreadPoolService>() {
-
-	            @Override
-	            public ThreadPoolService addingService(final ServiceReference<ThreadPoolService> reference) {
-	                final ThreadPoolService service = context.getService(reference);
-	                threadPool = service;
-	                return service;
-	            }
-
-	            @Override
-	            public void modifiedService(final ServiceReference<ThreadPoolService> reference, final ThreadPoolService service) {
-	                // Nope
-	            }
-
-	            @Override
-	            public void removedService(final ServiceReference<ThreadPoolService> reference, final ThreadPoolService service) {
-	                threadPool = null;
-	                context.ungetService(reference);
-	            }
-	        };
-	        poolTracker = new ServiceTracker<ThreadPoolService, ThreadPoolService>(context, ThreadPoolService.class, customizer);
-	        poolTracker.open();
-        }
-        future = ThreadPools.getThreadPool().submit(ThreadPools.task(this, simpleName));
-        permsMap = new TimeoutConcurrentMap<Pair, OCLPermission[]>(20, true);
-        gate.open();
-    }
-
-    /**
-     * Shuts-down this service.
-     */
-    public void shutDown() {
-        keepgoing.set(false);
-        queue.offer(POISON);
-        try {
-            future.get(3, TimeUnit.SECONDS);
-        } catch (final InterruptedException e) {
-            // Keep interrupted state
-            Thread.currentThread().interrupt();
-        } catch (final ExecutionException e) {
-            LOG.error("Error stopping queue", e.getCause());
-        } catch (final TimeoutException e) {
-            future.cancel(true);
-        } finally {
-            if (null != poolTracker) {
-                poolTracker.close();
-                poolTracker = null;
-            }
+    private void checkStarted() {
+        if (started.compareAndSet(false, true)) {
+            ThreadPools.getThreadPool().submit(ThreadPools.task(this, THREAD_NAME));
         }
     }
 
@@ -224,7 +125,8 @@ public final class PermissionLoaderService implements Runnable {
      * @param folderId The folder identifier
      */
     public void submitPermissionsFor(final int contextId, final int folderId) {
-        queue.offer(newPair(folderId, contextId));
+        checkStarted();
+        pairsToLoad.offer(newPair(folderId, contextId));
     }
 
     /**
@@ -234,12 +136,12 @@ public final class PermissionLoaderService implements Runnable {
      * @param contextId The context identifier
      */
     public void submitPermissionsFor(final int contextId, final int... folderIds) {
-        final List<Pair> tmp = new ArrayList<Pair>(folderIds.length);
-        for (final int folderId : folderIds) {
+        checkStarted();
+        List<Pair> tmp = new ArrayList<Pair>(folderIds.length);
+        for (int folderId : folderIds) {
             tmp.add(newPair(folderId, contextId));
         }
-
-        queue.addAll(tmp);
+        pairsToLoad.addAll(tmp);
     }
 
     /**
@@ -253,46 +155,20 @@ public final class PermissionLoaderService implements Runnable {
         return permsMap.remove(newPair(folderId, contextId));
     }
 
-    private static final class DelegaterTask implements Task<Object> {
-
-        private final TIntObjectMap<GroupedPairs> groupByContext;
-        private final TObjectProcedure<GroupedPairs> proc;
-
-        protected DelegaterTask(List<Pair> list, TObjectProcedure<GroupedPairs> proc) {
-            super();
-            this.groupByContext = groupByContext(list);
-            this.proc = proc;
+    /**
+     * Stops this loader.
+     */
+    public void stop() {
+        if (started.compareAndSet(true, false)) {
+            pairsToLoad.offer(POISON_PAIR);
         }
-
-        @Override
-        public void setThreadName(ThreadRenamer threadRenamer) {
-            //
-        }
-
-        @Override
-        public void beforeExecute(Thread t) {
-            //
-        }
-
-        @Override
-        public void afterExecute(Throwable t) {
-            //
-        }
-
-        @Override
-        public Object call() throws Exception {
-            groupByContext.forEachValue(proc);
-            return null;
-        }
-
     }
 
     @Override
     public void run() {
         try {
-            final Gate gate = this.gate;
-            final List<Pair> list = new ArrayList<Pair>(128);
-            final TObjectProcedure<GroupedPairs> proc = new TObjectProcedure<GroupedPairs>() {
+            List<Pair> list = new ArrayList<Pair>(16);
+            TObjectProcedure<GroupedPairs> proc = new TObjectProcedure<GroupedPairs>() {
 
                 @Override
                 public boolean execute(GroupedPairs pairs) {
@@ -304,54 +180,40 @@ public final class PermissionLoaderService implements Runnable {
                     return true;
                 }
             };
-            while (keepgoing.get()) {
-                /*
-                 * Check if paused
-                 */
-                gate.pass();
-                try {
-                    /*
-                     * Proceed taking from queue
-                     */
-                    if (queue.isEmpty()) {
-                        final Pair next;
-                        try {
-                            next = queue.take();
-                        } catch (final InterruptedException e) {
-                            Thread.currentThread().interrupt();
-                            return;
-                        }
-                        if (POISON == next) {
-                            return;
-                        }
-                        list.add(next);
-                        // Await possible more
-                        await(100, true);
-                    }
-                    queue.drainTo(list);
-                    final boolean quit = list.remove(POISON);
-                    if (!list.isEmpty()) {
-                        final DelegaterTask task = new DelegaterTask(list, proc);
-                        final ThreadPoolService threadPool = this.threadPool;
-                        if (null == threadPool) {
-                            task.call();
-                        } else {
-                            threadPool.submit(task);
-                        }
-                    }
-                    if (quit) {
+
+            while (true) {
+                if (pairsToLoad.isEmpty()) {
+                    final Pair next;
+                    try {
+                        next = pairsToLoad.poll(60, TimeUnit.SECONDS);
+                    } catch (final InterruptedException e) {
+                        Thread.currentThread().interrupt();
                         return;
                     }
-                    list.clear();
-                } finally {
-                    gate.signalDone();
+                    if (null == next || PermissionLoader.POISON_PAIR == next) {
+                        return;
+                    }
+                    list.add(next);
+                    // Await possible more
+                    await(100);
                 }
+                pairsToLoad.drainTo(list);
+                final boolean quit = list.remove(PermissionLoader.POISON_PAIR);
+                if (!list.isEmpty()) {
+                    DelegaterTask task = new DelegaterTask(list, proc);
+                    ThreadPools.execute(task);
+                }
+                if (quit) {
+                    return;
+                }
+                list.clear();
             }
-        } catch (final InterruptedException e) {
+
+        } catch (InterruptedException e) {
             // Restore the interrupted status; see http://www.ibm.com/developerworks/java/library/j-jtp05236/index.html
             Thread.currentThread().interrupt();
             LOG.error("Interrupted permission loader run.", e);
-        } catch (final Exception e) {
+        } catch (Exception e) {
             LOG.error("Failed permission loader run.", e);
         }
     }
@@ -363,7 +225,7 @@ public final class PermissionLoaderService implements Runnable {
      *
      * @param groupedPairs The equally-grouped pairs
      */
-    protected void handlePairs(GroupedPairs groupedPairs) {
+    void handlePairs(GroupedPairs groupedPairs) {
         int size = groupedPairs.size();
         int configuredBlockSize = MAX_FILLER_CHUNK;
         if (size <= configuredBlockSize) {
@@ -374,43 +236,19 @@ public final class PermissionLoaderService implements Runnable {
         // Handle chunk-wise...
         int fromIndex = 0;
         while (fromIndex < size) {
-            boolean lastChunk;
             int len;
 
             int toIndex = fromIndex + configuredBlockSize;
             if (toIndex > size) {
                 toIndex = size;
                 len = toIndex - fromIndex;
-                lastChunk = true;
             } else {
                 len = configuredBlockSize;
-                lastChunk = false;
             }
 
             GroupedPairs chunk = new GroupedPairs(groupedPairs.contextId, new TIntArrayList(groupedPairs.folderIds.toArray(fromIndex, len)));
-            if (lastChunk) {
-                // Handle last chunk with this thread
-                handlePairsSublist(chunk);
-            } else {
-                // Submit (if possible)
-                schedulePairsSublist(chunk);
-            }
+            handlePairsSublist(chunk);
             fromIndex = toIndex;
-        }
-    }
-
-    private void schedulePairsSublist(GroupedPairs groupedPairsSublist) {
-        final ThreadPoolService threadPool = this.threadPool;
-        if (null == threadPool) {
-            /*
-             * Caller runs because thread pool is absent
-             */
-            handlePairsSublist(groupedPairsSublist);
-        } else {
-            /*
-             * Submit without check for a free slot
-             */
-            threadPool.submit(ThreadPools.task(new PairHandlerTask(groupedPairsSublist)));
         }
     }
 
@@ -419,7 +257,7 @@ public final class PermissionLoaderService implements Runnable {
      *
      * @param pairsChunk The chunk of equally-grouped pairs
      */
-    protected void handlePairsSublist(GroupedPairs pairsChunk) {
+    void handlePairsSublist(GroupedPairs pairsChunk) {
         if (pairsChunk.isEmpty()) {
             return;
         }
@@ -448,7 +286,7 @@ public final class PermissionLoaderService implements Runnable {
                 iterator.advance();
                 int folderId = iterator.key();
                 List<OCLPermission> perms = iterator.value();
-                permsMap.put(new Pair(folderId, contextId), perms.toArray(new OCLPermission[perms.size()]), 60);
+                permsMap.put(new Pair(folderId, contextId), perms.toArray(new OCLPermission[perms.size()]));
             }
         } catch (OXException e) {
             LOG.error("Failed loading permissions.", e);
@@ -523,7 +361,43 @@ public final class PermissionLoaderService implements Runnable {
         return fPartitions;
     }
 
-    protected static TIntObjectMap<GroupedPairs> groupByContext(final Collection<Pair> pairs) {
+    // ----------------------------------------------------------------------------------------------------
+
+    private static class DelegaterTask implements Task<Object> {
+
+        private final TIntObjectMap<GroupedPairs> groupByContext;
+        private final TObjectProcedure<GroupedPairs> proc;
+
+        protected DelegaterTask(List<Pair> list, TObjectProcedure<GroupedPairs> proc) {
+            super();
+            this.groupByContext = groupByContext(list);
+            this.proc = proc;
+        }
+
+        @Override
+        public void setThreadName(ThreadRenamer threadRenamer) {
+            //
+        }
+
+        @Override
+        public void beforeExecute(Thread t) {
+            //
+        }
+
+        @Override
+        public void afterExecute(Throwable t) {
+            //
+        }
+
+        @Override
+        public Object call() throws Exception {
+            groupByContext.forEachValue(proc);
+            return null;
+        }
+
+    }
+
+    static TIntObjectMap<GroupedPairs> groupByContext(final Collection<Pair> pairs) {
         TIntObjectMap<GroupedPairs> map = new TIntObjectHashMap<GroupedPairs>(pairs.size());
         for (Pair pair : pairs) {
             int contextId = pair.contextId;
@@ -537,19 +411,12 @@ public final class PermissionLoaderService implements Runnable {
         return map;
     }
 
-    protected static void await(final long millis, final boolean blocking) throws InterruptedException {
-        if (blocking) {
-            Thread.sleep(millis);
-            return;
-        }
-        final long time0 = System.currentTimeMillis();
-        long time1;
-        do {
-            time1 = System.currentTimeMillis();
-        } while ((time1 - time0) < millis);
+    static void await(long millis) throws InterruptedException {
+        Thread.sleep(millis);
+        return;
     }
 
-    private static Pair newPair(final int folderid, final int contextId) {
+    static Pair newPair(final int folderid, final int contextId) {
         return new Pair(folderid, contextId);
     }
 
@@ -593,39 +460,6 @@ public final class PermissionLoaderService implements Runnable {
             }
             return true;
         }
-
-    }
-
-    private class PairHandlerTask implements Task<Object> {
-
-        protected final GroupedPairs pairs;
-
-        protected PairHandlerTask(GroupedPairs pairs) {
-            super();
-            this.pairs = pairs;
-        }
-
-        @Override
-        public void setThreadName(final ThreadRenamer threadRenamer) {
-            // Nope
-        }
-
-        @Override
-        public void beforeExecute(final Thread t) {
-            // Nope
-        }
-
-        @Override
-        public void afterExecute(final Throwable t) {
-            // Nope
-        }
-
-        @Override
-        public Object call() throws Exception {
-            handlePairsSublist(pairs);
-            return null;
-        }
-
     }
 
     /** A collection of folder identifiers associated with the same context */
@@ -656,4 +490,5 @@ public final class PermissionLoaderService implements Runnable {
             return folderIds.size();
         }
     }
+
 }

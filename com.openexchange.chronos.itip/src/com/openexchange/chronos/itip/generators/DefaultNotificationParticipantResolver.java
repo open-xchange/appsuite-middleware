@@ -418,6 +418,7 @@ public class DefaultNotificationParticipantResolver implements NotificationParti
             return update.getCreatedBy();
         }
         // Use current user as fall back
+        LOG.debug("Unable to resolve organizer for appointment: " + update.getId() + " in context " + ctx.getContextId() + ". Using current user as organizer");
         User defaultOrganizer = userService.getUser(session.getUserId(), ctx);
         CalendarUser cu = new CalendarUser();
         cu.setCn(defaultOrganizer.getDisplayName());
