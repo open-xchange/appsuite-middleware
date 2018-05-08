@@ -194,7 +194,7 @@ Bundle-ClassPath: .,
  lib/openws-1.5.5.jar,
  lib/velocity-1.7.jar,
  lib/xmltooling-1.4.5.jar,
- lib/xmlsec-1.5.8.jar,
+ lib/xmlsec-2.1.1.jar,
  lib/bcpkix-jdk15on-151.jar
 Export-Package: com.openexchange.saml,
  com.openexchange.saml.spi,
