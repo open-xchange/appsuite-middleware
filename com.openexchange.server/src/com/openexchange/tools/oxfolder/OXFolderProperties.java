@@ -64,7 +64,6 @@ import com.openexchange.server.Initialization;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.oxfolder.memory.ConditionTreeMapManagement;
-import com.openexchange.tools.oxfolder.permissionLoader.PermissionLoaderService;
 
 /**
  * <tt>OXFolderProperties</tt> contains both folder properties and folder cache properties
@@ -110,7 +109,6 @@ public final class OXFolderProperties implements Initialization, CacheAvailabili
             return;
         }
         init();
-        PermissionLoaderService.getInstance().startUp();
         final CacheAvailabilityRegistry reg = CacheAvailabilityRegistry.getInstance();
         if (reg != null) {
             reg.registerListener(this);
@@ -135,7 +133,6 @@ public final class OXFolderProperties implements Initialization, CacheAvailabili
         ConditionTreeMapManagement.stopInstance();
         FolderCacheManager.releaseInstance();
         FolderQueryCacheManager.releaseInstance();
-        PermissionLoaderService.dropInstance();
         reset();
     }
 

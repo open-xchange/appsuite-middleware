@@ -98,6 +98,9 @@ postFix() {
     PFILE=/opt/open-xchange/etc/ModuleAccessDefinitions.properties
     expression='# webdavxml (interface for OXtender for Microsoft Outlook, used by KDE for synchronization)'
     $(contains "^${expression}$" $PFILE) && sed -i "s/^${expression}$/${expression} [DEPRECATED]/" $PFILE
+
+    # SoftwareChange_Request-147
+    ox_remove_property CREATE_CONTEXT_USE_UNIT /opt/open-xchange/etc/plugin/hosting.properties
 }
 
 setConfigFilePermissions() {
