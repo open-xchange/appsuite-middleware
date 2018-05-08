@@ -9,4 +9,4 @@ properties:
     configcascadeAware: false
     related: 
     file: saml.properties
-  	tags: ["SAML"]	
+    tags: ["SAML"]

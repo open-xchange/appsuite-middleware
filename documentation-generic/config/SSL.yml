@@ -23,7 +23,7 @@ properties:
     version: 7.8.3
     reloadable: false
     configcascadeAware: false
-    related: com.openexchange.net.ssl.custom.truststore.path, com.openexchange.net.ssl.custom.truststore.password
+    related: ["com.openexchange.net.ssl.custom.truststore.path", "com.openexchange.net.ssl.custom.truststore.password"]
     file: ssl.properties
     tags: ["SSL"]
   - key: com.openexchange.net.ssl.custom.truststore.path
@@ -33,7 +33,7 @@ properties:
     version: 7.8.3
     reloadable: false
     configcascadeAware: false
-    related: com.openexchange.net.ssl.custom.truststore.enabled, com.openexchange.net.ssl.custom.truststore.password
+    related: ["com.openexchange.net.ssl.custom.truststore.enabled", "com.openexchange.net.ssl.custom.truststore.password"]
     file: ssl.properties
     tags: ["SSL"]
   - key: com.openexchange.net.ssl.custom.truststore.password
@@ -43,7 +43,7 @@ properties:
     version: 7.8.3
     reloadable: false
     configcascadeAware: false
-    related: com.openexchange.net.ssl.custom.truststore.enabled, com.openexchange.net.ssl.custom.truststore.path
+    related: ["com.openexchange.net.ssl.custom.truststore.enabled", "com.openexchange.net.ssl.custom.truststore.path"]
     file: ssl.properties
     tags: ["SSL"]
   - key: com.openexchange.net.ssl.hostname.verification.enabled
