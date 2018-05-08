@@ -93,6 +93,9 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.java.Strings;
 import com.openexchange.tools.sql.DBUtils;
 
+/**
+ * {@link AdminCache}
+ */
 public class AdminCache {
 
     private static final AtomicReference<BundleContext> BUNDLE_CONTEXT = new AtomicReference<BundleContext>();
@@ -113,7 +116,7 @@ public class AdminCache {
      * @param update the new <tt>BundleContext</tt>
      * @return <code>true</code> if successful. <code>false</code> return indicates that the actual <tt>ConfigurationService</tt> was not equal to the expected <tt>ConfigurationService</tt>.
      */
-    public static boolean compareAndSetBundleContext(final BundleContext expect, final BundleContext update) {
+    public static boolean compareAndSetBundleContext(BundleContext expect, BundleContext update) {
         return BUNDLE_CONTEXT.compareAndSet(expect, update);
     }
 
@@ -122,7 +125,7 @@ public class AdminCache {
      *
      * @param service The <tt>BundleContext</tt> to set
      */
-    public static void setBundleContext(final BundleContext service) {
+    public static void setBundleContext(BundleContext service) {
         BUNDLE_CONTEXT.set(service);
     }
 
@@ -144,7 +147,7 @@ public class AdminCache {
      * @param update the new <tt>ConfigurationService</tt>
      * @return <code>true</code> if successful. <code>false</code> return indicates that the actual <tt>ConfigurationService</tt> was not equal to the expected <tt>ConfigurationService</tt>.
      */
-    public static boolean compareAndSetConfigurationService(final ConfigurationService expect, final ConfigurationService update) {
+    public static boolean compareAndSetConfigurationService(ConfigurationService expect, ConfigurationService update) {
         return CONF_SERVICE.compareAndSet(expect, update);
     }
 
@@ -153,7 +156,7 @@ public class AdminCache {
      *
      * @param service The <tt>ConfigurationService</tt> to set
      */
-    public static void setConfigurationService(final ConfigurationService service) {
+    public static void setConfigurationService(ConfigurationService service) {
         CONF_SERVICE.set(service);
     }
 
@@ -243,7 +246,7 @@ public class AdminCache {
      * @param service The {@link ConfigurationService}
      * @throws OXGenericException if an error is occurred
      */
-    public void initCache(final ConfigurationService service) throws OXGenericException {
+    public void initCache(ConfigurationService service) throws OXGenericException {
         this.prop = new PropertyHandler(System.getProperties());
         configureAuthentication(); // disabling authentication mechs
         readAndSetMasterCredentials(service);
@@ -259,7 +262,7 @@ public class AdminCache {
      * @return
      */
     public static UserModuleAccess getDefaultUserModuleAccess() {
-        final UserModuleAccess ret = new UserModuleAccess();
+        UserModuleAccess ret = new UserModuleAccess();
         ret.disableAll();
         ret.setWebmail(true);
         ret.setContacts(true);
@@ -301,9 +304,15 @@ public class AdminCache {
         return named_access_combinations.containsKey(name);
     }
 
-    public synchronized String getNameForAccessCombination(final UserModuleAccess access_combination) {
-        for (final Entry<String, UserModuleAccess> entry : named_access_combinations.entrySet()) {
-            if (entry.getValue().equals(access_combination)) {
+    /**
+     * Gets the name for the specified access combination
+     * 
+     * @param accessCombination The access combination
+     * @return The name access combination, or <code>null</code> if none found
+     */
+    public synchronized String getNameForAccessCombination(UserModuleAccess accessCombination) {
+        for (Entry<String, UserModuleAccess> entry : named_access_combinations.entrySet()) {
+            if (entry.getValue().equals(accessCombination)) {
                 return entry.getKey();
             }
         }
@@ -316,20 +325,20 @@ public class AdminCache {
     }
 
     public synchronized void initAccessCombinations() throws ClassNotFoundException, OXGenericException {
-        if (named_access_combinations == null) {
-            try {
-                log.info("Processing access combinations...");
-                named_access_combinations = getAccessCombinations(loadValidAccessModules(), loadAccessCombinations());
-                log.info("Access combinations processed!");
-            } catch (ClassNotFoundException e) {
-                log.error("Error loading access modules and methods!", e);
-                throw e;
-            } catch (OXGenericException e) {
-                log.error("Error processing access combinations config file!!", e);
-                throw e;
-            }
+        if (named_access_combinations != null) {
+            return;
         }
-
+        try {
+            log.info("Processing access combinations...");
+            named_access_combinations = getAccessCombinations(loadValidAccessModules(), loadAccessCombinations());
+            log.info("Access combinations processed!");
+        } catch (ClassNotFoundException e) {
+            log.error("Error loading access modules and methods!", e);
+            throw e;
+        } catch (OXGenericException e) {
+            log.error("Error processing access combinations config file!!", e);
+            throw e;
+        }
     }
 
     private HashMap<String, UserModuleAccess> getAccessCombinations(HashMap<String, Method> module_method_mapping, Properties access_props) throws OXGenericException {
@@ -410,9 +419,8 @@ public class AdminCache {
     }
 
     private static Properties loadAccessCombinations() {
-        // Load properties from file , if does not exists use fallback
-        // properties!
-        final ConfigurationService service = AdminServiceRegistry.getInstance().getService(ConfigurationService.class);
+        // Load properties from file , if does not exists use fall-back properties!
+        ConfigurationService service = AdminServiceRegistry.getInstance().getService(ConfigurationService.class);
         if (null == service) {
             throw new IllegalStateException("Absent service: " + ConfigurationService.class.getName());
         }
@@ -439,7 +447,7 @@ public class AdminCache {
         return this.prop;
     }
 
-    public Connection getConnectionForContext(final int context_id) throws PoolException {
+    public Connection getConnectionForContext(int context_id) throws PoolException {
         return this.pool.getConnectionForContext(context_id);
     }
 
@@ -447,14 +455,14 @@ public class AdminCache {
         return this.pool.getConnectionForContextNoTimeout(contextId);
     }
 
-    public boolean pushConnectionForContext(final int context_id, final Connection con) throws PoolException {
+    public boolean pushConnectionForContext(int context_id, Connection con) throws PoolException {
         if (con == null) {
             return true;
         }
         return this.pool.pushConnectionForContext(context_id, con);
     }
 
-    public boolean pushConnectionForContextAfterReading(final int context_id, final Connection con) throws PoolException {
+    public boolean pushConnectionForContextAfterReading(int context_id, Connection con) throws PoolException {
         if (con == null) {
             return true;
         }
@@ -486,19 +494,19 @@ public class AdminCache {
     }
 
     @Deprecated
-    public boolean pushConnectionForConfigDB(final Connection con) throws PoolException {
+    public boolean pushConnectionForConfigDB(Connection con) throws PoolException {
         return this.pool.pushConnectionForConfigDB(con);
     }
 
-    public boolean pushWriteConnectionForConfigDB(final Connection con) throws PoolException {
+    public boolean pushWriteConnectionForConfigDB(Connection con) throws PoolException {
         return this.pool.pushWriteConnectionForConfigDB(con);
     }
 
-    public boolean pushReadConnectionForConfigDB(final Connection con) throws PoolException {
+    public boolean pushReadConnectionForConfigDB(Connection con) throws PoolException {
         return this.pool.pushReadConnectionForConfigDB(con);
     }
 
-    public boolean pushWriteConnectionForConfigDBNoTimeout(final Connection con) throws PoolException {
+    public boolean pushWriteConnectionForConfigDBNoTimeout(Connection con) throws PoolException {
         return this.pool.pushWriteConnectionForConfigDBNoTimeout(con);
     }
 
@@ -525,16 +533,17 @@ public class AdminCache {
      */
     public final void setAdminCredentials(Context ctx, String authMech, Credentials adminCredentials) {
         // only set if authentication is enabled
-        if (!this.contextAuthenticationDisabled) {
-            this.adminCredentialsCache.put(ctx.getId(), adminCredentials);
-            this.adminAuthMechCache.put(ctx.getId(), authMech);
+        if (this.contextAuthenticationDisabled) {
+            return;
         }
+        this.adminCredentialsCache.put(ctx.getId(), adminCredentials);
+        this.adminAuthMechCache.put(ctx.getId(), authMech);
     }
 
     /**
      * @param ctx
      */
-    public final void removeAdminCredentials(final Context ctx) {
+    public final void removeAdminCredentials(Context ctx) {
         if (this.adminCredentialsCache.containsKey(ctx.getId())) {
             this.adminCredentialsCache.remove(ctx.getId());
         }
@@ -552,7 +561,6 @@ public class AdminCache {
     }
 
     public static Connection getSimpleSqlConnection(String url, String user, String password, String driver) throws SQLException, ClassNotFoundException {
-        // System.err.println("-->"+driver+" ->"+url+" "+user+" "+password);
         Class.forName(driver);
         // give database some time to react (in seconds)
         DriverManager.setLoginTimeout(120);
@@ -572,22 +580,22 @@ public class AdminCache {
     public Connection getSimpleSQLConnectionWithoutTimeout(String url, String user, String password, String driver) throws SQLException, ClassNotFoundException {
         Class.forName(driver);
         DriverManager.setLoginTimeout(120);
-        final int paramStart = url.indexOf('?');
-        final String newUrl;
-        final Properties defaults = new Properties();
+        int paramStart = url.indexOf('?');
+        String newUrl;
+        Properties defaults = new Properties();
         defaults.put("user", user);
         defaults.put("password", password);
         defaults.setProperty("useSSL", "false");
         if (-1 != paramStart) {
-            final Matcher matcher = pattern.matcher(url);
+            Matcher matcher = pattern.matcher(url);
             newUrl = url.substring(0, paramStart);
             while (matcher.find()) {
-                final String name = matcher.group(1);
-                final String value = matcher.group(2);
+                String name = matcher.group(1);
+                String value = matcher.group(2);
                 if (name != null && name.length() > 0 && value != null && value.length() > 0 && !name.toLowerCase().endsWith("timeout")) {
                     try {
                         defaults.put(name, URLDecoder.decode(value, "UTF-8"));
-                    } catch (final UnsupportedEncodingException e) {
+                    } catch (UnsupportedEncodingException e) {
                         // Should not happen for UTF-8.
                         log.error("", e);
                     }
@@ -600,12 +608,13 @@ public class AdminCache {
     }
 
     public void closeSimpleConnection(Connection con) {
-        if (con != null) {
-            try {
-                con.close();
-            } catch (Exception ecp) {
-                log.warn("Error closing simple CONNECTION!", ecp);
-            }
+        if (con == null) {
+            return;
+        }
+        try {
+            con.close();
+        } catch (Exception ecp) {
+            log.warn("Error closing simple CONNECTION!", ecp);
         }
     }
 
@@ -614,8 +623,8 @@ public class AdminCache {
      * transforms this to a StorageException.
      */
     public final static StorageException parseDataTruncation(DataTruncation dt) {
-        final String[] fields = DBUtils.parseTruncatedFields(dt);
-        final StringBuilder sFields = new StringBuilder();
+        String[] fields = DBUtils.parseTruncatedFields(dt);
+        StringBuilder sFields = new StringBuilder();
         sFields.append("Data too long for underlying storage!Error field(s): ");
         for (String field : fields) {
             sFields.append(field);
@@ -623,7 +632,7 @@ public class AdminCache {
         }
         sFields.deleteCharAt(sFields.length() - 1);
 
-        final StorageException st = new StorageException(sFields.toString());
+        StorageException st = new StorageException(sFields.toString());
         st.setStackTrace(dt.getStackTrace());
         return st;
     }
@@ -639,12 +648,12 @@ public class AdminCache {
      * @throws NoSuchAlgorithmException
      * @throws UnsupportedEncodingException
      */
-    public String encryptPassword(final PasswordMechObject user) throws StorageException, NoSuchAlgorithmException, UnsupportedEncodingException {
+    public String encryptPassword(PasswordMechObject user) throws StorageException, NoSuchAlgorithmException, UnsupportedEncodingException {
         String passwordMech = getPasswordMechanism(user);
         Encrypter encrypter = encrypters.get(passwordMech);
         if (encrypter == null) {
-            log.error("unsupported password mechanism: {}", passwordMech);
-            throw new StorageException("unsupported password mechanism: " + passwordMech);
+            log.error("Unsupported password mechanism: {}", passwordMech);
+            throw new StorageException("Unsupported password mechanism: " + passwordMech);
         }
         return encrypter.encrypt(user.getPassword());
     }
@@ -656,7 +665,7 @@ public class AdminCache {
      * @return The password mechanism. If the {@link PasswordMechObject} contains an unknown password mechanism, then
      *         the <code>{SHA}</code> mechanism is returned.
      */
-    private String getPasswordMechanism(final PasswordMechObject user) {
+    private String getPasswordMechanism(PasswordMechObject user) {
         String passwordMech = user.getPasswordMech();
         if (com.openexchange.java.Strings.isEmpty(passwordMech) || "null".equals(com.openexchange.java.Strings.toLowerCase(passwordMech))) {
             String pwmech = getProperties().getUserProp(AdminProperties.User.DEFAULT_PASSWORD_MECHANISM, "SHA");
@@ -677,8 +686,8 @@ public class AdminCache {
     private void configureAuthentication() {
         log.debug("Configuring authentication mechanisms ...");
 
-        final String master_auth_disabled = this.prop.getProp("MASTER_AUTHENTICATION_DISABLED", "false"); // fallback is auth
-        final String context_auth_disabled = this.prop.getProp("CONTEXT_AUTHENTICATION_DISABLED", "false"); // fallback is auth
+        String master_auth_disabled = this.prop.getProp("MASTER_AUTHENTICATION_DISABLED", "false"); // fallback is auth
+        String context_auth_disabled = this.prop.getProp("CONTEXT_AUTHENTICATION_DISABLED", "false"); // fallback is auth
 
         masterAuthenticationDisabled = Boolean.parseBoolean(master_auth_disabled);
         log.debug("MasterAuthentication mechanism disabled: {}", masterAuthenticationDisabled);
@@ -690,10 +699,10 @@ public class AdminCache {
         log.debug("Master override: {}", allowMasterOverride);
     }
 
-    private void readAndSetMasterCredentials(final ConfigurationService service) throws OXGenericException {
+    private void readAndSetMasterCredentials(ConfigurationService service) throws OXGenericException {
         Credentials masterCredentials = readMasterCredentials(service);
         if (null == masterCredentials) {
-            final OXGenericException genericException = new OXGenericException("No master credentials defined!");
+            OXGenericException genericException = new OXGenericException("No master credentials defined!");
             log.warn("", genericException);
         } else {
             this.masterCredentials = masterCredentials;
@@ -701,82 +710,82 @@ public class AdminCache {
         }
     }
 
-    private Credentials readMasterCredentials(final ConfigurationService service) throws OXGenericException {
-        BufferedReader bf = null;
-        try {
-            final File file = service.getFileByName("mpasswd");
-            if (null != file) {
-                bf = new BufferedReader(new FileReader(file), 2048);
-                String line = null;
-                while ((line = bf.readLine()) != null) {
-                    if (!line.startsWith("#")) {
-                        if (line.indexOf(':') >= 0) {
-                            // ok seems to be a line with user:pass entry
-                            final String[] user_pass_combination = line.split(":");
-                            if (user_pass_combination.length == 3) {
-                                Credentials masterCredentials = new Credentials(user_pass_combination[0], user_pass_combination[2]);
-                                masterCredentials.setPasswordMech(user_pass_combination[1]);
-                                return masterCredentials;
-                            } else {
-                                throw new OXGenericException("Invalid mpasswd format.");
-                            }
-                        }
-                    }
+    /**
+     * Reads the master credentials
+     * 
+     * @param service The {@link ConfigurationService} from which to read the master credentials file
+     * @return The master {@link Credentials} or <code>null</code> if the file is not found
+     * @throws OXGenericException if an invalid mpasswd format is detected
+     */
+    private Credentials readMasterCredentials(ConfigurationService service) throws OXGenericException {
+        File file = service.getFileByName("mpasswd");
+        if (null == file) {
+            return null;
+        }
+
+        try (BufferedReader bf = new BufferedReader(new FileReader(file), 2048)) {
+            String line = null;
+            while ((line = bf.readLine()) != null) {
+                if (line.startsWith("#")) {
+                    continue;
                 }
+                if (line.indexOf(':') < 0) {
+                    continue;
+                }
+                // Ok seems to be a line with user:pass entry
+                String[] user_pass_combination = line.split(":");
+                if (user_pass_combination.length != 3) {
+                    throw new OXGenericException("Invalid mpasswd format.");
+                }
+                Credentials masterCredentials = new Credentials(user_pass_combination[0], user_pass_combination[2]);
+                masterCredentials.setPasswordMech(user_pass_combination[1]);
+                return masterCredentials;
             }
         } catch (IOException e) {
             throw new OXGenericException("Error processing master auth file: mpasswd", e);
-        } finally {
-            if (null != bf) {
-                try {
-                    bf.close();
-                } catch (IOException e) {
-                    log.error("", e);
-                }
-            }
         }
         return null;
     }
 
     @Deprecated
-    public void closeConfigDBSqlStuff(final Connection con, final PreparedStatement stmt, final ResultSet rs) {
+    public void closeConfigDBSqlStuff(Connection con, PreparedStatement stmt, ResultSet rs) {
         if (null != rs) {
             try {
                 rs.close();
-            } catch (final SQLException e) {
+            } catch (SQLException e) {
                 log.error("Error closing resultset", e);
             }
         }
         closeConfigDBSqlStuff(con, stmt);
     }
 
-    public void closeConfigDBSqlStuff(final PreparedStatement stmt, final ResultSet rs) {
+    public void closeConfigDBSqlStuff(PreparedStatement stmt, ResultSet rs) {
         if (null != rs) {
             try {
                 rs.close();
-            } catch (final SQLException e) {
+            } catch (SQLException e) {
                 log.error("Error closing resultset", e);
             }
         }
         closeReadConfigDBSqlStuff(null, stmt);
     }
 
-    public void closeReadConfigDBSqlStuff(final Connection con, final PreparedStatement stmt, final ResultSet rs) {
+    public void closeReadConfigDBSqlStuff(Connection con, PreparedStatement stmt, ResultSet rs) {
         if (null != rs) {
             try {
                 rs.close();
-            } catch (final SQLException e) {
+            } catch (SQLException e) {
                 log.error("Error closing resultset", e);
             }
         }
         closeReadConfigDBSqlStuff(con, stmt);
     }
 
-    public void closeWriteConfigDBSqlStuff(final Connection con, final PreparedStatement stmt, final ResultSet rs) {
+    public void closeWriteConfigDBSqlStuff(Connection con, PreparedStatement stmt, ResultSet rs) {
         if (null != rs) {
             try {
                 rs.close();
-            } catch (final SQLException e) {
+            } catch (SQLException e) {
                 log.error("Error closing resultset", e);
             }
         }
@@ -784,62 +793,62 @@ public class AdminCache {
     }
 
     @Deprecated
-    public void closeConfigDBSqlStuff(final Connection con, final PreparedStatement stmt) {
+    public void closeConfigDBSqlStuff(Connection con, PreparedStatement stmt) {
         if (stmt != null) {
             try {
                 stmt.close();
-            } catch (final SQLException e) {
+            } catch (SQLException e) {
                 log.error("Error closing statement", e);
             }
         }
         if (con != null) {
             try {
                 pushConnectionForConfigDB(con);
-            } catch (final PoolException exp) {
+            } catch (PoolException exp) {
                 log.error("Pool Error pushing connection to pool!", exp);
             }
         }
     }
 
-    public void closeReadConfigDBSqlStuff(final Connection con, final PreparedStatement stmt) {
+    public void closeReadConfigDBSqlStuff(Connection con, PreparedStatement stmt) {
         if (stmt != null) {
             try {
                 stmt.close();
-            } catch (final SQLException e) {
+            } catch (SQLException e) {
                 log.error("Error closing statement", e);
             }
         }
         if (con != null) {
             try {
                 pushReadConnectionForConfigDB(con);
-            } catch (final PoolException exp) {
+            } catch (PoolException exp) {
                 log.error("Pool Error pushing connection to pool!", exp);
             }
         }
     }
 
-    public void closeWriteConfigDBSqlStuff(final Connection con, final PreparedStatement stmt) {
+    public void closeWriteConfigDBSqlStuff(Connection con, PreparedStatement stmt) {
         if (stmt != null) {
             try {
                 stmt.close();
-            } catch (final SQLException e) {
+            } catch (SQLException e) {
                 log.error("Error closing statement", e);
             }
         }
         if (con != null) {
             try {
                 pushWriteConnectionForConfigDB(con);
-            } catch (final PoolException exp) {
+            } catch (PoolException exp) {
                 log.error("Pool Error pushing connection to pool!", exp);
             }
         }
     }
 
-    public void closeContextSqlStuff(final Connection con, final int context_id) {
+    public void closeContextSqlStuff(Connection con, int context_id) {
         closeContextSqlStuff(con, context_id, false);
     }
 
-    public void closeContextSqlStuff(final Connection con, final int context_id, final boolean afterReading) {
+    public void closeContextSqlStuff(Connection con, int context_id, boolean afterReading) {
         if (con != null) {
             try {
                 if (afterReading) {
@@ -847,16 +856,22 @@ public class AdminCache {
                 } else {
                     pushConnectionForContext(context_id, con);
                 }
-            } catch (final PoolException exp) {
+            } catch (PoolException exp) {
                 log.error("Pool Error pushing connection to pool!", exp);
             }
         }
     }
 
-    public boolean isMasterAdmin(final Credentials auth) {
+    public boolean isMasterAdmin(Credentials auth) {
         return masterAuthenticationDisabled || (getMasterCredentials() != null && getMasterCredentials().getLogin().equals(auth.getLogin()));
     }
 
+    /**
+     * Reloads the master {@link Credentials} from the specified {@link ConfigurationService}
+     * 
+     * @param configService the {@link ConfigurationService}
+     * @throws OXGenericException if no master credentials are defined
+     */
     public void reloadMasterCredentials(ConfigurationService configService) throws OXGenericException {
         Credentials credentials = readMasterCredentials(configService);
         if (this.masterCredentials == null) {
@@ -867,7 +882,7 @@ public class AdminCache {
         } else if (!this.masterCredentials.equals(credentials)) {
             this.masterCredentials = credentials;
             if (null == this.masterCredentials) {
-                final OXGenericException genericException = new OXGenericException("No master credentials defined!");
+                OXGenericException genericException = new OXGenericException("No master credentials defined!");
                 log.warn("", genericException);
             } else {
                 log.debug("Master credentials successfully set!");
