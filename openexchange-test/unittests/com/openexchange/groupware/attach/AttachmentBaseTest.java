@@ -225,7 +225,7 @@ public class AttachmentBaseTest extends AbstractAttachmentTest {
         Assert.assertEquals("Hallo Welt", new String(out.toByteArray(), com.openexchange.java.Charsets.UTF_8));
     }
 
-    public void doAttach(final int folderId, final int attachedId, final int moduleId) throws Exception {
+    public int doAttach(final int folderId, final int attachedId, final int moduleId) throws Exception {
         final AttachmentMetadata attachment = getAttachment(testFile, folderId, attachedId, moduleId, true);
 
         final AttachmentMetadata copy = new AttachmentImpl(attachment);
@@ -264,8 +264,8 @@ public class AttachmentBaseTest extends AbstractAttachmentTest {
             if (in2 != null) {
                 in.close();
             }
-
         }
+        return attachment.getId();
     }
 
     public void doDetach(final int folderId, final int attachedId, final int moduleId) throws Exception {
@@ -479,27 +479,29 @@ public class AttachmentBaseTest extends AbstractAttachmentTest {
 
     public void doCheckPermissions(final int folderId, final int attachedId, final int moduleId) throws Exception {
         final TestAttachmentAuthz authz = new TestAttachmentAuthz();
-
+        // Attach a test attachment to use for the gets
+        int attachmentId = doAttach(folderId, attachedId, moduleId);
+        // Revoke the authorisation
         attachmentBase.addAuthorization(authz, moduleId);
+        // Check for the permissions
         try {
             try {
-                final AttachmentMetadata attachment = getAttachment(testFile, folderId, attachedId, moduleId, false);
+                AttachmentMetadata attachment = getAttachment(testFile, folderId, attachedId, moduleId, false);
                 attachmentBase.attachToObject(attachment, null, MODE.getSession(), MODE.getContext(), MODE.getUser(), new MutableUserConfiguration(new HashSet<String>(), 0, new int[0], null));
                 clean.add(attachment);
                 fail("Disallow failed");
             } catch (final OXException x) {
                 authz.assertMayAttach();
             }
-
             try {
-                attachmentBase.getAttachment(MODE.getSession(), folderId, attachedId, moduleId, -1, MODE.getContext(), MODE.getUser(), new MutableUserConfiguration(new HashSet<String>(), 0, new int[0], null));
+                attachmentBase.getAttachment(MODE.getSession(), folderId, attachedId, moduleId, attachmentId, MODE.getContext(), MODE.getUser(), new MutableUserConfiguration(new HashSet<String>(), 0, new int[0], null));
                 fail("Disallow failed");
             } catch (final OXException x) {
                 authz.assertMayRead();
             }
 
             try {
-                attachmentBase.getAttachedFile(MODE.getSession(), folderId, attachedId, moduleId, -1, MODE.getContext(), MODE.getUser(), new MutableUserConfiguration(new HashSet<String>(), 0, new int[0], null));
+                attachmentBase.getAttachedFile(MODE.getSession(), folderId, attachedId, moduleId, attachmentId, MODE.getContext(), MODE.getUser(), new MutableUserConfiguration(new HashSet<String>(), 0, new int[0], null));
                 fail("Disallow failed");
             } catch (final OXException x) {
                 authz.assertMayRead();

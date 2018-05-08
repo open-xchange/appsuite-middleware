@@ -3,11 +3,19 @@ package com.openexchange.groupware.attach;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.BeforeClass;
+import com.openexchange.ajax.framework.ProvisioningSetup;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Init;
 
 public abstract class AbstractAttachmentTest {
 
     private Mode mode;
+
+    @BeforeClass
+    public static void beforeClass() throws OXException {
+        ProvisioningSetup.init();
+    }
 
     @Before
     public void setUp() throws Exception {
