@@ -87,7 +87,11 @@ import com.openexchange.tools.session.ServerSessionFactory;
 public class AbstractInfostoreTest {
 
     protected InfostoreFacade infostore;
-    private TestContext testContext = null;
+
+    private TestContext testContext;
+    private TestUser testUserA;
+    private TestUser testUserB;
+
     protected Context ctx = null;
     protected User user = null;
     protected User user2 = null;
@@ -122,8 +126,8 @@ public class AbstractInfostoreTest {
         ContextStorage.getInstance();
 
         testContext = TestContextPool.acquireContext(this.getClass().getName());
-        TestUser testUserA = testContext.acquireUser();
-        TestUser testUserB = testContext.acquireUser();
+        testUserA = testContext.acquireUser();
+        testUserB = testContext.acquireUser();
 
         String userName = testUserA.getUser();
         String userName2 = testUserB.getUser();
@@ -165,6 +169,8 @@ public class AbstractInfostoreTest {
         }
 
         Init.stopServer();
+        testContext.backUser(testUserA);
+        testContext.backUser(testUserB);
         TestContextPool.backContext(testContext);
     }
 
