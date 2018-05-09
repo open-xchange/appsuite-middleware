@@ -27,7 +27,7 @@
 	<classpathentry exported="true" kind="lib" path="lib/sis-netcdf-0.8.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/sis-storage-0.8.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/sis-utility-0.8.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/tagsoup-1.2.1.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/tagsoup-1.2.1.jar" sourcepath="lib/source/tagsoup-1.2.1-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/unit-api-1.0.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/vorbis-java-core-0.8.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/vorbis-java-tika-0.8.jar"/>
