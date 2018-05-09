@@ -35,7 +35,6 @@ import org.apache.cxf.databinding.DataReader;
 import org.apache.cxf.endpoint.Endpoint;
 import org.apache.cxf.interceptor.AbstractInDatabindingInterceptor;
 import org.apache.cxf.interceptor.Fault;
-import org.apache.cxf.interceptor.URIMappingInterceptor;
 import org.apache.cxf.message.Exchange;
 import org.apache.cxf.message.Message;
 import org.apache.cxf.message.MessageContentsList;
@@ -67,7 +66,9 @@ public class DocLiteralInInterceptor extends AbstractInDatabindingInterceptor {
 
     public DocLiteralInInterceptor() {
         super(Phase.UNMARSHAL);
-        addAfter(URIMappingInterceptor.class.getName());
+        // 'The deprecated URIMappingInterceptor has been removed.  This hasn't been on the default chain for some time due to a bunch of security related issues.'
+        // from http://cxf.apache.org/docs/30-migration-guide.html
+//        addAfter(URIMappingInterceptor.class.getName());
     }
 
     @Override
