@@ -430,4 +430,18 @@ public abstract class AbstractITipAnalyzer implements ITipAnalyzer {
             event.setAttendees(attendees);
         }
     }
+
+    /**
+     * Checks if a exception was already deleted
+     * 
+     * @param original The original or rather the master event
+     * @param exception The exception to check
+     * @return <code>true</code> if the given exception was already deleted
+     */
+    protected boolean isDeleteException(Event original, Event exception) {
+        if (original.containsDeleteExceptionDates() && null != original.getDeleteExceptionDates()) {
+            return original.getDeleteExceptionDates().stream().anyMatch(r -> 0 == r.compareTo(exception.getRecurrenceId()));
+        }
+        return false;
+    }
 }

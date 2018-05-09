@@ -159,6 +159,11 @@ public class ReplyITipAnalyzer extends AbstractITipAnalyzer {
 
                 analysis.addChange(change);
             } else {
+                if (isDeleteException(original, exception)) {
+                    analysis.addAnnotation(new ITipAnnotation(Messages.CHANGE_PARTICIPANT_STATE_IN_DELETED_APPOINTMENT, locale));
+                    analysis.recommendAction(ITipAction.IGNORE);
+                    return analysis;
+                }
                 session.getUtilities().adjustTimeZones(message.getOwner() > 0 ? message.getOwner() : session.getUserId(), exception, original);
                 change.setCurrentEvent(original);
                 change.setNewEvent(ensureAttendees(original, exception));

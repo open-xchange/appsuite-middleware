@@ -70,6 +70,7 @@ public class Messages implements LocalizableStrings {
     public static final String ADD_WOULD_OVERWRITE_EXISTING_EXCEPTION = "The organizer would like to change the occurrence of a recurrence on a day that already contains such a change. The server can only store one change for a series per day.";
     public static final String CANCEL_UNKNOWN_APPOINTMENT = "The organizer would like to cancel an appointment that could not be found.";
     public static final String CHANGE_PARTICIPANT_STATE_IN_UNKNOWN_APPOINTMENT = "An attendee wanted to change his/her participant state in an appointment that could not be found. Probably the appointment was already canceled.";
+    public static final String CHANGE_PARTICIPANT_STATE_IN_DELETED_APPOINTMENT = "An attendee wanted to change his/her participant state in an appointment that was already deleted.";
     public static final String OLD_UPDATE = "This is an update to an appointment that has been changed in the meantime. Best ignore it.";
     public static final String COUNTER_UNKNOWN_APPOINTMENT = "An attendee wants to change an appointment that could not be found. Probably the appointment was deleted. Best ignore it.";
     public static final String DECLINED_COUNTER_PROPOSAL = "The organizer declined your counter proposal for the appointment.";

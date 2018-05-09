@@ -369,9 +369,9 @@ public interface OXContextServicePortType {
     public java.util.List<com.openexchange.admin.soap.context.dataobjects.Context> listPageByDatabase(
         @WebParam(name = "db", targetNamespace = "http://soap.admin.openexchange.com")
         com.openexchange.admin.soap.context.dataobjects.Database db,
-        @WebParam(name = "db", targetNamespace = "http://soap.admin.openexchange.com")
+        @WebParam(name = "offset", targetNamespace = "http://soap.admin.openexchange.com")
         String offset,
-        @WebParam(name = "db", targetNamespace = "http://soap.admin.openexchange.com")
+        @WebParam(name = "length", targetNamespace = "http://soap.admin.openexchange.com")
         String length,
         @WebParam(name = "auth", targetNamespace = "http://soap.admin.openexchange.com")
         com.openexchange.admin.soap.context.dataobjects.Credentials auth
