@@ -522,7 +522,7 @@ public class ResourceTest extends AbstractResourceTest {
         now = new Date();
         res.setDisplayName(res.getDisplayName());
         res.save();
-        assertEquals(now, res.getLastModified(), SKEW);
+        assertEquals(now, res.getLastModified(), SKEW + 1000);
 
         return null;
     }
