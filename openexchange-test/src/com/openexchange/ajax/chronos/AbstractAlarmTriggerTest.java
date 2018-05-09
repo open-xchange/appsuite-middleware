@@ -139,6 +139,16 @@ public abstract class AbstractAlarmTriggerTest extends AbstractAlarmTest {
     }
 
     /**
+     * Retrieves alarm triggers until two days.
+     *
+     * @return The {@link AlarmTriggerData}
+     * @throws ApiException
+     */
+    AlarmTriggerData getAlarmTriggers() throws ApiException {
+        return eventManager.getAlarmTrigger(System.currentTimeMillis() + TimeUnit.DAYS.toMillis(2));
+    }
+
+    /**
      * Checks if the trigger is related to the given event and if the trigger time is correct
      *
      * @param trigger The trigger
