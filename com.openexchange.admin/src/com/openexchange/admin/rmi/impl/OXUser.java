@@ -414,13 +414,13 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
 
             // Check capacity
             OXUtilStorageInterface oxu = OXUtilStorageInterface.getInstance();
-            Filestore destFilestore = oxu.getFilestore(dstFilestore.getId().intValue(), false);
-            if (!oxu.hasSpaceForAnotherUser(destFilestore)) {
+            Filestore loadedDstFilestore = oxu.getFilestore(dstFilestore.getId().intValue(), false);
+            if (!oxu.hasSpaceForAnotherUser(loadedDstFilestore)) {
                 throw new StorageException("Destination filestore does not have enough space for another user.");
             }
 
             // Load it to ensure validity
-            String baseUri = destFilestore.getUrl();
+            String baseUri = loadedDstFilestore.getUrl();
             try {
                 URI uri = FileStorages.getFullyQualifyingUriForContext(ctx.getId().intValue(), new java.net.URI(baseUri));
                 FileStorages.getFileStorageService().getFileStorage(uri);
@@ -431,7 +431,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             }
 
             // Initialize mover instance
-            FilestoreDataMover fsdm = FilestoreDataMover.newUserMover(oxu.getFilestore(srcStore_id), dstFilestore, storageUser, ctx);
+            FilestoreDataMover fsdm = FilestoreDataMover.newUserMover(oxu.getFilestore(srcStore_id, false), loadedDstFilestore, storageUser, ctx);
 
             // Enable user after processing
             fsdm.addPostProcessTask(new PostProcessTask() {
@@ -2591,6 +2591,10 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
 
     /**
      * Checks for valid Module Accesses.
+<<<<<<< HEAD
+=======
+     *
+>>>>>>> 6f387ad763b... Bug #58509: use properly loaded filestore
      * @param addAccess
      * @throws InvalidDataException
      */
@@ -2794,6 +2798,10 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
     /**
      *
      * {@inheritDoc}
+<<<<<<< HEAD
+=======
+     *
+>>>>>>> 6f387ad763b... Bug #58509: use properly loaded filestore
      * @throws InvalidDataException
      */
     @Override
