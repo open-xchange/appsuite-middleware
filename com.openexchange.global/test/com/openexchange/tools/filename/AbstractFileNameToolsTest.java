@@ -49,27 +49,37 @@
 
 package com.openexchange.tools.filename;
 
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import org.junit.Test;
+import com.openexchange.java.Strings;
 
 /**
- * {@link Bug58052Test}
+ * {@link AbstractFileNameToolsTest}
  *
- * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
- * @since v7.10.0
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.8.0
  */
-public class Bug58052Test extends AbstractFileNameToolsTest {
+public abstract class AbstractFileNameToolsTest {
 
-    @Test
-    public void testLeaveAllowedUnicodeChars() {
-        String fileName = "\u2460ab\u2461cd\u2462.zip";
+    /**
+     * Initializes a new {@link AbstractFileNameToolsTest}.
+     */
+    protected AbstractFileNameToolsTest() {
+        super();
+    }
 
-        String sanitizedString = FileNameTools.sanitizeFilename(fileName);
-
-        assertTrue("Characters wrongly sanitized " + sanitizedString, sanitizedString.contains("\u2460"));
-        assertTrue("Characters wrongly sanitized " + sanitizedString, sanitizedString.contains("\u2461"));
-        assertTrue("Characters wrongly sanitized " + sanitizedString, sanitizedString.contains("\u2462"));
-        assertTrue("Unexpected string after sanitizing", fileName.equalsIgnoreCase(sanitizedString));
+    /**
+     * Checks if specified string "survives" sanitization through {@link FileNameTools#sanitizeFilename(String) sanitizeFilename()}.
+     *
+     * @param string The string to check
+     * @param checkNormalized <code>true</code> to also check if sanitization maintains noralized form, otherwise <code>false</code>
+     */
+    protected static void checkSanitizing(String string, boolean checkNormalized) {
+        String sanitizedString = FileNameTools.sanitizeFilename(string);
+        assertFalse("Sanitized characters in " + sanitizedString, sanitizedString.indexOf('_') >= 0);
+        if (checkNormalized) {
+            assertTrue("Unexpected string after sanitizing", Strings.equalsNormalized(string, sanitizedString));
+        }
     }
 
 }
