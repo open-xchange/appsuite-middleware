@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
+	<classpathentry exported="true" kind="lib" path="lib/uimaj-core-3.0.0.jar" sourcepath="lib/source/uimaj-core-3.0.0-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/cdm-4.5.5.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/curvesapi-1.04.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/geoapi-3.0.1.jar"/>
