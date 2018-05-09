@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
+	<classpathentry exported="true" kind="lib" path="lib/jai-imageio-jpeg2000-1.3.0.jar" sourcepath="lib/source/jai-imageio-jpeg2000-1.3.0-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/ctakes-core-4.0.0.jar" sourcepath="lib/source/ctakes-core-4.0.0-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/uimaj-core-3.0.0.jar" sourcepath="lib/source/uimaj-core-3.0.0-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/cdm-4.5.5.jar"/>
