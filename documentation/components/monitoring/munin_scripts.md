@@ -6,26 +6,6 @@ title: Munin scripts
 
 ## Installation on OX App Suite
 
-### Debian GNU/Linux 7.0 (valid until v7.8.2)
-
-Add the following entry to /etc/apt/sources.list.d/open-xchange.list if not already present:
-
-```
-deb https://software.open-xchange.com/products/appsuite/7.8.2/backend/DebianWheezy/ /
-
-\# if you have a valid maintenance subscription, please uncomment the 
-\# following and add the ldb account data to the url so that the most recent
-\# packages get installed
-\# deb https://[CUSTOMERID:PASSWORD]@software.open-xchange.com/products/appsuite/7.8.2/backend/updates/DebianWheezy/ /
-```	
-
-and run 
-
-```
-$ apt-get update
-$ apt-get install open-xchange-munin-scripts
-```
-
 ### Debian GNU/Linux 8.0
 
 Add the following entry to /etc/apt/sources.list.d/open-xchange.list if not already present:
@@ -45,27 +25,6 @@ and run
 $ apt-get update
 $ apt-get install open-xchange-munin-scripts
 ```
-
-### SUSE Linux Enterprise Server 11 (valid until v7.8.2)
-Add the package repository using zypper if not already present:
-
-```
-$ zypper ar https://software.open-xchange.com/products/appsuite/7.8.2/backend/SLES11 ox
-```
-
-If you have a valid maintenance subscription, please run the following command and add the ldb account data to the url so that the most recent packages get installed:
-
-```
-$ zypper ar https://[CUSTOMERID:PASSWORD]@software.open-xchange.com/products/appsuite/7.8.2/backend/updates/SLES11 ox-updates
-```
-
-and run
-
-```
-$ zypper ref
-$ zypper in open-xchange-munin-scripts
-```
-
 ### SUSE Linux Enterprise Server 12
 
 Add the package repository using zypper if not already present:
