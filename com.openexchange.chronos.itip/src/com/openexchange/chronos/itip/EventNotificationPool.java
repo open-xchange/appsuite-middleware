@@ -55,10 +55,12 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.locks.ReentrantLock;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.AttendeeField;
@@ -422,8 +424,9 @@ public class EventNotificationPool implements EventNotificationPoolService, Runn
                 generator.noActor();
             }
             List<NotificationParticipant> recipients = generator.getRecipients();
+            Set<Integer> selfRemoved = getSelfRemoved();
             for (NotificationParticipant participant : recipients) {
-                if (isAlreadyInformed(participant, mostRecent, I(session.getContextId()))) {
+                if (selfRemoved.contains(I(participant.getIdentifier())) || isAlreadyInformed(participant, mostRecent, I(session.getContextId()))) {
                     continue; // Skip this participant. He was already informed about the exact same event.
                 }
 
@@ -440,9 +443,10 @@ public class EventNotificationPool implements EventNotificationPoolService, Runn
                 generator.noActor();
             }
             List<NotificationParticipant> recipients = generator.getRecipients();
+            Set<Integer> selfRemoved = getSelfRemoved();
             for (NotificationParticipant participant : recipients) {
                 if (!participant.isExternal()) {
-                    if (isAlreadyInformed(participant, mostRecent, I(session.getContextId()))) {
+                    if (selfRemoved.contains(I(participant.getIdentifier())) || isAlreadyInformed(participant, mostRecent, I(session.getContextId()))) {
                         continue; // Skip this participant. He was already informed about the exact same event.
                     }
 
@@ -461,6 +465,16 @@ public class EventNotificationPool implements EventNotificationPoolService, Runn
                 return diff.getUpdatedFields().isEmpty();
             }
             return false;
+        }
+
+        private Set<Integer> getSelfRemoved() throws OXException {
+            Set<Integer> retval = new HashSet<>();
+            for (Update u : updates) {
+                if (u.getDiff().isAboutCertainParticipantsRemoval(u.getSession().getUserId())) {
+                    retval.add(I(u.getSession().getUserId()));
+                }
+            }
+            return retval;
         }
 
         private boolean moreThanOneUserActed() {
@@ -507,8 +521,10 @@ public class EventNotificationPool implements EventNotificationPoolService, Runn
                 Event newEvent = userScopedUpdate[1].getNewEvent();
                 ITipMailGenerator generator = generatorFactory.create(oldEvent, newEvent, session, userScopedUpdate[0].getSharedFolderOwner(), principal);
                 List<NotificationParticipant> recipients = generator.getRecipients();
+                Set<Integer> selfRemoved = getSelfRemoved();
                 for (NotificationParticipant participant : recipients) {
-                    if (participant.isExternal() && !participant.hasRole(ITipRole.ORGANIZER)) {
+                    if (selfRemoved.contains(I(participant.getIdentifier())) || (participant.isExternal() && !participant.hasRole(ITipRole.ORGANIZER))) {
+                        // Skip external attendees or internal users that removed themselves
                         continue;
                     }
                     NotificationMail mail = generator.generateUpdateMailFor(participant);
@@ -543,8 +559,9 @@ public class EventNotificationPool implements EventNotificationPoolService, Runn
                 generator.noActor();
             }
             List<NotificationParticipant> recipients = generator.getRecipients();
+            Set<Integer> selfRemoved = getSelfRemoved();
             for (NotificationParticipant participant : recipients) {
-                if (participant.isExternal()) {
+                if (participant.isExternal() || selfRemoved.contains(I(participant.getIdentifier()))) {
                     continue;
                 }
                 NotificationMail mail = generator.generateUpdateMailFor(participant);
