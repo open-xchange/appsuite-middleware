@@ -66,11 +66,9 @@ import com.openexchange.groupware.infostore.facade.impl.InfostoreFacadeImpl;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
+import com.openexchange.setuptools.TestConfig;
 import com.openexchange.setuptools.TestContextToolkit;
 import com.openexchange.test.TestInit;
-import com.openexchange.test.pool.TestContext;
-import com.openexchange.test.pool.TestContextPool;
-import com.openexchange.test.pool.TestUser;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.oxfolder.OXFolderManager;
 import com.openexchange.tools.session.ServerSession;
@@ -85,10 +83,6 @@ import com.openexchange.tools.session.ServerSessionFactory;
 public class AbstractInfostoreTest {
 
     protected InfostoreFacade infostore;
-
-    private TestContext testContext;
-    private TestUser testUserA;
-    private TestUser testUserB;
 
     protected Context ctx = null;
     protected User user = null;
@@ -118,14 +112,12 @@ public class AbstractInfostoreTest {
 
         ContextStorage.getInstance();
 
-        testContext = TestContextPool.acquireContext(this.getClass().getName());
-        testUserA = testContext.acquireUser();
-        testUserB = testContext.acquireUser();
+        final TestConfig config = new TestConfig();
+        final String userName = config.getUser();
+        final String userName2 = config.getSecondUser();
+        final TestContextToolkit tools = new TestContextToolkit();
+        final String ctxName = config.getContextName();
 
-        String userName = testUserA.getUser();
-        String userName2 = testUserB.getUser();
-        TestContextToolkit tools = new TestContextToolkit();
-        String ctxName = testContext.getName();
         ctx = null == ctxName || ctxName.trim().length() == 0 ? tools.getDefaultContext() : tools.getContextByName(ctxName);
         user = UserStorage.getInstance().getUser(tools.resolveUser(userName, ctx), ctx);
         user2 = UserStorage.getInstance().getUser(tools.resolveUser(userName2, ctx), ctx);
@@ -162,9 +154,6 @@ public class AbstractInfostoreTest {
         }
 
         Init.stopServer();
-        testContext.backUser(testUserA);
-        testContext.backUser(testUserB);
-        TestContextPool.backContext(testContext);
     }
 
     protected InfostoreFacade getInfostore() {
