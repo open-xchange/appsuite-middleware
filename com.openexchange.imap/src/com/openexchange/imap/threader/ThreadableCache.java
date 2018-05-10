@@ -54,9 +54,10 @@ import gnu.trove.TLongCollection;
 import gnu.trove.set.TLongSet;
 import gnu.trove.set.hash.TLongHashSet;
 import java.util.List;
-import java.util.concurrent.ConcurrentMap;
-import com.googlecode.concurrentlinkedhashmap.ConcurrentLinkedHashMap;
-import com.googlecode.concurrentlinkedhashmap.Weighers;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 import com.openexchange.session.Session;
 
 /**
@@ -83,14 +84,14 @@ public final class ThreadableCache {
      * @param session The session providing user information
      */
     public static void dropFor(final Session session) {
-        INSTANCE.userMap.remove(new UserKey(session.getUserId(), session.getContextId()));
+        INSTANCE.userMap.invalidate(new UserKey(session.getUserId(), session.getContextId()));
     }
 
     /**
      * Drops the cache associated with specified user.
      */
     public static void dropFor(int userId, int contextId) {
-        INSTANCE.userMap.remove(new UserKey(userId, contextId));
+        INSTANCE.userMap.invalidate(new UserKey(userId, contextId));
     }
 
     /**
@@ -106,21 +107,21 @@ public final class ThreadableCache {
      * ------------------------------------------------------------------------
      */
 
-    private final ConcurrentMap<UserKey, ConcurrentTIntObjectHashMap<ConcurrentMap<String, ThreadableCacheEntry>>> userMap;
+    private final Cache<UserKey, ConcurrentTIntObjectHashMap<Cache<String, ThreadableCacheEntry>>> userMap;
 
     /**
      * Initializes a new {@link ThreadableCache}.
      */
     private ThreadableCache() {
         super();
-        userMap = new ConcurrentLinkedHashMap.Builder<UserKey, ConcurrentTIntObjectHashMap<ConcurrentMap<String, ThreadableCacheEntry>>>().initialCapacity(1024).maximumWeightedCapacity(5000).weigher(Weighers.entrySingleton()).build();
+        userMap = CacheBuilder.newBuilder().initialCapacity(1024).maximumSize(5000).build();
     }
 
     /**
      * Clears this cache completely.
      */
     public void clear() {
-        userMap.clear();
+        userMap.invalidateAll();
     }
 
     /**
@@ -130,7 +131,7 @@ public final class ThreadableCache {
      * @param contextId The context identifier
      */
     public void clear(final int userId, final int contextId) {
-        userMap.remove(new UserKey(userId, contextId));
+        userMap.invalidate(new UserKey(userId, contextId));
     }
 
     /**
@@ -143,29 +144,42 @@ public final class ThreadableCache {
      */
     public ThreadableCacheEntry getEntry(final String fullName, final int accountId, final Session session) {
         final UserKey key = new UserKey(session.getUserId(), session.getContextId());
-        ConcurrentTIntObjectHashMap<ConcurrentMap<String, ThreadableCacheEntry>> accountMap = userMap.get(key);
+        ConcurrentTIntObjectHashMap<Cache<String, ThreadableCacheEntry>> accountMap = userMap.getIfPresent(key);
         if (null == accountMap) {
-            final ConcurrentTIntObjectHashMap<ConcurrentMap<String, ThreadableCacheEntry>> newAccMap =
-                new ConcurrentTIntObjectHashMap<ConcurrentMap<String, ThreadableCacheEntry>>(8);
-            accountMap = userMap.putIfAbsent(key, newAccMap);
-            if (null == accountMap) {
-                accountMap = newAccMap;
+            Callable<? extends ConcurrentTIntObjectHashMap<Cache<String, ThreadableCacheEntry>>> loader = new Callable<ConcurrentTIntObjectHashMap<Cache<String,ThreadableCacheEntry>>>() {
+
+                @Override
+                public ConcurrentTIntObjectHashMap<Cache<String, ThreadableCacheEntry>> call() throws Exception {
+                    return new ConcurrentTIntObjectHashMap<Cache<String, ThreadableCacheEntry>>(8);
+                }
+            };
+            try {
+                accountMap = userMap.get(key, loader);
+            } catch (ExecutionException e) {
+                throw new IllegalStateException(e.getCause());
             }
         }
-        ConcurrentMap<String, ThreadableCacheEntry> map = accountMap.get(accountId);
+        Cache<String, ThreadableCacheEntry> map = accountMap.get(accountId);
         if (null == map) {
-            final ConcurrentMap<String, ThreadableCacheEntry> newmap = new ConcurrentLinkedHashMap.Builder<String, ThreadableCacheEntry>().maximumWeightedCapacity(32).weigher(Weighers.entrySingleton()).build();
+            Cache<String, ThreadableCacheEntry> newmap = CacheBuilder.newBuilder().maximumSize(32).build();
             map = accountMap.putIfAbsent(accountId, newmap);
             if (null == map) {
                 map = newmap;
             }
         }
-        ThreadableCacheEntry entry = map.get(fullName);
+        ThreadableCacheEntry entry = map.getIfPresent(fullName);
         if (null == entry) {
-            final ThreadableCacheEntry newentry = new ThreadableCacheEntry();
-            entry = map.putIfAbsent(fullName, newentry);
-            if (null == entry) {
-                entry = newentry;
+            Callable<? extends ThreadableCacheEntry> loader = new Callable<ThreadableCacheEntry>() {
+
+                @Override
+                public ThreadableCacheEntry call() throws Exception {
+                    return new ThreadableCacheEntry();
+                }
+            };
+            try {
+                entry = map.get(fullName, loader);
+            } catch (ExecutionException e) {
+                throw new IllegalStateException(e.getCause());
             }
         }
         return entry;
@@ -179,16 +193,15 @@ public final class ThreadableCache {
      * @return The cache entry or <code>null</code>
      */
     public ThreadableCacheEntry optEntry(final String fullName, final int accountId, final Session session) {
-        final ConcurrentTIntObjectHashMap<ConcurrentMap<String, ThreadableCacheEntry>> accountMap =
-            userMap.get(new UserKey(session.getUserId(), session.getContextId()));
+        ConcurrentTIntObjectHashMap<Cache<String, ThreadableCacheEntry>> accountMap = userMap.getIfPresent(new UserKey(session.getUserId(), session.getContextId()));
         if (null == accountMap) {
             return null;
         }
-        final ConcurrentMap<String, ThreadableCacheEntry> map = accountMap.get(accountId);
+        final Cache<String, ThreadableCacheEntry> map = accountMap.get(accountId);
         if (null == map) {
             return null;
         }
-        return map.get(fullName);
+        return map.getIfPresent(fullName);
     }
 
     /**
