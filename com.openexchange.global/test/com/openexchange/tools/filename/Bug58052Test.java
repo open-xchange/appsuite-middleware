@@ -58,18 +58,18 @@ import org.junit.Test;
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since v7.10.0
  */
-public class Bug58052Test {
+public class Bug58052Test extends AbstractFileNameToolsTest {
 
     @Test
     public void testLeaveAllowedUnicodeChars() {
         String fileName = "\u2460ab\u2461cd\u2462.zip";
 
         String sanitizedString = FileNameTools.sanitizeFilename(fileName);
-        
+
         assertTrue("Characters wrongly sanitized " + sanitizedString, sanitizedString.contains("\u2460"));
         assertTrue("Characters wrongly sanitized " + sanitizedString, sanitizedString.contains("\u2461"));
         assertTrue("Characters wrongly sanitized " + sanitizedString, sanitizedString.contains("\u2462"));
         assertTrue("Unexpected string after sanitizing", fileName.equalsIgnoreCase(sanitizedString));
     }
-    
+
 }

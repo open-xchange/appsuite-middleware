@@ -51,9 +51,8 @@ package com.openexchange.tools.filename;
 
 import java.text.Normalizer;
 import java.text.Normalizer.Form;
-import java.util.Collections;
-import java.util.HashSet;
 import java.util.Set;
+import com.google.common.collect.ImmutableSet;
 import com.openexchange.emoji.EmojiRegistry;
 import com.openexchange.java.Strings;
 
@@ -86,11 +85,11 @@ public class FileNameTools {
         if (Strings.isEmpty(fileName)) {
             return fileName;
         }
-        fileName = Normalizer.normalize(fileName, Form.NFC);
+        String fileNameToCheck = Normalizer.normalize(fileName, Form.NFC);
         StringBuilder sb = null;
-        int len = fileName.length();
-        for (int i = 0; i < len; i++) {
-            char ch = fileName.charAt(i);
+        int len = fileNameToCheck.length();
+        for (int i = 0, k = len; k-- > 0; i++) {
+            char ch = fileNameToCheck.charAt(i);
             if (' ' == ch) { // Space
                 if (null != sb) {
                     sb.append(ch);
@@ -108,55 +107,60 @@ public class FileNameTools {
                     sb.append(ch);
                 }
             } else {
-                if (i + 1 < len) {
-                    char nc = fileName.charAt(i + 1);
+                if (k > 0) {
+                    char nc = fileNameToCheck.charAt(i + 1);
                     if (Character.isSurrogatePair(ch, nc)) {
+                        k--;
                         i++;
                         int codePoint = Character.toCodePoint(ch, nc);
-                        sb = appendOrReplaceCodePoint(codePoint, len, fileName, i, sb);
+                        if (isAllowedUnicodeBlock(codePoint)) {
+                            if (null != sb) {
+                                sb.appendCodePoint(codePoint);
+                            }
+                        } else {
+                            sb = appendOrReplaceCodePoint(codePoint, len, fileNameToCheck, i, sb);
+                        }
                     } else {
-                        sb = appendOrReplaceCharacter(ch, len, fileName, i, sb);
+                        sb = appendOrReplaceCharacter(ch, len, fileNameToCheck, i, sb);
                     }
                 } else {
-                    sb = appendOrReplaceCharacter(ch, len, fileName, i, sb);
+                    sb = appendOrReplaceCharacter(ch, len, fileNameToCheck, i, sb);
                 }
             }
         }
 
-        return null == sb ? fileName : sb.toString();
+        return null == sb ? fileNameToCheck : sb.toString();
     }
 
-    private static final Set<Character.UnicodeBlock> WHITELISTED_UNICODE_BLOCKS;
-    static {
-        Set<Character.UnicodeBlock> set = new HashSet<Character.UnicodeBlock>();
-
-        // CJK = Chinese, Japanese and Korean
-        set.add(Character.UnicodeBlock.CJK_SYMBOLS_AND_PUNCTUATION);
-        set.add(Character.UnicodeBlock.CJK_COMPATIBILITY);
-        set.add(Character.UnicodeBlock.CJK_COMPATIBILITY_FORMS);
-        set.add(Character.UnicodeBlock.CJK_COMPATIBILITY_IDEOGRAPHS);
-        set.add(Character.UnicodeBlock.CJK_RADICALS_SUPPLEMENT);
-        set.add(Character.UnicodeBlock.CJK_STROKES);
-        set.add(Character.UnicodeBlock.CJK_UNIFIED_IDEOGRAPHS);
-        set.add(Character.UnicodeBlock.CJK_UNIFIED_IDEOGRAPHS_EXTENSION_A);
-        set.add(Character.UnicodeBlock.CJK_UNIFIED_IDEOGRAPHS_EXTENSION_B);
-        set.add(Character.UnicodeBlock.CJK_UNIFIED_IDEOGRAPHS_EXTENSION_C);
-        set.add(Character.UnicodeBlock.CJK_UNIFIED_IDEOGRAPHS_EXTENSION_D);
-        set.add(Character.UnicodeBlock.ENCLOSED_ALPHANUMERICS);
-        set.add(Character.UnicodeBlock.ENCLOSED_ALPHANUMERIC_SUPPLEMENT);
-        set.add(Character.UnicodeBlock.ENCLOSED_CJK_LETTERS_AND_MONTHS);
-        set.add(Character.UnicodeBlock.ENCLOSED_IDEOGRAPHIC_SUPPLEMENT);
-        set.add(Character.UnicodeBlock.HALFWIDTH_AND_FULLWIDTH_FORMS);
-        set.add(Character.UnicodeBlock.HIRAGANA);
-        set.add(Character.UnicodeBlock.KANA_SUPPLEMENT);
-        set.add(Character.UnicodeBlock.KANGXI_RADICALS);
-        set.add(Character.UnicodeBlock.KATAKANA);
-        set.add(Character.UnicodeBlock.KATAKANA_PHONETIC_EXTENSIONS);
-        WHITELISTED_UNICODE_BLOCKS = Collections.unmodifiableSet(set);
-    }
+    private static final Set<Character.UnicodeBlock> WHITELISTED_UNICODE_BLOCKS = ImmutableSet.of(
+        Character.UnicodeBlock.CJK_SYMBOLS_AND_PUNCTUATION,
+        Character.UnicodeBlock.CJK_COMPATIBILITY,
+        Character.UnicodeBlock.CJK_COMPATIBILITY_FORMS,
+        Character.UnicodeBlock.CJK_COMPATIBILITY_IDEOGRAPHS,
+        Character.UnicodeBlock.CJK_RADICALS_SUPPLEMENT,
+        Character.UnicodeBlock.CJK_STROKES,
+        Character.UnicodeBlock.CJK_UNIFIED_IDEOGRAPHS,
+        Character.UnicodeBlock.CJK_UNIFIED_IDEOGRAPHS_EXTENSION_A,
+        Character.UnicodeBlock.CJK_UNIFIED_IDEOGRAPHS_EXTENSION_B,
+        Character.UnicodeBlock.CJK_UNIFIED_IDEOGRAPHS_EXTENSION_C,
+        Character.UnicodeBlock.CJK_UNIFIED_IDEOGRAPHS_EXTENSION_D,
+        Character.UnicodeBlock.ENCLOSED_ALPHANUMERICS,
+        Character.UnicodeBlock.ENCLOSED_ALPHANUMERIC_SUPPLEMENT,
+        Character.UnicodeBlock.ENCLOSED_CJK_LETTERS_AND_MONTHS,
+        Character.UnicodeBlock.ENCLOSED_IDEOGRAPHIC_SUPPLEMENT,
+        Character.UnicodeBlock.HALFWIDTH_AND_FULLWIDTH_FORMS,
+        Character.UnicodeBlock.HIRAGANA,
+        Character.UnicodeBlock.KANA_SUPPLEMENT,
+        Character.UnicodeBlock.KANGXI_RADICALS,
+        Character.UnicodeBlock.KATAKANA,
+        Character.UnicodeBlock.KATAKANA_PHONETIC_EXTENSIONS);
 
     private static boolean isAllowedUnicodeBlock(char ch) {
-        return WHITELISTED_UNICODE_BLOCKS.contains(Character.UnicodeBlock.of(ch));
+        return isAllowedUnicodeBlock((int) ch);
+    }
+
+    private static boolean isAllowedUnicodeBlock(int codePoint) {
+        return WHITELISTED_UNICODE_BLOCKS.contains(Character.UnicodeBlock.of(codePoint));
     }
 
     private static StringBuilder appendOrReplaceCharacter(char ch, int len, String fileName, int index, StringBuilder builder) {
