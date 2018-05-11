@@ -362,6 +362,11 @@ public class BasicAlarmTriggerTest extends AbstractUserTimezoneAlarmTriggerTest 
         getAndAssertAlarms(event, 1, folderId);
 
         UpdatesResult updatesResult = eventManager2.getUpdates(time);
+        if (updatesResult.getNewAndModified().size() == 0) {
+            // The event is maybe not processed yet. Wait 10 seconds and try again
+            Thread.sleep(10 * 1000);
+            updatesResult = eventManager2.getUpdates(time);
+        }
         assertEquals(1, updatesResult.getNewAndModified().size());
         EventData eventU2 = updatesResult.getNewAndModified().get(0);
 
