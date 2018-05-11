@@ -31,6 +31,7 @@ import java.util.regex.Pattern;
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamConstants;
 import javax.xml.stream.XMLStreamReader;
+import org.apache.cxf.binding.soap.interceptor.MustUnderstandInterceptor;
 import org.apache.cxf.databinding.DataReader;
 import org.apache.cxf.endpoint.Endpoint;
 import org.apache.cxf.interceptor.AbstractInDatabindingInterceptor;
@@ -66,9 +67,7 @@ public class DocLiteralInInterceptor extends AbstractInDatabindingInterceptor {
 
     public DocLiteralInInterceptor() {
         super(Phase.UNMARSHAL);
-        // 'The deprecated URIMappingInterceptor has been removed.  This hasn't been on the default chain for some time due to a bunch of security related issues.'
-        // from http://cxf.apache.org/docs/30-migration-guide.html
-//        addAfter(URIMappingInterceptor.class.getName());
+        addAfter(MustUnderstandInterceptor.class.getName());
     }
 
     @Override
