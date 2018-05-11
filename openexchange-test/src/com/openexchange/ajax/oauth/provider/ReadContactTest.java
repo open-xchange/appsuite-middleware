@@ -50,6 +50,7 @@
 package com.openexchange.ajax.oauth.provider;
 
 import static org.junit.Assert.assertNotNull;
+import java.nio.charset.StandardCharsets;
 import org.apache.commons.codec.binary.Base64;
 import org.json.JSONObject;
 import org.junit.After;
@@ -153,7 +154,7 @@ public class ReadContactTest extends AbstractOAuthTest {
                 "8bPRlTLgDRkM1TQWGHUMrgAeDZnRkMEVArjE8aYZWKMHl2ZixEkxA69jQEU5Mwew4QyqX8jAIL0g\n" +
                 "M4gFVG12EmspLnV4QwaXJlqJjzoGV8iOhsxoyOAKAVziADt/ifvTHt/1AAAAAElFTkSuQmCC";
 
-            image = Base64.decodeBase64(base64Image);
+            image = Base64.decodeBase64(base64Image.getBytes(StandardCharsets.US_ASCII));
         }
 
         Contact contact = new Contact();

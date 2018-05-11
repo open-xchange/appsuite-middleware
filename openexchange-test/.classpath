@@ -87,13 +87,11 @@
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.capabilities"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.8"/>
 	<classpathentry kind="lib" path="lib/hamcrest-core-1.3.jar"/>
-	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/org.apache.commons.codec_1.9.0.v20170208-1614.jar"/>
 	<classpathentry kind="src" path="/com.openexchange.admin.rmi"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.file.storage"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.contactcollector.impl"/>
 	<classpathentry kind="lib" path="lib/httpmime-4.2.1.jar" sourcepath="lib/source/httpcomponents-client-4.2.1-src.zip"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/org.apache.felix.eventadmin"/>
-	<classpathentry exported="true" kind="lib" path="lib/commons-codec-1.3.jar"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.find"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.find.basic"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.search"/>
@@ -194,5 +192,6 @@
 	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/commons-validator-1.6.jar"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.chronos.ical"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.chronos.ical.ical4j"/>
+	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/commons-codec-1.11.jar"/>
 	<classpathentry kind="output" path="build"/>
 </classpath>
