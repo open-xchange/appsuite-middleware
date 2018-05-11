@@ -6,7 +6,8 @@ Bundle-Version: 7.10.0
 Bundle-Activator: com.openexchange.soap.cxf.osgi.CXFActivator
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
-Import-Package: com.openexchange.config,
+Import-Package: com.ctc.wstx.stax,
+ com.openexchange.config,
  com.openexchange.exception,
  com.openexchange.java,
  com.openexchange.java.util,
