@@ -60,6 +60,7 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.powermock.api.mockito.PowerMockito;
+import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import com.openexchange.chronos.ical.ICalService;
@@ -78,6 +79,7 @@ import com.openexchange.server.services.ServerServiceRegistry;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 @RunWith(PowerMockRunner.class)
+@PowerMockIgnore("javax.management.*")
 public class Bug19471StructureTest extends AbstractMailTest {
 
     //@formatter:off

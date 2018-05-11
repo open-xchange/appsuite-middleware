@@ -93,6 +93,7 @@ public class BasicAlarmTriggerTest extends AbstractUserTimezoneAlarmTriggerTest 
 
     @Test
     public void testCreateSingleAlarmTrigger() throws Exception {
+        int currentTriggers = getAlarmTriggers().size();
         // Create an event with alarm
         long currentTime = System.currentTimeMillis();
         DateTimeData startDate = DateTimeUtil.getDateTime(System.currentTimeMillis() + TimeUnit.DAYS.toMillis(1));
@@ -107,8 +108,17 @@ public class BasicAlarmTriggerTest extends AbstractUserTimezoneAlarmTriggerTest 
         getAndCheckAlarmTrigger(currentTime + TimeUnit.HOURS.toMillis(1), null, 0); // No triggers
 
         // 2. Get alarms within the next two days
-        AlarmTriggerData triggers = getAndCheckAlarmTrigger(1); // One trigger
-        assertTrue(triggers.get(0).getEventId().equals(event.getId()));
+        AlarmTriggerData triggers = getAndCheckAlarmTrigger(1 + currentTriggers); // One trigger
+
+        AlarmTrigger alarmTrigger = null;
+        for (AlarmTrigger trigger : triggers) {
+            if (trigger.getFolder().equalsIgnoreCase(folderId)) {
+                alarmTrigger = trigger;
+                break;
+            }
+        }
+
+        assertTrue(alarmTrigger.getEventId().equals(event.getId()));
         // 3. Get only mail alarms within the next two days
         getAndCheckAlarmTrigger(currentTime + TimeUnit.DAYS.toMillis(2), "MAIL", 0); // No triggers
 
@@ -150,6 +160,8 @@ public class BasicAlarmTriggerTest extends AbstractUserTimezoneAlarmTriggerTest 
 
     @Test
     public void testSingleEventAlarmTriggerTimeAfterUpdate() throws Exception {
+        int currentTriggers = getAlarmTriggers().size();
+
         // Create an event tomorrow 12 o clock
         Calendar cal = DateTimeUtil.getUTCCalendar();
         cal.add(Calendar.DAY_OF_MONTH, 1);
@@ -166,21 +178,38 @@ public class BasicAlarmTriggerTest extends AbstractUserTimezoneAlarmTriggerTest 
         today.setTime(new Date());
 
         // Check if next trigger is at correct time
-        AlarmTriggerData triggers = getAndCheckAlarmTrigger(1); // No triggers
+        AlarmTriggerData triggers = getAndCheckAlarmTrigger(1 + currentTriggers);
         Calendar trigger1 = (Calendar) cal.clone();
         trigger1.add(Calendar.MINUTE, -15);
-        checkAlarmTime(triggers.get(0), event.getId(), trigger1.getTimeInMillis());
+
+        AlarmTrigger alarmTrigger = null;
+        for (AlarmTrigger trigger : triggers) {
+            if (trigger.getFolder().equalsIgnoreCase(folderId)) {
+                alarmTrigger = trigger;
+                break;
+            }
+        }
+
+        checkAlarmTime(alarmTrigger, event.getId(), trigger1.getTimeInMillis());
 
         // Shift the start time by one hour
         eventManager.shiftEvent(event.getId(), null, event, cal, TimeUnit.HOURS, 1, eventManager.getLastTimeStamp());
 
         // Check if trigger time changed accordingly
-        triggers = getAndCheckAlarmTrigger(1); // No triggers
+        triggers = getAndCheckAlarmTrigger(1 + currentTriggers);
         Calendar trigger2 = (Calendar) cal.clone();
         trigger2.add(Calendar.HOUR, 1);
         trigger2.add(Calendar.MINUTE, -15);
-        checkAlarmTime(triggers.get(0), event.getId(), trigger2.getTimeInMillis());
 
+        alarmTrigger = null;
+        for (AlarmTrigger trigger : triggers) {
+            if (trigger.getFolder().equalsIgnoreCase(folderId)) {
+                alarmTrigger = trigger;
+                break;
+            }
+        }
+
+        checkAlarmTime(alarmTrigger, event.getId(), trigger2.getTimeInMillis());
     }
 
     @Test
@@ -333,6 +362,11 @@ public class BasicAlarmTriggerTest extends AbstractUserTimezoneAlarmTriggerTest 
         getAndAssertAlarms(event, 1, folderId);
 
         UpdatesResult updatesResult = eventManager2.getUpdates(time);
+        if (updatesResult.getNewAndModified().size() == 0) {
+            // The event is maybe not processed yet. Wait 10 seconds and try again
+            Thread.sleep(10 * 1000);
+            updatesResult = eventManager2.getUpdates(time);
+        }
         assertEquals(1, updatesResult.getNewAndModified().size());
         EventData eventU2 = updatesResult.getNewAndModified().get(0);
 
