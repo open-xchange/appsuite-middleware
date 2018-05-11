@@ -80,12 +80,9 @@ import edu.emory.mathcs.backport.java.util.concurrent.TimeUnit;
 @RunWith(BlockJUnit4ClassRunner.class)
 public class BasicSeriesEventTest extends AbstractChronosTest {
 
-    private String folderId;
-
     @Override
     public void setUp() throws Exception {
         super.setUp();
-        folderId = getDefaultFolder();
     }
 
     /**
@@ -161,7 +158,7 @@ public class BasicSeriesEventTest extends AbstractChronosTest {
         }
 
         // Get updates
-        UpdatesResult updates = eventManager.getUpdates(from, true);
+        UpdatesResult updates = eventManager.getUpdates(from, true, folderId);
         assertEquals(2, updates.getNewAndModified().size());
         for (int x = 0; x < updates.getNewAndModified().size(); x++) {
             assertEquals(expectedEventData.getId(), updates.getNewAndModified().get(x).getId());
@@ -232,7 +229,7 @@ public class BasicSeriesEventTest extends AbstractChronosTest {
 
         eventManager.updateOccurenceEvent(updatedData, occurence.getRecurrenceId());
 
-        UpdatesResult updates = eventManager.getUpdates(from);
+        UpdatesResult updates = eventManager.getUpdates(from, false, folderId);
 
         // Get updates
         assertEquals(2, updates.getNewAndModified().size());
@@ -283,7 +280,7 @@ public class BasicSeriesEventTest extends AbstractChronosTest {
         assertEquals(expectedRecurrenceId.getValue(), recurringEvent.getRecurrenceId());
 
         // Get updates
-        UpdatesResult updates = eventManager.getUpdates(from, true);
+        UpdatesResult updates = eventManager.getUpdates(from, true, folderId);
         assertEquals(3, updates.getNewAndModified().size());
         for (int x = 0; x < updates.getNewAndModified().size(); x++) {
             assertEquals(expectedEventData.getId(), updates.getNewAndModified().get(x).getId());
@@ -332,7 +329,7 @@ public class BasicSeriesEventTest extends AbstractChronosTest {
         assertEquals(expectedRecurrenceId.getValue(), recurringEvent.getRecurrenceId());
 
         // Get updates
-        UpdatesResult updates = eventManager.getUpdates(from, true);
+        UpdatesResult updates = eventManager.getUpdates(from, true, folderId);
         assertEquals(3, updates.getNewAndModified().size());
         for (int x = 0; x < updates.getNewAndModified().size(); x++) {
             assertEquals(expectedEventData.getId(), updates.getNewAndModified().get(x).getId());

@@ -88,7 +88,6 @@ public class TranslatedTest {
         com.openexchange.publish.online.infostore.FormStrings.class,
         com.openexchange.publish.microformats.MicroformatStrings.class,
         com.openexchange.publish.microformats.FormStrings.class,
-        com.openexchange.subscribe.crawler.internal.FormStrings.class,
 //        com.openexchange.subscribe.linkedin.FormStrings.class,
         com.openexchange.subscribe.microformats.FormStrings.class,
         com.openexchange.unifiedinbox.NameStrings.class

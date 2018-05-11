@@ -62,7 +62,6 @@ import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.subscribe.SubscribeService;
 import com.openexchange.subscribe.SubscriptionExecutionService;
-import com.openexchange.subscribe.crawler.CrawlerBlacklister;
 import com.openexchange.subscribe.xing.Services;
 import com.openexchange.subscribe.xing.XingSubscribeService;
 import com.openexchange.subscribe.xing.groupware.XingSubscriptionsOAuthAccountDeleteListener;
@@ -77,9 +76,6 @@ import com.openexchange.xing.access.XingOAuthAccessProvider;
 public final class XingSubscribeActivator extends HousekeepingActivator {
 
     private ServiceRegistration<SubscribeService> serviceRegistration;
-
-    private ServiceRegistration<CrawlerBlacklister> blacklisterRegistration;
-
     private ServiceRegistration<OAuthAccountDeleteListener> deleteListenerRegistration;
 
     /**
@@ -123,14 +119,6 @@ public final class XingSubscribeActivator extends HousekeepingActivator {
      */
     public synchronized void registerSubscribeService() {
         if (null == serviceRegistration) {
-            final CrawlerBlacklister blacklister = new CrawlerBlacklister() {
-
-                @Override
-                public String getCrawlerId() {
-                    return "com.openexchange.subscribe.xing";
-                }
-            };
-            blacklisterRegistration = context.registerService(CrawlerBlacklister.class, blacklister, null);
             final XingSubscribeService xingSubscribeService = new XingSubscribeService(this);
             serviceRegistration = context.registerService(SubscribeService.class, xingSubscribeService, null);
             org.slf4j.LoggerFactory.getLogger(XingSubscribeActivator.class).info("XingSubscribeService was started");
@@ -152,11 +140,6 @@ public final class XingSubscribeActivator extends HousekeepingActivator {
         if (null != serviceRegistration) {
             serviceRegistration.unregister();
             this.serviceRegistration = null;
-        }
-        final ServiceRegistration<CrawlerBlacklister> blacklisterRegistration = this.blacklisterRegistration;
-        if (null != blacklisterRegistration) {
-            blacklisterRegistration.unregister();
-            this.blacklisterRegistration = null;
         }
         final ServiceRegistration<OAuthAccountDeleteListener> deleteRegistration = this.deleteListenerRegistration;
         if (null != deleteRegistration) {

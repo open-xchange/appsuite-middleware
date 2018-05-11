@@ -51,8 +51,6 @@ package com.openexchange.proxy.authenticator.osgi;
 
 import java.lang.reflect.Field;
 import java.net.Authenticator;
-import java.net.NetPermission;
-import java.security.Permission;
 import org.slf4j.Logger;
 import com.openexchange.java.Strings;
 import com.openexchange.java.util.Tools;
@@ -70,8 +68,6 @@ import com.openexchange.proxy.authenticator.impl.ProxyAuthenticator;
 public class ProxyAuthenticatorActivator extends HousekeepingActivator {
 
     private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(ProxyAuthenticatorActivator.class);
-
-    private SecurityManager oldSecurityManager = null;
     private Authenticator previousAuthenticator = null;
 
     /**
@@ -95,7 +91,6 @@ public class ProxyAuthenticatorActivator extends HousekeepingActivator {
         track(PasswordAuthenticationProvider.class, authenticator);
         Authenticator.setDefault(authenticator);
 
-        setSecurityManager();
         createDefaultAuthenticationproviders();
 
         LOG.info("Bundle {} successfully started.", context.getBundle().getSymbolicName());
@@ -170,9 +165,6 @@ public class ProxyAuthenticatorActivator extends HousekeepingActivator {
         org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(ProxyAuthenticatorActivator.class);
         logger.info("Stopping bundle {}", this.context.getBundle().getSymbolicName());
 
-        // Restore previous SecurityManager
-        removeSecurityManager();
-
         // Restore previous default Authenticator
         Authenticator previousAuthenticator = this.previousAuthenticator;
         if (null != previousAuthenticator) {
@@ -181,39 +173,8 @@ public class ProxyAuthenticatorActivator extends HousekeepingActivator {
         }
 
         super.stopBundle();
-
         logger.info("Bundle {} successfully stopped", context.getBundle().getSymbolicName());
     }
 
-    /**
-     * Sets a java {@link SecurityManager} which prevents that the authenticator will be overwritten.
-     */
-    private void setSecurityManager() {
-        final SecurityManager oldSecurityManager = System.getSecurityManager();
-        this.oldSecurityManager = oldSecurityManager;
-        System.setSecurityManager(new SecurityManager() {
-
-            @Override
-            public void checkPermission(Permission perm) {
-                if (perm instanceof NetPermission) {
-                    if ("setDefaultAuthenticator".equals(perm.getName())) {
-                        throw new SecurityException("Setting the default authenticator twice is not allowed.");
-                    }
-                }
-                if (oldSecurityManager != null) {
-                    oldSecurityManager.checkPermission(perm);
-                }
-            }
-        });
-    }
-
-    /**
-     * Sets the java {@link SecurityManager} back to its previous value.
-     */
-    private void removeSecurityManager() {
-        final SecurityManager oldSecurityManager = this.oldSecurityManager;
-        this.oldSecurityManager = null;
-        System.setSecurityManager(oldSecurityManager);
-    }
 
 }

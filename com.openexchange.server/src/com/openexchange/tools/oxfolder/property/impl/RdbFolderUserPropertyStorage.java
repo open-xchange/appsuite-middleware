@@ -57,7 +57,6 @@ import java.sql.SQLException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 import org.slf4j.Logger;
 import com.openexchange.database.DatabaseService;
@@ -83,6 +82,7 @@ public class RdbFolderUserPropertyStorage implements FolderUserPropertyStorage {
     private final static String EXIST       = "SELECT EXISTS(SELECT 1 FROM " + TABLE_NAME + " WHERE cid=? AND fuid=? AND userid=? LIMIT 1)";
     private final static String GET         = "SELECT name, value FROM " + TABLE_NAME + " WHERE cid=? AND fuid=? AND userid=?";
     private final static String GET_PROP    = "SELECT value FROM " + TABLE_NAME + " WHERE cid=? AND fuid=? AND userid=? AND name=? LIMIT 1";
+    private final static String INSERT      = "INSERT INTO " + TABLE_NAME + " (cid,fuid,userid,name,value) VALUES (?,?,?,?,?)";
     private final static String SET         = "INSERT INTO " + TABLE_NAME + " (cid,fuid,userid,name,value) VALUES (?,?,?,?,?) ON DUPLICATE KEY UPDATE value=?";
     private final static String UPDATE      = "UPDATE " + TABLE_NAME + " SET value=? WHERE cid=? AND fuid=? AND userid=? AND name=?";
 
@@ -410,14 +410,14 @@ public class RdbFolderUserPropertyStorage implements FolderUserPropertyStorage {
         }
 
         if (null == connection) {
-            // Get connection an re-call this function
+            // Get connection and re-call this function
             insertFolderProperties(contextId, folderId, userId, properties);
             return;
         }
 
         PreparedStatement stmt = null;
         try {
-            stmt = connection.prepareStatement(SET);
+            stmt = connection.prepareStatement(INSERT);
             stmt.setInt(1, contextId);
             stmt.setInt(2, folderId);
             stmt.setInt(3, userId);
@@ -425,7 +425,6 @@ public class RdbFolderUserPropertyStorage implements FolderUserPropertyStorage {
                 // New entry
                 stmt.setString(4, propertyName.getKey());
                 stmt.setString(5, propertyName.getValue());
-                stmt.setString(6, propertyName.getValue());
                 stmt.addBatch();
             }
 
@@ -449,9 +448,7 @@ public class RdbFolderUserPropertyStorage implements FolderUserPropertyStorage {
             return;
         }
 
-        Map<String, String> map = new HashMap<>(1);
-        map.put(key, value);
-        insertFolderProperties(contextId, folderId, userId, map, connection);
+        insertFolderProperties(contextId, folderId, userId, Collections.singletonMap(key, value), connection);
     }
 
     @Override
@@ -511,7 +508,7 @@ public class RdbFolderUserPropertyStorage implements FolderUserPropertyStorage {
             stmt.setInt(1, contextId);
             stmt.setInt(2, folderId);
             stmt.setInt(3, userId);
-            for (Entry<String, String> entry : properties.entrySet()) {
+            for (Map.Entry<String, String> entry : properties.entrySet()) {
                 // Update entry
                 stmt.setString(4, entry.getKey());
                 stmt.setString(5, entry.getValue());
@@ -584,7 +581,7 @@ public class RdbFolderUserPropertyStorage implements FolderUserPropertyStorage {
             stmt.setInt(2, contextId);
             stmt.setInt(3, folderId);
             stmt.setInt(4, userId);
-            for (Entry<String, String> propertyName : properties.entrySet()) {
+            for (Map.Entry<String, String> propertyName : properties.entrySet()) {
                 // Update entry
                 stmt.setString(1, propertyName.getValue());
                 stmt.setString(5, propertyName.getKey());
@@ -611,9 +608,8 @@ public class RdbFolderUserPropertyStorage implements FolderUserPropertyStorage {
             LOGGER.debug("Flawed key-value pair!");
             return;
         }
-        Map<String, String> map = new HashMap<>(1);
-        map.put(key, value);
-        updateFolderProperties(folderId, contextId, userId, map, connection);
+
+        updateFolderProperties(folderId, contextId, userId, Collections.singletonMap(key, value), connection);
     }
 
     private DatabaseService getDatabaseServiceService() throws OXException {

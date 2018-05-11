@@ -1,6 +1,5 @@
 Bundle-Activator: com.openexchange.jolokia.osgi.CustomJolokiaBundleActivator
 Bundle-ClassPath: .,
- lib/json-simple-1.1.jar,
  lib/jolokia-osgi-1.3.5.jar
 Bundle-Description: Jolokia agent exposing JMX via HTTP/JSON
 Bundle-ManifestVersion: 2
@@ -30,6 +29,8 @@ Import-Package: com.openexchange.config,
  javax.xml.transform,
  org.apache.commons.logging,
  org.apache.log4j,
+ org.json.simple,
+ org.json.simple.parser,
  org.osgi.framework;version="[1.0.0,2.0.0)",
  org.osgi.service.cm,
  org.osgi.service.http,

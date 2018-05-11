@@ -60,6 +60,7 @@ import java.util.UUID;
 import javax.mail.MessagingException;
 import org.junit.Test;
 import com.openexchange.exception.OXException;
+import com.openexchange.imap.ACLPermission;
 import com.openexchange.imap.dataobjects.IMAPMailFolder;
 import com.openexchange.mail.AbstractMailTest;
 import com.openexchange.mail.IndexRange;
@@ -70,6 +71,7 @@ import com.openexchange.mail.OrderDirection;
 import com.openexchange.mail.Quota;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.api.MailCapabilities;
+import com.openexchange.mail.api.MailProvider;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.dataobjects.MailFolderDescription;
@@ -386,6 +388,7 @@ public final class MailFolderTest extends AbstractMailTest {
         try {
 
             String parentFullname = null;
+            MailProvider mailProvider = MailProviderRegistry.getMailProviderBySession(session, MailAccount.DEFAULT_ID);
             {
                 final MailFolder inbox = mailAccess.getFolderStorage().getFolder(INBOX);
                 String name = "TemporaryFolder" + UUID.randomUUID().toString().substring(0, 8);
@@ -404,7 +407,7 @@ public final class MailFolderTest extends AbstractMailTest {
                 mfd.setSubscribed(false);
                 mfd.setName(name);
 
-                final MailPermission p = MailProviderRegistry.getMailProviderBySession(session, MailAccount.DEFAULT_ID).createNewMailPermission(session, MailAccount.DEFAULT_ID);
+                final MailPermission p = mailProvider.createNewMailPermission(session, MailAccount.DEFAULT_ID);
                 p.setEntity(getUser());
                 p.setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
                 p.setFolderAdmin(true);
@@ -422,13 +425,13 @@ public final class MailFolderTest extends AbstractMailTest {
             }
 
             final MailFolderDescription mfd = new MailFolderDescription();
-            final MailPermission p1 = MailProviderRegistry.getMailProviderBySession(session, MailAccount.DEFAULT_ID).createNewMailPermission(session, MailAccount.DEFAULT_ID);
+            final MailPermission p1 = mailProvider.createNewMailPermission(session, MailAccount.DEFAULT_ID);
             p1.setEntity(getUser());
             p1.setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
             p1.setFolderAdmin(true);
             p1.setGroupPermission(false);
             mfd.addPermission(p1);
-            final MailPermission p2 = MailProviderRegistry.getMailProviderBySession(session, MailAccount.DEFAULT_ID).createNewMailPermission(session, MailAccount.DEFAULT_ID);
+            final MailPermission p2 = mailProvider.createNewMailPermission(session, MailAccount.DEFAULT_ID);
             p2.setEntity(getSecondUser());
             p2.setAllPermission(OCLPermission.READ_FOLDER, OCLPermission.ADMIN_PERMISSION, OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS);
             p2.setFolderAdmin(false);
@@ -459,7 +462,13 @@ public final class MailFolderTest extends AbstractMailTest {
                     }
                 }
             } else {
-                assertTrue("No default permission set!" + perms.length, perms.length == 1 && DefaultMailPermission.class.isInstance(perms[0]));
+                if ("imap".equals(mailProvider.getProtocol().getName())) {
+                    assertTrue("No default permission set!" + perms.length, perms.length == 1 && ACLPermission.class.isInstance(perms[0]));
+                    ACLPermission aclPermission = (ACLPermission) perms[0];
+                    assertTrue(aclPermission.isFolderAdmin());
+                } else {
+                    assertTrue("No default permission set!" + perms.length, perms.length == 1 && DefaultMailPermission.class.isInstance(perms[0]));
+                }
             }
         } finally {
             if (fullname != null) {
