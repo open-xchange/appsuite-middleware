@@ -110,7 +110,7 @@ public class MaxMailSizeTest extends AbstractMailTest {
         mail.setBody("Test Mail");
         mail.sanitize();
 
-        TestMail inSentBox = manager.send(mail, new FooInputStream(3500000L)); // Results in approx. 4800000 Byte Mail Size
+        TestMail inSentBox = manager.send(mail, new FooInputStream(3500000L), "text/plain"); // Results in approx. 4800000 Byte Mail Size
         assertFalse("Sending resulted in error.", manager.getLastResponse().hasError());
         assertEquals("Mail went into inbox", values.getSentFolder(), inSentBox.getFolder());
 
