@@ -10,7 +10,7 @@ BuildRequires:  open-xchange-oauth
 BuildRequires:  open-xchange-xerces
 BuildRequires:  java-devel >= 1.6.0
 Version:        @OXVERSION@
-%define        ox_release 37
+%define        ox_release 38
 Release:        %{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GPL-2.0
@@ -101,6 +101,8 @@ fi
 %dir /opt/open-xchange/etc/
 
 %changelog
+* Fri May 11 2018 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2018-05-04 (4695)
 * Fri Apr 20 2018 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2018-04-23 (4667)
 * Tue Jan 30 2018 Marcus Klein <marcus.klein@open-xchange.com>
