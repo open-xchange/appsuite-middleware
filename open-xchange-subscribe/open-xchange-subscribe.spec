@@ -24,7 +24,6 @@ Source:        %{name}_%{version}.orig.tar.bz2
 Summary:       The Open-Xchange backend subscribe extension
 Autoreqprov:   no
 Requires:      open-xchange-oauth >= @OXVERSION@
-Provides:      open-xchange-subscribe-crawler = %{version}
 Obsoletes:     open-xchange-subscribe-crawler < %{version}
 Provides:      open-xchange-subscribe-json = %{version}
 Obsoletes:     open-xchange-subscribe-json < %{version}
@@ -96,9 +95,6 @@ fi
 %dir /opt/open-xchange/osgi/bundle.d/
 /opt/open-xchange/osgi/bundle.d/*
 %dir /opt/open-xchange/etc/
-%dir %attr(755,open-xchange,root) /opt/open-xchange/etc/crawlers/
-%attr(644,open-xchange,root) /opt/open-xchange/etc/crawlers/*
-%config(noreplace) /opt/open-xchange/etc/crawler.properties
 %config(noreplace) /opt/open-xchange/etc/microformatSubscription.properties
 %config(noreplace) /opt/open-xchange/etc/xingsubscribe.properties
 %config(noreplace) /opt/open-xchange/etc/yahoosubscribe.properties
