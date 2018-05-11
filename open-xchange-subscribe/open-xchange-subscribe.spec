@@ -64,23 +64,6 @@ if [ ${1:-0} -eq 2 ]; then
     # SoftwareChange_Request-2470
     ox_add_property com.openexchange.subscribe.microformats.createModifyEnabled false /opt/open-xchange/etc/microformatSubscription.properties
 
-    # SoftwareChange_Request-2670
-    pfile=/opt/open-xchange/etc/crawler.properties
-    rm -f /opt/open-xchange/etc/crawlers/t-online.yml
-    ox_remove_property com.openexchange.subscribe.crawler.t-online.de $pfile
-    ox_remove_property com.openexchange.subscribe.crawler.t-online.de.autorunInterval $pfile
-
-    # SoftwareChange_Request-2865
-    ox_remove_property com.openexchange.subscribe.crawler.yahoocom /opt/open-xchange/etc/crawler.properties
-    ox_remove_property com.openexchange.subscribe.crawler.gmx.autorunInterval /opt/open-xchange/etc/crawler.properties
-    ox_remove_property com.openexchange.subscribe.crawler.t-online.de.autorunInterval /opt/open-xchange/etc/crawler.properties
-    ox_add_property com.openexchange.subscribe.crawler.web.de.autorunInterval 1d /opt/open-xchange/etc/crawler.properties
-    VALUE=$( ox_read_property com.openexchange.subscribe.crawler.webde.autorunInterval /opt/open-xchange/etc/crawler.properties )
-    if [ "" != "$VALUE" ]; then
-        ox_set_property com.openexchange.subscribe.crawler.web.de.autorunInterval "$VALUE" /opt/open-xchange/etc/crawler.properties
-    fi
-    ox_remove_property com.openexchange.subscribe.crawler.webde.autorunInterval /opt/open-xchange/etc/crawler.properties
-
     # SoftwareChange_Request-2942
     ox_add_property com.openexchange.subscribe.socialplugin.xing.autorunInterval 1d /opt/open-xchange/etc/xingsubscribe.properties
 fi
