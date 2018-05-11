@@ -278,4 +278,30 @@ public class ITipEventUpdate implements EventUpdate {
         return true;
     }
 
+    public boolean isAboutCertainParticipantsRemoval(int userId) {
+        if (getAttendeeUpdates() == null || getAttendeeUpdates().isEmpty()) {
+            return false;
+        }
+
+        CollectionUpdate<Attendee, AttendeeField> attendeeUpdates = getAttendeeUpdates();
+
+        if (attendeeUpdates.getAddedItems() != null && !attendeeUpdates.getAddedItems().isEmpty()) {
+            return false;
+        }
+
+        if (attendeeUpdates.getUpdatedItems() != null && !attendeeUpdates.getUpdatedItems().isEmpty()) {
+            return false;
+        }
+
+        if (attendeeUpdates.getRemovedItems() == null || attendeeUpdates.getRemovedItems().size() != 1) {
+            return false;
+        }
+
+        if (attendeeUpdates.getRemovedItems().get(0).getEntity() != userId) {
+            return false;
+        }
+
+        return true;
+    }
+
 }
