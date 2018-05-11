@@ -49,10 +49,7 @@
 
 package com.openexchange.tools.filename;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
 import org.junit.Test;
-import com.openexchange.java.Strings;
 
 /**
  * {@link Bug56499Test}
@@ -62,17 +59,11 @@ import com.openexchange.java.Strings;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.10.0
  */
-public class Bug56499Test {
+public class Bug56499Test extends AbstractFileNameToolsTest {
 
     @Test
     public void testDecomposedString() {
-        checkSanitizing("\u3010\u30c9\u30e9\u30d5\u30c8\u7248\u3011\u57fa\u76e4\u6280\u8853\u306e\u9ad8\u5ea6\u5316-20171011.zip");
-    }
-
-    private static void checkSanitizing(String string) {
-        String sanitizedString = FileNameTools.sanitizeFilename(string);
-        assertFalse("Sanitized characters in " + sanitizedString, sanitizedString.contains("_"));
-        assertTrue("Unexpected string after sanitizing", Strings.equalsNormalized(string, sanitizedString));
+        checkSanitizing("\u3010\u30c9\u30e9\u30d5\u30c8\u7248\u3011\u57fa\u76e4\u6280\u8853\u306e\u9ad8\u5ea6\u5316-20171011.zip", true);
     }
 
 }

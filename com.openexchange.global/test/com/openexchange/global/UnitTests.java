@@ -73,7 +73,8 @@ import com.openexchange.tools.filename.Bug55271Test;
     Bug50893Test.class,
     Bug53791Test.class,
     Bug55271Test.class,
-    com.openexchange.tools.filename.Bug56499Test.class
+    com.openexchange.tools.filename.Bug56499Test.class,
+    com.openexchange.tools.filename.Bug58052Test.class,
 })
 public class UnitTests {
 }

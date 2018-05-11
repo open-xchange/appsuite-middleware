@@ -74,6 +74,8 @@ import gnu.trove.list.array.TIntArrayList;
  */
 public class CachingFolderUserPropertyStorage implements FolderUserPropertyStorage {
 
+    private static final ImmutableMap<Object, Object> EMPTY_IMMUTABLE_MAP = ImmutableMap.of();
+    
     private static final String REGION_NAME = "FolderUserProperty";
 
     /**
@@ -120,13 +122,13 @@ public class CachingFolderUserPropertyStorage implements FolderUserPropertyStora
             Object object = cache.get(key);
             if (object instanceof Map) {
                 if (null == propertyKeys || propertyKeys.isEmpty()) {
-                    cache.put(key, ImmutableMap.of(), true);
+                    cache.put(key, EMPTY_IMMUTABLE_MAP, true);
                 } else {
                     Map<String, String> newProperties = new LinkedHashMap<>((Map<String, String>) object);
                     for (String propertyKey : propertyKeys) {
                         newProperties.remove(propertyKey);
                     }
-                    cache.put(key, newProperties.isEmpty() ? ImmutableMap.of() : ImmutableMap.copyOf(newProperties), true);
+                    cache.put(key, newProperties.isEmpty() ? EMPTY_IMMUTABLE_MAP : ImmutableMap.copyOf(newProperties), true);
                 }
             }
         }
@@ -150,7 +152,7 @@ public class CachingFolderUserPropertyStorage implements FolderUserPropertyStora
                 if (object instanceof Map) {
                     Map<String, String> newProperties = new LinkedHashMap<>((Map<String, String>) object);
                     newProperties.remove(propertyKey);
-                    cache.put(key, newProperties.isEmpty() ? ImmutableMap.of() : ImmutableMap.copyOf(newProperties), true);
+                    cache.put(key, newProperties.isEmpty() ? EMPTY_IMMUTABLE_MAP : ImmutableMap.copyOf(newProperties), true);
                 }
             }
         }
@@ -197,7 +199,7 @@ public class CachingFolderUserPropertyStorage implements FolderUserPropertyStora
         }
 
         Map<String, String> properties = delegate.getFolderProperties(contextId, folderId, userId, connection);
-        cache.put(key, properties.isEmpty() ? ImmutableMap.of() : ImmutableMap.copyOf(properties), false);
+        cache.put(key, properties.isEmpty() ? EMPTY_IMMUTABLE_MAP : ImmutableMap.copyOf(properties), false);
         return properties;
     }
 
@@ -246,7 +248,7 @@ public class CachingFolderUserPropertyStorage implements FolderUserPropertyStora
                 int folderId = iterator.next();
                 Map<String, String> properties = delegate.getFolderProperties(contextId, folderId, userId, connection);
                 CacheKey key = newCacheKey(cacheService, folderId, userId, contextId);
-                cache.put(key, properties.isEmpty() ? ImmutableMap.of() : ImmutableMap.copyOf(properties), false);
+                cache.put(key, properties.isEmpty() ? EMPTY_IMMUTABLE_MAP : ImmutableMap.copyOf(properties), false);
                 retval.put(Integer.valueOf(folderId), properties);
             }
         }
@@ -278,7 +280,7 @@ public class CachingFolderUserPropertyStorage implements FolderUserPropertyStora
         }
 
         Map<String, String> properties = delegate.getFolderProperties(contextId, folderId, userId, connection);
-        cache.put(key, properties.isEmpty() ? ImmutableMap.of() : ImmutableMap.copyOf(properties), false);
+        cache.put(key, properties.isEmpty() ? EMPTY_IMMUTABLE_MAP : ImmutableMap.copyOf(properties), false);
         return properties.get(propertyKey);
     }
 
@@ -310,7 +312,7 @@ public class CachingFolderUserPropertyStorage implements FolderUserPropertyStora
                     inserted |= (false == newValue.equals(previousValue));
                 }
                 if (inserted) {
-                    cache.put(key, newProperties.isEmpty() ? ImmutableMap.of() : ImmutableMap.copyOf(newProperties), true);
+                    cache.put(key, newProperties.isEmpty() ? EMPTY_IMMUTABLE_MAP : ImmutableMap.copyOf(newProperties), true);
                 }
             }
         }
@@ -339,7 +341,7 @@ public class CachingFolderUserPropertyStorage implements FolderUserPropertyStora
                 String previousValue = newProperties.put(propertyKey, newValue);
                 boolean inserted = (false == newValue.equals(previousValue));
                 if (inserted) {
-                    cache.put(key, newProperties.isEmpty() ? ImmutableMap.of() : ImmutableMap.copyOf(newProperties), true);
+                    cache.put(key, newProperties.isEmpty() ? EMPTY_IMMUTABLE_MAP : ImmutableMap.copyOf(newProperties), true);
                 }
             }
         }
@@ -373,7 +375,7 @@ public class CachingFolderUserPropertyStorage implements FolderUserPropertyStora
                     inserted |= (false == newValue.equals(previousValue));
                 }
                 if (inserted) {
-                    cache.put(key, newProperties.isEmpty() ? ImmutableMap.of() : ImmutableMap.copyOf(newProperties), true);
+                    cache.put(key, newProperties.isEmpty() ? EMPTY_IMMUTABLE_MAP : ImmutableMap.copyOf(newProperties), true);
                 }
             }
         }
@@ -409,7 +411,7 @@ public class CachingFolderUserPropertyStorage implements FolderUserPropertyStora
                     }
                 }
                 if (inserted) {
-                    cache.put(key, newProperties.isEmpty() ? ImmutableMap.of() : ImmutableMap.copyOf(newProperties), true);
+                    cache.put(key, newProperties.isEmpty() ? EMPTY_IMMUTABLE_MAP : ImmutableMap.copyOf(newProperties), true);
                 }
             }
         }
@@ -444,7 +446,7 @@ public class CachingFolderUserPropertyStorage implements FolderUserPropertyStora
                     String previousValue = newProperties.put(propertyKey, newValue);
                     boolean inserted = (false == newValue.equals(previousValue));
                     if (inserted) {
-                        cache.put(key, newProperties.isEmpty() ? ImmutableMap.of() : ImmutableMap.copyOf(newProperties), true);
+                        cache.put(key, newProperties.isEmpty() ? EMPTY_IMMUTABLE_MAP : ImmutableMap.copyOf(newProperties), true);
                     }
                 }
             }

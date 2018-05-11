@@ -215,6 +215,11 @@ public class UpdateITipAnalyzer extends AbstractITipAnalyzer {
                 ensureParticipant(matchingException, exception, session, owner);
                 differ = doAppointmentsDiffer(exception, matchingException);
             } else {
+                if (isDeleteException(original, exception)) {
+                    analysis.addAnnotation(new ITipAnnotation(Messages.CHANGE_PARTICIPANT_STATE_IN_DELETED_APPOINTMENT, locale));
+                    analysis.recommendAction(ITipAction.IGNORE);
+                    return analysis;
+                }
                 // Exception is not yet created
                 session.getUtilities().adjustTimeZones(owner, exception, master);
                 exception.removeUid();
