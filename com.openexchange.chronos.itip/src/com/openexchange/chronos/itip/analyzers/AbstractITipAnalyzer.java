@@ -56,6 +56,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.SortedSet;
 import java.util.TimeZone;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.AttendeeField;
@@ -64,6 +65,7 @@ import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.Organizer;
 import com.openexchange.chronos.ParticipationStatus;
+import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.itip.ITipAnalysis;
 import com.openexchange.chronos.itip.ITipAnalyzer;
@@ -259,8 +261,9 @@ public abstract class AbstractITipAnalyzer implements ITipAnalyzer {
 
         List<? extends ItemUpdate<Attendee, AttendeeField>> updatedItems = attendeeUpdates.getUpdatedItems();
         for (ItemUpdate<Attendee, AttendeeField> attendeeUpdate : updatedItems) {
-            if (attendeeUpdate.containsAnyChangeOf(ALL_BUT_CONFIRMATION))
+            if (attendeeUpdate.containsAnyChangeOf(ALL_BUT_CONFIRMATION)) {
                 return false;
+            }
         }
 
         return true;
@@ -412,7 +415,7 @@ public abstract class AbstractITipAnalyzer implements ITipAnalyzer {
 
     protected void ensureParticipant(final Event original, final Event event, final CalendarSession session, int owner) {
         if (null == CalendarUtils.find(event.getAttendees(), owner)) {
-            // Owner is a party crasher.. 
+            // Owner is a party crasher..
             Attendee attendee = new Attendee();
             attendee.setEntity(owner);
             attendee.setPartStat(ParticipationStatus.NEEDS_ACTION);
@@ -433,14 +436,17 @@ public abstract class AbstractITipAnalyzer implements ITipAnalyzer {
 
     /**
      * Checks if a exception was already deleted
-     * 
+     *
      * @param original The original or rather the master event
      * @param exception The exception to check
      * @return <code>true</code> if the given exception was already deleted
      */
     protected boolean isDeleteException(Event original, Event exception) {
-        if (original.containsDeleteExceptionDates() && null != original.getDeleteExceptionDates()) {
-            return original.getDeleteExceptionDates().stream().anyMatch(r -> 0 == r.compareTo(exception.getRecurrenceId()));
+        if (null != original && original.containsDeleteExceptionDates()) {
+            SortedSet<RecurrenceId> deleteExceptionDates = original.getDeleteExceptionDates();
+            if (null != deleteExceptionDates) {
+                return deleteExceptionDates.stream().anyMatch(r -> 0 == r.compareTo(exception.getRecurrenceId()));
+            }
         }
         return false;
     }
