@@ -51,6 +51,7 @@ package com.openexchange.ajax.share.tests;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import org.junit.Test;
@@ -83,7 +84,7 @@ public class GuestContactTest extends ShareTest {
 
     /**
      * Initializes a new {@link GuestContactTest}.
-     * 
+     *
      * @param name
      */
     public GuestContactTest() {
@@ -226,8 +227,8 @@ public class GuestContactTest extends ShareTest {
         assertFalse("Contact could not be loaded.", getResponse.hasError());
         Contact contact = getResponse.getContact();
         User user = getResponse.getUser();
-        assertEquals("Wrong contact loaded.", guestName, contact.getDisplayName());
-        assertEquals("Wrong contact loaded.", guestMail, contact.getEmail1());
+        assertNotEquals("Wrong contact loaded.", guestName, contact.getDisplayName());
+        assertNotEquals("Wrong contact loaded.", guestMail, contact.getEmail1());
         /*
          * try to update guest's display name as foreign user
          */
