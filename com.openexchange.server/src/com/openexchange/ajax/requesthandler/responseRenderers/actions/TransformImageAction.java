@@ -462,7 +462,7 @@ public class TransformImageAction implements IFileResponseRendererAction {
                             throw e;
                         }
 
-                        if (null != transformedImage) {
+                        if (null != transformedImage && transformedImage.getTransformationExpenses() == ImageTransformations.HIGH_EXPENSE) {
                             final IFileHolder transformedImageFile = transformedImage.getImageFile();
                             final ThresholdFileHolder optImageFileHolder = ((transformedImageFile instanceof ThresholdFileHolder) ? (ThresholdFileHolder) transformedImageFile : null);
                             final long size = transformedImage.getSize();
@@ -483,7 +483,7 @@ public class TransformImageAction implements IFileResponseRendererAction {
                         if (LOG.isDebugEnabled()) {
                             try {
                                 LOG.error("Unable to transform image from {}. Unparseable image file is written to disk at: {}", repetitiveFile.getName(), writeBrokenImage2Disk(repetitiveFile, tmpDirReference).getPath(), e);
-                            } catch (@SuppressWarnings("unused") final Exception excp) {
+                            } catch (final Exception excp) {
                                 LOG.error("Unable to transform image from {}", repetitiveFile.getName(), e);
                             }
                         } else {
