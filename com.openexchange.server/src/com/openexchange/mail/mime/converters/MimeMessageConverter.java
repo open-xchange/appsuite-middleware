@@ -2104,6 +2104,7 @@ public final class MimeMessageConverter {
             }
         } catch (final Exception e) {
             // Ignore
+            LOG.debug("{}", e.getMessage(), e);
         }
         return null;
     }
