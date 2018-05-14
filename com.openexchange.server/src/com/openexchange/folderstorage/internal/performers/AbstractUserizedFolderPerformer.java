@@ -696,6 +696,7 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
          * check added guest permissions
          */
         if (comparedPermissions.hasAddedGuests()) {
+            Permission addedAnonymousPermission = null;
             List<Integer> addedGuests = comparedPermissions.getAddedGuests();
             for (Integer guestID : addedGuests) {
                 /*
@@ -704,6 +705,20 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
                 GuestInfo guestInfo = comparedPermissions.getGuestInfo(guestID);
                 Permission guestPermission = comparedPermissions.getAddedGuestPermission(guestID);
                 checkGuestPermission(session, folder, guestPermission, guestInfo);
+                if (isAnonymous(guestInfo)) {
+                    /*
+                     * allow only one not inherited anonymous permission
+                     */
+                    if (null == addedAnonymousPermission) {
+                        if (!FolderPermissionType.INHERITED.equals(guestPermission.getType())) {
+                            addedAnonymousPermission = guestPermission;
+                        }
+                    } else {
+                        if (!FolderPermissionType.INHERITED.equals(guestPermission.getType())) {
+                            throw invalidPermissions(folder, guestPermission);
+                        }
+                    }
+                }
             }
 
             /*
@@ -731,12 +746,22 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
          * check new guest permissions
          */
         if (comparedPermissions.hasNewGuests()) {
+            GuestPermission newAnonymousPermission = null;
             for (GuestPermission guestPermission : comparedPermissions.getNewGuestPermissions()) {
                 if (guestPermission.getRecipient().getType() == RecipientType.ANONYMOUS) {
                     /*
                      * allow only one anonymous permission with "read-only" permission bits
                      */
                     checkIsLinkPermission(folder, guestPermission);
+                    if (null == newAnonymousPermission) {
+                        if (!FolderPermissionType.INHERITED.equals(guestPermission.getType())) {
+                            newAnonymousPermission = guestPermission;
+                        }
+                    } else {
+                        if (!FolderPermissionType.INHERITED.equals(guestPermission.getType())) {
+                            throw invalidPermissions(folder, guestPermission);
+                        }
+                    }
                 } else if (isReadOnlySharing(folder)) {
                     /*
                      * allow only "read-only" permissions for invited guests in non-infostore folders

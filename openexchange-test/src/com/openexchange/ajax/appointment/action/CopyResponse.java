@@ -59,7 +59,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Appointment;
 
 /**
- * 
+ *
  * {@link CopyResponse}
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
@@ -84,7 +84,9 @@ public class CopyResponse extends AbstractAJAXResponse {
     public Appointment getAppointment(final TimeZone timeZone) throws OXException {
         if (null == appointmentObj) {
             this.appointmentObj = new Appointment();
-            final JSONObject json = (JSONObject) getResponse().getData();
+            Response resp = getResponse();
+            assertFalse(resp.getErrorMessage(), resp.hasError());
+            final JSONObject json = (JSONObject) resp.getData();
             new AppointmentParser(true, timeZone).parse(appointmentObj, json);
         }
         return appointmentObj;

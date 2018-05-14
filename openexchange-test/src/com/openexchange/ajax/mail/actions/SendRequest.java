@@ -66,6 +66,8 @@ import com.openexchange.ajax.framework.Header;
  */
 public class SendRequest implements AJAXRequest<SendResponse> {
 
+    private static final String DEFAULT_MIME_TYPE = "text/plain; charset=us-ascii";
+
     /**
      * URL of the tasks AJAX interface.
      */
@@ -83,6 +85,8 @@ public class SendRequest implements AJAXRequest<SendResponse> {
 
     private final boolean failOnError;
 
+    private final String mimeType;
+
     /**
      * Initializes a new {@link SendRequest}
      *
@@ -97,8 +101,13 @@ public class SendRequest implements AJAXRequest<SendResponse> {
     }
 
     public SendRequest(String mailStr, InputStream upload, boolean failOnError) {
+        this(mailStr, upload, DEFAULT_MIME_TYPE, failOnError);
+    }
+    
+    public SendRequest(String mailStr, InputStream upload, String mimeType, boolean failOnError) {
         super();
         this.mailStr = mailStr;
+        this.mimeType = mimeType;
         this.uploads = new LinkedList<InputStream>();
         if (null != upload) {
             this.uploads.add(upload);
@@ -149,7 +158,7 @@ public class SendRequest implements AJAXRequest<SendResponse> {
             final int size = uploads.size();
             for (int i = 0; i < size; i++) {
                 final String sNum = Integer.toString(i + 1);
-                params.add(new FileParameter("file_" + sNum, "text" + sNum + ".txt", uploads.get(i), "text/plain; charset=us-ascii"));
+                params.add(new FileParameter("file_" + sNum, "text" + sNum + ".txt", uploads.get(i), mimeType));
             }
         }
         return params.toArray(new Parameter[params.size()]);
