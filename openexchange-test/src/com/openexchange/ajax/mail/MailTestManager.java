@@ -107,6 +107,8 @@ import com.openexchange.test.TestManager;
  */
 public class MailTestManager implements TestManager {
 
+    private static final String DEFAULT_UPLOAD_MIME_TYPE = "text/plain; charset=us-ascii";
+
     private final List<MailCleaner> cleaningSteps;
 
     private boolean failOnError;
@@ -216,7 +218,16 @@ public class MailTestManager implements TestManager {
      * @return The mail as placed in the sent box.
      */
     public TestMail send(TestMail mail, InputStream upload) throws JSONException, OXException, IOException, SAXException {
-        SendRequest request = new SendRequest(mail.toJSON().toString(), upload, failOnError);
+        return send(mail, upload, DEFAULT_UPLOAD_MIME_TYPE);
+    }
+
+    /**
+     * Sends a mail. This methods also sets the lastResponse field.
+     *
+     * @return The mail as placed in the sent box.
+     */
+    public TestMail send(TestMail mail, InputStream upload, String mimeType) throws JSONException, OXException, IOException, SAXException {
+        SendRequest request = new SendRequest(mail.toJSON().toString(), upload, mimeType, failOnError);
         SendResponse response = client.execute(request);
         lastResponse = response;
         if (lastResponse.hasError()) {

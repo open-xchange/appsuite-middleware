@@ -253,11 +253,11 @@ public class BasicFreeBusyTest extends AbstractChronosTest {
 
         EventsResponse allEvents = secondUserChronosApi.getAllEvents(secondSession, from.getValue(), until.getValue(), secondUserFolder, null, null, null, false, true, false);
         assertNull(allEvents.getErrorDesc(), allEvents.getError());
-        Long timestamp = allEvents.getTimestamp();
 
         // Create three overlapping events
+        Date time = Calendar.getInstance(TimeZone.getTimeZone("UTC")).getTime();
         createEvent("first", first, first + TimeUnit.HOURS.toMillis(1), users);
-        ChronosUpdatesResponse updates = secondUserChronosApi.getUpdates(secondSession, secondUserFolder, timestamp == null ? first - TimeUnit.DAYS.toMillis(1) : timestamp, null, null, null, null, null, false, false);
+        ChronosUpdatesResponse updates = secondUserChronosApi.getUpdates(secondSession, secondUserFolder, time.getTime(), null, null, null, null, null, false, false);
         assertNull(updates.getErrorDesc(), updates.getError());
         assertNotNull(updates.getData());
         assertEquals(1, updates.getData().getNewAndModified().size());

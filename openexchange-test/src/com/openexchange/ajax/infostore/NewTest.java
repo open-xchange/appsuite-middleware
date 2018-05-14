@@ -19,7 +19,7 @@ import com.openexchange.test.TestInit;
 
 public class NewTest extends InfostoreAJAXTest {
 
-    public static final int SIZE = 15; // Size of the large file in Megabytes
+    public static final int SIZE = 1; // Size of the large file in Megabytes
 
     private static final byte[] megabyte = new byte[1000000];
 
@@ -167,10 +167,9 @@ public class NewTest extends InfostoreAJAXTest {
         itm.newAction(data, upload);
 
         com.openexchange.file.storage.File obj = itm.getAction(data.getId());
-        assertEquals(data.getTitle(), obj.getTitle());
+        assertEquals("", obj.getTitle());
     }
 
-    @SuppressWarnings("deprecation")
     @Test
     public void testTitleFromFilenameTheSameEvenIfFilenameIsChangedOnCollision() throws Exception {
         final File upload = new File(TestInit.getTestProperty("ajaxPropertiesFile"));

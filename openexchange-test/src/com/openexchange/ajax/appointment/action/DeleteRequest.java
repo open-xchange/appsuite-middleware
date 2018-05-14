@@ -61,7 +61,7 @@ import com.openexchange.groupware.container.Appointment;
 
 /**
  * Stores parameters for the delete request.
- * 
+ *
  * @author <a href="mailto:sebastian.kauss@open-xchange.org">Sebastian Kauss</a>
  */
 public class DeleteRequest extends AbstractAppointmentRequest<CommonDeleteResponse> {
@@ -213,8 +213,7 @@ public class DeleteRequest extends AbstractAppointmentRequest<CommonDeleteRespon
      */
     @Override
     public Parameter[] getParameters() {
-        return new Parameter[] { new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_DELETE), new Parameter(AJAXServlet.PARAMETER_TIMESTAMP, String.valueOf(lastModified.getTime()))
-        };
+        return new Parameter[] { new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_DELETE), new Parameter(AJAXServlet.PARAMETER_TIMESTAMP, String.valueOf(lastModified == null ? System.currentTimeMillis() : lastModified.getTime())) };
     }
 
     /**
