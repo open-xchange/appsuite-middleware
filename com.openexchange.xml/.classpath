@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
 	<classpathentry kind="src" path="src"/>
+	<classpathentry exported="true" kind="lib" path="lib/joox-1.5.0.jar" sourcepath="lib/source/joox-1.5.0-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/jdom2-2.0.6.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/joox-1.6.0.jar" sourcepath="lib/source/joox-1.6.0-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/spring-beans-5.0.6.RELEASE.jar" sourcepath="lib/source/spring-beans-5.0.6.RELEASE-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/spring-jcl-5.0.6.RELEASE.jar" sourcepath="lib/source/spring-jcl-5.0.6.RELEASE-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/spring-core-5.0.6.RELEASE.jar" sourcepath="lib/source/spring-core-5.0.6.RELEASE-sources.jar"/>
