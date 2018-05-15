@@ -130,6 +130,7 @@ public class IDBasedFileAccessDocumentLoaderTest {
     public void testLoad_Fine_ReturnCollectionWithDocument() throws OXException {
         PowerMockito.when(this.idBasedFileAccessFactory.createAccess(ArgumentMatchers.any(Session.class))).thenReturn(this.idBasedFileAccess);
         PowerMockito.when(this.idBasedFileAccess.getDocument(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())).thenReturn(this.inputStream);
+        PowerMockito.when(this.idBasedFileAccess.getDocument(ArgumentMatchers.isNull(), ArgumentMatchers.isNull())).thenReturn(this.inputStream);
 
         Collection<? extends Object> load = this.idBasedFileAccessDocumentLoader.load(this.publication, null);
 
