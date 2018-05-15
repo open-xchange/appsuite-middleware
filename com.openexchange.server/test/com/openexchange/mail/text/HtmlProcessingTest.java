@@ -53,7 +53,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Matchers;
+import org.mockito.ArgumentMatchers;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
@@ -227,8 +227,8 @@ public class HtmlProcessingTest {
 
         PowerMockito.when(ServerServiceRegistry.getInstance()).thenReturn(serverServiceRegistry);
         PowerMockito.when(serverServiceRegistry.getService(HtmlService.class)).thenReturn(htmlService);
-        PowerMockito.when(htmlService.sanitize(Matchers.anyString(), Matchers.anyString(), Matchers.anyBoolean(), (boolean[]) Matchers.any(), Matchers.anyString(), Matchers.anyInt())).thenReturn(new HtmlSanitizeResult(sanitizedHtmlContent));
-        PowerMockito.when(htmlService.sanitize(Matchers.anyString(), Matchers.any(HtmlSanitizeOptions.class))).thenReturn(new HtmlSanitizeResult(sanitizedHtmlContent));
+        PowerMockito.when(htmlService.sanitize(ArgumentMatchers.anyString(), ArgumentMatchers.anyString(), ArgumentMatchers.anyBoolean(), (boolean[]) ArgumentMatchers.any(), ArgumentMatchers.anyString(), ArgumentMatchers.anyInt())).thenReturn(new HtmlSanitizeResult(sanitizedHtmlContent));
+        PowerMockito.when(htmlService.sanitize(ArgumentMatchers.anyString(), ArgumentMatchers.any(HtmlSanitizeOptions.class))).thenReturn(new HtmlSanitizeResult(sanitizedHtmlContent));
     }
 
      @Test
@@ -254,7 +254,7 @@ public class HtmlProcessingTest {
 
         HtmlProcessing.formatContentForDisplay(htmlContent, "UTF-8", true, session, mailPath, userSettingMail, modified, DisplayMode.DISPLAY, true, true, true, -1);
 
-        Mockito.verify(htmlService, Mockito.times(1)).sanitize(Matchers.anyString(), Matchers.any(HtmlSanitizeOptions.class));
+        Mockito.verify(htmlService, Mockito.times(1)).sanitize(ArgumentMatchers.anyString(), ArgumentMatchers.any(HtmlSanitizeOptions.class));
     }
 
      @Test
@@ -265,7 +265,7 @@ public class HtmlProcessingTest {
 
         HtmlProcessing.formatContentForDisplay(htmlContent, "UTF-8", true, session, null, userSettingMail, modified, DisplayMode.DISPLAY, true, true, true, -1);
 
-        Mockito.verify(htmlService, Mockito.times(1)).sanitize(Matchers.anyString(), Matchers.any(HtmlSanitizeOptions.class));
+        Mockito.verify(htmlService, Mockito.times(1)).sanitize(ArgumentMatchers.anyString(), ArgumentMatchers.any(HtmlSanitizeOptions.class));
     }
 
      @Test
@@ -277,21 +277,21 @@ public class HtmlProcessingTest {
 
         Assert.assertTrue(!sanitizeResult.getContent().contains("<br />"));
         Assert.assertTrue(!sanitizeResult.getContent().contains("<meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\" />"));
-        Mockito.verify(htmlService, Mockito.times(1)).sanitize(Matchers.anyString(), Matchers.any(HtmlSanitizeOptions.class));
+        Mockito.verify(htmlService, Mockito.times(1)).sanitize(ArgumentMatchers.anyString(), ArgumentMatchers.any(HtmlSanitizeOptions.class));
     }
 
     @Test
     public void testFormatContentForDisplay_noHtmlDisplayMode_formatCalled() throws OXException {
         HtmlProcessing.formatContentForDisplay(textContent, "UTF-8", false, session, mailPath, userSettingMail, modified, DisplayMode.DISPLAY, true, true, true, -1);
 
-        Mockito.verify(htmlService, Mockito.times(1)).htmlFormat(Matchers.anyString(), Matchers.anyBoolean(), Matchers.anyString(), Matchers.anyInt());
+        Mockito.verify(htmlService, Mockito.times(1)).htmlFormat(ArgumentMatchers.anyString(), ArgumentMatchers.anyBoolean(), ArgumentMatchers.anyString(), ArgumentMatchers.anyInt());
     }
 
     @Test
     public void testFormatContentForDisplay_noHtml_formatCalledOnce() throws OXException {
         HtmlProcessing.formatContentForDisplay(textContent, "UTF-8", false, session, mailPath, userSettingMail, modified, DisplayMode.MODIFYABLE, true, true, true, -1);
 
-        Mockito.verify(htmlService, Mockito.times(1)).htmlFormat(Matchers.anyString(), Matchers.anyBoolean(), Matchers.anyString(), Matchers.anyInt());
+        Mockito.verify(htmlService, Mockito.times(1)).htmlFormat(ArgumentMatchers.anyString(), ArgumentMatchers.anyBoolean(), ArgumentMatchers.anyString(), ArgumentMatchers.anyInt());
     }
 
      @Test
