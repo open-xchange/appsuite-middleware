@@ -39,7 +39,6 @@ case "$1" in
             # we are in update mode, run postFix to apply fixes
             postFix "$2"
         }
-        setConfigFilePermissions
     ;;
 
     abort-upgrade|abort-remove|abort-deconfigure)

@@ -982,6 +982,34 @@ public class MimeMailException extends OXException {
     }
 
     /**
+     * Checks if cause of specified messaging exception indicates a connect problem.
+     *
+     * @param e The messaging exception to examine
+     * @return <code>true</code> if a connect problem is indicated; otherwise <code>false</code>
+     */
+    public static boolean isConnectException(MessagingException e) {
+        if (null == e) {
+            return false;
+        }
+
+        return isEitherOf(e, java.net.ConnectException.class);
+    }
+
+    /**
+     * Checks if cause of specified messaging exception indicates a timeout or connect problem.
+     *
+     * @param e The messaging exception to examine
+     * @return <code>true</code> if a timeout or connect problem is indicated; otherwise <code>false</code>
+     */
+    public static boolean isTimeoutOrConnectException(MessagingException e) {
+        if (null == e) {
+            return false;
+        }
+
+        return isEitherOf(e, java.net.SocketTimeoutException.class, java.net.ConnectException.class);
+    }
+
+    /**
      * Checks if cause of specified messaging exception indicates a timeout problem.
      *
      * @param e The messaging exception to examine
