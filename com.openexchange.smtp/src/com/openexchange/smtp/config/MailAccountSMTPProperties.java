@@ -49,7 +49,7 @@
 
 package com.openexchange.smtp.config;
 
-import java.nio.charset.Charset;
+import com.openexchange.java.CharsetDetector;
 import com.openexchange.mail.transport.config.MailAccountTransportProperties;
 import com.openexchange.mailaccount.MailAccount;
 
@@ -95,7 +95,7 @@ public final class MailAccountSMTPProperties extends MailAccountTransportPropert
     public String getSmtpAuthEnc() {
         String smtpAuthEncStr = getAccountProperty("com.openexchange.smtp.smtpAuthEnc");
         if (null != smtpAuthEncStr) {
-            if (Charset.isSupported(smtpAuthEncStr)) {
+            if (CharsetDetector.isValid(smtpAuthEncStr)) {
                 return smtpAuthEncStr;
             }
             final String fallback = SMTPProperties.getInstance().getSmtpAuthEnc();
@@ -107,7 +107,7 @@ public final class MailAccountSMTPProperties extends MailAccountTransportPropert
             smtpAuthEncStr = lookUpProperty("com.openexchange.smtp.primary.smtpAuthEnc");
             if (null != smtpAuthEncStr) {
 
-                if (Charset.isSupported(smtpAuthEncStr)) {
+                if (CharsetDetector.isValid(smtpAuthEncStr)) {
                     return smtpAuthEncStr;
                 }
                 final String fallback = SMTPProperties.getInstance().getSmtpAuthEnc();
@@ -276,14 +276,14 @@ public final class MailAccountSMTPProperties extends MailAccountTransportPropert
 
         return lookUpProperty("com.openexchange.smtp.ssl.ciphersuites", SMTPProperties.getInstance().getSSLCipherSuites());
     }
-    
+
     @Override
     public String getPrimaryAddressHeader() {
         // Only applies for the primary mail account
         if (mailAccountId != PRIMARY) {
             return null;
         }
-        
+
         String tmp = getAccountProperty("com.openexchange.smtp.setPrimaryAddressHeader");
         if (null != tmp) {
             return tmp.trim();
