@@ -493,11 +493,14 @@ public final class PushManagerRegistry implements PushListenerService {
             return false;
         }
 
+        PermanentListenerRescheduler useThisInstanceToReschedule = null;
+
+        boolean inserted;
         synchronized (this) {
             int contextId = session.getContextId();
             int userId = session.getUserId();
 
-            boolean inserted = PushDbUtils.insertPushRegistration(userId, contextId, clientId);
+            inserted = PushDbUtils.insertPushRegistration(userId, contextId, clientId);
 
             if (inserted) {
                 // Not registered
@@ -512,22 +515,18 @@ public final class PushManagerRegistry implements PushListenerService {
                 }
 
                 // Start for push user
+                PermanentListenerRescheduler rescheduler = reschedulerRef.get();
                 boolean allowPermanentPush = isPermanentPushAllowed();
                 Collection<PushUser> toStart = Collections.singletonList(new PushUser(userId, contextId));
                 for (Iterator<PushManagerService> pushManagersIterator = map.values().iterator(); pushManagersIterator.hasNext();) {
                     PushManagerService pushManager = pushManagersIterator.next();
                     if (pushManager instanceof PushManagerExtendedService) {
                         PushManagerExtendedService extendedService = (PushManagerExtendedService) pushManager;
-                        PermanentListenerRescheduler rescheduler = reschedulerRef.get();
                         if (null == rescheduler) {
                             startPermanentListenersFor(toStart, extendedService, allowPermanentPush);
                         } else {
                             if (extendedService.supportsPermanentListeners()) {
-                                try {
-                                    rescheduler.planReschedule(true);
-                                } catch (OXException e) {
-                                    LOG.error("Failed to plan rescheduling", e);
-                                }
+                                useThisInstanceToReschedule = rescheduler;
                             }
                         }
 
@@ -547,9 +546,17 @@ public final class PushManagerRegistry implements PushListenerService {
                     }
                 }
             }
+        } // End of synchronized block
 
-            return inserted;
+        if (null != useThisInstanceToReschedule) {
+            try {
+                useThisInstanceToReschedule.planReschedule(true);
+            } catch (OXException e) {
+                LOG.error("Failed to plan rescheduling", e);
+            }
         }
+
+        return inserted;
     }
 
     @Override
