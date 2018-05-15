@@ -62,7 +62,7 @@ public class RecursiveFileProviderTest {
 
     @Test
     public void testReadConfigurationFiles_listFilesNull_returnEmptyArray() {
-        PowerMockito.when(FileUtils.listFiles((File) ArgumentMatchers.any(), ArgumentMatchers.any(String[].class), ArgumentMatchers.anyBoolean())).thenReturn(null);
+        PowerMockito.when(FileUtils.listFiles(ArgumentMatchers.any(File.class), ArgumentMatchers.any(String[].class), ArgumentMatchers.anyBoolean())).thenReturn(null);
 
         List<File> readConfigurationFiles = fileProvider.readConfigurationFiles(new DiffResult(), rootFolder, ConfigurationFileTypes.CONFIGURATION_FILE_TYPE);
 
@@ -71,7 +71,7 @@ public class RecursiveFileProviderTest {
 
     @Test
     public void testReadConfigurationFiles_fileFound_fileInList() {
-        PowerMockito.when(FileUtils.listFiles((File) ArgumentMatchers.any(), ArgumentMatchers.any(String[].class), ArgumentMatchers.anyBoolean())).thenReturn(configurationFiles);
+        PowerMockito.when(FileUtils.listFiles(ArgumentMatchers.any(File.class), ArgumentMatchers.any(String[].class), ArgumentMatchers.anyBoolean())).thenReturn(configurationFiles);
 
         List<File> readConfigurationFiles = fileProvider.readConfigurationFiles(new DiffResult(), rootFolder, ConfigurationFileTypes.CONFIGURATION_FILE_TYPE);
 
@@ -82,8 +82,8 @@ public class RecursiveFileProviderTest {
     public void testAddFilesToDiffQueue_filesNull_noFileAddedToQueue() {
         fileProvider.addFilesToDiffQueue(new DiffResult(), rootFolder, null, true);
 
-        PowerMockito.verifyStatic(File.class, Mockito.never());
-        ConfFileHandler.addConfigurationFile((DiffResult) ArgumentMatchers.any(), (ConfigurationFile) ArgumentMatchers.any());
+        PowerMockito.verifyStatic(ConfFileHandler.class, Mockito.never());
+        ConfFileHandler.addConfigurationFile(ArgumentMatchers.any(DiffResult.class), ArgumentMatchers.any(ConfigurationFile.class));
     }
 
     @Test
@@ -96,7 +96,7 @@ public class RecursiveFileProviderTest {
 
         fileProvider.addFilesToDiffQueue(new DiffResult(), rootFolder, files, true);
 
-        PowerMockito.verifyStatic(File.class, Mockito.times(2));
-        ConfFileHandler.addConfigurationFile((DiffResult) ArgumentMatchers.any(), (ConfigurationFile) ArgumentMatchers.any());
+        PowerMockito.verifyStatic(ConfFileHandler.class, Mockito.times(2));
+        ConfFileHandler.addConfigurationFile(ArgumentMatchers.any(DiffResult.class), ArgumentMatchers.any(ConfigurationFile.class));
     }
 }
