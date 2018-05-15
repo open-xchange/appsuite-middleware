@@ -1,7 +1,57 @@
+/*
+ *
+ *    OPEN-XCHANGE legal information
+ *
+ *    All intellectual property rights in the Software are protected by
+ *    international copyright laws.
+ *
+ *
+ *    In some countries OX, OX Open-Xchange, open xchange and OXtender
+ *    as well as the corresponding Logos OX Open-Xchange and OX are registered
+ *    trademarks of the OX Software GmbH group of companies.
+ *    The use of the Logos is not covered by the GNU General Public License.
+ *    Instead, you are allowed to use these Logos according to the terms and
+ *    conditions of the Creative Commons License, Version 2.5, Attribution,
+ *    Non-commercial, ShareAlike, and the interpretation of the term
+ *    Non-commercial applicable to the aforementioned license is published
+ *    on the web site http://www.open-xchange.com/EN/legal/index.html.
+ *
+ *    Please make sure that third-party modules and libraries are used
+ *    according to their respective licenses.
+ *
+ *    Any modifications to this package must retain all copyright notices
+ *    of the original copyright holder(s) for the original code used.
+ *
+ *    After any such modifications, the original and derivative code shall remain
+ *    under the copyright of the copyright holder(s) and/or original author(s)per
+ *    the Attribution and Assignment Agreement that can be located at
+ *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
+ *    given Attribution for the derivative code and a license granting use.
+ *
+ *     Copyright (C) 2016-2020 OX Software GmbH
+ *     Mail: info@open-xchange.com
+ *
+ *
+ *     This program is free software; you can redistribute it and/or modify it
+ *     under the terms of the GNU General Public License, Version 2 as published
+ *     by the Free Software Foundation.
+ *
+ *     This program is distributed in the hope that it will be useful, but
+ *     WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ *     or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
+ *     for more details.
+ *
+ *     You should have received a copy of the GNU General Public License along
+ *     with this program; if not, write to the Free Software Foundation, Inc., 59
+ *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ *
+ */
+
 package com.openexchange.saml;
 
 import java.io.ByteArrayOutputStream;
 import java.net.URI;
+import java.nio.charset.Charset;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Collections;
@@ -97,55 +147,6 @@ import com.openexchange.sessiond.SimSessiondService;
 import com.openexchange.user.SimUserService;
 import com.openexchange.user.UserService;
 
-/*
- *
- *    OPEN-XCHANGE legal information
- *
- *    All intellectual property rights in the Software are protected by
- *    international copyright laws.
- *
- *
- *    In some countries OX, OX Open-Xchange, open xchange and OXtender
- *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
- *    The use of the Logos is not covered by the GNU General Public License.
- *    Instead, you are allowed to use these Logos according to the terms and
- *    conditions of the Creative Commons License, Version 2.5, Attribution,
- *    Non-commercial, ShareAlike, and the interpretation of the term
- *    Non-commercial applicable to the aforementioned license is published
- *    on the web site http://www.open-xchange.com/EN/legal/index.html.
- *
- *    Please make sure that third-party modules and libraries are used
- *    according to their respective licenses.
- *
- *    Any modifications to this package must retain all copyright notices
- *    of the original copyright holder(s) for the original code used.
- *
- *    After any such modifications, the original and derivative code shall remain
- *    under the copyright of the copyright holder(s) and/or original author(s)per
- *    the Attribution and Assignment Agreement that can be located at
- *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
- *    given Attribution for the derivative code and a license granting use.
- *
- *     Copyright (C) 2016-2020 OX Software GmbH
- *     Mail: info@open-xchange.com
- *
- *
- *     This program is free software; you can redistribute it and/or modify it
- *     under the terms of the GNU General Public License, Version 2 as published
- *     by the Free Software Foundation.
- *
- *     This program is distributed in the hope that it will be useful, but
- *     WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
- *     or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
- *     for more details.
- *
- *     You should have received a copy of the GNU General Public License along
- *     with this program; if not, write to the Free Software Foundation, Inc., 59
- *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
- *
- */
-
 /**
  * {@link SAMLWebSSOProviderOAuthTest}
  *
@@ -154,7 +155,7 @@ import com.openexchange.user.UserService;
  */
 @RunWith(PowerMockRunner.class)
 @PrepareForTest(OAuthAccessTokenService.class)
-@PowerMockIgnore({"javax.net.*","javax.security.*","javax.crypto.*"})
+@PowerMockIgnore({ "javax.net.*", "javax.security.*", "javax.crypto.*" })
 public class SAMLWebSSOProviderOAuthTest {
 
     private static SAMLWebSSOProvider provider;
@@ -186,6 +187,7 @@ public class SAMLWebSSOProviderOAuthTest {
         sessionReservationService = new SimSessionReservationService();
         services.add(SessionReservationService.class, sessionReservationService);
         services.add(DispatcherPrefixService.class, new DispatcherPrefixService() {
+
             @Override
             public String getPrefix() {
                 return "/appsuite/api/";
@@ -201,27 +203,20 @@ public class SAMLWebSSOProviderOAuthTest {
         stateManagement = new SimStateManagement();
 
         mock = PowerMockito.mock(OAuthAccessTokenService.class);
-        PowerMockito.when(mock, "isConfigured", 1,1).thenReturn(true);
-        services.add(OAuthAccessTokenService.class,mock);
+        PowerMockito.when(mock, "isConfigured", 1, 1).thenReturn(true);
+        services.add(OAuthAccessTokenService.class, mock);
 
         provider = new WebSSOProviderImpl(config, openSAML, stateManagement, services, samlBackend);
     }
 
-     @Test
-     public void testLoginRoundtrip() throws Exception {
+    @Test
+    public void testLoginRoundtrip() throws Exception {
         /*
          * Trigger AuthnRequest
          */
         String requestHost = "webmail.example.com";
         String requestedLoginPath = "/fancyclient/login.html";
-        SimHttpServletRequest loginHTTPRequest = prepareHTTPRequest("GET", new URIBuilder()
-            .setScheme("https")
-            .setHost(requestHost)
-            .setPath("/appsuite/api/saml/init")
-            .setParameter("flow", "login")
-            .setParameter("loginPath", requestedLoginPath)
-            .setParameter("client", "test-client")
-            .build());
+        SimHttpServletRequest loginHTTPRequest = prepareHTTPRequest("GET", new URIBuilder().setScheme("https").setHost(requestHost).setPath("/appsuite/api/saml/init").setParameter("flow", "login").setParameter("loginPath", requestedLoginPath).setParameter("client", "test-client").build());
         URI authnRequestURI = new URI(provider.buildAuthnRequest(loginHTTPRequest, new SimHttpServletResponse()));
 
         /*
@@ -237,10 +232,7 @@ public class SAMLWebSSOProviderOAuthTest {
          * Build response and process it
          */
         Response response = buildResponse(authnRequest);
-        SimHttpServletRequest samlResponseRequest = prepareHTTPRequest("POST", new URIBuilder(authnRequest.getAssertionConsumerServiceURL())
-            .setParameter("SAMLResponse", Base64.encodeBytes(marshall(response).getBytes()))
-            .setParameter("RelayState", relayState)
-            .build());
+        SimHttpServletRequest samlResponseRequest = prepareHTTPRequest("POST", new URIBuilder(authnRequest.getAssertionConsumerServiceURL()).setParameter("SAMLResponse", Base64.encodeBytes(marshall(response).getBytes())).setParameter("RelayState", relayState).build());
 
         SimHttpServletResponse httpResponse = new SimHttpServletResponse();
         mockSAMLConfig();
@@ -264,21 +256,18 @@ public class SAMLWebSSOProviderOAuthTest {
         Assert.assertNotNull(sessionReservationService.removeReservation(reservationToken));
     }
 
-     @Test
-     public void testIdPInitiatedLogin() throws Exception {
+    @Test
+    public void testIdPInitiatedLogin() throws Exception {
         AuthnRequest authnRequest = prepareAuthnRequest();
 
         /*
          * Build response and process it
          */
         Response response = buildResponseWithoutInResponseTo();
-        SimHttpServletRequest samlResponseRequest = prepareHTTPRequest("POST", new URIBuilder(authnRequest.getAssertionConsumerServiceURL())
-            .setParameter("SAMLResponse", Base64.encodeBytes(marshall(response).getBytes()))
-            .build());
+        SimHttpServletRequest samlResponseRequest = prepareHTTPRequest("POST", new URIBuilder(authnRequest.getAssertionConsumerServiceURL()).setParameter("SAMLResponse", Base64.encodeBytes(marshall(response).getBytes())).build());
 
         SimHttpServletResponse httpResponse = new SimHttpServletResponse();
         mockSAMLConfig();
-
 
         provider.handleAuthnResponse(samlResponseRequest, httpResponse, Binding.HTTP_POST);
         assertCachingDisabledHeaders(httpResponse);
@@ -300,12 +289,12 @@ public class SAMLWebSSOProviderOAuthTest {
 
     private void mockSAMLConfig() throws Exception {
 
-        PowerMockito.when(mock.getAccessToken((OAuthGrantType) Mockito.any(), Mockito.anyString(), Mockito.anyInt(), Mockito.anyInt(), Mockito.anyString())).thenReturn(new OAuthAccessToken("access", "refresh", "oauth_bearer", 10));
+        PowerMockito.when(mock.getAccessToken(Mockito.any(OAuthGrantType.class), Mockito.anyString(), Mockito.anyInt(), Mockito.anyInt(), Mockito.isNull())).thenReturn(new OAuthAccessToken("access", "refresh", "oauth_bearer", 10));
 
-     }
+    }
 
-     @Test
-     public void testIdPInitiatedLoginWithRelayState() throws Exception {
+    @Test
+    public void testIdPInitiatedLoginWithRelayState() throws Exception {
         AuthnRequest authnRequest = prepareAuthnRequest();
 
         String requestHost = "webmail2.example.com";
@@ -323,10 +312,7 @@ public class SAMLWebSSOProviderOAuthTest {
          * Build response and process it
          */
         Response response = buildResponseWithoutInResponseTo();
-        SimHttpServletRequest samlResponseRequest = prepareHTTPRequest("POST", new URIBuilder(authnRequest.getAssertionConsumerServiceURL())
-            .setParameter("SAMLResponse", Base64.encodeBytes(marshall(response).getBytes()))
-            .setParameter("RelayState", encodedRelayState)
-            .build());
+        SimHttpServletRequest samlResponseRequest = prepareHTTPRequest("POST", new URIBuilder(authnRequest.getAssertionConsumerServiceURL()).setParameter("SAMLResponse", Base64.encodeBytes(marshall(response).getBytes())).setParameter("RelayState", encodedRelayState).build());
 
         SimHttpServletResponse httpResponse = new SimHttpServletResponse();
 
@@ -352,8 +338,8 @@ public class SAMLWebSSOProviderOAuthTest {
         Assert.assertNotNull(sessionReservationService.removeReservation(reservationToken));
     }
 
-     @Test
-     public void testIdPInitiatedLoginWithPartlyRelayState() throws Exception {
+    @Test
+    public void testIdPInitiatedLoginWithPartlyRelayState() throws Exception {
         AuthnRequest authnRequest = prepareAuthnRequest();
 
         String requestHost = "webmail2.example.com";
@@ -367,10 +353,7 @@ public class SAMLWebSSOProviderOAuthTest {
          * Build response and process it
          */
         Response response = buildResponseWithoutInResponseTo();
-        SimHttpServletRequest samlResponseRequest = prepareHTTPRequest("POST", new URIBuilder(authnRequest.getAssertionConsumerServiceURL())
-            .setParameter("SAMLResponse", Base64.encodeBytes(marshall(response).getBytes()))
-            .setParameter("RelayState", encodedRelayState)
-            .build());
+        SimHttpServletRequest samlResponseRequest = prepareHTTPRequest("POST", new URIBuilder(authnRequest.getAssertionConsumerServiceURL()).setParameter("SAMLResponse", Base64.encodeBytes(marshall(response).getBytes())).setParameter("RelayState", encodedRelayState).build());
 
         SimHttpServletResponse httpResponse = new SimHttpServletResponse();
         mockSAMLConfig();
@@ -466,7 +449,7 @@ public class SAMLWebSSOProviderOAuthTest {
         request.setSecure("https".equals(location.getScheme()));
         request.setServerName(location.getHost());
         request.setQueryString(location.getRawQuery());
-        request.setCookies(Collections.<Cookie>emptyList());
+        request.setCookies(Collections.<Cookie> emptyList());
         request.setRemoteAddr("127.0.0.1");
         Map<String, String> params = parseURIQuery(location);
         for (String name : params.keySet()) {
@@ -477,7 +460,7 @@ public class SAMLWebSSOProviderOAuthTest {
 
     private static Map<String, String> parseURIQuery(URI uri) {
         Map<String, String> map = new HashMap<String, String>();
-        List<NameValuePair> pairs = URLEncodedUtils.parse(uri, "UTF-8");
+        List<NameValuePair> pairs = URLEncodedUtils.parse(uri, Charset.forName("UTF-8"));
         for (NameValuePair pair : pairs) {
             map.put(pair.getName(), pair.getValue());
         }
@@ -522,7 +505,7 @@ public class SAMLWebSSOProviderOAuthTest {
         SubjectConfirmationData subjectConfirmationData = openSAML.buildSAMLObject(SubjectConfirmationData.class);
         subjectConfirmationData.setAddress("10.20.30.1");
         subjectConfirmationData.setInResponseTo(requestID);
-        subjectConfirmationData.setNotOnOrAfter(new DateTime(System.currentTimeMillis() + 60 *60 * 1000));
+        subjectConfirmationData.setNotOnOrAfter(new DateTime(System.currentTimeMillis() + 60 * 60 * 1000));
         subjectConfirmationData.setRecipient(config.getAssertionConsumerServiceURL());
         subjectConfirmation.setSubjectConfirmationData(subjectConfirmationData);
         subject.getSubjectConfirmations().add(subjectConfirmation);
@@ -530,7 +513,7 @@ public class SAMLWebSSOProviderOAuthTest {
 
         Conditions conditions = openSAML.buildSAMLObject(Conditions.class);
         conditions.setNotBefore(new DateTime(System.currentTimeMillis() - 60 * 1000));
-        conditions.setNotOnOrAfter(new DateTime(System.currentTimeMillis() + 60 *60 * 1000));
+        conditions.setNotOnOrAfter(new DateTime(System.currentTimeMillis() + 60 * 60 * 1000));
         AudienceRestriction audienceRestriction = openSAML.buildSAMLObject(AudienceRestriction.class);
         Audience audience = openSAML.buildSAMLObject(Audience.class);
         audience.setAudienceURI(config.getEntityID());
@@ -614,7 +597,7 @@ public class SAMLWebSSOProviderOAuthTest {
         subjectConfirmation.setMethod("urn:oasis:names:tc:SAML:2.0:cm:bearer");
         SubjectConfirmationData subjectConfirmationData = openSAML.buildSAMLObject(SubjectConfirmationData.class);
         subjectConfirmationData.setAddress("10.20.30.1");
-        subjectConfirmationData.setNotOnOrAfter(new DateTime(System.currentTimeMillis() + 60 *60 * 1000));
+        subjectConfirmationData.setNotOnOrAfter(new DateTime(System.currentTimeMillis() + 60 * 60 * 1000));
         subjectConfirmationData.setRecipient(config.getAssertionConsumerServiceURL());
         subjectConfirmation.setSubjectConfirmationData(subjectConfirmationData);
         subject.getSubjectConfirmations().add(subjectConfirmation);
@@ -622,7 +605,7 @@ public class SAMLWebSSOProviderOAuthTest {
 
         Conditions conditions = openSAML.buildSAMLObject(Conditions.class);
         conditions.setNotBefore(new DateTime(System.currentTimeMillis() - 60 * 1000));
-        conditions.setNotOnOrAfter(new DateTime(System.currentTimeMillis() + 60 *60 * 1000));
+        conditions.setNotOnOrAfter(new DateTime(System.currentTimeMillis() + 60 * 60 * 1000));
         AudienceRestriction audienceRestriction = openSAML.buildSAMLObject(AudienceRestriction.class);
         Audience audience = openSAML.buildSAMLObject(Audience.class);
         audience.setAudienceURI(config.getEntityID());
