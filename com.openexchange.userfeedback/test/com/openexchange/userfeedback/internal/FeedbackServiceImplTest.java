@@ -161,6 +161,7 @@ public class FeedbackServiceImplTest {
         PowerMockito.when(Services.getService(DatabaseService.class)).thenReturn(databaseService);
         PowerMockito.when(databaseService.isGlobalDatabaseAvailable()).thenReturn(true);
         PowerMockito.when(databaseService.getWritableForGlobal(ArgumentMatchers.anyString())).thenReturn(connection);
+        PowerMockito.when(databaseService.getWritableForGlobal(ArgumentMatchers.isNull())).thenReturn(connection);
 
         PowerMockito.when(feedbackType.getType()).thenReturn("star-rating-v1");
         PowerMockito.when(feedbackType.storeFeedback(ArgumentMatchers.any(), (Connection) ArgumentMatchers.any())).thenReturn(1L);
