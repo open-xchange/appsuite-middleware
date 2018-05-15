@@ -18,16 +18,16 @@
 	<classpathentry kind="con" path="org.eclipse.pde.core.requiredPlugins"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.8"/>
 	<classpathentry kind="lib" path="testlib/javassist-3.21.0-GA.jar" sourcepath="testlib/source/javassist-3.21.0-GA-sources.jar"/>
-	<classpathentry exported="true" kind="lib" path="testlib/powermock-api-mockito-common-1.7.4.jar" sourcepath="testlib/source/powermock-api-mockito-common-1.7.4-sources.jar"/>
-	<classpathentry exported="true" kind="lib" path="testlib/powermock-api-support-1.7.4.jar" sourcepath="testlib/source/powermock-api-support-1.7.4-sources.jar"/>
-	<classpathentry exported="true" kind="lib" path="testlib/powermock-core-1.7.4.jar" sourcepath="testlib/source/powermock-core-1.7.4-sources.jar"/>
-	<classpathentry exported="true" kind="lib" path="testlib/powermock-module-junit4-1.7.4.jar" sourcepath="testlib/source/powermock-module-junit4-1.7.4-sources.jar"/>
-	<classpathentry exported="true" kind="lib" path="testlib/powermock-module-junit4-common-1.7.4.jar" sourcepath="testlib/source/powermock-module-junit4-common-1.7.4-sources.jar"/>
-	<classpathentry exported="true" kind="lib" path="testlib/powermock-reflect-1.7.4.jar" sourcepath="testlib/source/powermock-reflect-1.7.4-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="testlib/mockito-core-2.18.3.jar" sourcepath="testlib/source/mockito-core-2.18.3-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="testlib/byte-buddy-1.8.11.jar" sourcepath="testlib/source/byte-buddy-1.8.11-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="testlib/byte-buddy-agent-1.8.11.jar" sourcepath="testlib/source/byte-buddy-agent-1.8.11-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="testlib/objenesis-2.6.jar" sourcepath="testlib/source/objenesis-2.6-sources.jar"/>
-	<classpathentry exported="true" kind="lib" path="testlib/powermock-api-mockito2-1.7.4.jar" sourcepath="testlib/source/powermock-api-mockito2-1.7.4-sources.jar"/>
+	<classpathentry exported="true" kind="lib" path="testlib/powermock-api-mockito-common-1.7.5.jar"/>
+	<classpathentry exported="true" kind="lib" path="testlib/powermock-api-mockito2-2.0.0-beta.10.jar"/>
+	<classpathentry exported="true" kind="lib" path="testlib/powermock-api-support-2.0.0-beta.10.jar"/>
+	<classpathentry exported="true" kind="lib" path="testlib/powermock-core-2.0.0-beta.10.jar"/>
+	<classpathentry exported="true" kind="lib" path="testlib/powermock-module-junit4-2.0.0-beta.10.jar"/>
+	<classpathentry exported="true" kind="lib" path="testlib/powermock-module-junit4-common-2.0.0-beta.10.jar"/>
+	<classpathentry exported="true" kind="lib" path="testlib/powermock-reflect-2.0.0-beta.10.jar"/>
 	<classpathentry kind="output" path="build"/>
 </classpath>
