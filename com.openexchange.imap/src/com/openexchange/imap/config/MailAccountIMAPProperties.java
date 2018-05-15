@@ -49,12 +49,12 @@
 
 package com.openexchange.imap.config;
 
-import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import com.openexchange.java.CharsetDetector;
 import com.openexchange.mail.api.MailConfig.BoolCapVal;
 import com.openexchange.mail.config.MailAccountProperties;
 import com.openexchange.mailaccount.MailAccount;
@@ -144,7 +144,7 @@ public final class MailAccountIMAPProperties extends MailAccountProperties imple
         String imapAuthEncStr = getAccountProperty("com.openexchange.imap.imapAuthEnc");
         if (null != imapAuthEncStr) {
             imapAuthEncStr = imapAuthEncStr.trim();
-            if (Charset.isSupported(imapAuthEncStr)) {
+            if (CharsetDetector.isValid(imapAuthEncStr)) {
                 return imapAuthEncStr;
             }
             final String fallback = IMAPProperties.getInstance().getImapAuthEnc();
@@ -156,7 +156,7 @@ public final class MailAccountIMAPProperties extends MailAccountProperties imple
             imapAuthEncStr = lookUpProperty("com.openexchange.imap.primary.imapAuthEnc");
             if (null != imapAuthEncStr) {
                 imapAuthEncStr = imapAuthEncStr.trim();
-                if (Charset.isSupported(imapAuthEncStr)) {
+                if (CharsetDetector.isValid(imapAuthEncStr)) {
                     return imapAuthEncStr;
                 }
                 final String fallback = IMAPProperties.getInstance().getImapAuthEnc();
