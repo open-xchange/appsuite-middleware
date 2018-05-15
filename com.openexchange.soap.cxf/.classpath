@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
 	<classpathentry kind="src" path="src"/>
+	<classpathentry exported="true" kind="lib" path="lib/velocity-engine-core-2.0.jar" sourcepath="lib/source/velocity-engine-core-2.0-sources.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/jaxb-core-2.2.11.jar" sourcepath="lib/source/jaxb-core-2.2.11-sources.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/jaxb-impl-2.2.11.jar" sourcepath="lib/source/jaxb-impl-2.2.11-sources.jar"/>
 	<classpathentry kind="con" path="org.eclipse.pde.core.requiredPlugins"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.8">
 		<accessrules>
