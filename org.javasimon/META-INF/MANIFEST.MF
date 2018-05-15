@@ -10,9 +10,7 @@ Bundle-ClassPath: .,
  lib/hamcrest-core-1.1.jar,
  lib/javasimon-core-4.1.4.jar,
  lib/jcommander-1.12.jar,
- lib/mockito-core-1.9.0.jar,
- lib/objenesis-1.0.jar,
- lib/testng-6.5.2.jar
+ lib/objenesis-1.0.jar
 Export-Package: org.javasimon;version="4.1.4",
  org.javasimon.aop;version="4.1.4",
  org.javasimon.callback;version="4.1.4",
