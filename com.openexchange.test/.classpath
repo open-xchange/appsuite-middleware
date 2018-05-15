@@ -12,7 +12,6 @@
 	<classpathentry exported="true" kind="lib" path="testlib/dumbster1.6.jar" sourcepath="testlib/source/dumbster1.6-src.zip"/>
 	<classpathentry exported="true" kind="lib" path="testlib/jersey-test-framework-core-2.25.jar" sourcepath="testlib/source/jersey-test-framework-core-2.25-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="testlib/system-rules-1.12.0.jar" sourcepath="system-rules-1.12.0-sources.jar"/>
-	<classpathentry exported="true" kind="lib" path="testlib/objenesis-2.4.jar"/>
 	<classpathentry exported="true" kind="lib" path="testlib/junit-4.12.jar" sourcepath="testlib/source/junit-4.12-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="testlib/jchronic-0.2.3.jar"/>
 	<classpathentry kind="lib" path="testlib/cglib-nodep-2.2.2.jar"/>
@@ -27,5 +26,8 @@
 	<classpathentry exported="true" kind="lib" path="testlib/powermock-module-junit4-common-1.7.4.jar" sourcepath="testlib/source/powermock-module-junit4-common-1.7.4-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="testlib/powermock-reflect-1.7.4.jar" sourcepath="testlib/source/powermock-reflect-1.7.4-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="testlib/mockito-core-2.18.3.jar" sourcepath="testlib/source/mockito-core-2.18.3-sources.jar"/>
+	<classpathentry exported="true" kind="lib" path="testlib/byte-buddy-1.8.11.jar" sourcepath="testlib/source/byte-buddy-1.8.11-sources.jar"/>
+	<classpathentry exported="true" kind="lib" path="testlib/byte-buddy-agent-1.8.11.jar" sourcepath="testlib/source/byte-buddy-agent-1.8.11-sources.jar"/>
+	<classpathentry exported="true" kind="lib" path="testlib/objenesis-2.6.jar" sourcepath="testlib/source/objenesis-2.6-sources.jar"/>
 	<classpathentry kind="output" path="build"/>
 </classpath>
