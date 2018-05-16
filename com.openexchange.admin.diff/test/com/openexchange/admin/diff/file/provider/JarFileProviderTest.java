@@ -84,8 +84,8 @@ public class JarFileProviderTest {
     public void testAddFilesToDiffQueue_filesNull_noFileAddedToQueue() throws IOException {
         fileProvider.addFilesToDiffQueue(new DiffResult(), rootFolder, null, true);
 
-        PowerMockito.verifyStatic(File.class, Mockito.never());
-        ConfFileHandler.addConfigurationFile((DiffResult) ArgumentMatchers.any(), (ConfigurationFile) ArgumentMatchers.any());
+        PowerMockito.verifyStatic(ConfFileHandler.class, Mockito.never());
+        ConfFileHandler.addConfigurationFile(ArgumentMatchers.any(DiffResult.class), ArgumentMatchers.any(ConfigurationFile.class));
     }
 
     @Test
@@ -98,7 +98,7 @@ public class JarFileProviderTest {
 
         fileProvider.addFilesToDiffQueue(new DiffResult(), rootFolder, files, true);
 
-        PowerMockito.verifyStatic(File.class, Mockito.never());
-        ConfFileHandler.addConfigurationFile((DiffResult) ArgumentMatchers.any(), (ConfigurationFile) ArgumentMatchers.any());
+        PowerMockito.verifyStatic(ConfFileHandler.class, Mockito.never());
+        ConfFileHandler.addConfigurationFile(ArgumentMatchers.any(DiffResult.class), ArgumentMatchers.any(ConfigurationFile.class));
     }
 }

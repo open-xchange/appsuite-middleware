@@ -83,7 +83,7 @@ public class ConfFolderFileProviderTest {
     public void testAddFilesToDiffQueue_filesNull_noFileAddedToQueue() throws IOException {
         fileProvider.addFilesToDiffQueue(new DiffResult(), rootFolder, null, true);
 
-        PowerMockito.verifyStatic(File.class, Mockito.never());
+        PowerMockito.verifyStatic(ConfFileHandler.class, Mockito.never());
         ConfFileHandler.addConfigurationFile((DiffResult) ArgumentMatchers.any(), (ConfigurationFile) ArgumentMatchers.any());
     }
 
@@ -97,7 +97,7 @@ public class ConfFolderFileProviderTest {
 
         fileProvider.addFilesToDiffQueue(new DiffResult(), rootFolder, files, true);
 
-        PowerMockito.verifyStatic(File.class, Mockito.never());
+        PowerMockito.verifyStatic(ConfFileHandler.class, Mockito.never());
         ConfFileHandler.addConfigurationFile((DiffResult) ArgumentMatchers.any(), (ConfigurationFile) ArgumentMatchers.any());
     }
 }
