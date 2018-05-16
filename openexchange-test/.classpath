@@ -193,5 +193,6 @@
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.chronos.ical.ical4j"/>
 	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/commons-codec-1.11.jar"/>
 	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/joda-time-2.9.9.jar"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/org.apache.tika"/>
 	<classpathentry kind="output" path="build"/>
 </classpath>
