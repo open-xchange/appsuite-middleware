@@ -47,69 +47,45 @@
  *
  */
 
-package com.openexchange.oauth.twitter;
+package com.openexchange.pgp.core;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Map;
-import java.util.Set;
-import org.scribe.builder.api.Api;
-import org.scribe.builder.api.TwitterApi;
-import com.openexchange.exception.OXException;
-import com.openexchange.oauth.KnownApi;
-import com.openexchange.oauth.OAuthToken;
-import com.openexchange.oauth.impl.AbstractExtendedScribeAwareOAuthServiceMetaData;
-import com.openexchange.oauth.scope.OAuthScope;
-import com.openexchange.server.ServiceLookup;
-import com.openexchange.session.Session;
+import java.io.IOException;
+import java.util.Objects;
+import org.bouncycastle.openpgp.PGPException;
+import com.openexchange.pgp.core.PGPDecrypter.PGPDataContainer;
 
 /**
- * {@link OAuthServiceMetaDataTwitterImpl}
+ * {@link MDCSignatureVerificationResult}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @author <a href="mailto:benjamin.gruedelbach@open-xchange.com">Benjamin Gruedelbach</a>
+ * @since v7.10.0
  */
-public class OAuthServiceMetaDataTwitterImpl extends AbstractExtendedScribeAwareOAuthServiceMetaData {
+public class MDCVerificationResult {
 
-    /**
-     * Initializes a new {@link OAuthServiceMetaDataTwitterImpl}.
-     */
-    public OAuthServiceMetaDataTwitterImpl(ServiceLookup services) {
-        super(services, KnownApi.TWITTER, true, true, TwitterOAuthScope.values());
+    boolean isPresent;
+    boolean verified;
+
+    private MDCVerificationResult(boolean isPresent, boolean verified) {
+        this.isPresent = isPresent;
+        this.verified = verified;
     }
 
-    @Override
-    public Class<? extends Api> getScribeService() {
-        return TwitterApi.class;
+    public static MDCVerificationResult createFrom(PGPDataContainer data) throws PGPException, IOException {
+        boolean isPresent = false;
+        boolean verified = false;
+        data = Objects.requireNonNull(data, "data must not be null");
+        if (data.getData().isIntegrityProtected()) {
+            isPresent = true;
+            verified = data.getData().verify();
+        }
+        return new MDCVerificationResult(isPresent, verified);
     }
 
-    @Override
-    protected String getPropertyId() {
-        return "twitter";
+    public boolean isPresent() {
+        return this.isPresent;
     }
 
-    @Override
-    protected Collection<OAuthPropertyID> getExtraPropertyNames() {
-        return Collections.emptyList();
-    }
-
-    @Override
-    public String processAuthorizationURL(final String authUrl, Session session) {
-        return authUrl;
-    }
-
-    @Override
-    public void processArguments(final Map<String, Object> arguments, final Map<String, String> parameter, final Map<String, Object> state) throws OXException {
-        // no-op
-    }
-
-    @Override
-    public String getRegisterToken(String authUrl) {
-        return null;
-    }
-
-    @Override
-    public OAuthToken getOAuthToken(final Map<String, Object> arguments, Set<OAuthScope> scopes) throws OXException {
-        return null;
+    public boolean isVerified() {
+       return this.verified;
     }
 }

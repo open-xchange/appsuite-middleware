@@ -47,58 +47,59 @@
  *
  */
 
-package com.openexchange.oauth.yahoo.internal;
+package com.openexchange.file.storage.rdb.osgi;
 
-import java.util.Collection;
-import java.util.Collections;
-import org.scribe.builder.api.Api;
-import com.openexchange.http.deferrer.DeferringURLService;
-import com.openexchange.oauth.HostInfo;
-import com.openexchange.oauth.KnownApi;
-import com.openexchange.oauth.impl.AbstractExtendedScribeAwareOAuthServiceMetaData;
-import com.openexchange.oauth.yahoo.YahooOAuthScope;
-import com.openexchange.server.ServiceLookup;
-import com.openexchange.session.Session;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
+import org.osgi.util.tracker.ServiceTrackerCustomizer;
+import com.openexchange.file.storage.FileStorageAccountDeleteListener;
+import com.openexchange.file.storage.rdb.internal.DeleteListenerRegistry;
 
 /**
- * {@link OAuthServiceMetaDataYahooImpl}
+ * {@link DeleteListenerServiceTracker} - The {@link ServiceTrackerCustomizer} for file storage account delete listeners.
  *
- * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class OAuthServiceMetaDataYahooImpl extends AbstractExtendedScribeAwareOAuthServiceMetaData {
+public final class DeleteListenerServiceTracker implements ServiceTrackerCustomizer<FileStorageAccountDeleteListener, FileStorageAccountDeleteListener> {
 
-    public OAuthServiceMetaDataYahooImpl(ServiceLookup services) {
-        super(services, KnownApi.YAHOO, YahooOAuthScope.values());
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(DeleteListenerServiceTracker.class);
+
+    private final BundleContext context;
+
+    /**
+     * Initializes a new {@link DeleteListenerServiceTracker}.
+     */
+    public DeleteListenerServiceTracker(final BundleContext context) {
+        super();
+        this.context = context;
     }
 
     @Override
-    public String modifyCallbackURL(String callbackUrl, HostInfo currentHost, Session session) {
-        DeferringURLService deferrer = services.getService(DeferringURLService.class);
-        if (deferrer == null) {
-            return callbackUrl;
+    public FileStorageAccountDeleteListener addingService(final ServiceReference<FileStorageAccountDeleteListener> reference) {
+        final FileStorageAccountDeleteListener addedService = context.getService(reference);
+        if (DeleteListenerRegistry.getInstance().addDeleteListener(addedService)) {
+            return addedService;
         }
-        return injectRoute(deferrer.getDeferredURL(callbackUrl, session.getUserId(), session.getContextId()), currentHost.getRoute());
+        LOG.warn("Duplicate delete listener \"{}\" is not be added to registry.", addedService.getClass().getName());
+        // This service needs not to be tracked, thus return null
+        context.ungetService(reference);
+        return null;
     }
 
     @Override
-    public Class<? extends Api> getScribeService() {
-        return YahooApi2.class;
+    public void modifiedService(final ServiceReference<FileStorageAccountDeleteListener> reference, final FileStorageAccountDeleteListener service) {
+        // Nothing to do
     }
 
     @Override
-    public boolean needsRequestToken() {
-        return false;
+    public void removedService(final ServiceReference<FileStorageAccountDeleteListener> reference, final FileStorageAccountDeleteListener service) {
+        if (null != service) {
+            try {
+                DeleteListenerRegistry.getInstance().removeDeleteListener(service);
+            } finally {
+                context.ungetService(reference);
+            }
+        }
     }
 
-    @Override
-    protected String getPropertyId() {
-        return "yahoo";
-    }
-
-    @Override
-    protected Collection<OAuthPropertyID> getExtraPropertyNames() {
-        return Collections.singletonList(OAuthPropertyID.redirectUrl);
-    }
 }

@@ -80,6 +80,7 @@ import com.openexchange.server.services.ServerServiceRegistry;
  */
 @RunWith(PowerMockRunner.class)
 @PowerMockIgnore("javax.management.*")
+@PrepareForTest(ServerServiceRegistry.class)
 public class Bug19471StructureTest extends AbstractMailTest {
 
     //@formatter:off

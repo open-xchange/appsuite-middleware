@@ -105,7 +105,7 @@ public class LinkedinProfileDataSource extends AbstractLinkedinDataSource implem
         final ContactEMailCompletor cc = new ContactEMailCompletor(session, contactService, userService);
         cc.complete(contact);
 
-        final List<OAuthAccount> accounts = getOauthService().getAccounts(KnownApi.LINKEDIN.getFullName(), session, uid, cid);
+        final List<OAuthAccount> accounts = getOauthService().getAccounts(session, KnownApi.LINKEDIN.getFullName());
         if (accounts.size() == 0) {
             throw LinkedinHaloExceptionCodes.NO_ACCOUNT.create();
         }
@@ -159,7 +159,7 @@ public class LinkedinProfileDataSource extends AbstractLinkedinDataSource implem
             throw LinkedinHaloExceptionCodes.MISSING_EMAIL_ADDR.create();
         }
 
-        final List<OAuthAccount> accounts = getOauthService().getAccounts(KnownApi.LINKEDIN.getFullName(), session, uid, cid);
+        final List<OAuthAccount> accounts = getOauthService().getAccounts(session, KnownApi.LINKEDIN.getFullName());
         if (accounts.isEmpty()) {
             throw LinkedinHaloExceptionCodes.NO_ACCOUNT.create();
         }

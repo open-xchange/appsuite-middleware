@@ -79,7 +79,7 @@ public class MailAccountOAuthAccountReauthorizedListener extends MailAccountOAut
         if (null != mass) {
             MailAccount[] userMailAccounts = mass.getUserMailAccounts(user, contextId, con);
             for (MailAccount mailAccount : userMailAccounts) {
-                if (false == mailAccount.isDefaultAccount() && false == isUnifiedINBOXAccount(mailAccount)) {
+                if (false == mailAccount.isDefaultAccount() && false == isUnifiedINBOXAccount(mailAccount) && mailAccount.getMailOAuthId() == oauthAccountId) {
                     enbledMailAccount(mailAccount, oauthAccountId, user, contextId, con, mass);
                 }
             }

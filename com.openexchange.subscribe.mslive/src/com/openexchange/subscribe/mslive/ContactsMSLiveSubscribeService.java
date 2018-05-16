@@ -129,7 +129,7 @@ public class ContactsMSLiveSubscribeService extends AbstractMSLiveSubscribeServi
                     iAccountId = Integer.parseInt(accountId.toString());
                 }
                 OAuthService service = services.getService(OAuthService.class);
-                oauthAccount = service.getAccount(iAccountId, session, session.getUserId(), session.getContextId());
+                oauthAccount = service.getAccount(session, iAccountId);
             }
         }
 

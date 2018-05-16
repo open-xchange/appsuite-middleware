@@ -53,6 +53,7 @@ import java.util.Collection;
 import java.util.Collections;
 import org.scribe.builder.api.Api;
 import org.scribe.builder.api.Google2Api;
+import org.scribe.model.Verb;
 import com.openexchange.exception.OXException;
 import com.openexchange.oauth.KnownApi;
 import com.openexchange.oauth.impl.AbstractExtendedScribeAwareOAuthServiceMetaData;
@@ -66,6 +67,9 @@ import com.openexchange.session.Session;
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 public final class GoogleOAuthServiceMetaData extends AbstractExtendedScribeAwareOAuthServiceMetaData {
+
+    private static final String IDENTITY_URL = "https://www.googleapis.com/oauth2/v1/userinfo";
+    private static final String IDENTITY_FIELD_NAME = "id";
 
     /**
      * Initializes a new {@link GoogleOAuthServiceMetaData}.
@@ -94,7 +98,37 @@ public final class GoogleOAuthServiceMetaData extends AbstractExtendedScribeAwar
     @Override
     public String processAuthorizationURL(String authUrl, Session session) throws OXException {
         StringBuilder authUrlBuilder = new StringBuilder(super.processAuthorizationURL(authUrl, session));
-        // Request a refresh token, too
-        return authUrlBuilder.append("&approval_prompt=force").append("&access_type=offline").toString();
+        // Request a refresh token, too and keep the already granted scopes
+        return authUrlBuilder.append("&approval_prompt=force").append("&access_type=offline").append("&include_granted_scopes=true").toString();
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.oauth.impl.OAuthIdentityAware#getIdentityMethod()
+     */
+    @Override
+    public Verb getIdentityHTTPMethod() {
+        return Verb.GET;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.oauth.impl.OAuthIdentityAware#getIdentityURL()
+     */
+    @Override
+    public String getIdentityURL(String accessToken) {
+        return IDENTITY_URL;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.oauth.impl.OAuthIdentityAware#getIdentityPattern()
+     */
+    @Override
+    public String getIdentityFieldName() {
+        return IDENTITY_FIELD_NAME;
     }
 }

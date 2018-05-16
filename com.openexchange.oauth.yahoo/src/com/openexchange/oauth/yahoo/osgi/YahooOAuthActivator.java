@@ -64,7 +64,7 @@ import com.openexchange.oauth.scope.OAuthScopeRegistry;
 import com.openexchange.oauth.yahoo.YahooOAuthScope;
 import com.openexchange.oauth.yahoo.YahooService;
 import com.openexchange.oauth.yahoo.access.YahooAccessEventHandler;
-import com.openexchange.oauth.yahoo.internal.OAuthServiceMetaDataYahooImpl;
+import com.openexchange.oauth.yahoo.internal.YahooOAuthServiceMetaData;
 import com.openexchange.oauth.yahoo.internal.YahooServiceImpl;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.sessiond.SessiondEventConstants;
@@ -81,7 +81,7 @@ public class YahooOAuthActivator extends HousekeepingActivator {
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(YahooOAuthActivator.class);
 
     private volatile OAuthService oauthService;
-    private volatile OAuthServiceMetaDataYahooImpl oAuthMetaData;
+    private volatile YahooOAuthServiceMetaData oAuthMetaData;
 
     /** Gets OAuthService */
     public OAuthService getOauthService() {
@@ -94,12 +94,12 @@ public class YahooOAuthActivator extends HousekeepingActivator {
     }
 
     /** Gets OAuthServiceMetaDataYahooImpl */
-    public OAuthServiceMetaDataYahooImpl getOAuthMetaData() {
+    public YahooOAuthServiceMetaData getOAuthMetaData() {
         return oAuthMetaData;
     }
 
     /** Sets OAuthServiceMetaDataYahooImpl */
-    public void setOAuthMetaData(final OAuthServiceMetaDataYahooImpl oauthMetaData) {
+    public void setOAuthMetaData(final YahooOAuthServiceMetaData oauthMetaData) {
         this.oAuthMetaData = oauthMetaData;
     }
 
@@ -112,7 +112,7 @@ public class YahooOAuthActivator extends HousekeepingActivator {
     protected void startBundle() throws Exception {
         Services.setServices(this);
         oauthService = getService(OAuthService.class);
-        oAuthMetaData = new OAuthServiceMetaDataYahooImpl(this);
+        oAuthMetaData = new YahooOAuthServiceMetaData(this);
         registerService(OAuthServiceMetaData.class, oAuthMetaData);
         registerService(Reloadable.class, oAuthMetaData);
         LOG.info("OAuthServiceMetaData for Yahoo was started");

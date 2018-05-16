@@ -129,11 +129,7 @@ public class GoogleCalendarAccess extends BasicCachingCalendarAccess {
         } catch (JSONException e) {
             throw CalendarExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
-        try {
-            init(checkConfig);
-        } catch (OXException e) {
-            // ignore exception for now
-        }
+        init(checkConfig);
     }
 
     private void init(boolean checkConfig) throws OXException {

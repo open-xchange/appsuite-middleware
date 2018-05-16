@@ -54,19 +54,17 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Arrays;
 import java.util.List;
-import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.PerformParameters;
-import com.openexchange.groupware.update.UpdateExceptionCodes;
-import com.openexchange.groupware.update.UpdateTaskAdapter;
 import com.openexchange.tools.update.Tools;
 
 /**
  * {@link DropForeignKeyFromOAuthAccountTask} - Drops rather needless foreign key from <code>"oauthAccounts"</code> table.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public final class DropForeignKeyFromOAuthAccountTask extends UpdateTaskAdapter {
+public final class DropForeignKeyFromOAuthAccountTask extends AbstractOAuthUpdateTask {
 
     /**
      * Initializes a new {@link DropForeignKeyFromOAuthAccountTask}.
@@ -75,47 +73,41 @@ public final class DropForeignKeyFromOAuthAccountTask extends UpdateTaskAdapter 
         super();
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.groupware.update.UpdateTaskV2#getDependencies()
+     */
     @Override
     public String[] getDependencies() {
         return new String[] {};
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.oauth.impl.internal.groupware.AbstractOAuthUpdateTask#innerPerform(java.sql.Connection, com.openexchange.groupware.update.PerformParameters)
+     */
     @Override
-    public void perform(final PerformParameters params) throws OXException {
-        Connection con = params.getConnection();
-        boolean rollback = false;
-        try {
-            Databases.startTransaction(con);
-            rollback = true;
-
-            // Drop foreign keys from...
-            for (String table : Arrays.asList("oauthAccounts")) {
-                dropForeignKeysFrom(table, con);
-            }
-
-            con.commit();
-            rollback = false;
-        } catch (SQLException e) {
-            throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
-        } catch (final RuntimeException e) {
-            throw UpdateExceptionCodes.OTHER_PROBLEM.create(e, e.getMessage());
-        } finally {
-            if (rollback) {
-                Databases.rollback(con);
-            }
-            Databases.autocommit(con);
+    void innerPerform(Connection connection, PerformParameters performParameters) throws OXException, SQLException {
+        // Drop foreign keys from...
+        for (String table : Arrays.asList("oauthAccounts")) {
+            dropForeignKeysFrom(table, connection);
         }
     }
 
+    /**
+     * Drops the foreign keys from the specified table
+     * 
+     * @param table The table from which to drop the foreign keys
+     * @param con The {@link Connection} to use
+     * @throws SQLException If an SQL error is occurred
+     */
     private void dropForeignKeysFrom(String table, Connection con) throws SQLException {
         List<String> keyNames = Tools.allForeignKey(con, table);
-        Statement stmt = null;
         for (String keyName : keyNames) {
-            try {
-                stmt = con.createStatement();
+            try (Statement stmt = con.createStatement()) {
                 stmt.execute("ALTER TABLE " + table + " DROP FOREIGN KEY " + keyName);
-            } finally {
-                Databases.closeSQLStuff(stmt);
             }
         }
     }
