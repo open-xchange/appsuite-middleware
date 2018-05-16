@@ -171,7 +171,6 @@
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.rest.services"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.advertisement.json"/>
 	<classpathentry kind="lib" path="lib/jackson-datatype-joda-2.8.7.jar" sourcepath="lib/source/jackson-datatype-joda-2.8.7-sources.jar"/>
-	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/joda-time-2.7.jar" sourcepath="/com.openexchange.bundles/source/joda-time-2.7-source.jar"/>
 	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/jersey-media-json-jackson-2.17.jar" sourcepath="/com.openexchange.bundles/source/jersey-media-json-jackson-2.17-sources.jar"/>
 	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/jersey-entity-filtering-2.17.jar" sourcepath="/com.openexchange.bundles/source/jersey-entity-filtering-2.17-sources.jar"/>
 	<classpathentry kind="lib" path="lib/mimepull-1.6.jar" sourcepath="lib/source/mimepull-1.6-sources.jar"/>
@@ -193,5 +192,6 @@
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.chronos.ical"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.chronos.ical.ical4j"/>
 	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/commons-codec-1.11.jar"/>
+	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/joda-time-2.9.9.jar"/>
 	<classpathentry kind="output" path="build"/>
 </classpath>

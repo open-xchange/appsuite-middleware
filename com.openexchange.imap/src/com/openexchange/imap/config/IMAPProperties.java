@@ -50,7 +50,6 @@
 package com.openexchange.imap.config;
 
 import static com.openexchange.java.Autoboxing.I;
-import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -78,6 +77,7 @@ import com.openexchange.imap.entity2acl.Entity2ACL;
 import com.openexchange.imap.services.Services;
 import com.openexchange.imap.util.CircuitBreakerCommandListener;
 import com.openexchange.java.Autoboxing;
+import com.openexchange.java.CharsetDetector;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.api.AbstractProtocolProperties;
 import com.openexchange.mail.api.IMailProperties;
@@ -616,7 +616,7 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
 
         {
             final String imapAuthEncStr = configuration.getProperty("com.openexchange.imap.imapAuthEnc", "UTF-8").trim();
-            if (Charset.isSupported(imapAuthEncStr)) {
+            if (CharsetDetector.isValid(imapAuthEncStr)) {
                 imapAuthEnc = imapAuthEncStr;
                 logBuilder.append("    Authentication Encoding: {}{}");
                 args.add(imapAuthEnc);

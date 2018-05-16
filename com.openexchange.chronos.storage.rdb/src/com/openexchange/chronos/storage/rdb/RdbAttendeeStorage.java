@@ -418,18 +418,23 @@ public class RdbAttendeeStorage extends RdbStorage implements AttendeeStorage {
         stringBuilder.append(';');
         try (PreparedStatement stmt = connection.prepareStatement(stringBuilder.toString())) {
             int parameterIndex = 1;
+            boolean attendeesToStore = false;
             for (Entry<String, List<Attendee>> entry : attendeesByEventId.entrySet()) {
                 Set<Integer> usedEntities = new HashSet<Integer>(entry.getValue().size());
                 int eventId = asInt(entry.getKey());
-                for (Attendee attendee : entry.getValue()) {
-                    attendee = entityProcessor.adjustPriorInsert(attendee, usedEntities);
-                    stmt.setInt(parameterIndex++, context.getContextId());
-                    stmt.setInt(parameterIndex++, accountId);
-                    stmt.setInt(parameterIndex++, eventId);
-                    parameterIndex = MAPPER.setParameters(stmt, parameterIndex, attendee, mappedFields);
+                List<Attendee> attendeeList = entry.getValue();
+                if (attendeeList != null && attendeeList.size() > 0) {
+                    attendeesToStore = true;
+                    for (Attendee attendee : entry.getValue()) {
+                        attendee = entityProcessor.adjustPriorInsert(attendee, usedEntities);
+                        stmt.setInt(parameterIndex++, context.getContextId());
+                        stmt.setInt(parameterIndex++, accountId);
+                        stmt.setInt(parameterIndex++, eventId);
+                        parameterIndex = MAPPER.setParameters(stmt, parameterIndex, attendee, mappedFields);
+                    }
                 }
             }
-            return logExecuteUpdate(stmt);
+            return attendeesToStore ? logExecuteUpdate(stmt) : 0;
         }
     }
 
