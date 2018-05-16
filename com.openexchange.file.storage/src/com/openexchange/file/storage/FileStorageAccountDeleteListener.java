@@ -47,50 +47,41 @@
  *
  */
 
-package com.openexchange.halo.linkedin;
+package com.openexchange.file.storage;
 
-import java.util.List;
-import org.json.JSONObject;
-import com.openexchange.ajax.requesthandler.AJAXRequestData;
-import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import java.sql.Connection;
+import java.util.Map;
 import com.openexchange.exception.OXException;
-import com.openexchange.halo.HaloContactQuery;
-import com.openexchange.oauth.KnownApi;
-import com.openexchange.oauth.OAuthAccount;
-import com.openexchange.server.ServiceLookup;
-import com.openexchange.tools.session.ServerSession;
+import com.openexchange.session.Session;
 
-public class LinkedinInboxDataSource extends AbstractLinkedinDataSource {
+/**
+ * {@link FileStorageAccountDeleteListener} - Listener interface for file storage account deletion.
+ *
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ */
+public interface FileStorageAccountDeleteListener {
 
-    public LinkedinInboxDataSource(final ServiceLookup lookup) {
-        super(lookup);
-    }
+    /**
+     * Handles the event <i>before</i> the denoted file storage account is deleted.
+     * 
+     * @param session The session
+     * @param id The file storage account identfier
+     * @param eventProps Optional properties for delete event
+     * @param connection The used connection <i>in transactional state</i>
+     *
+     * @throws OXException If a critical error occurs which should abort file storage account deletion
+     */
+    public void onBeforeFileStorageAccountDeletion(Session session, int id, Map<String, Object> eventProps, Connection connection) throws OXException;
 
-    @Override
-    public String getId() {
-        return "com.openexchange.halo.linkedIn.inbox";
-    }
-
-    @Override
-    public boolean isAvailable(ServerSession session) throws OXException {
-        return hasAccount(session) && hasPlusFeatures(session);
-    }
-
-    @Override
-    public AJAXRequestResult investigate(final HaloContactQuery query, final AJAXRequestData req, final ServerSession session) throws OXException {
-        final int uid = session.getUserId();
-        final int cid = session.getContextId();
-
-        final List<OAuthAccount> accounts = getOauthService().getAccounts(session, KnownApi.LINKEDIN.getFullName());
-        if (accounts.isEmpty()) {
-            throw LinkedinHaloExceptionCodes.NO_ACCOUNT.create();
-        }
-
-        final OAuthAccount linkedinAccount = accounts.get(0);
-        final JSONObject json = getLinkedinService().getMessageInbox(session, uid, cid, linkedinAccount.getId());
-        final AJAXRequestResult result = new AJAXRequestResult();
-        result.setResultObject(json, "json");
-        return result;
-    }
-
+    /**
+     * Handles the event <i>after</i> the denoted OAuth account is deleted.
+     * 
+     * @param session The session
+     * @param id The file storage account identifier
+     * @param eventProps Optional properties for delete event
+     * @param connection The used connection <i>in transactional state</i>
+     *
+     * @throws OXException If a critical error occurs which should abort OAuth account deletion
+     */
+    public void onAfterFileStorageAccountDeletion(Session session, int id, Map<String, Object> eventProps, Connection connection) throws OXException;
 }

@@ -47,46 +47,104 @@
  *
  */
 
-package com.openexchange.oauth.linkedin;
+package com.openexchange.oauth.twitter;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Map;
+import java.util.Set;
 import org.scribe.builder.api.Api;
-import org.scribe.builder.api.LinkedInApi20;
+import org.scribe.builder.api.TwitterApi;
+import org.scribe.model.Verb;
+import com.openexchange.exception.OXException;
 import com.openexchange.oauth.KnownApi;
+import com.openexchange.oauth.OAuthToken;
 import com.openexchange.oauth.impl.AbstractExtendedScribeAwareOAuthServiceMetaData;
+import com.openexchange.oauth.scope.OAuthScope;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.session.Session;
 
 /**
- * {@link OAuthServiceMetaDataLinkedInImpl}
+ * {@link TwitterOAuthServiceMetaData}
  *
- * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class OAuthServiceMetaDataLinkedInImpl extends AbstractExtendedScribeAwareOAuthServiceMetaData {
+public class TwitterOAuthServiceMetaData extends AbstractExtendedScribeAwareOAuthServiceMetaData {
 
-    public OAuthServiceMetaDataLinkedInImpl(ServiceLookup services) {
-        super(services, KnownApi.LINKEDIN, LinkedInOAuthScope.values());
-    }
+    private static final String IDENTITY_URL = "https://api.twitter.com/1.1/account/verify_credentials.json";
+    private static final String IDENTITY_FIELD_NAME = "id_str";
 
-    @Override
-    protected String getPropertyId() {
-        return "linkedin";
-    }
-
-    @Override
-    protected Collection<OAuthPropertyID> getExtraPropertyNames() {
-        return Collections.singletonList(OAuthPropertyID.redirectUrl);
-    }
-
-    @Override
-    protected String getEnabledProperty() {
-        return "com.openexchange.oauth.linkedin";
+    /**
+     * Initializes a new {@link TwitterOAuthServiceMetaData}.
+     */
+    public TwitterOAuthServiceMetaData(ServiceLookup services) {
+        super(services, KnownApi.TWITTER, true, true, TwitterOAuthScope.values());
     }
 
     @Override
     public Class<? extends Api> getScribeService() {
-        return LinkedInApi20.class;
+        return TwitterApi.class;
     }
+
+    @Override
+    protected String getPropertyId() {
+        return "twitter";
+    }
+
+    @Override
+    protected Collection<OAuthPropertyID> getExtraPropertyNames() {
+        return Collections.emptyList();
+    }
+
+    @Override
+    public String processAuthorizationURL(final String authUrl, Session session) {
+        return authUrl;
+    }
+
+    @Override
+    public void processArguments(final Map<String, Object> arguments, final Map<String, String> parameter, final Map<String, Object> state) throws OXException {
+        // no-op
+    }
+
+    @Override
+    public String getRegisterToken(String authUrl) {
+        return null;
+    }
+
+    @Override
+    public OAuthToken getOAuthToken(final Map<String, Object> arguments, Set<OAuthScope> scopes) throws OXException {
+        return null;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.oauth.impl.OAuthIdentityAware#getIdentityMethod()
+     */
+    @Override
+    public Verb getIdentityHTTPMethod() {
+        return Verb.GET;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.oauth.impl.OAuthIdentityAware#getIdentityURL()
+     */
+    @Override
+    public String getIdentityURL(String accessToken) {
+        return IDENTITY_URL;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.oauth.impl.OAuthIdentityAware#getIdentityPattern()
+     */
+    @Override
+    public String getIdentityFieldName() {
+        return IDENTITY_FIELD_NAME;
+    }
+
 }

@@ -54,7 +54,7 @@ import java.util.List;
 import org.junit.Test;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
-import com.openexchange.oauth.yahoo.internal.OAuthServiceMetaDataYahooImpl;
+import com.openexchange.oauth.yahoo.internal.YahooOAuthServiceMetaData;
 import com.openexchange.oauth.yahoo.internal.YahooServiceImpl;
 import com.openexchange.oauth.yahoo.osgi.YahooOAuthActivator;
 
@@ -75,7 +75,7 @@ public class YahooConnectionTest {
      public void testUsingExistingAccessToken() throws OXException {
 
         final YahooOAuthActivator activator = new YahooOAuthActivator();
-        activator.setOAuthMetaData(new OAuthServiceMetaDataYahooImpl(null));
+        activator.setOAuthMetaData(new YahooOAuthServiceMetaData(null));
         final MockOAuthService oAuthService = new MockOAuthService();
         oAuthService.setToken(token);
         oAuthService.setSecret(tokenSecret);

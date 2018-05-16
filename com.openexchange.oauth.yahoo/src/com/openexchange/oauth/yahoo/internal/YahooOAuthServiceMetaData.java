@@ -47,69 +47,92 @@
  *
  */
 
-package com.openexchange.oauth.twitter;
+package com.openexchange.oauth.yahoo.internal;
 
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Map;
-import java.util.Set;
 import org.scribe.builder.api.Api;
-import org.scribe.builder.api.TwitterApi;
-import com.openexchange.exception.OXException;
+import org.scribe.model.Verb;
+import com.openexchange.http.deferrer.DeferringURLService;
+import com.openexchange.oauth.HostInfo;
 import com.openexchange.oauth.KnownApi;
-import com.openexchange.oauth.OAuthToken;
 import com.openexchange.oauth.impl.AbstractExtendedScribeAwareOAuthServiceMetaData;
-import com.openexchange.oauth.scope.OAuthScope;
+import com.openexchange.oauth.yahoo.YahooOAuthScope;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 
 /**
- * {@link OAuthServiceMetaDataTwitterImpl}
+ * {@link YahooOAuthServiceMetaData}
  *
+ * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class OAuthServiceMetaDataTwitterImpl extends AbstractExtendedScribeAwareOAuthServiceMetaData {
+public class YahooOAuthServiceMetaData extends AbstractExtendedScribeAwareOAuthServiceMetaData {
 
-    /**
-     * Initializes a new {@link OAuthServiceMetaDataTwitterImpl}.
-     */
-    public OAuthServiceMetaDataTwitterImpl(ServiceLookup services) {
-        super(services, KnownApi.TWITTER, true, true, TwitterOAuthScope.values());
+    private static final String IDENTITY_URL = "https://social.yahooapis.com/v1/me/guid?format=json";
+    private static final String IDENTITY_FIELD_NAME = "value";
+
+    public YahooOAuthServiceMetaData(ServiceLookup services) {
+        super(services, KnownApi.YAHOO, YahooOAuthScope.values());
+    }
+
+    @Override
+    public String modifyCallbackURL(String callbackUrl, HostInfo currentHost, Session session) {
+        DeferringURLService deferrer = services.getService(DeferringURLService.class);
+        if (deferrer == null) {
+            return callbackUrl;
+        }
+        return injectRoute(deferrer.getDeferredURL(callbackUrl, session.getUserId(), session.getContextId()), currentHost.getRoute());
     }
 
     @Override
     public Class<? extends Api> getScribeService() {
-        return TwitterApi.class;
+        return YahooApi2.class;
+    }
+
+    @Override
+    public boolean needsRequestToken() {
+        return false;
     }
 
     @Override
     protected String getPropertyId() {
-        return "twitter";
+        return "yahoo";
     }
 
     @Override
     protected Collection<OAuthPropertyID> getExtraPropertyNames() {
-        return Collections.emptyList();
+        return Collections.singletonList(OAuthPropertyID.redirectUrl);
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.oauth.impl.OAuthIdentityAware#getIdentityURL()
+     */
     @Override
-    public String processAuthorizationURL(final String authUrl, Session session) {
-        return authUrl;
+    public String getIdentityURL(String accessToken) {
+        return IDENTITY_URL;
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.oauth.impl.OAuthIdentityAware#getIdentityMethod()
+     */
     @Override
-    public void processArguments(final Map<String, Object> arguments, final Map<String, String> parameter, final Map<String, Object> state) throws OXException {
-        // no-op
+    public Verb getIdentityHTTPMethod() {
+        return Verb.GET;
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.oauth.impl.OAuthIdentityAware#getIdentityPattern()
+     */
     @Override
-    public String getRegisterToken(String authUrl) {
-        return null;
-    }
-
-    @Override
-    public OAuthToken getOAuthToken(final Map<String, Object> arguments, Set<OAuthScope> scopes) throws OXException {
-        return null;
+    public String getIdentityFieldName() {
+        return IDENTITY_FIELD_NAME;
     }
 }

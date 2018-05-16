@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2016-2020 OX Software GmbH
+ *     Copyright (C) 2018-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,50 +47,53 @@
  *
  */
 
-package com.openexchange.halo.linkedin;
+package com.openexchange.oauth.impl.internal.groupware;
 
-import java.util.List;
-import org.json.JSONObject;
-import com.openexchange.ajax.requesthandler.AJAXRequestData;
-import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import java.sql.Connection;
+import java.sql.SQLException;
 import com.openexchange.exception.OXException;
-import com.openexchange.halo.HaloContactQuery;
-import com.openexchange.oauth.KnownApi;
-import com.openexchange.oauth.OAuthAccount;
-import com.openexchange.server.ServiceLookup;
-import com.openexchange.tools.session.ServerSession;
+import com.openexchange.groupware.update.PerformParameters;
+import com.openexchange.tools.update.Column;
+import com.openexchange.tools.update.Tools;
 
-public class LinkedinInboxDataSource extends AbstractLinkedinDataSource {
+/**
+ * {@link OAuthAddIdentityColumnTask}
+ *
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @since 7.10.0
+ */
+public class OAuthAddIdentityColumnTask extends AbstractOAuthUpdateTask {
 
-    public LinkedinInboxDataSource(final ServiceLookup lookup) {
-        super(lookup);
+    private static final String IDENTITY_COLUMN_NAME = "identity";
+
+    /**
+     * Initialises a new {@link OAuthAddIdentityColumnTask}.
+     */
+    public OAuthAddIdentityColumnTask() {
+        super();
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.oauth.impl.internal.groupware.AbstractOAuthUpdateTask#innerPerform(java.sql.Connection, com.openexchange.groupware.update.PerformParameters)
+     */
     @Override
-    public String getId() {
-        return "com.openexchange.halo.linkedIn.inbox";
-    }
-
-    @Override
-    public boolean isAvailable(ServerSession session) throws OXException {
-        return hasAccount(session) && hasPlusFeatures(session);
-    }
-
-    @Override
-    public AJAXRequestResult investigate(final HaloContactQuery query, final AJAXRequestData req, final ServerSession session) throws OXException {
-        final int uid = session.getUserId();
-        final int cid = session.getContextId();
-
-        final List<OAuthAccount> accounts = getOauthService().getAccounts(session, KnownApi.LINKEDIN.getFullName());
-        if (accounts.isEmpty()) {
-            throw LinkedinHaloExceptionCodes.NO_ACCOUNT.create();
+    void innerPerform(Connection connection, PerformParameters performParameters) throws OXException, SQLException {
+        if (Tools.columnExists(connection, CreateOAuthAccountTable.TABLE_NAME, IDENTITY_COLUMN_NAME)) {
+            return;
         }
-
-        final OAuthAccount linkedinAccount = accounts.get(0);
-        final JSONObject json = getLinkedinService().getMessageInbox(session, uid, cid, linkedinAccount.getId());
-        final AJAXRequestResult result = new AJAXRequestResult();
-        result.setResultObject(json, "json");
-        return result;
+        Tools.addColumns(connection, CreateOAuthAccountTable.TABLE_NAME, new Column(IDENTITY_COLUMN_NAME, "varchar(767)"));
+        Tools.createIndex(connection, CreateOAuthAccountTable.TABLE_NAME, new String[] { IDENTITY_COLUMN_NAME });
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.groupware.update.UpdateTaskV2#getDependencies()
+     */
+    @Override
+    public String[] getDependencies() {
+        return new String[] { OAuthCreateTableTask2.class.getName() };
+    }
 }

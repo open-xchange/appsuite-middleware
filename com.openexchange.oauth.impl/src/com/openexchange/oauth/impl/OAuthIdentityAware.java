@@ -1,3 +1,8 @@
+
+package com.openexchange.oauth.impl;
+
+import org.scribe.model.Verb;
+
 /*
  *
  *    OPEN-XCHANGE legal information
@@ -28,7 +33,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2016-2020 OX Software GmbH
+ *     Copyright (C) 2018-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,50 +52,40 @@
  *
  */
 
-package com.openexchange.halo.linkedin;
+/**
+ * {@link OAuthIdentityAware}
+ *
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @since 7.10.0
+ */
+public interface OAuthIdentityAware {
 
-import java.util.List;
-import org.json.JSONObject;
-import com.openexchange.ajax.requesthandler.AJAXRequestData;
-import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.exception.OXException;
-import com.openexchange.halo.HaloContactQuery;
-import com.openexchange.oauth.KnownApi;
-import com.openexchange.oauth.OAuthAccount;
-import com.openexchange.server.ServiceLookup;
-import com.openexchange.tools.session.ServerSession;
+    /**
+     * Returns the identity URL used to identity the current user
+     * 
+     * @param accessToken The accessToken in case it needs to be part of the URL
+     * @return The identity URL used to identify the current user
+     */
+    String getIdentityURL(String accessToken);
 
-public class LinkedinInboxDataSource extends AbstractLinkedinDataSource {
+    /**
+     * Returns the HTTP method used for the identity request
+     * 
+     * @return HTTP method used for the identity request
+     */
+    Verb getIdentityHTTPMethod();
 
-    public LinkedinInboxDataSource(final ServiceLookup lookup) {
-        super(lookup);
-    }
+    /**
+     * Returns the field name that contains the identity of the user in the response object
+     * 
+     * @return the field name that contains the identity of the user in the response object
+     */
+    String getIdentityFieldName();
 
-    @Override
-    public String getId() {
-        return "com.openexchange.halo.linkedIn.inbox";
-    }
-
-    @Override
-    public boolean isAvailable(ServerSession session) throws OXException {
-        return hasAccount(session) && hasPlusFeatures(session);
-    }
-
-    @Override
-    public AJAXRequestResult investigate(final HaloContactQuery query, final AJAXRequestData req, final ServerSession session) throws OXException {
-        final int uid = session.getUserId();
-        final int cid = session.getContextId();
-
-        final List<OAuthAccount> accounts = getOauthService().getAccounts(session, KnownApi.LINKEDIN.getFullName());
-        if (accounts.isEmpty()) {
-            throw LinkedinHaloExceptionCodes.NO_ACCOUNT.create();
-        }
-
-        final OAuthAccount linkedinAccount = accounts.get(0);
-        final JSONObject json = getLinkedinService().getMessageInbox(session, uid, cid, linkedinAccount.getId());
-        final AJAXRequestResult result = new AJAXRequestResult();
-        result.setResultObject(json, "json");
-        return result;
-    }
-
+    /**
+     * Returns the content type of the identity request
+     * 
+     * @return the content type of the identity request
+     */
+    String getContentType();
 }

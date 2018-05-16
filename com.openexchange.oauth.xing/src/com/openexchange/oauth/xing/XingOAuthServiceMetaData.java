@@ -55,6 +55,7 @@ import java.util.Map;
 import java.util.Set;
 import org.scribe.builder.api.Api;
 import org.scribe.builder.api.XingApi;
+import org.scribe.model.Verb;
 import com.openexchange.exception.OXException;
 import com.openexchange.oauth.KnownApi;
 import com.openexchange.oauth.OAuthToken;
@@ -70,6 +71,9 @@ import com.openexchange.session.Session;
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 public final class XingOAuthServiceMetaData extends AbstractExtendedScribeAwareOAuthServiceMetaData {
+
+    private static final String IDENTITY_URL = "https://api.xing.com/v1/users/me";
+    private static final String IDENTITY_FIELD_NAME = "id";
 
     /**
      * Initializes a new {@link XingOAuthServiceMetaData}.
@@ -117,5 +121,35 @@ public final class XingOAuthServiceMetaData extends AbstractExtendedScribeAwareO
     @Override
     public OAuthToken getOAuthToken(final Map<String, Object> arguments, Set<OAuthScope> scopes) throws OXException {
         return null;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.oauth.impl.OAuthIdentityAware#getIdentityURL()
+     */
+    @Override
+    public String getIdentityURL(String accessToken) {
+        return IDENTITY_URL;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.oauth.impl.OAuthIdentityAware#getIdentityMethod()
+     */
+    @Override
+    public Verb getIdentityHTTPMethod() {
+        return Verb.GET;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.oauth.impl.OAuthIdentityAware#getIdentityPattern()
+     */
+    @Override
+    public String getIdentityFieldName() {
+        return IDENTITY_FIELD_NAME;
     }
 }

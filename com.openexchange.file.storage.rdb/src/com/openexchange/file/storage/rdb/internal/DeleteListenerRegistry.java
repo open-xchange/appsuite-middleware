@@ -47,19 +47,20 @@
  *
  */
 
-package com.openexchange.oauth.impl.internal;
+package com.openexchange.file.storage.rdb.internal;
 
 import java.sql.Connection;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import com.openexchange.exception.OXException;
-import com.openexchange.oauth.OAuthAccountDeleteListener;
+import com.openexchange.file.storage.FileStorageAccountDeleteListener;
+import com.openexchange.session.Session;
 
 /**
- * {@link DeleteListenerRegistry} - Registry for OAuth account delete listeners.
+ * {@link DeleteListenerRegistry} - Registry for file storage account delete listeners.
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 public final class DeleteListenerRegistry {
 
@@ -92,14 +93,14 @@ public final class DeleteListenerRegistry {
      * Member section
      */
 
-    private final ConcurrentMap<Class<? extends OAuthAccountDeleteListener>, OAuthAccountDeleteListener> registry;
+    private final ConcurrentMap<Class<? extends FileStorageAccountDeleteListener>, FileStorageAccountDeleteListener> registry;
 
     /**
      * Initializes a new {@link DeleteListenerRegistry}.
      */
     public DeleteListenerRegistry() {
         super();
-        registry = new ConcurrentHashMap<Class<? extends OAuthAccountDeleteListener>, OAuthAccountDeleteListener>();
+        registry = new ConcurrentHashMap<Class<? extends FileStorageAccountDeleteListener>, FileStorageAccountDeleteListener>();
     }
 
     /**
@@ -108,7 +109,7 @@ public final class DeleteListenerRegistry {
      * @param deleteListener The delete listener to add
      * @return <code>true</code> if listener could be successfully added; otherwise <code>false</code>
      */
-    public boolean addDeleteListener(final OAuthAccountDeleteListener deleteListener) {
+    public boolean addDeleteListener(final FileStorageAccountDeleteListener deleteListener) {
         return (null == registry.putIfAbsent(deleteListener.getClass(), deleteListener));
     }
 
@@ -117,27 +118,27 @@ public final class DeleteListenerRegistry {
      *
      * @param deleteListener The delete listener to add
      */
-    public void removeDeleteListener(final OAuthAccountDeleteListener deleteListener) {
+    public void removeDeleteListener(final FileStorageAccountDeleteListener deleteListener) {
         registry.remove(deleteListener.getClass());
     }
 
     /**
-     * Triggers the {@link OAuthAccountDeleteListener#onBeforeOAuthAccountDeletion()} event for registered listeners.
-     * @param user TODO
+     * Triggers the {@link FileStorageAccountDeleteListener#onBeforeFileStorageAccountDeletion()} event for registered listeners.
+     * @param session TODO
      */
-    public void triggerOnBeforeDeletion(final int id, final Map<String, Object> properties, int user, int cid, final Connection con) throws OXException {
-        for (final OAuthAccountDeleteListener listener : registry.values()) {
-            listener.onBeforeOAuthAccountDeletion(id, properties, user, cid, con);
+    public void triggerOnBeforeDeletion(Session session, final int id, final Map<String, Object> properties, final Connection con) throws OXException {
+        for (final FileStorageAccountDeleteListener listener : registry.values()) {
+            listener.onBeforeFileStorageAccountDeletion(session, id, properties, con);
         }
     }
 
     /**
-     * Triggers the {@link OAuthAccountDeleteListener#onAfterOAuthAccountDeletion()} event for registered listeners.
+     * Triggers the {@link FileStorageAccountDeleteListener#onAfterFileStorageAccountDeletion()} event for registered listeners.
+     * @param session TODO
      */
-    public void triggerOnAfterDeletion(final int id, final Map<String, Object> properties, final int user, final int cid, final Connection con) throws OXException {
-        for (final OAuthAccountDeleteListener listener : registry.values()) {
-            listener.onAfterOAuthAccountDeletion(id, properties, user, cid, con);
+    public void triggerOnAfterDeletion(Session session, final int id, final Map<String, Object> properties, final Connection con) throws OXException {
+        for (final FileStorageAccountDeleteListener listener : registry.values()) {
+            listener.onAfterFileStorageAccountDeletion(session, id, properties, con);
         }
     }
-
 }

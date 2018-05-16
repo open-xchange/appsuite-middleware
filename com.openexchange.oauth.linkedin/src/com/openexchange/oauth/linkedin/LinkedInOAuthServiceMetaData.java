@@ -47,50 +47,80 @@
  *
  */
 
-package com.openexchange.halo.linkedin;
+package com.openexchange.oauth.linkedin;
 
-import java.util.List;
-import org.json.JSONObject;
-import com.openexchange.ajax.requesthandler.AJAXRequestData;
-import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.exception.OXException;
-import com.openexchange.halo.HaloContactQuery;
+import java.util.Collection;
+import java.util.Collections;
+import org.scribe.builder.api.Api;
+import org.scribe.builder.api.LinkedInApi20;
+import org.scribe.model.Verb;
 import com.openexchange.oauth.KnownApi;
-import com.openexchange.oauth.OAuthAccount;
+import com.openexchange.oauth.impl.AbstractExtendedScribeAwareOAuthServiceMetaData;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.tools.session.ServerSession;
 
-public class LinkedinInboxDataSource extends AbstractLinkedinDataSource {
+/**
+ * {@link LinkedInOAuthServiceMetaData}
+ *
+ * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ */
+public class LinkedInOAuthServiceMetaData extends AbstractExtendedScribeAwareOAuthServiceMetaData {
 
-    public LinkedinInboxDataSource(final ServiceLookup lookup) {
-        super(lookup);
+    private static final String IDENTITY_URL = "https://api.linkedin.com/v1/people/~?format=json&oauth2_access_token=";
+    private static final String IDENTITY_FIELD_NAME = "id";
+
+    public LinkedInOAuthServiceMetaData(ServiceLookup services) {
+        super(services, KnownApi.LINKEDIN, LinkedInOAuthScope.values());
     }
 
     @Override
-    public String getId() {
-        return "com.openexchange.halo.linkedIn.inbox";
+    protected String getPropertyId() {
+        return "linkedin";
     }
 
     @Override
-    public boolean isAvailable(ServerSession session) throws OXException {
-        return hasAccount(session) && hasPlusFeatures(session);
+    protected Collection<OAuthPropertyID> getExtraPropertyNames() {
+        return Collections.singletonList(OAuthPropertyID.redirectUrl);
     }
 
     @Override
-    public AJAXRequestResult investigate(final HaloContactQuery query, final AJAXRequestData req, final ServerSession session) throws OXException {
-        final int uid = session.getUserId();
-        final int cid = session.getContextId();
-
-        final List<OAuthAccount> accounts = getOauthService().getAccounts(session, KnownApi.LINKEDIN.getFullName());
-        if (accounts.isEmpty()) {
-            throw LinkedinHaloExceptionCodes.NO_ACCOUNT.create();
-        }
-
-        final OAuthAccount linkedinAccount = accounts.get(0);
-        final JSONObject json = getLinkedinService().getMessageInbox(session, uid, cid, linkedinAccount.getId());
-        final AJAXRequestResult result = new AJAXRequestResult();
-        result.setResultObject(json, "json");
-        return result;
+    protected String getEnabledProperty() {
+        return "com.openexchange.oauth.linkedin";
     }
 
+    @Override
+    public Class<? extends Api> getScribeService() {
+        return LinkedInApi20.class;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.oauth.impl.OAuthIdentityAware#getIdentityURL()
+     */
+    @Override
+    public String getIdentityURL(String accessToken) {
+        return IDENTITY_URL + urlEncode(accessToken);
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.oauth.impl.OAuthIdentityAware#getIdentityMethod()
+     */
+    @Override
+    public Verb getIdentityHTTPMethod() {
+        return Verb.GET;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.oauth.impl.OAuthIdentityAware#getIdentityPattern()
+     */
+    @Override
+    public String getIdentityFieldName() {
+        return IDENTITY_FIELD_NAME;
+    }
 }
