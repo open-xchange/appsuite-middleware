@@ -6,7 +6,7 @@ Bundle-Version: 4.1.4
 Bundle-Vendor: Richard "Virgo" Richter
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ClassPath: .,
- lib/bsh-2.0b5.jar,
+ lib/bsh-2.0b6.jar,
  lib/hamcrest-core-1.1.jar,
  lib/javasimon-core-4.1.4.jar,
  lib/jcommander-1.12.jar,
