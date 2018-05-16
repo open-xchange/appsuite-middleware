@@ -18,8 +18,8 @@
         name: timestamp
         type: integer
         format: int64
-        description:  Timestamp of the updated folder. If the folder was modified after the specified timestamp, then the update must fail.
-        required: true
+        description: Timestamp of the updated folder. If the folder was modified after the specified timestamp, then the update must fail.
+        required: false
       - $ref: "#/parameters/gblQueryParamFolderTree"
       - $ref: "#/parameters/gblQueryParamAllowedModules"
       - in: query
