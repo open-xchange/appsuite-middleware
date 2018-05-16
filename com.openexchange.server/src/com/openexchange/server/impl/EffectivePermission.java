@@ -317,8 +317,7 @@ public class EffectivePermission extends OCLPermission {
         super.setFuid(fuid);
     }
 
-    private static final int[] SYSTEM_PUBLIC_FOLDERS = {
-        FolderObject.SYSTEM_PUBLIC_FOLDER_ID, FolderObject.SYSTEM_GLOBAL_FOLDER_ID, FolderObject.SYSTEM_LDAP_FOLDER_ID };
+    private static final int[] SYSTEM_PUBLIC_FOLDERS = { FolderObject.SYSTEM_PUBLIC_FOLDER_ID, /*FolderObject.SYSTEM_GLOBAL_FOLDER_ID,*/ FolderObject.SYSTEM_LDAP_FOLDER_ID };
 
     private boolean isPublicFolder() {
         return ((folderType == FolderObject.PUBLIC) || (Arrays.binarySearch(SYSTEM_PUBLIC_FOLDERS, getFuid())) >= 0);
