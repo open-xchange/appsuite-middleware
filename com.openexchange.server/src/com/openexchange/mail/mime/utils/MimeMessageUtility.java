@@ -63,7 +63,6 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PipedOutputStream;
 import java.io.UnsupportedEncodingException;
-import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -1400,7 +1399,8 @@ public final class MimeMessageUtility {
     }
 
     private static String qencode(final char toEncode, final String charset) {
-        if (!Charset.isSupported(charset)) {
+        if (!CharsetDetector.isValid(charset)) {
+            LOG.warn("Illegal or unsupported charset name: {}", charset);
             return String.valueOf(toEncode);
         }
         final StringBuilder retval = new StringBuilder(4);
