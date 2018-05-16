@@ -24,17 +24,6 @@ Source:        %{name}_%{version}.orig.tar.bz2
 Summary:       The Open-Xchange backend subscribe extension
 Autoreqprov:   no
 Requires:      open-xchange-oauth >= @OXVERSION@
-Obsoletes:     open-xchange-subscribe-crawler < %{version}
-Provides:      open-xchange-subscribe-json = %{version}
-Obsoletes:     open-xchange-subscribe-json < %{version}
-Provides:      open-xchange-subscribe-linkedin = %{version}
-Obsoletes:     open-xchange-subscribe-linkedin < %{version}
-Provides:      open-xchange-subscribe-microformats = %{version}
-Obsoletes:     open-xchange-subscribe-microformats < %{version}
-Provides:      open-xchange-subscribe-msn = %{version}
-Obsoletes:     open-xchange-subscribe-msn < %{version}
-Provides:      open-xchange-subscribe-yahoo = %{version}
-Obsoletes:     open-xchange-subscribe-yahoo < %{version}
 
 %description
 Adds the feature to subscribe to third party services or
