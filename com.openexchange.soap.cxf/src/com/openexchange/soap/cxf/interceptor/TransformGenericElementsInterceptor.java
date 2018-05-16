@@ -53,13 +53,13 @@ import java.io.InputStream;
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamReader;
 import org.apache.cxf.interceptor.AbstractInDatabindingInterceptor;
-import org.apache.cxf.interceptor.DocLiteralInInterceptor;
 import org.apache.cxf.interceptor.Fault;
 import org.apache.cxf.message.Exchange;
 import org.apache.cxf.message.Message;
 import org.apache.cxf.phase.Phase;
 import org.apache.cxf.service.model.BindingOperationInfo;
 import org.apache.cxf.staxutils.transform.TransformUtils;
+import org.apache.cxf.wsdl.interceptors.DocLiteralInInterceptor;
 import com.openexchange.soap.cxf.staxutils.ReplacingXMLStreamReader;
 
 /**

@@ -70,6 +70,7 @@ import com.openexchange.ajax.task.actions.InsertRequest;
 import com.openexchange.ajax.task.actions.InsertResponse;
 import com.openexchange.ajax.task.actions.UpdateRequest;
 import com.openexchange.ajax.task.actions.UpdateResponse;
+import com.openexchange.ajax.writer.ResponseWriter;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.UserParticipant;
@@ -147,7 +148,7 @@ public class Bug7377Test extends AbstractTaskTest {
             }
             if (rResponse.getResponse() != null) {
                 System.out.println("There is a response!");
-                System.out.println("Response is " + rResponse.getResponse().getJSON());
+                System.out.println("Response is " + ResponseWriter.getJSON(rResponse.getResponse()));
                 if (rResponse.hasError()) {
                     System.out.println("Response has got " + rResponse.getProblematics().length + " problematics");
                 }

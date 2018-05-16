@@ -114,11 +114,11 @@ public class DerbyDatabase extends AbstractJdbcDatabase {
         } else {
             String dateString = super.getDateLiteral(isoDate);
             int decimalDigits = dateString.length() - dateString.indexOf('.') - 2;
-            String padding = "";
+            StringBuilder sb = new StringBuilder();
             for (int i=6; i> decimalDigits; i--) {
-                padding += "0";
+                sb.append("0");
             }
-            return "TIMESTAMP(" + dateString.replaceFirst("'$", padding+"'") + ")";
+            return "TIMESTAMP(" + dateString.replaceFirst("'$", sb.toString()+"'") + ")";
         }
     }
 
