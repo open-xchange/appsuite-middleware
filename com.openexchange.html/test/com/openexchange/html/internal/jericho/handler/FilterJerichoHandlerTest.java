@@ -68,6 +68,7 @@ import org.powermock.reflect.Whitebox;
 import com.openexchange.html.internal.HtmlServiceImpl;
 import com.openexchange.html.internal.jericho.handler.FilterJerichoHandler.CellPadding;
 import com.openexchange.test.mock.MockUtils;
+import net.htmlparser.jericho.Attributes;
 import net.htmlparser.jericho.StartTag;
 
 /**
@@ -77,7 +78,7 @@ import net.htmlparser.jericho.StartTag;
  * @since 7.6.1
  */
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({ HtmlServiceImpl.class, StartTag.class, FilterJerichoHandler.class })
+@PrepareForTest({ HtmlServiceImpl.class, StartTag.class, FilterJerichoHandler.class, Attributes.class })
 public class FilterJerichoHandlerTest {
 
     @Mock
@@ -213,6 +214,7 @@ public class FilterJerichoHandlerTest {
     @Test
     public void testMarkCssStart_DepthCalculatedCorrectly() throws Exception {
         PowerMockito.doNothing().when(spyOnHandler, PowerMockito.method(FilterJerichoHandler.class, "addStartTag", StartTag.class, boolean.class, Map.class)).withArguments(ArgumentMatchers.any(StartTag.class), ArgumentMatchers.anyBoolean(), ArgumentMatchers.anyMap());
+        PowerMockito.doNothing().when(spyOnHandler, PowerMockito.method(FilterJerichoHandler.class, "addStartTag", StartTag.class, boolean.class, Map.class)).withArguments(ArgumentMatchers.any(StartTag.class), ArgumentMatchers.anyBoolean(), ArgumentMatchers.isNull());
         Whitebox.setInternalState(spyOnHandler, "depth", 1);
         StartTag startTag = PowerMockito.mock(StartTag.class);
         spyOnHandler.markCssStart(startTag);
