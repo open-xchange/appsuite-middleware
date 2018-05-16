@@ -68,6 +68,7 @@ public class PGPSignatureVerificationResult {
     private PGPPublicKey                    publicKey;
     private PGPUserAttributeSubpacketVector userAttributes;
     private PGPPublicKey                    issuerKey;
+    private MDCVerificationResult           mdcVerificationResult;
 
     /**
      * Initializes a new {@link PGPSignatureVerificationResult}.
@@ -92,6 +93,13 @@ public class PGPSignatureVerificationResult {
         this.signature = signature;
         this.verified = verified;
         this.missing = missing;
+    }
+
+    public PGPSignatureVerificationResult(MDCVerificationResult mdcVerificationResult) {
+        this.signature = null;
+        this.verified = false;
+        this.missing = false;
+        this.mdcVerificationResult = mdcVerificationResult;
     }
 
     /**
@@ -192,6 +200,10 @@ public class PGPSignatureVerificationResult {
     public PGPSignatureVerificationResult setIssuerKey(PGPPublicKey issuerKey) {
         this.issuerKey = issuerKey;
         return this;
+    }
+
+    public MDCVerificationResult getMDCVerifiacionResult() {
+        return this.mdcVerificationResult;
     }
 }
 

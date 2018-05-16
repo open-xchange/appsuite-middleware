@@ -49,30 +49,43 @@
 
 package com.openexchange.pgp.core;
 
-import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
-import org.junit.runners.Suite.SuiteClasses;
+import java.io.IOException;
+import java.util.Objects;
+import org.bouncycastle.openpgp.PGPException;
+import com.openexchange.pgp.core.PGPDecrypter.PGPDataContainer;
 
 /**
- * {@link UnitTests} - Unit tests for c.o.pgp.core
+ * {@link MDCSignatureVerificationResult}
  *
  * @author <a href="mailto:benjamin.gruedelbach@open-xchange.com">Benjamin Gruedelbach</a>
- * @since v7.8.4
+ * @since v7.10.0
  */
-@RunWith(Suite.class)
-@SuiteClasses({
-    PGPEncrypterDecrypterTest.class,
-    PGPSignVerifyTests.class,
-    ModifyRecipientTest.class,
-    ExtractSessionPaketTest.class,
-    PGPIntegrityCheckTests.class
-})
-public class UnitTests {
+public class MDCVerificationResult {
 
-    /**
-     * Initializes a new {@link UnitTests}.
-     */
-    public UnitTests() {
-        super();
+    boolean isPresent;
+    boolean verified;
+
+    private MDCVerificationResult(boolean isPresent, boolean verified) {
+        this.isPresent = isPresent;
+        this.verified = verified;
+    }
+
+    public static MDCVerificationResult createFrom(PGPDataContainer data) throws PGPException, IOException {
+        boolean isPresent = false;
+        boolean verified = false;
+        data = Objects.requireNonNull(data, "data must not be null");
+        if (data.getData().isIntegrityProtected()) {
+            isPresent = true;
+            verified = data.getData().verify();
+        }
+        return new MDCVerificationResult(isPresent, verified);
+    }
+
+    public boolean isPresent() {
+        return this.isPresent;
+    }
+
+    public boolean isVerified() {
+       return this.verified;
     }
 }
