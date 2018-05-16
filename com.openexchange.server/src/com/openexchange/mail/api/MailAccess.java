@@ -769,7 +769,7 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
                         if (null != oauthService) {
                             OAuthAccount oAuthAccount;
                             try {
-                                oAuthAccount = oauthService.getAccount(mailAccount.getMailOAuthId(), session, session.getUserId(), session.getContextId());
+                                oAuthAccount = oauthService.getAccount(session, mailAccount.getMailOAuthId());
                             } catch (Exception x) {
                                 LOG.warn("Failed to load mail-associated OAuth account", x);
                                 oAuthAccount = null;
@@ -854,7 +854,7 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
                     LOG.warn("Detected failed OAuth authentication, but unable to handle as needed service {} is missing", OAuthService.class.getSimpleName());
                 } else {
                     try {
-                        OAuthAccount oAuthAccount = oauthService.getAccount(oauthAccountId, session, session.getUserId(), session.getContextId());
+                        OAuthAccount oAuthAccount = oauthService.getAccount(session, oauthAccountId);
                         API api = oAuthAccount.getAPI();
                         Throwable cause = e.getCause();
                         return AuthenticationFailureHandlerResult.createErrorResult(OAuthExceptionCodes.OAUTH_ACCESS_TOKEN_INVALID.create(cause, api.getName(), I(oAuthAccount.getId()), I(session.getUserId()), I(session.getContextId())));

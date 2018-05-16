@@ -62,13 +62,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import org.junit.Test;
-import com.openexchange.context.SimContextService;
+import org.mockito.Mock;
+import org.mockito.Mockito;
 import com.openexchange.exception.OXException;
-import com.openexchange.id.SimIDGenerator;
 import com.openexchange.oauth.API;
 import com.openexchange.oauth.DefaultOAuthAccount;
 import com.openexchange.oauth.KnownApi;
 import com.openexchange.oauth.OAuthAccount;
+import com.openexchange.oauth.OAuthAccountStorage;
 import com.openexchange.oauth.OAuthConstants;
 import com.openexchange.oauth.OAuthInteractionType;
 import com.openexchange.oauth.OAuthToken;
@@ -85,16 +86,25 @@ import com.openexchange.tools.sql.SQLTestCase;
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
+//TODO: Fix tests
 public class OAuthServiceImplDBTest extends SQLTestCase {
 
     private OAuthServiceImpl oauth;
     private SimOAuthServiceMetaDataRegistry registry;
+    private OAuthAccountStorage oauthAccountStorage;
+
+    @Mock
+    private Session session;
 
     @Override
     public void setUp() throws Exception {
         super.setUp();
-        registry = new SimOAuthServiceMetaDataRegistry();
 
+        session = Mockito.mock(Session.class);
+        Mockito.when(session.getUserId()).thenReturn(23);
+        Mockito.when(session.getContextId()).thenReturn(1);
+
+        registry = new SimOAuthServiceMetaDataRegistry();
         registry.addService(new AbstractOAuthServiceMetaData() {
 
             @Override
@@ -127,9 +137,73 @@ public class OAuthServiceImplDBTest extends SQLTestCase {
                 return Collections.emptySet();
             }
 
+            /*
+             * (non-Javadoc)
+             * 
+             * @see com.openexchange.oauth.OAuthServiceMetaData#getUserIdentity(java.lang.String)
+             */
+            @Override
+            public String getUserIdentity(Session session, int accountId, String accessToken, String accessSecret) throws OXException {
+                return "someIdentity";
+            }
         });
+        oauthAccountStorage = new OAuthAccountStorage() {
 
-        oauth = new OAuthServiceImpl(getDBProvider(), new SimIDGenerator(), registry, new SimContextService(), null) {
+            @Override
+            public void updateAccount(Session session, int accountId, Map<String, Object> arguments) throws OXException {
+                // TODO Auto-generated method stub
+
+            }
+
+            @Override
+            public void updateAccount(Session session, OAuthAccount account) throws OXException {
+                // TODO Auto-generated method stub
+
+            }
+
+            @Override
+            public int storeAccount(Session session, OAuthAccount account) throws OXException {
+                // TODO Auto-generated method stub
+                return 0;
+            }
+
+            @Override
+            public List<OAuthAccount> getAccounts(Session session, String serviceMetaData) throws OXException {
+                // TODO Auto-generated method stub
+                return Collections.emptyList();
+            }
+
+            @Override
+            public List<OAuthAccount> getAccounts(Session session) throws OXException {
+                // TODO Auto-generated method stub
+                return Collections.emptyList();
+            }
+
+            @Override
+            public OAuthAccount getAccount(Session session, int accountId) throws OXException {
+                // TODO Auto-generated method stub
+                return new DefaultOAuthAccount();
+            }
+
+            @Override
+            public OAuthAccount findByUserIdentity(Session session, String userIdentity, String serviceId) throws OXException {
+                // TODO Auto-generated method stub
+                return new DefaultOAuthAccount();
+            }
+
+            @Override
+            public boolean hasUserIdentity(Session session, int accountId, String serviceId) throws OXException {
+                // TODO Auto-generated method stub
+                return true;
+            }
+
+            @Override
+            public void deleteAccount(Session session, int accountId) throws OXException {
+                // TODO Auto-generated method stub
+
+            }
+        };
+        oauth = new OAuthServiceImpl(registry, oauthAccountStorage, null) {
 
             @Override
             protected void obtainToken(final OAuthInteractionType type, final Map<String, Object> arguments, final DefaultOAuthAccount account, Set<OAuthScope> scopes) {
@@ -183,7 +257,7 @@ public class OAuthServiceImplDBTest extends SQLTestCase {
         scopes.add(TestOAuthScope.calendar);
         scopes.add(TestOAuthScope.drive);
 
-        final OAuthAccount authAccount = oauth.createAccount("com.openexchange.test", OAuthInteractionType.OUT_OF_BAND, arguments, 23, 1, scopes);
+        final OAuthAccount authAccount = oauth.createAccount(session, "com.openexchange.test", scopes, OAuthInteractionType.OUT_OF_BAND, arguments);
         return authAccount;
     }
 
@@ -209,7 +283,7 @@ public class OAuthServiceImplDBTest extends SQLTestCase {
         scopes.add(TestOAuthScope.calendar);
         scopes.add(TestOAuthScope.drive);
 
-        final OAuthAccount authAccount = oauth.createAccount("com.openexchange.test", OAuthInteractionType.OUT_OF_BAND, arguments, 23, 1, scopes);
+        final OAuthAccount authAccount = oauth.createAccount(session, "com.openexchange.test", scopes, OAuthInteractionType.OUT_OF_BAND, arguments);
 
         assertNotNull(authAccount);
         assertEquals("The cool oauthService", authAccount.getDisplayName());
@@ -219,7 +293,7 @@ public class OAuthServiceImplDBTest extends SQLTestCase {
     public void testGetAccount() throws Exception {
         final OAuthAccount authAccount = createTestAccount();
 
-        final OAuthAccount account = oauth.getAccount(authAccount.getId(), null, 23, 1);
+        final OAuthAccount account = oauth.getAccount(null, authAccount.getId());
 
         assertNotNull(account);
         assertEqualAttributes(authAccount, account);
@@ -231,7 +305,7 @@ public class OAuthServiceImplDBTest extends SQLTestCase {
         exec("INSERT INTO oauthAccounts (cid, user, id, displayName, accessToken, accessSecret, serviceId) VALUES (1,23,2,'account2user1', '1234', '4321', 'com.openexchange.test');");
         exec("INSERT INTO oauthAccounts (cid, user, id, displayName, accessToken, accessSecret, serviceId) VALUES (1,42,3,'account1user2', '1234', '4321', 'com.openexchange.test');");
 
-        final List<OAuthAccount> accounts = oauth.getAccounts(null, 23, 1);
+        final List<OAuthAccount> accounts = oauth.getAccounts(session);
 
         assertEquals(2, accounts.size());
 
@@ -255,7 +329,7 @@ public class OAuthServiceImplDBTest extends SQLTestCase {
         exec("INSERT INTO oauthAccounts (cid, user, id, displayName, accessToken, accessSecret, serviceId) VALUES (1,23,3,'account3user1', '1234', '4321', 'com.openexchange.notTest');");
         exec("INSERT INTO oauthAccounts (cid, user, id, displayName, accessToken, accessSecret, serviceId) VALUES (1,42,4,'account1user2', '1234', '4321', 'com.openexchange.test');");
 
-        final List<OAuthAccount> accounts = oauth.getAccounts("com.openexchange.test", null, 23, 1);
+        final List<OAuthAccount> accounts = oauth.getAccounts(session, "com.openexchange.test");
 
         assertEquals(2, accounts.size());
 
@@ -283,7 +357,7 @@ public class OAuthServiceImplDBTest extends SQLTestCase {
         update.put(OAuthConstants.ARGUMENT_DISPLAY_NAME, "updatedDisplayName");
         update.put(OAuthConstants.ARGUMENT_SCOPES, scopes);
         update.put(OAuthConstants.ARGUMENT_SESSION, null);
-        oauth.updateAccount(1, update, 23, 1);
+        oauth.updateAccount(session, 1, update);
 
         assertResult("SELECT 1 FROM oauthAccounts WHERE cid = 1 AND user = 23 AND displayName = 'updatedDisplayName' AND id = 1");
     }
@@ -292,7 +366,7 @@ public class OAuthServiceImplDBTest extends SQLTestCase {
     public void testDeleteAccount() throws Exception {
         exec("INSERT INTO oauthAccounts (cid, user, id, displayName, accessToken, accessSecret, serviceId) VALUES (1,23,1,'account1', '1234', '4321', 'com.openexchange.test');");
 
-        oauth.deleteAccount(1, 23, 1);
+        oauth.deleteAccount(session, 1);
 
         assertNoResult("SELECT 1 FROM oauthAccounts WHERE cid = 1 AND user = 23 AND id = 1");
     }
@@ -323,7 +397,7 @@ public class OAuthServiceImplDBTest extends SQLTestCase {
         scopes.add(TestOAuthScope.drive);
 
         try {
-            oauth.createAccount("com.openexchange.fantasy", OAuthInteractionType.OUT_OF_BAND, arguments, 23, 1, scopes);
+            oauth.createAccount(session, "com.openexchange.fantasy", scopes, OAuthInteractionType.OUT_OF_BAND, arguments);
             fail("Should have died");
         } catch (final OXException e) {
             // Hooray;
@@ -333,7 +407,7 @@ public class OAuthServiceImplDBTest extends SQLTestCase {
     @Test
     public void testUnknownIdOnGet() {
         try {
-            oauth.getAccount(12, null, 1, 23);
+            oauth.getAccount(null, 12);
             fail("Should have died");
         } catch (final OXException x) {
             // Hooray!
@@ -351,7 +425,7 @@ public class OAuthServiceImplDBTest extends SQLTestCase {
             update.put(OAuthConstants.ARGUMENT_DISPLAY_NAME, "updatedDisplayName");
             update.put(OAuthConstants.ARGUMENT_SCOPES, scopes);
             update.put(OAuthConstants.ARGUMENT_SESSION, null);
-            oauth.updateAccount(12, update, 23, 1);
+            oauth.updateAccount(session, 12, update);
             fail("Should have died");
         } catch (final OXException x) {
             // Hooray!
@@ -361,7 +435,7 @@ public class OAuthServiceImplDBTest extends SQLTestCase {
     @Test
     public void testUnknownIdOnDelete() {
         try {
-            oauth.deleteAccount(12, 1, 23);
+            oauth.deleteAccount(session, 12);
             // Don't die here, just gracefully do nothing
         } catch (final OXException x) {
             fail(x.getMessage());

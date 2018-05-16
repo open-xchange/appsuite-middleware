@@ -55,6 +55,8 @@ import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.FileStorageAccountAccess;
 import com.openexchange.file.storage.oauth.AbstractOAuthFileStorageService;
 import com.openexchange.oauth.KnownApi;
+import com.openexchange.oauth.google.GoogleOAuthScope;
+import com.openexchange.oauth.scope.OAuthScope;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 
@@ -84,4 +86,15 @@ public final class GoogleDriveFileStorageService extends AbstractOAuthFileStorag
         FileStorageAccount account = getAccountAccess(session, accountId);
         return new GoogleDriveAccountAccess(this, account, session);
     }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.file.storage.oauth.AbstractOAuthFileStorageService#getScope()
+     */
+    @Override
+    protected OAuthScope getScope() {
+        return GoogleOAuthScope.drive;
+    }
+
 }

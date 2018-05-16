@@ -478,10 +478,14 @@ public class RdbFileStorageAccountStorage implements FileStorageAccountStorage, 
         {
             Connection con = (Connection) session.getParameter("__file.storage.delete.connection");
             if (null != con) {
-                if (isInTransaction(con)) {
-                    // Given connection is already in transaction. Invoke & return immediately.
-                    deleteAccounts(serviceId, accounts, genericConfIds, session, con);
-                    return;
+                try {
+                    if (Databases.isInTransaction(con)) {
+                        // Given connection is already in transaction. Invoke & return immediately.
+                        deleteAccounts(serviceId, accounts, genericConfIds, session, con);
+                        return;
+                    }
+                } catch (SQLException e) {
+                    throw FileStorageExceptionCodes.SQL_ERROR.create(e, e.getMessage());
                 }
 
                 // Use given connection
@@ -493,7 +497,7 @@ public class RdbFileStorageAccountStorage implements FileStorageAccountStorage, 
                 connectionProvider = new DatabaseServiceConnectionProvider(contextId, databaseService);
             }
         }
-
+        
         // Acquire connection & invoke
         Connection con = connectionProvider.getConnection();
         int rollback = 0;
@@ -520,14 +524,6 @@ public class RdbFileStorageAccountStorage implements FileStorageAccountStorage, 
         }
     }
 
-    private static boolean isInTransaction(Connection con) throws OXException {
-        try {
-            return false == con.getAutoCommit();
-        } catch (SQLException e) {
-            throw FileStorageExceptionCodes.SQL_ERROR.create(e, e.getMessage());
-        }
-    }
-
     /**
      * Deletes specified accounts using given connection.
      *
@@ -543,15 +539,17 @@ public class RdbFileStorageAccountStorage implements FileStorageAccountStorage, 
             deleteAccounts(serviceId, accounts, genericConfIds, session);
             return;
         }
-
+        
         try {
             int contextId = session.getContextId();
             int userId = session.getUserId();
             Context context = getContext(session);
-
+            final DeleteListenerRegistry deleteListenerRegistry = DeleteListenerRegistry.getInstance();
             for (int i = 0; i < accounts.length; i++) {
-                FileStorageAccount account = accounts[i];
-                int accountId = Integer.parseInt(account.getId());
+                final FileStorageAccount account = accounts[i];
+                final int accountId = Integer.parseInt(account.getId());
+                Map<String, Object> properties = account.getConfiguration();
+                deleteListenerRegistry.triggerOnBeforeDeletion(session, accountId, properties, con);
                 /*
                  * Delete account configuration using generic conf
                  */
@@ -577,6 +575,7 @@ public class RdbFileStorageAccountStorage implements FileStorageAccountStorage, 
                     stmt.setString(pos++, serviceId);
                     stmt.setInt(pos, accountId);
                     stmt.executeUpdate();
+                    deleteListenerRegistry.triggerOnAfterDeletion(session, accountId, properties, con);
                 } finally {
                     Databases.closeSQLStuff(stmt);
                 }

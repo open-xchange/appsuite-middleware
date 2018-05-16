@@ -714,7 +714,7 @@ public class MimeMailException extends OXException {
                     if (null != oauthService) {
                         OAuthAccount oAuthAccount;
                         try {
-                            oAuthAccount = oauthService.getAccount(mailAccount.getMailOAuthId(), session, session.getUserId(), session.getContextId());
+                            oAuthAccount = oauthService.getAccount(session, mailAccount.getMailOAuthId());
                         } catch (Exception x) {
                             LOG.warn("Failed to load mail-associated OAuth account", x);
                             oAuthAccount = null;

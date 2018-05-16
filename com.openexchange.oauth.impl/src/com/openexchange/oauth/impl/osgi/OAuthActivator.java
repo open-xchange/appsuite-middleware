@@ -77,6 +77,7 @@ import com.openexchange.oauth.OAuthAPIRegistry;
 import com.openexchange.oauth.OAuthAccountDeleteListener;
 import com.openexchange.oauth.OAuthAccountInvalidationListener;
 import com.openexchange.oauth.OAuthAccountReauthorizedListener;
+import com.openexchange.oauth.OAuthAccountStorage;
 import com.openexchange.oauth.OAuthService;
 import com.openexchange.oauth.OAuthServiceMetaDataRegistry;
 import com.openexchange.oauth.access.OAuthAccessRegistryService;
@@ -89,6 +90,7 @@ import com.openexchange.oauth.impl.httpclient.impl.scribe.ScribeHTTPClientFactor
 import com.openexchange.oauth.impl.internal.CallbackRegistryImpl;
 import com.openexchange.oauth.impl.internal.DeleteListenerRegistry;
 import com.openexchange.oauth.impl.internal.InvalidationListenerRegistry;
+import com.openexchange.oauth.impl.internal.OAuthAccountStorageSQLImpl;
 import com.openexchange.oauth.impl.internal.OAuthServiceImpl;
 import com.openexchange.oauth.impl.internal.ReauthorizeListenerRegistry;
 import com.openexchange.oauth.impl.internal.hazelcast.PortableCallbackRegistryFetch;
@@ -130,8 +132,7 @@ public final class OAuthActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { DatabaseService.class, SessiondService.class, EventAdmin.class, SecretEncryptionFactoryService.class, SessionHolder.class, CryptoService.class, ConfigViewFactory.class,
-            TimerService.class, DispatcherPrefixService.class, UserService.class, SSLSocketFactoryProvider.class, ThreadPoolService.class };
+        return new Class<?>[] { DatabaseService.class, SessiondService.class, EventAdmin.class, SecretEncryptionFactoryService.class, SessionHolder.class, CryptoService.class, ConfigViewFactory.class, TimerService.class, DispatcherPrefixService.class, UserService.class, SSLSocketFactoryProvider.class, ThreadPoolService.class };
     }
 
     @Override
@@ -210,16 +211,18 @@ public final class OAuthActivator extends HousekeepingActivator {
             delegateServices.put(IDGeneratorService.class, new OSGiIDGeneratorService().start(context));
             delegateServices.startAll(context);
 
-            final OAuthServiceImpl oauthService = new OAuthServiceImpl(delegateServices.get(DBProvider.class), delegateServices.get(IDGeneratorService.class), registry, delegateServices.get(ContextService.class), cbRegistry);
+            final OAuthAccountStorageSQLImpl oauthAccountStorage = new OAuthAccountStorageSQLImpl(delegateServices.get(DBProvider.class), delegateServices.get(IDGeneratorService.class), registry, delegateServices.get(ContextService.class));
+            final OAuthServiceImpl oauthService = new OAuthServiceImpl(registry, oauthAccountStorage, cbRegistry);
 
             registerService(CallbackRegistry.class, cbRegistry);
             registerService(CustomRedirectURLDetermination.class, cbRegistry);
             registerService(OAuthService.class, oauthService);
+            registerService(OAuthAccountStorage.class, oauthAccountStorage);
             registerService(OAuthServiceMetaDataRegistry.class, registry);
             registerService(OAuthAccountAssociationService.class, associationService);
-            registerService(EncryptedItemDetectorService.class, oauthService);
-            registerService(SecretMigrator.class, oauthService);
-            registerService(EncryptedItemCleanUpService.class, oauthService);
+            registerService(EncryptedItemDetectorService.class, oauthAccountStorage);
+            registerService(SecretMigrator.class, oauthAccountStorage);
+            registerService(EncryptedItemCleanUpService.class, oauthAccountStorage);
             registerService(OAuthAPIRegistry.class, OAuthAPIRegistryImpl.getInstance());
 
             final ScribeHTTPClientFactoryImpl oauthFactory = new ScribeHTTPClientFactoryImpl();
