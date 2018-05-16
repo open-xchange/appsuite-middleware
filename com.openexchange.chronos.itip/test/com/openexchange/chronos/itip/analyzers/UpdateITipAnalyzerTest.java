@@ -127,7 +127,7 @@ public class UpdateITipAnalyzerTest {
         updateITipAnalyzer.addResourcesToUpdate(original, update);
 
         Mockito.verify(original, Mockito.atLeast(1)).getAttendees();
-        Mockito.verify(update, Mockito.never()).getAttendees();
+        Mockito.verify(update, Mockito.times(1)).getAttendees();
     }
 
     @Test
@@ -139,7 +139,7 @@ public class UpdateITipAnalyzerTest {
         updateITipAnalyzer.addResourcesToUpdate(original, update);
 
         Mockito.verify(original, Mockito.atLeast(1)).getAttendees();
-        Mockito.verify(update, Mockito.never()).getAttendees();
+        Mockito.verify(update, Mockito.times(1)).getAttendees();
     }
 
     @Test

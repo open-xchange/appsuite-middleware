@@ -66,4 +66,14 @@ public interface PacketProcessorHandler {
      * @throws Exception
      */
     public PGPPacket[] handlePacket(PGPPacket packet) throws Exception;
+
+    /**
+     *
+     * Handles the raw packet data right before writing them back to the message.
+     *
+     * @param packet the {@link PGPPacket} owning the packetData
+     * @param packetData The raw packet data
+     * @return The data which will be written back to the message.
+     */
+    public byte[] handlePacketData(PGPPacket packet, byte[] packetData);
 }
