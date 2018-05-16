@@ -88,6 +88,20 @@ public class PGPDecrypter {
 
     private final PGPKeyRetrievalStrategy keyRetrievalStrategy;
     private static final int BUFFERSIZE = 1024;
+    private MDCValidationMode mdcValidationMode = MDCValidationMode.WARN_ON_MISSING;
+
+    public enum MDCValidationMode {
+
+        /**
+         * gently - Returns a warning-result if no MDC package was found for integrity verification
+         */
+        WARN_ON_MISSING,
+
+        /**
+         * Strict - Throws an exception if no MDC package was found for integrity verification
+         */
+        FAIL_ON_MISSING,
+    };
 
     public static class PGPDataContainer {
 
@@ -281,6 +295,17 @@ public class PGPDecrypter {
     }
 
     /**
+     * Defines how to handle missing MDC (Modification detection code) packages.
+     *
+     * @param mdcValidationMode
+     * @return this
+     */
+    public PGPDecrypter setMDCValidationMode(MDCValidationMode mdcValidationMode) {
+        this.mdcValidationMode = mdcValidationMode;
+        return this;
+    }
+
+    /**
      * Decrypts data
      *
      * @param input The input stream to read the PGP data from
@@ -290,8 +315,9 @@ public class PGPDecrypter {
      * @return A list of Signature verification results, or an empty list, if the encrypted data was not signed
      * @throws Exception
      */
-    public List<PGPSignatureVerificationResult> decrypt(InputStream input, OutputStream output, String userID, char[] password) throws Exception {
-        List<PGPSignatureVerificationResult> ret = new ArrayList<>();
+    public PGPDecryptionResult decrypt(InputStream input, OutputStream output, String userID, char[] password) throws Exception {
+        List<PGPSignatureVerificationResult> signatureVerificationResults = new ArrayList<>();
+        MDCVerificationResult mdcVerificationResult  = null;
         try (InputStream decoderStream = PGPUtil.getDecoderStream(input)) {
 
             //Gets a list of PGP data from the stream
@@ -305,7 +331,6 @@ public class PGPDecrypter {
 
             //Decrypting the data
             InputStream clearDataStream = decrypt(publicKeyEncryptedData);
-
             //Processing decrypted pgp data
             PGPObjectFactory plainFact = new PGPObjectFactory(clearDataStream, new BcKeyFingerprintCalculator());
             Object pgpObject = plainFact.nextObject();
@@ -373,18 +398,31 @@ public class PGPDecrypter {
                         PGPSignature signature = signatureList.get(0);
                         if (signatureInitialized) {
                             //Verify signatures
-                            ret.add(new PGPSignatureVerificationResult(signature, onePassSignature.verify(signature)));
+                            signatureVerificationResults.add(new PGPSignatureVerificationResult(signature, onePassSignature.verify(signature)));
                         }
                         else if (!signatureVerificationKeyFound) {
                             //Key not found for verifying the signature; KeyRetrievalStrategy is responsible for logging this;
-                            ret.add(new PGPSignatureVerificationResult(signature, false, true));
+                            signatureVerificationResults.add(new PGPSignatureVerificationResult(signature, false, true));
                         }
                     }
                     pgpObject = plainFact.nextObject();
                 }
             }
+
+            //Perform integrity/MDC validation
+            mdcVerificationResult = MDCVerificationResult.createFrom(publicKeyEncryptedData);
+            if(mdcVerificationResult.isPresent()) {
+                if(!mdcVerificationResult.verified){
+                    throw PGPCoreExceptionCodes.PGP_EXCEPTION.create("Integrity check of the message failed.");
+                }
+            }
+            else {
+               if(mdcValidationMode == MDCValidationMode.FAIL_ON_MISSING) {
+                    throw PGPCoreExceptionCodes.PGP_EXCEPTION.create("Itegrity protection not found.");
+               }
+            }
         }
         output.flush();
-        return ret;
+        return new PGPDecryptionResult(signatureVerificationResults, mdcVerificationResult);
     }
 }

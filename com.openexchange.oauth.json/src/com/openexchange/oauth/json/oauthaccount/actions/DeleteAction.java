@@ -90,7 +90,7 @@ public final class DeleteAction extends AbstractOAuthAJAXActionService {
              * Delete account
              */
             final OAuthService oAuthService = getOAuthService();
-            oAuthService.deleteAccount(getUnsignedInteger(accountId), session.getUserId(), session.getContextId());
+            oAuthService.deleteAccount(session, getUnsignedInteger(accountId));
         } else if(data instanceof JSONArray) {
             JSONArray jsonArray = (JSONArray) data;
             for (int i = 0; i < jsonArray.length(); i++) {
@@ -104,7 +104,7 @@ public final class DeleteAction extends AbstractOAuthAJAXActionService {
                  * Delete account
                  */
                 final OAuthService oAuthService = getOAuthService();
-                oAuthService.deleteAccount(getUnsignedInteger(accountId), session.getUserId(), session.getContextId());
+                oAuthService.deleteAccount(session, getUnsignedInteger(accountId));
                 } catch (JSONException e) {
                     throw AjaxExceptionCodes.JSON_ERROR.create(e);
                 }
@@ -113,7 +113,7 @@ public final class DeleteAction extends AbstractOAuthAJAXActionService {
         	request.require("id");
         	int id = request.getParameter("id", int.class).intValue();
         	final OAuthService oAuthService = getOAuthService();
-            oAuthService.deleteAccount(id, session.getUserId(), session.getContextId());
+            oAuthService.deleteAccount(session, id);
 
         }
         /*

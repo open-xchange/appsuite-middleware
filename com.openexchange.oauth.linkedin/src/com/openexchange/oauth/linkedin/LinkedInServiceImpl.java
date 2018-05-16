@@ -150,7 +150,7 @@ public class LinkedInServiceImpl implements LinkedInService {
             if (null == oAuthService) {
                 throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(com.openexchange.oauth.OAuthService.class.getName());
             }
-            account = oAuthService.getAccount(accountId, session, user, contextId);
+            account = oAuthService.getAccount(session, accountId);
         } catch (final OXException e) {
             LOG.error("", e);
             return null;
@@ -242,7 +242,7 @@ public class LinkedInServiceImpl implements LinkedInService {
             if (null == oAuthService) {
                 throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(com.openexchange.oauth.OAuthService.class.getName());
             }
-            final OAuthAccount account = oAuthService.getAccount(accountId, session, user, contextId);
+            final OAuthAccount account = oAuthService.getAccount(session, accountId);
             displayName = account.getDisplayName();
         } catch (final OXException e) {
             LOG.error("", e);

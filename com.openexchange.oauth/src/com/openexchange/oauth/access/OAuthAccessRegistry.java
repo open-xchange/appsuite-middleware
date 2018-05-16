@@ -69,7 +69,7 @@ public interface OAuthAccessRegistry {
      * @param oauthAccess The {@link OAuthAccess}
      * @return The previous associated {@link OAuthAccess}, or <code>null</code> if there was none (and specified instance was added)
      */
-    OAuthAccess addIfAbsent(int contextId, int userId, OAuthAccess oauthAccess);
+    OAuthAccess addIfAbsent(int contextId, int userId, int oauthAccountId, OAuthAccess oauthAccess);
 
     /**
      * Adds the specified {@link OAuthAccess} to the registry if there is none associated with specified user, yet.
@@ -83,7 +83,7 @@ public interface OAuthAccessRegistry {
      * @return The previous associated {@link OAuthAccess}, or <code>null</code> if there was none (and specified instance was added)
      * @throws OXException If executing the optional task fails
      */
-    <V> OAuthAccess addIfAbsent(int contextId, int userId, OAuthAccess oauthAccess, Callable<V> executeIfAdded) throws OXException;
+    <V> OAuthAccess addIfAbsent(int contextId, int userId, int oauthAccountId, OAuthAccess oauthAccess, Callable<V> executeIfAdded) throws OXException;
 
     /**
      * Checks the presence of the {@link OAuthAccess} associated with the given user/context/account tuple
@@ -93,7 +93,7 @@ public interface OAuthAccessRegistry {
      * @param accountId The account identifier
      * @return <code>true if such an {@link OAuthAccess} is present; <code>false</code> otherwise
      */
-    boolean contains(int contextId, int userId);
+    boolean contains(int contextId, int userId, int oauthAccountId);
 
     /**
      * Retrieves the {@link OAuthAccess} associated with the given user/context/account tuple
@@ -103,7 +103,7 @@ public interface OAuthAccessRegistry {
      * @param accountId The account identifier
      * @return The {@link OAuthAccess} that is associated with the tuple, or <code>null</code> if none exists
      */
-    OAuthAccess get(int contextId, int userId);
+    OAuthAccess get(int contextId, int userId, int oauthAccountId);
 
     /**
      * Removes the {@link OAuthAccess} associated with the specified user/context tuple, if no more accesses for that tuple are present
@@ -122,7 +122,7 @@ public interface OAuthAccessRegistry {
      * @param accountId The account identifier
      * @return <code>true</code> if an {@link OAuthAccess} for the specified tuple was found and purged; <code>false</code> otherwise
      */
-    boolean purgeUserAccess(int contextId, int userId);
+    boolean purgeUserAccess(int contextId, int userId, int oauthAccountId);
 
     /**
      * Returns the service identifier of this registry

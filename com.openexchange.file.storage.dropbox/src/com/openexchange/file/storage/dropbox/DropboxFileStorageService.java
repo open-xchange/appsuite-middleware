@@ -61,6 +61,8 @@ import com.openexchange.file.storage.RootFolderPermissionsAware;
 import com.openexchange.file.storage.dropbox.access.DropboxAccountAccess;
 import com.openexchange.file.storage.oauth.AbstractOAuthFileStorageService;
 import com.openexchange.oauth.KnownApi;
+import com.openexchange.oauth.dropbox.DropboxOAuthScope;
+import com.openexchange.oauth.scope.OAuthScope;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 
@@ -100,6 +102,16 @@ public final class DropboxFileStorageService extends AbstractOAuthFileStorageSer
         permission.setAdmin(false);
         permission.setFolderPermission(FileStoragePermission.CREATE_SUB_FOLDERS);
         permission.setEntity(session.getUserId());
-        return Collections.<FileStoragePermission>singletonList(permission);
+        return Collections.<FileStoragePermission> singletonList(permission);
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.file.storage.oauth.AbstractOAuthFileStorageService#getScope()
+     */
+    @Override
+    protected OAuthScope getScope() {
+        return DropboxOAuthScope.drive;
     }
 }

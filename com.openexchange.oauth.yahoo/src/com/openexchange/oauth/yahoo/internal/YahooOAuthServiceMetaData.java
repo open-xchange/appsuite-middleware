@@ -47,32 +47,58 @@
  *
  */
 
-package com.openexchange.oauth.linkedin;
+package com.openexchange.oauth.yahoo.internal;
 
 import java.util.Collection;
 import java.util.Collections;
 import org.scribe.builder.api.Api;
-import org.scribe.builder.api.LinkedInApi20;
+import org.scribe.model.Verb;
+import com.openexchange.http.deferrer.DeferringURLService;
+import com.openexchange.oauth.HostInfo;
 import com.openexchange.oauth.KnownApi;
 import com.openexchange.oauth.impl.AbstractExtendedScribeAwareOAuthServiceMetaData;
+import com.openexchange.oauth.yahoo.YahooOAuthScope;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.session.Session;
 
 /**
- * {@link OAuthServiceMetaDataLinkedInImpl}
+ * {@link YahooOAuthServiceMetaData}
  *
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class OAuthServiceMetaDataLinkedInImpl extends AbstractExtendedScribeAwareOAuthServiceMetaData {
+public class YahooOAuthServiceMetaData extends AbstractExtendedScribeAwareOAuthServiceMetaData {
 
-    public OAuthServiceMetaDataLinkedInImpl(ServiceLookup services) {
-        super(services, KnownApi.LINKEDIN, LinkedInOAuthScope.values());
+    private static final String IDENTITY_URL = "https://social.yahooapis.com/v1/me/guid?format=json";
+    private static final String IDENTITY_FIELD_NAME = "value";
+
+    public YahooOAuthServiceMetaData(ServiceLookup services) {
+        super(services, KnownApi.YAHOO, YahooOAuthScope.values());
+    }
+
+    @Override
+    public String modifyCallbackURL(String callbackUrl, HostInfo currentHost, Session session) {
+        DeferringURLService deferrer = services.getService(DeferringURLService.class);
+        if (deferrer == null) {
+            return callbackUrl;
+        }
+        return injectRoute(deferrer.getDeferredURL(callbackUrl, session.getUserId(), session.getContextId()), currentHost.getRoute());
+    }
+
+    @Override
+    public Class<? extends Api> getScribeService() {
+        return YahooApi2.class;
+    }
+
+    @Override
+    public boolean needsRequestToken() {
+        return false;
     }
 
     @Override
     protected String getPropertyId() {
-        return "linkedin";
+        return "yahoo";
     }
 
     @Override
@@ -80,13 +106,33 @@ public class OAuthServiceMetaDataLinkedInImpl extends AbstractExtendedScribeAwar
         return Collections.singletonList(OAuthPropertyID.redirectUrl);
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.oauth.impl.OAuthIdentityAware#getIdentityURL()
+     */
     @Override
-    protected String getEnabledProperty() {
-        return "com.openexchange.oauth.linkedin";
+    public String getIdentityURL(String accessToken) {
+        return IDENTITY_URL;
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.oauth.impl.OAuthIdentityAware#getIdentityMethod()
+     */
     @Override
-    public Class<? extends Api> getScribeService() {
-        return LinkedInApi20.class;
+    public Verb getIdentityHTTPMethod() {
+        return Verb.GET;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.oauth.impl.OAuthIdentityAware#getIdentityPattern()
+     */
+    @Override
+    public String getIdentityFieldName() {
+        return IDENTITY_FIELD_NAME;
     }
 }

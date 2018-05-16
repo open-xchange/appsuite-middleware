@@ -68,6 +68,7 @@ public class DefaultOAuthAccount extends DefaultOAuthToken implements OAuthAccou
     private OAuthServiceMetaData metaData;
     private Set<OAuthScope> enabledScopes;
     private boolean enabledScopesSet;
+    private String userIdentity;
 
     /**
      * Initializes a new {@link DefaultOAuthAccount}.
@@ -167,5 +168,24 @@ public class DefaultOAuthAccount extends DefaultOAuthToken implements OAuthAccou
      */
     public boolean isEnabledScopesSet() {
         return enabledScopesSet;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.oauth.OAuthAccount#getUserIdentity()
+     */
+    @Override
+    public String getUserIdentity() {
+        return userIdentity;
+    }
+
+    /**
+     * Sets the userIdentity
+     *
+     * @param userIdentity The userIdentity to set
+     */
+    public void setUserIdentity(String userIdentity) {
+        this.userIdentity = userIdentity;
     }
 }

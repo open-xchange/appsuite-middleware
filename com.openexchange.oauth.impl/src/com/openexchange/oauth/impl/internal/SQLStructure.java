@@ -88,7 +88,8 @@ public class SQLStructure {
         ACCESS_TOKEN("accessToken"),
         ACCESS_SECRET("accessSecret"),
         SERVICE_ID("serviceId"),
-        SCOPE("scope");
+        SCOPE("scope"),
+        IDENTITY("identity");
         
         public static Set<OAUTH_COLUMN> updateableColumns = EnumSet.complementOf(EnumSet.of(CID, USER, ID, SERVICE_ID));
 
@@ -139,6 +140,8 @@ public class SQLStructure {
                         scopes[index++] = s.getOXScope().name();
                     }
                     return Strings.concat(" ", scopes);
+                case IDENTITY:
+                    return account.getUserIdentity();
                 default:
                     break;
             }

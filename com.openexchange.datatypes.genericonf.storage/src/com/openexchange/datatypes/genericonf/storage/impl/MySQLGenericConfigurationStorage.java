@@ -58,6 +58,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import com.openexchange.database.Databases;
 import com.openexchange.database.provider.DBProvider;
 import com.openexchange.datatypes.genericonf.storage.GenericConfigStorageExceptionCode;
 import com.openexchange.datatypes.genericonf.storage.GenericConfigurationStorageService;
@@ -114,13 +115,13 @@ public class MySQLGenericConfigurationStorage implements GenericConfigurationSto
         Connection writeCon = con;
         final boolean connectionHandling = con == null;
         try {
-            if(connectionHandling) {
+            if (connectionHandling) {
                 writeCon = provider.getWriteConnection(ctx);
                 writeCon.setAutoCommit(false);
             }
             tx.setConnection(writeCon);
             final Object retval = tx.perform();
-            if(connectionHandling) {
+            if (connectionHandling) {
                 writeCon.commit();
             }
             return retval;
@@ -128,16 +129,20 @@ public class MySQLGenericConfigurationStorage implements GenericConfigurationSto
             if (connectionHandling) {
                 try {
                     writeCon.rollback();
-                } catch (final SQLException e) { /**/ }
+                } catch (final SQLException e) {
+                    LOG.debug("{}", e.getMessage(), e);
+                }
             }
             LOG.error("", x);
             throw GenericConfigStorageExceptionCode.SQLException.create(x, x.getMessage());
         } finally {
             tx.close();
-            if(connectionHandling) {
+            if (connectionHandling) {
                 try {
                     writeCon.setAutoCommit(true);
-                } catch (final SQLException e) { /**/ }
+                } catch (final SQLException e) {
+                    LOG.debug("{}", e.getMessage(), e);
+                }
                 provider.releaseWriteConnection(ctx, writeCon);
             }
         }
@@ -153,13 +158,13 @@ public class MySQLGenericConfigurationStorage implements GenericConfigurationSto
         Connection readCon = con;
         final boolean connectionHandling = con == null;
         try {
-            if(connectionHandling) {
+            if (connectionHandling) {
                 readCon = provider.getReadConnection(ctx);
             }
             loadValues(readCon, ctx, id, content, "genconf_attributes_strings");
             loadValues(readCon, ctx, id, content, "genconf_attributes_bools");
         } finally {
-            if(connectionHandling) {
+            if (connectionHandling) {
                 provider.releaseReadConnection(ctx, readCon);
             }
         }
@@ -171,7 +176,7 @@ public class MySQLGenericConfigurationStorage implements GenericConfigurationSto
 
         try {
 
-            stmt = readCon.prepareStatement("SELECT name, value FROM "+tablename+" WHERE cid = ? AND id = ?");
+            stmt = readCon.prepareStatement("SELECT name, value FROM " + tablename + " WHERE cid = ? AND id = ?");
             stmt.setInt(1, ctx.getContextId());
             stmt.setInt(2, id);
             rs = stmt.executeQuery();
@@ -184,22 +189,9 @@ public class MySQLGenericConfigurationStorage implements GenericConfigurationSto
         } catch (final SQLException x) {
             throw GenericConfigStorageExceptionCode.SQLException.create(x, null == stmt ? x.getMessage() : stmt.toString());
         } finally {
-            if (stmt != null) {
-                try {
-                    stmt.close();
-                } catch (final SQLException x) {
-                }
-
-            }
-            if (rs != null) {
-                try {
-                    rs.close();
-                } catch (final SQLException x) {
-                }
-            }
+            Databases.closeSQLStuff(rs, stmt);
         }
     }
-
 
     @Override
     public void update(final Context ctx, final int id, final Map<String, Object> content) throws OXException {
@@ -228,7 +220,6 @@ public class MySQLGenericConfigurationStorage implements GenericConfigurationSto
                 updateIterator.throwException();
                 return null;
             }
-
         });
 
     }
@@ -252,13 +243,11 @@ public class MySQLGenericConfigurationStorage implements GenericConfigurationSto
 
             private void clearTable(final String tablename) throws SQLException {
                 PreparedStatement delete = null;
-                delete = prepare("DELETE FROM "+tablename+" WHERE cid = ? AND id = ?");
+                delete = prepare("DELETE FROM " + tablename + " WHERE cid = ? AND id = ?");
                 delete.setInt(1, ctx.getContextId());
                 delete.setInt(2, id);
                 delete.executeUpdate();
-
             }
-
         });
 
     }
@@ -277,11 +266,10 @@ public class MySQLGenericConfigurationStorage implements GenericConfigurationSto
 
             private void clearTable(final String tablename) throws SQLException {
                 PreparedStatement delete = null;
-                delete = prepare("DELETE FROM "+tablename+" WHERE cid = ?");
+                delete = prepare("DELETE FROM " + tablename + " WHERE cid = ?");
                 delete.setInt(1, ctx.getContextId());
                 delete.executeUpdate();
             }
-
         });
 
     }
@@ -293,13 +281,10 @@ public class MySQLGenericConfigurationStorage implements GenericConfigurationSto
 
     @Override
     public List<Integer> search(Connection con, final Context ctx, final Map<String, Object> query) throws OXException {
-        final boolean handleOwnConnections = con == null;
-
         final LinkedList<Integer> list = new LinkedList<Integer>();
         final StringBuilder builder = new StringBuilder("SELECT DISTINCT p.id FROM ");
         final SearchIterator whereIterator = new SearchIterator();
         Tools.iterate(query, whereIterator);
-
 
         builder.append(whereIterator.getFrom());
         builder.append(" WHERE ");
@@ -309,36 +294,26 @@ public class MySQLGenericConfigurationStorage implements GenericConfigurationSto
         whereIterator.addReplacement(I(ctx.getContextId()));
         PreparedStatement stmt = null;
         ResultSet rs = null;
+
+        boolean releaseConnection = false;
+        if (con == null) {
+            con = provider.getReadConnection(ctx);
+            releaseConnection = true;
+        }
         try {
-            if(handleOwnConnections) {
-                con = provider.getReadConnection(ctx);
-            }
             stmt = con.prepareStatement(builder.toString());
             whereIterator.setReplacements(stmt);
             rs = stmt.executeQuery();
 
-            while(rs.next()) {
+            while (rs.next()) {
                 list.add(I(rs.getInt(1)));
             }
 
         } catch (final SQLException e) {
             throw GenericConfigStorageExceptionCode.SQLException.create(e, null == stmt ? e.getMessage() : stmt.toString());
         } finally {
-            if(stmt != null) {
-                try {
-                    stmt.close();
-                } catch (final SQLException x) {
-                    // Ignore
-                }
-            }
-            if(rs != null) {
-                try {
-                    rs.close();
-                } catch (final SQLException x) {
-                    // Ignore
-                }
-            }
-            if(handleOwnConnections) {
+            Databases.closeSQLStuff(rs, stmt);
+            if (releaseConnection) {
                 provider.releaseReadConnection(ctx, con);
             }
         }
