@@ -49,30 +49,44 @@
 
 package com.openexchange.pgp.core;
 
-import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
-import org.junit.runners.Suite.SuiteClasses;
+import java.util.List;
 
 /**
- * {@link UnitTests} - Unit tests for c.o.pgp.core
+ * {@link PGPDecryptionResult}
  *
  * @author <a href="mailto:benjamin.gruedelbach@open-xchange.com">Benjamin Gruedelbach</a>
- * @since v7.8.4
+ * @since v7.10.0
  */
-@RunWith(Suite.class)
-@SuiteClasses({
-    PGPEncrypterDecrypterTest.class,
-    PGPSignVerifyTests.class,
-    ModifyRecipientTest.class,
-    ExtractSessionPaketTest.class,
-    PGPIntegrityCheckTests.class
-})
-public class UnitTests {
+public class PGPDecryptionResult {
+
+    List<PGPSignatureVerificationResult> signatureVerificationResults;
+    MDCVerificationResult                mdcVerificationResult;
 
     /**
-     * Initializes a new {@link UnitTests}.
+     * Initializes a new {@link PGPDecryptionResult}.
+     *
+     * @param signatureVerificationResults results of the signature verifications
+     * @param mdcVerificationResult  result of the data integrity check
      */
-    public UnitTests() {
-        super();
+    public PGPDecryptionResult(List<PGPSignatureVerificationResult> signatureVerificationResults,
+        MDCVerificationResult mdcVerificationResult) {
+        this.signatureVerificationResults = signatureVerificationResults;
+        this.mdcVerificationResult = mdcVerificationResult;
+    }
+
+    public List<PGPSignatureVerificationResult> getSignatureVerificationResults() {
+        return this.signatureVerificationResults;
+    }
+
+    public void setSignatureVerificationResults(List<PGPSignatureVerificationResult> signatureVerificationResults) {
+        this.signatureVerificationResults = signatureVerificationResults;
+    }
+
+    public MDCVerificationResult getMDCVerificationResult() {
+        return mdcVerificationResult;
+    }
+
+    public void setMDCVerificationResult(MDCVerificationResult mdcVerificationResult) {
+        this.mdcVerificationResult = mdcVerificationResult;
     }
 }
