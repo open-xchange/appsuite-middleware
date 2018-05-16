@@ -69,7 +69,6 @@ import com.openexchange.tools.iterator.SearchIterator;
  */
 public class GetArisingReminder {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(GetArisingReminder.class);
     private static final ReminderStorage STORAGE = ReminderStorage.getInstance();
 
     private final Session session;
@@ -94,7 +93,7 @@ public class GetArisingReminder {
     public ReminderObject[] removeAppointments(final ReminderObject[] reminders) {
         final List<ReminderObject> retval = new ArrayList<ReminderObject>(reminders.length);
         for (final ReminderObject reminder : reminders) {
-            if (Types.APPOINTMENT != reminder.getModule()) {
+            if (Types.APPOINTMENT != reminder.getModule() || Types.TASK != reminder.getModule()) {
                 retval.add(reminder);
             }
         }

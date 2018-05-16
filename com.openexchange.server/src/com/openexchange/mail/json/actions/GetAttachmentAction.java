@@ -329,7 +329,7 @@ public final class GetAttachmentAction extends AbstractMailAction implements ETa
                     if (filter && !saveToDisk && ((Strings.startsWithAny(toLowerCase(mailPart.getContentType().getSubType()), "htm", "xhtm") && fileNameAbsentOrIndicatesHtml(mailPart.getFileName())) || fileNameIndicatesHtml(mailPart.getFileName()))) {
                         // Expect the attachment to be HTML content. Therefore apply filter...
                         if (isEmpty(mailPart.getFileName())) {
-                            mailPart.setFileName(MailMessageParser.generateFilename(sequenceId, mailPart.getContentType().getBaseType()));
+                            mailPart.setFileName(MailMessageParser.generateFilename(sequenceId, getBaseType(mailPart)));
                         }
                         ContentType contentType = mailPart.getContentType();
                         String cs = contentType.containsCharsetParameter() ? contentType.getCharsetParameter() : MailProperties.getInstance().getDefaultMimeCharset();
@@ -368,7 +368,7 @@ public final class GetAttachmentAction extends AbstractMailAction implements ETa
                         }
                     } else {
                         if (isEmpty(mailPart.getFileName())) {
-                            mailPart.setFileName(MailMessageParser.generateFilename(sequenceId, mailPart.getContentType().getBaseType()));
+                            mailPart.setFileName(MailMessageParser.generateFilename(sequenceId, getBaseType(mailPart)));
                         }
                         boolean exactLength = AJAXRequestDataTools.parseBoolParameter(req.getParameter("exact_length")) || clientRequestsRange(req);
                         if (exactLength) {
@@ -411,13 +411,14 @@ public final class GetAttachmentAction extends AbstractMailAction implements ETa
 
                 // Check for image data
                 isPreviewImage = "preview_image".equals(requestData.getFormat());
-                String baseType = mailPart.getContentType().getBaseType();
+                String baseType = getBaseType(mailPart);
                 String filename = getFileName(fileNameFromRequest, mailPart.getFileName(), baseType);
 
                 // Read from stream
                 if (saveToDisk) {
                     if (null == sink) {
-                        @SuppressWarnings("resource") FileHolder tmp = new FileHolder(isClosure, size, MimeType2ExtMap.getContentType(filename), filename);
+                        @SuppressWarnings("resource")
+                        FileHolder tmp = new FileHolder(isClosure, size, baseType, filename);
                         tmp.setDelivery("download");
                         fileHolder = tmp;
                     } else {
@@ -430,9 +431,9 @@ public final class GetAttachmentAction extends AbstractMailAction implements ETa
                     requestData.putParameter(PARAMETER_DELIVERY, "download");
                 } else {
                     if (null == sink) {
-                        fileHolder = new FileHolder(isClosure, size, baseType, filename);
+                        fileHolder = new FileHolder(isClosure, size, getContentType(mailPart, true), filename);
                     } else {
-                        sink.setContentType(baseType);
+                        sink.setContentType(getContentType(mailPart, true));
                         sink.setName(filename);
                         fileHolder = sink;
                         sink = null;
@@ -484,6 +485,22 @@ public final class GetAttachmentAction extends AbstractMailAction implements ETa
         } finally {
             Streams.close(fileHolder);
         }
+    }
+
+    private String getBaseType(MailPart mailPart) {
+        return getContentType(mailPart, false);
+    }
+
+    private String getContentType(MailPart mailPart, boolean includeCharsetParameterIfText) {
+        ContentType contentType = mailPart.getContentType();
+        if (includeCharsetParameterIfText && contentType.containsCharsetParameter() && contentType.startsWith("text/")) {
+            return new ContentType()
+                .setPrimaryType(contentType.getPrimaryType())
+                .setSubType(contentType.getSubType())
+                .setCharsetParameter(contentType.getCharsetParameter())
+                .toString();
+        }
+        return contentType.getBaseType();
     }
 
     private boolean clientRequestsRange(MailRequest req) {
@@ -561,7 +578,7 @@ public final class GetAttachmentAction extends AbstractMailAction implements ETa
             Set<Field> set = EnumSet.copyOf(fields);
 
             // Apply to mail part
-            String mimeType = mailPart.getContentType().getBaseType();
+            String mimeType = getBaseType(mailPart);
             String fileName = mailPart.getFileName();
             if (isEmpty(fileName)) {
                 fileName = "part_" + sequenceId + ".dat";

@@ -839,7 +839,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
                 /*
                  * Check for a SocketTimeoutException
                  */
-                if (tmpDownEnabled && MimeMailException.isTimeoutException(e)) {
+                if (tmpDownEnabled && MimeMailException.isTimeoutOrConnectException(e)) {
                     /*
                      * Remember a timed-out IMAP server on connect attempt
                      */

@@ -61,9 +61,11 @@ import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
 import java.util.GregorianCalendar;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.TimeZone;
 import java.util.UUID;
 import org.apache.commons.io.FileUtils;
@@ -500,7 +502,7 @@ public class BasicMailTest extends AbstractMailFindTest {
         assertTrue("Did not find mail", documents.size() > 0);
         PropDocument document = documents.get(0);
 
-        List<String> jsonFields = new LinkedList<String>();
+        Set<String> jsonFields = new HashSet<String>();
         for (MailListField field : fields) {
             jsonFields.add(field.getKey());
         }
