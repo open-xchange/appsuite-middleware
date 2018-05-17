@@ -57,17 +57,18 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Matchers;
+import org.mockito.ArgumentMatchers;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
-import org.mockito.internal.util.reflection.Whitebox;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
+import org.powermock.reflect.Whitebox;
 import com.openexchange.html.internal.HtmlServiceImpl;
 import com.openexchange.html.internal.jericho.handler.FilterJerichoHandler.CellPadding;
 import com.openexchange.test.mock.MockUtils;
+import net.htmlparser.jericho.Attributes;
 import net.htmlparser.jericho.StartTag;
 
 /**
@@ -77,16 +78,16 @@ import net.htmlparser.jericho.StartTag;
  * @since 7.6.1
  */
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({ HtmlServiceImpl.class, StartTag.class, FilterJerichoHandler.class })
+@PrepareForTest({ HtmlServiceImpl.class, StartTag.class, FilterJerichoHandler.class, Attributes.class })
 public class FilterJerichoHandlerTest {
 
     @Mock
     private HtmlServiceImpl htmlServiceImpl;
 
     private FilterJerichoHandler filterJerichoHandler;
-    
+
     private FilterJerichoHandler spyOnHandler;
-    
+
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
@@ -94,48 +95,48 @@ public class FilterJerichoHandlerTest {
         spyOnHandler = PowerMockito.spy(filterJerichoHandler);
     }
 
-     @Test
-     public void testSetMaxContentSize_infiniteWithMinusOne_setInfinite() {
+    @Test
+    public void testSetMaxContentSize_infiniteWithMinusOne_setInfinite() {
         filterJerichoHandler.setMaxContentSize(-1);
 
-        int valueFromField = (Integer)MockUtils.getValueFromField(filterJerichoHandler, "maxContentSize");
+        int valueFromField = (Integer) MockUtils.getValueFromField(filterJerichoHandler, "maxContentSize");
         Assert.assertEquals(-1, valueFromField);
     }
 
-     @Test
-     public void testSetMaxContentSize_infiniteWithMinusZero_setInfinite() {
+    @Test
+    public void testSetMaxContentSize_infiniteWithMinusZero_setInfinite() {
         filterJerichoHandler.setMaxContentSize(0);
 
         int valueFromField = (Integer) MockUtils.getValueFromField(filterJerichoHandler, "maxContentSize");
         Assert.assertEquals(0, valueFromField);
     }
 
-     @Test
-     public void testSetMaxContentSize_lessThanMinimum_setMinimum10000() {
+    @Test
+    public void testSetMaxContentSize_lessThanMinimum_setMinimum10000() {
         filterJerichoHandler.setMaxContentSize(555);
 
         int valueFromField = (Integer) MockUtils.getValueFromField(filterJerichoHandler, "maxContentSize");
         Assert.assertEquals(10000, valueFromField);
     }
 
-     @Test
-     public void testSetMaxContentSize_validMaxSize_setMaxSize() {
+    @Test
+    public void testSetMaxContentSize_validMaxSize_setMaxSize() {
         filterJerichoHandler.setMaxContentSize(22222);
 
         int valueFromField = (Integer) MockUtils.getValueFromField(filterJerichoHandler, "maxContentSize");
         Assert.assertEquals(22222, valueFromField);
     }
 
-     @Test
-     public void testHandleTableCellpaddingAttribute_mapNull_return() {
+    @Test
+    public void testHandleTableCellpaddingAttribute_mapNull_return() {
         filterJerichoHandler.handleTableCellpaddingAttribute(null);
 
         LinkedList<CellPadding> tablePaddings = (LinkedList<CellPadding>) MockUtils.getValueFromField(filterJerichoHandler, "tablePaddings");
         Assert.assertEquals(0, tablePaddings.size());
     }
 
-     @Test
-     public void testHandleTableCellpaddingAttribute_emptyMap_addEmptyCellpadding() {
+    @Test
+    public void testHandleTableCellpaddingAttribute_emptyMap_addEmptyCellpadding() {
         Map<String, String> map = new LinkedHashMap<String, String>();
 
         filterJerichoHandler.handleTableCellpaddingAttribute(map);
@@ -146,8 +147,8 @@ public class FilterJerichoHandlerTest {
         Assert.assertEquals(0, map.size());
     }
 
-     @Test
-     public void testHandleTableCellpaddingAttribute_cellpaddingInAttributes_addCellpadding() {
+    @Test
+    public void testHandleTableCellpaddingAttribute_cellpaddingInAttributes_addCellpadding() {
         Map<String, String> map = new LinkedHashMap<String, String>();
         map.put("cellpadding", "10");
 
@@ -158,8 +159,8 @@ public class FilterJerichoHandlerTest {
         Assert.assertEquals("10", tablePaddings.getFirst().cellPadding);
     }
 
-     @Test
-     public void testHandleTableCellpaddingAttribute_cellpaddingZero_addCellpadding() {
+    @Test
+    public void testHandleTableCellpaddingAttribute_cellpaddingZero_addCellpadding() {
         Map<String, String> map = new LinkedHashMap<String, String>();
         map.put("cellpadding", "0");
 
@@ -170,8 +171,8 @@ public class FilterJerichoHandlerTest {
         Assert.assertEquals("0", tablePaddings.getFirst().cellPadding);
     }
 
-     @Test
-     public void testHandleTableCellpaddingAttribute_cellsapcingZero_addCellpaddingAndBorderCollapse() {
+    @Test
+    public void testHandleTableCellpaddingAttribute_cellsapcingZero_addCellpaddingAndBorderCollapse() {
         Map<String, String> map = new LinkedHashMap<String, String>();
         map.put("cellpadding", "0");
         map.put("cellspacing", "0");
@@ -184,8 +185,8 @@ public class FilterJerichoHandlerTest {
         Assert.assertEquals(3, map.size());
     }
 
-     @Test
-     public void testHandleTableCellpaddingAttribute_cellpaddingInStyle_addCellpadding() {
+    @Test
+    public void testHandleTableCellpaddingAttribute_cellpaddingInStyle_addCellpadding() {
         Map<String, String> map = new LinkedHashMap<String, String>();
         map.put("style", "border-collapse:collapse;margin:2px;padding:20;width:546px;background-color:#dbefff;");
 
@@ -197,8 +198,8 @@ public class FilterJerichoHandlerTest {
         Assert.assertEquals(1, map.size());
     }
 
-     @Test
-     public void testHandleTableCellpaddingAttribute_styleAvailableButNoCellpadding_doNotAdd() {
+    @Test
+    public void testHandleTableCellpaddingAttribute_styleAvailableButNoCellpadding_doNotAdd() {
         Map<String, String> map = new LinkedHashMap<String, String>();
         map.put("style", "border-collapse:collapse;margin:2px;width:546px;background-color:#dbefff;");
 
@@ -209,17 +210,18 @@ public class FilterJerichoHandlerTest {
         Assert.assertEquals(null, tablePaddings.getFirst().cellPadding);
         Assert.assertEquals(1, map.size());
     }
-     
+
     @Test
     public void testMarkCssStart_DepthCalculatedCorrectly() throws Exception {
-        PowerMockito.doNothing().when(spyOnHandler, PowerMockito.method(FilterJerichoHandler.class, "addStartTag", StartTag.class, boolean.class, Map.class)).withArguments(Matchers.any(StartTag.class), Matchers.anyBoolean(), Matchers.anyMap());
+        PowerMockito.doNothing().when(spyOnHandler, PowerMockito.method(FilterJerichoHandler.class, "addStartTag", StartTag.class, boolean.class, Map.class)).withArguments(ArgumentMatchers.any(StartTag.class), ArgumentMatchers.anyBoolean(), ArgumentMatchers.anyMap());
+        PowerMockito.doNothing().when(spyOnHandler, PowerMockito.method(FilterJerichoHandler.class, "addStartTag", StartTag.class, boolean.class, Map.class)).withArguments(ArgumentMatchers.any(StartTag.class), ArgumentMatchers.anyBoolean(), ArgumentMatchers.isNull());
         Whitebox.setInternalState(spyOnHandler, "depth", 1);
         StartTag startTag = PowerMockito.mock(StartTag.class);
         spyOnHandler.markCssStart(startTag);
         int depth = (int) Whitebox.getInternalState(spyOnHandler, "depth");
         assertTrue("depth attribute is not 2", depth == 2);
     }
-    
+
     @Test
     public void testMarkCssStart_SkiplevelBiggerZeroToReturn() throws Exception {
         Whitebox.setInternalState(spyOnHandler, "skipLevel", 1);
@@ -227,17 +229,17 @@ public class FilterJerichoHandlerTest {
         spyOnHandler.markCssStart(startTag);
         int skipLevel = (int) Whitebox.getInternalState(spyOnHandler, "skipLevel");
         assertTrue("skipLevel attribute is not 2", skipLevel == 2);
-        PowerMockito.verifyPrivate(spyOnHandler, Mockito.times(0)).invoke("addStartTag", Matchers.any(StartTag.class), Matchers.anyBoolean(), Matchers.anyMap());
+        PowerMockito.verifyPrivate(spyOnHandler, Mockito.times(0)).invoke("addStartTag", ArgumentMatchers.any(StartTag.class), ArgumentMatchers.anyBoolean(), ArgumentMatchers.anyMap());
     }
-    
+
     @Test
     public void testMarkCssStart_StartTagAddedAndCssSet() throws Exception {
-        PowerMockito.doNothing().when(spyOnHandler, PowerMockito.method(FilterJerichoHandler.class, "addStartTag", StartTag.class, boolean.class, Map.class)).withArguments(Matchers.any(StartTag.class), Matchers.anyBoolean(), Matchers.anyMap());
+        PowerMockito.doNothing().when(spyOnHandler, PowerMockito.method(FilterJerichoHandler.class, "addStartTag", StartTag.class, boolean.class, Map.class)).withArguments(ArgumentMatchers.any(StartTag.class), ArgumentMatchers.anyBoolean(), ArgumentMatchers.anyMap());
         StartTag startTag = PowerMockito.mock(StartTag.class);
         Mockito.when(startTag.getName()).thenReturn("style");
         spyOnHandler.markCssStart(startTag);
         boolean isCss = (boolean) Whitebox.getInternalState(spyOnHandler, "isCss");
         assertTrue("CSS flag not set", isCss);
-        PowerMockito.verifyPrivate(spyOnHandler, Mockito.times(1)).invoke("addStartTag", Matchers.any(StartTag.class), Matchers.anyBoolean(), Matchers.anyMap());
+        PowerMockito.verifyPrivate(spyOnHandler, Mockito.times(1)).invoke("addStartTag", ArgumentMatchers.any(StartTag.class), ArgumentMatchers.anyBoolean(), ArgumentMatchers.anyMap());
     }
 }

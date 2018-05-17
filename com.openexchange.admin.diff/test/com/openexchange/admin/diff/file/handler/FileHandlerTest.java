@@ -53,7 +53,7 @@ import java.io.File;
 import java.io.IOException;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Matchers;
+import org.mockito.ArgumentMatchers;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
@@ -86,23 +86,23 @@ public class FileHandlerTest {
         rootFolder = Mockito.mock(File.class);
     }
 
-     @Test
-     public void testReadConfFiles_noConfigurationFileProvider_doNothing() throws IOException, TooManyFilesException {
-        Mockito.doNothing().when(fileHandler).validateDirectory((File) Matchers.any());
+    @Test
+    public void testReadConfFiles_noConfigurationFileProvider_doNothing() throws IOException, TooManyFilesException {
+        Mockito.doNothing().when(fileHandler).validateDirectory(ArgumentMatchers.any());
 
-        fileHandler.readConfFiles(new DiffResult(), rootFolder, isOriginal, null);
+        fileHandler.readConfFiles(new DiffResult(), rootFolder, isOriginal);
 
-        Mockito.verify(configurationFileProvider, Mockito.never()).addFilesToDiffQueue(Matchers.<DiffResult> any(), (File) Matchers.any(), Matchers.anyList(), Matchers.anyBoolean());
-        Mockito.verify(configurationFileProvider, Mockito.never()).readConfigurationFiles(Matchers.<DiffResult> any(), (File) Matchers.any(), Matchers.any(String[].class));
+        Mockito.verify(configurationFileProvider, Mockito.never()).addFilesToDiffQueue(ArgumentMatchers.<DiffResult> any(), ArgumentMatchers.any(File.class), ArgumentMatchers.anyList(), ArgumentMatchers.anyBoolean());
+        Mockito.verify(configurationFileProvider, Mockito.never()).readConfigurationFiles(ArgumentMatchers.<DiffResult> any(), ArgumentMatchers.any(File.class), ArgumentMatchers.any(String[].class));
     }
 
-     @Test
-     public void testReadConfFiles_configurationFileProvider_readAndAddFiles() throws IOException, TooManyFilesException {
-        Mockito.doNothing().when(fileHandler).validateDirectory((File) Matchers.any());
+    @Test
+    public void testReadConfFiles_configurationFileProvider_readAndAddFiles() throws IOException, TooManyFilesException {
+        Mockito.doNothing().when(fileHandler).validateDirectory(ArgumentMatchers.any());
 
         fileHandler.readConfFiles(new DiffResult(), rootFolder, isOriginal, configurationFileProvider);
 
-        Mockito.verify(configurationFileProvider, Mockito.times(1)).addFilesToDiffQueue(Matchers.<DiffResult> any(), (File) Matchers.any(), Matchers.anyList(), Matchers.anyBoolean());
-        Mockito.verify(configurationFileProvider, Mockito.times(1)).readConfigurationFiles(Matchers.<DiffResult> any(), (File) Matchers.any(), Matchers.any(String[].class));
+        Mockito.verify(configurationFileProvider, Mockito.times(1)).addFilesToDiffQueue(ArgumentMatchers.<DiffResult> any(), ArgumentMatchers.any(File.class), ArgumentMatchers.anyList(), ArgumentMatchers.anyBoolean());
+        Mockito.verify(configurationFileProvider, Mockito.times(1)).readConfigurationFiles(ArgumentMatchers.<DiffResult> any(), ArgumentMatchers.any(File.class), ArgumentMatchers.any(String[].class));
     }
 }

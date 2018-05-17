@@ -1,7 +1,7 @@
 
 package com.openexchange.saml;
 
-import java.util.Dictionary;
+import javax.servlet.Servlet;
 import javax.servlet.ServletException;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -11,7 +11,6 @@ import org.mockito.Mockito;
 import org.opensaml.DefaultBootstrap;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
-import org.osgi.service.http.HttpContext;
 import org.osgi.service.http.HttpService;
 import org.osgi.service.http.NamespaceException;
 import com.hazelcast.core.HazelcastInstance;
@@ -200,9 +199,9 @@ public class MultiSAMLTest {
 
     private void prepareServletMockitoCheck(final String path) throws ServletException, NamespaceException {
         if (Strings.isEmpty(path)) {
-            Mockito.doNothing().doThrow(NamespaceException.class).when(httpService).registerServlet(Mockito.eq("/appsuite/api/saml/acs"), Mockito.any(javax.servlet.Servlet.class), Mockito.any(Dictionary.class), Mockito.any(HttpContext.class));
+            Mockito.doNothing().doThrow(NamespaceException.class).when(httpService).registerServlet(Mockito.eq("/appsuite/api/saml/acs"), Mockito.any(Servlet.class), Mockito.isNull(), Mockito.isNull());
         } else {
-            Mockito.doNothing().doThrow(NamespaceException.class).when(httpService).registerServlet(Mockito.eq("/appsuite/api/saml/" + path + "/acs"), Mockito.any(javax.servlet.Servlet.class), Mockito.any(Dictionary.class), Mockito.any(HttpContext.class));
+            Mockito.doNothing().doThrow(NamespaceException.class).when(httpService).registerServlet(Mockito.eq("/appsuite/api/saml/" + path + "/acs"), Mockito.any(Servlet.class), Mockito.isNull(), Mockito.isNull());
         }
     }
 

@@ -54,8 +54,8 @@ import java.util.Collection;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.ArgumentMatchers;
 import org.mockito.InjectMocks;
-import org.mockito.Matchers;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.powermock.api.mockito.PowerMockito;
@@ -64,7 +64,6 @@ import com.openexchange.file.storage.composition.IDBasedFileAccess;
 import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
 import com.openexchange.publish.Publication;
 import com.openexchange.session.Session;
-
 
 /**
  * Unit tests for {@link IDBasedFileAccessDocumentLoader}
@@ -109,28 +108,29 @@ public class IDBasedFileAccessDocumentLoaderTest {
         MockitoAnnotations.initMocks(this);
     }
 
-     @Test
-     public void testLoad_NoDocumentFound_ReturnEmptyCollection() throws OXException {
-        PowerMockito.when(this.idBasedFileAccessFactory.createAccess((Session) Matchers.any())).thenReturn(this.idBasedFileAccess);
+    @Test
+    public void testLoad_NoDocumentFound_ReturnEmptyCollection() throws OXException {
+        PowerMockito.when(this.idBasedFileAccessFactory.createAccess(ArgumentMatchers.any(Session.class))).thenReturn(this.idBasedFileAccess);
 
         Collection<? extends Object> load = this.idBasedFileAccessDocumentLoader.load(publication, null);
 
         Assert.assertEquals(0, load.size());
     }
 
-     @Test
-     public void testLoad_PublicationNull_ReturnEmptyCollection() throws OXException {
-        PowerMockito.when(this.idBasedFileAccessFactory.createAccess((Session) Matchers.any())).thenReturn(this.idBasedFileAccess);
+    @Test
+    public void testLoad_PublicationNull_ReturnEmptyCollection() throws OXException {
+        PowerMockito.when(this.idBasedFileAccessFactory.createAccess(ArgumentMatchers.any(Session.class))).thenReturn(this.idBasedFileAccess);
 
         Collection<? extends Object> load = this.idBasedFileAccessDocumentLoader.load(null, null);
 
         Assert.assertEquals(0, load.size());
     }
 
-     @Test
-     public void testLoad_Fine_ReturnCollectionWithDocument() throws OXException {
-        PowerMockito.when(this.idBasedFileAccessFactory.createAccess((Session) Matchers.any())).thenReturn(this.idBasedFileAccess);
-        PowerMockito.when(this.idBasedFileAccess.getDocument(Matchers.anyString(), Matchers.anyString())).thenReturn(this.inputStream);
+    @Test
+    public void testLoad_Fine_ReturnCollectionWithDocument() throws OXException {
+        PowerMockito.when(this.idBasedFileAccessFactory.createAccess(ArgumentMatchers.any(Session.class))).thenReturn(this.idBasedFileAccess);
+        PowerMockito.when(this.idBasedFileAccess.getDocument(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())).thenReturn(this.inputStream);
+        PowerMockito.when(this.idBasedFileAccess.getDocument(ArgumentMatchers.isNull(), ArgumentMatchers.isNull())).thenReturn(this.inputStream);
 
         Collection<? extends Object> load = this.idBasedFileAccessDocumentLoader.load(this.publication, null);
 

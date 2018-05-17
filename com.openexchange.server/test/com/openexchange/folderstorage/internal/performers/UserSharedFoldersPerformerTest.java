@@ -112,14 +112,14 @@ public class UserSharedFoldersPerformerTest {
     @Test
     public void testCallAndWait_executionExceptionWithoutCause_getUnexpectedError() throws InterruptedException {
         CompletionService<Object> completionService = Mockito.mock(CompletionService.class);
-        Mockito.when(completionService.take()).thenThrow(ExecutionException.class);
+        Mockito.when(completionService.take()).thenThrow(InterruptedException.class);
 
         try {
             performer.callAndWait(completionService, 1);
             fail("No exception occurred!");
         } catch (OXException e) {
-            assertFalse(FolderExceptionErrorMessage.INTERRUPT_ERROR.equals(e));
-            assertTrue(FolderExceptionErrorMessage.UNEXPECTED_ERROR.equals(e));
+            assertTrue(FolderExceptionErrorMessage.INTERRUPT_ERROR.equals(e));
+            assertFalse(FolderExceptionErrorMessage.UNEXPECTED_ERROR.equals(e));
         }
     }
 

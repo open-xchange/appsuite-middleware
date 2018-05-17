@@ -62,7 +62,7 @@ import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Matchers;
+import org.mockito.ArgumentMatchers;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
@@ -104,7 +104,7 @@ public class FeedbackServiceImplTest {
 
     private JSONObject feedback = null;
 
-    // @formatter:off
+    //@formatter:off
     private final String validFeedbackStr = new String("{ " +
         "\"score\":\"3\","+
         "\"app\":\"app\","+
@@ -117,6 +117,7 @@ public class FeedbackServiceImplTest {
         "\"Screen_Resolution\":\"1600x900\","+
         "\"Language\": \"de_de\""+
         "}");
+    //@formatter:on
 
     @Mock
     private Session session;
@@ -138,7 +139,7 @@ public class FeedbackServiceImplTest {
 
     @Mock
     private Connection connection;
-    
+
     @Mock
     private ExportResultConverter resultConverter;
 
@@ -150,27 +151,28 @@ public class FeedbackServiceImplTest {
         MockUtils.injectValueIntoPrivateField(FeedbackTypeRegistryImpl.getInstance(), "map", new ConcurrentHashMap<String, FeedbackType>(1));
 
         PowerMockito.mockStatic(Services.class);
-        
+
         PowerMockito.when(Services.getService(ServerConfigService.class)).thenReturn(serverConfigService);
-        
+
         PowerMockito.when(Services.getService(ConfigViewFactory.class)).thenReturn(configViewFactory);
-        PowerMockito.when(configViewFactory.getView(Matchers.anyInt(), Matchers.anyInt())).thenReturn(configView);
+        PowerMockito.when(configViewFactory.getView(ArgumentMatchers.anyInt(), ArgumentMatchers.anyInt())).thenReturn(configView);
         PowerMockito.when(configView.opt("com.openexchange.context.group", String.class, "default")).thenReturn(null);
-        
+
         PowerMockito.when(Services.getService(DatabaseService.class)).thenReturn(databaseService);
         PowerMockito.when(databaseService.isGlobalDatabaseAvailable()).thenReturn(true);
-        PowerMockito.when(databaseService.getWritableForGlobal(Matchers.anyString())).thenReturn(connection);
+        PowerMockito.when(databaseService.getWritableForGlobal(ArgumentMatchers.anyString())).thenReturn(connection);
+        PowerMockito.when(databaseService.getWritableForGlobal(ArgumentMatchers.isNull())).thenReturn(connection);
 
         PowerMockito.when(feedbackType.getType()).thenReturn("star-rating-v1");
-        PowerMockito.when(feedbackType.storeFeedback(Matchers.any(), (Connection)Matchers.any())).thenReturn(1L);
-        PowerMockito.when(feedbackType.getFeedbacks(Matchers.anyList(), (Connection)Matchers.any())).thenReturn(resultConverter);
-        PowerMockito.when(feedbackType.getFeedbacks(Matchers.anyList(), (Connection)Matchers.any(), Matchers.anyMap())).thenReturn(resultConverter);
+        PowerMockito.when(feedbackType.storeFeedback(ArgumentMatchers.any(), (Connection) ArgumentMatchers.any())).thenReturn(1L);
+        PowerMockito.when(feedbackType.getFeedbacks(ArgumentMatchers.anyList(), (Connection) ArgumentMatchers.any())).thenReturn(resultConverter);
+        PowerMockito.when(feedbackType.getFeedbacks(ArgumentMatchers.anyList(), (Connection) ArgumentMatchers.any(), ArgumentMatchers.anyMap())).thenReturn(resultConverter);
 
         feedback = new JSONObject(validFeedbackStr);
 
         Mockito.when(session.getUserId()).thenReturn(userId);
         Mockito.when(session.getContextId()).thenReturn(contextId);
-        
+
         storeParams = new HashMap<>();
         storeParams.put("type", type);
         storeParams.put("hostname", hostname);
@@ -210,7 +212,7 @@ public class FeedbackServiceImplTest {
     public void testStore_globalDatabaseNotConfigured_throwException() throws OXException {
         FeedbackTypeRegistryImpl.getInstance().registerType(feedbackType);
         PowerMockito.when(databaseService.isGlobalDatabaseAvailable()).thenReturn(false);
-        
+
         feedbackService.store(session, feedback, storeParams);
 
         fail();
@@ -219,7 +221,7 @@ public class FeedbackServiceImplTest {
     @Test(expected = OXException.class)
     public void testStore_feedbackTypeNotAbleToPersist_throwException() throws OXException {
         FeedbackTypeRegistryImpl.getInstance().registerType(feedbackType);
-        PowerMockito.when(feedbackType.storeFeedback(Matchers.any(), (Connection)Matchers.any())).thenReturn(-1L);
+        PowerMockito.when(feedbackType.storeFeedback(ArgumentMatchers.any(), (Connection) ArgumentMatchers.any())).thenReturn(-1L);
 
         feedbackService.store(session, feedback, storeParams);
 
@@ -229,9 +231,9 @@ public class FeedbackServiceImplTest {
     @Test
     public void testStore_feedbackTypeNotAbleToPersist_ensureNotSaved() throws SQLException, OXException {
         FeedbackTypeRegistryImpl.getInstance().registerType(feedbackType);
-        PowerMockito.when(feedbackType.storeFeedback(Matchers.any(), (Connection)Matchers.any())).thenReturn(-1L);
+        PowerMockito.when(feedbackType.storeFeedback(ArgumentMatchers.any(), (Connection) ArgumentMatchers.any())).thenReturn(-1L);
         feedbackService = Mockito.spy(new FeedbackServiceImpl());
-        Mockito.doNothing().when(feedbackService).saveFeedBackInternal((Connection)Matchers.any(), (FeedbackMetaData)Matchers.any(), Matchers.anyString());
+        Mockito.doNothing().when(feedbackService).saveFeedBackInternal((Connection) ArgumentMatchers.any(), (FeedbackMetaData) ArgumentMatchers.any(), ArgumentMatchers.anyString());
 
         boolean exceptionThrown = false;
         try {
@@ -241,20 +243,20 @@ public class FeedbackServiceImplTest {
         }
 
         assertTrue(exceptionThrown);
-        Mockito.verify(feedbackService, Mockito.never()).saveFeedBackInternal((Connection)Matchers.any(), (FeedbackMetaData)Matchers.any(), Matchers.anyString());
+        Mockito.verify(feedbackService, Mockito.never()).saveFeedBackInternal((Connection) ArgumentMatchers.any(), (FeedbackMetaData) ArgumentMatchers.any(), ArgumentMatchers.anyString());
     }
 
     @Test
     public void testStore_ok_ensureSavedInternally() throws OXException, SQLException {
         FeedbackTypeRegistryImpl.getInstance().registerType(feedbackType);
         feedbackService = Mockito.spy(new FeedbackServiceImpl());
-        Mockito.doNothing().when(feedbackService).saveFeedBackInternal((Connection)Matchers.any(), (FeedbackMetaData)Matchers.any(), Matchers.anyString());
+        Mockito.doNothing().when(feedbackService).saveFeedBackInternal((Connection) ArgumentMatchers.any(), (FeedbackMetaData) ArgumentMatchers.any(), ArgumentMatchers.anyString());
 
         feedbackService.store(session, feedback, storeParams);
 
-        Mockito.verify(feedbackService, Mockito.times(1)).saveFeedBackInternal((Connection)Matchers.any(), (FeedbackMetaData)Matchers.any(), Matchers.anyString());
+        Mockito.verify(feedbackService, Mockito.times(1)).saveFeedBackInternal((Connection) ArgumentMatchers.any(), (FeedbackMetaData) ArgumentMatchers.any(), ArgumentMatchers.anyString());
     }
-    
+
     @Test(expected = OXException.class)
     public void testExport_contextTypeNull_throwException() throws OXException {
         feedbackService.export(null, FeedbackFilter.DEFAULT_FILTER);
@@ -279,7 +281,7 @@ public class FeedbackServiceImplTest {
     @Test(expected = OXException.class)
     public void testExport_feedbackTypeNotRegistered_throwException() throws OXException, SQLException {
         feedbackService = Mockito.spy(new FeedbackServiceImpl());
-        Mockito.doReturn(Collections.EMPTY_LIST).when(feedbackService).loadFeedbackMetaData((Connection)Matchers.any(), (FeedbackFilter)Matchers.any(), Matchers.anyString());
+        Mockito.doReturn(Collections.EMPTY_LIST).when(feedbackService).loadFeedbackMetaData((Connection) ArgumentMatchers.any(), (FeedbackFilter) ArgumentMatchers.any(), ArgumentMatchers.anyString());
 
         feedbackService.export("default", FeedbackFilter.DEFAULT_FILTER);
 
@@ -290,7 +292,7 @@ public class FeedbackServiceImplTest {
     public void testExport_globalDatabaseNotConfigured_throwException() throws OXException {
         FeedbackTypeRegistryImpl.getInstance().registerType(feedbackType);
         PowerMockito.when(databaseService.isGlobalDatabaseAvailable()).thenReturn(false);
-        
+
         feedbackService.export("default", FeedbackFilter.DEFAULT_FILTER);
 
         fail();
@@ -300,10 +302,10 @@ public class FeedbackServiceImplTest {
     public void testExport_noDataAvailable_returnEmptyResult() throws OXException, SQLException {
         FeedbackTypeRegistryImpl.getInstance().registerType(feedbackType);
         feedbackService = Mockito.spy(new FeedbackServiceImpl());
-        Mockito.doReturn(Collections.EMPTY_LIST).when(feedbackService).loadFeedbackMetaData((Connection)Matchers.any(), (FeedbackFilter)Matchers.any(), Matchers.anyString());
-        
-        ExportResultConverter export = feedbackService.export("default", FeedbackFilter.DEFAULT_FILTER,  Collections.<String, String> emptyMap());
-        
+        Mockito.doReturn(Collections.EMPTY_LIST).when(feedbackService).loadFeedbackMetaData((Connection) ArgumentMatchers.any(), (FeedbackFilter) ArgumentMatchers.any(), ArgumentMatchers.anyString());
+
+        ExportResultConverter export = feedbackService.export("default", FeedbackFilter.DEFAULT_FILTER, Collections.<String, String> emptyMap());
+
         assertEquals(resultConverter, export);
     }
 }
