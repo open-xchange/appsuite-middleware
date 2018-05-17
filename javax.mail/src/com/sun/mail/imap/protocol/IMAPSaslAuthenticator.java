@@ -49,6 +49,25 @@ import javax.security.auth.callback.*;
 import com.sun.mail.iap.*;
 import com.sun.mail.imap.*;
 import com.sun.mail.util.*;
+import javax.security.auth.callback.Callback;
+import javax.security.auth.callback.CallbackHandler;
+import javax.security.auth.callback.NameCallback;
+import javax.security.auth.callback.PasswordCallback;
+import javax.security.sasl.RealmCallback;
+import javax.security.sasl.RealmChoiceCallback;
+import javax.security.sasl.Sasl;
+import javax.security.sasl.SaslClient;
+import javax.security.sasl.SaslException;
+import com.sun.mail.iap.Argument;
+import com.sun.mail.iap.ByteArray;
+import com.sun.mail.iap.ProtocolException;
+import com.sun.mail.iap.Response;
+import com.sun.mail.util.ASCIIUtility;
+import com.sun.mail.util.BASE64DecoderStream;
+import com.sun.mail.util.BASE64EncoderStream;
+import com.sun.mail.util.MailLogger;
+import com.sun.mail.util.PropUtil;
+import com.sun.mail.util.Reference;
 
 /**
  * This class contains a single method that does authentication using
@@ -56,7 +75,7 @@ import com.sun.mail.util.*;
  * J2SE 1.5.  Eventually it should be merged into IMAPProtocol.java.
  */
 
-public class IMAPSaslAuthenticator implements SaslAuthenticator {
+public class IMAPSaslAuthenticator implements SaslAuthenticatorWithReference {
 
     private IMAPProtocol pr;
     private String name;
@@ -86,8 +105,14 @@ public class IMAPSaslAuthenticator implements SaslAuthenticator {
     }
 
     public boolean authenticate(String[] mechs, final String realm,
+        final String authzid, final String u,
+        final String p) throws ProtocolException {
+        return authenticate(mechs, realm, authzid, u, p, null);
+    }
+
+    public boolean authenticate(String[] mechs, final String realm,
 				final String authzid, final String u,
-				final String p) throws ProtocolException {
+				final String p, final Reference<Exception> optErrorRef) throws ProtocolException {
 
 	synchronized (pr) {	// authenticate method should be synchronized
 	List<Response> v = new ArrayList<Response>();
@@ -171,6 +196,8 @@ public class IMAPSaslAuthenticator implements SaslAuthenticator {
 	    tag = pr.writeCommand("AUTHENTICATE", args);
 	} catch (Exception ex) {
 	    logger.log(Level.FINE, "SASL AUTHENTICATE Exception", ex);
+	    if (null != optErrorRef)
+	        optErrorRef.setValue(ex);
 	    return false;
 	}
 
