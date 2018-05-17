@@ -635,6 +635,11 @@ public final class FilterJerichoHandler implements JerichoHandler {
                     prependWidthHeightToStyleIfAbsent(mapFor("width", width + "px", "height", height + "px"), attrMap);
                 }
             }
+            String src = attrMap.get("src");
+            if (Strings.isNotEmpty(src) && false == isInlineImage(src) && (src.indexOf('<') >= 0 || src.indexOf('\n') >= 0 || src.indexOf('\r') >= 0)) {
+                // Invalid <img> tag
+                return;
+            }
         } else if (HTMLElementName.TABLE == tagName) {
             addTableTag(attrMap);
         } else if (HTMLElementName.TD == tagName || HTMLElementName.TH == tagName) {

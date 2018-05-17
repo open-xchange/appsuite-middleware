@@ -649,6 +649,12 @@ public final class CleaningJsoupHandler implements JsoupHandler {
                     prependWidthHeightToStyleIfAbsent(mapFor("width", width + "px", "height", height + "px"), attributes, startTag);
                 }
             }
+            String src = attributes.getIgnoreCase("src");
+            if (Strings.isNotEmpty(src) && false == isInlineImage(src) && (src.indexOf('<') >= 0 || src.indexOf('\n') >= 0 || src.indexOf('\r') >= 0)) {
+                // Invalid <img> tag
+                removedNodes.add(startTag);
+                return;
+            }
         } else if ("table".equals(tagName)) {
             addTableTag(attributes, startTag);
         } else if ("td".equals(tagName) || "th".equals(tagName)) {
