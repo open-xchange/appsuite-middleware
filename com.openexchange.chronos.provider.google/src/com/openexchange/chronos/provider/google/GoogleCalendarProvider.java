@@ -243,6 +243,7 @@ public class GoogleCalendarProvider extends BasicCachingCalendarProvider {
             if (userConfig.hasAndNotNull(GoogleCalendarConfigField.FOLDER)) {
                 internalConfig.put(GoogleCalendarConfigField.FOLDER, userConfig.getString(GoogleCalendarConfigField.FOLDER));
             }
+            internalConfig.put("name", settings.getName());
 
             // store extended properties
             ExtendedProperties extendedProperties = settings.getExtendedProperties();
@@ -280,6 +281,9 @@ public class GoogleCalendarProvider extends BasicCachingCalendarProvider {
             updated.put(GoogleCalendarConfigField.OAUTH_ID, accountId);
             if (config.hasAndNotNull(GoogleCalendarConfigField.FOLDER)) {
                 updated.put(GoogleCalendarConfigField.FOLDER, config.getString(GoogleCalendarConfigField.FOLDER));
+            }
+            if (config.hasAndNotNull("name")) {
+                updated.put("name", settings.getName());
             }
 
             Object colorValue = optPropertyValue(settings.getExtendedProperties(), COLOR_LITERAL);
