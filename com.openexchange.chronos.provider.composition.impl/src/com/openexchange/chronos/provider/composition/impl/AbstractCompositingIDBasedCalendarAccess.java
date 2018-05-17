@@ -86,6 +86,7 @@ import com.openexchange.chronos.provider.FreeBusyProvider;
 import com.openexchange.chronos.provider.account.CalendarAccountService;
 import com.openexchange.chronos.provider.composition.impl.idmangling.IDMangling;
 import com.openexchange.chronos.provider.extensions.WarningsAware;
+import com.openexchange.chronos.provider.folder.FolderCalendarProvider;
 import com.openexchange.chronos.provider.groupware.GroupwareCalendarAccess;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.ErrorAwareCalendarResult;
@@ -665,6 +666,18 @@ public abstract class AbstractCompositingIDBasedCalendarAccess implements Transa
             return false;
         }
         return provider.getCapabilities().contains(capability);
+    }
+
+    /**
+     * Checks if the {@link CalendarProvider} for the given account is a {@link FolderCalendarPrvider}.
+     * 
+     * @param accountId
+     * @return
+     * @throws OXException
+     */
+    protected boolean isFolderCalendarProvider(int accountId) throws OXException {
+        CalendarProvider provider = providerRegistry.getCalendarProvider(getAccount(accountId).getProviderId());
+        return FolderCalendarProvider.class.isInstance(provider);
     }
 
     @Override
