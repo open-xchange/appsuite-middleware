@@ -8,6 +8,12 @@
       - application/json
     parameters:
       - $ref: "#/parameters/gblQueryParamSession"
+      - in: query
+        name: timestamp
+        type: integer
+        format: int64
+        description: The timestamp of the last modification of the link. Used to detect concurrent modifications.
+        required: true
       - in: body
         name: body
         description: A JSON object containing the share target where the link should be deleted for.

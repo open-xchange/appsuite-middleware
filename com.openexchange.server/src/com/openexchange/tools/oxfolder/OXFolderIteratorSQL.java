@@ -156,7 +156,7 @@ public final class OXFolderIteratorSQL {
 
     private static final int PRIVATE_PERMISSION = FolderObject.PRIVATE_PERMISSION;
 
-    private static final int SYSTEM_GLOBAL_FOLDER_ID = FolderObject.SYSTEM_GLOBAL_FOLDER_ID;
+    /*private static final int SYSTEM_GLOBAL_FOLDER_ID = FolderObject.SYSTEM_GLOBAL_FOLDER_ID;*/ // finally dropped
 
     private static final String SHARED_PREFIX = FolderObject.SHARED_PREFIX;
 
@@ -353,9 +353,12 @@ public final class OXFolderIteratorSQL {
     }
 
     private static final void appendix(final StringBuilder sb, final String accessibleModules, final String additionalCondition) {
+        /*-
+         *
         if (OXFolderProperties.isIgnoreSharedAddressbook()) {
             sb.append(" AND (ot.fuid != ").append(SYSTEM_GLOBAL_FOLDER_ID).append(')');
         }
+        */
         if (accessibleModules != null) {
             sb.append(" AND (ot.module IN ").append(accessibleModules).append(')');
         }

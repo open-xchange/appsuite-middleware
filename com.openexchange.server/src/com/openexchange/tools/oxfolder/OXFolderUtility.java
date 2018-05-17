@@ -203,13 +203,14 @@ public final class OXFolderUtility {
                  */
                 throw OXFolderExceptionCode.NO_DUPLICATE_FOLDER.create(parentFolderName, Integer.valueOf(ctx.getContextId()), folderName);
             }
+            /*-
+             *  // finally dropped
             if (!OXFolderProperties.isIgnoreSharedAddressbook() && FolderObject.getFolderString(FolderObject.SYSTEM_GLOBAL_FOLDER_ID, locale).equalsIgnoreCase(folderName)) {
                 final String parentFolderName = new StringBuilder(FolderObject.getFolderString(parentFolderId, locale)).append(" (").append(parentFolderId).append(')').toString();
-                /*
-                 * A duplicate folder exists
-                 */
+                // A duplicate folder exists
                 throw OXFolderExceptionCode.NO_DUPLICATE_FOLDER.create(parentFolderName, Integer.valueOf(ctx.getContextId()), folderName);
             }
+            */
         }
     }
 
