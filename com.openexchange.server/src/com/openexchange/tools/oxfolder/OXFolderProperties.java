@@ -49,6 +49,8 @@
 
 package com.openexchange.tools.oxfolder;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import javax.management.MalformedObjectNameException;
 import javax.management.NotCompliantMBeanException;
@@ -59,6 +61,7 @@ import com.openexchange.cache.registry.CacheAvailabilityListener;
 import com.openexchange.cache.registry.CacheAvailabilityRegistry;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Strings;
 import com.openexchange.management.ManagementService;
 import com.openexchange.server.Initialization;
 import com.openexchange.server.impl.OCLPermission;
@@ -92,7 +95,7 @@ public final class OXFolderProperties implements Initialization, CacheAvailabili
 
     private boolean enableFolderCache = true;
 
-    private boolean ignoreSharedAddressbook = false;
+    /*private boolean ignoreSharedAddressbook = false; */ // finally dropped
 
     volatile boolean enableInternalUsersEdit = true;
 
@@ -164,7 +167,7 @@ public final class OXFolderProperties implements Initialization, CacheAvailabili
         enableSharedFolderCaching = true;
         enableDBGrouping = true;
         enableFolderCache = true;
-        ignoreSharedAddressbook = false;
+        /*ignoreSharedAddressbook = false;*/
         enableInternalUsersEdit = true;
     }
 
@@ -199,15 +202,15 @@ public final class OXFolderProperties implements Initialization, CacheAvailabili
         } else {
             enableFolderCache = Boolean.parseBoolean(value.trim());
         }
-        /*
+        /*-
          * IGNORE_SHARED_ADDRESSBOOK
-         */
         value = configurationService.getProperty("IGNORE_SHARED_ADDRESSBOOK");
         if (null == value) {
             LOG.warn("Missing property IGNORE_SHARED_ADDRESSBOOK");
         } else {
             ignoreSharedAddressbook = Boolean.parseBoolean(value.trim());
         }
+        */
         /*
          * ENABLE_INTERNAL_USER_EDIT
          */
@@ -225,14 +228,37 @@ public final class OXFolderProperties implements Initialization, CacheAvailabili
     }
 
     private void logInfo() {
-        final StringBuilder sb = new StringBuilder(512);
-        sb.append("\nFolder Properties & Folder Cache Properties:\n");
-        sb.append("\tENABLE_SHARED_FOLDER_CACHING=").append(enableSharedFolderCaching).append('\n');
-        sb.append("\tENABLE_DB_GROUPING=").append(enableDBGrouping).append('\n');
-        sb.append("\tENABLE_FOLDER_CACHE=").append(enableFolderCache).append('\n');
-        sb.append("\tENABLE_INTERNAL_USER_EDIT=").append(enableInternalUsersEdit).append('\n');
-        sb.append("\tIGNORE_SHARED_ADDRESSBOOK=").append(ignoreSharedAddressbook);
-        LOG.info(sb.toString());
+        StringBuilder sb = new StringBuilder(512);
+        List<Object> args = new ArrayList<Object>(16);
+
+        sb.append("{}Folder Properties & Folder Cache Properties:{}");
+        args.add(Strings.getLineSeparator());
+        args.add(Strings.getLineSeparator());
+
+        sb.append("    ENABLE_SHARED_FOLDER_CACHING={}{}");
+        args.add(enableSharedFolderCaching);
+        args.add(Strings.getLineSeparator());
+
+        sb.append("    ENABLE_DB_GROUPING={}{}");
+        args.add(enableDBGrouping);
+        args.add(Strings.getLineSeparator());
+
+        sb.append("    ENABLE_FOLDER_CACHE={}{}");
+        args.add(enableFolderCache);
+        args.add(Strings.getLineSeparator());
+
+        sb.append("   ENABLE_INTERNAL_USER_EDIT={}{}");
+        args.add(enableInternalUsersEdit);
+        args.add(Strings.getLineSeparator());
+
+        /*-
+         *
+        sb.append("\tIGNORE_SHARED_ADDRESSBOOK={}{}");
+        args.add(ignoreSharedAddressbook);
+        args.add(Strings.getLineSeparator());
+        */
+
+        LOG.info(sb.toString(), args.toArray(new Object[args.size()]));
     }
 
     private static final String WARN_FOLDER_PROPERTIES_INIT = "Folder properties have not been started.";
@@ -257,15 +283,16 @@ public final class OXFolderProperties implements Initialization, CacheAvailabili
         return instance.enableFolderCache;
     }
 
-    /**
+    /*-
+     *
      * @return <code>true</code> if shared address book should be omitted in folder tree display; otherwise <code>false</code>
-     */
     public static boolean isIgnoreSharedAddressbook() {
         if (!instance.started.get()) {
             LOG.error(WARN_FOLDER_PROPERTIES_INIT, new Throwable());
         }
         return instance.ignoreSharedAddressbook;
     }
+    */
 
     /**
      * Context's system folder "<code>Global address book</code>" is created with write permission set to

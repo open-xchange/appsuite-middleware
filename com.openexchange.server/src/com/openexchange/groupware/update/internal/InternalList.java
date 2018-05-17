@@ -666,6 +666,9 @@ public final class InternalList {
         // Removes any duplicate entries from the updateTask table
         list.add(new com.openexchange.groupware.update.tasks.RemoveDuplicatesFromUpdateTaskTable());
 
+        // Drops the unused "Shared address book" from database
+        list.add(new com.openexchange.groupware.update.tasks.DropUnusedSharedAddressBookFolder());
+
         return list.toArray(new UpdateTaskV2[list.size()]);
     }
 

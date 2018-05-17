@@ -1800,9 +1800,8 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage,
                 ConfigurationService configurationService = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
                 boolean applyParentPermissions = configurationService.getBoolProperty("com.openexchange.folderstorage.inheritParentPermissions", false);
                 if (applyParentPermissions && isInPublicTree(folder.getParentID(), context, con, storageParameters)) {
-                    FolderObject destFolder = getFolderObject(folderId, context, con, storageParameters);
-                    FolderObject parent = getFolderObject(destFolder.getParentFolderID(), context, con, storageParameters);
-                    inheritPublicFolderPermissions(destFolder, parent, context, con, storageParameters, folderManager, millis);
+                    FolderObject parent = getFolderObject(updateMe.getParentFolderID(), context, con, storageParameters);
+                    inheritPublicFolderPermissions(updateMe, parent, context, con, storageParameters, folderManager, millis);
                 }
             }
             folderManager.updateFolder(updateMe, true, StorageParametersUtility.isHandDownPermissions(storageParameters), millis.getTime());
