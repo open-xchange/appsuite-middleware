@@ -189,7 +189,7 @@ public class GetAttachmentActionTest {
         assertEquals("Wrong format", "file", ajaxRequestData.getFormat());
         assertEquals("Wrong caching value", false, ajaxRequestData.getParameter("cache", boolean.class));
         assertTrue("Wrong class", IFileHolder.class.isInstance(object));
-        assertEquals("Wrong content type", "text/html", ((IFileHolder) object).getContentType());
+        assertEquals("Wrong content type", "text/html; charset=ISO-8859-1", ((IFileHolder) object).getContentType());
     }
 
     @Test
