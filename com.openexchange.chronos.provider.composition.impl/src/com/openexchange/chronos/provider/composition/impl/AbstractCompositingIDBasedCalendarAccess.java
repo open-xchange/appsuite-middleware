@@ -345,7 +345,7 @@ public abstract class AbstractCompositingIDBasedCalendarAccess implements Transa
      * @param capability The targeted capability
      * @return The calendar accounts supporting the capability, or an empty list if there are none
      */
-    protected <T extends CalendarAccess> List<CalendarAccount> getAccounts(CalendarCapability capability) throws OXException {
+    protected List<CalendarAccount> getAccounts(CalendarCapability capability) throws OXException {
         List<CalendarAccount> accounts = new ArrayList<CalendarAccount>();
         for (CalendarAccount account : getAccounts()) {
             if (supports(account, capability)) {
@@ -669,10 +669,7 @@ public abstract class AbstractCompositingIDBasedCalendarAccess implements Transa
 
     @Override
     public String toString() {
-        return new StringBuilder("IDBasedCalendarAccess ")
-            .append("[user=").append(session.getUserId()).append(", context=").append(session.getContextId())
-            .append(", connectedAccesses=").append(connectedAccesses.keySet()).append(']')
-        .toString();
+        return new StringBuilder("IDBasedCalendarAccess ").append("[user=").append(session.getUserId()).append(", context=").append(session.getContextId()).append(", connectedAccesses=").append(connectedAccesses.keySet()).append(']').toString();
     }
 
 }
