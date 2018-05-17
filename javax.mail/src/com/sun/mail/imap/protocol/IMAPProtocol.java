@@ -65,6 +65,7 @@ import com.sun.mail.util.ASCIIUtility;
 import com.sun.mail.util.BASE64EncoderStream;
 import com.sun.mail.util.MailLogger;
 import com.sun.mail.util.PropUtil;
+import com.sun.mail.util.Reference;
 
 /**
  * This class extends the iap.Protocol object and implements IMAP
@@ -1337,13 +1338,29 @@ public class IMAPProtocol extends Protocol {
 		suspendTracing();
 	    }
 
-	    if (saslAuthenticator.authenticate(mechs, realm, authzid, u, p)) {
+	    Reference<Exception> optErrorRef = null;
+	    boolean saslAuthenticated;
+	    if (saslAuthenticator instanceof SaslAuthenticatorWithReference) {
+	        optErrorRef = new Reference<Exception>(null);
+            saslAuthenticated = ((SaslAuthenticatorWithReference) saslAuthenticator)
+                .authenticate(mechs, realm, authzid, u, p, optErrorRef);
+        } else {
+            saslAuthenticated = saslAuthenticator.authenticate(mechs, realm, authzid, u, p);
+        }
+
+	    if (saslAuthenticated) {
 		if (noauthdebug && isTracing())
 		    logger.fine("SASL authentication succeeded");
 		authenticated = true;
 	    } else {
 		if (noauthdebug && isTracing())
 		    logger.fine("SASL authentication failed");
+		Exception e = null == optErrorRef ? null : optErrorRef.getValue();
+		if (null == e) {
+            e = new Exception("SASL authentication failed");
+        }
+		Response r = Response.byeResponse(e);
+		handleLoginResult(r);
 	    }
 	} finally {
 	    resumeTracing();
