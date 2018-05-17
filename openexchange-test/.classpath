@@ -195,6 +195,5 @@
 	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/joda-time-2.9.9.jar"/>
 	<classpathentry kind="lib" path="/org.apache.tika/lib/tika-core-1.18.jar" sourcepath="/org.apache.tika/lib/source/tika-core-1.18-sources.jar"/>
 	<classpathentry kind="lib" path="/org.apache.tika/lib/tika-parsers-1.18.jar" sourcepath="/org.apache.tika/lib/source/tika-parsers-1.18-sources.jar"/>
-	<classpathentry kind="lib" path="/com.openexchange.xerces/lib/xerces2-xsd11-2.11.2.jar" sourcepath="/com.openexchange.xerces/lib/source/xerces2-xsd11-2.11.2-sources.jar"/>
 	<classpathentry kind="output" path="build"/>
 </classpath>
