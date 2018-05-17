@@ -663,9 +663,9 @@ public final class OXFolderAdminHelper {
         if (!checkFolderExistence(cid, FolderObject.SYSTEM_INFOSTORE_FOLDER_ID, writeCon)) {
             createSystemInfostoreFolder(cid, mailAdmin, writeCon, creatingTime);
         }
-        /*
+        /*-
          * Insert system system_global folder aka 'Shared Address Book'
-         */
+         *
         systemPermission.setAllPermission(CREATE_SUB_FOLDERS, ADMIN_PERMISSION, ADMIN_PERMISSION, ADMIN_PERMISSION);
         systemPermission.setFolderAdmin(false);
         createSystemFolder(
@@ -680,6 +680,7 @@ public final class OXFolderAdminHelper {
             true,
             cid,
             writeCon);
+        */
         /*
          * Insert system internal users folder aka 'Global Address Book'
          */
@@ -757,9 +758,9 @@ public final class OXFolderAdminHelper {
             cid,
             writeCon);
          */
-        /*
+        /*-
          * Grant full access for 'Shared Address Book' to admin
-         */
+         *
         createSingleUserPermission(
             FolderObject.SYSTEM_GLOBAL_FOLDER_ID,
             mailAdmin,
@@ -767,6 +768,7 @@ public final class OXFolderAdminHelper {
             true,
             cid,
             writeCon);
+        */
         if (ADMIN_EDITABLE) {
             /*
              * Grant admin access for public infostore folder to admin

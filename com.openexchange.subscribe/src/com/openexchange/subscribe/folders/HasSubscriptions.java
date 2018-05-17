@@ -74,7 +74,7 @@ public class HasSubscriptions implements AdditionalFolderField {
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(HasSubscriptions.class);
 
     private static final Set<String> ID_BLACKLIST = ImmutableSet.of(
-        String.valueOf(FolderObject.SYSTEM_GLOBAL_FOLDER_ID),
+        /*String.valueOf(FolderObject.SYSTEM_GLOBAL_FOLDER_ID),*/ // finally dropped
         String.valueOf(FolderObject.SYSTEM_LDAP_FOLDER_ID),
         String.valueOf(FolderObject.SYSTEM_PRIVATE_FOLDER_ID),
         String.valueOf(FolderObject.SYSTEM_PUBLIC_FOLDER_ID),
