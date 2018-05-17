@@ -8,8 +8,7 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ClassPath: lib/org.eclipse.wst.xml.xpath2.processor-2.1.100.jar,
  lib/xerces2-xsd11-2.11.2.jar,
  lib/xml-apis-1.4.01.jar,
- lib/xml-resolver-1.2.jar,
- lib/xercesImpl.jar
+ lib/xml-resolver-1.2.jar
 Eclipse-BuddyPolicy: registered
 Export-Package: org.apache.xerces.dom,
  org.apache.xerces.impl,
