@@ -160,7 +160,7 @@ public class ITipHandler implements CalendarHandler {
         }
     }
 
-    private boolean shouldHandle(CalendarEvent event) {
+    protected boolean shouldHandle(CalendarEvent event) {
         if (event == null || event.getAccountId() != CalendarAccount.DEFAULT_ACCOUNT.getAccountId()) {
             return false;
         }

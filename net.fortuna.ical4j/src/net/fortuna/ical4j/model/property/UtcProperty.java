@@ -31,6 +31,7 @@
  */
 package net.fortuna.ical4j.model.property;
 
+import net.fortuna.ical4j.model.Date;
 import net.fortuna.ical4j.model.DateTime;
 import net.fortuna.ical4j.model.ParameterList;
 import net.fortuna.ical4j.model.PropertyFactory;
@@ -73,7 +74,8 @@ public abstract class UtcProperty extends DateProperty {
      * @return Returns the date-time.
      */
     public final DateTime getDateTime() {
-        return (DateTime) getDate();
+        Date date = getDate();
+        return date instanceof DateTime ? (DateTime) date : new DateTime(date.getTime());
     }
 
     /**

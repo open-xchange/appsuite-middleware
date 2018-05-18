@@ -80,7 +80,7 @@ public class RecursiveFileProvider implements IConfigurationFileProvider {
     @Override
     public List<File> readConfigurationFiles(DiffResult diffResult, File rootFolder, String[] fileExtension) {
         // read all file types and not those in ConfigurationFileTypes.CONFIGURATION_FILE_TYPE to get unexpected files
-        Collection<File> listFiles = FileUtils.listFiles(rootFolder, null, true);
+        Collection<File> listFiles = FileUtils.listFiles(rootFolder, fileExtension, true);
 
         if (listFiles != null) {
             return Collections.synchronizedList(new ArrayList<File>(listFiles));
