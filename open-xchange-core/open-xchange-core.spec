@@ -535,6 +535,9 @@ EOF
     ox_add_property html.style.-webkit-box-sizing '"border-box"' ${whlipr}
     ox_add_property html.style.-moz-box-sizing '"border-box"' ${whlipr}
 
+    # SoftwareChange_Request-175
+    ox_add_property com.openexchange.server.migrationRedirectURL "" /opt/open-xchange/etc/server.properties
+
 fi
 
 PROTECT=( autoconfig.properties configdb.properties hazelcast.properties jolokia.properties mail.properties mail-push.properties management.properties secret.properties secrets server.properties sessiond.properties share.properties tokenlogin-secrets )
