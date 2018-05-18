@@ -175,7 +175,7 @@ public class ITipChange {
             diff = new ITipEventUpdate(currentEvent, newEvent, true, AbstractITipAnalyzer.SKIP);
         }
 
-        if (isException && master != null && newEvent != null && type == Type.CREATE) {
+        if (isException && master != null && newEvent != null && newEvent.getRecurrenceId() != null && newEvent.getRecurrenceId().getValue() != null && type == Type.CREATE) {
             RecurrenceService recurrenceService = Services.getService(RecurrenceService.class);
             Calendar recurrenceId = GregorianCalendar.getInstance(newEvent.getRecurrenceId().getValue().getTimeZone());
             recurrenceId.setTimeInMillis(newEvent.getRecurrenceId().getValue().getTimestamp());

@@ -49,7 +49,6 @@
 
 package com.openexchange.chronos.itip.json.action;
 
-import java.util.Collection;
 import java.util.Map;
 import com.google.common.collect.ImmutableMap;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
@@ -81,11 +80,6 @@ public class ITipActionFactory implements AJAXActionServiceFactory {
         }
 
         this.actions = actions.build();
-    }
-
-    @Override
-    public Collection<?> getSupportedServices() {
-        return java.util.Collections.unmodifiableCollection(actions.values());
     }
 
     @Override

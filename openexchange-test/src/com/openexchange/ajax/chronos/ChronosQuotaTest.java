@@ -95,8 +95,6 @@ public class ChronosQuotaTest extends AbstractChronosTest {
     public void setUp() throws Exception {
         super.setUp();
 
-        getApiClient().login(testUser.getLogin(), testUser.getPassword());
-
         Map<String, String> userAttributes = new HashMap<>(1);
         userAttributes.put("com.openexchange.quota.calendar", "0");
         setQuota(userAttributes);

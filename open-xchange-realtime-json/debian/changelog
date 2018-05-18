@@ -1,3 +1,15 @@
+open-xchange-realtime-json (7.10.0-5) stable; urgency=medium
+
+  * Fifth preview of 7.10.0 release
+
+ -- Steffen Templin <steffen.templin@open-xchange.com>  Thu, 19 Apr 2018 15:17:47 +0200
+
+open-xchange-realtime-json (7.10.0-4) stable; urgency=medium
+
+  * Fourth preview of 7.10.0 release
+
+ -- Steffen Templin <steffen.templin@open-xchange.com>  Tue, 03 Apr 2018 12:58:16 +0200
+
 open-xchange-realtime-json (7.10.0-3) stable; urgency=medium
 
   * Third preview of 7.10.0 release

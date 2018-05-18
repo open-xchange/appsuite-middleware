@@ -65,9 +65,10 @@ public interface PushSubscriptionRegistry extends PushSubscriptionProvider {
      * Registers specified subscription.
      *
      * @param subscription The subscription to register
+     * @return The subscription result
      * @throws OXException If registration fails
      */
-    void registerSubscription(PushSubscription subscription) throws OXException;
+    PushSubscriptionResult registerSubscription(PushSubscription subscription) throws OXException;
 
     /**
      * Unregisters specified subscription.

@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the Open-Xchange, Inc. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2020 Open-Xchange, Inc.
+ *     Copyright (C) 2016-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -51,6 +51,7 @@ package com.openexchange.chronos.storage.rdb.legacy;
 
 import static com.openexchange.chronos.common.AlarmUtils.filter;
 import static com.openexchange.chronos.common.AlarmUtils.findAlarm;
+import static com.openexchange.chronos.common.CalendarUtils.getFolderView;
 import static com.openexchange.chronos.common.CalendarUtils.isSeriesMaster;
 import static com.openexchange.groupware.tools.mappings.database.DefaultDbMapper.getParameters;
 import static com.openexchange.java.Autoboxing.I;
@@ -73,8 +74,7 @@ import java.util.concurrent.TimeUnit;
 import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.AlarmAction;
 import com.openexchange.chronos.AlarmTrigger;
-import com.openexchange.chronos.Attendee;
-import com.openexchange.chronos.CalendarUserType;
+import com.openexchange.chronos.DelegatingEvent;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.Trigger;
@@ -141,40 +141,45 @@ public class RdbAlarmTriggerStorage extends RdbStorage implements AlarmTriggerSt
                 return;
             }
         }
-        for (Entry<Integer, List<Alarm>> user : alarmsPerUserId.entrySet()) {
-            String userFolder = null;
-            int userId = user.getKey().intValue();
-            for(Attendee att : event.getAttendees()) {
-                if (att.getEntity() == userId && att.getCuType().equals(CalendarUserType.INDIVIDUAL)) {
-                    userFolder = att.getFolderId();
+        int updated = 0;
+        Connection connection = dbProvider.getWriteConnection(context);
+        try {
+            for (Entry<Integer, List<Alarm>> entry : alarmsPerUserId.entrySet()) {
+                int userId = i(entry.getKey());
+                String folderView = getFolderView(event, userId);
+                if (false == folderView.equals(event.getFolderId())) {
+                    Event userizedEvent = new DelegatingEvent(event) {
+
+                        @Override
+                        public String getFolderId() {
+                            return folderView;
+                        }
+
+                        @Override
+                        public boolean containsFolderId() {
+                            return true;
+                        }
+                    };
+                    updated += insertReminder(connection, userizedEvent, userId, entry.getValue());
+                } else {
+                    updated += insertReminder(connection, event, userId, entry.getValue());
                 }
             }
-            List<Alarm> alarms = user.getValue();
-            if (alarms == null || alarms.isEmpty()) {
-                // Skip user in case no alarms are available
-                continue;
-            }
-
-            Connection con = dbProvider.getWriteConnection(context);
-            int updated = 0;
-            try {
-                updated = insertReminder(con, event, userId, alarms, userFolder);
-            } catch (SQLException e) {
-                throw asOXException(e);
-            } finally {
-                release(con, updated);
-            }
+        } catch (SQLException e) {
+            throw asOXException(e);
+        } finally {
+            release(connection, updated);
         }
     }
 
-    private int insertReminder(Connection connection, Event event, int userID, List<Alarm> alarms, String userFolder) throws OXException, SQLException {
+    private int insertReminder(Connection connection, Event event, int userID, List<Alarm> alarms) throws OXException, SQLException {
         ReminderData reminder = getNextReminder(event, userID, alarms, null);
         if (null == reminder) {
             return 0;
         }
         int updated = 0;
         ReminderData originalReminder = selectReminder(connection, context.getContextId(), asInt(event.getId()), userID);
-        if (null == originalReminder) {
+        if (null == originalReminder || 0 == originalReminder.id) {
             updated += insertReminder(connection, context.getContextId(), event, userID, reminder);
         } else {
             ReminderData updatedReminder = getNextReminder(event, userID, alarms, originalReminder);
@@ -183,7 +188,7 @@ public class RdbAlarmTriggerStorage extends RdbStorage implements AlarmTriggerSt
                 updated += deleteReminderTriggers(connection, context.getContextId(), asInt(event.getId()), new int[] { userID });
             } else {
                 updated += updateReminderMinutes(connection, context.getContextId(), event, userID, updatedReminder.reminderMinutes);
-                updated += updateReminderTrigger(connection, context.getContextId(), event, userID, updatedReminder.nextTriggerTime, userFolder);
+                updated += updateReminderTrigger(connection, context.getContextId(), event, userID, updatedReminder.nextTriggerTime);
             }
         }
         return updated;
@@ -508,7 +513,7 @@ public class RdbAlarmTriggerStorage extends RdbStorage implements AlarmTriggerSt
         return triggers;
     }
 
-    private static ReminderData selectReminder(Connection connection, int contextID, int eventID, int userID) throws SQLException, OXException {
+    private static ReminderData selectReminder(Connection connection, int contextID, int eventID, int userID) throws SQLException {
         String sql = new StringBuilder().append("SELECT m.reminder,r.object_id,r.alarm,r.last_modified FROM prg_dates_members AS m ").append("LEFT JOIN reminder AS r ON m.cid=r.cid AND m.member_uid=r.userid AND m.object_id=r.target_id ").append("WHERE m.cid=? AND m.member_uid=? AND m.object_id=?;").toString();
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
             int parameterIndex = 1;
@@ -598,7 +603,7 @@ public class RdbAlarmTriggerStorage extends RdbStorage implements AlarmTriggerSt
         }
     }
 
-    private static int updateReminderTrigger(Connection connection, int contextID, Event event, int userID, long triggerTime, String userFolder) throws SQLException {
+    private static int updateReminderTrigger(Connection connection, int contextID, Event event, int userID, long triggerTime) throws SQLException {
         String sql = "INSERT INTO reminder (cid,object_id,last_modified,target_id,module,userid,alarm,recurrence,folder) VALUES (?,?,?,?,?,?,?,?,?) " + "ON DUPLICATE KEY UPDATE last_modified=?,alarm=?,recurrence=?,folder=?;";
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
             stmt.setInt(1, contextID);
@@ -609,11 +614,11 @@ public class RdbAlarmTriggerStorage extends RdbStorage implements AlarmTriggerSt
             stmt.setInt(6, userID);
             stmt.setTimestamp(7, new Timestamp(triggerTime));
             stmt.setInt(8, isSeriesMaster(event) ? 1 : 0);
-            stmt.setInt(9, asInt(event.getFolderId()==null ? userFolder : event.getFolderId()));
+            stmt.setInt(9, asInt(event.getFolderId()));
             stmt.setLong(10, System.currentTimeMillis());
             stmt.setTimestamp(11, new Timestamp(triggerTime));
             stmt.setInt(12, isSeriesMaster(event) ? 1 : 0);
-            stmt.setInt(13, asInt(event.getFolderId()==null ? userFolder : event.getFolderId()));
+            stmt.setInt(13, asInt(event.getFolderId()));
             return logExecuteUpdate(stmt);
         }
     }

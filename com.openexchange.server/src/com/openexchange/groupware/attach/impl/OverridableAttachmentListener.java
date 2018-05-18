@@ -72,12 +72,14 @@ public class OverridableAttachmentListener implements AttachmentListener {
 
     @Override
     public long attached(AttachmentEvent e) throws Exception {
-        return getDelegate(e).attached(e);
+        AttachmentListener delegate = getDelegate(e);
+        return delegate == null ? -1 : delegate.attached(e);
     }
 
     @Override
     public long detached(AttachmentEvent e) throws Exception {
-        return getDelegate(e).detached(e);
+        AttachmentListener delegate = getDelegate(e);
+        return delegate == null ? -1 : delegate.detached(e);
     }
 
     private AttachmentListener getDelegate(AttachmentEvent e) throws OXException {

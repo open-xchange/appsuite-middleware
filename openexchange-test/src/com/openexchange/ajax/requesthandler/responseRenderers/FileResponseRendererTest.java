@@ -118,6 +118,7 @@ public class FileResponseRendererTest {
         final SimConfigurationService simConfigurationService = new SimConfigurationService();
         simConfigurationService.stringProperties.put("UPLOAD_DIRECTORY", "/tmp/");
         ServerServiceRegistry.getInstance().addService(ConfigurationService.class, simConfigurationService);
+        AJAXConfig.init();
     }
 
     @After

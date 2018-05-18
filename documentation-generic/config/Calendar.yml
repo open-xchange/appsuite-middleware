@@ -167,6 +167,17 @@ properties:
       file: calendar.properties
       packageName: open-xchange-core
       tags: ["Calendar","Database"]
+    - key: com.openexchange.calendar.migration.purgeLegacyData
+      description: |
+        Manually activates an update task for purging legacy data after the calendar migration took place.  
+      defaultValue: false
+      version: 7.10.0
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: calendar.properties
+      packageName: open-xchange-core
+      tags: ["Calendar","Database"]
     - key: com.openexchange.calendar.resolveGroupAttendees
       description: |
          Defines whether newly added group attendees should be resolved to their individual members implicitly, without preserving the group reference, or not. 

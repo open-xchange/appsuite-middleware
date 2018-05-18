@@ -49,31 +49,23 @@
 
 package com.openexchange.chronos.json.action;
 
+import static com.openexchange.chronos.common.CalendarUtils.getMaximumTimestamp;
 import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_FIELDS;
 import static com.openexchange.tools.arrays.Collections.unmodifiableSet;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import org.json.JSONArray;
-import org.json.JSONException;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.chronos.json.converter.MultipleCalendarResultConverter;
+import com.openexchange.chronos.json.converter.CalendarResultsPerEventIdConverter;
 import com.openexchange.chronos.json.oauth.ChronosOAuthScope;
 import com.openexchange.chronos.provider.composition.IDBasedCalendarAccess;
-import com.openexchange.chronos.service.CalendarResult;
-import com.openexchange.chronos.service.CreateResult;
-import com.openexchange.chronos.service.DeleteResult;
+import com.openexchange.chronos.service.ErrorAwareCalendarResult;
 import com.openexchange.chronos.service.EventID;
-import com.openexchange.chronos.service.UpdateResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.oauth.provider.resourceserver.annotations.OAuthAction;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.session.Session;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
-import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 
 /**
  * {@link DeleteAction}
@@ -102,95 +94,12 @@ public class DeleteAction extends ChronosAction {
 
     @Override
     protected AJAXRequestResult perform(IDBasedCalendarAccess calendarAccess, AJAXRequestData requestData) throws OXException {
-        long clientTimestamp = parseClientTimestamp(requestData);
         Object data = requestData.getData();
         if (data == null || !(data instanceof JSONArray)) {
             throw AjaxExceptionCodes.ILLEGAL_REQUEST_BODY.create();
         }
-        JSONArray ids = (JSONArray) data;
-        try {
-            List<EventID> eventIDs = new ArrayList<>(ids.length());
-            for (int x = 0; x < ids.length(); x++) {
-                eventIDs.add(parseIdParameter(ids.getJSONObject(x)));
-            }
-
-            List<CalendarResult> results = new ArrayList<>();
-            for (EventID id : eventIDs) {
-                try {
-                    results.add(calendarAccess.deleteEvent(id, clientTimestamp));
-                } catch (OXException e) {
-                    results.add(new ErrorAwareCalendarResult(e, requestData.getSession().getUserId(), id, requestData.getSession()));
-                }
-            }
-
-            long timestamp = 0L;
-            for (CalendarResult result : results) {
-                timestamp = Math.max(timestamp, result.getTimestamp());
-            }
-            return new AJAXRequestResult(results, new Date(timestamp), MultipleCalendarResultConverter.INPUT_FORMAT);
-        } catch (JSONException e) {
-            throw OXJSONExceptionCodes.JSON_READ_ERROR.create(e, e.getMessage());
-        }
-    }
-
-    public static class ErrorAwareCalendarResult implements CalendarResult {
-
-        private final OXException error;
-        private final EventID id;
-        private final Session session;
-        private final int user;
-
-        public ErrorAwareCalendarResult(OXException error, int calUser, EventID id, Session session){
-            this.error = error;
-            this.id = id;
-            this.session = session;
-            user = calUser;
-        }
-
-        public OXException getError() {
-            return error;
-        }
-
-        public EventID getId() {
-            return id;
-        }
-
-        @Override
-        public long getTimestamp() {
-            return 0l;
-        }
-
-        @Override
-        public Session getSession() {
-            return session;
-        }
-
-        @Override
-        public int getCalendarUser() {
-           return user;
-        }
-
-        @Override
-        public String getFolderID() {
-            return id.getFolderID();
-        }
-
-        @Override
-        public List<DeleteResult> getDeletions() {
-            return Collections.emptyList();
-        }
-
-        @Override
-        public List<UpdateResult> getUpdates() {
-            return Collections.emptyList();
-        }
-
-        @Override
-        public List<CreateResult> getCreations() {
-            return Collections.emptyList();
-        }
-
-
+        Map<EventID, ErrorAwareCalendarResult> results = calendarAccess.deleteEvents(parseEventIDs((JSONArray) data), parseClientTimestamp(requestData));
+        return new AJAXRequestResult(results, getMaximumTimestamp(results), CalendarResultsPerEventIdConverter.INPUT_FORMAT);
     }
 
 }

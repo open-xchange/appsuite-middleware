@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the Open-Xchange, Inc. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2020 Open-Xchange, Inc.
+ *     Copyright (C) 2016-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -167,7 +167,7 @@ public class CalendarUtils {
     private static final Set<EventField> DEFAULT_FIELDS = Collections.unmodifiableSet(EnumSet.copyOf(Arrays.asList(
         EventField.ID, EventField.SERIES_ID, EventField.FOLDER_ID, EventField.RECURRENCE_ID, EventField.TIMESTAMP, EventField.CREATED_BY,
         EventField.CALENDAR_USER, EventField.CLASSIFICATION, EventField.START_DATE, EventField.END_DATE, EventField.RECURRENCE_RULE,
-        EventField.CHANGE_EXCEPTION_DATES, EventField.DELETE_EXCEPTION_DATES, EventField.ORGANIZER
+        EventField.CHANGE_EXCEPTION_DATES, EventField.DELETE_EXCEPTION_DATES, EventField.RECURRENCE_DATES, EventField.ORGANIZER
     )));
 
     /** A collection of identifying meta fields */
@@ -319,17 +319,21 @@ public class CalendarUtils {
     }
 
     /**
-     * Gets a value indicating whether one calendar user equals another, by comparing all properties of the calendar users.
+     * Gets a value indicating whether one calendar user equals another, by comparing all properties of the calendar users, after the
+     * identifying properties (<i>entity</i> and <i>uri</i>) do match based on {@link #matches(CalendarUser, CalendarUser)}.
      *
      * @param user1 The first calendar user to check
      * @param user2 The second calendar user to check
-     * @return <code>true</code> if the objects are <i>equal</i>, i.e. all properties are equal in both user references, <code>false</code>, otherwise
+     * @return <code>true</code> if the objects are <i>equal</i>, i.e. the users match and all further properties are equal in both user references, <code>false</code>, otherwise
      */
     public static boolean equals(CalendarUser user1, CalendarUser user2) {
         if (null == user1) {
             return null == user2;
         }
         if (null == user2) {
+            return false;
+        }
+        if (false == matches(user1, user2)) {
             return false;
         }
         if (user1.getCn() == null) {
@@ -346,21 +350,11 @@ public class CalendarUtils {
         } else if (!user1.getEMail().equals(user2.getEMail())) {
             return false;
         }
-        if (user1.getEntity() != user2.getEntity()) {
-            return false;
-        }
         if (user1.getSentBy() == null) {
             if (user2.getSentBy() != null) {
                 return false;
             }
         } else if (!user1.getSentBy().equals(user2.getSentBy())) {
-            return false;
-        }
-        if (user1.getUri() == null) {
-            if (user2.getUri() != null) {
-                return false;
-            }
-        } else if (!user1.getUri().equals(user2.getUri())) {
             return false;
         }
         return true;
@@ -419,7 +413,7 @@ public class CalendarUtils {
      * @return <code>true</code> if the attendee is internal, <code>false</code>, otherwise
      */
     public static boolean isInternalUser(Attendee attendee) {
-        return null != attendee && CalendarUserType.INDIVIDUAL.equals(attendee.getCuType()) && attendee.getEntity() > 0;
+        return null != attendee && CalendarUserType.INDIVIDUAL.matches(attendee.getCuType()) && attendee.getEntity() > 0;
     }
 
     /**
@@ -429,7 +423,7 @@ public class CalendarUtils {
      * @return <code>true</code> if the attendee is internal, <code>false</code>, otherwise
      */
     public static boolean isExternalUser(Attendee attendee) {
-        return null != attendee && CalendarUserType.INDIVIDUAL.equals(attendee.getCuType()) && attendee.getEntity() <= 0;
+        return null != attendee && CalendarUserType.INDIVIDUAL.matches(attendee.getCuType()) && attendee.getEntity() <= 0;
     }
 
     /**
@@ -600,6 +594,22 @@ public class CalendarUtils {
         for (Event event : events) {
             if (null != event) {
                 maximumTimestamp = Math.max(maximumTimestamp, event.getTimestamp());
+            }
+        }
+        return Integer.MIN_VALUE == maximumTimestamp ? null : new Date(maximumTimestamp);
+    }
+
+    /**
+     * Gets the maximum timestamp of a map containing multiple timestamped results.
+     *
+     * @param results The results to get the maximum timestamp from
+     * @return The maximum timestamp as {@link Date}, or <code>null</code> if all values in the supplied map were <code>null</code> or empty
+     */
+    public static <K, V extends TimestampedResult> Date getMaximumTimestamp(Map<K, V> results) {
+        long maximumTimestamp = Integer.MIN_VALUE;
+        if (null != results && 0 < results.size()) {
+            for (TimestampedResult result : results.values()) {
+                maximumTimestamp = Math.max(maximumTimestamp, result.getTimestamp());
             }
         }
         return Integer.MIN_VALUE == maximumTimestamp ? null : new Date(maximumTimestamp);
@@ -925,13 +935,15 @@ public class CalendarUtils {
             int days = 0;
             if (dateTime1.before(dateTime2)) {
                 Duration ONE_DAY_MORE = new Duration(1, 1, 0);
-                for (DateTime current = dateTime1; false == current.equals(dateTime2); current = current.addDuration(ONE_DAY_MORE), days++)
+                for (DateTime current = dateTime1; false == current.equals(dateTime2); current = current.addDuration(ONE_DAY_MORE), days++) {
                     ;
+                }
             }
             if (dateTime1.after(dateTime2)) {
                 Duration ONE_DAY_LESS = new Duration(-1, 1, 0);
-                for (DateTime current = dateTime1; false == current.equals(dateTime2); current = current.addDuration(ONE_DAY_LESS), days--)
+                for (DateTime current = dateTime1; false == current.equals(dateTime2); current = current.addDuration(ONE_DAY_LESS), days--) {
                     ;
+                }
             }
             return new Duration(days >= 0 ? 1 : -1, Math.abs(days), 0);
         }
@@ -979,13 +991,15 @@ public class CalendarUtils {
             DateTime value = originalRecurrenceId.getValue();
             if (originalSeriesStart.before(updatedSeriesStart)) {
                 Duration ONE_DAY_MORE = new Duration(1, 1, 0);
-                for (DateTime current = originalSeriesStart; false == current.equals(updatedSeriesStart); current = current.addDuration(ONE_DAY_MORE), value = value.addDuration(ONE_DAY_MORE))
+                for (DateTime current = originalSeriesStart; false == current.equals(updatedSeriesStart); current = current.addDuration(ONE_DAY_MORE), value = value.addDuration(ONE_DAY_MORE)) {
                     ;
+                }
             }
             if (originalSeriesStart.after(updatedSeriesStart)) {
                 Duration ONE_DAY_LESS = new Duration(-1, 1, 0);
-                for (DateTime current = originalSeriesStart; false == current.equals(updatedSeriesStart); current = current.addDuration(ONE_DAY_LESS), value = value.addDuration(ONE_DAY_LESS))
+                for (DateTime current = originalSeriesStart; false == current.equals(updatedSeriesStart); current = current.addDuration(ONE_DAY_LESS), value = value.addDuration(ONE_DAY_LESS)) {
                     ;
+                }
             }
             return new DefaultRecurrenceId(value);
         }
@@ -1615,7 +1629,21 @@ public class CalendarUtils {
      * @return The collection update
      */
     public static AbstractCollectionUpdate<Attendee, AttendeeField> getAttendeeUpdates(List<Attendee> originalAttendees, List<Attendee> updatedAttendees) throws OXException {
-        return new AbstractCollectionUpdate<Attendee, AttendeeField>(AttendeeMapper.getInstance(), originalAttendees, updatedAttendees) {
+        return getAttendeeUpdates(originalAttendees, updatedAttendees, true, (AttendeeField[]) null);
+    }
+
+    /**
+     * Initializes a new attendee collection update based on the supplied original and updated attendee lists.
+     *
+     * @param originalAttendees The original attendees
+     * @param updatedAttendees The updated attendees
+     * @param considerUnset <code>true</code> to also consider comparison with not <i>set</i> fields of the original, <code>false</code>, otherwise
+     * @param ignoredFields Fields to ignore when determining the differences between updated items
+     * @return The collection update
+     * @throws OXException In case mapping fails
+     */
+    public static AbstractCollectionUpdate<Attendee, AttendeeField> getAttendeeUpdates(List<Attendee> originalAttendees, List<Attendee> updatedAttendees, boolean considerUnset, AttendeeField... ignoredFields) throws OXException {
+        return new AbstractCollectionUpdate<Attendee, AttendeeField>(AttendeeMapper.getInstance(), originalAttendees, updatedAttendees, considerUnset, ignoredFields) {
 
             @Override
             protected boolean matches(Attendee item1, Attendee item2) {
@@ -1885,7 +1913,7 @@ public class CalendarUtils {
     /**
      * Prepends the default account to the given folder id if this is a plain numeric folder id.
      *
-     * @param folderId
+     * @param folderId The folder identifier
      * @return The folder id with the default account as absolute identifier.
      */
     public static String prependDefaultAccount(String folderId) {

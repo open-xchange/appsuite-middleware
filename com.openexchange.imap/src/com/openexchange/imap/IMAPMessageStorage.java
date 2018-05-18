@@ -927,6 +927,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
         return map;
     }
 
+    @SuppressWarnings("unused")
     @Override
     public MailMessage[] getMessagesByMessageID(final String... messageIDs) throws OXException {
         try {
@@ -3308,7 +3309,12 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                     }
                 } catch (final MessagingException e) {
                     if (MimeMailException.isOverQuotaException(e)) {
-                        throw MailExceptionCode.COPY_TO_SENT_FOLDER_FAILED_QUOTA.create(e, new Object[0]);
+                        // Special handling for over-quota error
+                        String sentFullname = imapAccess.getFolderStorage().getSentFolder();
+                        if (null != sentFullname && sentFullname.equals(destFullName)) {
+                            throw MailExceptionCode.COPY_TO_SENT_FOLDER_FAILED_QUOTA.create(e, new Object[0]);
+                        }
+                        throw MimeMailException.handleMessagingException(e, imapConfig, session);
                     }
 
                     OXException oxe = handleMessagingException(destFullName, e);
@@ -3500,7 +3506,12 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                     }
                 } catch (final MessagingException e) {
                     if (MimeMailException.isOverQuotaException(e)) {
-                        throw MailExceptionCode.COPY_TO_SENT_FOLDER_FAILED_QUOTA.create(e, new Object[0]);
+                        // Special handling for over-quota error
+                        String sentFullname = imapAccess.getFolderStorage().getSentFolder();
+                        if (null != sentFullname && sentFullname.equals(destFullName)) {
+                            throw MailExceptionCode.COPY_TO_SENT_FOLDER_FAILED_QUOTA.create(e, new Object[0]);
+                        }
+                        throw MimeMailException.handleMessagingException(e, imapConfig, session);
                     }
 
                     OXException oxe = handleMessagingException(destFullName, e);
@@ -4158,7 +4169,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                      */
                     uid = appendMessagesLong(draftFullName, new MailMessage[] { MimeMessageConverter.convertMessage(mimeMessage, false) })[0];
                 } catch (OXException ex) {
-                    if (MailExceptionCode.COPY_TO_SENT_FOLDER_FAILED_QUOTA.equals(ex)) {
+                    if (MailExceptionCode.COPY_TO_SENT_FOLDER_FAILED_QUOTA.equals(ex) || MimeMailExceptionCode.QUOTA_EXCEEDED.equals(ex)) {
                         throw MailExceptionCode.UNABLE_TO_SAVE_DRAFT_QUOTA.create();
                     }
                     throw ex;

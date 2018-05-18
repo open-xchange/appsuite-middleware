@@ -81,7 +81,7 @@ public enum SubscriptionErrorMessage implements DisplayableOXExceptionCode {
      */
     ParsingError(CATEGORY_ERROR, 6, SubscriptionErrorMessage.PARSING_ERROR),
     /**
-     * Could not find Subscription (according ID and Context).
+     * Cannot find the requested subscription.
      */
     SubscriptionNotFound(CATEGORY_USER_INPUT, 5, SubscriptionErrorMessage.CANT_FIND_SUBSCRIPTION, SubscriptionErrorStrings.CANT_FIND_SUBSCRIPTION_DISPLAY),
     /**

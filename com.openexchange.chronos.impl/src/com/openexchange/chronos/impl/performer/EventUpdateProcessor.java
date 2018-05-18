@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the Open-Xchange, Inc. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2020 Open-Xchange, Inc.
+ *     Copyright (C) 2016-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -73,12 +73,15 @@ import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import org.dmfs.rfc5545.DateTime;
 import org.dmfs.rfc5545.recur.RecurrenceRule;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.AlarmField;
 import com.openexchange.chronos.Attachment;
@@ -114,6 +117,7 @@ import com.openexchange.chronos.service.SimpleCollectionUpdate;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.type.PublicType;
 import com.openexchange.groupware.tools.mappings.Mapping;
+import com.openexchange.tools.arrays.Arrays;
 
 /**
  * {@link EventUpdateProcessor}
@@ -134,6 +138,8 @@ public class EventUpdateProcessor implements EventUpdate {
     private final Event deltaEvent;
     private final CollectionUpdate<Event, EventField> exceptionUpdates;
 
+    private static final Logger LOG = LoggerFactory.getLogger(EventUpdateProcessor.class);
+
     /**
      * Initializes a new {@link EventUpdateProcessor}.
      *
@@ -143,9 +149,10 @@ public class EventUpdateProcessor implements EventUpdate {
      * @param originalChangeExceptions The change exceptions of the original series event, or <code>null</code> if not applicable
      * @param updatedEvent The updated event, as passed by the client
      * @param timestamp The timestamp to apply in the updated event data
+     * @param consideredFields An optional list defining the <i>whitelist<i/> of event fields to consider during the update
      * @param ignoredFields Additional fields to ignore during the update
      */
-    public EventUpdateProcessor(CalendarSession session, CalendarFolder folder, Event originalEvent, List<Event> originalChangeExceptions, Event updatedEvent, Date timestamp, EventField... ignoredFields) throws OXException {
+    public EventUpdateProcessor(CalendarSession session, CalendarFolder folder, Event originalEvent, List<Event> originalChangeExceptions, Event updatedEvent, Date timestamp, EventField[] consideredFields, EventField... ignoredFields) throws OXException {
         super();
         this.session = session;
         this.folder = folder;
@@ -153,7 +160,7 @@ public class EventUpdateProcessor implements EventUpdate {
         /*
          * apply, check, adjust event update as needed
          */
-        Event changedEvent = apply(originalEvent, updatedEvent, ignoredFields);
+        Event changedEvent = apply(originalEvent, updatedEvent, consideredFields, ignoredFields);
         checkIntegrity(originalEvent, changedEvent);
         ensureConsistency(originalEvent, changedEvent, timestamp);
         List<Event> changedChangeExceptions = adjustExceptions(originalEvent, changedEvent, originalChangeExceptions);
@@ -296,11 +303,6 @@ public class EventUpdateProcessor implements EventUpdate {
             updatedEvent.setSeriesId(originalEvent.getId());
         }
         /*
-         * apply & take over attendee updates in changed event
-         */
-        List<Attendee> updatedAttendees = AttendeeHelper.onUpdatedEvent(session, folder, originalEvent.getAttendees(), updatedEvent.getAttendees()).previewChanges();
-        updatedEvent.setAttendees(AttendeeMapper.getInstance().copy(updatedAttendees, (AttendeeField[]) null));
-        /*
          * adjust attendee-dependent fields (ignore for change exceptions)
          */
         if (isSeriesException(originalEvent)) {
@@ -334,9 +336,9 @@ public class EventUpdateProcessor implements EventUpdate {
                 /*
                  * check validity
                  */
-                Check.classificationIsValid(updatedEvent.getClassification(), folder);
+                Check.classificationIsValid(updatedEvent.getClassification(), folder, updatedEvent.getAttendees());
                 /*
-                 * deny update for change exceptions (but ignore if effectively same classification) 
+                 * deny update for change exceptions (but ignore if effectively same classification)
                  */
                 //TODO: implement correct propagation of classification change to master and change exceptions;
                 //      requires to pass series information in event update processor of change exceptions
@@ -347,14 +349,33 @@ public class EventUpdateProcessor implements EventUpdate {
                         throw CalendarExceptionCodes.UNSUPPORTED_CLASSIFICATION_FOR_OCCURRENCE.create(
                             String.valueOf(updatedEvent.getClassification()), originalEvent.getSeriesId(), String.valueOf(originalEvent.getRecurrenceId()));
                     }
-                }                
+                }
+                break;
+            case ATTENDEES:
+                /*
+                 * (re-)check classification validity
+                 */
+                Check.classificationIsValid(updatedEvent.getClassification(), folder, updatedEvent.getAttendees());
                 break;
             case START_DATE:
             case END_DATE:
-                Check.startAndEndDate(updatedEvent);
+                Check.startAndEndDate(session, updatedEvent);
                 break;
             case RECURRENCE_RULE:
-                Check.recurrenceRuleIsValid(session.getRecurrenceService(), updatedEvent);
+                try {
+                    Check.recurrenceRuleIsValid(session.getRecurrenceService(), updatedEvent);
+                } catch (Exception e) {
+                    LOG.error("Invalid Recurrence Rule: {}, start: {}, end: {}", updatedEvent.getRecurrenceRule(), updatedEvent.getStartDate(), updatedEvent.getEndDate());
+                    throw CalendarExceptionCodes.FORBIDDEN_CHANGE.create(e, originalEvent.getId(), updatedField);
+                }
+                /*
+                 * ignore a 'matching' recurrence rule
+                 */
+                if (null != updatedEvent.getRecurrenceRule() && null != originalEvent.getRecurrenceRule() &&
+                    initRecurrenceRule(updatedEvent.getRecurrenceRule()).toString().equals(initRecurrenceRule(originalEvent.getRecurrenceRule()).toString())) {
+                    updatedEvent.setRecurrenceRule(originalEvent.getRecurrenceRule());
+                    break;
+                }
                 /*
                  * deny update for change exceptions (but ignore if set to 'null')
                  */
@@ -390,10 +411,11 @@ public class EventUpdateProcessor implements EventUpdate {
      *
      * @param originalEvent The original event being updated
      * @param updatedEvent The updated event, as passed by the client
+     * @param consideredFields An optional list defining the <i>whitelist<i/> of event fields to consider during the update
      * @param ignoredFields Optional event fields to ignore during the update
      * @return The changed event
      */
-    private Event apply(Event originalEvent, Event updatedEvent, EventField... ignoredFields) throws OXException {
+    private Event apply(Event originalEvent, Event updatedEvent, EventField[] consideredFields, EventField... ignoredFields) throws OXException {
         /*
          * determine relevant changes in passed event update
          */
@@ -401,6 +423,13 @@ public class EventUpdateProcessor implements EventUpdate {
         if (null != ignoredFields) {
             for (EventField ignoredField : ignoredFields) {
                 updatedFields.remove(ignoredField);
+            }
+        }
+        if (null != consideredFields) {
+            for (Iterator<EventField> iterator = updatedFields.iterator(); iterator.hasNext();) {
+                if (false == Arrays.contains(consideredFields, iterator.next())) {
+                    iterator.remove();
+                }
             }
         }
         /*
@@ -417,7 +446,15 @@ public class EventUpdateProcessor implements EventUpdate {
          */
         EventField[] changedFields = updatedFields.toArray(new EventField[updatedFields.size()]);
         Event changedEvent = EventMapper.getInstance().copy(originalEvent, null, (EventField[]) null);
-        return EventMapper.getInstance().copy(updatedEvent, changedEvent, changedFields);
+        changedEvent = EventMapper.getInstance().copy(updatedEvent, changedEvent, changedFields);
+        /*
+         * (virtually) apply & take over attendee updates in changed event
+         */
+        if (updatedFields.contains(EventField.ATTENDEES)) {
+            List<Attendee> updatedAttendees = AttendeeHelper.onUpdatedEvent(session, folder, originalEvent.getAttendees(), updatedEvent.getAttendees()).previewChanges();
+            changedEvent.setAttendees(AttendeeMapper.getInstance().copy(updatedAttendees, (AttendeeField[]) null));
+        }
+        return changedEvent;
     }
 
     /**
@@ -473,7 +510,7 @@ public class EventUpdateProcessor implements EventUpdate {
      * @param originalEvent The original event
      * @param updatedEvent The updated event
      */
-    private void adjustForNonGroupScheduled(Event originalEvent, Event updatedEvent) throws OXException {
+    private void adjustForNonGroupScheduled(Event originalEvent, Event updatedEvent) {
         /*
          * no group-scheduled event (any longer), ensure to take over common calendar folder & user, remove organizer
          */
@@ -644,7 +681,7 @@ public class EventUpdateProcessor implements EventUpdate {
      * @param changeExceptions The change exception events
      * @return The resulting list of (possibly adjusted) change exceptions
      */
-    private List<Event> adjustDeletedChangeExceptions(Event seriesMaster, List<Event> changeExceptions) throws OXException {
+    private List<Event> adjustDeletedChangeExceptions(Event seriesMaster, List<Event> changeExceptions) {
         if (false == isNullOrEmpty(seriesMaster.getDeleteExceptionDates())) {
             if (false == isNullOrEmpty(changeExceptions)) {
                 List<Event> newChangeExceptions = new ArrayList<Event>(changeExceptions);
@@ -713,16 +750,17 @@ public class EventUpdateProcessor implements EventUpdate {
 
     /**
      * Resets the participation status of all individual attendees - excluding the current calendar user - to
-     * {@link ParticipationStatus#NEEDS_ACTION} for a specific event.
+     * {@link ParticipationStatus#NEEDS_ACTION} for a specific event, including a previously set attendee comment.
      *
      * @param attendees The event's attendees
      */
-    private void resetParticipationStatus(List<Attendee> attendees) throws OXException {
+    private void resetParticipationStatus(List<Attendee> attendees) {
         for (Attendee attendee : CalendarUtils.filter(attendees, null, CalendarUserType.INDIVIDUAL)) {
-            if (calendarUser.getEntity() == attendee.getEntity() || ParticipationStatus.NEEDS_ACTION.equals(attendee.getPartStat())) {
+            if (calendarUser.getEntity() != attendee.getEntity()) {
+                attendee.setPartStat(ParticipationStatus.NEEDS_ACTION); //TODO: or reset to initial partstat based on folder type?
+                attendee.setComment(null);
                 continue;
             }
-            attendee.setPartStat(ParticipationStatus.NEEDS_ACTION); //TODO: or reset to initial partstat based on folder type?
         }
     }
 

@@ -221,7 +221,7 @@ public class InfostoreAdapterFileAccess extends InfostoreAccess implements FileS
         try {
             DocumentMetadata metadata;
             if (null == folderId) {
-                metadata = getInfostore(folderId).getDocumentMetadata(ID(id), null == version ? -1 : Utils.parseUnsignedInt(version), session);
+                metadata = getInfostore(folderId).getDocumentMetadata(-1, ID(id), null == version ? -1 : Utils.parseUnsignedInt(version), session);
             } else {
                 metadata = getInfostore(folderId).getDocumentMetadata(FOLDERID(folderId), ID(id), null == version ? -1 : Utils.parseUnsignedInt(version), session);
                 if (0 < metadata.getFolderId() && false == folderId.equals(Long.toString(metadata.getFolderId()))) {
@@ -244,7 +244,7 @@ public class InfostoreAdapterFileAccess extends InfostoreAccess implements FileS
         try {
             DocumentAndMetadata document;
             if (null == folderId) {
-                document = getInfostore(folderId).getDocumentAndMetadata(ID(id), null == version ? -1 : ID(version), clientETag, session);
+                document = getInfostore(folderId).getDocumentAndMetadata(-1, ID(id), null == version ? -1 : ID(version), clientETag, session);
             } else {
                 document = getInfostore(folderId).getDocumentAndMetadata(FOLDERID(folderId), ID(id), null == version ? -1 : ID(version), clientETag, session);
                 long documentFolderId = null != document.getMetadata() ? document.getMetadata().getFolderId() : 0;
@@ -465,7 +465,7 @@ public class InfostoreAdapterFileAccess extends InfostoreAccess implements FileS
     private void addOriginPathIfNecessary(File file, FileMetadata metadata) throws OXException {
         if (null == file.getOrigin() && FileStorageFileAccess.NEW != file.getId() && null != file.getFolderId() && isBelowTrashFolder(file.getFolderId(), null)) {
             // File is supposed to be moved to a Trash folder
-            DocumentMetadata loaded = getInfostore(null).getDocumentMetadata(metadata.getId(), metadata.getVersion(), session);
+            DocumentMetadata loaded = getInfostore(null).getDocumentMetadata(-1, metadata.getId(), metadata.getVersion(), session);
             if (loaded.getFolderId() != metadata.getFolderId()) {
                 InfostoreFolderPath originPath = generateOriginPathIfTrashed(Long.toString(loaded.getFolderId()), null, null);
                 if (null != originPath) {
@@ -481,7 +481,7 @@ public class InfostoreAdapterFileAccess extends InfostoreAccess implements FileS
             // File's folder is supposed to be changed and no origin path is set
             if (FileStorageFileAccess.NEW != file.getId() && null != file.getFolderId() && isBelowTrashFolder(file.getFolderId(), null)) {
                 // File is supposed to be moved to a Trash folder
-                DocumentMetadata loaded = getInfostore(null).getDocumentMetadata(metadata.getId(), metadata.getVersion(), session);
+                DocumentMetadata loaded = getInfostore(null).getDocumentMetadata(-1, metadata.getId(), metadata.getVersion(), session);
                 if (loaded.getFolderId() != metadata.getFolderId()) {
                     InfostoreFolderPath originPath = generateOriginPathIfTrashed(Long.toString(loaded.getFolderId()), null, null);
                     if (null != originPath) {
@@ -938,7 +938,7 @@ public class InfostoreAdapterFileAccess extends InfostoreAccess implements FileS
         if (size > 1) {
             SearchIterator<DocumentMetadata> iterator = null;
             try {
-                TimedResult<DocumentMetadata> documents = infostoreFacade.getDocuments(tuples, new Metadata[] { Metadata.ID_LITERAL, Metadata.ORIGIN_LITERAL}, session);
+                TimedResult<DocumentMetadata> documents = infostoreFacade.getDocuments(tuples, new Metadata[] { Metadata.ID_LITERAL, Metadata.ORIGIN_LITERAL, Metadata.FOLDER_ID_LITERAL }, session);
                 iterator = documents.results();
                 originPaths = new TIntObjectHashMap<>(size);
                 while (iterator.hasNext()) {

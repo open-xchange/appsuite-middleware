@@ -59,7 +59,6 @@ import java.io.Writer;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.regex.Pattern;
 import javax.xml.transform.OutputKeys;
 import javax.xml.transform.TransformerConfigurationException;
 import javax.xml.transform.TransformerFactory;
@@ -212,8 +211,6 @@ public final class TikaDocumentHandler {
             Streams.close(stream);
         }
     }
-
-    private static final Pattern PATTERN_EMBEDDED_IMAGE = Pattern.compile("(<img[^>]*?src=\")embedded:([^>\"]+)(\"[^>]*?>)");
 
     private static final EnumSet<PreviewOutput> HTML_ALIKE = EnumSet.of(PreviewOutput.HTML, PreviewOutput.XHTML);
 

@@ -118,7 +118,11 @@ public class JSONDocumentMetadata implements DocumentMetadata {
     @Override
     public void setLastModified(final Date now) {
         try {
-            jsonObject.put(Metadata.LAST_MODIFIED_LITERAL.getName(), now.getTime());
+            if (now != null) {
+                jsonObject.put(Metadata.LAST_MODIFIED_LITERAL.getName(), now.getTime());
+            } else {
+                jsonObject.remove(Metadata.LAST_MODIFIED_LITERAL.getName());
+            }
         } catch (final JSONException e) {
             LOG.error("",e);
         }
@@ -135,7 +139,11 @@ public class JSONDocumentMetadata implements DocumentMetadata {
     @Override
     public void setCreationDate(final Date creationDate) {
         try {
-            jsonObject.put(Metadata.CREATION_DATE_LITERAL.getName(), creationDate.getTime());
+            if (creationDate != null) {
+                jsonObject.put(Metadata.CREATION_DATE_LITERAL.getName(), creationDate.getTime());
+            } else {
+                jsonObject.remove(Metadata.CREATION_DATE_LITERAL.getName());
+            }
         } catch (final JSONException e) {
             LOG.error("",e);
         }
@@ -592,6 +600,7 @@ public class JSONDocumentMetadata implements DocumentMetadata {
         throw new UnsupportedOperationException();
     }
 
+    @Override
     public InfostoreFolderPath getOriginFolderPath() {
         throw new UnsupportedOperationException();
     }

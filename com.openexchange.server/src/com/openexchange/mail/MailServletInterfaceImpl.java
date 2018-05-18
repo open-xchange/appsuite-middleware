@@ -76,8 +76,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-import java.util.concurrent.Callable;
-import java.util.concurrent.locks.Lock;
 import javax.mail.Address;
 import javax.mail.Message;
 import javax.mail.MessageRemovedException;
@@ -178,7 +176,6 @@ import com.openexchange.mail.transport.TransportProviderRegistry;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.mail.utils.MailFolderUtility;
-import com.openexchange.mail.utils.MailMessageComparator;
 import com.openexchange.mail.utils.MessageUtility;
 import com.openexchange.mail.utils.MsisdnUtility;
 import com.openexchange.mail.utils.StorageUtility;
@@ -249,7 +246,6 @@ final class MailServletInterfaceImpl extends MailServletInterface {
     private User user;
     private final Collection<OXException> warnings;
     private final ArrayList<MailImportResult> mailImportResults;
-    private MailAccount mailAccount;
     private final MailFields folderAndId;
     private final boolean checkParameters;
     private final boolean doDecryption;
@@ -353,18 +349,6 @@ final class MailServletInterfaceImpl extends MailServletInterface {
             }
         }
         return locale;
-    }
-
-    private MailAccount getMailAccount() throws OXException {
-        if (mailAccount == null) {
-            try {
-                MailAccountStorageService storageService = ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class);
-                mailAccount = storageService.getMailAccount(accountId, session.getUserId(), session.getContextId());
-            } catch (RuntimeException e) {
-                throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
-            }
-        }
-        return mailAccount;
     }
 
     @Override
@@ -1070,8 +1054,6 @@ final class MailServletInterfaceImpl extends MailServletInterface {
     public SearchIterator<MailMessage> getAllMessages(String folder, int sortCol, int order, int[] fields, String[] headerFields, int[] fromToIndices, boolean supportsContinuation) throws OXException {
         return getMessages(folder, fromToIndices, sortCol, order, null, null, false, fields, headerFields, supportsContinuation);
     }
-
-    private static final MailMessageComparator COMPARATOR_DESC = new MailMessageComparator(MailSortField.RECEIVED_DATE, true, null);
 
     @Override
     public List<List<MailMessage>> getAllSimpleThreadStructuredMessages(String folder, boolean includeSent, boolean cache, int sortCol, int order, int[] fields, String[] headerFields2, int[] fromToIndices, final long lookAhead, SearchTerm<?> searchTerm) throws OXException {
@@ -2961,6 +2943,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         return initMailAccess(accountId, null);
     }
 
+    @SuppressWarnings("unchecked")
     private MailAccess<?, ?> initMailAccess(int accountId, MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> access) throws OXException {
         /*
          * Fetch a mail access (either from cache or a new instance)
@@ -3901,23 +3884,10 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                     LOG.error("", e);
                 }
             } finally {
-                if (null != mailAccess) {
+                if (null != otherAccess) {
                     otherAccess.close(false);
                 }
             }
-        }
-    }
-
-    private <V> V performSynchronized(Callable<V> task, Session session) throws Exception {
-        Lock lock = (Lock) session.getParameter(Session.PARAM_LOCK);
-        if (null == lock) {
-            lock = Session.EMPTY_LOCK;
-        }
-        lock.lock();
-        try {
-            return task.call();
-        } finally {
-            lock.unlock();
         }
     }
 
@@ -4340,16 +4310,6 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         EventPool.getInstance().put(new PooledEvent(contextId, session.getUserId(), accountId, prepareFullname(accountId, fullName), contentRelated, immediateDelivery, false, session).setAsync(async));
     }
 
-    private void postEventRemote(int accountId, String fullName, boolean contentRelated, boolean immediateDelivery, boolean async) {
-        if (MailAccount.DEFAULT_ID != accountId) {
-            /*
-             * TODO: No event for non-primary account?
-             */
-            return;
-        }
-        EventPool.getInstance().put(new PooledEvent(contextId, session.getUserId(), accountId, prepareFullname(accountId, fullName), contentRelated, immediateDelivery, true, session).setAsync(async));
-    }
-
     // ---------------------------------------------------------------------------------------------------------------------------------- //
 
     private void postEvent(String topic, int accountId, String fullName, boolean contentRelated, boolean immediateDelivery) {
@@ -4362,40 +4322,6 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         EventPool.getInstance().put(new PooledEvent(topic, contextId, session.getUserId(), accountId, prepareFullname(accountId, fullName), contentRelated, immediateDelivery, false, session));
     }
 
-    private void postEventRemote(String topic, int accountId, String fullName, boolean contentRelated, boolean immediateDelivery) {
-        if (MailAccount.DEFAULT_ID != accountId) {
-            /*
-             * TODO: No event for non-primary account?
-             */
-            return;
-        }
-        EventPool.getInstance().put(new PooledEvent(topic, contextId, session.getUserId(), accountId, prepareFullname(accountId, fullName), contentRelated, immediateDelivery, true, session));
-    }
-
-    // ---------------------------------------------------------------------------------------------------------------------------------- //
-
-    private void postEvent(String topic, int accountId, String fullName, boolean contentRelated, boolean immediateDelivery, boolean async) {
-        if (MailAccount.DEFAULT_ID != accountId) {
-            /*
-             * TODO: No event for non-primary account?
-             */
-            return;
-        }
-        PooledEvent pooledEvent = new PooledEvent(topic, contextId, session.getUserId(), accountId, prepareFullname(accountId, fullName), contentRelated, immediateDelivery, false, session);
-        EventPool.getInstance().put(pooledEvent.setAsync(async));
-    }
-
-    private void postEventRemote(String topic, int accountId, String fullName, boolean contentRelated, boolean immediateDelivery, boolean async) {
-        if (MailAccount.DEFAULT_ID != accountId) {
-            /*
-             * TODO: No event for non-primary account?
-             */
-            return;
-        }
-        PooledEvent pooledEvent = new PooledEvent(topic, contextId, session.getUserId(), accountId, prepareFullname(accountId, fullName), contentRelated, immediateDelivery, true, session);
-        EventPool.getInstance().put(pooledEvent.setAsync(async));
-    }
-
     // ---------------------------------------------------------------------------------------------------------------------------------- //
 
     private void postEvent(String topic, int accountId, String fullName, boolean contentRelated, boolean immediateDelivery, boolean async, Map<String, Object> moreProperties) {
@@ -4406,22 +4332,6 @@ final class MailServletInterfaceImpl extends MailServletInterface {
             return;
         }
         PooledEvent pooledEvent = new PooledEvent(topic, contextId, session.getUserId(), accountId, prepareFullname(accountId, fullName), contentRelated, immediateDelivery, false, session);
-        if (null != moreProperties) {
-            for (Entry<String, Object> entry : moreProperties.entrySet()) {
-                pooledEvent.putProperty(entry.getKey(), entry.getValue());
-            }
-        }
-        EventPool.getInstance().put(pooledEvent.setAsync(async));
-    }
-
-    private void postEventRemote(String topic, int accountId, String fullName, boolean contentRelated, boolean immediateDelivery, boolean async, Map<String, Object> moreProperties) {
-        if (MailAccount.DEFAULT_ID != accountId) {
-            /*
-             * TODO: No event for non-primary account?
-             */
-            return;
-        }
-        PooledEvent pooledEvent = new PooledEvent(topic, contextId, session.getUserId(), accountId, prepareFullname(accountId, fullName), contentRelated, immediateDelivery, true, session);
         if (null != moreProperties) {
             for (Entry<String, Object> entry : moreProperties.entrySet()) {
                 pooledEvent.putProperty(entry.getKey(), entry.getValue());

@@ -60,6 +60,7 @@ import java.util.ArrayList;
 import java.util.List;
 import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
+import com.openexchange.folderstorage.FolderPermissionType;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.impl.RdbContextStorage;
 import com.openexchange.groupware.update.Attributes;
@@ -236,7 +237,7 @@ public class DropIndividualUserPermissionsOnPublicFolderTask extends UpdateTaskA
         ResultSet result = null;
         final List<OCLPermission> retval = new ArrayList<OCLPermission>();
         try {
-            stmt = con.prepareStatement("SELECT permission_id,fp,orp,owp,odp,admin_flag,group_flag,system FROM oxfolder_permissions WHERE cid=? AND fuid=?");
+            stmt = con.prepareStatement("SELECT permission_id,fp,orp,owp,odp,admin_flag,group_flag,system,type,sharedParentFolder FROM oxfolder_permissions WHERE cid=? AND fuid=?");
             stmt.setInt(1, ctxId);
             stmt.setInt(2, FolderObject.SYSTEM_PUBLIC_FOLDER_ID);
             result = stmt.executeQuery();
@@ -247,6 +248,9 @@ public class DropIndividualUserPermissionsOnPublicFolderTask extends UpdateTaskA
                 p.setFolderAdmin(result.getInt(6) > 0 ? true : false);
                 p.setGroupPermission(result.getInt(7) > 0 ? true : false);
                 p.setSystem(result.getInt(8));
+                p.setType(FolderPermissionType.getType(result.getInt(9)));
+                int legator = result.getInt(10);
+                p.setPermissionLegator(legator == 0 ? null : String.valueOf(legator));
                 retval.add(p);
             }
         } finally {

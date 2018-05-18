@@ -112,7 +112,7 @@ public class ShowDepartmentJSlobEntry implements JSlobEntry {
     @Override
     public Object getValue(Session session) throws OXException {
         LeanConfigurationService configService = Services.getLeanConfigurationService();
-        return configService.getBooleanProperty(ContactProperty.showDepartment);
+        return configService.getBooleanProperty(ContactProperty.showDepartments);
     }
 
     /*

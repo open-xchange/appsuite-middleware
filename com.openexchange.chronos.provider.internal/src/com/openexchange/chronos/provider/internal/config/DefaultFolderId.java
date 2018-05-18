@@ -50,18 +50,15 @@
 package com.openexchange.chronos.provider.internal.config;
 
 import static com.openexchange.chronos.provider.internal.Constants.CONTENT_TYPE;
-import static com.openexchange.chronos.provider.internal.Constants.PROVIDER_ID;
 import static com.openexchange.chronos.provider.internal.Constants.QUALIFIED_ACCOUNT_ID;
 import static com.openexchange.chronos.provider.internal.Constants.TREE_ID;
 import static com.openexchange.osgi.Tools.requireService;
 import org.json.JSONObject;
-import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.FolderService;
 import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.folderstorage.type.PrivateType;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -70,7 +67,7 @@ import com.openexchange.tools.session.ServerSession;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public class DefaultFolderId extends ChronosJSlobEntry {
+public class DefaultFolderId extends ReadOnlyChronosJSlobEntry {
 
     /**
      * Initializes a new {@link DefaultFolderId}.
@@ -87,20 +84,10 @@ public class DefaultFolderId extends ChronosJSlobEntry {
     }
 
     @Override
-    public boolean isWritable(Session session) throws OXException {
-        return false;
-    }
-
-    @Override
     protected Object getValue(ServerSession session, JSONObject userConfig) throws OXException {
         UserizedFolder defaultFolder = requireService(FolderService.class, services).getDefaultFolder(
             session.getUser(), TREE_ID, CONTENT_TYPE, PrivateType.getInstance(), session, null);
         return QUALIFIED_ACCOUNT_ID + '/' + defaultFolder.getID();
-    }
-
-    @Override
-    protected void setValue(ServerSession session, JSONObject userConfig, Object value) throws OXException {
-        throw CalendarExceptionCodes.UNSUPPORTED_OPERATION_FOR_PROVIDER.create(PROVIDER_ID);
     }
 
 }

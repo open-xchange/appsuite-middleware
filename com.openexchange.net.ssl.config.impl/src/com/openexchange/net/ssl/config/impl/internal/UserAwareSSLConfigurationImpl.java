@@ -50,11 +50,13 @@
 package com.openexchange.net.ssl.config.impl.internal;
 
 import org.slf4j.Logger;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.net.ssl.config.TrustLevel;
 import com.openexchange.net.ssl.config.UserAwareSSLConfigurationService;
 import com.openexchange.user.UserService;
 
@@ -62,6 +64,7 @@ import com.openexchange.user.UserService;
  * The {@link UserAwareSSLConfigurationImpl} provides user specific configuration with regards to SSL
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @since v7.8.3
  */
 public class UserAwareSSLConfigurationImpl implements UserAwareSSLConfigurationService {
@@ -71,6 +74,7 @@ public class UserAwareSSLConfigurationImpl implements UserAwareSSLConfigurationS
     private final UserService userService;
     private final ContextService contextService;
     private final ConfigViewFactory configViewFactory;
+    private final ConfigurationService configService;
 
     /**
      * Initializes a new {@link UserAwareSSLConfigurationImpl}.
@@ -79,9 +83,10 @@ public class UserAwareSSLConfigurationImpl implements UserAwareSSLConfigurationS
      * @param contextService The context service
      * @param configViewFactory The config-cascade service
      */
-    public UserAwareSSLConfigurationImpl(UserService userService, ContextService contextService, ConfigViewFactory configViewFactory) {
+    public UserAwareSSLConfigurationImpl(UserService userService, ContextService contextService, ConfigurationService configService, ConfigViewFactory configViewFactory) {
         this.userService = userService;
         this.contextService = contextService;
+        this.configService = configService;
         this.configViewFactory = configViewFactory;
     }
 
@@ -136,4 +141,17 @@ public class UserAwareSSLConfigurationImpl implements UserAwareSSLConfigurationS
         }
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.net.ssl.config.UserAwareSSLConfigurationService#canManageCertificates(int, int)
+     */
+    @Override
+    public boolean canManageCertificates(int userId, int contextId) {
+        boolean allowedToDefineTrustLevel = isAllowedToDefineTrustLevel(userId, contextId);
+        if (!allowedToDefineTrustLevel) {
+            return false;
+        }
+        return TrustLevel.TRUST_RESTRICTED.equals(SSLProperties.trustLevel(configService));
+    }
 }

@@ -57,7 +57,6 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
-import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.update.Tools;
 
 /**
@@ -70,16 +69,11 @@ import com.openexchange.tools.update.Tools;
  */
 public class PnsSubscriptionsReindexTask extends UpdateTaskAdapter {
 
-    private final ServiceLookup services;
-
     /**
      * Initializes a new {@link PnsSubscriptionsReindexTask}.
-     *
-     * @param services A service lookup reference
      */
-    public PnsSubscriptionsReindexTask(ServiceLookup services) {
+    public PnsSubscriptionsReindexTask() {
         super();
-        this.services = services;
     }
 
     @Override

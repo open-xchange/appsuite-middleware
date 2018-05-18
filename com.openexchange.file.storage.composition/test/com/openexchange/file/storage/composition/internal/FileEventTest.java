@@ -263,7 +263,7 @@ public class FileEventTest {
                 String folderId = FileStorageEventHelper.extractFolderId(event);
                 String objectId = FileStorageEventHelper.extractObjectId(event);
                 assertEquals("Wrong folder.", folderID, folderId);
-                assertEquals("Wrong id.", folderID + "/" + file.getId(), objectId);
+                assertEquals("Wrong id.", file.getId(), objectId);
             }
         });
         fileAccess.saveFileMetadata(file, 0);

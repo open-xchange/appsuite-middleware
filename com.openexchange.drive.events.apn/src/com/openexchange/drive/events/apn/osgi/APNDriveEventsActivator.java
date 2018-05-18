@@ -161,7 +161,7 @@ public class APNDriveEventsActivator extends HousekeepingActivator {
         if (false == Strings.isEmpty(feedbackQueryInterval)) {
             long interval = TimeSpanParser.parseTimespan(feedbackQueryInterval);
             if (60 * 1000 <= interval) {
-                Services.getService(TimerService.class).scheduleWithFixedDelay(new Runnable() {
+                Services.getService(TimerService.class, true).scheduleWithFixedDelay(new Runnable() {
 
                     @Override
                     public void run() {

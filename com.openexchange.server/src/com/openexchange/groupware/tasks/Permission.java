@@ -190,7 +190,7 @@ public final class Permission {
         checkForTaskFolder(folder);
         final OCLPermission permission = getPermission(ctx, con, user, userPerms, folder);
         if (!permission.canReadAllObjects() && !permission.canReadOwnObjects()) {
-            throw TaskExceptionCode.NO_READ_PERMISSION.create(I(folder.getObjectID()));
+            throw TaskExceptionCode.FOLDER_NOT_FOUND.create(I(folder.getObjectID()));
         }
         return !permission.canReadAllObjects() && permission.canReadOwnObjects();
     }
@@ -274,7 +274,7 @@ public final class Permission {
 
     static void checkForTaskFolder(final FolderObject folder) throws OXException {
         if (!Tools.isFolderTask(folder)) {
-            throw TaskExceptionCode.NOT_TASK_FOLDER.create(folder.getFolderName(), I(folder.getObjectID()));
+            throw TaskExceptionCode.FOLDER_NOT_FOUND.create(I(folder.getObjectID()));
         }
     }
 }

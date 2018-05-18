@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the Open-Xchange, Inc. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2020 Open-Xchange, Inc.
+ *     Copyright (C) 2016-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -52,6 +52,7 @@ package com.openexchange.chronos.provider.groupware;
 import java.util.List;
 import org.dmfs.rfc5545.DateTime;
 import com.openexchange.ajax.fileholder.IFileHolder;
+import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.Attachment;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.Event;
@@ -206,10 +207,11 @@ public interface GroupwareCalendarAccess extends FolderCalendarAccess, Permissio
      *
      * @param eventID The identifier of the event to update
      * @param attendee The attendee to update
+     * @param alarms The alarms to update, or <code>null</code> to not change alarms, or an empty array to delete any existing alarms
      * @param clientTimestamp The last timestamp / sequence number known by the client to catch concurrent updates
      * @return The update result
      */
-    CalendarResult updateAttendee(EventID eventID, Attendee attendee, long clientTimestamp) throws OXException;
+    CalendarResult updateAttendee(EventID eventID, Attendee attendee, List<Alarm> alarms, long clientTimestamp) throws OXException;
 
     /**
      * Deletes an existing event.

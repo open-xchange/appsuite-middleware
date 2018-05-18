@@ -379,11 +379,6 @@ public final class FolderWriter {
             return false;
         }
 
-        public JSONArrayPutter(final JSONArray jsonArray, final Map<String, Object> parameters) {
-            this(parameters);
-            this.jsonArray = jsonArray;
-        }
-
         public void setJSONArray(final JSONArray jsonArray) {
             this.jsonArray = jsonArray;
         }
@@ -416,10 +411,6 @@ public final class FolderWriter {
             this.jsonObject = jsonObject;
         }
 
-        public void setJSONObject(final JSONObject jsonObject) {
-            this.jsonObject = jsonObject;
-        }
-
         @Override
         public void put(final String key, final Object value) throws JSONException {
             if (null == value || JSONObject.NULL.equals(value)) {
@@ -448,11 +439,11 @@ public final class FolderWriter {
 
     protected static final FolderFieldWriter UNKNOWN_FIELD_FFW = new FolderFieldWriter() {
 
-        private final String name = "unknown_field";
+        private static final String NAME = "unknown_field";
 
         @Override
         public void writeField(final JSONValuePutter jsonValue, final UserizedFolder folder, Map<String, Object> state, ServerSession session) throws JSONException {
-            jsonValue.put(jsonValue.withKey() ? name : null, JSONObject.NULL);
+            jsonValue.put(jsonValue.withKey() ? NAME : null, JSONObject.NULL);
         }
     };
 

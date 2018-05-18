@@ -212,7 +212,7 @@ public final class FileStorageUtility {
         return new StringBuilder(filename).insert(index, ' ' + counterString).toString();
     }
 
-    private static volatile Integer numberOfPregeneratedPreviews;
+    static volatile Integer numberOfPregeneratedPreviews;
 
     /**
      * Gets the number of previews that are supposed to be generated when listing files in a folder.
@@ -238,7 +238,7 @@ public final class FileStorageUtility {
         return tmp.intValue();
     }
 
-    private static volatile Long threshold;
+    static volatile Long threshold;
 
     /**
      * Gets the size threshold for ZIP archives
@@ -265,7 +265,7 @@ public final class FileStorageUtility {
         return tmp.longValue();
     }
 
-    private static volatile Integer compressionLevel;
+    static volatile Integer compressionLevel;
 
     /**
      * Gets the configured value for "com.openexchange.infostore.zipDocumentsCompressionLevel".

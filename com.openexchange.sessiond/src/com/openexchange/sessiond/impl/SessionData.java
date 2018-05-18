@@ -58,7 +58,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import com.openexchange.exception.OXException;
@@ -90,7 +89,7 @@ final class SessionData {
     private final Map<String, String> randoms;
 
     /** Plain array+direct indexing is the fastest technique of iterating. So, use CopyOnWriteArrayList since 'sessionList' is seldom modified (see rotateShort()) */
-    private final CopyOnWriteArrayList<SessionContainer> sessionList;
+    private final RotatableCopyOnWriteArrayList<SessionContainer> sessionList;
 
     /**
      * The LongTermUserGuardian contains an entry for a given UserKey if the longTermList contains a session for the user
@@ -100,7 +99,7 @@ final class SessionData {
     private final UserRefCounter longTermUserGuardian = new UserRefCounter();
 
     /** Plain array+direct indexing is the fastest technique of iterating. So, use CopyOnWriteArrayList since 'longTermList' is seldom modified (see rotateLongTerm()) */
-    private final CopyOnWriteArrayList<SessionMap> longTermList;
+    private final RotatableCopyOnWriteArrayList<SessionMap> longTermList;
 
     /**
      * Map to remember if there is already a task that should move the session to the first container.
@@ -131,27 +130,25 @@ final class SessionData {
 
         randoms = new ConcurrentHashMap<String, String>(1024, 0.75f, 1);
 
-        sessionList = new CopyOnWriteArrayList<SessionContainer>();
+        SessionContainer[] shortTermInit = new SessionContainer[containerCount];
         for (int i = containerCount; i-- > 0;) {
-            sessionList.add(new SessionContainer());
+            shortTermInit[i] = new SessionContainer();
         }
+        sessionList = new RotatableCopyOnWriteArrayList<SessionContainer>(shortTermInit);
 
-        longTermList = new CopyOnWriteArrayList<SessionMap>();
+        SessionMap[] longTermInit = new SessionMap[longTermContainerCount];
         for (int i = longTermContainerCount; i-- > 0;) {
-            longTermList.add(new SessionMap(256));
+            longTermInit[i] = new SessionMap(256);
         }
+        longTermList = new RotatableCopyOnWriteArrayList<SessionMap>(longTermInit);
     }
 
     void clear() {
-        synchronized (sessionList) {
-            sessionList.clear();
-        }
+        sessionList.clear();
         randoms.clear();
 
         longTermUserGuardian.clear();
-        synchronized (longTermList) {
-            longTermList.clear();
-        }
+        longTermList.clear();
     }
 
     /**
@@ -161,11 +158,7 @@ final class SessionData {
      */
     List<SessionControl> rotateShort() {
         // This is the only location which alters 'sessionList' during runtime
-        List<SessionControl> removedSessions;
-        synchronized (sessionList) {
-            sessionList.add(0, new SessionContainer());
-            removedSessions = new ArrayList<SessionControl>(sessionList.remove(sessionList.size() - 1).getSessionControls());
-        }
+        List<SessionControl> removedSessions = new ArrayList<SessionControl>(sessionList.rotate(new SessionContainer()).getSessionControls());
 
         if (autoLogin && false == removedSessions.isEmpty()) {
             List<SessionControl> transientSessions = null;
@@ -202,12 +195,8 @@ final class SessionData {
     }
 
     List<SessionControl> rotateLongTerm() {
-        // This is the only location which alters 'sessionList' during runtime
-        List<SessionControl> removedSessions;
-        synchronized (longTermList) {
-            longTermList.add(0, new SessionMap(256));
-            removedSessions = new ArrayList<SessionControl>(longTermList.remove(longTermList.size() - 1).values());
-        }
+        // This is the only location which alters 'longTermList' during runtime
+        List<SessionControl> removedSessions = new ArrayList<SessionControl>(longTermList.rotate(new SessionMap(256)).values());
 
         for (SessionControl sessionControl : removedSessions) {
             SessionImpl session = sessionControl.getSession();
@@ -658,23 +647,28 @@ final class SessionData {
         }
 
         final SessionControl sessionControl = getSession(sessionId);
+        if (null == sessionControl) {
+            LOG.error("Unable to get session for sessionId: {}.", sessionId);
+            SessionHandler.clearSession(sessionId, true);
+            return null;
+        }
         final SessionImpl session = sessionControl.getSession();
         if (!randomToken.equals(session.getRandomToken())) {
             final OXException e = SessionExceptionCodes.WRONG_BY_RANDOM.create(session.getSessionID(), session.getRandomToken(), randomToken, sessionId);
             LOG.error("", e);
-            SessionHandler.clearSession(sessionId);
+            SessionHandler.clearSession(sessionId, true);
             return null;
         }
         session.removeRandomToken();
         if (sessionControl.getCreationTime() + randomTokenTimeout < System.currentTimeMillis()) {
-            SessionHandler.clearSession(sessionId);
+            SessionHandler.clearSession(sessionId, true);
             return null;
         }
         return sessionControl;
     }
 
     SessionControl clearSession(final String sessionId) {
-        // A read-write access
+        // Look-up in short-term list
         for (SessionContainer container : sessionList) {
             SessionControl sessionControl = container.removeSessionById(sessionId);
             if (null != sessionControl) {
@@ -691,6 +685,24 @@ final class SessionData {
             }
         }
 
+        // Look-up in long-term list
+        for (SessionMap longTermMap : longTermList) {
+            SessionControl sessionControl = longTermMap.removeBySessionId(sessionId);
+            if (null != sessionControl) {
+                Session session = sessionControl.getSession();
+
+                String random = session.getRandomToken();
+                if (null != random) {
+                    // If session is accessed through random token, random token is removed in the session.
+                    randoms.remove(random);
+                }
+
+                unscheduleTask2MoveSession2FirstContainer(sessionId, true);
+                return sessionControl;
+            }
+        }
+
+        // No such session...
         return null;
     }
 
@@ -723,7 +735,7 @@ final class SessionData {
 
     void move2FirstContainer(final String sessionId) {
         Iterator<SessionContainer> iterator = sessionList.iterator();
-        iterator.next(); // Skip first container
+        SessionContainer firstContainer = iterator.next(); // Skip first container
 
         // Look for associated session in successor containers
         SessionControl control = null;
@@ -732,12 +744,12 @@ final class SessionData {
                 // Remove from current container & put into first one
                 control = iterator.next().removeSessionById(sessionId);
                 if (null != control) {
-                    sessionList.get(0).putSessionControl(control);
+                    firstContainer.putSessionControl(control);
                 }
             }
 
             if (null == control) {
-                if (sessionList.get(0).containsSessionId(sessionId)) {
+                if (firstContainer.containsSessionId(sessionId)) {
                     LOG.warn("Somebody else moved session to most up-to-date container.");
                 } else {
                     LOG.debug("Was not able to move the session {} into the most up-to-date container since it has already been removed in the meantime", sessionId);
@@ -759,12 +771,13 @@ final class SessionData {
     void move2FirstContainerLongTerm(final String sessionId) {
         SessionControl control = null;
         try {
+            SessionContainer firstContainer = sessionList.get(0);
             boolean movedSession = false;
             for (Iterator<SessionMap> iterator = longTermList.iterator(); !movedSession && iterator.hasNext();) {
                 SessionMap longTermMap = iterator.next();
                 control = longTermMap.removeBySessionId(sessionId);
                 if (null != control) {
-                    sessionList.get(0).putSessionControl(control);
+                    firstContainer.putSessionControl(control);
                     final SessionImpl session = control.getSession();
                     longTermUserGuardian.remove(session.getUserId(), session.getContextId());
                     LOG.trace("Moved from long term container to first one.");
@@ -772,7 +785,7 @@ final class SessionData {
                 }
             }
             if (!movedSession) {
-                if (sessionList.get(0).containsSessionId(sessionId)) {
+                if (firstContainer.containsSessionId(sessionId)) {
                     LOG.warn("Somebody else moved session to most actual container.");
                 } else {
                     LOG.warn("Was not able to move the session into the most actual container.");

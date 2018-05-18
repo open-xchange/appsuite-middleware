@@ -142,11 +142,29 @@ public class CalDAVRootCollection extends DAVRootCollection {
 
     @Override
     public DAVCollection getChild(String name) throws WebdavProtocolException {
+        /*
+         * check static paths
+         */
         if (ScheduleOutboxURL.SCHEDULE_OUTBOX.equals(name)) {
             return factory.mixin(new ScheduleOutboxCollection(factory));
-        } else if (ScheduleInboxURL.SCHEDULE_INBOX.equals(name)) {
+        }
+        if (ScheduleInboxURL.SCHEDULE_INBOX.equals(name)) {
             return factory.mixin(new ScheduleInboxCollection(factory));
         }
+        /*
+         * check folder via decoded identifier
+         */
+        try {
+            UserizedFolder folder = getFolder(Tools.decodeFolderId(name));
+            if (matches(name, folder)) {
+                return createCollection(folder);
+            }
+        } catch (OXException | IllegalArgumentException e) {
+            LOG.debug("Unable to get folder by resource name \"{}\", matching against all visible folders as fallback.", name, e);
+        }
+        /*
+         * match against all visible folders; then fall-back to placeholder collection
+         */
         try {
             for (UserizedFolder folder : getSubfolders()) {
                 if (matches(name, folder)) {
@@ -227,6 +245,14 @@ public class CalDAVRootCollection extends DAVRootCollection {
             folders.addAll(getSynchronizedFolders(PrivateType.getInstance(), TaskContentType.getInstance()));
         }
         return folders;
+    }
+
+    private UserizedFolder getFolder(String folderId) throws OXException {
+        UserizedFolder folder = getFolderService().getFolder(getTreeID(), folderId, factory.getSession(), null);
+        if (false == isUsedForSync(folder)) {
+            throw OXException.notFound(folderId);
+        }
+        return folder;
     }
 
     /**

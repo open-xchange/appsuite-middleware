@@ -59,6 +59,7 @@ import com.openexchange.database.DatabaseService;
 import com.openexchange.groupware.update.UpdateTaskProviderService;
 import com.openexchange.groupware.update.UpdateTaskV2;
 import com.openexchange.oauth.impl.internal.groupware.DropForeignKeyFromOAuthAccountTask;
+import com.openexchange.oauth.impl.internal.groupware.OAuthAddIdentityColumnTask;
 import com.openexchange.oauth.impl.internal.groupware.OAuthAddScopeColumnTask;
 import com.openexchange.oauth.impl.internal.groupware.OAuthCreateTableTask;
 import com.openexchange.oauth.impl.internal.groupware.OAuthCreateTableTask2;
@@ -92,7 +93,7 @@ public final class UpdateTaskRegisterer implements ServiceTrackerCustomizer<Data
 
             @Override
             public Collection<UpdateTaskV2> getUpdateTasks() {
-                return Arrays.asList(((UpdateTaskV2) new OAuthCreateTableTask()), new OAuthCreateTableTask2(), new OAuthAddScopeColumnTask(), new RenameMigrateLinkedInServiceIdUpdateTask(), new DropForeignKeyFromOAuthAccountTask());
+                return Arrays.asList(((UpdateTaskV2) new OAuthCreateTableTask()), new OAuthCreateTableTask2(), new OAuthAddScopeColumnTask(), new RenameMigrateLinkedInServiceIdUpdateTask(), new DropForeignKeyFromOAuthAccountTask(), new OAuthAddIdentityColumnTask());
             }
         }, null);
         return dbService;

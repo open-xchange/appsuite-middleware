@@ -61,10 +61,13 @@ import com.openexchange.dav.DAVProtocol;
 import com.openexchange.dav.actions.PROPFINDAction;
 import com.openexchange.webdav.action.WebdavRequest;
 import com.openexchange.webdav.action.WebdavResponse;
+import com.openexchange.webdav.protocol.Multistatus;
 import com.openexchange.webdav.protocol.Protocol;
+import com.openexchange.webdav.protocol.WebdavFactory;
 import com.openexchange.webdav.protocol.WebdavPath;
 import com.openexchange.webdav.protocol.WebdavProtocolException;
 import com.openexchange.webdav.protocol.WebdavResource;
+import com.openexchange.webdav.protocol.WebdavStatus;
 import com.openexchange.webdav.xml.resources.PropertiesMarshaller;
 import com.openexchange.webdav.xml.resources.ResourceMarshaller;
 
@@ -95,20 +98,43 @@ public class CaldavMultigetReport extends PROPFINDAction {
         Document requestBody = requireRequestBody(request);
         List<WebdavPath> paths = getPaths(request, requestBody);
         /*
-         * marshal requested resources
+         * resolve & marshal requested resources
          */
         ResourceMarshaller marshaller = getMarshaller(request, requireRequestBody(request));
         PropertiesMarshaller helper = new PropertiesMarshaller(request.getURLPrefix(), request.getCharset());
         Element multistatusElement = prepareMultistatusElement();
-        for (WebdavPath path : paths) {
-            try {
-                WebdavResource resource = request.getFactory().resolveResource(path);
-                multistatusElement.addContent(marshaller.marshal(resource));
-            } catch (WebdavProtocolException e) {
-                multistatusElement.addContent(new Element("response", Protocol.DAV_NS)
-                    .addContent(helper.marshalHREF(path, false))
-                    .addContent(helper.marshalStatus(e.getStatus()))
-                );
+        WebdavFactory factory = request.getFactory();
+        if (GroupwareCaldavFactory.class.isInstance(factory)) {
+            /*
+             * batch-resolve requested resources
+             */
+            Multistatus<WebdavResource> multistatus = ((GroupwareCaldavFactory) factory).resolveResources(paths);
+            for (int statusCode : multistatus.getStatusCodes()) {
+                for (WebdavStatus<WebdavResource> status : multistatus.toIterable(statusCode)) {
+                    if (null != status.getAdditional()) {
+                        multistatusElement.addContent(marshaller.marshal(status.getAdditional()));
+                    } else {
+                        multistatusElement.addContent(new Element("response", Protocol.DAV_NS)
+                            .addContent(helper.marshalHREF(status.getUrl(), false))
+                            .addContent(helper.marshalStatus(status.getStatus()))
+                        );
+                    }
+                }
+            }
+        } else {
+            /*
+             * resolve each requested resource individually
+             */
+            for (WebdavPath path : paths) {
+                try {
+                    WebdavResource resource = request.getFactory().resolveResource(path);
+                    multistatusElement.addContent(marshaller.marshal(resource));
+                } catch (WebdavProtocolException e) {
+                    multistatusElement.addContent(new Element("response", Protocol.DAV_NS)
+                        .addContent(helper.marshalHREF(path, false))
+                        .addContent(helper.marshalStatus(e.getStatus()))
+                    );
+                }
             }
         }
         /*

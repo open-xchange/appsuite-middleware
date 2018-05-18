@@ -66,6 +66,7 @@ import java.util.SortedSet;
 import java.util.TimeZone;
 import java.util.UUID;
 import org.dmfs.rfc5545.DateTime;
+import com.openexchange.ajax.fileholder.IFileHolder;
 import com.openexchange.caldav.resources.CalendarAccessOperation;
 import com.openexchange.caldav.resources.EventResource;
 import com.openexchange.chronos.Alarm;
@@ -85,8 +86,11 @@ import com.openexchange.chronos.ResourceId;
 import com.openexchange.chronos.Trigger;
 import com.openexchange.chronos.common.AlarmUtils;
 import com.openexchange.chronos.common.CalendarUtils;
+import com.openexchange.chronos.common.mapping.DefaultEventUpdate;
 import com.openexchange.chronos.ical.CalendarExport;
 import com.openexchange.chronos.ical.ICalParameters;
+import com.openexchange.chronos.ical.ICalService;
+import com.openexchange.chronos.ical.ImportedCalendar;
 import com.openexchange.chronos.provider.composition.IDBasedCalendarAccess;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.CalendarUtilities;
@@ -99,6 +103,7 @@ import com.openexchange.dav.DAVUserAgent;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.type.PublicType;
 import com.openexchange.groupware.attach.AttachmentMetadata;
+import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
 
 /**
@@ -353,6 +358,11 @@ public class EventPatches {
                     Alarm snoozeAlarm = null;
                     if (null != newChangeException && null != newChangeException.getAlarms()) {
                         for (Alarm alarm : newChangeException.getAlarms()) {
+                            /*
+                             * XXX: If the original event did contain more than one alarm the snooze alarm of e.g. the second alarm
+                             * will contain the wrong UID in 'RELATE_TO' field, letting the function below return the wrong snoozed alarm.
+                             * This alarm will be updated instead, efficiently deleting one snooze alarm.
+                             */
                             snoozedAlarm = AlarmUtils.getSnoozedAlarm(alarm, newChangeException.getAlarms());
                             if (null != snoozedAlarm) {
                                 snoozeAlarm = alarm;
@@ -376,17 +386,25 @@ public class EventPatches {
                     Iterator<Event> iterator = factory.requireService(RecurrenceService.class).iterateEventOccurrences(masterEvent, new Date(recurrenceId.getValue().getTimestamp()), null);
                     Event originalOccurrence = iterator.hasNext() ? iterator.next() : null;
                     if (null != originalOccurrence) {
-                        if (null != originalOccurrence.getAlarms() && 1 == originalOccurrence.getAlarms().size() && snoozedAlarm.getTrigger().equals(originalOccurrence.getAlarms().get(0).getTrigger())) {
-                            Alarm originalAlarm = originalOccurrence.getAlarms().get(0);
-                            CalendarUtilities calendarUtilities = factory.requireService(CalendarUtilities.class);
-                            originalOccurrence = calendarUtilities.copyEvent(originalOccurrence, (EventField[]) null);
-                            originalOccurrence = EventPatches.Outgoing(factory).applyAll(resource, originalOccurrence);
-                            EventUpdate eventUpdate = calendarUtilities.compare(
-                                originalOccurrence, newChangeException, true, EventField.TIMESTAMP, EventField.LAST_MODIFIED, EventField.RECURRENCE_RULE, EventField.CREATED, EventField.ALARMS);
+                        Alarm originalAlarm = getSnoozedAlarm(originalOccurrence, snoozedAlarm);
+                        if (null != originalAlarm) {
+                            originalOccurrence = exportAndImport(resource, originalOccurrence);
+                            EventUpdate eventUpdate = DefaultEventUpdate.builder()
+                                .originalEvent(originalOccurrence)
+                                .updatedEvent(newChangeException)
+                                .ignoredEventFields(EventField.TIMESTAMP, EventField.LAST_MODIFIED, EventField.RECURRENCE_RULE, EventField.CREATED, EventField.ALARMS, EventField.EXTENDED_PROPERTIES)
+                                .considerUnset(true)
+                                .ignoreDefaults(true)
+                            .build();
                             if (eventUpdate.getUpdatedFields().isEmpty() && eventUpdate.getAttendeeUpdates().isEmpty() && false == eventUpdate.getAlarmUpdates().isEmpty()) {
-                                List<Alarm> patchedAlarms = new ArrayList<Alarm>(2);
                                 snoozedAlarm.setUid(originalAlarm.getUid());
                                 snoozeAlarm.setRelatedTo(new RelatedTo("SNOOZE", originalAlarm.getUid()));
+                                List<Alarm> patchedAlarms = new ArrayList<Alarm>(originalOccurrence.getAlarms().size());
+                                for (Alarm a : originalOccurrence.getAlarms()) {
+                                    if (!snoozedAlarm.getTrigger().matches(a.getTrigger()) && !snoozeAlarm.getRelatedTo().equals(a.getRelatedTo())) {
+                                        patchedAlarms.add(a);
+                                    }
+                                }
                                 patchedAlarms.add(snoozeAlarm);
                                 patchedAlarms.add(snoozedAlarm);
                                 importedEvent.setAlarms(patchedAlarms);
@@ -402,6 +420,50 @@ public class EventPatches {
                 } catch (OXException e) {
                     LOG.warn("Error adjusting snooze exceptions", e);
                 }
+            }
+        }
+
+        /**
+         * Get the original {@link Alarm} that is equal to the snoozed alarm
+         * 
+         * @param originalOccurrence The original occurrence of the exception
+         * @param snoozedAlarm The alarm that has been snoozed
+         * @return The {@link Alarm} that matches the snoozedAlarm or <code>null</code>
+         */
+        private Alarm getSnoozedAlarm(Event originalOccurrence, Alarm snoozedAlarm) {
+            if (null != originalOccurrence.getAlarms()) {
+                for (Alarm a : originalOccurrence.getAlarms()) {
+                    if (snoozedAlarm.getTrigger().matches(a.getTrigger())) {
+                        return a;
+                    }
+                }
+            }
+            return null;
+        }
+
+        private Event exportAndImport(EventResource resource, Event event) throws OXException {
+            /*
+             * prepare exported event
+             */
+            CalendarUtilities calendarUtilities = factory.requireService(CalendarUtilities.class);
+            event = calendarUtilities.copyEvent(event, (EventField[]) null);
+            EventPatches.Outgoing(factory).applyAll(resource, event);
+            /*
+             * export to ical & re-import the event
+             */
+            ICalService iCalService = factory.requireService(ICalService.class);
+            CalendarExport calendarExport = iCalService.exportICal(null);
+            calendarExport.add(event);
+            IFileHolder fileHolder = null;
+            try {
+                fileHolder = calendarExport.getVCalendar();
+                ImportedCalendar calendar = iCalService.importICal(fileHolder.getStream(), null);
+                if (null != calendar.getEvents() && 0 < calendar.getEvents().size()) {
+                    return calendar.getEvents().get(0);
+                }
+                throw OXException.notFound("export");
+            } finally {
+                Streams.close(fileHolder);
             }
         }
 
@@ -634,7 +696,7 @@ public class EventPatches {
                  */
                 for (Event importedChangeException : importedChangeExceptions) {
                     adjustAttendeeComments(resource, importedChangeException);
-                    restoreResourceCUTypes(resource, importedEvent);
+                    restoreResourceCUTypes(resource, importedChangeException);
                     adjustProposedTimePrefixes(importedChangeException);
                     adjustAlarms(resource, importedChangeException, importedEvent);
                     applyManagedAttachments(importedChangeException);
@@ -769,8 +831,7 @@ public class EventPatches {
                         /*
                          * use relative triggers for snoozed alarms in event series for apple clients
                          */
-                        if (isSeriesMaster(exportedEvent) && null != alarm.getTrigger() && null != alarm.getTrigger().getDateTime() &&
-                            (DAVUserAgent.IOS.equals(resource.getUserAgent()) || DAVUserAgent.MAC_CALENDAR.equals(resource.getUserAgent()))) {
+                        if (isSeriesMaster(exportedEvent) && null != alarm.getTrigger() && null != alarm.getTrigger().getDateTime() && (DAVUserAgent.IOS.equals(resource.getUserAgent()))) {
                             try {
                                 Trigger trigger = alarm.getTrigger();
                                 trigger.setDuration(AlarmUtils.getTriggerDuration(alarm.getTrigger(), exportedEvent, factory.requireService(RecurrenceService.class)));

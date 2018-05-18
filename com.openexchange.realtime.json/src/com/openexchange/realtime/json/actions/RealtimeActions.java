@@ -49,8 +49,6 @@
 
 package com.openexchange.realtime.json.actions;
 
-import java.util.Arrays;
-import java.util.Collection;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
 import com.openexchange.exception.OXException;
@@ -79,11 +77,6 @@ public class RealtimeActions implements AJAXActionServiceFactory {
         POLL = new PollAction(stateManager);
         QUERY = new QueryAction(services, protocolHandler.getGate(), stateManager);
         SEND = new SendAction(services, stateManager, protocolHandler);
-    }
-
-    @Override
-    public Collection<?> getSupportedServices() {
-        return Arrays.asList("enrol", "poll", "query", "send");
     }
 
     @Override

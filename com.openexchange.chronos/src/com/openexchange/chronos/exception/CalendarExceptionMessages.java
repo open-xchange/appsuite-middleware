@@ -93,9 +93,11 @@ public class CalendarExceptionMessages implements LocalizableStrings {
 
     public static final String END_BEFORE_START_MSG = "The end date lies before the start date. Please correct the appointment times and try again.";
 
-    public static final String UNSUPPORTED_CLASSIFICATION_MSG = "Appointments in non-personal folders must not be classified as \"private\" or \"confidential\".";
+    public static final String UNSUPPORTED_CLASSIFICATION_FOR_FOLDER_MSG = "Appointments in non-personal folders must not be classified as \"private\" or \"secret\".";
 
-    public static final String UNSUPPORTED_CLASSIFICATION_FOR_MOVE_MSG = "Appointments classified as \"private\" or \"confidential\" cannot be moved to this type of folder.";
+    public static final String UNSUPPORTED_CLASSIFICATION_FOR_RESOURCE_MSG = "Appointments with resources must not be classified as \"secret\".";
+
+    public static final String UNSUPPORTED_CLASSIFICATION_FOR_MOVE_MSG = "Appointments classified as \"private\" or \"secret\" cannot be moved to this type of folder.";
 
     public static final String UNSUPPORTED_CLASSIFICATION_FOR_OCCURRENCE_MSG = "Occurrences of appointment series must not be classified differently.";
 
@@ -131,7 +133,9 @@ public class CalendarExceptionMessages implements LocalizableStrings {
 
     public static final String MAX_ACCOUNTS_EXCEEDED_MSG = "The maximum number of calendar subscriptions is exceeded.";
 
-    public static final String IGNORED_INVALID_DATA_MSG = "The value for \"%2$s\" is invalid and wasn't be applied.";
+    public static final String IGNORED_INVALID_DATA_MSG = "The value for \"%2$s\" is invalid and wasn't applied.";
+
+    public static final String UNSUPPORTED_DATA_MSG = "The value for \"%2$s\" is not supported and wasn't applied.";
 
     public static final String UNKNOWN_INTERNAL_ATTENDEE_MSG = "The '%1$s' is either not an internal user or does not exist.";
 

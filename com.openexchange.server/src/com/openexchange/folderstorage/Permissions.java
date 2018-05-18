@@ -68,16 +68,17 @@ public class Permissions {
 
     private static final int[] MAPPING_0 = { 0, 2, 4, -1, 8 };
 
-    private static final TIntIntHashMap MAPPING_1 = new TIntIntHashMap(6) {
-        { // Unnamed Block.
-            put(Permission.MAX_PERMISSION, MAX_PERMISSION);
-            put(MAX_PERMISSION, MAX_PERMISSION);
-            put(0, 0);
-            put(2, 1);
-            put(4, 2);
-            put(8, 4);
-        }
-    };
+    private static final TIntIntHashMap MAPPING_1;
+    static {
+        TIntIntHashMap m = new TIntIntHashMap(6);
+        m.put(Permission.MAX_PERMISSION, MAX_PERMISSION);
+        m.put(MAX_PERMISSION, MAX_PERMISSION);
+        m.put(0, 0);
+        m.put(2, 1);
+        m.put(4, 2);
+        m.put(8, 4);
+        MAPPING_1 = m;
+    }
 
     /**
      * Parses the given permission bit mask into an array with 5 elements:

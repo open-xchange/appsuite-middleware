@@ -53,10 +53,10 @@ import net.fortuna.ical4j.util.Strings;
  * $Id$ [Apr 5, 2004]
  *
  * Defines an iCalendar calendar.
- * 
+ *
  * <pre>
  *    4.6 Calendar Components
- *    
+ *
  *       The body of the iCalendar object consists of a sequence of calendar
  *       properties and one or more calendar components. The calendar
  *       properties are attributes that apply to the calendar as a whole. The
@@ -64,56 +64,56 @@ import net.fortuna.ical4j.util.Strings;
  *       particular calendar semantic. For example, the calendar component can
  *       specify an event, a to-do, a journal entry, time zone information, or
  *       free/busy time information, or an alarm.
- *    
+ *
  *       The body of the iCalendar object is defined by the following
  *       notation:
- *    
+ *
  *         icalbody   = calprops component
- *    
+ *
  *         calprops   = 2*(
- *    
+ *
  *                    ; 'prodid' and 'version' are both REQUIRED,
  *                    ; but MUST NOT occur more than once
- *    
+ *
  *                    prodid /version /
- *    
+ *
  *                    ; 'calscale' and 'method' are optional,
  *                    ; but MUST NOT occur more than once
- *    
+ *
  *                    calscale        /
  *                    method          /
- *    
+ *
  *                    x-prop
- *    
+ *
  *                    )
- *    
+ *
  *         component  = 1*(eventc / todoc / journalc / freebusyc /
  *                    / timezonec / iana-comp / x-comp)
- *    
+ *
  *         iana-comp  = &quot;BEGIN&quot; &quot;:&quot; iana-token CRLF
- *    
+ *
  *                      1*contentline
- *    
+ *
  *                      &quot;END&quot; &quot;:&quot; iana-token CRLF
- *    
+ *
  *         x-comp     = &quot;BEGIN&quot; &quot;:&quot; x-name CRLF
- *    
+ *
  *                      1*contentline
- *    
+ *
  *                      &quot;END&quot; &quot;:&quot; x-name CRLF
  * </pre>
- * 
+ *
  * Example 1 - Creating a new calendar:
- * 
+ *
  * <pre><code>
  * Calendar calendar = new Calendar();
  * calendar.getProperties().add(new ProdId(&quot;-//Ben Fortuna//iCal4j 1.0//EN&quot;));
  * calendar.getProperties().add(Version.VERSION_2_0);
  * calendar.getProperties().add(CalScale.GREGORIAN);
- * 
+ *
  * // Add events, etc..
  * </code></pre>
- * 
+ *
  * @author Ben Fortuna
  */
 public class Calendar implements Serializable {
@@ -135,9 +135,9 @@ public class Calendar implements Serializable {
      */
     public static final String END = "END";
 
-    private PropertyList properties;
+    private final PropertyList properties;
 
-    private ComponentList components;
+    private final ComponentList components;
 
     /**
      * Default constructor.
@@ -173,7 +173,7 @@ public class Calendar implements Serializable {
      */
     public Calendar(Calendar c) throws ParseException, IOException,
             URISyntaxException {
-        
+
         this(new PropertyList(c.getProperties()), new ComponentList(c
                 .getComponents()));
     }
@@ -181,6 +181,7 @@ public class Calendar implements Serializable {
     /**
      * {@inheritDoc}
      */
+    @Override
     public final String toString() {
         final StringBuffer buffer = new StringBuffer();
         buffer.append(BEGIN);
@@ -272,7 +273,7 @@ public class Calendar implements Serializable {
                 throw new ValidationException("Unsupported Version: " + getProperty(Property.VERSION).getValue());
             }
         }
-        
+
         // 'calscale' and 'method' are optional,
         // but MUST NOT occur more than once
         PropertyValidator.getInstance().assertOneOrLess(Property.CALSCALE,
@@ -287,8 +288,8 @@ public class Calendar implements Serializable {
         }
 
         // validate properties..
-        for (final Iterator i = getProperties().iterator(); i.hasNext();) {
-            final Property property = (Property) i.next();
+        for (@SuppressWarnings("unchecked") final Iterator<Property> i = getProperties().iterator(); i.hasNext();) {
+            final Property property = i.next();
 
             if (!(property instanceof XProperty)
                     && !property.isCalendarProperty()) {
@@ -298,8 +299,8 @@ public class Calendar implements Serializable {
         }
 
         // validate components..
-        for (final Iterator i = getComponents().iterator(); i.hasNext();) {
-            final Component component = (Component) i.next();
+        for (@SuppressWarnings("unchecked") final Iterator<Component> i = getComponents().iterator(); i.hasNext();) {
+            final Component component = i.next();
             if (!(component instanceof CalendarComponent)) {
                 throw new ValidationException("Not a valid calendar component: " + component.getName());
             }
@@ -312,7 +313,7 @@ public class Calendar implements Serializable {
                 if (getComponent(Component.VEVENT) != null) {
                     ComponentValidator.assertNone(Component.VFREEBUSY, getComponents());
                     ComponentValidator.assertNone(Component.VJOURNAL, getComponents());
-                    
+
                     if (!CompatibilityHints.isHintEnabled(CompatibilityHints.KEY_RELAXED_VALIDATION)) {
                         ComponentValidator.assertNone(Component.VTODO, getComponents());
                     }
@@ -355,7 +356,7 @@ public class Calendar implements Serializable {
             else if (Method.REPLY.equals(getProperty(Property.METHOD))) {
                 if (getComponent(Component.VEVENT) != null) {
                     ComponentValidator.assertOneOrLess(Component.VTIMEZONE, getComponents());
-                    
+
                     ComponentValidator.assertNone(Component.VALARM, getComponents());
                     ComponentValidator.assertNone(Component.VFREEBUSY, getComponents());
                     ComponentValidator.assertNone(Component.VJOURNAL, getComponents());
@@ -369,7 +370,7 @@ public class Calendar implements Serializable {
                 }
                 else if (getComponent(Component.VTODO) != null) {
                     ComponentValidator.assertOneOrLess(Component.VTIMEZONE, getComponents());
-                    
+
                     ComponentValidator.assertNone(Component.VALARM, getComponents());
 //                  ComponentValidator.assertNone(Component.VFREEBUSY, getComponents());
 //                  ComponentValidator.assertNone(Component.VEVENT, getComponents());
@@ -389,7 +390,7 @@ public class Calendar implements Serializable {
                 }
                 else if (getComponent(Component.VJOURNAL) != null) {
                     ComponentValidator.assertOneOrLess(Component.VTIMEZONE, getComponents());
-                    
+
                     ComponentValidator.assertNone(Component.VFREEBUSY, getComponents());
 //                  ComponentValidator.assertNone(Component.VEVENT, getComponents());
 //                  ComponentValidator.assertNone(Component.VTODO, getComponents());
@@ -404,7 +405,7 @@ public class Calendar implements Serializable {
                 }
                 else if (getComponent(Component.VTODO) != null) {
                     ComponentValidator.assertOneOrLess(Component.VTIMEZONE, getComponents());
-                    
+
                     ComponentValidator.assertNone(Component.VALARM, getComponents());
                     ComponentValidator.assertNone(Component.VFREEBUSY, getComponents());
 //                  ComponentValidator.assertNone(Component.VEVENT, getComponents());
@@ -440,7 +441,7 @@ public class Calendar implements Serializable {
                 }
                 else if (getComponent(Component.VTODO) != null) {
                     ComponentValidator.assertOneOrLess(Component.VTIMEZONE, getComponents());
-                    
+
                     ComponentValidator.assertNone(Component.VFREEBUSY, getComponents());
 //                  ComponentValidator.assertNone(Component.VEVENT, getComponents());
                     ComponentValidator.assertNone(Component.VJOURNAL, getComponents());
@@ -462,15 +463,15 @@ public class Calendar implements Serializable {
                 }
             }
 //        }
-            
+
             // perform ITIP validation on components..
             if (method != null) {
-                for (final Iterator i = getComponents().iterator(); i.hasNext();) {
-                    final CalendarComponent component = (CalendarComponent) i.next();
+                for (@SuppressWarnings("unchecked") final Iterator<CalendarComponent> i = getComponents().iterator(); i.hasNext();) {
+                    final CalendarComponent component = i.next();
                     component.validate(method);
                 }
             }
-        
+
         if (recurse) {
             validateProperties();
             validateComponents();
@@ -482,8 +483,8 @@ public class Calendar implements Serializable {
      * @throws ValidationException where any of the calendar properties is not in a valid state
      */
     private void validateProperties() throws ValidationException {
-        for (final Iterator i = getProperties().iterator(); i.hasNext();) {
-            final Property property = (Property) i.next();
+        for (@SuppressWarnings("unchecked") final Iterator<Property> i = getProperties().iterator(); i.hasNext();) {
+            final Property property = i.next();
             property.validate();
         }
     }
@@ -493,8 +494,8 @@ public class Calendar implements Serializable {
      * @throws ValidationException where any of the calendar components is not in a valid state
      */
     private void validateComponents() throws ValidationException {
-        for (final Iterator i = getComponents().iterator(); i.hasNext();) {
-            final Component component = (Component) i.next();
+        for (@SuppressWarnings("unchecked") final Iterator<Component> i = getComponents().iterator(); i.hasNext();) {
+            final Component component = i.next();
             component.validate();
         }
     }
@@ -534,6 +535,7 @@ public class Calendar implements Serializable {
     /**
      * {@inheritDoc}
      */
+    @Override
     public final boolean equals(final Object arg0) {
         if (arg0 instanceof Calendar) {
             final Calendar calendar = (Calendar) arg0;
@@ -546,6 +548,7 @@ public class Calendar implements Serializable {
     /**
      * {@inheritDoc}
      */
+    @Override
     public final int hashCode() {
         return new HashCodeBuilder().append(getProperties()).append(
                 getComponents()).toHashCode();

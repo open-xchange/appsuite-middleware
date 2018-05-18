@@ -196,6 +196,7 @@ public class LoginRequestImpl implements LoginRequest {
         this.tranzient = builder.tranzient;
         this.language = builder.language;
         this.storeLanguage = builder.storeLanguage;
+        this.clientToken = builder.clientToken;
     }
 
     /**

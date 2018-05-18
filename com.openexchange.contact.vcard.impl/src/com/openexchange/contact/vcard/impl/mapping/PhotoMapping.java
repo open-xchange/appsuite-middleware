@@ -379,6 +379,10 @@ public class PhotoMapping extends AbstractMapping {
              */
             inputStream = new ByteArrayInputStream(imageBytes);
             BufferedImage sourceImage = ImageIO.read(inputStream);
+            if (null == sourceImage) {
+                addConversionWarning(warnings, "PHOTO", "unable to acquire an ImageReader capable of decoding the supplied image, unable to crop image");
+                return imageBytes;
+            }
             /*
              * crop the image
              */

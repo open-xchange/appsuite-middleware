@@ -49,18 +49,14 @@
 
 package com.openexchange.chronos.alarm.json;
 
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.TimeZone;
 import org.json.JSONArray;
-import org.json.JSONException;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.json.action.ChronosAction;
 import com.openexchange.chronos.json.converter.CalendarResultConverter;
-import com.openexchange.chronos.json.converter.mapper.AlarmMapper;
 import com.openexchange.chronos.json.oauth.ChronosOAuthScope;
 import com.openexchange.chronos.provider.composition.IDBasedCalendarAccess;
 import com.openexchange.chronos.service.CalendarResult;
@@ -91,26 +87,14 @@ public class UpdateAlarmsAction extends ChronosAction {
     @Override
     protected AJAXRequestResult perform(IDBasedCalendarAccess calendarAccess, AJAXRequestData requestData) throws OXException {
         long clientTimestamp = parseClientTimestamp(requestData);
-        EventID eventID = parseIdParameter(requestData);
-        List<Alarm> alarms = parseAlarms(requestData.getData(), getTimeZone(calendarAccess.getSession(), requestData));
-        CalendarResult calendarResult = calendarAccess.updateAlarms(eventID, alarms, clientTimestamp);
-        return new AJAXRequestResult(calendarResult, new Date(calendarResult.getTimestamp()), CalendarResultConverter.INPUT_FORMAT);
-    }
-
-    private static List<Alarm> parseAlarms(Object requestBody, TimeZone timeZone) throws OXException {
-        if (null == requestBody) {
+        JSONArray jsonArray = requestData.getData(JSONArray.class);
+        if (null == jsonArray) {
             throw AjaxExceptionCodes.MISSING_REQUEST_BODY.create();
         }
-        try {
-            JSONArray jsonArray = ((JSONArray) requestBody);
-            List<Alarm> alarms = new ArrayList<>(jsonArray.length());
-            for (int i = 0; i < jsonArray.length(); i++) {
-                alarms.add(AlarmMapper.getInstance().deserialize(jsonArray.getJSONObject(i), AlarmMapper.getInstance().getMappedFields(), timeZone));
-            }
-            return alarms;
-        } catch (JSONException | ClassCastException e) {
-            throw AjaxExceptionCodes.INVALID_JSON_REQUEST_BODY.create(e);
-        }
+        EventID eventID = parseIdParameter(requestData);
+        List<Alarm> alarms = parseAlarms(jsonArray, getTimeZone(requestData));
+        CalendarResult calendarResult = calendarAccess.updateAlarms(eventID, alarms, clientTimestamp);
+        return new AJAXRequestResult(calendarResult, new Date(calendarResult.getTimestamp()), CalendarResultConverter.INPUT_FORMAT);
     }
 
 }

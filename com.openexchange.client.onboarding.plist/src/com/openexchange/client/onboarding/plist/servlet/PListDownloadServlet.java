@@ -97,7 +97,7 @@ public class PListDownloadServlet extends WebDavServlet {
     public static final String SERVLET_PATH = "plist";
     private static final Logger LOG = LoggerFactory.getLogger(PListDownloadServlet.class);
 
-    private final ServiceLookup lookup;
+    private final transient ServiceLookup lookup;
 
     /**
      * Initializes a new {@link PListDownloadServlet}.

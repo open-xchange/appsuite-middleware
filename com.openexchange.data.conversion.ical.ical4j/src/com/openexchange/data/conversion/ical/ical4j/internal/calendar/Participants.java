@@ -587,7 +587,7 @@ public class Participants<T extends CalendarComponent, U extends CalendarObject>
      * @return
      */
     private ICalParticipant createIcalParticipant(final Attendee attendee, final String mail, final String message) {
-        final ICalParticipant retval = new ICalParticipant(mail, -1, message);
+        final ICalParticipant retval = new ICalParticipant(-1, message);
 
         final Parameter parameter = attendee.getParameter(Parameter.PARTSTAT);
         if (parameter != null) {
@@ -605,12 +605,10 @@ public class Participants<T extends CalendarComponent, U extends CalendarObject>
     }
 
     private class ICalParticipant {
-        public String mail;
         public int status;
         public String message;
 
-        public ICalParticipant(final String mail, final int status, final String message) {
-            this.mail = mail;
+        public ICalParticipant(final int status, final String message) {
             this.status = status;
             this.message = message;
         }

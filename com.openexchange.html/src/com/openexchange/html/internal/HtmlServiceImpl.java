@@ -1441,6 +1441,9 @@ public final class HtmlServiceImpl implements HtmlService {
              * Clean...
              */
             final TagNode htmlNode = newHtmlCleaner().clean(htmlContent);
+            if (null == htmlNode) {
+                return htmlContent;
+            }
             /*
              * Serialize
              */

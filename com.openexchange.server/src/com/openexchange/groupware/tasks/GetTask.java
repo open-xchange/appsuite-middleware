@@ -233,9 +233,9 @@ public final class GetTask {
             throw TaskExceptionCode.UNIMPLEMENTED.create();
         }
         if (null == con) {
-            Permission.canReadInFolder(ctx, user, permissionBits, getFolder(), getTask());
+            Permission.canReadInFolder(ctx, user, permissionBits, getFolder());
         } else {
-            Permission.canReadInFolder(ctx, con, user, permissionBits, getFolder(), getTask());
+            Permission.canReadInFolder(ctx, con, user, permissionBits, getFolder());
         }
         final Folder check = FolderStorage.getFolder(getFolders(), folderId);
         if (null == check || (Tools.isFolderShared(getFolder(), user) && getTask().getPrivateFlag())) {

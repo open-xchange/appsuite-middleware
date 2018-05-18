@@ -168,8 +168,12 @@ public class AddressbookQueryReport extends PROPFINDAction {
             return compositeTerm;
         }
         Element textMatchElement = propFilterElement.getChild("text-match", CARD_NS);
-        String matchType = textMatchElement.getAttributeValue("match-type");
-        String match = textMatchElement.getValue();
+        String matchType = null;
+        String match = null;
+        if (textMatchElement != null) {
+            matchType = textMatchElement.getAttributeValue("match-type");
+            match = textMatchElement.getValue();
+        }
         if (Strings.isEmpty(matchType) || "contains".equals(matchType)) {
             match = '*' + match + '*';
         } else if ("starts-with".equals(matchType)) {
@@ -193,10 +197,13 @@ public class AddressbookQueryReport extends PROPFINDAction {
             }
             term = compositeTerm;
         }
-        if (null != textMatchElement.getAttribute("negate-condition") && "yes".equals(textMatchElement.getAttribute("negate-condition").getValue())) {
-            CompositeSearchTerm notTerm = new CompositeSearchTerm(CompositeOperation.NOT);
-            notTerm.addSearchTerm(term);
-            term = notTerm;
+        if (null != textMatchElement) {
+            Attribute attribute = textMatchElement.getAttribute("negate-condition");
+            if (null != attribute && "yes".equals(attribute.getValue())) {
+                CompositeSearchTerm notTerm = new CompositeSearchTerm(CompositeOperation.NOT);
+                notTerm.addSearchTerm(term);
+                term = notTerm;
+            }
         }
         return term;
     }

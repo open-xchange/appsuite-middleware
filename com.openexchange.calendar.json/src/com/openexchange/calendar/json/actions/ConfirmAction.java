@@ -105,7 +105,7 @@ public final class ConfirmAction extends AppointmentAction {
         if ((0 == participant.getType() || Participant.USER == participant.getType()) && 0 == participant.getIdentifier()) {
             attendee.setEntity(jsonObject.has(AJAXServlet.PARAMETER_ID) ? jsonObject.getInt(AJAXServlet.PARAMETER_ID) : session.getUserId());
         }
-        CalendarResult result = session.getCalendarService().updateAttendee(session, eventID, attendee, clientTimestamp);
+        CalendarResult result = session.getCalendarService().updateAttendee(session, eventID, attendee, null, clientTimestamp);
         return new AJAXRequestResult(new JSONObject(0), new Date(result.getTimestamp()), "json");
     }
 

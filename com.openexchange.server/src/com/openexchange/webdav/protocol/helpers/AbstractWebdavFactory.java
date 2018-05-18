@@ -101,7 +101,7 @@ public abstract class AbstractWebdavFactory implements WebdavFactory {
     }
 
     public <T extends AbstractResource> T mixin(T thing) {
-        if (mixins != null) {
+        if (mixins != null && thing != null) {
             thing.includeProperties(mixins);
         }
         return thing;

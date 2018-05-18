@@ -241,7 +241,7 @@ public class DriveServiceImpl implements DriveService {
                 }
                 int touched = driveSession.getChecksumStore().touchDirectoryChecksums(directoryChecksums);
                 driveSession.trace("Successfully touched " + touched + " stored directory checksums.");
-                TempCleaner.cleanUpIfNeeded(driveSession);
+                TempCleaner.cleanUpIfNeeded(driveSession, false);
             }
             /*
              * check (soft) version restrictions
@@ -396,6 +396,7 @@ public class DriveServiceImpl implements DriveService {
                 e.getMessage(), syncSession, path, originalVersion, newVersion, offset, totalLength, e);
             if (DriveUtils.indicatesQuotaExceeded(e)) {
                 syncResult.addActionsForClient(DriveUtils.handleQuotaExceeded(syncSession, e, path, originalVersion, newVersion));
+                TempCleaner.cleanUpIfNeeded(syncSession, true);
             } else if (DriveUtils.indicatesLockedContents(e)) {
                 syncResult.addActionsForClient(DriveUtils.handleLockedContents(syncSession, e, path, originalVersion, newVersion));
             } else if (DriveUtils.indicatesFailedSave(e)) {

@@ -197,7 +197,7 @@ public final class ManagedFileManagementImpl implements ManagedFileManagement {
                             String fname = null != file && file.exists() ? file.getName() : "";
                             cur.delete();
                             filesIter.remove();
-                            logger.debug("Removed expired managed file {}", fname);
+                            logger.debug("Removed expired managed file {}, id {}", fname, cur.getID());
                         } else {
                             // For Safety's sake, cleanse from orphaned files
                             if (null != orphanedFiles) {
@@ -625,6 +625,7 @@ public final class ManagedFileManagementImpl implements ManagedFileManagement {
 
     @Override
     public void removeByID(final String id) {
+        LOG.debug("Remove managed file by id {}", id);
         final ManagedFile mf = files.get(id);
         if (null == mf) {
             removeByIDDistributed(id);
@@ -707,6 +708,7 @@ public final class ManagedFileManagementImpl implements ManagedFileManagement {
         }
     }
 
+    @SuppressWarnings("resource")
     private static void copyFile(final File sourceFile, final File destFile) throws IOException {
         if (!destFile.exists()) {
             destFile.createNewFile();
@@ -719,12 +721,7 @@ public final class ManagedFileManagementImpl implements ManagedFileManagement {
             destination = new FileOutputStream(destFile).getChannel();
             destination.transferFrom(source, 0, source.size());
         } finally {
-            if (source != null) {
-                source.close();
-            }
-            if (destination != null) {
-                destination.close();
-            }
+            Streams.close(source, destination);
         }
     }
 

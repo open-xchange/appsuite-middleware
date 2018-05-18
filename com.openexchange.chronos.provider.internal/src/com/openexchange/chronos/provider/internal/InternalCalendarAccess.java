@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the Open-Xchange, Inc. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2020 Open-Xchange, Inc.
+ *     Copyright (C) 2016-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -57,18 +57,23 @@ import static com.openexchange.chronos.provider.CalendarFolderProperty.USED_FOR_
 import static com.openexchange.chronos.provider.CalendarFolderProperty.USED_FOR_SYNC_LITERAL;
 import static com.openexchange.chronos.provider.internal.Constants.ACCOUNT_ID;
 import static com.openexchange.chronos.provider.internal.Constants.CONTENT_TYPE;
+import static com.openexchange.chronos.provider.internal.Constants.PRIVATE_FOLDER_ID;
+import static com.openexchange.chronos.provider.internal.Constants.PUBLIC_FOLDER_ID;
+import static com.openexchange.chronos.provider.internal.Constants.SHARED_FOLDER_ID;
 import static com.openexchange.chronos.provider.internal.Constants.TREE_ID;
 import static com.openexchange.chronos.provider.internal.Constants.USER_PROPERTY_PREFIX;
 import static com.openexchange.folderstorage.CalendarFolderConverter.getStorageFolder;
-import static com.openexchange.folderstorage.CalendarFolderConverter.getStorageType;
 import static com.openexchange.osgi.Tools.requireService;
 import java.sql.Connection;
+import java.text.Collator;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import org.dmfs.rfc5545.DateTime;
@@ -83,6 +88,7 @@ import com.openexchange.chronos.ParticipationStatus;
 import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.TimeTransparency;
 import com.openexchange.chronos.compat.Appointment2Event;
+import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.provider.CalendarAccount;
 import com.openexchange.chronos.provider.CalendarCapability;
 import com.openexchange.chronos.provider.CalendarFolder;
@@ -115,6 +121,7 @@ import com.openexchange.folderstorage.FolderServiceDecorator;
 import com.openexchange.folderstorage.ParameterizedFolder;
 import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.folderstorage.type.PrivateType;
+import com.openexchange.java.Collators;
 import com.openexchange.java.util.TimeZones;
 import com.openexchange.quota.Quota;
 import com.openexchange.server.ServiceLookup;
@@ -158,7 +165,17 @@ public class InternalCalendarAccess implements FolderCalendarAccess, SubscribeAw
 
     @Override
     public List<GroupwareCalendarFolder> getVisibleFolders(GroupwareFolderType type) throws OXException {
-        return getCalendarFolders(getFolderService().getVisibleFolders(TREE_ID, CONTENT_TYPE, getStorageType(type), true, session.getSession(), initDecorator()));
+        //        return getCalendarFolders(getFolderService().getVisibleFolders(TREE_ID, CONTENT_TYPE, getStorageType(type), true, session.getSession(), initDecorator()));
+        switch (type) {
+            case PRIVATE:
+                return getCalendarFolders(getSubfoldersRecursively(getFolderService(), initDecorator(), PRIVATE_FOLDER_ID));
+            case SHARED:
+                return getCalendarFolders(getSubfoldersRecursively(getFolderService(), initDecorator(), SHARED_FOLDER_ID));
+            case PUBLIC:
+                return getCalendarFolders(getSubfoldersRecursively(getFolderService(), initDecorator(), PUBLIC_FOLDER_ID));
+            default:
+                throw CalendarExceptionCodes.UNSUPPORTED_OPERATION_FOR_PROVIDER.create(Constants.PROVIDER_ID);
+        }
     }
 
     @Override
@@ -299,6 +316,11 @@ public class InternalCalendarAccess implements FolderCalendarAccess, SubscribeAw
     }
 
     @Override
+    public Map<String, EventsResult> resolveResources(String folderId, List<String> resourceNames) throws OXException {
+        return getCalendarService().getUtilities().resolveResources(session, folderId, resourceNames);
+    }
+
+    @Override
     public Map<String, EventsResult> searchEvents(List<String> folderIds, List<SearchFilter> filters, List<String> queries) throws OXException {
         return getCalendarService().searchEvents(session, folderIds, filters, queries);
     }
@@ -319,8 +341,8 @@ public class InternalCalendarAccess implements FolderCalendarAccess, SubscribeAw
     }
 
     @Override
-    public CalendarResult updateAttendee(EventID eventID, Attendee attendee, long clientTimestamp) throws OXException {
-        return getCalendarService().updateAttendee(session, eventID, attendee, clientTimestamp);
+    public CalendarResult updateAttendee(EventID eventID, Attendee attendee, List<Alarm> alarms, long clientTimestamp) throws OXException {
+        return getCalendarService().updateAttendee(session, eventID, attendee, alarms, clientTimestamp);
     }
 
     @Override
@@ -377,7 +399,7 @@ public class InternalCalendarAccess implements FolderCalendarAccess, SubscribeAw
      *
      * @return The calendar service
      */
-    private CalendarService getCalendarService() throws OXException {
+    private CalendarService getCalendarService() {
         return session.getCalendarService();
     }
 
@@ -444,12 +466,53 @@ public class InternalCalendarAccess implements FolderCalendarAccess, SubscribeAw
     }
 
     /**
+     * Gets a list of groupware calendar folders representing the userized folders in the supplied userized folders.
+     *
+     * @param folders The folders from the folder service
+     * @return The groupware calendar folders
+     */
+    private List<GroupwareCalendarFolder> getCalendarFolders(List<UserizedFolder> folders) throws OXException {
+        if (null == folders || 0 == folders.size()) {
+            return Collections.emptyList();
+        }
+        List<GroupwareCalendarFolder> calendarFolders = new ArrayList<GroupwareCalendarFolder>(folders.size());
+        for (UserizedFolder userizedFolder : folders) {
+            calendarFolders.add(getCalendarFolder(userizedFolder));
+        }
+        return sort(calendarFolders, session.getEntityResolver().getLocale(session.getUserId()));
+    }
+
+    private List<GroupwareCalendarFolder> sort(List<GroupwareCalendarFolder> calendarFolders, Locale locale) {
+        if (null == calendarFolders || 2 > calendarFolders.size()) {
+            return calendarFolders;
+        }
+        Collator collator = Collators.getSecondaryInstance(locale);
+        calendarFolders.sort(new Comparator<GroupwareCalendarFolder>() {
+
+            @Override
+            public int compare(GroupwareCalendarFolder folder1, GroupwareCalendarFolder folder2) {
+                if (folder1.isDefaultFolder() != folder2.isDefaultFolder()) {
+                    /*
+                     * default folders first
+                     */
+                    return folder1.isDefaultFolder() ? -1 : 1;
+                }
+                /*
+                 * compare folder names, otherwise
+                 */
+                return collator.compare(folder1.getName(), folder2.getName());
+            }
+        });
+        return calendarFolders;
+    }
+
+    /**
      * Gets the extended calendar properties for a storage folder.
      *
      * @param folder The folder to get the extended calendar properties for
      * @return The extended properties
      */
-    private static ExtendedProperties getExtendedProperties(Map<String, String> userProperties, UserizedFolder folder) throws OXException {
+    private static ExtendedProperties getExtendedProperties(Map<String, String> userProperties, UserizedFolder folder) {
         ExtendedProperties properties = new ExtendedProperties();
         /*
          * used for sync
@@ -562,6 +625,31 @@ public class InternalCalendarAccess implements FolderCalendarAccess, SubscribeAw
         } else {
             propertyStorage.deleteFolderProperties(contextId, asInt(folderId), userId, propertyNames, connection);
         }
+    }
+
+    /**
+     * Collects all calendar subfolders from a parent folder recursively.
+     *
+     * @param folderService A reference to the folder service
+     * @param decorator The optional folder service decorator to use
+     * @param parentId The parent folder identifier to get the subfolders from
+     * @return The collected subfolders, or an empty list if there are none
+     */
+    private List<UserizedFolder> getSubfoldersRecursively(FolderService folderService, FolderServiceDecorator decorator, String parentId) throws OXException {
+        UserizedFolder[] subfolders = folderService.getSubfolders(TREE_ID, parentId, false, session.getSession(), decorator).getResponse();
+        if (null == subfolders || 0 == subfolders.length) {
+            return Collections.emptyList();
+        }
+        List<UserizedFolder> allFolders = new ArrayList<UserizedFolder>();
+        for (UserizedFolder subfolder : subfolders) {
+            if (CONTENT_TYPE.equals(subfolder.getContentType())) {
+                allFolders.add(subfolder);
+            }
+            if (subfolder.hasSubscribedSubfolders()) {
+                allFolders.addAll(getSubfoldersRecursively(folderService, decorator, subfolder.getID()));
+            }
+        }
+        return allFolders;
     }
 
 }

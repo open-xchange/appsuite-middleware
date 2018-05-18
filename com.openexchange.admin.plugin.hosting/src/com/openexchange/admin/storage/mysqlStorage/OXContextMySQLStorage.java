@@ -164,15 +164,13 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
 
     static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(OXContextMySQLStorage.class);
 
-    private final int CONTEXTS_PER_SCHEMA;
+    private final int maxNumberOfContextsPerSchema;
 
     private final boolean lockOnWriteContextToPayloadDb;
 
     private final String selectionCriteria = "cid";
 
     private final int criteriaType = Types.INTEGER;
-
-    // private Object criteriaMatch = null;
 
     private final OXContextMySQLStorageCommon contextCommon;
 
@@ -186,16 +184,16 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
         this.prop = cache.getProperties();
         this.contextCommon = new OXContextMySQLStorageCommon();
 
-        int CONTEXTS_PER_SCHEMA = 1;
+        int maxNumberOfContextsPerSchema = 1;
         try {
-            CONTEXTS_PER_SCHEMA = Integer.parseInt(prop.getProp("CONTEXTS_PER_SCHEMA", "1"));
-            if (CONTEXTS_PER_SCHEMA <= 0) {
+            maxNumberOfContextsPerSchema = Integer.parseInt(prop.getProp("CONTEXTS_PER_SCHEMA", "1"));
+            if (maxNumberOfContextsPerSchema <= 0) {
                 throw new OXContextException("CONTEXTS_PER_SCHEMA MUST BE > 0");
             }
         } catch (final OXContextException e) {
             LOG.error("Error init", e);
         }
-        this.CONTEXTS_PER_SCHEMA = CONTEXTS_PER_SCHEMA;
+        this.maxNumberOfContextsPerSchema = maxNumberOfContextsPerSchema;
 
         boolean lockOnWriteContextToPayloadDb = false;
         try {
@@ -564,7 +562,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
             }
 
             // Put context identifiers into a list
-            List<Integer> contextIds = new ArrayList<>(CONTEXTS_PER_SCHEMA >> 1);
+            List<Integer> contextIds = new ArrayList<>(maxNumberOfContextsPerSchema >> 1);
             do {
                 contextIds.add(Integer.valueOf(rs.getInt(1)));
             } while (rs.next());
@@ -676,7 +674,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
             }
 
             // Put context identifiers into a list
-            List<Integer> contextIds = new ArrayList<>(CONTEXTS_PER_SCHEMA >> 1);
+            List<Integer> contextIds = new ArrayList<>(maxNumberOfContextsPerSchema >> 1);
             do {
                 contextIds.add(Integer.valueOf(rs.getInt(1)));
             } while (rs.next());
@@ -1914,6 +1912,12 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                     } catch (final Exception e) {
                         LOG.error("", e);
                     }
+                    try {
+                        final Cache jcs = cacheService.getCache("Capabilities");
+                        jcs.invalidateGroup(ctx.getId().toString());
+                    } catch (final Exception e) {
+                        LOG.error("", e);
+                    }
                 }
             }
         } finally {
@@ -2051,7 +2055,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
         final String[] unfilledSchemas;
         try {
             pool.lock(con, i(poolId));
-            unfilledSchemas = pool.getUnfilledSchemas(con, i(poolId), this.CONTEXTS_PER_SCHEMA);
+            unfilledSchemas = pool.getUnfilledSchemas(con, i(poolId), this.maxNumberOfContextsPerSchema);
         } catch (PoolException e) {
             LOG.error("Pool Error", e);
             throw new StorageException(e);
@@ -2467,14 +2471,16 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                 return new Quota[0];
             }
 
-            Quota[] retval = new Quota[length];
+            List<Quota> quotaList = new ArrayList<>();
             for (int i = length; i-- > 0;) {
                 String module = moduleIds[i];
                 Long qlimit = AmountQuotas.getQuotaFromDB(con, contextId, module);
-                retval[i] = new Quota(qlimit.longValue(), module);
+                if (qlimit != null) {
+                    quotaList.add(new Quota(qlimit.longValue(), module));
+                }
             }
 
-            return retval;
+            return quotaList.size() > 0 ? quotaList.toArray(new Quota[quotaList.size()]) : new Quota[0];
         } catch (PoolException e) {
             LOG.error("Pool Error", e);
             throw new StorageException(e);

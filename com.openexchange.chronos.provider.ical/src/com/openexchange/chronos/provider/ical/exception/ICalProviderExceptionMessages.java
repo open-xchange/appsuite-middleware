@@ -62,11 +62,11 @@ public class ICalProviderExceptionMessages implements LocalizableStrings {
 
     public static final String MISSING_FEED_URI_MSG = "The feed URI is missing.";
 
-    public static final String BAD_FEED_URI_MSG = "The feed URI does not match the standard.";
+    public static final String BAD_FEED_URI_MSG = "The given feed URI is invalid. Please change it and try again.";
 
-    public static final String FEED_URI_NOT_ALLOWED_MSG = "Cannot connect to feed with URL: %1$s. Please change the URL and try again.";
+    public static final String FEED_URI_NOT_ALLOWED_MSG = "Cannot connect to feed with URI: %1$s. Please change it and try again.";
 
-    public static final String NO_FEED_MSG = "The provided URL %1$s does not contain content as expected. Please change the URL and try again.";
+    public static final String NO_FEED_MSG = "The provided URI %1$s does not contain content as expected. Please change it and try again.";
 
     public static final String NOT_ALLOWED_CHANGE_MSG = "The field %1$s cannot be changed.";
 
@@ -74,7 +74,7 @@ public class ICalProviderExceptionMessages implements LocalizableStrings {
 
     public static final String FEED_SIZE_EXCEEDED_MSG = "Unfortunately your requested feed cannot be subscribed due to size limitations.";
 
-    public static final String UNEXPECTED_FEED_ERROR_MSG = "Unfortunately the given feed URL cannot be processed as expected.";
+    public static final String UNEXPECTED_FEED_ERROR_MSG = "Unfortunately the given feed URI cannot be processed as expected.";
 
     public static final String REMOTE_SERVICE_UNAVAILABLE_MSG = "The remote service is unavailable at the moment. There is nothing we can do about it. Please try again later.";
 
@@ -89,6 +89,8 @@ public class ICalProviderExceptionMessages implements LocalizableStrings {
     public static final String PASSWORD_REQUIRED_MSG = "Access to this calendar is restricted. Please enter your password and try again.";
 
     public static final String PASSWORD_WRONG_MSG = "Authentication failed. Please enter your password and try again.";
+
+    public static final String CREDENTIALS_CHANGED_MSG = "Authentication failed due to a recent credentials change. Please remove the account and add it again with correct credentials.";
 
     /**
      * Initializes a new {@link ICalProviderExceptionMessages}.

@@ -56,6 +56,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.SortedSet;
 import java.util.TimeZone;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.AttendeeField;
@@ -64,6 +65,7 @@ import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.Organizer;
 import com.openexchange.chronos.ParticipationStatus;
+import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.itip.ITipAnalysis;
 import com.openexchange.chronos.itip.ITipAnalyzer;
@@ -222,19 +224,8 @@ public abstract class AbstractITipAnalyzer implements ITipAnalyzer {
                 }
             }
 
-            Sentence sentence = null;
-            if (newStatus != null) {
-                if (newStatus.equals(ParticipationStatus.ACCEPTED)) {
-                    sentence = new Sentence(Messages.ACCEPT_INTRO).add(displayName, ArgumentType.PARTICIPANT).add("", ArgumentType.STATUS, newStatus);
-                } else if (newStatus.equals(ParticipationStatus.DECLINED)) {
-                    sentence = new Sentence(Messages.DECLINE_INTRO).add(displayName, ArgumentType.PARTICIPANT).add("", ArgumentType.STATUS, newStatus);
-                } else if (newStatus.equals(ParticipationStatus.TENTATIVE)) {
-                    sentence = new Sentence(Messages.TENTATIVE_INTRO).add(displayName, ArgumentType.PARTICIPANT).add("", ArgumentType.STATUS, newStatus);
-                }
-
-                if (sentence != null) {
-                    change.setIntroduction(sentence.getMessage(wrapper, locale));
-                }
+            if (ParticipationStatus.ACCEPTED.equals(newStatus) || ParticipationStatus.TENTATIVE.equals(newStatus) || ParticipationStatus.DECLINED.equals(newStatus)) {
+                change.setIntroduction(new Sentence(Messages.STATUS_CHANGED_INTRO).add(displayName, ArgumentType.PARTICIPANT).add("", ArgumentType.STATUS, newStatus).getMessage(wrapper, locale));
             }
         } else {
             if (message.getMethod() != ITipMethod.COUNTER) {
@@ -247,6 +238,9 @@ public abstract class AbstractITipAnalyzer implements ITipAnalyzer {
         AttendeeField.SENT_BY, AttendeeField.URI };
 
     private boolean onlyStateChanged(ITipEventUpdate diff) {
+        if (null == diff) {
+            return false;
+        }
         if (diff.containsAnyChangesBeside(new EventField[] { EventField.ATTENDEES })) {
             return false;
         }
@@ -267,8 +261,9 @@ public abstract class AbstractITipAnalyzer implements ITipAnalyzer {
 
         List<? extends ItemUpdate<Attendee, AttendeeField>> updatedItems = attendeeUpdates.getUpdatedItems();
         for (ItemUpdate<Attendee, AttendeeField> attendeeUpdate : updatedItems) {
-            if (attendeeUpdate.containsAnyChangeOf(ALL_BUT_CONFIRMATION))
+            if (attendeeUpdate.containsAnyChangeOf(ALL_BUT_CONFIRMATION)) {
                 return false;
+            }
         }
 
         return true;
@@ -308,7 +303,7 @@ public abstract class AbstractITipAnalyzer implements ITipAnalyzer {
 
     public boolean doAppointmentsDiffer(final Event update, final Event original) throws OXException {
         if (original == update) {
-            // Can be the same object .. so omit roundtrip of diff
+            // Can be the same object .. so avoid roundtrip of diff
             return false;
         }
         final ITipEventUpdate diff = new ITipEventUpdate(original, update, true, AbstractITipAnalyzer.SKIP);
@@ -420,7 +415,7 @@ public abstract class AbstractITipAnalyzer implements ITipAnalyzer {
 
     protected void ensureParticipant(final Event original, final Event event, final CalendarSession session, int owner) {
         if (null == CalendarUtils.find(event.getAttendees(), owner)) {
-            // Owner is a party crasher.. 
+            // Owner is a party crasher..
             Attendee attendee = new Attendee();
             attendee.setEntity(owner);
             attendee.setPartStat(ParticipationStatus.NEEDS_ACTION);
@@ -437,5 +432,22 @@ public abstract class AbstractITipAnalyzer implements ITipAnalyzer {
             attendees.add(attendee);
             event.setAttendees(attendees);
         }
+    }
+
+    /**
+     * Checks if a exception was already deleted
+     *
+     * @param original The original or rather the master event
+     * @param exception The exception to check
+     * @return <code>true</code> if the given exception was already deleted
+     */
+    protected boolean isDeleteException(Event original, Event exception) {
+        if (null != original && original.containsDeleteExceptionDates()) {
+            SortedSet<RecurrenceId> deleteExceptionDates = original.getDeleteExceptionDates();
+            if (null != deleteExceptionDates) {
+                return deleteExceptionDates.stream().anyMatch(r -> 0 == r.compareTo(exception.getRecurrenceId()));
+            }
+        }
+        return false;
     }
 }

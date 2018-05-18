@@ -52,6 +52,7 @@ package com.openexchange.ajax.chronos;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.fail;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
@@ -79,12 +80,9 @@ import edu.emory.mathcs.backport.java.util.concurrent.TimeUnit;
 @RunWith(BlockJUnit4ClassRunner.class)
 public class BasicSeriesEventTest extends AbstractChronosTest {
 
-    private String folderId;
-
     @Override
     public void setUp() throws Exception {
         super.setUp();
-        folderId = getDefaultFolder();
     }
 
     /**
@@ -92,9 +90,9 @@ public class BasicSeriesEventTest extends AbstractChronosTest {
      */
     @Test
     public void testCreateSeries() throws Exception {
-        EventData toCreate = EventFactory.createSeriesEvent(defaultUserApi.getCalUser(), "testCreateSeries", 3);
+        EventData toCreate = EventFactory.createSeriesEvent(defaultUserApi.getCalUser(), "testCreateSeries", 3, folderId);
         EventData expectedEventData = eventManager.createEvent(toCreate);
-        EventData actualEventData = eventManager.getEvent(expectedEventData.getId());
+        EventData actualEventData = eventManager.getEvent(folderId, expectedEventData.getId());
         AssertUtil.assertEventsEqual(expectedEventData, actualEventData);
     }
 
@@ -103,7 +101,7 @@ public class BasicSeriesEventTest extends AbstractChronosTest {
      */
     @Test
     public void testDeleteCompleteSeries() throws Exception {
-        EventData toCreate = EventFactory.createSeriesEvent(defaultUserApi.getCalUser(), "testDeleteCompleteSeries", 3);
+        EventData toCreate = EventFactory.createSeriesEvent(defaultUserApi.getCalUser(), "testDeleteCompleteSeries", 3, folderId);
         EventData expectedEventData = eventManager.createEvent(toCreate);
 
         EventId eventId = new EventId();
@@ -112,7 +110,7 @@ public class BasicSeriesEventTest extends AbstractChronosTest {
         eventManager.deleteEvent(eventId);
 
         try {
-            eventManager.getEvent(expectedEventData.getId(), true);
+            eventManager.getEvent(folderId, expectedEventData.getId(), true);
             fail("Series exists. Expected 'CAL-4040' error");
         } catch (ChronosApiException e) {
             assertEquals("CAL-4040", e.getErrorCode());
@@ -124,19 +122,22 @@ public class BasicSeriesEventTest extends AbstractChronosTest {
      */
     @Test
     public void testDeleteSeriesOccurence() throws Exception {
-        Date date = new Date();
-        int offset = TimeZone.getDefault().getOffset(date.getTime());
-        Date today = DateTimeUtil.getZuluDate(date.getTime() - offset);
-        Date nextWeek = DateTimeUtil.parseZuluDateTime(DateTimeUtil.formatZuluDate(DateTimeUtil.incrementDateTimeData(TimeZone.getTimeZone("UTC"), date, 7)));
+        Calendar instance = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+        instance.setTimeInMillis(System.currentTimeMillis());
+        instance.add(Calendar.DAY_OF_MONTH, -1);
+        Date from = instance.getTime();
+        instance.add(Calendar.DAY_OF_MONTH, 7);
+        Date until = instance.getTime();
+        instance.add(Calendar.DAY_OF_MONTH, -7);
 
-        EventData toCreate = EventFactory.createSeriesEvent(defaultUserApi.getCalUser(), "testDeleteSeriesOccurence", 3);
+        EventData toCreate = EventFactory.createSeriesEvent(defaultUserApi.getCalUser(), "testDeleteSeriesOccurence", 3, folderId);
         EventData expectedEventData = eventManager.createEvent(toCreate);
 
         EventId eventId = new EventId();
         eventId.setId(expectedEventData.getId());
         eventId.setFolder(expectedEventData.getFolder());
 
-        List<EventData> allEvents = eventManager.getAllEvents(today, nextWeek, true);
+        List<EventData> allEvents = eventManager.getAllEvents(folderId, from, until, true);
         assertEquals("Expected 3 occurrences", 3, allEvents.size());
         for (int x = 0; x < allEvents.size(); x++) {
             assertEquals(expectedEventData.getId(), allEvents.get(x).getId());
@@ -150,14 +151,14 @@ public class BasicSeriesEventTest extends AbstractChronosTest {
         eventManager.deleteEvent(occurence);
 
         try {
-            eventManager.getRecurringEvent(occurence.getId(), occurence.getRecurrenceId(), true);
+            eventManager.getRecurringEvent(folderId, occurence.getId(), occurence.getRecurrenceId(), true);
             fail("Series exists. Expected 'CAL-4042' error");
         } catch (ChronosApiException e) {
             assertEquals("CAL-4042", e.getErrorCode());
         }
 
         // Get updates
-        UpdatesResult updates = eventManager.getUpdates(date, true);
+        UpdatesResult updates = eventManager.getUpdates(from, true, folderId);
         assertEquals(2, updates.getNewAndModified().size());
         for (int x = 0; x < updates.getNewAndModified().size(); x++) {
             assertEquals(expectedEventData.getId(), updates.getNewAndModified().get(x).getId());
@@ -169,7 +170,7 @@ public class BasicSeriesEventTest extends AbstractChronosTest {
      */
     @Test
     public void testUpdateSeriesMaster() throws Exception {
-        EventData toCreate = EventFactory.createSeriesEvent(defaultUserApi.getCalUser(), "testUpdateSeriesMaster", 3);
+        EventData toCreate = EventFactory.createSeriesEvent(defaultUserApi.getCalUser(), "testUpdateSeriesMaster", 3, folderId);
         EventData expectedEventData = eventManager.createEvent(toCreate);
 
         EventId eventId = new EventId();
@@ -195,19 +196,22 @@ public class BasicSeriesEventTest extends AbstractChronosTest {
      */
     @Test
     public void testUpdateSeriesOccurence() throws Exception {
-        Date date = new Date();
-        int offset = TimeZone.getDefault().getOffset(date.getTime());
-        Date today = DateTimeUtil.getZuluDate(date.getTime() - offset);
-        Date nextWeek = DateTimeUtil.parseZuluDateTime(DateTimeUtil.formatZuluDate(DateTimeUtil.incrementDateTimeData(TimeZone.getTimeZone("UTC"), date, 7)));
+        Calendar instance = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+        instance.setTimeInMillis(System.currentTimeMillis());
+        instance.add(Calendar.DAY_OF_MONTH, -1);
+        Date from = instance.getTime();
+        instance.add(Calendar.DAY_OF_MONTH, 7);
+        Date until = instance.getTime();
+        instance.add(Calendar.DAY_OF_MONTH, -7);
 
-        EventData toCreate = EventFactory.createSeriesEvent(defaultUserApi.getCalUser(), "testUpdateSeriesOccurence", 3);
+        EventData toCreate = EventFactory.createSeriesEvent(defaultUserApi.getCalUser(), "testUpdateSeriesOccurence", 3, folderId);
         EventData expectedEventData = eventManager.createEvent(toCreate);
 
         EventId masterId = new EventId();
         masterId.setId(expectedEventData.getId());
         masterId.setFolder(expectedEventData.getFolder());
 
-        List<EventData> allEvents = eventManager.getAllEvents(today, nextWeek, true);
+        List<EventData> allEvents = eventManager.getAllEvents(folderId, from, until, true);
         assertEquals("Expected 3 occurrences", 3, allEvents.size());
         for (int x = 0; x < allEvents.size(); x++) {
             assertEquals(expectedEventData.getId(), allEvents.get(x).getId());
@@ -221,10 +225,11 @@ public class BasicSeriesEventTest extends AbstractChronosTest {
         EventData updatedData = new EventData();
         updatedData.setEndDate(DateTimeUtil.incrementDateTimeData(allEvents.get(2).getEndDate(), 5000));
         updatedData.setId(occurence.getId());
+        updatedData.setFolder(folderId);
 
-        EventData updatedEvent = eventManager.updateOccurenceEvent(updatedData, occurence.getRecurrenceId());
+        eventManager.updateOccurenceEvent(updatedData, occurence.getRecurrenceId());
 
-        UpdatesResult updates = eventManager.getUpdates(today);
+        UpdatesResult updates = eventManager.getUpdates(from, false, folderId);
 
         // Get updates
         assertEquals(2, updates.getNewAndModified().size());
@@ -244,35 +249,38 @@ public class BasicSeriesEventTest extends AbstractChronosTest {
      */
     @Test
     public void testGetSeries() throws Exception {
-        Date date = new Date();
-        int offset = TimeZone.getDefault().getOffset(date.getTime());
-        DateTimeData today = DateTimeUtil.getZuluDateTime(date.getTime() - offset);
-        DateTimeData nextWeek = DateTimeUtil.getZuluDateTime(DateTimeUtil.incrementDateTimeData(TimeZone.getTimeZone("UTC"), date, 7).getTime());
+        Calendar instance = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+        instance.setTimeInMillis(System.currentTimeMillis());
+        instance.add(Calendar.DAY_OF_MONTH, -1);
+        Date from = instance.getTime();
+        instance.add(Calendar.DAY_OF_MONTH, 7);
+        Date until = instance.getTime();
+        instance.add(Calendar.DAY_OF_MONTH, -7);
 
         // Create a series event
-        EventData toCreate = EventFactory.createSeriesEvent(defaultUserApi.getCalUser(), "testGetSeries", 3);
+        EventData toCreate = EventFactory.createSeriesEvent(defaultUserApi.getCalUser(), "testGetSeries", 3, folderId);
         EventData expectedEventData = eventManager.createEvent(toCreate);
 
         // Get series master
-        EventData actualEventData = eventManager.getEvent(expectedEventData.getId());
+        EventData actualEventData = eventManager.getEvent(folderId, expectedEventData.getId());
         AssertUtil.assertEventsEqual(expectedEventData, actualEventData);
 
         // Get all events
-        List<EventData> allEvents = eventManager.getAllEvents(DateTimeUtil.parseZuluDateTime(today), DateTimeUtil.parseZuluDateTime(nextWeek), true);
+        List<EventData> allEvents = eventManager.getAllEvents(folderId, from, until, true);
         assertEquals("Expected 3 occurrences", 3, allEvents.size());
         for (int x = 0; x < allEvents.size(); x++) {
             assertEquals(expectedEventData.getId(), allEvents.get(x).getId());
         }
 
         // Get series occurrence
-        EventData recurringEvent = eventManager.getRecurringEvent(expectedEventData.getId(), allEvents.get(2).getRecurrenceId(), false);
+        EventData recurringEvent = eventManager.getRecurringEvent(folderId, expectedEventData.getId(), allEvents.get(2).getRecurrenceId(), false);
         assertEquals(expectedEventData.getId(), recurringEvent.getId());
         assertNotEquals(expectedEventData.getRecurrenceId(), recurringEvent.getRecurrenceId());
-        DateTimeData expectedRecurrenceId = DateTimeUtil.getZuluDateTime(DateTimeUtil.parseDateTime(expectedEventData.getStartDate()).getTime() + TimeUnit.DAYS.toMillis(2) - offset);
+        DateTimeData expectedRecurrenceId = DateTimeUtil.getZuluDateTime(DateTimeUtil.parseDateTime(expectedEventData.getStartDate()).getTime() + TimeUnit.DAYS.toMillis(2));
         assertEquals(expectedRecurrenceId.getValue(), recurringEvent.getRecurrenceId());
 
         // Get updates
-        UpdatesResult updates = eventManager.getUpdates(date, true);
+        UpdatesResult updates = eventManager.getUpdates(from, true, folderId);
         assertEquals(3, updates.getNewAndModified().size());
         for (int x = 0; x < updates.getNewAndModified().size(); x++) {
             assertEquals(expectedEventData.getId(), updates.getNewAndModified().get(x).getId());
@@ -285,37 +293,43 @@ public class BasicSeriesEventTest extends AbstractChronosTest {
      */
     @Test
     public void testFloatingSeries() throws Exception {
-        Date date = new Date();
-        int offset = TimeZone.getDefault().getOffset(date.getTime());
-        DateTimeData today = DateTimeUtil.getZuluDateTime(date.getTime() - offset);
-        DateTimeData nextWeek = DateTimeUtil.getZuluDateTime(DateTimeUtil.incrementDateTimeData(TimeZone.getTimeZone("UTC"), date, 7).getTime());
+        Calendar instance = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+        instance.setTimeInMillis(System.currentTimeMillis());
+        instance.add(Calendar.DAY_OF_MONTH, -1);
+        Date from = instance.getTime();
+        instance.add(Calendar.DAY_OF_MONTH, 7);
+        Date until = instance.getTime();
+        instance.add(Calendar.DAY_OF_MONTH, -7);
 
         // Create a series event
-        EventData toCreate = EventFactory.createSeriesEvent(defaultUserApi.getCalUser(), "testFloatingSeries", 3);
-        toCreate.setStartDate(DateTimeUtil.getDateTime(null, System.currentTimeMillis()));
-        toCreate.setEndDate(DateTimeUtil.getDateTime(null, System.currentTimeMillis() + 5000));
+        EventData toCreate = EventFactory.createSeriesEvent(defaultUserApi.getCalUser(), "testFloatingSeries", 3, folderId);
+        instance.add(Calendar.DAY_OF_MONTH, 1);
+        toCreate.setStartDate(DateTimeUtil.getDateTime(null, instance.getTimeInMillis()));
+        toCreate.setEndDate(DateTimeUtil.getDateTime(null, instance.getTimeInMillis() + 5000));
         EventData expectedEventData = eventManager.createEvent(toCreate);
 
         // Get series master
-        EventData actualEventData = eventManager.getEvent(expectedEventData.getId());
+        EventData actualEventData = eventManager.getEvent(folderId, expectedEventData.getId());
         AssertUtil.assertEventsEqual(expectedEventData, actualEventData);
 
         // Get all events
-        List<EventData> allEvents = eventManager.getAllEvents(DateTimeUtil.parseZuluDateTime(today), DateTimeUtil.parseZuluDateTime(nextWeek), true);
+        List<EventData> allEvents = eventManager.getAllEvents(folderId, from, until, true);
         assertEquals("Expected 3 occurrences", 3, allEvents.size());
         for (int x = 0; x < allEvents.size(); x++) {
             assertEquals(expectedEventData.getId(), allEvents.get(x).getId());
         }
 
         // Get series occurrence
-        EventData recurringEvent = eventManager.getRecurringEvent(expectedEventData.getId(), allEvents.get(2).getRecurrenceId(), false);
+        EventData recurringEvent = eventManager.getRecurringEvent(folderId, expectedEventData.getId(), allEvents.get(2).getRecurrenceId(), false);
         assertEquals(expectedEventData.getId(), recurringEvent.getId());
         assertNotEquals(expectedEventData.getRecurrenceId(), recurringEvent.getRecurrenceId());
-        DateTimeData expectedRecurrenceId = DateTimeUtil.getDateTime(null, DateTimeUtil.parseDateTime(expectedEventData.getStartDate()).getTime() + TimeUnit.DAYS.toMillis(2));
+        instance.add(Calendar.DAY_OF_MONTH, 2);
+        DateTimeData expectedRecurrenceId = DateTimeUtil.getDateTime(instance.getTimeInMillis());
+        assertEquals(expectedRecurrenceId.getValue(), recurringEvent.getStartDate().getValue());
         assertEquals(expectedRecurrenceId.getValue(), recurringEvent.getRecurrenceId());
 
         // Get updates
-        UpdatesResult updates = eventManager.getUpdates(date, true);
+        UpdatesResult updates = eventManager.getUpdates(from, true, folderId);
         assertEquals(3, updates.getNewAndModified().size());
         for (int x = 0; x < updates.getNewAndModified().size(); x++) {
             assertEquals(expectedEventData.getId(), updates.getNewAndModified().get(x).getId());

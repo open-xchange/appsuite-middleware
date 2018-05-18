@@ -65,7 +65,10 @@ abstract class AbstractManager {
     public AbstractManager() {
         super();
     }
-    
+
+
+    private static final String WARNING = "warning";
+
     /**
      * Checks if a response doesn't contain any errors
      *
@@ -74,7 +77,11 @@ abstract class AbstractManager {
      * @param data The data element of the response
      * @return The data
      */
-    <T> T checkResponse(String error, String errorDesc, T data) {
+    <T> T checkResponse(String error, String errorDesc, String category, T data) {
+
+        if(WARNING.equalsIgnoreCase(category)) {
+            return data;
+        }
         assertNull(errorDesc, error);
         assertNotNull(data);
         return data;

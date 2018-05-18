@@ -162,8 +162,8 @@ public final class ConfigFileStorageActivator extends HousekeepingActivator {
         try {
             log.info("stopping bundle: com.openexchange.file.storage.config");
             Services.setServices(null);
-            cleanUp();
             dropFileStorageProperties();
+            super.stopBundle();
         } catch (final Exception e) {
             log.error("Stopping bundle \"com.openexchange.file.storage.config\" failed.", e);
             throw e;

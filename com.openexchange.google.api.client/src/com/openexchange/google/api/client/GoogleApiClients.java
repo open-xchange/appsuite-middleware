@@ -204,7 +204,7 @@ public class GoogleApiClients {
         }
 
         // Get default Google account
-        OAuthAccount googleAccount = oAuthService.getAccount(accountId, session, session.getUserId(), session.getContextId());
+        OAuthAccount googleAccount = oAuthService.getAccount(session, accountId);
 
         googleAccount = reacquireIfExpired(session, reacquireIfExpired, googleAccount);
 

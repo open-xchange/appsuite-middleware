@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the Open-Xchange, Inc. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2020 Open-Xchange, Inc.
+ *     Copyright (C) 2016-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -54,6 +54,7 @@ import java.util.List;
 import java.util.Map;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.ParticipationStatus;
+import com.openexchange.chronos.exception.ProblemSeverity;
 import com.openexchange.chronos.service.CalendarUtilities;
 import com.openexchange.chronos.storage.AttendeeStorage;
 import com.openexchange.exception.OXException;
@@ -76,10 +77,13 @@ public class RdbAttendeeStorage extends RdbResilientStorage implements AttendeeS
      * @param delegate The delegate storage
      * @param handleTruncations <code>true</code> to automatically handle data truncation warnings, <code>false</code>, otherwise
      * @param handleIncorrectStrings <code>true</code> to automatically handle incorrect string warnings, <code>false</code>, otherwise
+     * @param unsupportedDataThreshold The threshold defining up to which severity unsupported data errors can be ignored, or <code>null</code> to not ignore any
+     *            unsupported data error at all
      */
-    public RdbAttendeeStorage(ServiceLookup services, AttendeeStorage delegate, boolean handleTruncations, boolean handleIncorrectStrings) {
+    public RdbAttendeeStorage(ServiceLookup services, AttendeeStorage delegate, boolean handleTruncations, boolean handleIncorrectStrings, ProblemSeverity unsupportedDataThreshold) {
         super(services, handleTruncations, handleIncorrectStrings);
         this.delegate = delegate;
+        setUnsupportedDataThreshold(unsupportedDataThreshold, delegate);
     }
 
     @Override

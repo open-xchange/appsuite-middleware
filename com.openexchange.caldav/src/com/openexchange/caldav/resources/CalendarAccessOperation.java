@@ -111,8 +111,9 @@ public abstract class CalendarAccessOperation<T> {
         IDBasedCalendarAccess calendarAccess = requireService(IDBasedCalendarAccessFactory.class, services).createAccess(session);
         calendarAccess.set(CalendarParameters.PARAMETER_EXPAND_OCCURRENCES, Boolean.FALSE);
         calendarAccess.set(CalendarParameters.PARAMETER_CHECK_CONFLICTS, Boolean.FALSE);
-        calendarAccess.set(CalendarParameters.PARAMETER_AUTO_HANDLE_DATA_TRUNCATIONS, Boolean.TRUE);
-        calendarAccess.set(CalendarParameters.PARAMETER_AUTO_HANDLE_INCORRECT_STRINGS, Boolean.TRUE);
+        calendarAccess.set(CalendarParameters.PARAMETER_IGNORE_STORAGE_WARNINGS, Boolean.TRUE);
+        calendarAccess.set(CalendarParameters.PARAMETER_TRACK_ATTENDEE_USAGE, Boolean.TRUE);
+        calendarAccess.set(CalendarParameters.PARAMETER_IGNORE_FORBIDDEN_ATTENDEE_CHANGES, Boolean.TRUE);
         return calendarAccess;
     }
 

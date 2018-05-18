@@ -50,6 +50,7 @@
 package com.openexchange.mail.authenticity.impl.core.parsers;
 
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.function.BiFunction;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.authenticity.MailAuthenticityResultKey;
@@ -188,8 +189,8 @@ abstract class AbstractMailAuthenticityMechanismParser implements BiFunction<Map
      * @param mechResult The {@link MailAuthenticityMechanismResult} to add the attributes to
      */
     protected void addProperties(Map<String, String> attributes, AbstractAuthMechResult mechResult) {
-        for (String key : attributes.keySet()) {
-            mechResult.addProperty(key, attributes.get(key));
+        for (Entry<String, String> entry : attributes.entrySet()) {
+            mechResult.addProperty(entry.getKey(), entry.getValue());
         }
     }
 

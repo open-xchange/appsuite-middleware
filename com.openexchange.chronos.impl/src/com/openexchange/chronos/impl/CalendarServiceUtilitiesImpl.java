@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the Open-Xchange, Inc. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2020 Open-Xchange, Inc.
+ *     Copyright (C) 2016-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -53,8 +53,12 @@ import static com.openexchange.chronos.common.CalendarUtils.isSeriesMaster;
 import static com.openexchange.java.Autoboxing.B;
 import static com.openexchange.java.Autoboxing.L;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import com.openexchange.chronos.Event;
+import com.openexchange.chronos.common.DefaultEventsResult;
+import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.impl.performer.ChangeExceptionsPerformer;
 import com.openexchange.chronos.impl.performer.CountEventsPerformer;
 import com.openexchange.chronos.impl.performer.ForeignEventsPerformer;
@@ -64,6 +68,7 @@ import com.openexchange.chronos.impl.performer.ResolveIdPerformer;
 import com.openexchange.chronos.impl.performer.ResolveUidPerformer;
 import com.openexchange.chronos.service.CalendarServiceUtilities;
 import com.openexchange.chronos.service.CalendarSession;
+import com.openexchange.chronos.service.EventsResult;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.exception.OXException;
 import com.openexchange.quota.Quota;
@@ -175,35 +180,71 @@ public class CalendarServiceUtilitiesImpl implements CalendarServiceUtilities {
                 String id = new ResolveUidPerformer(storage).perform(resourceName);
                 if (null == id) {
                     id = new ResolveFilenamePerformer(storage).perform(resourceName);
-                }
-                if (null == id) {
-                    return null;
-                }
-                /*
-                 * get event & any overridden instances in folder
-                 */
-                try {
-                    Event event = new GetPerformer(session, storage).perform(folderId, id, null);
-                    List<Event> events = new ArrayList<Event>();
-                    events.add(event);
-                    if (isSeriesMaster(event)) {
-                        events.addAll(new ChangeExceptionsPerformer(session, storage).perform(folderId, id));
-                    }
-                    return events;
-                } catch (OXException e) {
-                    if ("CAL-4041".equals(e.getErrorCode())) {
-                        /*
-                         * "Event not found in folder..." -> try to load detached occurrences
-                         */
-                        List<Event> detachedOccurrences = new ChangeExceptionsPerformer(session, storage).perform(folderId, id);
-                        if (0 < detachedOccurrences.size()) {
-                            return detachedOccurrences;
-                        }
+                    if (null == id) {
+                        return null;
                     }
                 }
-                return null;
+                return resolveEvent(session, storage, folderId, id).getEvents();
             }
         }.executeQuery();
+    }
+
+    @Override
+    public Map<String, EventsResult> resolveResources(CalendarSession session, String folderId, List<String> resourceNames) throws OXException {
+        return new InternalCalendarStorageOperation<Map<String, EventsResult>>(session) {
+
+            @Override
+            protected Map<String, EventsResult> execute(CalendarSession session, CalendarStorage storage) throws OXException {
+                Map<String, EventsResult> resultsPerResourceName = new HashMap<String, EventsResult>(resourceNames.size());
+                /*
+                 * batch-resolve by UID, falling back to filename as needed, and wrap into appropriate events results
+                 */
+                Map<String, String> eventIdsByResourceName = new ResolveUidPerformer(storage).perform(resourceNames);
+                for (String resourceName : resourceNames) {
+                    String id = eventIdsByResourceName.get(resourceName);
+                    if (null == id) {
+                        id = new ResolveFilenamePerformer(storage).perform(resourceName);
+                        if (null == id) {
+                            DefaultEventsResult result = new DefaultEventsResult(CalendarExceptionCodes.EVENT_NOT_FOUND_IN_FOLDER.create(folderId, resourceName));
+                            resultsPerResourceName.put(resourceName, result);
+                            continue;
+                        }
+                    }
+                    resultsPerResourceName.put(resourceName, resolveEvent(session, storage, folderId, id));
+                }
+                return resultsPerResourceName;
+            }
+        }.executeQuery();
+    }
+
+    static EventsResult resolveEvent(CalendarSession session, CalendarStorage storage, String folderId, String id) {
+        /*
+         * get event & any overridden instances in folder
+         */
+        try {
+            Event event = new GetPerformer(session, storage).perform(folderId, id, null);
+            List<Event> events = new ArrayList<Event>();
+            events.add(event);
+            if (isSeriesMaster(event)) {
+                events.addAll(new ChangeExceptionsPerformer(session, storage).perform(folderId, id));
+            }
+            return new DefaultEventsResult(events);
+        } catch (OXException e) {
+            if ("CAL-4041".equals(e.getErrorCode())) {
+                /*
+                 * "Event not found in folder..." -> try to load detached occurrences
+                 */
+                try {
+                    List<Event> detachedOccurrences = new ChangeExceptionsPerformer(session, storage).perform(folderId, id);
+                    if (0 < detachedOccurrences.size()) {
+                        return new DefaultEventsResult(detachedOccurrences);
+                    }
+                } catch (OXException x) {
+                    // ignore
+                }
+            }
+            return new DefaultEventsResult(e);
+        }
     }
 
 }

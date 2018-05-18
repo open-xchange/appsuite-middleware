@@ -182,7 +182,8 @@ public class ExtractSessionPaketTest extends AbstractPGPTest {
         //Now trying to decrypt the PGP Data just with the knowledge of the session key
         PGPSymmetricDecrypter symmetricDecrypter = new PGPSymmetricDecrypter(symmetricKey);
         ByteArrayOutputStream decryptedData = new ByteArrayOutputStream();
-        List<PGPSignatureVerificationResult> verifyResults = symmetricDecrypter.decrypt(new ByteArrayInputStream(encryptedTestData), decryptedData);
+        PGPDecryptionResult result = symmetricDecrypter.decrypt(new ByteArrayInputStream(encryptedTestData), decryptedData);
+        List<PGPSignatureVerificationResult> verifyResults = result.getSignatureVerificationResults();
         assertNotNull("Verification results should be empty for non signed data", verifyResults.isEmpty());
         assertArrayEquals("Decrypted data should be equals to plaintext data", decryptedData.toByteArray(), testData);
 

@@ -54,51 +54,247 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+import org.powermock.api.mockito.PowerMockito;
+import org.powermock.core.classloader.annotations.PowerMockIgnore;
+import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.modules.junit4.PowerMockRunner;
+import com.openexchange.chronos.ical.ICalService;
+import com.openexchange.chronos.ical.ICalUtilities;
+import com.openexchange.chronos.ical.ical4j.mapping.ICalMapper;
+import com.openexchange.chronos.ical.impl.ICalUtilitiesImpl;
 import com.openexchange.mail.AbstractMailTest;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.mime.converters.MimeMessageConverter;
 import com.openexchange.mail.structure.handler.MIMEStructureHandler;
+import com.openexchange.server.services.ServerServiceRegistry;
 
 /**
  * {@link Bug19471StructureTest} - Test for output of structured JSON mail object.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
+@RunWith(PowerMockRunner.class)
+@PowerMockIgnore("javax.management.*")
+@PrepareForTest(ServerServiceRegistry.class)
 public class Bug19471StructureTest extends AbstractMailTest {
 
-    private static final byte[] SIMPLE = ("Date: Fri, 12 Aug 2011 17:31:35 +0200 (CEST)\n" + "From: jane@doe.de\n" + "To: mark@nowhere.com\n" + "Message-ID: <1423407397.2.1313163096085.JavaMail.blubber@bar>\n" + "Subject: New Appointment: Generate ICal\n" + "MIME-Version: 1.0\n" + "Content-Type: multipart/alternative; \n" + "    boundary=\"----=_Part_0_2043410500.1313163095014\"\n" + "\n" + "------=_Part_0_2043410500.1313163095014\n" + "Content-Type: text/plain; charset=UTF-8\n" + "Content-Transfer-Encoding: 7bit\n" + "\n" + "A new appointment was created by Blubber Foo.\n" + "\n" + "Appointment\n" + "===========\n" + "Created by: Blubber Foo\n" + "Created at: Friday, Aug 12, 2011 5:31:00 PM, CEST\n" + "Description: Generate ICal\n" + "\n" + "Start date: Wednesday, Aug 17, 2011 2:00:00 PM, CEST\n" + "End date: Wednesday, Aug 17, 2011 3:00:00 PM, CEST\n" + "\n" + "\n" + "Participants\n" + "============\n" + "Blubber Foo (accepted)\n" + "mark@nowhere.com (external)\n" + "\n" + "Resources\n" + "=========\n" + "No resources have been scheduled.\n" + "\n" + "========================================== \n" + "------=_Part_0_2043410500.1313163095014\n" + "Content-Type: text/calendar; charset=\"utf-8\"\n" + "Content-Transfer-Encoding: 7bit\n" + "\n" + "BEGIN:VCALENDAR\n" + "PRODID:Open-Xchange\n" + "VERSION:2.0\n" + "CALSCALE:GREGORIAN\n" + "METHOD:REQUEST\n" + "BEGIN:VEVENT\n" + "DTSTAMP:20110812T153135Z\n" + "SUMMARY:Generate ICal\n" + "DTSTART;TZID=Europe/Berlin:20110817T140000\n" + "DTEND;TZID=Europe/Berlin:20110817T150000\n" + "CLASS:PUBLIC\n" + "TRANSP:OPAQUE\n" + "UID:cb3f5f83-a2de-4554-b352-78429527d259\n" + "CREATED:20110812T153134Z\n" + "LAST-MODIFIED:20110812T153134Z\n" + "ORGANIZER:mailto:jane@doe.de\n" + "ATTENDEE;ROLE=REQ-PARTICIPANT;CUTYPE=INDIVIDUAL:mailto:thorben@devel-mail.n\n" + " etline.de\n" + "ATTENDEE;CUTYPE=INDIVIDUAL;PARTSTAT=NEEDS-ACTION;ROLE=REQ-PARTICIPANT;RSVP=\n" + " TRUE:mailto:mark@nowhere.com\n" + "END:VEVENT\n" + "BEGIN:VTIMEZONE\n" + "TZID:Europe/Berlin\n" + "TZURL:http://tzurl.org/zoneinfo/Europe/Berlin\n" + "X-LIC-LOCATION:Europe/Berlin\n" + "BEGIN:DAYLIGHT\n" + "TZOFFSETFROM:+0100\n" + "TZOFFSETTO:+0200\n" + "TZNAME:CEST\n" + "DTSTART:19810329T020000\n" + "RRULE:FREQ=YEARLY;BYMONTH=3;BYDAY=-1SU\n" + "END:DAYLIGHT\n" + "BEGIN:STANDARD\n" + "TZOFFSETFROM:+0200\n" + "TZOFFSETTO:+0100\n" + "TZNAME:CET\n" + "DTSTART:19961027T030000\n" + "RRULE:FREQ=YEARLY;BYMONTH=10;BYDAY=-1SU\n" + "END:STANDARD\n" + "BEGIN:STANDARD\n" + "TZOFFSETFROM:+005328\n" + "TZOFFSETTO:+0100\n" + "TZNAME:CET\n" + "DTSTART:18930401T000000\n" + "RDATE:18930401T000000\n" + "END:STANDARD\n" + "BEGIN:DAYLIGHT\n" + "TZOFFSETFROM:+0100\n" + "TZOFFSETTO:+0200\n" + "TZNAME:CEST\n" + "DTSTART:19160430T230000\n" + "RDATE:19160430T230000\n" + "RDATE:19170416T020000\n" + "RDATE:19180415T020000\n" + "RDATE:19400401T020000\n" + "RDATE:19430329T020000\n" + "RDATE:19440403T020000\n" + "RDATE:19450402T020000\n" + "RDATE:19460414T020000\n" + "RDATE:19470406T030000\n" + "RDATE:19480418T020000\n" + "RDATE:19490410T020000\n" + "RDATE:19800406T020000\n" + "END:DAYLIGHT\n" + "BEGIN:STANDARD\n" + "TZOFFSETFROM:+0200\n" + "TZOFFSETTO:+0100\n" + "TZNAME:CET\n" + "DTSTART:19161001T010000\n" + "RDATE:19161001T010000\n" + "RDATE:19170917T030000\n" + "RDATE:19180916T030000\n" + "RDATE:19421102T030000\n" + "RDATE:19431004T030000\n" + "RDATE:19441002T030000\n" + "RDATE:19451118T030000\n" + "RDATE:19461007T030000\n" + "RDATE:19471005T030000\n" + "RDATE:19481003T030000\n" + "RDATE:19491002T030000\n" + "RDATE:19800928T030000\n" + "RDATE:19810927T030000\n" + "RDATE:19820926T030000\n" + "RDATE:19830925T030000\n" + "RDATE:19840930T030000\n" + "RDATE:19850929T030000\n" + "RDATE:19860928T030000\n" + "RDATE:19870927T030000\n" + "RDATE:19880925T030000\n" + "RDATE:19890924T030000\n" + "RDATE:19900930T030000\n" + "RDATE:19910929T030000\n" + "RDATE:19920927T030000\n" + "RDATE:19930926T030000\n" + "RDATE:19940925T030000\n" + "RDATE:19950924T030000\n" + "END:STANDARD\n" + "BEGIN:DAYLIGHT\n" + "TZOFFSETFROM:+0200\n" + "TZOFFSETTO:+0300\n" + "TZNAME:CEMT\n" + "DTSTART:19450524T020000\n" + "RDATE:19450524T020000\n" + "RDATE:19470511T030000\n" + "END:DAYLIGHT\n" + "BEGIN:DAYLIGHT\n" + "TZOFFSETFROM:+0300\n" + "TZOFFSETTO:+0200\n" + "TZNAME:CEST\n" + "DTSTART:19450924T030000\n" + "RDATE:19450924T030000\n" + "RDATE:19470629T030000\n" + "END:DAYLIGHT\n" + "BEGIN:STANDARD\n" + "TZOFFSETFROM:+0100\n" + "TZOFFSETTO:+0100\n" + "TZNAME:CET\n" + "DTSTART:19460101T000000\n" + "RDATE:19460101T000000\n" + "RDATE:19800101T000000\n" + "END:STANDARD\n" + "END:VTIMEZONE\n" + "END:VCALENDAR\n" + "\n" + "------=_Part_0_2043410500.1313163095014--" + "\n").getBytes();
+    //@formatter:off
+    private static final byte[] SIMPLE = ("Date: Fri, 12 Aug 2011 17:31:35 +0200 (CEST)\n" +
+        "From: jane@doe.de\n" +
+        "To: mark@nowhere.com\n" +
+        "Message-ID: <1423407397.2.1313163096085.JavaMail.blubber@bar>\n" +
+        "Subject: New Appointment: Generate ICal\n" +
+        "MIME-Version: 1.0\n" +
+        "Content-Type: multipart/alternative; \n" +
+        "    boundary=\"----=_Part_0_2043410500.1313163095014\"\n" +
+        "\n" +
+        "------=_Part_0_2043410500.1313163095014\n" +
+        "Content-Type: text/plain; charset=UTF-8\n" +
+        "Content-Transfer-Encoding: 7bit\n" +
+        "\n" +
+        "A new appointment was created by Blubber Foo.\n" +
+        "\n" +
+        "Appointment\n" +
+        "===========\n" +
+        "Created by: Blubber Foo\n" +
+        "Created at: Friday, Aug 12, 2011 5:31:00 PM, CEST\n" +
+        "Description: Generate ICal\n" +
+        "\n" +
+        "Start date: Wednesday, Aug 17, 2011 2:00:00 PM, CEST\n" +
+        "End date: Wednesday, Aug 17, 2011 3:00:00 PM, CEST\n" +
+        "\n" +
+        "\n" +
+        "Participants\n" +
+        "============\n" +
+        "Blubber Foo (accepted)\n" +
+        "mark@nowhere.com (external)\n" +
+        "\n" +
+        "Resources\n" +
+        "=========\n" +
+        "No resources have been scheduled.\n" +
+        "\n" +
+        "========================================== \n" +
+        "------=_Part_0_2043410500.1313163095014\n" +
+        "Content-Type: text/calendar; charset=\"utf-8\"\n" +
+        "Content-Transfer-Encoding: 7bit\n" +
+        "\n" +
+        "BEGIN:VCALENDAR\n" +
+        "PRODID:Open-Xchange\n" +
+        "VERSION:2.0\n" +
+        "CALSCALE:GREGORIAN\n" +
+        "METHOD:REQUEST\n" +
+        "BEGIN:VEVENT\n" +
+        "DTSTAMP:20110812T153135Z\n" +
+        "SUMMARY:Generate ICal\n" +
+        "DTSTART;TZID=Europe/Berlin:20110817T140000\n" +
+        "DTEND;TZID=Europe/Berlin:20110817T150000\n" +
+        "CLASS:PUBLIC\n" +
+        "TRANSP:OPAQUE\n" +
+        "UID:cb3f5f83-a2de-4554-b352-78429527d259\n" +
+        "CREATED:20110812T153134Z\n" +
+        "LAST-MODIFIED:20110812T153134Z\n" +
+        "ORGANIZER:mailto:jane@doe.de\n" +
+        "ATTENDEE;ROLE=REQ-PARTICIPANT;CUTYPE=INDIVIDUAL:mailto:thorben@devel-mail.n\n" +
+        " etline.de\n" +
+        "ATTENDEE;CUTYPE=INDIVIDUAL;PARTSTAT=NEEDS-ACTION;ROLE=REQ-PARTICIPANT;RSVP=\n" +
+        " TRUE:mailto:mark@nowhere.com\n" +
+        "END:VEVENT\n" +
+        "BEGIN:VTIMEZONE\n" +
+        "TZID:Europe/Berlin\n" +
+        "TZURL:http://tzurl.org/zoneinfo/Europe/Berlin\n" +
+        "X-LIC-LOCATION:Europe/Berlin\n" +
+        "BEGIN:DAYLIGHT\n" +
+        "TZOFFSETFROM:+0100\n" +
+        "TZOFFSETTO:+0200\n" +
+        "TZNAME:CEST\n" +
+        "DTSTART:19810329T020000\n" +
+        "RRULE:FREQ=YEARLY;BYMONTH=3;BYDAY=-1SU\n" +
+        "END:DAYLIGHT\n" +
+        "BEGIN:STANDARD\n" +
+        "TZOFFSETFROM:+0200\n" +
+        "TZOFFSETTO:+0100\n" +
+        "TZNAME:CET\n" +
+        "DTSTART:19961027T030000\n" +
+        "RRULE:FREQ=YEARLY;BYMONTH=10;BYDAY=-1SU\n" +
+        "END:STANDARD\n" +
+        "BEGIN:STANDARD\n" +
+        "TZOFFSETFROM:+005328\n" +
+        "TZOFFSETTO:+0100\n" +
+        "TZNAME:CET\n" +
+        "DTSTART:18930401T000000\n" +
+        "RDATE:18930401T000000\n" +
+        "END:STANDARD\n" +
+        "BEGIN:DAYLIGHT\n" +
+        "TZOFFSETFROM:+0100\n" +
+        "TZOFFSETTO:+0200\n" +
+        "TZNAME:CEST\n" +
+        "DTSTART:19160430T230000\n" +
+        "RDATE:19160430T230000\n" +
+        "RDATE:19170416T020000\n" +
+        "RDATE:19180415T020000\n" +
+        "RDATE:19400401T020000\n" +
+        "RDATE:19430329T020000\n" +
+        "RDATE:19440403T020000\n" +
+        "RDATE:19450402T020000\n" +
+        "RDATE:19460414T020000\n" +
+        "RDATE:19470406T030000\n" +
+        "RDATE:19480418T020000\n" +
+        "RDATE:19490410T020000\n" +
+        "RDATE:19800406T020000\n" +
+        "END:DAYLIGHT\n" +
+        "BEGIN:STANDARD\n" +
+        "TZOFFSETFROM:+0200\n" +
+        "TZOFFSETTO:+0100\n" +
+        "TZNAME:CET\n" +
+        "DTSTART:19161001T010000\n" +
+        "RDATE:19161001T010000\n" +
+        "RDATE:19170917T030000\n" +
+        "RDATE:19180916T030000\n" +
+        "RDATE:19421102T030000\n" +
+        "RDATE:19431004T030000\n" +
+        "RDATE:19441002T030000\n" +
+        "RDATE:19451118T030000\n" +
+        "RDATE:19461007T030000\n" +
+        "RDATE:19471005T030000\n" +
+        "RDATE:19481003T030000\n" +
+        "RDATE:19491002T030000\n" +
+        "RDATE:19800928T030000\n" +
+        "RDATE:19810927T030000\n" +
+        "RDATE:19820926T030000\n" +
+        "RDATE:19830925T030000\n" +
+        "RDATE:19840930T030000\n" +
+        "RDATE:19850929T030000\n" +
+        "RDATE:19860928T030000\n" +
+        "RDATE:19870927T030000\n" +
+        "RDATE:19880925T030000\n" +
+        "RDATE:19890924T030000\n" +
+        "RDATE:19900930T030000\n" +
+        "RDATE:19910929T030000\n" +
+        "RDATE:19920927T030000\n" +
+        "RDATE:19930926T030000\n" +
+        "RDATE:19940925T030000\n" +
+        "RDATE:19950924T030000\n" +
+        "END:STANDARD\n" +
+        "BEGIN:DAYLIGHT\n" +
+        "TZOFFSETFROM:+0200\n" +
+        "TZOFFSETTO:+0300\n" +
+        "TZNAME:CEMT\n" +
+        "DTSTART:19450524T020000\n" +
+        "RDATE:19450524T020000\n" +
+        "RDATE:19470511T030000\n" +
+        "END:DAYLIGHT\n" +
+        "BEGIN:DAYLIGHT\n" +
+        "TZOFFSETFROM:+0300\n" +
+        "TZOFFSETTO:+0200\n" +
+        "TZNAME:CEST\n" +
+        "DTSTART:19450924T030000\n" +
+        "RDATE:19450924T030000\n" +
+        "RDATE:19470629T030000\n" +
+        "END:DAYLIGHT\n" +
+        "BEGIN:STANDARD\n" +
+        "TZOFFSETFROM:+0100\n" +
+        "TZOFFSETTO:+0100\n" +
+        "TZNAME:CET\n" +
+        "DTSTART:19460101T000000\n" +
+        "RDATE:19460101T000000\n" +
+        "RDATE:19800101T000000\n" +
+        "END:STANDARD\n" +
+        "END:VTIMEZONE\n" +
+        "END:VCALENDAR\n" +
+        "\n" +
+        "------=_Part_0_2043410500.1313163095014--" +
+        "\n").getBytes();
+    //@formatter:on
+
+    @Mock
+    private ServerServiceRegistry serviceRegistry;
+
+    @Before
+    public void setup() {
+        MockitoAnnotations.initMocks(this);
+    }
 
     @Test
+    @PrepareForTest(ServerServiceRegistry.class)
     public void testMIMEStructure() {
+        ICalService service = PowerMockito.mock(ICalService.class);
+        ICalUtilities icalUtils = new ICalUtilitiesImpl(new ICalMapper());
+        PowerMockito.when(service.getUtilities()).thenReturn(icalUtils);
+
+        PowerMockito.mockStatic(ServerServiceRegistry.class);
+        PowerMockito.when(ServerServiceRegistry.getInstance()).thenReturn(serviceRegistry);
+        PowerMockito.when(serviceRegistry.getService(ICalService.class)).thenReturn(service);
+
         try {
             getSession();
 
-            final MailMessage mail = MimeMessageConverter.convertMessage(SIMPLE);
+            MailMessage mail = MimeMessageConverter.convertMessage(SIMPLE);
 
-            final MIMEStructureHandler handler = new MIMEStructureHandler(-1L);
+            MIMEStructureHandler handler = new MIMEStructureHandler(-1L);
             new StructureMailMessageParser().parseMailMessage(mail, handler);
 
-            final JSONObject jsonMailObject = handler.getJSONMailObject();
+            JSONObject jsonMailObject = handler.getJSONMailObject();
             assertNotNull("Structured JSON mail object is null.", jsonMailObject);
 
-            // System.out.println(jsonMailObject.toString(2));
-
-            final JSONArray jsonBodyArray;
+            JSONArray jsonBodyArray;
             {
-                final Object bodyObject = jsonMailObject.opt("body");
+                Object bodyObject = jsonMailObject.opt("body");
                 assertNotNull("Missing mail body.", bodyObject);
 
-                // {"data":"This is a text message.\n\n","id":"1"}
                 assertTrue("Body object is not a JSON object.", (bodyObject instanceof JSONArray));
                 jsonBodyArray = (JSONArray) bodyObject;
 
             }
 
-            final JSONObject icalObject = jsonBodyArray.getJSONObject(1);
-            final JSONObject ct = icalObject.getJSONObject("headers").getJSONObject("content-type");
-            final JSONObject param = ct.getJSONObject("params");
-            assertTrue(param.hasAndNotNull("method") && "REQUEST".equals(param.getString("method")));
+            JSONObject icalObject = jsonBodyArray.getJSONObject(1);
+            JSONObject ct = icalObject.getJSONObject("headers").getJSONObject("content-type");
+            JSONObject param = ct.getJSONObject("params");
+            assertTrue("The 'REQUEST' method is not present in the parsed JSON object", param.hasAndNotNull("method") && "REQUEST".equals(param.getString("method")));
         } catch (final Exception e) {
             e.printStackTrace();
             fail(e.getMessage());

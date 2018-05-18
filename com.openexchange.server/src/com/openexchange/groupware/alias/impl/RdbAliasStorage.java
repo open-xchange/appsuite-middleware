@@ -57,6 +57,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -235,7 +236,7 @@ public class RdbAliasStorage implements UserAliasStorage {
              * Use utf8*_bin to match umlauts. But that also makes it case sensitive, so use LOWER to be case insensitive.
              */
             StringBuilder stringBuilder = new StringBuilder("SELECT user FROM user_alias WHERE cid=? AND LOWER(alias) LIKE LOWER(?) COLLATE ")
-                .append(Databases.getCharacterSet(con).contains("utf8mb4") ? "utf8mb4_bin" : "utf8_bin");
+                .append(Databases.getCharacterSet(con).contains("utf8mb4") ? "utf8mb4_bin" : "utf8_bin").append(" ORDER BY user;");
             stmt = con.prepareStatement(stringBuilder.toString());
             stmt.setInt(++index, contextId);
             stmt.setString(++index, alias);
@@ -292,8 +293,92 @@ public class RdbAliasStorage implements UserAliasStorage {
             stmt = null;
 
             if (null != aliases && !aliases.isEmpty()) {
-                stmt = con.prepareStatement("INSERT INTO user_alias (cid, user, alias, uuid) VALUES (?,?,?,?) ON DUPLICATE KEY UPDATE alias=?");
                 for (String alias : aliases) {
+                    if (null != alias) {
+                        if (null == stmt) {
+                            stmt = con.prepareStatement("INSERT INTO user_alias (cid, user, alias, uuid) VALUES (?,?,?,?) ON DUPLICATE KEY UPDATE alias=?");
+                        }
+                        index = 0;
+                        stmt.setInt(++index, contextId);
+                        stmt.setInt(++index, userId);
+                        stmt.setString(++index, alias);
+                        stmt.setBytes(++index, UUIDs.toByteArray(UUID.randomUUID()));
+                        stmt.setString(++index, alias);
+                        stmt.addBatch();
+                    }
+                }
+                if (null != stmt) {
+                    stmt.executeBatch();
+                }
+            }
+        } catch (SQLException e) {
+            throw DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+        } finally {
+            Databases.closeSQLStuff(stmt);
+        }
+    }
+
+    private Set<String> setAndGetAliases(int contextId, int userId, Set<String> aliases) throws OXException {
+        Connection con = Database.get(contextId, true);
+        boolean rollback = false;
+        try {
+            Databases.startTransaction(con);
+            rollback = true;
+
+            Set<String> newAliases = setAndGetAliases(con, contextId, userId, aliases);
+
+            con.commit();
+            rollback = false;
+            return newAliases;
+        } catch (SQLException e) {
+            throw DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+        } finally {
+            if (rollback) {
+                Databases.rollback(con);
+            }
+            Databases.autocommit(con);
+            Database.back(contextId, true, con);
+        }
+    }
+
+    /**
+     * Sets a user's aliases and returns what has actually been set.
+     *
+     * A write connection object to use or <code>null</code> to obtain a new database write connection.
+     * @param contextId The context identifier
+     * @param userId The user identifier
+     * @return The new aliases
+     * @param aliases The aliases to set
+     * @throws OXException If aliases cannot be set
+     */
+    public Set<String> setAndGetAliases(Connection con, int contextId, int userId, Set<String> aliases) throws OXException {
+        if (con == null) {
+            return setAndGetAliases(contextId, userId, aliases);
+        }
+
+        PreparedStatement stmt = null;
+        try {
+            int index = 0;
+            stmt = con.prepareStatement("DELETE FROM user_alias WHERE cid=? AND user=?");
+            stmt.setInt(++index, contextId);
+            stmt.setInt(++index, userId);
+            stmt.executeUpdate();
+            Databases.closeSQLStuff(stmt);
+            stmt = null;
+
+            if (null == aliases || aliases.isEmpty()) {
+                // No aliases given
+                return Collections.emptySet();
+            }
+
+            Set<String> newAliases = null;
+            for (String alias : aliases) {
+                if (null != alias) {
+                    if (null == stmt) {
+                        // Not yet initialized
+                        stmt = con.prepareStatement("INSERT INTO user_alias (cid, user, alias, uuid) VALUES (?,?,?,?) ON DUPLICATE KEY UPDATE alias=?");
+                        newAliases = new LinkedHashSet<>(aliases.size());
+                    }
                     index = 0;
                     stmt.setInt(++index, contextId);
                     stmt.setInt(++index, userId);
@@ -301,9 +386,15 @@ public class RdbAliasStorage implements UserAliasStorage {
                     stmt.setBytes(++index, UUIDs.toByteArray(UUID.randomUUID()));
                     stmt.setString(++index, alias);
                     stmt.addBatch();
+                    newAliases.add(alias);
                 }
-                stmt.executeBatch();
             }
+            if (null == stmt) {
+                // Nothing was INSERTed
+                return Collections.emptySet();
+            }
+            stmt.executeBatch();
+            return newAliases;
         } catch (SQLException e) {
             throw DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {

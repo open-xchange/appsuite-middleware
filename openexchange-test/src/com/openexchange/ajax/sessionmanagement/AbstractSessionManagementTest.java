@@ -69,16 +69,12 @@ public class AbstractSessionManagementTest extends AbstractAPIClientSession {
     public void setUp() throws Exception {
         super.setUp();
 
-        getClient().logout();
-        apiClient.login(testUser.getLogin(), testUser.getPassword());
-
         // Remove all other sessions to make sure tests run independently
         api = new SessionmanagementApi(apiClient);
         api.clear(apiClient.getSession());
 
         // For the same user
         apiClient2 = generateApiClient(testUser);
-        apiClient2.login(testUser.getLogin(), testUser.getPassword());
     }
 
     @Override

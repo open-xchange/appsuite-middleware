@@ -109,6 +109,32 @@ public class CalendarFolder {
      * @throws OXException {@link CalendarExceptionCodes#UNSUPPORTED_FOLDER}
      */
     public CalendarFolder(Session session, FolderObject folder, int ownPermissionBits) throws OXException {
+        this(session, folder, new BasicPermission(session.getUserId(), false, ownPermissionBits));
+    }
+
+    /**
+     * Initializes a new {@link CalendarFolder} for the session's user based on the supplied folder object, applying a specific set of
+     * <i>own</i> permissions.
+     *
+     * @param session The session
+     * @param folder The underlying folder to use for initialization
+     * @param ownPermission The permission take over as <i>own</i> permissions
+     * @throws OXException {@link CalendarExceptionCodes#UNSUPPORTED_FOLDER}
+     */
+    public CalendarFolder(Session session, FolderObject folder, OCLPermission ownPermission) throws OXException {
+        this(session, folder, getPermission(ownPermission));
+    }
+
+    /**
+     * Initializes a new {@link CalendarFolder} for the session's user based on the supplied folder object, applying a specific set of
+     * <i>own</i> permissions.
+     *
+     * @param session The session
+     * @param folder The underlying folder to use for initialization
+     * @param ownPermission The permission take over as <i>own</i> permissions
+     * @throws OXException {@link CalendarExceptionCodes#UNSUPPORTED_FOLDER}
+     */
+    private CalendarFolder(Session session, FolderObject folder, Permission ownPermission) throws OXException {
         super();
         if (Module.CALENDAR.getFolderConstant() != folder.getModule()) {
             throw CalendarExceptionCodes.UNSUPPORTED_FOLDER.create(String.valueOf(folder.getObjectID()), String.valueOf(folder.getModule()));
@@ -117,7 +143,7 @@ public class CalendarFolder {
         this.createdBy = folder.getCreatedBy();
         this.type = FolderObject.PUBLIC == folder.getType() ? PublicType.getInstance() : createdBy != session.getUserId() ? SharedType.getInstance() : PrivateType.getInstance();
         this.permissions = getPermissions(folder.getNonSystemPermissionsAsArray());
-        this.ownPermission = new BasicPermission(session.getUserId(), false, ownPermissionBits);
+        this.ownPermission = ownPermission;
         this.session = session;
     }
 

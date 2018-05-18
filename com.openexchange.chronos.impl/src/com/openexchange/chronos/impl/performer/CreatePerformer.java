@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the Open-Xchange, Inc. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2020 Open-Xchange, Inc.
+ *     Copyright (C) 2016-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -114,7 +114,6 @@ public class CreatePerformer extends AbstractUpdatePerformer {
          * prepare event & attendee data for insert, assign parent folder
          */
         Event newEvent = prepareEvent(event);
-        newEvent.setAttendees(Check.maxAttendees(getSelfProtection(), prepareAttendees(event.getAttendees())));
         if (isNullOrEmpty(newEvent.getAttendees())) {
             /*
              * not group-scheduled event (only on a single user's calendar), apply parent folder identifier
@@ -194,15 +193,19 @@ public class CreatePerformer extends AbstractUpdatePerformer {
         /*
          * date/time related properties
          */
-        Check.startAndEndDate(eventData);
+        Check.startAndEndDate(session, eventData);
         EventMapper.getInstance().copy(eventData, event, EventField.START_DATE, EventField.END_DATE);
         Consistency.adjustAllDayDates(event);
         Consistency.adjustTimeZones(session, calendarUserId, event, null);
         /*
+         * attendees
+         */
+        event.setAttendees(Check.maxAttendees(getSelfProtection(), prepareAttendees(eventData.getAttendees())));
+        /*
          * classification, transparency, color, geo
          */
         if (eventData.containsClassification() && null != eventData.getClassification()) {
-            event.setClassification(Check.classificationIsValid(eventData.getClassification(), folder));
+            event.setClassification(Check.classificationIsValid(eventData.getClassification(), folder, event.getAttendees()));
         } else {
             event.setClassification(Classification.PUBLIC);
         }
@@ -217,6 +220,7 @@ public class CreatePerformer extends AbstractUpdatePerformer {
         if (eventData.containsRecurrenceRule() && null != eventData.getRecurrenceRule()) {
             event.setRecurrenceRule(Check.recurrenceRuleIsValid(session.getRecurrenceService(), eventData));
             event.setSeriesId(event.getId());
+            event.setRecurrenceDates(eventData.getRecurrenceDates());
             event.setDeleteExceptionDates(Check.recurrenceIdsExist(session.getRecurrenceService(), event, eventData.getDeleteExceptionDates()));
         }
         /*

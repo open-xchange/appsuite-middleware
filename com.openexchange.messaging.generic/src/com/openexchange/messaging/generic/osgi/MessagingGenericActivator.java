@@ -171,7 +171,7 @@ public class MessagingGenericActivator extends HousekeepingActivator {
             if (null != cacheService) {
                 cacheService.freeCache(CachingMessagingAccountStorage.getRegionName());
             }
-            cleanUp();
+            super.stopBundle();
             /*
              * Clear service registry
              */

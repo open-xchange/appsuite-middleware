@@ -90,7 +90,6 @@ CREATE TABLE context_server2db_pool (
     write_db_pool_id INT4 UNSIGNED NOT NULL,
     db_schema VARCHAR(32) NOT NULL,
     PRIMARY KEY(`cid`, `server_id`),
-    INDEX (write_db_pool_id),
     INDEX (server_id),
     INDEX (db_schema),
     INDEX `poolAndSchema` (write_db_pool_id, db_schema),

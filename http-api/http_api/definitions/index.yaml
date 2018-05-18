@@ -166,6 +166,10 @@ Alarm:
   $ref: ./chronos/Alarm.yaml
 ChronosCalendarResultResponse:
   $ref: ./chronos/CalendarResultResponse.yaml
+ChronosMultipleCalendarResultResponse:
+  $ref: ./chronos/MultipleCalendarResultResponse.yaml
+ChronosErrorAwareCalendarResult:
+  $ref: ./chronos/ErrorAwareCalendarResult.yaml
 ChronosUpdatesResponse:
   $ref: ./chronos/UpdatesResponse.yaml
 ChronosAttachment:
@@ -197,6 +201,11 @@ Available:
   $ref: ./chronos-availability/Available.yaml
 GetAvailabilityResponse:
   $ref: ./chronos-availability/GetAvailabilityResponse.yaml
+# Module: chronos-itip
+AnalyzeResponse:
+  $ref: ./chronos-itip/AnalyzeResponse.yaml
+AnalysisChange:
+  $ref: ./chronos-itip/AnalysisChange.yaml
 # Module: chronos-schedjoules
 CountryData:
   $ref: ./chronos-schedjoules/CountryData.yaml
@@ -358,6 +367,8 @@ InfoItemSharingNotificationResponse:
   $ref: ./infostore/InfoItemSharingNotificationResponse.yaml
 InfoItemSharingNotificationData:
   $ref: ./infostore/InfoItemSharingNotificationData.yaml
+InfoItemsRestoreResponseData:
+  $ref: ./infostore/InfoItemsRestoreResponseData.yaml
 InfoFolderPathData:
   $ref: ./infostore/FolderPathData.yaml
 # Module: attachments

@@ -149,7 +149,9 @@ public class EnhancedChronosApi extends ChronosApi {
 
         String[] localVarAuthNames = new String[] {};
 
-        GenericType<String> localVarReturnType = new GenericType<String>() {};
+        GenericType<String> localVarReturnType = new GenericType<String>() {
+            // empty
+        };
         return enhancedApiClient.invokeAPI(localVarPath, "POST", localVarQueryParams, localVarPostBody, localVarHeaderParams, localVarFormParams, localVarAccept, localVarContentType, localVarAuthNames, localVarReturnType);
     }
 
@@ -234,7 +236,9 @@ public class EnhancedChronosApi extends ChronosApi {
 
         String[] localVarAuthNames = new String[] {};
 
-        GenericType<String> localVarReturnType = new GenericType<String>() {};
+        GenericType<String> localVarReturnType = new GenericType<String>() {
+            //empty
+        };
         return enhancedApiClient.invokeAPI(localVarPath, "POST", localVarQueryParams, localVarPostBody, localVarHeaderParams, localVarFormParams, localVarAccept, localVarContentType, localVarAuthNames, localVarReturnType);
     }
 }

@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the Open-Xchange, Inc. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2020 Open-Xchange, Inc.
+ *     Copyright (C) 2016-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -173,7 +173,7 @@ public class CalendarExportImpl implements CalendarExport {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.chronos.ical.CalendarExport#add(com.openexchange.chronos.CalendarAvailability)
      */
     @Override
@@ -212,7 +212,7 @@ public class CalendarExportImpl implements CalendarExport {
         /*
          * export calendar
          */
-        ICalUtils.exportCalendar(vCalendar, parameters, outputStream);
+        ICalUtils.exportCalendar(vCalendar, outputStream);
     }
 
     @Override
@@ -227,7 +227,7 @@ public class CalendarExportImpl implements CalendarExport {
         }
     }
 
-    private VEvent exportEvent(Event event) throws OXException {
+    private VEvent exportEvent(Event event) {
         /*
          * export event data, track timezones
          */
@@ -248,7 +248,7 @@ public class CalendarExportImpl implements CalendarExport {
         return vEvent;
     }
 
-    private VAlarm exportAlarm(Alarm alarm) throws OXException {
+    private VAlarm exportAlarm(Alarm alarm) {
         /*
          * export alarm data
          */
@@ -257,7 +257,7 @@ public class CalendarExportImpl implements CalendarExport {
         return vAlarm;
     }
 
-    private VFreeBusy exportFreeBusy(FreeBusyData freeBusyData) throws OXException {
+    private VFreeBusy exportFreeBusy(FreeBusyData freeBusyData) {
         /*
          * export free/busy data, track timezones
          */
@@ -269,7 +269,7 @@ public class CalendarExportImpl implements CalendarExport {
 
     /**
      * Exports the specified {@link Availability} to a {@link VAvailability} component
-     * 
+     *
      * @param availability The {@link Availability} to export
      * @return The exported {@link VAvailability} component
      * @throws OXException if an error is occurred

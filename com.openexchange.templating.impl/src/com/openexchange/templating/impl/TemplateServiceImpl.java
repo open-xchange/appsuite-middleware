@@ -379,24 +379,24 @@ public class TemplateServiceImpl implements TemplateService {
         StringBuilder keep = new StringBuilder();
         StringBuilder props = new StringBuilder();
         int state = 0;
-        for(String line: text.split("\n")) {
+        for (String line : text.split("\n")) {
             switch (state) {
-            case 0:
-                if (line.startsWith("BEGIN")) {
-                    state = 1;
-                } else {
+                case 0:
+                    if (line.startsWith("BEGIN")) {
+                        state = 1;
+                    } else {
+                        keep.append(line).append('\n');
+                    }
+                    break;
+                case 1:
+                    if (line.startsWith("END")) {
+                        state = 2;
+                    } else {
+                        props.append(line).append('\n');
+                    }
+                    break;
+                case 2:
                     keep.append(line).append('\n');
-                }
-                break;
-            case 1:
-                if (line.startsWith("END")) {
-                    state = 2;
-                } else {
-                    props.append(line).append('\n');
-                }
-                break;
-            case 2:
-                keep.append(line).append('\n');
             }
         }
 

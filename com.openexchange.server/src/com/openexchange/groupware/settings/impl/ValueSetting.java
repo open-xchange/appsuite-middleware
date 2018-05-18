@@ -65,12 +65,12 @@ public class ValueSetting extends AbstractSetting<ValueSetting> {
     /**
      * Single value of this setting.
      */
-    private Object singleValue;
+    private volatile Object singleValue;
 
     /**
      * Multi value of this setting.
      */
-    private ArrayList<Object> multiValue;
+    private volatile ArrayList<Object> multiValue;
 
     /**
      * Copy constructor.
@@ -97,7 +97,8 @@ public class ValueSetting extends AbstractSetting<ValueSetting> {
     public Object[] getMultiValue() {
         Object[] retval;
         synchronized (this) {
-            if (null == multiValue || 0 == multiValue.size()) {
+            ArrayList<Object> multiValue = this.multiValue;
+            if (null == multiValue || multiValue.isEmpty()) {
                 retval = null;
             } else {
                 retval = multiValue.toArray(new Object[multiValue.size()]);
@@ -108,6 +109,7 @@ public class ValueSetting extends AbstractSetting<ValueSetting> {
 
     @Override
     public boolean isEmptyMultivalue() {
+        ArrayList<Object> multiValue = this.multiValue;
         return multiValue != null && multiValue.isEmpty();
     }
 
@@ -161,6 +163,7 @@ public class ValueSetting extends AbstractSetting<ValueSetting> {
         out.append(getName());
         out.append('=');
         if (null == getElements()) {
+            ArrayList<Object> multiValue = this.multiValue;
             if (null != multiValue && multiValue.size() > 0) {
                 out.append(multiValue);
             } else {
@@ -190,10 +193,15 @@ public class ValueSetting extends AbstractSetting<ValueSetting> {
             return false;
         }
         final ValueSetting other = (ValueSetting) obj;
+        Object singleValue = this.singleValue;
         if (singleValue != null && !singleValue.equals(other.getSingleValue())) {
             return false;
         }
-        if (multiValue != null && !multiValue.equals(Arrays.asList(other.getMultiValue()))) {
+        ArrayList<Object> multiValue = this.multiValue;
+        if((multiValue!= null && other.getMultiValue()==null) || (multiValue==null && other.getMultiValue()!=null)) {
+            return false;
+        }
+        if (multiValue != null && other.getMultiValue() != null && !multiValue.equals(Arrays.asList(other.getMultiValue()))) {
             return false;
         }
         return true;
@@ -202,9 +210,11 @@ public class ValueSetting extends AbstractSetting<ValueSetting> {
     @Override
     public int hashCode() {
         int retval = super.hashCode();
+        Object singleValue = this.singleValue;
         if (singleValue != null) {
             retval ^= singleValue.hashCode();
         }
+        ArrayList<Object> multiValue = this.multiValue;
         if (multiValue != null) {
             retval ^= multiValue.hashCode();
         }

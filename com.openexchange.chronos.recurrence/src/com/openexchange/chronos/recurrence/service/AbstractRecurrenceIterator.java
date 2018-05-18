@@ -58,6 +58,7 @@ import org.dmfs.rfc5545.DateTime;
 import org.dmfs.rfc5545.recurrenceset.RecurrenceSetIterator;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.RecurrenceId;
+import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.common.ChronosLogger;
 import com.openexchange.chronos.common.DefaultRecurrenceData;
 import com.openexchange.chronos.service.RecurrenceData;
@@ -68,6 +69,7 @@ import com.openexchange.exception.OXException;
  * {@link AbstractRecurrenceIterator}
  *
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
+ * @param <T> The generic type
  * @since v7.10.0
  */
 public abstract class AbstractRecurrenceIterator<T> implements RecurrenceIterator<T> {
@@ -92,17 +94,16 @@ public abstract class AbstractRecurrenceIterator<T> implements RecurrenceIterato
      * Initializes a new {@link AbstractRecurrenceIterator}.
      *
      * @param config The recurrence configuration to use
-     * @param recurrenceData The underlying recurrence data
+     * @param master The master event containing all necessary information like recurrence rule, star and end date, timezones etc.
      * @param forwardToOccurrence <code>true</code> to fast-forward the iterator to the first occurrence if the recurrence data's start
      *            does not fall into the pattern, <code>false</code> otherwise
-     * @param exceptionDates A sorted array of change- and delete-exception timestamps to ignore during iteration, or <code>null</code> if not set
      * @param start The left side boundary for the calculation. Optional, can be null.
      * @param end The right side boundary for the calculation. Optional, can be null.
      * @param limit The maximum number of calculated instances. Optional, can be null.
      * @param ignoreExceptions Determines if exceptions should be ignored. If true, all occurrences are calculated as if no exceptions exist. Note: This does not add change exceptions. See {@link ChangeExceptionAwareRecurrenceIterator}
      */
     protected AbstractRecurrenceIterator(RecurrenceConfig config, Event master, boolean forwardToOccurrence, Calendar start, Calendar end, Integer limit, boolean ignoreExceptions) throws OXException {
-        this(config, new DefaultRecurrenceData(master.getRecurrenceRule(), master.getStartDate(), ignoreExceptions ? null : getExceptionDates(master)), getEventDuration(master), forwardToOccurrence, start, end, null, limit);
+        this(config, new DefaultRecurrenceData(master.getRecurrenceRule(), master.getStartDate(), ignoreExceptions ? null : getExceptionDates(master), CalendarUtils.getExceptionDates(master.getRecurrenceDates())), getEventDuration(master), forwardToOccurrence, start, end, null, limit);
     }
 
     /**
@@ -141,7 +142,7 @@ public abstract class AbstractRecurrenceIterator<T> implements RecurrenceIterato
 
     private void init() {
         if (null != start || null != startPosition && 1 < startPosition.intValue()) {
-            while (inner.hasNext()) {
+            while (_hasNext()) {
                 long candidate = inner.next();
                 if (isException(candidate)) {
                     position++;
@@ -150,7 +151,7 @@ public abstract class AbstractRecurrenceIterator<T> implements RecurrenceIterato
                 if (start != null && candidate + eventDuration > start.getTimeInMillis() ||
                     start != null && 0L == eventDuration && candidate == start.getTimeInMillis() ||
                     startPosition != null && position + 1 >= startPosition.intValue()) {
-                    lookAhead = candidate;
+                    lookAhead = Long.valueOf(candidate);
                     break;
                 } else {
                     position++;
@@ -159,6 +160,10 @@ public abstract class AbstractRecurrenceIterator<T> implements RecurrenceIterato
         }
 
         innerNext();
+    }
+
+    private boolean _hasNext() {
+        return inner != null && inner.hasNext();
     }
 
     @Override
@@ -186,45 +191,40 @@ public abstract class AbstractRecurrenceIterator<T> implements RecurrenceIterato
             return;
         }
 
-        if (limit != null && count >= limit) {
+        if (limit != null && count >= limit.intValue()) {
             ChronosLogger.debug("Reached given limit. Stop calculation.");
             next = null;
             return;
         }
 
-        if (!inner.hasNext() && lookAhead == null) {
-            ChronosLogger.debug("No more instances available.");
-            next = null;
-            return;
-        }
-
         if (lookAhead == null) {
-            lookAhead = inner.next();
+            if (!_hasNext()) {
+                ChronosLogger.debug("No more instances available.");
+                next = null;
+                return;
+            }
+            lookAhead = Long.valueOf(inner.next());
         }
 
-        while (isException(lookAhead)) {
+        while (isException(lookAhead.longValue())) {
             ChronosLogger.debug("Next instance is exception.");
             position++;
-            if (inner.hasNext()) {
-                lookAhead = inner.next();
+            if (_hasNext()) {
+                lookAhead = Long.valueOf(inner.next());
             } else {
                 next = null;
                 return;
             }
         }
 
-        if (this.end != null && lookAhead >= this.end.getTimeInMillis()) {
-            ChronosLogger.debug("Next instance ({}) reached end boundary ({}).", lookAhead, this.end.getTimeInMillis());
+        if (this.end != null && lookAhead.longValue() >= this.end.getTimeInMillis()) {
+            ChronosLogger.debug("Next instance ({}) reached end boundary ({}).", lookAhead, Long.valueOf(this.end.getTimeInMillis()));
             next = null;
             return;
         }
 
-        if (lookAhead == null) {
-            next = toDateTime(inner.next());
-        } else {
-            next = toDateTime(lookAhead.longValue());
-            lookAhead = null;
-        }
+        next = toDateTime(lookAhead.longValue());
+        lookAhead = null;
         count++;
         position++;
     }
@@ -246,7 +246,7 @@ public abstract class AbstractRecurrenceIterator<T> implements RecurrenceIterato
 
     @Override
     public boolean isLastOccurrence() {
-        return null == lookAhead && false == inner.hasNext() && 0 < getPosition();
+        return null == lookAhead && false == _hasNext() && 0 < getPosition();
     }
 
     /**

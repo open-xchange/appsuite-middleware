@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the Open-Xchange, Inc. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2020 Open-Xchange, Inc.
+ *     Copyright (C) 2016-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -65,7 +65,6 @@ import com.openexchange.chronos.common.DefaultCalendarResult;
 import com.openexchange.chronos.common.DeleteResultImpl;
 import com.openexchange.chronos.common.UpdateResultImpl;
 import com.openexchange.chronos.service.CalendarEvent;
-import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.CalendarResult;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.CreateResult;
@@ -106,6 +105,18 @@ public class InternalCalendarResult {
         this.calendarUserId = calendarUserId;
         this.folder = folder;
         this.affectedFolderIds = new HashSet<String>();
+    }
+
+    public CalendarSession getSession() {
+        return session;
+    }
+
+    public int getCalendarUserId() {
+        return calendarUserId;
+    }
+
+    public CalendarFolder getFolder() {
+        return folder;
     }
 
     /**
@@ -300,11 +311,10 @@ public class InternalCalendarResult {
     /**
      * Gets the calendar event representing the system-wide view on the performed calendar changes.
      *
-     * @param parameters Additional calendar parameters, or <code>null</code> if not available
      * @return The calendar event
      */
-    public CalendarEvent getCalendarEvent(CalendarParameters parameters) {
-        return new DefaultCalendarEvent(session.getContextId(), Utils.ACCOUNT_ID, calendarUserId, session.getSession(), getAffectedFoldersPerUser(), creations, updates, deletions, parameters);
+    public CalendarEvent getCalendarEvent() {
+        return new DefaultCalendarEvent(session.getContextId(), Utils.ACCOUNT_ID, calendarUserId, session.getSession(), getAffectedFoldersPerUser(), creations, updates, deletions, session);
     }
 
     /**
@@ -327,7 +337,12 @@ public class InternalCalendarResult {
             }
             return affectedFoldersPerUser;
         }
-        return Utils.getAffectedFoldersPerUser(session, affectedFolderIds);
+        try {
+            return Utils.getAffectedFoldersPerUser(session, affectedFolderIds);
+        } catch (OXException e) {
+            org.slf4j.LoggerFactory.getLogger(InternalCalendarResult.class).warn("Error getting affected users", e);
+            return Collections.emptyMap();
+        }
     }
 
     private static CreateResult findCreation(List<CreateResult> creations, String folderId, String id, RecurrenceId recurrenceId) {

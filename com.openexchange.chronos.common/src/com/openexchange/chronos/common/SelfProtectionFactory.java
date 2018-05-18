@@ -62,7 +62,6 @@ import com.openexchange.config.lean.DefaultProperty;
 import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.config.lean.Property;
 import com.openexchange.exception.OXException;
-import com.openexchange.session.Session;
 
 /**
  * {@link SelfProtectionFactory}
@@ -85,8 +84,8 @@ public class SelfProtectionFactory {
         super();
     }
 
-    public static SelfProtection createSelfProtection(Session session, LeanConfigurationService leanConfigurationService) throws OXException{
-        return new SelfProtection(session, leanConfigurationService);
+    public static SelfProtection createSelfProtection(LeanConfigurationService leanConfigurationService) throws OXException{
+        return new SelfProtection(leanConfigurationService);
     }
 
     public static class SelfProtection {
@@ -99,7 +98,7 @@ public class SelfProtectionFactory {
          * Initializes a new {@link SelfProtectionFactory.SelfProtection}.
          * @throws OXException
          */
-        public SelfProtection(Session session, LeanConfigurationService leanConfigurationService) throws OXException {
+        public SelfProtection(LeanConfigurationService leanConfigurationService) throws OXException {
             super();
             if(leanConfigurationService == null){
                 // Log warning and use defaults
@@ -146,7 +145,7 @@ public class SelfProtectionFactory {
         }
 
         /**
-         * Checks if an {@link Event} contains too many {@link Alarm}s
+         * Checks if an {@link Event} contains too many {@link Alarm}s or too many {@link Attendee}s
          *
          * @param event The event to check
          * @throws OXException if the event contains too many {@link Attendee}s or {@link Alarm}s
@@ -154,6 +153,9 @@ public class SelfProtectionFactory {
         public void checkEvent(Event event) throws OXException {
             if (event.getAlarms() != null && event.getAlarms().size() > alarmLimit) {
                 throw CalendarExceptionCodes.TOO_MANY_ALARMS.create();
+            }
+            if (event.getAttendees() != null && event.getAttendees().size() > attendeeLimit) {
+                throw CalendarExceptionCodes.TOO_MANY_ATTENDEES.create();
             }
         }
 

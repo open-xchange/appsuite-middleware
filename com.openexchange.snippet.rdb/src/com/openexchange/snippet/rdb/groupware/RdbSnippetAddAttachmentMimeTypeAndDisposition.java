@@ -76,7 +76,7 @@ public class RdbSnippetAddAttachmentMimeTypeAndDisposition extends UpdateTaskAda
     @Override
     public void perform(PerformParameters params) throws OXException {
         Connection con = params.getConnection();
-        boolean rollback = false;
+        byte rollback = 0;
         try {
             boolean mimeTypeExists = Tools.columnExists(con, "snippetAttachment", "mimeType");
             boolean dispositionExists = Tools.columnExists(con, "snippetAttachment", "disposition");
@@ -85,7 +85,7 @@ public class RdbSnippetAddAttachmentMimeTypeAndDisposition extends UpdateTaskAda
             }
 
             Databases.startTransaction(con);
-            rollback = true;
+            rollback = 1;
 
             // https://stackoverflow.com/questions/7599519/alter-table-add-column-takes-a-long-time
             Column columnMimeType = new Column("mimeType", "VARCHAR(255) CHARACTER SET utf8 COLLATE utf8_unicode_ci DEFAULT NULL");
@@ -93,16 +93,18 @@ public class RdbSnippetAddAttachmentMimeTypeAndDisposition extends UpdateTaskAda
             Tools.checkAndAddColumns(con, "snippetAttachment", columnMimeType, columnDisposition);
 
             con.commit();
-            rollback = false;
+            rollback = 2;
         } catch (SQLException e) {
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } catch (RuntimeException e) {
             throw UpdateExceptionCodes.OTHER_PROBLEM.create(e, e.getMessage());
         } finally {
-            if (rollback) {
-                Databases.rollback(con);
+            if (rollback > 0) {
+                if (rollback == 1) {
+                    Databases.rollback(con);
+                }
+                Databases.autocommit(con);
             }
-            Databases.autocommit(con);
         }
     }
 

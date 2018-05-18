@@ -66,4 +66,6 @@ final class SchedJoulesProviderExceptionMessages {
     static final String MALFORMED_ACCOUNT_MSG = "Your SchedJoules account is malformed. Please re-create it.";
     // You have specified an invalid refresh minimum interval for the calendar subscription
     static final String INVALID_MINIMUM_REFRESH_INTERVAL_MSG = "You have specified an invalid refresh minimum interval for the calendar subscription";
+    // You have specified an invalid alarm value for the calendar subscription
+    static final String INVALID_ALARM_VALUE_MSG = "You have specified an invalid alarm value for the calendar subscription";
 }

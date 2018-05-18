@@ -59,6 +59,7 @@ public class SubfolderAwareTargetPermission extends TargetPermission {
 
     private final int type;
     private final String legator;
+    private final int system;
 
     /**
      * Initializes a new {@link SubfolderAwareTargetPermission}.
@@ -67,10 +68,11 @@ public class SubfolderAwareTargetPermission extends TargetPermission {
      * @param permissionBits
      * @param includeSubfolders
      */
-    public SubfolderAwareTargetPermission(int entityId, boolean isGroup, int permissionBits, int type, String legator) {
+    public SubfolderAwareTargetPermission(int entityId, boolean isGroup, int permissionBits, int type, String legator, int system) {
         super(entityId, isGroup, permissionBits);
         this.type = type;
         this.legator = legator;
+        this.system = system;
     }
 
     /**
@@ -89,6 +91,15 @@ public class SubfolderAwareTargetPermission extends TargetPermission {
      */
     public String getPermissionLegator() {
        return legator;
+    }
+
+    /**
+     * Gets the system
+     *
+     * @return The system
+     */
+    public int getSystem() {
+        return system;
     }
 
 }

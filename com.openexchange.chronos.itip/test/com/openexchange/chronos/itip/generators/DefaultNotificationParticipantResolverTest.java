@@ -51,6 +51,7 @@ package com.openexchange.chronos.itip.generators;
 
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsNull.nullValue;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
@@ -68,11 +69,13 @@ import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import com.openexchange.chronos.Attendee;
-import com.openexchange.chronos.ChronosTestTools;
 import com.openexchange.chronos.Event;
+import com.openexchange.chronos.Organizer;
 import com.openexchange.chronos.ParticipationStatus;
 import com.openexchange.chronos.common.CalendarUtils;
+import com.openexchange.chronos.itip.ChronosTestTools;
 import com.openexchange.chronos.itip.ITipIntegrationUtility;
+import com.openexchange.chronos.itip.ITipRole;
 import com.openexchange.chronos.itip.osgi.Services;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
@@ -151,7 +154,6 @@ public class DefaultNotificationParticipantResolverTest {
 
     private void prepareServices(Event updated, User onBehalfOf) throws OXException {
         List<MockUser> attendeesAsUser = ChronosTestTools.convertToUser(updated.getAttendees());
-        PowerMockito.when(userService.getUser(updated.getCreatedBy().getEntity(), context)).thenReturn(onBehalfOf);
         PowerMockito.when(userService.getUser(Matchers.any(Context.class), (int[]) Matchers.any())).thenReturn(attendeesAsUser.toArray(new MockUser[] {}));
     }
 
@@ -275,6 +277,147 @@ public class DefaultNotificationParticipantResolverTest {
         Assert.assertThat("Comment should not be set!", participant.getComment(), nullValue());
         Assert.assertThat("Confirm status should not be set!", participant.getConfirmStatus(), is(ParticipationStatus.NEEDS_ACTION)); // NotificationParticipant default
         Assert.assertFalse("Shouldn't be external!", participant.isExternal());
+    }
+
+    @Test
+    public void testResolveAllRecipients_OrganizerNotAttendee_OrganizerIsAdded() throws OXException {
+
+        // Setup test data
+        Event updated = ChronosTestTools.createEvent(CONTEXT_ID, null);
+        User user;
+        User onBehalfOf = user = ChronosTestTools.convertToUser(updated.getCreatedBy());
+
+        Iterator<Attendee> iterator = updated.getAttendees().iterator();
+        while (iterator.hasNext()) {
+            Attendee next = iterator.next();
+            if (next.getEntity() == updated.getOrganizer().getEntity()) {
+                iterator.remove();
+                break;
+            }
+        }
+
+        prepareServices(updated, onBehalfOf);
+
+        List<NotificationParticipant> participants = resolver.resolveAllRecipients(null, updated, user, onBehalfOf, context, session, null);
+        Assert.assertFalse("No participants resolved", participants.isEmpty());
+        NotificationParticipant participant = participants.stream().filter(p -> p.getIdentifier() == updated.getOrganizer().getEntity()).findFirst().get();
+        Assert.assertThat("Confirm status should not be set!", participant.getConfirmStatus(), is(ParticipationStatus.NEEDS_ACTION)); // NotificationParticipant default
+        Assert.assertFalse("Shouldn't be external!", participant.isExternal());
+    }
+
+    @Test
+    public void testResolveAllRecipients_OrganizerNotSet_OrganizerIsFoundInAttendeeList() throws OXException {
+
+        // Setup test data
+        Event updated = ChronosTestTools.createEvent(CONTEXT_ID, null);
+        User user;
+        User onBehalfOf = user = ChronosTestTools.convertToUser(updated.getCreatedBy());
+
+        Organizer o = updated.getOrganizer();
+        updated.removeOrganizer();
+        updated.removeCreatedBy();
+
+        Iterator<Attendee> iterator = updated.getAttendees().iterator();
+        while (iterator.hasNext()) {
+            Attendee next = iterator.next();
+            if (next.getEntity() == o.getEntity()) {
+                iterator.remove();
+                break;
+            }
+        }
+
+        prepareServices(updated, onBehalfOf);
+        PowerMockito.when(userService.getUser(Matchers.eq(session.getUserId()), Matchers.any(Context.class))).thenReturn(user);
+
+        List<NotificationParticipant> participants = resolver.resolveAllRecipients(null, updated, user, onBehalfOf, context, session, null);
+        Assert.assertFalse("No participants resolved", participants.isEmpty());
+        NotificationParticipant participant = participants.stream().filter(p -> p.getIdentifier() == o.getEntity()).findFirst().get();
+        Assert.assertThat("Confirm status should not be set!", participant.getConfirmStatus(), is(ParticipationStatus.NEEDS_ACTION)); // NotificationParticipant default
+        Assert.assertFalse("Shouldn't be external!", participant.isExternal());
+    }
+
+    @Test
+    public void testResolveAllRecipients_OrganizerNotSetAndUserNotAttendee_OrganizerIsFoundInAttendeeList() throws OXException {
+
+        // Setup test data
+        Event updated = ChronosTestTools.createEvent(CONTEXT_ID, null);
+        User user;
+        User onBehalfOf = user = ChronosTestTools.convertToUser(updated.getCreatedBy());
+
+        Organizer o = updated.getOrganizer();
+        updated.removeOrganizer();
+        updated.removeCreatedBy();
+
+        Iterator<Attendee> iterator = updated.getAttendees().iterator();
+        while (iterator.hasNext()) {
+            Attendee next = iterator.next();
+            if (next.getEntity() == o.getEntity() || next.getEntity() == user.getId()) {
+                iterator.remove();
+            }
+        }
+
+        prepareServices(updated, onBehalfOf);
+        PowerMockito.when(userService.getUser(Matchers.eq(session.getUserId()), Matchers.any(Context.class))).thenReturn(user);
+
+        List<NotificationParticipant> participants = resolver.resolveAllRecipients(null, updated, user, onBehalfOf, context, session, null);
+        Assert.assertFalse("No participants resolved", participants.isEmpty());
+        NotificationParticipant participant = participants.stream().filter(p -> p.getIdentifier() == o.getEntity()).findFirst().get();
+        Assert.assertThat("Confirm status should not be set!", participant.getConfirmStatus(), is(ParticipationStatus.NEEDS_ACTION)); // NotificationParticipant default
+        Assert.assertFalse("Shouldn't be external!", participant.isExternal());
+    }
+
+    @Test
+    public void testResolveAllRecipients_ExternalOrganizer_OrganizerIsFound() throws OXException {
+
+        // Setup test data
+        Event updated = ChronosTestTools.createEvent(CONTEXT_ID, null);
+        User user;
+        User onBehalfOf = user = ChronosTestTools.convertToUser(updated.getCreatedBy());
+
+        Attendee externalAttendee = ChronosTestTools.createExternalAttendee(CONTEXT_ID, null);
+
+        Organizer o = new Organizer();
+        o.setEntity(externalAttendee.getEntity());
+        o.setEMail(externalAttendee.getEMail());
+        o.setCn(externalAttendee.getCn());
+        o.setUri(externalAttendee.getUri());
+        updated.setOrganizer(o);
+        updated.getAttendees().add(externalAttendee);
+
+        prepareServices(updated, onBehalfOf);
+
+        List<NotificationParticipant> participants = resolver.resolveAllRecipients(null, updated, user, onBehalfOf, context, session, null);
+        Assert.assertFalse("No participants resolved", participants.isEmpty());
+        NotificationParticipant participant = participants.stream().filter(p -> p.hasRole(ITipRole.ORGANIZER)).findFirst().get();
+        Assert.assertThat("Confirm status doesn't match!", participant.getConfirmStatus(), is(externalAttendee.getPartStat()));
+        Assert.assertTrue("Should be external!", participant.isExternal());
+    }
+
+    @Test
+    public void testResolveAllRecipients_ExternalOrganizerNotAttendee_OrganizerIsAdded() throws OXException {
+        // See bug 58461
+        // Setup test data
+        Event updated = ChronosTestTools.createEvent(CONTEXT_ID, null);
+        User user;
+        User onBehalfOf = user = ChronosTestTools.convertToUser(updated.getCreatedBy());
+
+        Attendee externalAttendee = ChronosTestTools.createExternalAttendee(CONTEXT_ID, null);
+
+        Organizer o = new Organizer();
+        o.setEntity(externalAttendee.getEntity());
+        o.setEMail(externalAttendee.getEMail());
+        o.setCn(externalAttendee.getCn());
+        o.setUri(externalAttendee.getUri());
+        updated.setOrganizer(o);
+        updated.getAttendees().add(ChronosTestTools.createExternalAttendee(CONTEXT_ID, null));
+
+        prepareServices(updated, onBehalfOf);
+
+        List<NotificationParticipant> participants = resolver.resolveAllRecipients(null, updated, user, onBehalfOf, context, session, null);
+        Assert.assertFalse("No participants resolved", participants.isEmpty());
+        NotificationParticipant participant = participants.stream().filter(p -> p.hasRole(ITipRole.ORGANIZER)).findFirst().get();
+        Assert.assertThat("Confirm status doesn't match!", participant.getConfirmStatus(), is(ParticipationStatus.NEEDS_ACTION)); // Organizer is not an attendee, so he can't accept etc.
+        Assert.assertTrue("Should be external!", participant.isExternal());
     }
 
 }

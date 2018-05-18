@@ -52,7 +52,9 @@ package com.openexchange.data.conversion.ical.ical4j;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.regex.Pattern;
 import com.openexchange.data.conversion.ical.ConversionError;
@@ -180,8 +182,8 @@ public class ICal4JEmitter implements ICalEmitter {
         ByteArrayOutputStream temp = new ByteArrayOutputStream();
         try {
             outputter.output(calendar, temp);
-            String icalPart = removeTimezoneData(new String(temp.toByteArray()));
-            PrintWriter writer = new PrintWriter(stream);
+            String icalPart = removeTimezoneData(new String(temp.toByteArray(), StandardCharsets.UTF_8));
+            PrintWriter writer = new PrintWriter(new OutputStreamWriter(stream, StandardCharsets.UTF_8));
             writer.write("\n");
             writer.write(icalPart);
             writer.write("\n");

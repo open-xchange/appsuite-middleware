@@ -52,6 +52,7 @@ package com.openexchange.chronos.json.action;
 import java.io.File;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -59,14 +60,18 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TimeZone;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.container.FileHolder;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.Attachment;
 import com.openexchange.chronos.Event;
+import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.json.converter.EventConflictResultConverter;
+import com.openexchange.chronos.json.converter.mapper.AlarmMapper;
 import com.openexchange.chronos.json.converter.mapper.EventMapper;
 import com.openexchange.chronos.json.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.provider.composition.IDBasedCalendarAccess;
@@ -77,13 +82,11 @@ import com.openexchange.groupware.attach.AttachmentConfig;
 import com.openexchange.groupware.upload.UploadFile;
 import com.openexchange.groupware.upload.impl.UploadEvent;
 import com.openexchange.java.Strings;
+import com.openexchange.java.util.TimeZones;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.session.Session;
-import com.openexchange.tools.TimeZoneUtils;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
-import com.openexchange.tools.session.ServerSessionAdapter;
 
 /**
  * {@link ChronosAction}
@@ -129,14 +132,15 @@ public abstract class ChronosAction extends AbstractChronosAction {
     /**
      * Gets the timezone used to interpret <i>Time</i> parameters in for the underlying request.
      *
+     * @param requestData The resuest data sent by the client
      * @return The timezone
      */
-    protected static TimeZone getTimeZone(Session session, AJAXRequestData requestData) throws OXException {
+    protected static TimeZone getTimeZone(AJAXRequestData requestData) {
         String timezoneId = requestData.getParameter("timezone");
         if (Strings.isEmpty(timezoneId)) {
-            timezoneId = ServerSessionAdapter.valueOf(session).getUser().getTimeZone();
+            timezoneId = requestData.getSession().getUser().getTimeZone();
         }
-        return TimeZoneUtils.getTimeZone(timezoneId);
+        return CalendarUtils.optTimeZone(timezoneId, TimeZones.UTC);
     }
 
     /**
@@ -191,12 +195,11 @@ public abstract class ChronosAction extends AbstractChronosAction {
      * Parses the {@link Event} from the payload object of the specified {@link AJAXRequestData}.
      * Any {@link Attachment} uploads will also be handled and properly attached to the {@link Event}.
      *
-     * @param session The groupware {@link Session}
      * @param requestData The {@link AJAXRequestData}
      * @return The parsed {@link Event}
      * @throws OXException if a parsing error occurs
      */
-    protected Event parseEvent(Session session, AJAXRequestData requestData) throws OXException {
+    protected Event parseEvent(AJAXRequestData requestData) throws OXException {
         Map<String, UploadFile> uploads = new HashMap<>();
         JSONObject jsonEvent;
         long maxUploadSize = AttachmentConfig.getMaxUploadSize();
@@ -206,11 +209,33 @@ public abstract class ChronosAction extends AbstractChronosAction {
             jsonEvent = extractJsonBody(requestData);
         }
         try {
-            Event event = EventMapper.getInstance().deserialize(jsonEvent, EventMapper.getInstance().getMappedFields(), getTimeZone(session, requestData));
+            Event event = EventMapper.getInstance().deserialize(jsonEvent, EventMapper.getInstance().getMappedFields(), getTimeZone(requestData));
             processAttachments(uploads, event);
             return event;
         } catch (JSONException e) {
             throw OXJSONExceptionCodes.JSON_READ_ERROR.create(e, e.getMessage());
+        }
+    }
+
+    /**
+     * Parses a list of alarms from the supplied json array.
+     *
+     * @param jsonArray The json array to parse the alarms from
+     * @param timeZone The timezone to consider, or <code>null</code> if not relevant
+     * @return The parsed alarms, or <code>null</code> if passed json array was <code>null</code>
+     */
+    protected List<Alarm> parseAlarms(JSONArray jsonArray, TimeZone timeZone) throws OXException {
+        if (null == jsonArray) {
+            return null;
+        }
+        try {
+            List<Alarm> alarms = new ArrayList<Alarm>(jsonArray.length());
+            for (int i = 0; i < jsonArray.length(); i++) {
+                alarms.add(AlarmMapper.getInstance().deserialize(jsonArray.getJSONObject(i), AlarmMapper.getInstance().getMappedFields(), timeZone));
+            }
+            return alarms;
+        } catch (JSONException e) {
+            throw AjaxExceptionCodes.INVALID_JSON_REQUEST_BODY.create(e);
         }
     }
 

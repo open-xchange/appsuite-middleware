@@ -131,6 +131,11 @@ public enum SchedJoulesProviderExceptionCodes implements DisplayableOXExceptionC
      * <li>The requested item with identifier '{}' does not denote to a JSON page</li>
      */
     PAGE_DOES_NOT_DENOTE_TO_JSON("The requested item with identifier '%1$s' does not denote to a JSON page", CATEGORY_ERROR, 13),
+    /**
+     * <li>You have specified an invalid alarm value for the calendar subscription</li>
+     * <li>Invalid alarm value '%4$s' was specified [account %1$s, user %2$s, context %3$s]</li>
+     */
+    INVALID_ALARM_VALUE("Invalid alarm value '%4$s' was specified [account %1$s, user %2$s, context %3$s]", SchedJoulesProviderExceptionMessages.INVALID_ALARM_VALUE_MSG, CATEGORY_ERROR, 14),
     ;
 
     public static final String PREFIX = "SCHEDJOULES";

@@ -127,6 +127,11 @@ public final class ConfigJSlobService implements JSlobService {
      */
     private static final String METADATA_PROTECTED = "protected";
 
+    /**
+     * <code>"final"</code>
+     */
+    private static final String METADATA_FINAL = "final";
+
     private static final String SERVICE_ID = "com.openexchange.jslob.config";
 
     private static final String CORE = "io.ox/core";
@@ -1217,7 +1222,7 @@ public final class ConfigJSlobService implements JSlobService {
         return services.getService(ConfigViewFactory.class);
     }
 
-    private static final Set<String> SKIP_META = ImmutableSet.of("final", METADATA_PROTECTED, METADATA_PREFERENCE_PATH);
+    private static final Set<String> SKIP_META = ImmutableSet.of(METADATA_FINAL, METADATA_PROTECTED, METADATA_PREFERENCE_PATH);
 
     private static void add2JSlob(final AttributedProperty attributedProperty, final JSlob jsonJSlob, final ConfigView view) throws OXException {
         if (null == attributedProperty) {
@@ -1246,9 +1251,9 @@ public final class ConfigJSlobService implements JSlobService {
                 }
             }
             // Lastly, let's add configurability.
-            final String finalScope = preferenceItem.get("final");
+            final String finalScope = preferenceItem.get(METADATA_FINAL);
             final String isProtected = preferenceItem.get(METADATA_PROTECTED);
-            final boolean writable = (finalScope == null || finalScope.equals("user")) && (isProtected == null || !preferenceItem.get(METADATA_PROTECTED, boolean.class).booleanValue());
+            final boolean writable = (finalScope == null || finalScope.equals("user")) && (isProtected == null || !Boolean.parseBoolean(isProtected));
             if (!writable) {
                 jMetaData.put("configurable", Boolean.valueOf(writable));
             }
@@ -1275,17 +1280,23 @@ public final class ConfigJSlobService implements JSlobService {
             addValueByPath(path, value, jsonJSlob.getJsonObject());
 
             // Add the metadata as well as a separate JSON object
-            JSONObject jMetaData = new JSONObject();
-            Map<String, Object> metadata = jSlobEntry.metadata(session);
-            if (null != metadata && !metadata.isEmpty()) {
-                for (Entry<String, Object> metadataEntry : metadata.entrySet()) {
-                    String metadataName = metadataEntry.getKey();
-                    if (SKIP_META.contains(metadataName)) {
-                        continue;
+            JSONObject jMetaData;
+            {
+                Map<String, Object> metadata = jSlobEntry.metadata(session);
+                int size;
+                if (null != metadata && (size = metadata.size()) > 0) {
+                    jMetaData = new JSONObject(size + 2);
+                    for (Map.Entry<String, Object> metadataEntry : metadata.entrySet()) {
+                        String metadataName = metadataEntry.getKey();
+                        if (SKIP_META.contains(metadataName)) {
+                            continue;
+                        }
+                        // Metadata value
+                        value = metadataEntry.getValue();
+                        jMetaData.put(metadataName, value);
                     }
-                    // Metadata value
-                    value = metadataEntry.getValue();
-                    jMetaData.put(metadataName, value);
+                } else {
+                    jMetaData = new JSONObject(2);
                 }
             }
             // Lastly, let's add configurability.

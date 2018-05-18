@@ -51,7 +51,6 @@ package com.openexchange.subscribe.dav.web.de.osgi;
 
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.subscribe.SubscribeService;
-import com.openexchange.subscribe.crawler.CrawlerBlacklister;
 import com.openexchange.subscribe.dav.web.de.WebDeSubscribeService;
 
 /**
@@ -76,14 +75,6 @@ public class WebDeSubscribeActivator extends HousekeepingActivator {
 
     @Override
     protected void startBundle() throws Exception {
-        CrawlerBlacklister blacklister = new CrawlerBlacklister() {
-
-            @Override
-            public String getCrawlerId() {
-                return "com.openexchange.subscribe.crawler.web.de";
-            }
-        };
-        registerService(CrawlerBlacklister.class, blacklister, null);
         WebDeSubscribeService subscribeService = new WebDeSubscribeService(this);
         registerService(SubscribeService.class, subscribeService, null);
     }

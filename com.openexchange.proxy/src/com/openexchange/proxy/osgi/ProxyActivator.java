@@ -74,6 +74,7 @@ public class ProxyActivator extends HousekeepingActivator {
 	    final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(ProxyActivator.class);
         try {
             log.info("stopping bundle: com.openexchange.proxy");
+            super.stopBundle();
         } catch (final Exception e) {
             log.error("Failed shut-down of bundle com.openexchange.proxy", e);
             throw e;

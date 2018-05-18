@@ -86,9 +86,11 @@ import static com.openexchange.chronos.exception.CalendarExceptionMessages.TOO_M
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.TOO_MANY_ATTENDEES_MSG;
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.TOO_MANY_EVENTS_MSG;
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.UID_CONFLICT_MSG;
+import static com.openexchange.chronos.exception.CalendarExceptionMessages.UNSUPPORTED_CLASSIFICATION_FOR_FOLDER_MSG;
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.UNSUPPORTED_CLASSIFICATION_FOR_MOVE_MSG;
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.UNSUPPORTED_CLASSIFICATION_FOR_OCCURRENCE_MSG;
-import static com.openexchange.chronos.exception.CalendarExceptionMessages.UNSUPPORTED_CLASSIFICATION_MSG;
+import static com.openexchange.chronos.exception.CalendarExceptionMessages.UNSUPPORTED_CLASSIFICATION_FOR_RESOURCE_MSG;
+import static com.openexchange.chronos.exception.CalendarExceptionMessages.UNSUPPORTED_DATA_MSG;
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.UNSUPPORTED_FOLDER_MSG;
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.UNSUPPORTED_OPERATION_FOR_PROVIDER_MSG;
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.UNSUPPORTED_RRULE_MSG;
@@ -238,10 +240,15 @@ public enum CalendarExceptionCodes implements DisplayableOXExceptionCode {
      */
     END_BEFORE_START("End before start date [start %1$s, end %2$s]", END_BEFORE_START_MSG, Category.CATEGORY_USER_INPUT, 4221),
     /**
-     * <li>Appointments in non-personal folders must not be classified as \"private\" or \"confidential\".</li>
+     * <li>Appointments in non-personal folders must not be classified as \"private\" or \"secret\".</li>
      * <li>Unsupported classification [classification %1$s, folder %2$d, type %3$s]</li>
      */
-    UNSUPPORTED_CLASSIFICATION("Unsupported classification [classification %1$s, folder %2$d, type %3$s]", UNSUPPORTED_CLASSIFICATION_MSG, Category.CATEGORY_USER_INPUT, 4222),
+    UNSUPPORTED_CLASSIFICATION_FOR_FOLDER("Unsupported classification [classification %1$s, folder %2$d, type %3$s]", UNSUPPORTED_CLASSIFICATION_FOR_FOLDER_MSG, Category.CATEGORY_USER_INPUT, 4222),
+    /**
+     * <li>Appointments with resources must not be classified as \"secret\".".</li>
+     * <li>Unsupported classification [classification %1$s, attendee %2$d]</li>
+     */
+    UNSUPPORTED_CLASSIFICATION_FOR_RESOURCE("Unsupported classification [classification %1$s, attendee %2$d]", UNSUPPORTED_CLASSIFICATION_FOR_RESOURCE_MSG, Category.CATEGORY_USER_INPUT, 42210),
     /**
      * <li>The supplied recurrence rule is not supported. Please use adjust the rule and try again.</li>
      * <li>Unsupported recurrence rule [rule %1$s, part %2$s, error %3$s]</li>
@@ -364,10 +371,15 @@ public enum CalendarExceptionCodes implements DisplayableOXExceptionCode {
      */
     MAX_ACCOUNTS_EXCEEDED("Maximum number of accounts exceeded [provider %1$s, limit %2$d, current %3$d]", MAX_ACCOUNTS_EXCEEDED_MSG, Category.CATEGORY_USER_INPUT, 5075),
     /**
-     * <li>The value for \"%2$s\" is invalid and wasn't be applied.</li>
+     * <li>The value for \"%2$s\" is invalid and wasn't applied.</li>
      * <li>Ignored invalid data [id %1$s, field %2$s, severity %3$s, message %4$s]</li>
      */
     IGNORED_INVALID_DATA("Ignored invalid data [id %1$s, field %2$s, severity %3$s, message %4$s]", IGNORED_INVALID_DATA_MSG, Category.CATEGORY_WARNING, 1990),
+    /**
+     * <li>The value for \"%2$s\" is not supported and wasn't applied.</li>
+     * <li>Unsupported data [id %1$s, field %2$s, severity %3$s, message %4$s]</li>
+     */
+    UNSUPPORTED_DATA("Unsupported data [id %1$s, field %2$s, severity %3$s, message %4$s]", UNSUPPORTED_DATA_MSG, Category.CATEGORY_TRUNCATED, 1991),
 
     //TODO: check if needed/useful, check code
     /**

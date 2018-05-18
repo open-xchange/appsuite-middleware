@@ -59,6 +59,7 @@ import java.util.Collection;
 import java.util.LinkedList;
 import org.xml.sax.helpers.DefaultHandler;
 import com.openexchange.java.Streams;
+import com.openexchange.java.URLConnections;
 import com.openexchange.subscribe.Subscription;
 
 /**
@@ -107,23 +108,24 @@ public abstract class AbstractMicroformatSAXHandler<T> extends DefaultHandler {
     protected String readSubscription(Subscription subscription) throws IOException{ //TODO: refactor to composite pattern
         URL url = new URL(""); //new URL(subscription.getUrl());
         BufferedReader buffy = null;
-        StringBuilder bob = new StringBuilder(2048);
-
         try {
             URLConnection connection = url.openConnection();
             connection.setConnectTimeout(2500);
             connection.setReadTimeout(2500);
-            buffy = new BufferedReader( new InputStreamReader( connection.getInputStream() ) );
+            connection.connect();
+
+            buffy = new BufferedReader( new InputStreamReader( connection.getInputStream(), URLConnections.getCharsetFrom(connection, "UTF-8") ) );
+            StringBuilder bob = new StringBuilder(2048);
             String line = buffy.readLine();
             while (line != null){
                 bob.append (line);
                 bob.append ('\n');
                 line = buffy.readLine();
             }
+            return bob.toString();
         } finally {
             Streams.close(buffy);
         }
-        return bob.toString();
     }
 
     /**

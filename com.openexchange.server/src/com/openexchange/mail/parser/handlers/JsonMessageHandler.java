@@ -66,7 +66,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TimeZone;
-import java.util.concurrent.atomic.AtomicReference;
 import javax.mail.Part;
 import javax.mail.internet.InternetAddress;
 import org.json.JSONArray;
@@ -244,17 +243,6 @@ public final class JsonMessageHandler implements MailMessageHandler {
         }
 
     } // End of class MultipartInfo
-
-    private static final AtomicReference<Boolean> hideInlineImages = new AtomicReference<Boolean>(null);
-    private static boolean hideInlineImages(int userId, int contextId) {
-        Boolean tmp = hideInlineImages.get();
-        if (null == tmp) {
-            synchronized (tmp) {
-
-            }
-        }
-        return tmp.booleanValue();
-    }
 
     // -----------------------------------------------------------------------------------------------------------------
 
@@ -572,11 +560,11 @@ public final class JsonMessageHandler implements MailMessageHandler {
         if (numOfAttributes > 0) {
             result = new JSONObject(numOfAttributes);
             JSONArray unconsideredResults = new JSONArray();
-            for (MailAuthenticityResultKey key : attributes.keySet()) {
-                if (!key.isVisible()) {
+            for (Entry<MailAuthenticityResultKey, Object> entry : attributes.entrySet()) {
+                if (!entry.getKey().isVisible()) {
                     continue;
                 }
-                Object object = attributes.get(key);
+                Object object = entry.getValue();
                 if (object instanceof Collection<?>) {
                     Collection<?> col = (Collection<?>) object;
 
@@ -597,7 +585,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
                         }
                     }
                 } else {
-                    result.put(key.getKey(), object);
+                    result.put(entry.getKey().getKey(), entry.getValue());
                 }
             }
             if (MailAuthenticityStatus.TRUSTED.equals(authenticityResult.getStatus()) && authenticityResult.getAttribute(MailAuthenticityResultKey.IMAGE) != null) {

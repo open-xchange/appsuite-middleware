@@ -5,7 +5,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Date;
@@ -26,7 +25,6 @@ import com.openexchange.groupware.infostore.utils.Metadata;
 import com.openexchange.groupware.modules.Module;
 import com.openexchange.groupware.search.Order;
 import com.openexchange.test.FolderTestManager;
-import com.openexchange.test.TestInit;
 
 public class SearchTest extends AbstractAJAXSession {
 
@@ -160,35 +158,6 @@ public class SearchTest extends AbstractAJAXSession {
         assertTitle(1, arrayOfarrays, "Test 15");
         assertTitle(2, arrayOfarrays, "Test 5");
 
-    }
-
-    @Test
-    public void testVersions() throws Exception {
-        final File upload = new File(TestInit.getTestProperty("ajaxPropertiesFile"));
-
-        String id = null;
-        for(com.openexchange.file.storage.File file: itm.getCreatedEntities()){
-            if(file.getTitle().equals(all[1])){
-                id=file.getId();
-            }
-        }
-        com.openexchange.file.storage.File org = itm.getAction(id);
-        org.setTitle("File");
-        itm.updateAction(org, upload, new com.openexchange.file.storage.File.Field[] { com.openexchange.file.storage.File.Field.TITLE }, new Date(Long.MAX_VALUE));
-        assertFalse(itm.getLastResponse().hasError());
-
-        List<com.openexchange.file.storage.File> found = itm.search("File", folderId);
-        assertFalse(itm.getLastResponse().hasError());
-
-        assertTitles(found, "File");
-
-        itm.revert(id);
-        assertFalse(itm.getLastResponse().hasError());
-
-        List<com.openexchange.file.storage.File> files = itm.search("1", folderId);
-        assertFalse(itm.getLastResponse().hasError());
-
-        assertTitles(files, "Test 1", "Test 10", "Test 11", "Test 12", "Test 13", "Test 14", "Test 15", "Test 16", "Test 17", "Test 18", "Test 19", "Test 21");
     }
 
     // Tests functionality that no one requested yet

@@ -68,12 +68,12 @@ import com.openexchange.chronos.provider.basic.CalendarSettings;
 import com.openexchange.chronos.provider.caching.ExternalCalendarResult;
 import com.openexchange.chronos.provider.caching.basic.BasicCachingCalendarAccess;
 import com.openexchange.chronos.provider.schedjoules.exception.SchedJoulesProviderExceptionCodes;
+import com.openexchange.chronos.provider.schedjoules.osgi.Services;
 import com.openexchange.chronos.schedjoules.SchedJoulesService;
 import com.openexchange.chronos.schedjoules.api.auxiliary.SchedJoulesCalendar;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
-import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 
 /**
@@ -106,8 +106,8 @@ public class BasicSchedJoulesCalendarAccess extends BasicCachingCalendarAccess {
      * @param parameters The optional {@link CalendarParameters}
      * @throws OXException If the context cannot be resolved
      */
-    protected BasicSchedJoulesCalendarAccess(ServiceLookup services, Session session, CalendarAccount account, CalendarParameters parameters) throws OXException {
-        super(services, session, account, parameters);
+    protected BasicSchedJoulesCalendarAccess(Session session, CalendarAccount account, CalendarParameters parameters) throws OXException {
+        super(session, account, parameters);
     }
 
     @Override
@@ -150,7 +150,7 @@ public class BasicSchedJoulesCalendarAccess extends BasicCachingCalendarAccess {
             long lastModified = internalConfig.optLong(SchedJoulesFields.LAST_MODIFIED, -1);
             URL url = getFeedURL(internalConfig);
 
-            SchedJoulesService schedJoulesService = services.getService(SchedJoulesService.class);
+            SchedJoulesService schedJoulesService = Services.getService(SchedJoulesService.class);
             SchedJoulesCalendar calendar = schedJoulesService.getCalendar(session.getContextId(), url, eTag, lastModified);
             if (eTag.equals(calendar.getETag())) {
                 return new ExternalCalendarResult(false, Collections.emptyList());
@@ -205,7 +205,7 @@ public class BasicSchedJoulesCalendarAccess extends BasicCachingCalendarAccess {
         StringBuilder sb = new StringBuilder();
         sb.append(urlStr);
         sb.append(urlStr.contains("?") ? "&" : "?");
-        sb.append("u=").append(userKey);
+        sb.append("u=").append(userKey).append("&al=none");
 
         return sb.toString();
     }

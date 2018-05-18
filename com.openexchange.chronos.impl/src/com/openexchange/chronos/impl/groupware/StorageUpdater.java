@@ -113,7 +113,7 @@ class StorageUpdater {
         this.context = context;
         this.attendeeId = attendeeId;
         this.entityResolver = calendarUtilities.getEntityResolver(context.getContextId());
-        this.replacement = entityResolver.prepareUserAttendee(null == destinationUserId ? context.getMailadmin() : destinationUserId.intValue());
+        this.replacement = entityResolver.prepareUserAttendee(null == destinationUserId || 0 >= destinationUserId ? context.getMailadmin() : destinationUserId.intValue());
         this.storage = factory.create(context, CalendarAccount.DEFAULT_ACCOUNT.getAccountId(), entityResolver, dbProvider, DBTransactionPolicy.NO_TRANSACTIONS);
         this.tracker = new SimpleResultTracker(calendarHandlers);
         this.calendarUtilities = calendarUtilities;

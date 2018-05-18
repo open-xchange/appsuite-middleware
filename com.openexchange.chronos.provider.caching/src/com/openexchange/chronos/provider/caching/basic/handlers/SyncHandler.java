@@ -50,15 +50,21 @@
 package com.openexchange.chronos.provider.caching.basic.handlers;
 
 import static com.openexchange.java.Autoboxing.L;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.common.CalendarUtils;
+import com.openexchange.chronos.common.DefaultEventsResult;
 import com.openexchange.chronos.common.DefaultUpdatesResult;
 import com.openexchange.chronos.common.SearchUtils;
+import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.provider.CalendarAccount;
+import com.openexchange.chronos.provider.caching.basic.BasicCachingCalendarAccess;
 import com.openexchange.chronos.provider.caching.internal.Services;
 import com.openexchange.chronos.service.CalendarParameters;
+import com.openexchange.chronos.service.EventsResult;
 import com.openexchange.chronos.service.SearchOptions;
 import com.openexchange.chronos.service.SortOrder;
 import com.openexchange.chronos.service.UpdatesResult;
@@ -170,17 +176,31 @@ public class SyncHandler extends AbstractExtensionHandler {
 
             @Override
             protected List<Event> call(CalendarStorage storage) throws OXException {
-                CompositeSearchTerm searchTerm = new CompositeSearchTerm(CompositeOperation.OR);
-                searchTerm.addSearchTerm(SearchUtils.getSearchTerm(EventField.UID, SingleOperation.EQUALS, resourceName));
-                searchTerm.addSearchTerm(SearchUtils.getSearchTerm(EventField.FILENAME, SingleOperation.EQUALS, resourceName));
+                return resolveResource(storage, resourceName);
+            }
+        }.executeQuery();
+    }
 
-                EventField[] eventFields = getEventFields();
+    public Map<String, EventsResult> resolveResources(List<String> resourceNames) throws OXException {
+        return new OSGiCalendarStorageOperation<Map<String, EventsResult>>(Services.getServiceLookup(), getSession().getContextId(), getAccount().getAccountId()) {
 
-                List<Event> resolvedEvents = storage.getEventStorage().searchEvents(searchTerm, getSearchOptions(), eventFields);
-                storage.getUtilities().loadAdditionalEventData(getSession().getUserId(), resolvedEvents, eventFields);
-
-                // Ensure that the series master event is the first element in the returned list
-                return CalendarUtils.sortSeriesMasterFirst(resolvedEvents);
+            @Override
+            protected Map<String, EventsResult> call(CalendarStorage storage) throws OXException {
+                Map<String, EventsResult> eventsResults = new HashMap<String, EventsResult>();
+                for (String resourceName : resourceNames) {
+                    try {
+                        List<Event> events = resolveResource(storage, resourceName);
+                        if (null == events || 0 == events.size()) {
+                            OXException e = CalendarExceptionCodes.EVENT_NOT_FOUND_IN_FOLDER.create(BasicCachingCalendarAccess.FOLDER_ID, resourceName);
+                            eventsResults.put(resourceName, new DefaultEventsResult(e));
+                        } else {
+                            eventsResults.put(resourceName, new DefaultEventsResult(events));
+                        }
+                    } catch (OXException e) {
+                        eventsResults.put(resourceName, new DefaultEventsResult(e));
+                    }
+                }
+                return eventsResults;
             }
         }.executeQuery();
     }
@@ -194,4 +214,19 @@ public class SyncHandler extends AbstractExtensionHandler {
     private SearchTerm<?> createSearchTerm(long updatedSince) {
         return SearchUtils.getSearchTerm(EventField.TIMESTAMP, SingleOperation.GREATER_THAN, L(updatedSince));
     }
+
+    private List<Event> resolveResource(CalendarStorage storage, String resourceName) throws OXException {
+        CompositeSearchTerm searchTerm = new CompositeSearchTerm(CompositeOperation.OR);
+        searchTerm.addSearchTerm(SearchUtils.getSearchTerm(EventField.UID, SingleOperation.EQUALS, resourceName));
+        searchTerm.addSearchTerm(SearchUtils.getSearchTerm(EventField.FILENAME, SingleOperation.EQUALS, resourceName));
+
+        EventField[] eventFields = getEventFields();
+
+        List<Event> resolvedEvents = storage.getEventStorage().searchEvents(searchTerm, getSearchOptions(), eventFields);
+        storage.getUtilities().loadAdditionalEventData(getSession().getUserId(), resolvedEvents, eventFields);
+
+        // Ensure that the series master event is the first element in the returned list
+        return CalendarUtils.sortSeriesMasterFirst(resolvedEvents);
+    }
+
 }

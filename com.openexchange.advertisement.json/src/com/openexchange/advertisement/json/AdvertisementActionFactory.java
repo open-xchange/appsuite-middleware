@@ -49,7 +49,6 @@
 
 package com.openexchange.advertisement.json;
 
-import java.util.Collection;
 import java.util.Map;
 import com.google.common.collect.ImmutableMap;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
@@ -97,10 +96,4 @@ public class AdvertisementActionFactory implements AJAXActionServiceFactory {
         }
         return retval;
     }
-
-    @Override
-    public Collection<?> getSupportedServices() {
-        return java.util.Collections.unmodifiableCollection(actions.values());
-    }
-
 }

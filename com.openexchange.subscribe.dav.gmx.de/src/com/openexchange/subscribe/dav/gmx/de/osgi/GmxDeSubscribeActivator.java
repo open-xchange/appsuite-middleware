@@ -51,7 +51,6 @@ package com.openexchange.subscribe.dav.gmx.de.osgi;
 
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.subscribe.SubscribeService;
-import com.openexchange.subscribe.crawler.CrawlerBlacklister;
 import com.openexchange.subscribe.dav.gmx.de.GmxDeSubscribeService;
 
 /**
@@ -76,14 +75,6 @@ public class GmxDeSubscribeActivator extends HousekeepingActivator {
 
     @Override
     protected void startBundle() throws Exception {
-        CrawlerBlacklister blacklister = new CrawlerBlacklister() {
-
-            @Override
-            public String getCrawlerId() {
-                return "com.openexchange.subscribe.crawler.gmx.de";
-            }
-        };
-        registerService(CrawlerBlacklister.class, blacklister, null);
         GmxDeSubscribeService subscribeService = new GmxDeSubscribeService(this);
         registerService(SubscribeService.class, subscribeService, null);
     }

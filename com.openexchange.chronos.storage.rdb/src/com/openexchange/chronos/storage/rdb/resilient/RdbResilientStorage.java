@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the Open-Xchange, Inc. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2020 Open-Xchange, Inc.
+ *     Copyright (C) 2016-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,6 +49,7 @@
 
 package com.openexchange.chronos.storage.rdb.resilient;
 
+import com.openexchange.chronos.exception.ProblemSeverity;
 import com.openexchange.chronos.storage.rdb.CalendarStorageWarnings;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceLookup;
@@ -84,6 +85,20 @@ public abstract class RdbResilientStorage extends CalendarStorageWarnings {
         this.services = services;
         this.handleIncorrectStrings = handleIncorrectStrings;
         this.handleTruncations = handleTruncations;
+    }
+
+    /**
+     * Configures the severity threshold defining which unsupported data errors can be ignored.
+     *
+     * @param severityThreshold The threshold defining up to which severity unsupported data errors can be ignored, or
+     *            <code>null</code> to not ignore any unsupported data error at all
+     * @param delegate The delegate storage
+     */
+    protected void setUnsupportedDataThreshold(ProblemSeverity severityThreshold, Object delegate) {
+        super.setUnsupportedDataThreshold(severityThreshold);
+        if (CalendarStorageWarnings.class.isInstance(delegate)) {
+            ((CalendarStorageWarnings) delegate).setUnsupportedDataThreshold(severityThreshold);
+        }
     }
 
     /**

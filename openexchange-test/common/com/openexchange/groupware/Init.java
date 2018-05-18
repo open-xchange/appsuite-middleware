@@ -565,14 +565,16 @@ public final class Init {
         SimpleServiceLookup myServices = new SimpleServiceLookup();
         Object configurationService = services.get(ConfigurationService.class);
         myServices.add(ConfigurationService.class, configurationService);
-        myServices.add(SSLConfigurationService.class, new TrustAllSSLConfigurationService());
+        TrustAllSSLConfigurationService sslConfigService = TrustAllSSLConfigurationService.getInstance();
+        myServices.add(SSLConfigurationService.class, sslConfigService);
         com.openexchange.net.ssl.osgi.Services.setServiceLookup(myServices);
 
-        services.put(SSLSocketFactoryProvider.class, DefaultSSLSocketFactoryProvider.getInstance());
-        services.put(SSLConfigurationService.class, new TrustAllSSLConfigurationService());
+        DefaultSSLSocketFactoryProvider factoryProvider = new DefaultSSLSocketFactoryProvider(sslConfigService);
+        services.put(SSLSocketFactoryProvider.class, factoryProvider);
+        services.put(SSLConfigurationService.class, sslConfigService);
 
-        TestServiceRegistry.getInstance().addService(SSLSocketFactoryProvider.class, DefaultSSLSocketFactoryProvider.getInstance());
-        TestServiceRegistry.getInstance().addService(SSLConfigurationService.class, new TrustAllSSLConfigurationService());
+        TestServiceRegistry.getInstance().addService(SSLSocketFactoryProvider.class, factoryProvider);
+        TestServiceRegistry.getInstance().addService(SSLConfigurationService.class, sslConfigService);
 
         TrustedSSLSocketFactory.init();
     }

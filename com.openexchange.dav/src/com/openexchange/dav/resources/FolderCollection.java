@@ -196,6 +196,16 @@ public abstract class FolderCollection<T> extends DAVCollection {
     }
 
     /**
+     * Gets the resource name from a filename, i.e. the resource name without the expected filename extension.
+     *
+     * @param filename The filename
+     * @return The resource name
+     */
+    public String extractResourceName(String filename) {
+        return Tools.extractResourceName(filename, getFileExtension());
+    }
+
+    /**
      * Gets a child resource from this collection by name. If the resource
      * does not yet exists, a placeholder resource is created.
      *
@@ -232,10 +242,10 @@ public abstract class FolderCollection<T> extends DAVCollection {
      * @return The sync status
      */
     public SyncStatus<WebdavResource> getSyncStatus(String token) throws WebdavProtocolException {
-        long since = 0;
+        Date since = null;
         if (Strings.isNotEmpty(token)) {
             try {
-                since = Long.parseLong(token);
+                since = new Date(Long.parseLong(token));
             } catch (NumberFormatException e) {
                 throw new PreconditionException(DAVProtocol.DAV_NS.getURI(), "valid-sync-token", getUrl(), HttpServletResponse.SC_FORBIDDEN);
             }
@@ -244,7 +254,7 @@ public abstract class FolderCollection<T> extends DAVCollection {
             /*
              * get sync-status
              */
-            return getSyncStatus(new Date(since));
+            return getSyncStatus(since);
         } catch (OXException e) {
             throw protocolException(getUrl(), e);
         }
@@ -371,7 +381,7 @@ public abstract class FolderCollection<T> extends DAVCollection {
      * Create a 'sync-status' multistatus report considering all changes since
      * the supplied time.
      *
-     * @param since the time
+     * @param since the time, or <code>null</code> for the initial synchronization
      * @return the sync status
      */
     protected abstract SyncStatus<WebdavResource> getSyncStatus(Date since) throws OXException;

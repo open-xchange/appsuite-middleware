@@ -124,8 +124,7 @@ class EventQueue implements Runnable {
      */
     synchronized void terminateQueue() {
 	if (q != null) {
-	    Vector<EventListener> dummyListeners = new Vector<>();
-	    dummyListeners.setSize(1); // need atleast one listener
+	    Vector<EventListener> dummyListeners = new Vector<>(1); // need atleast one listener
 	    q.add(new QueueElement(new TerminatorEvent(), dummyListeners));
 	    q = null;
 	}

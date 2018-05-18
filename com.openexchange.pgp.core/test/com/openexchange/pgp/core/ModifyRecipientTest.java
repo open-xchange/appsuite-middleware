@@ -207,12 +207,12 @@ public class ModifyRecipientTest extends AbstractPGPTest {
         //Decrypting the data for each recipient
         for (Identity encryptingIdentity : decryptFor) {
             ByteArrayOutputStream decryptedData = new ByteArrayOutputStream();
-            List<PGPSignatureVerificationResult> verifyResults =
-                new PGPDecrypter(keyRetrievalStrategy).decrypt(
+                PGPDecryptionResult result = new PGPDecrypter(keyRetrievalStrategy).decrypt(
                     new ByteArrayInputStream(modifiedEncryptedData.toByteArray()),
                     decryptedData,
                     encryptingIdentity.getIdentity(),
                     encryptingIdentity.getPassword());
+            List<PGPSignatureVerificationResult> verifyResults = result.getSignatureVerificationResults();
             Assert.assertTrue("Verification results should be empty for non signed data", verifyResults.isEmpty());
             Assert.assertArrayEquals("Decrypted data should be equals to plaintext data", decryptedData.toByteArray(), data);
         }
@@ -242,12 +242,12 @@ public class ModifyRecipientTest extends AbstractPGPTest {
         //Decrypting the data for each recipient
         for (Identity encryptingIdentity : decryptFor) {
             ByteArrayOutputStream decryptedData = new ByteArrayOutputStream();
-            List<PGPSignatureVerificationResult> verifyResults =
-                new PGPDecrypter(keyRetrievalStrategy).decrypt(
+                PGPDecryptionResult result = new PGPDecrypter(keyRetrievalStrategy).decrypt(
                     new ByteArrayInputStream(modifiedEncryptedData.toByteArray()),
                     decryptedData,
                     encryptingIdentity.getIdentity(),
                     encryptingIdentity.getPassword());
+            List<PGPSignatureVerificationResult> verifyResults = result.getSignatureVerificationResults();
 
             Assert.assertTrue("Verification results should be empty for non signed data", verifyResults.isEmpty());
             Assert.assertArrayEquals("Decrypted data should be equals to plaintext data", decryptedData.toByteArray(), data);
@@ -278,12 +278,12 @@ public class ModifyRecipientTest extends AbstractPGPTest {
         //Decrypting the data for each recipient
         for (Identity encryptingIdentity : decryptFor) {
             ByteArrayOutputStream decryptedData = new ByteArrayOutputStream();
-            List<PGPSignatureVerificationResult> verifyResults =
-                new PGPDecrypter(keyRetrievalStrategy).decrypt(
+                PGPDecryptionResult result = new PGPDecrypter(keyRetrievalStrategy).decrypt(
                     new ByteArrayInputStream(modifiedEncryptedData.toByteArray()),
                     decryptedData,
                     encryptingIdentity.getIdentity(),
                     encryptingIdentity.getPassword());
+            List<PGPSignatureVerificationResult> verifyResults = result.getSignatureVerificationResults();
 
             Assert.assertTrue("Verification results should be empty for non signed data", verifyResults.isEmpty());
             Assert.assertArrayEquals("Decrypted data should be equals to plaintext data", decryptedData.toByteArray(), data);
@@ -295,11 +295,12 @@ public class ModifyRecipientTest extends AbstractPGPTest {
             List<PGPSignatureVerificationResult> verifyResults = null;
             boolean failed = false;
             try {
-                verifyResults = new PGPDecrypter(keyRetrievalStrategy).decrypt(
+                PGPDecryptionResult result = new PGPDecrypter(keyRetrievalStrategy).decrypt(
                     new ByteArrayInputStream(modifiedEncryptedData.toByteArray()),
                     decryptedData,
                     encryptingIdentity.getIdentity(),
                     encryptingIdentity.getPassword());
+                verifyResults = result.getSignatureVerificationResults();
             } catch (Exception ex) {
                 failed = true;
             }

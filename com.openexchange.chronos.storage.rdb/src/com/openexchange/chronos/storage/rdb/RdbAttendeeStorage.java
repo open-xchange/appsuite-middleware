@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the Open-Xchange, Inc. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2020 Open-Xchange, Inc.
+ *     Copyright (C) 2016-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -303,7 +303,7 @@ public class RdbAttendeeStorage extends RdbStorage implements AttendeeStorage {
         }
     }
 
-    private int updateAttendees(Connection connection, String eventId, List<Attendee> attendees) throws SQLException, OXException {
+    private int updateAttendees(Connection connection, String eventId, List<Attendee> attendees) throws OXException {
         int updated = 0;
         for (Attendee attendee : attendees) {
             AttendeeField[] fields = MAPPER.getMappedFields(MAPPER.getAssignedFields(attendee));
@@ -350,7 +350,7 @@ public class RdbAttendeeStorage extends RdbStorage implements AttendeeStorage {
         }
     }
 
-    private int deleteAttendees(Connection connection, String eventId, List<Attendee> attendees) throws SQLException, OXException {
+    private int deleteAttendees(Connection connection, String eventId, List<Attendee> attendees) throws SQLException {
         int updated = 0;
         for (Attendee attendee : attendees) {
             String sql = new StringBuilder()
@@ -418,18 +418,23 @@ public class RdbAttendeeStorage extends RdbStorage implements AttendeeStorage {
         stringBuilder.append(';');
         try (PreparedStatement stmt = connection.prepareStatement(stringBuilder.toString())) {
             int parameterIndex = 1;
+            boolean attendeesToStore = false;
             for (Entry<String, List<Attendee>> entry : attendeesByEventId.entrySet()) {
                 Set<Integer> usedEntities = new HashSet<Integer>(entry.getValue().size());
                 int eventId = asInt(entry.getKey());
-                for (Attendee attendee : entry.getValue()) {
-                    attendee = entityProcessor.adjustPriorInsert(attendee, usedEntities);
-                    stmt.setInt(parameterIndex++, context.getContextId());
-                    stmt.setInt(parameterIndex++, accountId);
-                    stmt.setInt(parameterIndex++, eventId);
-                    parameterIndex = MAPPER.setParameters(stmt, parameterIndex, attendee, mappedFields);
+                List<Attendee> attendeeList = entry.getValue();
+                if (attendeeList != null && attendeeList.size() > 0) {
+                    attendeesToStore = true;
+                    for (Attendee attendee : entry.getValue()) {
+                        attendee = entityProcessor.adjustPriorInsert(attendee, usedEntities);
+                        stmt.setInt(parameterIndex++, context.getContextId());
+                        stmt.setInt(parameterIndex++, accountId);
+                        stmt.setInt(parameterIndex++, eventId);
+                        parameterIndex = MAPPER.setParameters(stmt, parameterIndex, attendee, mappedFields);
+                    }
                 }
             }
-            return logExecuteUpdate(stmt);
+            return attendeesToStore ? logExecuteUpdate(stmt) : 0;
         }
     }
 
@@ -461,7 +466,7 @@ public class RdbAttendeeStorage extends RdbStorage implements AttendeeStorage {
         return attendeesByEventId;
     }
 
-    private Map<String, ParticipationStatus> selectPartStats(Connection connection, String[] eventIds, Attendee attendee) throws SQLException, OXException {
+    private Map<String, ParticipationStatus> selectPartStats(Connection connection, String[] eventIds, Attendee attendee) throws SQLException {
         if (null == eventIds || 0 == eventIds.length) {
             return java.util.Collections.emptyMap();
         }

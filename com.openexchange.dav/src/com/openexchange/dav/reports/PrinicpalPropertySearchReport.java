@@ -152,46 +152,48 @@ public class PrinicpalPropertySearchReport extends PROPFINDAction {
                 }
                 String pattern = getPattern(matchElement);
                 Element prop = propertySearch.getChild("prop", DAV_NS);
-                for (Element element : prop.getChildren()) {
-                    /*
-                     * create a corresponding search term for each supported property
-                     */
-                    if ("displayname".equals(element.getName()) && DAV_NS.equals(element.getNamespace())) {
-                        SingleSearchTerm term = new SingleSearchTerm(SingleOperation.EQUALS);
-                        term.addOperand(new ContactFieldOperand(ContactField.DISPLAY_NAME));
-                        term.addOperand(new ConstantOperand<String>(pattern));
-                        orTerm.addSearchTerm(term);
-                    } else if ("first-name".equals(element.getName()) && DAVProtocol.CALENDARSERVER_NS.equals(element.getNamespace())) {
-                        SingleSearchTerm term = new SingleSearchTerm(SingleOperation.EQUALS);
-                        term.addOperand(new ContactFieldOperand(ContactField.GIVEN_NAME));
-                        term.addOperand(new ConstantOperand<String>(pattern));
-                        orTerm.addSearchTerm(term);
-                    } else if ("last-name".equals(element.getName()) && DAVProtocol.CALENDARSERVER_NS.equals(element.getNamespace())) {
-                        SingleSearchTerm term = new SingleSearchTerm(SingleOperation.EQUALS);
-                        term.addOperand(new ContactFieldOperand(ContactField.SUR_NAME));
-                        term.addOperand(new ConstantOperand<String>(pattern));
-                        orTerm.addSearchTerm(term);
-                    } else if ("email-address-set".equals(element.getName()) && DAVProtocol.CALENDARSERVER_NS.equals(element.getNamespace())) {
-                        CompositeSearchTerm emailTerm = new CompositeSearchTerm(CompositeOperation.OR);
-                        for (ContactField emailField : new ContactField[] { ContactField.EMAIL1, ContactField.EMAIL2, ContactField.EMAIL3 }) {
+                if (null != prop) {
+                    for (Element element : prop.getChildren()) {
+                        /*
+                         * create a corresponding search term for each supported property
+                         */
+                        if ("displayname".equals(element.getName()) && DAV_NS.equals(element.getNamespace())) {
                             SingleSearchTerm term = new SingleSearchTerm(SingleOperation.EQUALS);
-                            term.addOperand(new ContactFieldOperand(emailField));
+                            term.addOperand(new ContactFieldOperand(ContactField.DISPLAY_NAME));
                             term.addOperand(new ConstantOperand<String>(pattern));
-                            emailTerm.addSearchTerm(term);
-                        }
-                        orTerm.addSearchTerm(emailTerm);
-                    } else if ("calendar-user-address-set".equals(element.getName()) && DAVProtocol.CAL_NS.equals(element.getNamespace())) {
-                        int userID = extractPrincipalID(pattern, CalendarUserType.INDIVIDUAL);
-                        if (-1 != userID) {
-                            SingleSearchTerm term = new SingleSearchTerm(SingleOperation.EQUALS);
-                            term.addOperand(new ContactFieldOperand(ContactField.INTERNAL_USERID));
-                            term.addOperand(new ConstantOperand<Integer>(Integer.valueOf(userID)));
                             orTerm.addSearchTerm(term);
-                        } else if (pattern.startsWith("mailto:")) {
+                        } else if ("first-name".equals(element.getName()) && DAVProtocol.CALENDARSERVER_NS.equals(element.getNamespace())) {
                             SingleSearchTerm term = new SingleSearchTerm(SingleOperation.EQUALS);
-                            term.addOperand(new ContactFieldOperand(ContactField.EMAIL1));
-                            term.addOperand(new ConstantOperand<String>(pattern.substring(7)));
+                            term.addOperand(new ContactFieldOperand(ContactField.GIVEN_NAME));
+                            term.addOperand(new ConstantOperand<String>(pattern));
                             orTerm.addSearchTerm(term);
+                        } else if ("last-name".equals(element.getName()) && DAVProtocol.CALENDARSERVER_NS.equals(element.getNamespace())) {
+                            SingleSearchTerm term = new SingleSearchTerm(SingleOperation.EQUALS);
+                            term.addOperand(new ContactFieldOperand(ContactField.SUR_NAME));
+                            term.addOperand(new ConstantOperand<String>(pattern));
+                            orTerm.addSearchTerm(term);
+                        } else if ("email-address-set".equals(element.getName()) && DAVProtocol.CALENDARSERVER_NS.equals(element.getNamespace())) {
+                            CompositeSearchTerm emailTerm = new CompositeSearchTerm(CompositeOperation.OR);
+                            for (ContactField emailField : new ContactField[] { ContactField.EMAIL1, ContactField.EMAIL2, ContactField.EMAIL3 }) {
+                                SingleSearchTerm term = new SingleSearchTerm(SingleOperation.EQUALS);
+                                term.addOperand(new ContactFieldOperand(emailField));
+                                term.addOperand(new ConstantOperand<String>(pattern));
+                                emailTerm.addSearchTerm(term);
+                            }
+                            orTerm.addSearchTerm(emailTerm);
+                        } else if ("calendar-user-address-set".equals(element.getName()) && DAVProtocol.CAL_NS.equals(element.getNamespace())) {
+                            int userID = extractPrincipalID(pattern, CalendarUserType.INDIVIDUAL);
+                            if (-1 != userID) {
+                                SingleSearchTerm term = new SingleSearchTerm(SingleOperation.EQUALS);
+                                term.addOperand(new ContactFieldOperand(ContactField.INTERNAL_USERID));
+                                term.addOperand(new ConstantOperand<Integer>(Integer.valueOf(userID)));
+                                orTerm.addSearchTerm(term);
+                            } else if (pattern.startsWith("mailto:")) {
+                                SingleSearchTerm term = new SingleSearchTerm(SingleOperation.EQUALS);
+                                term.addOperand(new ContactFieldOperand(ContactField.EMAIL1));
+                                term.addOperand(new ConstantOperand<String>(pattern.substring(7)));
+                                orTerm.addSearchTerm(term);
+                            }
                         }
                     }
                 }
@@ -231,29 +233,31 @@ public class PrinicpalPropertySearchReport extends PROPFINDAction {
                 }
                 String pattern = getPattern(matchElement);
                 Element prop = propertySearch.getChild("prop", DAV_NS);
-                for (Element element : prop.getChildren()) {
-                    /*
-                     * search by displayname only
-                     */
-                    if ("displayname".equals(element.getName()) && DAV_NS.equals(element.getNamespace())) {
-                        try {
-                            Group[] foundGroups = GroupStorage.getInstance().searchGroups(pattern, false, factory.getContext());
-                            if (null != foundGroups) {
-                                groups.addAll(Arrays.asList(foundGroups));
-                            }
-                        } catch (OXException e) {
-                            LOG.warn("error searching groups", e);
-                        }
-                    } else if ("calendar-user-address-set".equals(element.getName()) && DAVProtocol.CAL_NS.equals(element.getNamespace())) {
-                        int groupID = extractPrincipalID(pattern, CalendarUserType.GROUP);
-                        if (-1 != groupID) {
+                if (null != prop) {
+                    for (Element element : prop.getChildren()) {
+                        /*
+                         * search by displayname only
+                         */
+                        if ("displayname".equals(element.getName()) && DAV_NS.equals(element.getNamespace())) {
                             try {
-                                Group group = GroupStorage.getInstance().getGroup(groupID, factory.getContext());
-                                if (null != group) {
-                                    groups.add(group);
+                                Group[] foundGroups = GroupStorage.getInstance().searchGroups(pattern, false, factory.getContext());
+                                if (null != foundGroups) {
+                                    groups.addAll(Arrays.asList(foundGroups));
                                 }
                             } catch (OXException e) {
                                 LOG.warn("error searching groups", e);
+                            }
+                        } else if ("calendar-user-address-set".equals(element.getName()) && DAVProtocol.CAL_NS.equals(element.getNamespace())) {
+                            int groupID = extractPrincipalID(pattern, CalendarUserType.GROUP);
+                            if (-1 != groupID) {
+                                try {
+                                    Group group = GroupStorage.getInstance().getGroup(groupID, factory.getContext());
+                                    if (null != group) {
+                                        groups.add(group);
+                                    }
+                                } catch (OXException e) {
+                                    LOG.warn("error searching groups", e);
+                                }
                             }
                         }
                     }

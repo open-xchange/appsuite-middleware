@@ -167,5 +167,15 @@ public class DropboxApi2 extends DefaultApi20 {
             Response response = request.send();
             return api.getAccessTokenExtractor().extract(response.getBody());
         }
+
+        /*
+         * (non-Javadoc)
+         * 
+         * @see org.scribe.oauth.OAuth20ServiceImpl#signRequest(org.scribe.model.Token, org.scribe.model.OAuthRequest)
+         */
+        @Override
+        public void signRequest(Token accessToken, OAuthRequest request) {
+            request.addQuerystringParameter("authorization", "Bearer " + accessToken.getToken());
+        }
     }
 }

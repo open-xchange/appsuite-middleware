@@ -72,7 +72,7 @@ public class InfostoreFacadeTest extends AbstractInfostoreTest {
     // Bug 7012
     @Test
     public void testExists() throws OXException {
-        final DocumentMetadata dm = new DocumentMetadataImpl();
+        DocumentMetadata dm = new DocumentMetadataImpl();
         dm.setFolderId(folderId);
         dm.setTitle("Exists Test");
 
@@ -90,7 +90,7 @@ public class InfostoreFacadeTest extends AbstractInfostoreTest {
     // Bug 7012
     @Test
     public void testNotExistsIfNoReadPermission() throws OXException {
-        final DocumentMetadata dm = new DocumentMetadataImpl();
+        DocumentMetadata dm = new DocumentMetadataImpl();
         dm.setFolderId(folderId);
         dm.setTitle("Exists Test");
 
@@ -100,22 +100,22 @@ public class InfostoreFacadeTest extends AbstractInfostoreTest {
         assertFalse("No read permission so should not exist", infostore.exists(dm.getId(), InfostoreFacade.CURRENT_VERSION, session2));
     }
 
-    //     Bug 9555
+    // Bug 9555
     @Test
     public void testMoveChecksDeletePermission() throws Exception {
-        final int folderId = createFolderWithoutDeletePermissionForSecondUser();
-        final DocumentMetadata document = createEntry(folderId);
+        int folderId = createFolderWithoutDeletePermissionForSecondUser();
+        DocumentMetadata document = createEntry(folderId);
         failMovingEntryAsOtherUser(document);
     }
 
     private int createFolderWithoutDeletePermissionForSecondUser() throws OXException {
-        final FolderObject folder = new FolderObject();
+        FolderObject folder = new FolderObject();
         folder.setFolderName("bug9555");
         folder.setParentFolderID(folderId);
         folder.setType(FolderObject.PUBLIC);
         folder.setModule(FolderObject.INFOSTORE);
 
-        final OCLPermission perm = new OCLPermission();
+        OCLPermission perm = new OCLPermission();
         perm.setEntity(user.getId());
         perm.setFolderAdmin(true);
         perm.setFolderPermission(OCLPermission.ADMIN_PERMISSION);
@@ -126,7 +126,7 @@ public class InfostoreFacadeTest extends AbstractInfostoreTest {
 
         // All others may read and write, but not delete
 
-        final OCLPermission perm2 = new OCLPermission();
+        OCLPermission perm2 = new OCLPermission();
         perm2.setEntity(OCLPermission.ALL_GROUPS_AND_USERS);
         perm2.setGroupPermission(true);
         perm2.setFolderPermission(OCLPermission.CREATE_OBJECTS_IN_FOLDER);
@@ -145,14 +145,13 @@ public class InfostoreFacadeTest extends AbstractInfostoreTest {
                 writeCon = null;
             }
         }
-        final OXFolderManager oxma = OXFolderManager.getInstance(session, writeCon, writeCon);
+        OXFolderManager oxma = OXFolderManager.getInstance(session, writeCon, writeCon);
         oxma.createFolder(folder, true, System.currentTimeMillis());
         cleanFolders.add(folder);
         return folder.getObjectID();
     }
 
     // Bug 11521
-
     @Test
     public void testShouldRemoveMIMETypeWhenRemovingLastVersionOfAFile() throws OXException {
         DocumentMetadata dm = new DocumentMetadataImpl();
@@ -168,7 +167,7 @@ public class InfostoreFacadeTest extends AbstractInfostoreTest {
             infostore.saveDocument(dm, new ByteArrayInputStream("Hallo".getBytes(com.openexchange.java.Charsets.UTF_8)), Long.MAX_VALUE, session);
             infostore.removeVersion(dm.getId(), new int[] { 1 }, session);
             infostore.commit();
-        } catch (final OXException x) {
+        } catch (OXException x) {
             x.printStackTrace();
             infostore.rollback();
             throw x;
@@ -177,7 +176,7 @@ public class InfostoreFacadeTest extends AbstractInfostoreTest {
 
         }
 
-        dm = infostore.getDocumentMetadata(dm.getId(), InfostoreFacade.CURRENT_VERSION, session);
+        dm = infostore.getDocumentMetadata(folderId, dm.getId(), InfostoreFacade.CURRENT_VERSION, session);
 
         assertEquals("", dm.getFileMIMEType());
         assertNull(dm.getFileName());
@@ -187,25 +186,28 @@ public class InfostoreFacadeTest extends AbstractInfostoreTest {
 
     }
 
+    /**
+     * @see Bug 44562
+     */
     @Test
     public void testTouch() throws Exception {
-        final DocumentMetadata document = createEntry(folderId);
-        assertNotNull(document.getLastModified());
-        assertTrue(document.getLastModified().getTime() != 0);
+        DocumentMetadata document = createEntry(folderId);
+        assertNotNull(document.getSequenceNumber());
+        assertTrue(document.getSequenceNumber() != 0);
         Thread.sleep(100);
         infostore.touch(document.getId(), session);
-        final DocumentMetadata reload = load(document.getId(), session);
+        DocumentMetadata reload = load(document.getId(), session);
 
-        assertTrue("lastModified did not change", reload.getLastModified().getTime() > document.getLastModified().getTime());
+        assertTrue("lastModified did not change", reload.getSequenceNumber() > document.getSequenceNumber());
 
     }
 
-    private DocumentMetadata load(final int id, final ServerSession session) throws OXException {
-        return infostore.getDocumentMetadata(id, InfostoreFacade.CURRENT_VERSION, session);
+    private DocumentMetadata load(int id, ServerSession session) throws OXException {
+        return infostore.getDocumentMetadata(folderId, id, InfostoreFacade.CURRENT_VERSION, session);
     }
 
-    private DocumentMetadata createEntry(final int fid) throws OXException {
-        final DocumentMetadata dm = new DocumentMetadataImpl();
+    private DocumentMetadata createEntry(int fid) throws OXException {
+        DocumentMetadata dm = new DocumentMetadataImpl();
         dm.setFolderId(fid);
         dm.setTitle("Exists Test");
 
@@ -215,13 +217,13 @@ public class InfostoreFacadeTest extends AbstractInfostoreTest {
         return dm;
     }
 
-    private void failMovingEntryAsOtherUser(final DocumentMetadata document) {
+    private void failMovingEntryAsOtherUser(DocumentMetadata document) {
         long originalFolderID = document.getFolderId();
         document.setFolderId(folderId2);
         try {
             infostore.saveDocumentMetadata(document, Long.MAX_VALUE, session2);
             fail("Shouldn't be able to move without delete permissions");
-        } catch (final OXException x) {
+        } catch (OXException x) {
             x.printStackTrace();
             assertTrue(true);
         } finally {

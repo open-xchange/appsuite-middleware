@@ -367,6 +367,11 @@ public class DefaultConverter implements Converter {
 
     static final class NoSuchPath extends Throwable {
 
+        /**
+         * serialVersionUID
+         */
+        private static final long serialVersionUID = 1L;
+
         NoSuchPath(String format) {
             super("Can't convert from " + format);
         }

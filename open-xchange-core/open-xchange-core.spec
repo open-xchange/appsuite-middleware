@@ -16,7 +16,7 @@ BuildRequires: java-1_8_0-openjdk-devel
 BuildRequires: java-1.8.0-openjdk-devel
 %endif
 Version:       @OXVERSION@
-%define        ox_release 3
+%define        ox_release 5
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -520,6 +520,21 @@ EOF
 
     # SoftwareChange_Request-82
     ox_remove_property com.openexchange.caching.jcs.enabled /opt/open-xchange/etc/cache.properties
+
+    # SoftwareChange_Request-151
+    VALUE=$(ox_read_property com.openexchange.push.allowedClients /opt/open-xchange/etc/mail-push.properties)
+    if [ "\"USM-EAS*\", \"USM-JSON*\", \"open-xchange-mailapp\"" = "${VALUE}" ]; then
+        ox_set_property com.openexchange.push.allowedClients "${VALUE}, \"open-xchange-mobile-api-facade*\"" /opt/open-xchange/etc/mail-push.properties
+    fi
+
+    # SoftwareChange_Request-160
+    whlipr=/opt/open-xchange/etc/whitelist.properties
+    ox_add_property html.style.webkit-box-sizing '""' ${whlipr}
+    ox_add_property html.style.moz-box-sizing '""' ${whlipr}
+    ox_add_property html.style.box-sizing '"border-box"' ${whlipr}
+    ox_add_property html.style.-webkit-box-sizing '"border-box"' ${whlipr}
+    ox_add_property html.style.-moz-box-sizing '"border-box"' ${whlipr}
+
 fi
 
 PROTECT=( autoconfig.properties configdb.properties hazelcast.properties jolokia.properties mail.properties mail-push.properties management.properties secret.properties secrets server.properties sessiond.properties share.properties tokenlogin-secrets )
@@ -541,6 +556,9 @@ exit 0
 %defattr(-,root,root)
 %dir /opt/open-xchange/bundles/
 /opt/open-xchange/bundles/*
+%dir /opt/open-xchange/documentation
+%dir /opt/open-xchange/documentation/etc
+/opt/open-xchange/documentation/etc/*.yml
 %dir /opt/open-xchange/etc
 %dir /opt/open-xchange/etc/contextSets
 %dir /opt/open-xchange/etc/meta
@@ -565,6 +583,10 @@ exit 0
 %doc com.openexchange.database/doc/examples
 
 %changelog
+* Thu Apr 19 2018 Marcus Klein <marcus.klein@open-xchange.com>
+Fifth preview of 7.10.0 release
+* Tue Apr 03 2018 Marcus Klein <marcus.klein@open-xchange.com>
+Fourth preview of 7.10.0 release
 * Tue Feb 20 2018 Marcus Klein <marcus.klein@open-xchange.com>
 Third preview of 7.10.0 release
 * Fri Feb 02 2018 Marcus Klein <marcus.klein@open-xchange.com>

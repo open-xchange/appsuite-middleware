@@ -192,4 +192,12 @@ public class ExtractSessionProcessorHandler implements PacketProcessorHandler {
         }
         return new PGPPacket[] {packet};
     }
+
+    /* (non-Javadoc)
+     * @see com.openexchange.pgp.core.packethandling.PacketProcessorHandler#modifyPacketData(com.openexchange.pgp.core.packethandling.PGPPacket, byte[])
+     */
+    @Override
+    public byte[] handlePacketData(PGPPacket packet, byte[] packetData) {
+        return packetData;
+    }
 }

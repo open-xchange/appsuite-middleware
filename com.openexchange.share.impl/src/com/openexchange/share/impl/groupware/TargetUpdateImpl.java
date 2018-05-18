@@ -145,13 +145,23 @@ public class TargetUpdateImpl extends AbstractTargetUpdate {
                     // should never occur
                     folderServiceDecorator = parameters.getFolderServiceDecorator();
                 }
-                folderServiceDecorator.put("permissions", "inherit");
                 for (UserizedFolder fol : folderObjects.getResponse()) {
-                    prepareInheritedPermissions(fol, appliedPermissions, removedPermissions);
-                    folderService.updateFolder(fol, fol.getLastModifiedUTC(), parameters.getSession(), folderServiceDecorator);
+                    updateSubfolder(folderService, fol, appliedPermissions, removedPermissions, folderServiceDecorator);
                 }
             }
         }
+    }
+
+    private void updateSubfolder(FolderService folderService, UserizedFolder fol, List<Permission> appliedPermissions, List<Permission> removedPermissions, FolderServiceDecorator folderServiceDecorator) throws OXException {
+        prepareInheritedPermissions(fol, appliedPermissions, removedPermissions);
+        folderService.updateFolder(fol, fol.getLastModifiedUTC(), parameters.getSession(), folderServiceDecorator);
+
+        FolderResponse<UserizedFolder[]> folderObjects = folderService.getSubfolders(fol.getTreeID(), fol.getID(), true, parameters.getSession(), parameters.getFolderServiceDecorator());
+        for(UserizedFolder subFolder : folderObjects.getResponse()) {
+            updateSubfolder(folderService, subFolder, appliedPermissions, removedPermissions, folderServiceDecorator);
+        }
+
+
     }
 
     private static UserizedFolder prepareInheritedPermissions(UserizedFolder folder, List<Permission> added, List<Permission> removed) {

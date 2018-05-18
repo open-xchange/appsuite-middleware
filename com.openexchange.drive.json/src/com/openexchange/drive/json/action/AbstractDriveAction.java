@@ -246,8 +246,9 @@ public abstract class AbstractDriveAction implements AJAXActionService {
      * @param requestData The AJAX request data
      * @param session The session
      * @return The extracted host data
+     * @throws OXException
      */
-    private static HostData extractHostData(AJAXRequestData requestData, ServerSession session) {
+    private static HostData extractHostData(AJAXRequestData requestData, ServerSession session) throws OXException {
         /*
          * get host data from reuest context or session parameter
          */
@@ -267,7 +268,7 @@ public abstract class AbstractDriveAction implements AJAXActionService {
         final String route = Tools.extractRoute(httpSessionID);
         final int port = null != requestData.optHttpServletRequest() ? requestData.optHttpServletRequest().getServerPort() : -1;
         final String host = determineHost(requestData, session);
-        final String prefix = Services.getService(DispatcherPrefixService.class).getPrefix();
+        final String prefix = Services.getService(DispatcherPrefixService.class, true).getPrefix();
         return new HostData() {
 
             @Override

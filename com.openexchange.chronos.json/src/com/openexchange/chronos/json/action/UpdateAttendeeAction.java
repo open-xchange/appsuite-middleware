@@ -51,31 +51,22 @@ package com.openexchange.chronos.json.action;
 
 import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_FIELDS;
 import static com.openexchange.tools.arrays.Collections.unmodifiableSet;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
-import java.util.Map.Entry;
 import java.util.Set;
-import java.util.TimeZone;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.Attendee;
-import com.openexchange.chronos.Event;
-import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.json.converter.CalendarResultConverter;
-import com.openexchange.chronos.json.converter.MultipleCalendarResultConverter;
-import com.openexchange.chronos.json.converter.mapper.EventMapper;
-import com.openexchange.chronos.json.converter.mapper.ListItemMapping;
-import com.openexchange.chronos.json.exception.CalendarExceptionCodes;
+import com.openexchange.chronos.json.converter.mapper.AttendeesMapping;
 import com.openexchange.chronos.json.oauth.ChronosOAuthScope;
 import com.openexchange.chronos.provider.composition.IDBasedCalendarAccess;
 import com.openexchange.chronos.service.CalendarResult;
-import com.openexchange.chronos.service.EventID;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.tools.mappings.json.ListMapping;
 import com.openexchange.oauth.provider.resourceserver.annotations.OAuthAction;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
@@ -102,7 +93,7 @@ public class UpdateAttendeeAction extends ChronosAction {
 
     private static final Set<String> OPTIONAL_PARAMETERS = unmodifiableSet(PARAM_SEND_INTERNAL_NOTIFICATIONS, PARAM_CHECK_CONFLICTS, PARAM_RANGE_START, PARAM_RANGE_END, PARAM_EXPAND, PARAMETER_FIELDS);
 
-    private static final String ATTENDEE = "attendee";
+    private static final String ATTENDEE_FIELD = "attendee";
     private static final String ALARMS_FIELD = "alarms";
 
     @Override
@@ -110,80 +101,41 @@ public class UpdateAttendeeAction extends ChronosAction {
         return OPTIONAL_PARAMETERS;
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     protected AJAXRequestResult perform(IDBasedCalendarAccess calendarAccess, AJAXRequestData requestData) throws OXException {
         long clientTimestamp = parseClientTimestamp(requestData);
-        Object data = requestData.getData();
-        if (data instanceof JSONObject) {
-            Attendee attendee = null;
-            try {
-                JSONObject attendeeJSON = ((JSONObject) data).getJSONObject(ATTENDEE);
-                ListItemMapping<Attendee, Event, JSONObject> mapping = (ListItemMapping<Attendee, Event, JSONObject>) ((ListMapping<Attendee, Event>) EventMapper.getInstance().opt(EventField.ATTENDEES));
-                Entry<String, ?> timezone = parseParameter(requestData, "timezone", false);
-                if (timezone != null && timezone.getValue() != null) {
-                    attendee = mapping.deserialize(attendeeJSON, TimeZone.getTimeZone((String) timezone.getValue()));
-                } else {
-                    attendee = mapping.deserialize(attendeeJSON, TimeZone.getTimeZone(requestData.getSession().getUser().getTimeZone()));
-                }
-                if (!attendee.containsUri() && !attendee.containsEntity()) {
-                    attendee.setEntity(requestData.getSession().getUserId());
-                }
-            } catch (JSONException e) {
-                throw OXJSONExceptionCodes.JSON_READ_ERROR.create(e, e.getMessage());
-            }
-
-            EventID eventID = parseIdParameter(requestData);
-            CalendarResult updateAttendeeResult;
-            try {
-                updateAttendeeResult = calendarAccess.updateAttendee(eventID, attendee, clientTimestamp);
-                clientTimestamp = updateAttendeeResult.getTimestamp() == 0l ? clientTimestamp : updateAttendeeResult.getTimestamp();
-            } catch (OXException e) {
-                return handleConflictException(e);
-            }
-
-            List<OXException> warnings = null;
-            List<CalendarResult> results = null;
-            if (((JSONObject) data).has(ALARMS_FIELD)) {
-                Event toUpdate = new Event();
-                Entry<String, ?> parseParameter = parseParameter(requestData, "timezone", false);
-                try {
-                    if (parseParameter == null) {
-                        EventMapper.getInstance().get(EventField.ALARMS).deserialize((JSONObject) data, toUpdate, TimeZone.getTimeZone(requestData.getSession().getUser().getTimeZone()));
-                    } else {
-                        TimeZone zone = (TimeZone) parseParameter.getValue();
-                        EventMapper.getInstance().get(EventField.ALARMS).deserialize((JSONObject) data, toUpdate, zone);
-                    }
-                    try {
-                        // Update calendar session with new timestamp
-                        CalendarResult updateAlarmResult = calendarAccess.updateAlarms(eventID, toUpdate.getAlarms(), clientTimestamp);
-                        results = new ArrayList<>(2);
-                        results.add(updateAttendeeResult);
-                        results.add(updateAlarmResult);
-                    } catch (OXException e) {
-                        warnings = Collections.singletonList(CalendarExceptionCodes.UNABLE_TO_ADD_ALARMS.create(e, e.getMessage()));
-                    }
-                } catch (JSONException e) {
-                    warnings = Collections.singletonList(CalendarExceptionCodes.UNABLE_TO_ADD_ALARMS.create(e, e.getMessage()));
-                }
-
-            }
-            if (results != null) {
-                long timestamp = 0L;
-                for (CalendarResult result : results) {
-                    timestamp = Math.max(timestamp, result.getTimestamp());
-                }
-                return new AJAXRequestResult(results, new Date(timestamp), MultipleCalendarResultConverter.INPUT_FORMAT);
-            } else {
-                AJAXRequestResult ajaxRequestResult = new AJAXRequestResult(updateAttendeeResult, new Date(updateAttendeeResult.getTimestamp()), CalendarResultConverter.INPUT_FORMAT);
-                if (warnings != null) {
-                    ajaxRequestResult.addWarnings(warnings);
-                }
-                return ajaxRequestResult;
-            }
-
-        } else {
+        JSONObject jsonObject = requestData.getData(JSONObject.class);
+        if (null == jsonObject) {
             throw AjaxExceptionCodes.ILLEGAL_REQUEST_BODY.create();
+        }
+        /*
+         * parse attendee & optional alarms
+         */
+        Attendee attendee;
+        List<Alarm> alarms;
+        try {
+            attendee = AttendeesMapping.deserializeAttendee(jsonObject.getJSONObject(ATTENDEE_FIELD));
+            if (false == jsonObject.has(ALARMS_FIELD)) {
+                alarms = null;
+            } else if (jsonObject.isNull(ALARMS_FIELD)) {
+                alarms = Collections.emptyList();
+            } else {
+                alarms = parseAlarms(jsonObject.getJSONArray(ALARMS_FIELD), getTimeZone(requestData));
+            }
+        } catch (JSONException e) {
+            throw OXJSONExceptionCodes.JSON_READ_ERROR.create(e, e.getMessage());
+        }
+        if (!attendee.containsUri() && !attendee.containsEntity()) {
+            attendee.setEntity(requestData.getSession().getUserId());
+        }
+        /*
+         * perform update & return result
+         */
+        try {
+            CalendarResult calendarResult = calendarAccess.updateAttendee(parseIdParameter(requestData), attendee, alarms, clientTimestamp);
+            return new AJAXRequestResult(calendarResult, new Date(calendarResult.getTimestamp()), CalendarResultConverter.INPUT_FORMAT);
+        } catch (OXException e) {
+            return handleConflictException(e);
         }
     }
 

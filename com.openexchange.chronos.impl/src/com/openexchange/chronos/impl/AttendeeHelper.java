@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the Open-Xchange, Inc. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2020 Open-Xchange, Inc.
+ *     Copyright (C) 2016-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -146,7 +146,7 @@ public class AttendeeHelper implements CollectionUpdate<Attendee, AttendeeField>
      * @param folder The parent folder of the event being processed
      * @param originalAttendees The original list of attendees
      */
-    public static AttendeeHelper onDeletedEvent(CalendarSession session, CalendarFolder folder, List<Attendee> originalAttendees) throws OXException {
+    public static AttendeeHelper onDeletedEvent(CalendarSession session, CalendarFolder folder, List<Attendee> originalAttendees) {
         AttendeeHelper attendeeHelper = new AttendeeHelper(session, folder, originalAttendees);
         attendeeHelper.processDeletedEvent();
         return attendeeHelper;
@@ -159,7 +159,7 @@ public class AttendeeHelper implements CollectionUpdate<Attendee, AttendeeField>
      * @param folder The parent folder of the event being processed
      * @param originalAttendees The original attendees of the event, or <code>null</code> for new event creations
      */
-    private AttendeeHelper(CalendarSession session, CalendarFolder folder, List<Attendee> originalAttendees) throws OXException {
+    private AttendeeHelper(CalendarSession session, CalendarFolder folder, List<Attendee> originalAttendees) {
         super();
         this.session = session;
         this.folder = folder;
@@ -202,7 +202,7 @@ public class AttendeeHelper implements CollectionUpdate<Attendee, AttendeeField>
             Attendee originalAttendee = attendeeToUpdate.getOriginal();
             newAttendees.remove(originalAttendee);
             Attendee newAttendee = AttendeeMapper.getInstance().copy(originalAttendee, null, (AttendeeField[]) null);
-            AttendeeMapper.getInstance().copy(attendeeToUpdate.getUpdate(), newAttendee, AttendeeField.RSVP, AttendeeField.COMMENT, AttendeeField.PARTSTAT, AttendeeField.ROLE);
+            AttendeeMapper.getInstance().copy(attendeeToUpdate.getUpdate(), newAttendee, AttendeeField.RSVP, AttendeeField.COMMENT, AttendeeField.PARTSTAT, AttendeeField.ROLE, AttendeeField.EXTENDED_PARAMETERS);
             newAttendees.add(newAttendee);
         }
         newAttendees.addAll(attendeesToInsert);
@@ -285,7 +285,7 @@ public class AttendeeHelper implements CollectionUpdate<Attendee, AttendeeField>
          */
         for (ItemUpdate<Attendee, AttendeeField> attendeeUpdate : attendeeDiff.getUpdatedItems()) {
             Attendee attendee = AttendeeMapper.getInstance().copy(attendeeUpdate.getOriginal(), null, AttendeeField.ENTITY, AttendeeField.MEMBER, AttendeeField.CU_TYPE, AttendeeField.URI);
-            AttendeeMapper.getInstance().copy(attendeeUpdate.getUpdate(), attendee, AttendeeField.RSVP, AttendeeField.COMMENT, AttendeeField.PARTSTAT, AttendeeField.ROLE);
+            AttendeeMapper.getInstance().copy(attendeeUpdate.getUpdate(), attendee, AttendeeField.RSVP, AttendeeField.COMMENT, AttendeeField.PARTSTAT, AttendeeField.ROLE, AttendeeField.EXTENDED_PARAMETERS);
             if (false == isInternal(attendee) && false == session.getConfig().isSkipExternalAttendeeURIChecks()) {
                 attendee = Check.requireValidEMail(attendee);
             }

@@ -116,7 +116,13 @@ public class ExtendedFolderPermission extends ExtendedPermission {
 
                 jsonObject.put("type", guest.getRecipientType().toString().toLowerCase());
                 if (RecipientType.ANONYMOUS.equals(guest.getRecipientType())) {
-                    addShareInfo(requestData, jsonObject, resolver.getShare(folder, permission.getEntity()));
+                    if (permission.getType() == FolderPermissionType.INHERITED) {
+                        FolderObject legator = new FolderObject(Integer.valueOf(permission.getPermissionLegator()));
+                        legator.setModule(folder.getModule());
+                        addShareInfo(requestData, jsonObject, resolver.getShare(legator, permission.getEntity()));
+                    } else {
+                        addShareInfo(requestData, jsonObject, resolver.getShare(folder, permission.getEntity()));
+                    }
                 } else {
                     addUserInfo(requestData, jsonObject, user);
                 }

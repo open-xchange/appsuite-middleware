@@ -141,6 +141,7 @@ public abstract class DeferredActivator implements BundleActivator, ServiceLooku
             this.stopOnUnavailability = stopOnUnavailability;
         }
 
+        @SuppressWarnings("unchecked")
         @Override
         public S addingService(ServiceReference<S> reference) {
             S service = super.addingService(reference);

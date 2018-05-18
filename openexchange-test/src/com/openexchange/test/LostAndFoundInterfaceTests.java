@@ -96,7 +96,6 @@ import com.openexchange.test.concurrent.ParallelSuite;
     com.openexchange.ajax.mail.CopyMailWithManagerTest.class,
     com.openexchange.ajax.mail.CopyTest.class,
     com.openexchange.ajax.mail.NewMailTest.class,
-    com.openexchange.ajax.mail.ThreadSortTest.class,
     com.openexchange.ajax.mail.addresscollector.ConfigurationTest.class,
     com.openexchange.ajax.mail.addresscollector.MailTest.class,
     com.openexchange.ajax.mail.netsol.NetsolTestEmptyTrash.class,

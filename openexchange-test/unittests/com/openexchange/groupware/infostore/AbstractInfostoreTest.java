@@ -117,6 +117,7 @@ public class AbstractInfostoreTest {
         final String userName2 = config.getSecondUser();
         final TestContextToolkit tools = new TestContextToolkit();
         final String ctxName = config.getContextName();
+
         ctx = null == ctxName || ctxName.trim().length() == 0 ? tools.getDefaultContext() : tools.getContextByName(ctxName);
         user = UserStorage.getInstance().getUser(tools.resolveUser(userName, ctx), ctx);
         user2 = UserStorage.getInstance().getUser(tools.resolveUser(userName2, ctx), ctx);

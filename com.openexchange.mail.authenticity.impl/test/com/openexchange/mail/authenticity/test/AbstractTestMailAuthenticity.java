@@ -94,7 +94,7 @@ public abstract class AbstractTestMailAuthenticity {
     private HeaderCollection headerCollection;
     private ArgumentCaptor<MailAuthenticityResult> argumentCaptor;
     private Session session;
-    private LeanConfigurationService leanConfig;
+    protected LeanConfigurationService leanConfig;
     private MailAuthenticityMetricLogger metricsLogger;
 
     /**
@@ -123,7 +123,6 @@ public abstract class AbstractTestMailAuthenticity {
         when(services.getService(MailAuthenticityMetricLogger.class)).thenReturn(metricsLogger);
         when(services.getService(LeanConfigurationService.class)).thenReturn(leanConfig);
         when(leanConfig.getProperty(1, 1, MailAuthenticityProperty.AUTHSERV_ID)).thenReturn("ox.io");
-        when(leanConfig.getBooleanProperty(MailAuthenticityProperty.LOG_METRICS)).thenReturn(false);
 
         mailMessage = mock(MailMessage.class);
         when(mailMessage.getHeaders()).thenReturn(headerCollection);
@@ -230,14 +229,17 @@ public abstract class AbstractTestMailAuthenticity {
             public boolean getBooleanProperty(int userId, int contextId, Property property, Map<String, String> optionals) {
                 return false;
             }
+
             @Override
             public boolean getBooleanProperty(Property property, Map<String, String> optionals) {
                 return false;
             }
+
             @Override
             public boolean getBooleanProperty(int userId, int contextId, Property property) {
                 return false;
             }
+
             @Override
             public boolean getBooleanProperty(Property property) {
                 return false;

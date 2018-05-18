@@ -78,6 +78,7 @@ public class GaugeMetricRegisterer implements MetricRegisterer {
      * @see com.openexchange.metrics.MetricRegisterer#register(com.openexchange.metrics.MetricDescriptor)
      */
     @Override
+    @SuppressWarnings("unchecked")
     public Metric register(MetricDescriptor descriptor) {
         return new DropwizardGauge(registry.gauge(MetricRegistry.name(descriptor.getGroup(), descriptor.getName()), () -> () -> descriptor.getMetricSupplier().get()));
     }

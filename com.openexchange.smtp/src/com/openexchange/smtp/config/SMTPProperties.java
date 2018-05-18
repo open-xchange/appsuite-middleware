@@ -49,11 +49,11 @@
 
 package com.openexchange.smtp.config;
 
-import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.CharsetDetector;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.api.AbstractProtocolProperties;
 import com.openexchange.mail.transport.config.ITransportProperties;
@@ -169,7 +169,7 @@ public final class SMTPProperties extends AbstractProtocolProperties implements 
 
         {
             final String smtpAuthEncStr = configuration.getProperty("com.openexchange.smtp.smtpAuthEnc", "UTF-8").trim();
-            if (Charset.isSupported(smtpAuthEncStr)) {
+            if (CharsetDetector.isValid(smtpAuthEncStr)) {
                 smtpAuthEnc = smtpAuthEncStr;
                 logBuilder.append("    SMTP Auth Encoding: ").append(smtpAuthEnc).append('\n');
                 args.add(smtpAuthEnc);

@@ -59,6 +59,7 @@ import javax.servlet.http.HttpServletResponse;
 import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXExceptionConstants;
 import com.openexchange.file.storage.FileStorageFileAccess.IDTuple;
+import com.openexchange.filestore.QuotaFileStorageExceptionCodes;
 import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.EffectiveInfostorePermission;
@@ -98,7 +99,7 @@ public class DocumentMetadataResource extends AbstractResource implements OXWebd
 
     private int id;
 
-    private DocumentMetadata metadata = new DocumentMetadataImpl();
+    DocumentMetadata metadata = new DocumentMetadataImpl();
 
     // State
     private final Set<Metadata> setMetadata = new HashSet<Metadata>();
@@ -569,7 +570,7 @@ public class DocumentMetadataResource extends AbstractResource implements OXWebd
         }
     }
 
-    private void loadMetadata() throws WebdavProtocolException {
+    void loadMetadata() throws WebdavProtocolException {
         if (!exists) {
             return;
         }
@@ -577,12 +578,16 @@ public class DocumentMetadataResource extends AbstractResource implements OXWebd
             return;
         }
         loadedMetadata = true;
+        if (metadata == null) {
+            metadata = new DocumentMetadataImpl();
+        }
         final Set<Metadata> toLoad = new HashSet<Metadata>(Metadata.VALUES);
         toLoad.removeAll(setMetadata);
         final ServerSession session = getSession();
 
         try {
-            final DocumentMetadata metadata = database.getDocumentMetadata(id, InfostoreFacade.CURRENT_VERSION, session);
+
+            final DocumentMetadata metadata = database.getDocumentMetadata(-1, id, InfostoreFacade.CURRENT_VERSION, session);
             final SetSwitch set = new SetSwitch(this.metadata);
             final GetSwitch get = new GetSwitch(metadata);
 
@@ -606,11 +611,11 @@ public class DocumentMetadataResource extends AbstractResource implements OXWebd
         }
     }
 
-    private void markSet(final Metadata metadata) {
+    void markSet(final Metadata metadata) {
         setMetadata.add(metadata);
     }
 
-    private void markChanged() {
+    void markChanged() {
         metadataChanged = true;
     }
 
@@ -626,6 +631,9 @@ public class DocumentMetadataResource extends AbstractResource implements OXWebd
                 } catch (final OXException x) {
                     if (CATEGORY_PERMISSION_DENIED == x.getCategory()) {
                         throw WebdavProtocolException.Code.GENERAL_ERROR.create(url, HttpServletResponse.SC_UNAUTHORIZED);
+                    }
+                    if (QuotaFileStorageExceptionCodes.STORE_FULL.equals(x)) {
+                        throw WebdavProtocolException.Code.GENERAL_ERROR.create(url, Protocol.SC_INSUFFICIENT_STORAGE);
                     }
                     throw WebdavProtocolException.Code.GENERAL_ERROR.create(url, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, x, new Object[0]);
                 } catch (final Exception x) {
@@ -782,7 +790,7 @@ public class DocumentMetadataResource extends AbstractResource implements OXWebd
         final ServerSession session = getSession();
         database.startTransaction();
         try {
-            DocumentMetadata document = database.getDocumentMetadata(id, InfostoreFacade.CURRENT_VERSION, session);
+            DocumentMetadata document = database.getDocumentMetadata(-1, id, InfostoreFacade.CURRENT_VERSION, session);
 			List<IDTuple> nd = database.removeDocument(
 			    Collections.<IDTuple>singletonList(
 			        new IDTuple(

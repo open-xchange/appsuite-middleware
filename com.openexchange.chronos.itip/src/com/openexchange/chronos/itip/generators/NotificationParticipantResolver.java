@@ -64,9 +64,36 @@ import com.openexchange.session.Session;
  */
 public interface NotificationParticipantResolver {
 
-    List<NotificationParticipant> resolveAllRecipients(Event original, Event appointment, User user, User onBehalfOf, Context ctx, Session session, CalendarUser principal) throws OXException;
+    /**
+     * Resolves {@link com.openexchange.chronos.Attendee}s to {@link NotificationParticipant}s
+     * 
+     * @param original The original {@link Event}. Can be <code>null</code>
+     * @param update The updated or new {@link Event}
+     * @param user The current {@link User}
+     * @param onBehalfOf The {@link User} to act and send mails on its behalf
+     * @param ctx The {@link Context} of the user
+     * @param session The users {@link Session}
+     * @param principal The principal
+     * @return A {@link List} of {@link NotificationParticipant}s for the given event
+     * @throws OXException If user, organizer, folder ID, etc. can't be resolved
+     */
+    List<NotificationParticipant> resolveAllRecipients(Event original, Event update, User user, User onBehalfOf, Context ctx, Session session, CalendarUser principal) throws OXException;
 
-    List<NotificationParticipant> getAllParticipants(List<NotificationParticipant> allRecipients, Event appointment, User user, Context ctx);
+    /**
+     * Get all internal and external participants that attendee the given event. Efficiently removes
+     * resources and groups from the given list of {@link NotificationParticipant}s.
+     * 
+     * @param allRecipients The {@link NotificationParticipant} to filter
+     * @param event The event to get the attendees from
+     * @return A filtered List of {@link NotificationParticipant}s that attend the event
+     */
+    List<NotificationParticipant> getAllParticipants(List<NotificationParticipant> allRecipients, Event event);
 
-    List<NotificationParticipant> getResources(Event appointment, Context ctx) throws OXException;
+    /**
+     * Get all resources of the given event and converts them to {@link NotificationParticipant}s
+     * 
+     * @param event The {@link Event}
+     * @return A {@link List} of {@link NotificationParticipant}
+     */
+    List<NotificationParticipant> getResources(Event event);
 }

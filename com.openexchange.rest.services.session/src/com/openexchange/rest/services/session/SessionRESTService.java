@@ -59,6 +59,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.crypto.CryptographicServiceAuthenticationFactory;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.ldap.User;
 import com.openexchange.rest.services.annotation.Role;
 import com.openexchange.rest.services.annotation.RoleAllowed;
 import com.openexchange.server.ServiceExceptionCode;
@@ -66,6 +67,8 @@ import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
+import com.openexchange.tools.session.ServerSession;
+import com.openexchange.tools.session.ServerSessionAdapter;
 
 /**
  *
@@ -87,6 +90,29 @@ public class SessionRESTService {
     public SessionRESTService(ServiceLookup services) {
         super();
         this.services = services;
+    }
+
+    /**
+     * Checks if the given session is a guest-session
+     *
+     * @param session The session
+     * @return True, if the session is a guest session, false otherwise
+     * @throws OXException
+     */
+    private boolean isGuest(Session session) throws OXException {
+        if (session != null) {
+
+            if (Boolean.TRUE.equals(session.getParameter(Session.PARAM_GUEST))) {
+                return true;
+            }
+
+            ServerSession serverSession = ServerSessionAdapter.valueOf(session);
+            if (serverSession != null) {
+                User user = serverSession.getUser();
+                return user != null && user.isGuest();
+            }
+        }
+        return false;
     }
 
     /**
@@ -115,7 +141,7 @@ public class SessionRESTService {
             JSONObject jResponse = new JSONObject(6).put("context", ses.getContextId()).put("user", ses.getUserId());
 
             // Add "guest" flag
-            boolean isGuest = Boolean.TRUE.equals(ses.getParameter(Session.PARAM_GUEST));
+            boolean isGuest = isGuest(ses);
             jResponse.put("guest", isGuest);
 
             // Add crypto session identifier

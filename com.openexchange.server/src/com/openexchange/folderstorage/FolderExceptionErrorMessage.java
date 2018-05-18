@@ -239,6 +239,11 @@ public enum FolderExceptionErrorMessage implements DisplayableOXExceptionCode {
      * Restore from trash is not supported.
      */
     NO_RESTORE_SUPPORT("Restore from trash is not supported.", Category.CATEGORY_ERROR, 1042, FolderExceptionMessages.NO_RESTORE_SUPPORT_MSG),
+    /**
+     * Process was interrupted. Please try again.
+     */
+    INTERRUPT_ERROR("Process was interrupted. Please try again.", CATEGORY_TRY_AGAIN, 1043, OXExceptionStrings.MESSAGE_RETRY),
+
     ;
 
     private static final String PREFIX = "FLD";
@@ -336,9 +341,12 @@ public enum FolderExceptionErrorMessage implements DisplayableOXExceptionCode {
     }
 
     private OXException specials(final OXException exc) {
-        switch(this) {
-        case NOT_FOUND:
-            exc.setGeneric(Generic.NOT_FOUND);
+        switch (this) {
+            case NOT_FOUND:
+                exc.setGeneric(Generic.NOT_FOUND);
+                break;
+            default:
+                break;
         }
 
         if (exc.getCategories().contains(Category.CATEGORY_CONFLICT)) {

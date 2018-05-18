@@ -79,7 +79,7 @@ public class BODY implements Item {
 	if (r.readByte() != ']')
 	    throw new ParsingException(
 		    "BODY parse error: missing ``]'' at section end");
-	isHeader = section.regionMatches(true, 0, "HEADER", 0, 6);
+	isHeader = null == section ? false : section.regionMatches(true, 0, "HEADER", 0, 6);
 
 	if (r.readByte() == '<') { // origin
 	    origin = r.readNumber();

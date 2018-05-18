@@ -115,8 +115,11 @@ public class FolderObject extends FolderChildObject implements Cloneable {
             return strHelper.getString(FolderStrings.SYSTEM_SHARED_FOLDER_NAME);
         case SYSTEM_FOLDER_ID:
             return strHelper.getString(FolderStrings.SYSTEM_FOLDER_NAME);
+        /*-
+         *
         case SYSTEM_GLOBAL_FOLDER_ID:
             return strHelper.getString(FolderStrings.SYSTEM_GLOBAL_FOLDER_NAME);
+        */
         case SYSTEM_LDAP_FOLDER_ID:
             return strHelper.getString(FolderStrings.SYSTEM_LDAP_FOLDER_NAME);
         case SYSTEM_OX_FOLDER_ID:
@@ -151,7 +154,7 @@ public class FolderObject extends FolderChildObject implements Cloneable {
 
     public static final int SYSTEM_FOLDER_ID = 4;
 
-    public static final int SYSTEM_GLOBAL_FOLDER_ID = 5;
+    /*public static final int SYSTEM_GLOBAL_FOLDER_ID = 5;*/ // finally dropped
 
     public static final int SYSTEM_LDAP_FOLDER_ID = 6;
 

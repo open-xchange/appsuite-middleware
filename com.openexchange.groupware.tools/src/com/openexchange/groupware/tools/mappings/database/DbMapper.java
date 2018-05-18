@@ -69,6 +69,9 @@ public interface DbMapper<O, E extends Enum<E>> extends Mapper<O, E> {
 	@Override
 	DbMapping<? extends Object, O> get(E field) throws OXException;
 
+    @Override
+    DbMapping<? extends Object, O> opt(E field);
+
 	/**
 	 * Gets the field whose mapping denotes the supplied column label.
 	 *

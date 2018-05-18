@@ -50,14 +50,16 @@
 package com.openexchange.mail.authenticity.impl.core.metrics;
 
 import java.util.List;
+import java.util.Map;
+import org.apache.commons.codec.digest.DigestUtils;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.mail.authenticity.MailAuthenticityProperty;
 import com.openexchange.mail.authenticity.MailAuthenticityResultKey;
-import com.openexchange.mail.authenticity.impl.osgi.Services;
-import com.openexchange.mail.authenticity.mechanism.AuthenticityMechanismResult;
-import com.openexchange.mail.authenticity.mechanism.MailAuthenticityMechanism;
 import com.openexchange.mail.authenticity.mechanism.MailAuthenticityMechanismResult;
 import com.openexchange.mail.dataobjects.MailAuthenticityResult;
 
@@ -65,97 +67,116 @@ import com.openexchange.mail.dataobjects.MailAuthenticityResult;
  * {@link MailAuthenticityMetricFileLogger}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @since v7.10.0
  */
-@SuppressWarnings("unchecked")
 public class MailAuthenticityMetricFileLogger implements MailAuthenticityMetricLogger {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MailAuthenticityMetricFileLogger.class);
+    private final LeanConfigurationService leanConfigService;
 
     /**
      * Initialises a new {@link MailAuthenticityMetricFileLogger}.
      */
-    public MailAuthenticityMetricFileLogger() {
+    public MailAuthenticityMetricFileLogger(LeanConfigurationService leanConfigService) {
         super();
+        this.leanConfigService = leanConfigService;
     }
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.mail.authenticity.impl.core.metrics.MailAuthenticityMetricLogger#log(java.util.List, com.openexchange.mail.dataobjects.MailAuthenticityResult)
      */
     @Override
     public void log(String mailId, List<String> rawHeaders, MailAuthenticityResult overallResult) {
-        LeanConfigurationService leanConfigService = Services.getService(LeanConfigurationService.class);
-        if (!leanConfigService.getBooleanProperty(MailAuthenticityProperty.LOG_METRICS)) {
+        Object arg = new Object() {
+
+            @Override
+            public String toString() {
+                return compileLog(mailId, rawHeaders, overallResult).toString();
+            }
+        };
+        LOGGER.debug("{}", arg);
+    }
+
+    /**
+     * Compiles the entire log entry
+     *
+     * @param mailId The mail identifier
+     * @param rawHeaders a {@link List} with the raw headers of the message
+     * @param overallResult The overall {@link MailAuthenticityResult}
+     * @return A {@link JSONObject} with the log entry
+     */
+    JSONObject compileLog(String mailId, List<String> rawHeaders, MailAuthenticityResult overallResult) {
+        JSONObject jLog = new JSONObject();
+        try {
+            logRawHeaders(jLog, rawHeaders);
+            logMechanisms(jLog, overallResult);
+            jLog.put(MailAuthenticityMetricLogField.mail_id.name(), DigestUtils.sha256Hex(mailId).substring(0, 12));
+            jLog.put(MailAuthenticityMetricLogField.domain_mismatch.name(), overallResult.getAttribute(MailAuthenticityResultKey.DOMAN_MISMATCH, Boolean.class));
+            jLog.put(MailAuthenticityMetricLogField.overall_result.name(), overallResult.getStatus().getTechnicalName());
+            jLog.put(MailAuthenticityMetricLogField.from_header.name(), overallResult.getAttribute(MailAuthenticityResultKey.FROM_HEADER_DOMAIN));
+            return jLog;
+        } catch (JSONException e) {
+            LOGGER.error("Unable to compile debug log entry for mail with id '{}'", mailId, e);
+        }
+        return jLog;
+    }
+
+    /**
+     * Log the raw headers if enabled.
+     *
+     * @param jLog The JSON log object
+     * @param rawHeaders The {@link List} with the raw headers of the message
+     * @throws JSONException if a JSON error is occurred
+     */
+    private void logRawHeaders(JSONObject jLog, List<String> rawHeaders) throws JSONException {
+        if (!leanConfigService.getBooleanProperty(MailAuthenticityProperty.LOG_RAW_HEADERS)) {
             return;
         }
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("MailId: {}, {}, {}, {}", mailId, serialiseCodes(overallResult), serialiseRawHeaders(rawHeaders), serialiseTechnicalNames(overallResult));
+        JSONArray jRawHeadersArray = new JSONArray(rawHeaders.size());
+        for (String rawHeader : rawHeaders) {
+            jRawHeadersArray.put(rawHeader);
         }
+        jLog.put(MailAuthenticityMetricLogField.raw_headers.name(), jRawHeadersArray);
     }
 
     /**
-     * Serialises the specified {@link MailAuthenticityMechanismResult} for logging. Serialises only the codes
-     * of the mechanisms and overall result in a form like: <code>1|1:4|2:3</code>. The first number designates
-     * the code for the overall status, the pipe character '|' is used as a separator for key/values, and the
-     * colon ':' separates the key from the value. The key/value part designates the mechanism and the result of
-     * that mechanism. The previous example can be then translated to:
-     * <code>Overall Result: fail, Mechanism Results: dkim=temperror, spf=fail</code>
-     * 
-     * @param overallResult The overall {@link MailAuthenticityResult}
-     * @return The serialised object
+     * Log the mechanisms
+     *
+     * @param jLog The JSON log object
+     * @param overallResult The overall result containing the mechanisms
+     * @throws JSONException if a JSON error is occurred
      */
-    private Object serialiseCodes(MailAuthenticityResult overallResult) {
-        StringBuilder serialised = new StringBuilder();
-        serialised.append("R:").append(overallResult.getStatus().ordinal()).append("|");
-        List<MailAuthenticityMechanismResult> knownResults = (List<MailAuthenticityMechanismResult>) overallResult.getAttribute(MailAuthenticityResultKey.MAIL_AUTH_MECH_RESULTS);
-        if (knownResults == null || knownResults.isEmpty()) {
-            serialised.setLength(serialised.length() - 1);
-            return serialised.toString();
+    @SuppressWarnings("unchecked")
+    private void logMechanisms(JSONObject jLog, MailAuthenticityResult overallResult) throws JSONException {
+        List<MailAuthenticityMechanismResult> results = overallResult.getAttribute(MailAuthenticityResultKey.MAIL_AUTH_MECH_RESULTS, List.class);
+        if (null == results) {
+            jLog.put(MailAuthenticityMetricLogField.mechanism_results.name(), JSONArray.EMPTY_ARRAY);
+            return;
         }
-        for (MailAuthenticityMechanismResult mechResult : knownResults) {
-            MailAuthenticityMechanism mechanism = mechResult.getMechanism();
-            serialised.append(mechanism.getCode()).append(":");
-            AuthenticityMechanismResult result = mechResult.getResult();
-            serialised.append(result.getCode()).append("|");
+
+        JSONObject jResultsObject = new JSONObject();
+        for (MailAuthenticityMechanismResult result : results) {
+            logMechanism(jResultsObject, result);
         }
-        serialised.setLength(serialised.length() - 1);
-        return serialised.toString();
+        jLog.put(MailAuthenticityMetricLogField.mechanism_results.name(), jResultsObject);
     }
 
     /**
-     * Serialises the {@link MailAuthenticityResult} for logging
-     * 
-     * @param overallResult The {@link MailAuthenticityResult} to serialised
-     * @return the serialised object
+     * Log a single mechanism
+     *
+     * @param jResultsArray The JSON array holding all the logged mechanism results
+     * @param result The {@link MailAuthenticityMechanismResult}
+     * @throws JSONException if a JSON error is occurred
      */
-    private Object serialiseTechnicalNames(MailAuthenticityResult overallResult) {
-        StringBuilder serialised = new StringBuilder();
-        serialised.append("Overall Result: ").append(overallResult.getStatus().getTechnicalName().toLowerCase()).append(", ");
-        List<MailAuthenticityMechanismResult> knownResults = (List<MailAuthenticityMechanismResult>) overallResult.getAttribute(MailAuthenticityResultKey.MAIL_AUTH_MECH_RESULTS);
-        if (knownResults == null || knownResults.isEmpty()) {
-            serialised.setLength(serialised.length() - 2);
-            return serialised.toString();
+    private void logMechanism(JSONObject resultsObject, MailAuthenticityMechanismResult result) throws JSONException {
+        JSONObject jResultLog = new JSONObject();
+        jResultLog.put(MailAuthenticityMetricLogField.result.name(), result.getResult().getTechnicalName());
+        for (Map.Entry<String, String> entry : result.getProperties().entrySet()) {
+            jResultLog.put(entry.getKey(), entry.getValue());
         }
-        serialised.append("Mechanism Results: ");
-        for (MailAuthenticityMechanismResult mechResult : knownResults) {
-            MailAuthenticityMechanism mechanism = mechResult.getMechanism();
-            serialised.append(mechanism.getTechnicalName().toLowerCase()).append("=");
-            AuthenticityMechanismResult result = mechResult.getResult();
-            serialised.append(result.getTechnicalName().toLowerCase()).append(", ");
-        }
-        serialised.setLength(serialised.length() - 2);
-        return serialised.toString();
-    }
-
-    /**
-     * Serialises the specified raw headers for logging
-     * 
-     * @param rawHeaders The {@link List} with the raw headers to serialise
-     * @return the serialised object
-     */
-    private Object serialiseRawHeaders(List<String> rawHeaders) {
-        StringBuilder serialiser = new StringBuilder("Raw Headers: ");
-        return serialiser.append(rawHeaders).toString();
+        jResultLog.put(MailAuthenticityMetricLogField.domain_mismatch.name(), !result.isDomainMatch());
+        resultsObject.put(result.getMechanism().getTechnicalName(), jResultLog);
     }
 }

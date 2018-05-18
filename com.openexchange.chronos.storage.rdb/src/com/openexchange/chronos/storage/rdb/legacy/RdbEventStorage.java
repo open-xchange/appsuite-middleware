@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the Open-Xchange, Inc. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2020 Open-Xchange, Inc.
+ *     Copyright (C) 2016-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -53,6 +53,7 @@ import static com.openexchange.chronos.common.CalendarUtils.isSeriesException;
 import static com.openexchange.chronos.common.CalendarUtils.isSeriesMaster;
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.I2i;
+import static com.openexchange.osgi.Tools.requireService;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -65,26 +66,33 @@ import java.util.List;
 import java.util.Set;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.CalendarUserType;
+import com.openexchange.chronos.Classification;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
+import com.openexchange.chronos.EventStatus;
 import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.common.DefaultRecurrenceData;
 import com.openexchange.chronos.compat.Appointment2Event;
 import com.openexchange.chronos.compat.Event2Appointment;
 import com.openexchange.chronos.compat.PositionAwareRecurrenceId;
+import com.openexchange.chronos.exception.CalendarExceptionCodes;
+import com.openexchange.chronos.exception.ProblemSeverity;
 import com.openexchange.chronos.service.EntityResolver;
 import com.openexchange.chronos.service.RecurrenceData;
+import com.openexchange.chronos.service.RecurrenceService;
 import com.openexchange.chronos.service.SearchFilter;
 import com.openexchange.chronos.service.SearchOptions;
 import com.openexchange.chronos.storage.EventStorage;
 import com.openexchange.chronos.storage.rdb.RdbStorage;
+import com.openexchange.chronos.storage.rdb.osgi.Services;
 import com.openexchange.database.provider.DBProvider;
 import com.openexchange.database.provider.DBTransactionPolicy;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.impl.IDGenerator;
+import com.openexchange.java.Strings;
 import com.openexchange.search.SearchTerm;
 
 /**
@@ -276,6 +284,7 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
             connection = dbProvider.getWriteConnection(context);
             txPolicy.setAutoCommit(connection, false);
             for (Event event : events) {
+                checkUnsupportedData(event);
                 updated += insertEvent(connection, context.getContextId(), event);
                 /*
                  * also take over series pattern from master for newly inserted change exception
@@ -300,6 +309,7 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
         try {
             connection = dbProvider.getWriteConnection(context);
             txPolicy.setAutoCommit(connection, false);
+            checkUnsupportedData(event);
             updated += updateEvent(connection, context.getContextId(), asInt(event.getId()), event);
             if (isSeriesMaster(event) && event.containsRecurrenceRule()) {
                 /*
@@ -383,6 +393,44 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
     @Override
     public void deleteAllEvents() throws OXException {
         throw new UnsupportedOperationException();
+    }
+
+    /**
+     * Checks if the supplied event does not contain properties or property values that are not supported by the underlying storage.
+     *
+     * @param event The event to check
+     * @throws OXException {@link CalendarExceptionCodes#IGNORED_INVALID_DATA}
+     */
+    protected void checkUnsupportedData(Event event) throws OXException {
+        if (event.containsClassification() && Classification.PRIVATE.equals(event.getClassification())) {
+            addUnsupportedDataError(event.getId(), EventField.CLASSIFICATION, ProblemSeverity.MAJOR, "Unable to store a 'private' classification");
+        }
+        if (event.containsGeo() && null != event.getGeo()) {
+            addUnsupportedDataError(event.getId(), EventField.GEO, ProblemSeverity.NORMAL, "Unable to store geo location");
+        }
+        if (event.containsRelatedTo() && null != event.getRelatedTo()) {
+            addUnsupportedDataError(event.getId(), EventField.RELATED_TO, ProblemSeverity.MINOR, "Unable to store related-to information");
+        }
+        if (event.containsExtendedProperties() && null != event.getExtendedProperties() && 0 < event.getExtendedProperties().size()) {
+            addUnsupportedDataError(event.getId(), EventField.EXTENDED_PROPERTIES, ProblemSeverity.NORMAL, "Unable to store extended properties");
+        }
+        if (event.containsColor() && Strings.isNotEmpty(event.getColor()) && 0 == Event2Appointment.getColorLabel(event.getColor())) {
+            addUnsupportedDataError(event.getId(), EventField.COLOR, ProblemSeverity.NORMAL, "Unable to store color");
+        }
+        if (event.containsStatus() && null != event.getStatus() && false == EventStatus.CONFIRMED.matches(event.getStatus())) {
+            addUnsupportedDataError(event.getId(), EventField.STATUS, ProblemSeverity.NORMAL, "Unable to store status");
+        }
+        if (event.containsEndDate() && null != event.getEndDate() && null != event.getEndDate().getTimeZone() &&
+            null != event.getStartDate() && false == event.getEndDate().getTimeZone().equals(event.getStartDate().getTimeZone())) {
+            addUnsupportedDataError(event.getId(), EventField.END_DATE, ProblemSeverity.NORMAL, "Unable to store end timezone");
+        }
+        if (event.containsRecurrenceRule() && null != event.getRecurrenceRule()) {
+            try {
+                Event2Appointment.getSeriesPattern(requireService(RecurrenceService.class, Services.get()), new DefaultRecurrenceData(event));
+            } catch (OXException e) {
+                addUnsupportedDataError(event.getId(), EventField.RECURRENCE_RULE, ProblemSeverity.MAJOR, e.getMessage(), e);
+            }
+        }
     }
 
     private static int deleteEvents(Connection connection, int contextID, List<String> objectIDs) throws SQLException {

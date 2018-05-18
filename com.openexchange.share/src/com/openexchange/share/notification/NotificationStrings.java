@@ -144,13 +144,13 @@ public class NotificationStrings implements LocalizableStrings {
     public static final String HAS_SHARED_FOLDER_NO_MESSAGE = "%1$s (%2$s) has shared the folder \"%3$s\" with you. Please click the button below to view it.";
 
     /** $username ($user_email) has shared folder $number folders with you. Please click the button below to view them. */
-    public static final String HAS_SHARED_FOLDERS_NO_MESSAGE = "%1$s (%2$s) has shared %3$ folders with you. Please click the button below to view them.";
+    public static final String HAS_SHARED_FOLDERS_NO_MESSAGE = "%1$s (%2$s) has shared %3$d folders with you. Please click the button below to view them.";
 
     /** $username ($user_email) has shared calendar $folder with you. Please click the button below to view it. */
     public static final String HAS_SHARED_CALENDAR_NO_MESSAGE = "%1$s (%2$s) has shared the calendar \"%3$s\" with you. Please click the button below to view it.";
 
     /** $username ($user_email) has shared $number calendars with you. Please click the button below to view them. */
-    public static final String HAS_SHARED_CALENDARS_NO_MESSAGE = "%1$s (%2$s) has shared %3$ calendars with you. Please click the button below to view them.";
+    public static final String HAS_SHARED_CALENDARS_NO_MESSAGE = "%1$s (%2$s) has shared %3$d calendars with you. Please click the button below to view them.";
 
     /** $username ($user_email) has shared file "$filename" with the group "Sales Dept.". Please click the button below to view it. */
     public static final String HAS_SHARED_FILE_NO_MESSAGE_GROUP = "%1$s (%2$s) has shared the file \"%3$s\" with the group \"%4$s\". Please click the button below to view it.";
@@ -174,13 +174,13 @@ public class NotificationStrings implements LocalizableStrings {
     public static final String HAS_SHARED_FOLDER_NO_MESSAGE_GROUP = "%1$s (%2$s) has shared the folder \"%3$s\" with the group \"%4$s\". Please click the button below to view it.";
 
     /** $username ($user_email) has shared folder $number folders with the group "Sales Dept.". Please click the button below to view them. */
-    public static final String HAS_SHARED_FOLDERS_NO_MESSAGE_GROUP = "%1$s (%2$s) has shared %3$ folders with the group \"%4$s\". Please click the button below to view them.";
+    public static final String HAS_SHARED_FOLDERS_NO_MESSAGE_GROUP = "%1$s (%2$s) has shared %3$d folders with the group \"%4$s\". Please click the button below to view them.";
 
     /** $username ($user_email) has shared the calendar $folder with the group "Sales Dept.". Please click the button below to view it. */
     public static final String HAS_SHARED_CALENDAR_NO_MESSAGE_GROUP = "%1$s (%2$s) has shared the calendar \"%3$s\" with the group \"%4$s\". Please click the button below to view it.";
 
     /** $username ($user_email) has shared $number calendars with the group "Sales Dept.". Please click the button below to view them. */
-    public static final String HAS_SHARED_CALENDARS_NO_MESSAGE_GROUP = "%1$s (%2$s) has shared %3$ calendars with the group \"%4$s\". Please click the button below to view them.";
+    public static final String HAS_SHARED_CALENDARS_NO_MESSAGE_GROUP = "%1$s (%2$s) has shared %3$d calendars with the group \"%4$s\". Please click the button below to view them.";
 
     /** $username ($user_email) has shared file "$filename" with you and left you a message: */
     public static final String HAS_SHARED_FILE_AND_MESSAGE = "%1$s (%2$s) has shared the file \"%3$s\" with you and left you a message:";

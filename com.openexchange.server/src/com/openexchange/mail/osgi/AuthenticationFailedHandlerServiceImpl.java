@@ -68,6 +68,7 @@ import com.openexchange.session.Session;
  */
 public class AuthenticationFailedHandlerServiceImpl extends RankingAwareNearRegistryServiceTracker<AuthenticationFailedHandler> implements AuthenticationFailedHandlerService {
 
+    /** Simply go ahead with original processing (that is to throw originating authentication error). */
     private static final Type CONTINUE = AuthenticationFailureHandlerResult.Type.CONTINUE;
 
     /**

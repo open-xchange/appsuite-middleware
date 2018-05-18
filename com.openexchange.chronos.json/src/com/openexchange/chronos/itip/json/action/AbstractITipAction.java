@@ -73,6 +73,7 @@ import com.openexchange.conversion.DataArguments;
 import com.openexchange.conversion.DataProperties;
 import com.openexchange.conversion.DataSource;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Streams;
 import com.openexchange.osgi.RankingAwareNearRegistryServiceTracker;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
@@ -80,7 +81,7 @@ import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
 /**
- * 
+ *
  * {@link AbstractITipAction}
  *
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
@@ -110,12 +111,15 @@ public abstract class AbstractITipAction implements AJAXActionService {
         TimeZone outputTimeZone = timezoneParameter == null ? tz : TimeZone.getTimeZone(timezoneParameter);
 
         Map<String, String> mailHeader = new HashMap<String, String>();
-        InputStream stream = getInputStreamAndFillMailHeader(requestData, session, mailHeader);
-        List<ITipAnalysis> analysis = analyzer.analyze(stream, requestData.getParameter("descriptionFormat"), initCalendarSession(session), mailHeader);
+        InputStream stream = null;
         try {
+            stream = getInputStreamAndFillMailHeader(requestData, session, mailHeader);
+            List<ITipAnalysis> analysis = analyzer.analyze(stream, requestData.getParameter("descriptionFormat"), initCalendarSession(session), mailHeader);
             return process(analysis, requestData, session, outputTimeZone);
         } catch (JSONException e) {
             throw AjaxExceptionCodes.JSON_ERROR.create(e);
+        } finally {
+            Streams.close(stream);
         }
     }
 
@@ -170,8 +174,8 @@ public abstract class AbstractITipAction implements AJAXActionService {
         final Object data = request.getData();
         if (data != null) {
             final JSONObject body = (JSONObject) data;
-            for (final String string : body.keySet()) {
-                dataArguments.put(string, body.opt(string).toString());
+            for (final Map.Entry<String, Object> entry : body.entrySet()) {
+                dataArguments.put(entry.getKey(), entry.getValue().toString());
             }
         } else {
             for (final Map.Entry<String, String> entry : request.getParameters().entrySet()) {
@@ -198,8 +202,7 @@ public abstract class AbstractITipAction implements AJAXActionService {
 
     protected CalendarSession initCalendarSession(ServerSession session) throws OXException {
         CalendarSession calendarSession = services.getService(CalendarService.class).init(session);
-        calendarSession.set(CalendarParameters.PARAMETER_AUTO_HANDLE_INCORRECT_STRINGS, Boolean.TRUE);
-        calendarSession.set(CalendarParameters.PARAMETER_AUTO_HANDLE_DATA_TRUNCATIONS, Boolean.TRUE);
+        calendarSession.set(CalendarParameters.PARAMETER_IGNORE_STORAGE_WARNINGS, Boolean.TRUE);
         return calendarSession;
     }
 }

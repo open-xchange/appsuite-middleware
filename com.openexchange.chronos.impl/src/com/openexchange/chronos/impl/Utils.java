@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the Open-Xchange, Inc. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2020 Open-Xchange, Inc.
+ *     Copyright (C) 2016-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -61,8 +61,10 @@ import static com.openexchange.chronos.common.CalendarUtils.isSeriesMaster;
 import static com.openexchange.chronos.common.CalendarUtils.matches;
 import static com.openexchange.chronos.common.CalendarUtils.optTimeZone;
 import static com.openexchange.chronos.common.SearchUtils.getSearchTerm;
+import static com.openexchange.chronos.compat.Event2Appointment.asInt;
 import static com.openexchange.chronos.impl.AbstractStorageOperation.PARAM_CONNECTION;
 import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.java.Autoboxing.b;
 import static com.openexchange.java.Autoboxing.i2I;
 import java.sql.Connection;
 import java.util.AbstractMap;
@@ -97,10 +99,12 @@ import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.common.DefaultRecurrenceData;
 import com.openexchange.chronos.common.mapping.EventMapper;
-import com.openexchange.chronos.compat.Event2Appointment;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.impl.osgi.Services;
+import com.openexchange.chronos.impl.performer.AttendeeUsageTracker;
+import com.openexchange.chronos.impl.session.DefaultEntityResolver;
 import com.openexchange.chronos.provider.CalendarAccount;
+import com.openexchange.chronos.service.CalendarEvent;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.EntityResolver;
@@ -123,6 +127,7 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.modules.Module;
+import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.java.Strings;
 import com.openexchange.quota.Quota;
@@ -133,6 +138,7 @@ import com.openexchange.search.CompositeSearchTerm.CompositeOperation;
 import com.openexchange.search.SearchTerm;
 import com.openexchange.search.SingleSearchTerm.SingleOperation;
 import com.openexchange.search.internal.operands.ColumnFieldOperand;
+import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.session.Session;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
@@ -661,7 +667,7 @@ public class Utils {
      * @param folder The folder where the event should appear in
      * @return <code>true</code> if the event <i>is</i> in the folder, <code>false</code>, otherwise
      */
-    public static boolean isInFolder(Event event, CalendarFolder folder) throws OXException {
+    public static boolean isInFolder(Event event, CalendarFolder folder) {
         if (PublicType.getInstance().equals(folder.getType()) || false == isGroupScheduled(event)) {
             return folder.getId().equals(event.getFolderId());
         } else {
@@ -734,6 +740,35 @@ public class Utils {
         FolderService folderService = Services.getService(FolderService.class);
         for (String folderId : folderIds) {
             folders.add(getFolder(folderService, folderId, session.getSession(), decorator, true));
+        }
+        return folders;
+    }
+
+    /**
+     * Gets the folders that are actually visible for the current session's user from a list of possible folder identifiers.
+     *
+     * @param session The calendar session
+     * @param folderIds The possible identifiers of the folders to get
+     * @return The visible folders, or an empty list if none are visible
+     */
+    public static List<CalendarFolder> getVisibleFolders(CalendarSession session, Collection<String> folderIds) throws OXException {
+        if (null == folderIds || 0 == folderIds.size()) {
+            return Collections.emptyList();
+        }
+        List<CalendarFolder> folders = new ArrayList<CalendarFolder>();
+        DefaultEntityResolver entityResolver = getEntityResolver(session);
+        UserPermissionBits permissionBits = ServerSessionAdapter.valueOf(session.getSession()).getUserPermissionBits();
+        for (String folderId : folderIds) {
+            try {
+                FolderObject folder = entityResolver.getFolder(asInt(folderId));
+                EffectivePermission permission = folder.getEffectiveUserPermission(session.getUserId(), permissionBits);
+                if (permission.isFolderVisible()) {
+                    folders.add(new CalendarFolder(session.getSession(), folder, permission));
+                }
+            } catch (OXException | NumberFormatException e) {
+                LOG.warn("Error evaluating if folder {} is visible, skipping.", folderId, e);
+                continue;
+            }
         }
         return folders;
     }
@@ -969,21 +1004,13 @@ public class Utils {
      * @param folderIds The identifiers of all folders to determine the users with access for
      * @return The identifiers of the affected folders for each user
      */
-    public static Map<Integer, List<String>> getAffectedFoldersPerUser(CalendarSession session, Set<String> folderIds) {
+    public static Map<Integer, List<String>> getAffectedFoldersPerUser(CalendarSession session, Collection<String> folderIds) throws OXException {
         Map<Integer, List<String>> affectedFoldersPerUser = new HashMap<Integer, List<String>>();
-        OXFolderAccess folderAccess;
-        try {
-            Context context = ServerSessionAdapter.valueOf(session.getSession()).getContext();
-            Connection connection = optConnection(session);
-            folderAccess = null != connection ? new OXFolderAccess(connection, context) : new OXFolderAccess(context);
-        } catch (OXException e) {
-            LOG.warn("Error collecting affected folders", e);
-            return affectedFoldersPerUser;
-        }
+        DefaultEntityResolver entityResolver = getEntityResolver(session);
         for (String folderId : folderIds) {
             try {
-                FolderObject folder = folderAccess.getFolderObject(Event2Appointment.asInt(folderId));
-                for (Integer userId : getAffectedUsers(folder, session.getEntityResolver())) {
+                FolderObject folder = entityResolver.getFolder(asInt(folderId));
+                for (Integer userId : getAffectedUsers(folder, entityResolver)) {
                     com.openexchange.tools.arrays.Collections.put(affectedFoldersPerUser, userId, folderId);
                 }
             } catch (Exception e) {
@@ -1138,6 +1165,19 @@ public class Utils {
     }
 
     /**
+     * Tracks newly added attendees from creations and updates found in the supplied calendar result, in case attendee tracking is
+     * enabled as per {@link CalendarParameters#PARAMETER_TRACK_ATTENDEE_USAGE}.
+     *
+     * @param session The calendar session
+     * @param event The calendar event to track
+     */
+    public static void trackAttendeeUsage(CalendarSession session, CalendarEvent event) {
+        if (null != event && b(session.get(CalendarParameters.PARAMETER_TRACK_ATTENDEE_USAGE, Boolean.class, Boolean.FALSE))) {
+            new AttendeeUsageTracker(session.getEntityResolver()).track(event);
+        }
+    }
+
+    /**
      * Prepares the organizer for an event, taking over an external organizer if specified.
      *
      * @param session The calendar session
@@ -1216,6 +1256,13 @@ public class Utils {
             LOG.warn("Error getting folder object {}.", folderId, e);
             return null;
         }
+    }
+
+    private static DefaultEntityResolver getEntityResolver(CalendarSession session) throws OXException {
+        if (DefaultEntityResolver.class.isInstance(session.getEntityResolver())) {
+            return (DefaultEntityResolver) session.getEntityResolver();
+        }
+        return new DefaultEntityResolver(ServerSessionAdapter.valueOf(session.getSession()), Services.getServiceLookup());
     }
 
 }

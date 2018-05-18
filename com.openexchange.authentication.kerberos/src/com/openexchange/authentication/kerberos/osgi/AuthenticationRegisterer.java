@@ -90,14 +90,11 @@ public final class AuthenticationRegisterer implements ServiceTrackerCustomizer<
         {
             if (obj instanceof KerberosService) {
                 kerberosService = (KerberosService) obj;
-            }
-            if (obj instanceof ContextService) {
+            } else if (obj instanceof ContextService) {
                 contextService = (ContextService) obj;
-            }
-            if (obj instanceof UserService) {
+            } else if (obj instanceof UserService) {
                 userService = (UserService) obj;
-            }
-            if (obj instanceof ConfigurationService) {
+            } else if (obj instanceof ConfigurationService) {
                 configService = (ConfigurationService) obj;
             }
             needsRegistration = null != kerberosService && null != contextService && null != userService && null != configService && registration == null;
@@ -124,14 +121,11 @@ public final class AuthenticationRegisterer implements ServiceTrackerCustomizer<
         {
             if (service instanceof ContextService) {
                 contextService = null;
-            }
-            if (service instanceof UserService) {
+            } else if (service instanceof UserService) {
                 userService = null;
-            }
-            if (service instanceof KerberosService) {
+            } else if (service instanceof KerberosService) {
                 kerberosService = null;
-            }
-            if (service instanceof ConfigurationService) {
+            } else if (service instanceof ConfigurationService) {
                 configService = null;
             }
             if (registration != null && (null == contextService || null == userService || null == kerberosService)) {

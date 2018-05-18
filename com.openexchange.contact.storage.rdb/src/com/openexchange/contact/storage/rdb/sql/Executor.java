@@ -66,6 +66,7 @@ import java.util.TimeZone;
 import java.util.UUID;
 import com.openexchange.contact.AutocompleteParameters;
 import com.openexchange.contact.SortOptions;
+import com.openexchange.contact.SortOrder;
 import com.openexchange.contact.storage.rdb.fields.DistListMemberField;
 import com.openexchange.contact.storage.rdb.fields.Fields;
 import com.openexchange.contact.storage.rdb.internal.DistListMember;
@@ -83,6 +84,7 @@ import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.search.ContactSearchObject;
+import com.openexchange.groupware.search.Order;
 import com.openexchange.l10n.SuperCollator;
 import com.openexchange.search.SearchTerm;
 
@@ -539,14 +541,16 @@ public class Executor {
          * construct query string
          */
         SearchAdapter adapter;
+        boolean usesGroupBy = false;
         if (FulltextAutocompleteAdapter.hasFulltextIndex(connection, contextID)) {
             adapter = new FulltextAutocompleteAdapter(query, parameters, folderIDs,contextID, fields, getCharset(sortOptions));
         } else {
             adapter = new AutocompleteAdapter(query, parameters, folderIDs,contextID, fields, getCharset(sortOptions));
+            usesGroupBy = ((AutocompleteAdapter) adapter).isUsingGroupBy();
         }
         StringBuilder stringBuilder = adapter.getClause();
         if (null != sortOptions && false == SortOptions.EMPTY.equals(sortOptions)) {
-            stringBuilder.append(' ').append(Tools.getOrderClause(sortOptions, true));
+            stringBuilder.append(' ').append(getOrderClause(sortOptions, true, usesGroupBy));
             if (0 < sortOptions.getLimit()) {
                 stringBuilder.append(' ').append(Tools.getLimitClause(sortOptions));
             }
@@ -569,6 +573,67 @@ public class Executor {
         } finally {
             Databases.closeSQLStuff(resultSet, stmt);
         }
+    }
+
+    private static String getOrderClause(final SortOptions sortOptions, boolean forAutocomplete, boolean wrappingClauseForGroupBy) throws OXException {
+        final StringBuilder stringBuilder = new StringBuilder();
+        if (forAutocomplete || (null != sortOptions && false == SortOptions.EMPTY.equals(sortOptions) && null != sortOptions.getOrder())) {
+            stringBuilder.append("ORDER BY ");
+            if (forAutocomplete) {
+                if(wrappingClauseForGroupBy) {
+                    stringBuilder.append("min(value) DESC, min(fid) ASC, ");
+                } else {
+                    stringBuilder.append("value DESC, fid ASC, ");
+                }
+            }
+            if (null != sortOptions) {
+                final SortOrder[] order = sortOptions.getOrder();
+                if (null != order && 0 < order.length) {
+                    final SuperCollator collator = SuperCollator.get(sortOptions.getCollation());
+                    stringBuilder.append(getOrderClause(order[0], collator, wrappingClauseForGroupBy));
+                    for (int i = 1; i < order.length; i++) {
+                        stringBuilder.append(", ").append(getOrderClause(order[i], collator, wrappingClauseForGroupBy));
+                    }
+                } else {
+                    stringBuilder.deleteCharAt(stringBuilder.lastIndexOf(","));
+                }
+            }
+        }
+        return stringBuilder.toString();
+    }
+
+    private static String getOrderClause(final SortOrder order, final SuperCollator collator, boolean wrappingClauseForGroupBy) throws OXException {
+        final StringBuilder stringBuilder = new StringBuilder();
+        if (null == collator || SuperCollator.DEFAULT.equals(collator)) {
+            ContactField by = order.getBy();
+            if (ContactField.USE_COUNT == by) {
+                if(wrappingClauseForGroupBy) {
+                    stringBuilder.append("min(").append(Table.OBJECT_USE_COUNT).append(".value)");
+                } else {
+                    stringBuilder.append(Table.OBJECT_USE_COUNT).append(".value");
+                }
+            } else {
+                if(wrappingClauseForGroupBy) {
+                    stringBuilder.append("min(").append(Mappers.CONTACT.get(by).getColumnLabel()).append(")");
+                } else {
+                    stringBuilder.append(Mappers.CONTACT.get(by).getColumnLabel());
+                }
+            }
+        } else {
+            if(wrappingClauseForGroupBy) {
+                stringBuilder.append("CONVERT (min(").append(Mappers.CONTACT.get(order.getBy()).getColumnLabel()).append(") USING '")
+                .append(collator.getSqlCharset()).append("') COLLATE '").append(collator.getSqlCollation()).append('\'');
+            } else {
+                stringBuilder.append("CONVERT (").append(Mappers.CONTACT.get(order.getBy()).getColumnLabel()).append(" USING '")
+                .append(collator.getSqlCharset()).append("') COLLATE '").append(collator.getSqlCollation()).append('\'');
+            }
+        }
+        if (Order.ASCENDING.equals(order.getOrder())) {
+            stringBuilder.append(" ASC");
+        } else if (Order.DESCENDING.equals(order.getOrder())) {
+            stringBuilder.append(" DESC");
+        }
+        return stringBuilder.toString();
     }
 
     public List<Contact> select(Connection connection, Table table, int contextID, ContactSearchObject contactSearch,

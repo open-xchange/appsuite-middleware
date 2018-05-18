@@ -175,11 +175,14 @@ public class ResolveShareReference extends AbstractMailAction {
 
                 JSONArray jFileObjs = new JSONArray(8);
                 while (searchIterator.hasNext()) {
-                    String fileId = searchIterator.next().getId();
-                    AJAXRequestData requestData = request().session(session).module("files").action("get").params("id", fileId, "folder", folderId, "timezone", "utc").format("json").build(originalRequestData);
-                    AJAXRequestResult requestResult = perform(requestData, ox, session);
-                    JSONObject jFileObj = ((JSONObject) requestResult.getResultObject());
-                    jFileObjs.put(jFileObj);
+                    File file = searchIterator.next();
+                    if (null != file) {
+                        String fileId = file.getId();
+                        AJAXRequestData requestData = request().session(session).module("files").action("get").params("id", fileId, "folder", folderId, "timezone", "utc").format("json").build(originalRequestData);
+                        AJAXRequestResult requestResult = perform(requestData, ox, session);
+                        JSONObject jFileObj = ((JSONObject) requestResult.getResultObject());
+                        jFileObjs.put(jFileObj);
+                    }
                 }
                 jReference.put("files", jFileObjs);
 

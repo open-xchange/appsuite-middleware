@@ -59,6 +59,7 @@ import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import com.openexchange.exception.OXException;
 
@@ -206,9 +207,9 @@ public abstract class ComparedOCLPermission<P, GP extends P> {
             removedUsers.add(oldUsers.get(removed));
         }
 
-        for (Integer id : newUsers.keySet()) {
-            if (oldUsers.containsKey(id)) {
-                modifiedUsers.add(newUsers.get(id));
+        for (Entry<Integer, P> entry : newUsers.entrySet()) {
+            if (oldUsers.containsKey(entry.getKey())) {
+                modifiedUsers.add(entry.getValue());
             }
         }
 

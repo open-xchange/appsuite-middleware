@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the Open-Xchange, Inc. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2020 Open-Xchange, Inc.
+ *     Copyright (C) 2016-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -55,10 +55,14 @@ import static com.openexchange.chronos.common.CalendarUtils.matches;
 import static com.openexchange.chronos.impl.Utils.getCalendarUserId;
 import static com.openexchange.java.Autoboxing.L;
 import java.util.List;
+import org.dmfs.rfc5545.DateTime;
 import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.Attendee;
+import com.openexchange.chronos.CalendarStrings;
+import com.openexchange.chronos.CalendarUserType;
 import com.openexchange.chronos.Classification;
 import com.openexchange.chronos.Event;
+import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.RecurrenceRange;
 import com.openexchange.chronos.common.CalendarUtils;
@@ -73,6 +77,7 @@ import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.type.PublicType;
+import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.java.Strings;
 import com.openexchange.quota.Quota;
 import com.openexchange.quota.QuotaExceptionCodes;
@@ -189,17 +194,62 @@ public class Check extends com.openexchange.chronos.common.Check {
     }
 
     /**
-     * Checks that the classification is supported based on the given folder's type, if it is not <code>null</code> and different from
-     * {@link Classification#PUBLIC}.
+     * Checks
+     * <ul>
+     * <li>that the start- and enddate properties are set in the event</li>
+     * <li>that the end date does is not before the start date</li>
+     * <li>that both start and enddate are either both <i>all-day</i> or not</li>
+     * <li>that both start and enddate are either both <i>floating</i> or not</li>
+     * </ul>
+     *
+     * @param session The calendar session
+     * @param event The event to check
+     * @see Check#mandatoryFields(Event, EventField...)
+     * @throws OXException {@link CalendarExceptionCodes#MANDATORY_FIELD}, {@link CalendarExceptionCodes#END_BEFORE_START}
+     */
+    public static void startAndEndDate(CalendarSession session, Event event) throws OXException {
+        DateTime startDate = event.getStartDate();
+        if (null == startDate) {
+            String fieldName = StringHelper.valueOf(session.getEntityResolver().getLocale(session.getUserId())).getString(CalendarStrings.FIELD_START_DATE);
+            throw CalendarExceptionCodes.MANDATORY_FIELD.create(fieldName);
+        }
+        DateTime endDate = event.getEndDate();
+        if (null == endDate) {
+            String fieldName = StringHelper.valueOf(session.getEntityResolver().getLocale(session.getUserId())).getString(CalendarStrings.FIELD_END_DATE);
+            throw CalendarExceptionCodes.MANDATORY_FIELD.create(fieldName);
+        }
+        if (startDate.after(endDate)) {
+            throw CalendarExceptionCodes.END_BEFORE_START.create(String.valueOf(startDate), String.valueOf(endDate));
+        }
+        if (startDate.isAllDay() != endDate.isAllDay()) {
+            throw CalendarExceptionCodes.INCOMPATIBLE_DATE_TYPES.create(String.valueOf(startDate), String.valueOf(endDate));
+        }
+        if (startDate.isFloating() != endDate.isFloating()) {
+            throw CalendarExceptionCodes.INCOMPATIBLE_DATE_TYPES.create(String.valueOf(startDate), String.valueOf(endDate));
+        }
+    }
+
+    /**
+     * Checks that the classification is supported based on the given folder's type and list of attendees, if it is not <code>null</code>
+     * and different from {@link Classification#PUBLIC}.
      *
      * @param classification The classification to check, or <code>null</code> to skip the check
      * @param folder The target folder for the event
+     * @param attendees The attendees participating in the event
      * @return The passed classification, after it was checked for validity
-     * @throws OXException {@link CalendarExceptionCodes#UNSUPPORTED_CLASSIFICATION}
+     * @throws OXException {@link CalendarExceptionCodes#UNSUPPORTED_CLASSIFICATION_FOR_FOLDER}, {@link CalendarExceptionCodes#UNSUPPORTED_CLASSIFICATION_FOR_RESOURCE}
      */
-    public static Classification classificationIsValid(Classification classification, CalendarFolder folder) throws OXException {
-        if (null != classification && false == Classification.PUBLIC.equals(classification) && PublicType.getInstance().equals(folder.getType())) {
-            throw CalendarExceptionCodes.UNSUPPORTED_CLASSIFICATION.create(String.valueOf(classification), folder.getId(), PublicType.getInstance());
+    public static Classification classificationIsValid(Classification classification, CalendarFolder folder, List<Attendee> attendees) throws OXException {
+        if (null != classification && false == Classification.PUBLIC.equals(classification)) {
+            if (PublicType.getInstance().equals(folder.getType())) {
+                throw CalendarExceptionCodes.UNSUPPORTED_CLASSIFICATION_FOR_FOLDER.create(String.valueOf(classification), folder.getId(), PublicType.getInstance());
+            }
+            if (Classification.PRIVATE.equals(classification)) {
+                List<Attendee> resourceAttendees = CalendarUtils.filter(attendees, Boolean.TRUE, CalendarUserType.RESOURCE, CalendarUserType.ROOM);
+                if (0 < resourceAttendees.size()) {
+                    throw CalendarExceptionCodes.UNSUPPORTED_CLASSIFICATION_FOR_RESOURCE.create(String.valueOf(classification), resourceAttendees.get(0));
+                }
+            }
         }
         return classification;
     }

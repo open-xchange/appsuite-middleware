@@ -132,6 +132,7 @@ public class ReplyITipAnalyzer extends AbstractITipAnalyzer {
         }
 
         if (update != null) {
+            session.getUtilities().adjustTimeZones(message.getOwner() > 0 ? message.getOwner() : session.getUserId(), update, original);
             final ITipChange change = new ITipChange();
             change.setCurrentEvent(original);
             change.setNewEvent(ensureAttendees(original, update));
@@ -148,6 +149,7 @@ public class ReplyITipAnalyzer extends AbstractITipAnalyzer {
             change.setException(true);
             change.setMaster(original);
             if (matchingException != null) {
+                session.getUtilities().adjustTimeZones(message.getOwner() > 0 ? message.getOwner() : session.getUserId(), exception, matchingException);
                 change = new ITipChange();
                 change.setNewEvent(ensureAttendees(matchingException, exception));
                 change.setCurrentEvent(matchingException);
@@ -157,6 +159,12 @@ public class ReplyITipAnalyzer extends AbstractITipAnalyzer {
 
                 analysis.addChange(change);
             } else {
+                if (isDeleteException(original, exception)) {
+                    analysis.addAnnotation(new ITipAnnotation(Messages.CHANGE_PARTICIPANT_STATE_IN_DELETED_APPOINTMENT, locale));
+                    analysis.recommendAction(ITipAction.IGNORE);
+                    return analysis;
+                }
+                session.getUtilities().adjustTimeZones(message.getOwner() > 0 ? message.getOwner() : session.getUserId(), exception, original);
                 change.setCurrentEvent(original);
                 change.setNewEvent(ensureAttendees(original, exception));
                 change.setType(Type.CREATE);
@@ -175,19 +183,16 @@ public class ReplyITipAnalyzer extends AbstractITipAnalyzer {
     }
 
     /**
-     * Ensures the original attendees to be set in the event
+     * Updates the attendee provided by the REPLY in the original event.
+     * Ignores all other changed fields.
      * 
      * @param original The original event
-     * @param update The event to assure the attendees to
+     * @param update The event containing the attendee
      * @return The event with correct set attendees
      * @throws OXException In case event can't be copied or reply is not RFC conform
      */
     private Event ensureAttendees(Event original, Event update) throws OXException {
-        if (null == original) {
-            return update;
-        }
-        Event event = new Event();
-        EventMapper.getInstance().copy(update, event, (EventField[]) null);
+        Event event = EventMapper.getInstance().copy(original, new Event(), (EventField[]) null);
         Attendee reply = getReply(update);
 
         List<Attendee> attendees = new LinkedList<>();
@@ -217,7 +222,7 @@ public class ReplyITipAnalyzer extends AbstractITipAnalyzer {
                 continue;
             }
 
-            if (change.getDiff().getUpdatedFields().size() != 0) {
+            if (false == change.getDiff().getAttendeeUpdates().isEmpty()) {
                 return true;
             }
         }

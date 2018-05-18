@@ -31,15 +31,17 @@ import java.util.regex.Pattern;
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamConstants;
 import javax.xml.stream.XMLStreamReader;
+import org.apache.cxf.common.logging.LogUtils;
 import org.apache.cxf.databinding.DataReader;
 import org.apache.cxf.endpoint.Endpoint;
 import org.apache.cxf.interceptor.AbstractInDatabindingInterceptor;
 import org.apache.cxf.interceptor.Fault;
-import org.apache.cxf.interceptor.URIMappingInterceptor;
 import org.apache.cxf.message.Exchange;
 import org.apache.cxf.message.Message;
 import org.apache.cxf.message.MessageContentsList;
+import org.apache.cxf.message.MessageUtils;
 import org.apache.cxf.phase.Phase;
+import org.apache.cxf.service.Service;
 import org.apache.cxf.service.model.BindingMessageInfo;
 import org.apache.cxf.service.model.BindingOperationInfo;
 import org.apache.cxf.service.model.MessageInfo;
@@ -50,8 +52,8 @@ import org.apache.cxf.service.model.ServiceModelUtil;
 import org.apache.cxf.staxutils.DepthXMLStreamReader;
 import org.apache.cxf.staxutils.StaxUtils;
 import org.apache.ws.commons.schema.XmlSchemaElement;
+import org.apache.ws.commons.schema.constants.Constants;
 import org.xml.sax.SAXParseException;
-import com.openexchange.log.Slf4jLogger;
 
 /**
  * {@link DocLiteralInInterceptor} - A rewrite of {@code org.apache.cxf.interceptor.DocLiteralInInterceptor} class for less strict parsing
@@ -60,17 +62,15 @@ import com.openexchange.log.Slf4jLogger;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class DocLiteralInInterceptor extends AbstractInDatabindingInterceptor {
-    public static final String KEEP_PARAMETERS_WRAPPER = DocLiteralInInterceptor.class.getName()
-        + ".DocLiteralInInterceptor.keep-parameters-wrapper";
 
-    private static final Logger LOG = new Slf4jLogger(DocLiteralInInterceptor.class);
+    public static final String KEEP_PARAMETERS_WRAPPER = DocLiteralInInterceptor.class.getName() + ".DocLiteralInInterceptor.keep-parameters-wrapper";
+
+    private static final Logger LOG = LogUtils.getL7dLogger(DocLiteralInInterceptor.class);
 
     public DocLiteralInInterceptor() {
         super(Phase.UNMARSHAL);
-        addAfter(URIMappingInterceptor.class.getName());
     }
 
-    @Override
     public void handleMessage(Message message) {
         if (isGET(message) && message.getContent(List.class) != null) {
             LOG.fine("DocLiteralInInterceptor skipped in HTTP GET method");
@@ -78,11 +78,6 @@ public class DocLiteralInInterceptor extends AbstractInDatabindingInterceptor {
         }
 
         DepthXMLStreamReader xmlReader = getXMLStreamReader(message);
-        if (xmlReader == null) {
-            LOG.warning("Unable to retrieve XMLStreamReader from message.");
-            return;
-        }
-        DataReader<XMLStreamReader> dr = getDataReader(message);
         MessageContentsList parameters = new MessageContentsList();
 
         Exchange exchange = message.getExchange();
@@ -97,28 +92,27 @@ public class DocLiteralInInterceptor extends AbstractInDatabindingInterceptor {
             return;
         }
 
-        //bop might be a unwrapped, wrap it back so that we can get correct info
-        if (bop != null && bop.isUnwrapped()) {
-            bop = bop.getWrappedOperation();
+        Service service = ServiceModelUtil.getService(message.getExchange());
+        bop = getBindingOperationInfo(xmlReader, exchange, bop, client);
+        boolean forceDocLitBare = false;
+        if (bop != null && bop.getBinding() != null) {
+            forceDocLitBare = Boolean.TRUE.equals(bop.getBinding().getService().getProperty("soap.force.doclit.bare"));
         }
-
-        if (bop == null) {
-            QName startQName = xmlReader.getName();
-            bop = getBindingOperationInfo(exchange, startQName, client);
-        }
+        DataReader<XMLStreamReader> dr = getDataReader(message);
 
         try {
-            if (bop != null && bop.isUnwrappedCapable()) {
+            if (!forceDocLitBare && bop != null && bop.isUnwrappedCapable()) {
                 ServiceInfo si = bop.getBinding().getService();
                 // Wrapped case
                 MessageInfo msgInfo = setMessage(message, bop, client, si);
+                setDataReaderValidation(service, message, dr);
 
                 // Determine if we should keep the parameters wrapper
                 if (shouldWrapParameters(msgInfo, message)) {
                     QName startQName = xmlReader.getName();
-                    if (!msgInfo.getMessageParts().get(0).getConcreteName().equals(startQName)) {
-                        throw new Fault("UNEXPECTED_WRAPPER_ELEMENT", LOG, null, startQName,
-                            msgInfo.getMessageParts().get(0).getConcreteName());
+                    MessagePartInfo mpi = msgInfo.getFirstMessagePart();
+                    if (!mpi.getConcreteName().equals(startQName)) {
+                        throw new Fault("UNEXPECTED_WRAPPER_ELEMENT", LOG, null, startQName, mpi.getConcreteName());
                     }
                     final MessagePartInfo messagePartInfo = msgInfo.getMessageParts().get(0);
                     try {
@@ -141,16 +135,11 @@ public class DocLiteralInInterceptor extends AbstractInDatabindingInterceptor {
                                     }
                                     final String[] info = extractUnexpectedElement(linkedException.getMessage());
                                     if (null != info) {
-                                        final String m ;
+                                        final String m;
                                         if (com.openexchange.java.Strings.isEmpty(info[0])) {
-                                            m = MessageFormat.format(
-                                                "Unexpected element \"{0}\". Please remove that element from SOAP request.",
-                                                info[1]);
+                                            m = MessageFormat.format("Unexpected element \"{0}\". Please remove that element from SOAP request.", info[1]);
                                         } else {
-                                            m = MessageFormat.format(
-                                                "Unexpected element \"{0}\" (URI={1}). Please remove that element from SOAP request.",
-                                                info[1],
-                                                info[0]);
+                                            m = MessageFormat.format("Unexpected element \"{0}\" (URI={1}). Please remove that element from SOAP request.", info[1], info[0]);
                                         }
                                         throw new Fault(m, LOG, fault);
                                     } else if (linkedException instanceof SAXParseException) {
@@ -192,8 +181,7 @@ public class DocLiteralInInterceptor extends AbstractInDatabindingInterceptor {
                 //Bare style
                 BindingMessageInfo msgInfo = null;
 
-
-                Endpoint ep = exchange.get(Endpoint.class);
+                Endpoint ep = exchange.getEndpoint();
                 ServiceInfo si = ep.getEndpointInfo().getService();
                 if (bop != null) { //for xml binding or client side
                     if (client) {
@@ -211,24 +199,16 @@ public class DocLiteralInInterceptor extends AbstractInDatabindingInterceptor {
                 }
 
                 Collection<OperationInfo> operations = null;
-                operations = new ArrayList<OperationInfo>();
+                operations = new ArrayList<>();
                 operations.addAll(si.getInterface().getOperations());
 
                 if (xmlReader == null || !StaxUtils.toNextElement(xmlReader)) {
                     // empty input
-
-                    // TO DO : check duplicate operation with no input
-                    for (OperationInfo op : operations) {
-                        MessageInfo bmsg = op.getInput();
-                        if (bmsg.getMessageParts().size() == 0) {
-                            BindingOperationInfo boi = ep.getEndpointInfo().getBinding().getOperation(op);
-                            exchange.put(BindingOperationInfo.class, boi);
-                            exchange.put(OperationInfo.class, op);
-                            exchange.setOneWay(op.isOneWay());
-                        }
-                    }
+                    getBindingOperationForEmptyBody(operations, ep, exchange);
                     return;
                 }
+
+                setDataReaderValidation(service, message, dr);
 
                 int paramNum = 0;
 
@@ -237,14 +217,12 @@ public class DocLiteralInInterceptor extends AbstractInDatabindingInterceptor {
                     Object o = null;
 
                     MessagePartInfo p;
-                    if (!client && msgInfo != null && msgInfo.getMessageParts() != null
-                        && msgInfo.getMessageParts().size() == 0) {
+                    if (!client && msgInfo != null && msgInfo.getMessageParts() != null && msgInfo.getMessageParts().isEmpty()) {
                         //no input messagePartInfo
                         return;
                     }
 
-                    if (msgInfo != null && msgInfo.getMessageParts() != null
-                        && msgInfo.getMessageParts().size() > 0) {
+                    if (msgInfo != null && msgInfo.getMessageParts() != null && msgInfo.getMessageParts().size() > 0) {
                         if (msgInfo.getMessageParts().size() > paramNum) {
                             p = msgInfo.getMessageParts().get(paramNum);
                         } else {
@@ -254,14 +232,14 @@ public class DocLiteralInInterceptor extends AbstractInDatabindingInterceptor {
                         p = findMessagePart(exchange, operations, elName, client, paramNum, message);
                     }
 
-                    if (p == null) {
-                        throw new Fault(new org.apache.cxf.common.i18n.Message("NO_PART_FOUND", LOG, elName),
-                            Fault.FAULT_CODE_CLIENT);
+                    if (!forceDocLitBare) {
+                        //Make sure the elName found on the wire is actually OK for
+                        //the purpose we need it
+                        validatePart(p, elName, message);
                     }
 
                     o = dr.read(p, xmlReader);
-                    if (Boolean.TRUE.equals(si.getProperty("soap.force.doclit.bare"))
-                        && parameters.isEmpty()) {
+                    if (forceDocLitBare && parameters.isEmpty()) {
                         // webservice provider does not need to ensure size
                         parameters.add(o);
                     } else {
@@ -286,6 +264,7 @@ public class DocLiteralInInterceptor extends AbstractInDatabindingInterceptor {
     }
 
     private static final Pattern P_UNEXPECTED_ELEM = Pattern.compile("\\(uri:\"([^\"]*)\", local:\"([^\"]*)\"\\)");
+
     private static String[] extractUnexpectedElement(final String fault) {
         final Matcher m = P_UNEXPECTED_ELEM.matcher(fault);
         if (!m.find()) {
@@ -294,11 +273,69 @@ public class DocLiteralInInterceptor extends AbstractInDatabindingInterceptor {
         return new String[] { m.group(1), m.group(2) };
     }
 
-    private void getPara(DepthXMLStreamReader xmlReader,
-        DataReader<XMLStreamReader> dr,
-        MessageContentsList parameters,
-        Iterator<MessagePartInfo> itr,
-        Message message) {
+    private void getBindingOperationForEmptyBody(Collection<OperationInfo> operations, Endpoint ep, Exchange exchange) {
+        // TO DO : check duplicate operation with no input and also check if the action matches
+        for (OperationInfo op : operations) {
+            MessageInfo bmsg = op.getInput();
+            int bPartsNum = bmsg.getMessagePartsNumber();
+            if (bPartsNum == 0 || (bPartsNum == 1 && Constants.XSD_ANYTYPE.equals(bmsg.getFirstMessagePart().getTypeQName()))) {
+                BindingOperationInfo boi = ep.getEndpointInfo().getBinding().getOperation(op);
+                exchange.put(BindingOperationInfo.class, boi);
+                exchange.setOneWay(op.isOneWay());
+            }
+        }
+    }
+
+    private BindingOperationInfo getBindingOperationInfo(DepthXMLStreamReader xmlReader, Exchange exchange, BindingOperationInfo bop, boolean client) {
+        //bop might be a unwrapped, wrap it back so that we can get correct info
+        if (bop != null && bop.isUnwrapped()) {
+            bop = bop.getWrappedOperation();
+        }
+
+        if (bop == null) {
+            QName startQName = xmlReader == null ? new QName("http://cxf.apache.org/jaxws/provider", "invoke") : xmlReader.getName();
+            bop = getBindingOperationInfo(exchange, startQName, client);
+        }
+        return bop;
+    }
+
+    private void validatePart(MessagePartInfo p, QName elName, Message m) {
+        if (p == null) {
+            throw new Fault(new org.apache.cxf.common.i18n.Message("NO_PART_FOUND", LOG, elName), Fault.FAULT_CODE_CLIENT);
+
+        }
+
+        boolean synth = false;
+        if (p.getMessageInfo() != null && p.getMessageInfo().getOperation() != null) {
+            OperationInfo op = p.getMessageInfo().getOperation();
+            Boolean b = (Boolean) op.getProperty("operation.is.synthetic");
+            if (b != null) {
+                synth = b;
+            }
+        }
+
+        if (MessageUtils.getContextualBoolean(m, "soap.no.validate.parts", false)) {
+            // something like a Provider service or similar that is forcing a
+            // doc/lit/bare on an endpoint that may not really be doc/lit/bare.
+            // we need to just let these through per spec so the endpoint
+            // can process it
+            synth = true;
+        }
+        if (synth) {
+            return;
+        }
+        if (p.isElement()) {
+            if (p.getConcreteName() != null && !elName.equals(p.getConcreteName()) && !synth) {
+                throw new Fault("UNEXPECTED_ELEMENT", LOG, null, elName, p.getConcreteName());
+            }
+        } else {
+            if (!(elName.equals(p.getName()) || elName.equals(p.getConcreteName())) && !synth) {
+                throw new Fault("UNEXPECTED_ELEMENT", LOG, null, elName, p.getConcreteName());
+            }
+        }
+    }
+
+    private void getPara(DepthXMLStreamReader xmlReader, DataReader<XMLStreamReader> dr, MessageContentsList parameters, Iterator<MessagePartInfo> itr, Message message) {
 
         boolean hasNext = true;
         while (itr.hasNext()) {
@@ -309,8 +346,7 @@ public class DocLiteralInInterceptor extends AbstractInDatabindingInterceptor {
             Object obj = null;
             if (hasNext) {
                 QName rname = xmlReader.getName();
-                while (part != null
-                    && !rname.equals(part.getConcreteName())) {
+                while (part != null && !rname.equals(part.getConcreteName())) {
                     if (part.getXmlSchema() instanceof XmlSchemaElement) {
                         //TODO - should check minOccurs=0 and throw validation exception
                         //thing if the part needs to be here
@@ -334,17 +370,12 @@ public class DocLiteralInInterceptor extends AbstractInDatabindingInterceptor {
         }
     }
 
-
-    private MessageInfo setMessage(Message message, BindingOperationInfo operation,
-        boolean requestor, ServiceInfo si) {
+    private MessageInfo setMessage(Message message, BindingOperationInfo operation, boolean requestor, ServiceInfo si) {
         MessageInfo msgInfo = getMessageInfo(message, operation, requestor);
         return setMessage(message, operation, requestor, si, msgInfo);
     }
 
-
-    @Override
-    protected BindingOperationInfo getBindingOperationInfo(Exchange exchange, QName name,
-        boolean client) {
+    protected BindingOperationInfo getBindingOperationInfo(Exchange exchange, QName name, boolean client) {
         BindingOperationInfo bop = ServiceModelUtil.getOperationForWrapperElement(exchange, name, client);
         if (bop == null) {
             bop = super.getBindingOperationInfo(exchange, name, client);
@@ -352,7 +383,6 @@ public class DocLiteralInInterceptor extends AbstractInDatabindingInterceptor {
 
         if (bop != null) {
             exchange.put(BindingOperationInfo.class, bop);
-            exchange.put(OperationInfo.class, bop.getOperationInfo());
         }
         return bop;
     }
@@ -360,38 +390,8 @@ public class DocLiteralInInterceptor extends AbstractInDatabindingInterceptor {
     protected boolean shouldWrapParameters(MessageInfo msgInfo, Message message) {
         Object keepParametersWrapperFlag = message.get(KEEP_PARAMETERS_WRAPPER);
         if (keepParametersWrapperFlag == null) {
-            return msgInfo.getMessageParts().get(0).getTypeClass() != null;
-        } else {
-            return Boolean.parseBoolean(keepParametersWrapperFlag.toString());
+            return msgInfo.getFirstMessagePart().getTypeClass() != null;
         }
+        return Boolean.parseBoolean(keepParametersWrapperFlag.toString());
     }
-
-    private static void appendStackTrace(final StackTraceElement[] trace, final StringBuilder sb, final String lineSeparator) {
-        if (null == trace) {
-            return;
-        }
-        for (final StackTraceElement ste : trace) {
-            final String className = ste.getClassName();
-            if (null != className) {
-                sb.append("    at ").append(className).append('.').append(ste.getMethodName());
-                if (ste.isNativeMethod()) {
-                    sb.append("(Native Method)");
-                } else {
-                    final String fileName = ste.getFileName();
-                    if (null == fileName) {
-                        sb.append("(Unknown Source)");
-                    } else {
-                        final int lineNumber = ste.getLineNumber();
-                        sb.append('(').append(fileName);
-                        if (lineNumber >= 0) {
-                            sb.append(':').append(lineNumber);
-                        }
-                        sb.append(')');
-                    }
-                }
-                sb.append(lineSeparator);
-            }
-        }
-    }
-
 }

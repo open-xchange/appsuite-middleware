@@ -289,9 +289,6 @@ public final class JSONPathElement {
     }
 
     static boolean isInstance(final String name, final Class<? extends JSONValue> clazz, final JSONObject jsonObject) {
-        if (!jsonObject.hasAndNotNull(name)) {
-            return false;
-        }
         return clazz.isInstance(jsonObject.opt(name));
     }
 

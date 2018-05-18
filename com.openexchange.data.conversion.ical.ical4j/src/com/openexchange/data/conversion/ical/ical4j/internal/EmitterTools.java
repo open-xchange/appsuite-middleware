@@ -56,6 +56,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.calendar.CalendarCollectionUtils;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.calendar.Constants;
+import com.openexchange.groupware.calendar.RecurringResultInterface;
 import com.openexchange.groupware.calendar.RecurringResultsInterface;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.CalendarObject;
@@ -183,7 +184,10 @@ public final class EmitterTools {
                 true);
             final int recurrencePosition = rrs.getPositionByLong(exception.getTime());
             if (recurrencePosition > 0) {
-                retval = new java.util.Date(rrs.getRecurringResultByPosition(recurrencePosition).getStart());
+                RecurringResultInterface result = rrs.getRecurringResultByPosition(recurrencePosition);
+                if (result != null) {
+                    retval = new java.util.Date(result.getStart());
+                }
             }
         } catch (final OXException e) {
             LOG.warn("", e);

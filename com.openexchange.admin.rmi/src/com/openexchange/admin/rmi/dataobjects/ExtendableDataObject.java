@@ -69,8 +69,6 @@ public abstract class ExtendableDataObject extends EnforceableDataObject impleme
 
     private Hashtable<String, OXCommonExtensionInterface> extensions = null;
 
-    private final boolean extensionsset = false;
-
     /**
      * This field is used to show if all extension have run fine and inserted their
      * data correctly
@@ -121,15 +119,6 @@ public abstract class ExtendableDataObject extends EnforceableDataObject impleme
      */
     public boolean isExtensionsok() {
         return extensionsok;
-    }
-
-    /**
-     * This method will be used in the future
-     *
-     * @return
-     */
-    public boolean isExtensionsset() {
-        return extensionsset;
     }
 
     /**
@@ -189,7 +178,6 @@ public abstract class ExtendableDataObject extends EnforceableDataObject impleme
         int result = super.hashCode();
         result = prime * result + ((extensions == null) ? 0 : extensions.hashCode());
         result = prime * result + (extensionsok ? 1231 : 1237);
-        result = prime * result + (extensionsset ? 1231 : 1237);
         return result;
     }
 
@@ -216,9 +204,6 @@ public abstract class ExtendableDataObject extends EnforceableDataObject impleme
             return false;
         }
         if (extensionsok != other.extensionsok) {
-            return false;
-        }
-        if (extensionsset != other.extensionsset) {
             return false;
         }
         return true;

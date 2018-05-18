@@ -94,6 +94,7 @@ import com.openexchange.quota.QuotaType;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
+import com.openexchange.sessiond.SessiondService;
 import com.openexchange.share.CreatedShares;
 import com.openexchange.share.GuestInfo;
 import com.openexchange.share.LinkUpdate;
@@ -389,6 +390,7 @@ public class DefaultShareService implements ShareService {
             }
 
             boolean guestUserUpdated = false;
+            boolean passwordChanged = false;
             if (linkUpdate.containsExpiryDate()) {
                 String expiryDateValue = null != linkUpdate.getExpiryDate() ? String.valueOf(linkUpdate.getExpiryDate().getTime()) : null;
                 userService.setAttribute(connectionHelper.getConnection(), ShareTool.EXPIRY_DATE_USER_ATTRIBUTE, expiryDateValue, guest.getId(), context);
@@ -396,17 +398,18 @@ public class DefaultShareService implements ShareService {
             }
             if (linkUpdate.containsPassword()) {
                 if(updatePassword(connectionHelper, context, guest, linkUpdate.getPassword())){
-                    guestUserUpdated=true;
+                    guestUserUpdated = true;
+                    passwordChanged = true;
                 }
             }
 
             boolean folderPermissionUpdate = false;
             if (shareInfo.isIncludeSubfolders() != linkUpdate.isIncludeSubfolders() && shareInfo.getTarget().getModule() == FolderObject.INFOSTORE) {
-                TargetPermission targetPermission = new SubfolderAwareTargetPermission(shareInfo.getGuest().getGuestID(), false, LINK_PERMISSION_BITS, FolderPermissionType.LEGATOR.getTypeNumber(), null);
+                TargetPermission targetPermission = new SubfolderAwareTargetPermission(shareInfo.getGuest().getGuestID(), false, LINK_PERMISSION_BITS, FolderPermissionType.LEGATOR.getTypeNumber(), null, 0);
                 if (shareInfo.isIncludeSubfolders()) {
                     // Remove permission in case includeSubfolders is changed from 'true' to 'false' so handed down permissions get removed as well
                     targetProxy.removePermissions(Collections.singletonList(targetPermission));
-                    targetPermission = new SubfolderAwareTargetPermission(shareInfo.getGuest().getGuestID(), false, LINK_PERMISSION_BITS, FolderPermissionType.NORMAL.getTypeNumber(), null);
+                    targetPermission = new SubfolderAwareTargetPermission(shareInfo.getGuest().getGuestID(), false, LINK_PERMISSION_BITS, FolderPermissionType.NORMAL.getTypeNumber(), null, 0);
                 }
                 // Re-apply the link permission
                 targetProxy.applyPermissions(Collections.singletonList(targetPermission));
@@ -420,6 +423,15 @@ public class DefaultShareService implements ShareService {
             connectionHelper.commit();
             if (guestUserUpdated || folderPermissionUpdate) {
                 userService.invalidateUser(context, guest.getId());
+                if (passwordChanged) {
+                    // kill guest user sessions
+                    SessiondService service = services.getService(SessiondService.class);
+                    if (service == null) {
+                        LOG.error("Unable to remove guest sessions, because SessiondService is not available.");
+                    } else {
+                        service.removeUserSessionsGlobally(guest.getId(), session.getContextId());
+                    }
+                }
                 return new DefaultShareLink(shareInfo, moduleSupport.load(target, session).getTimestamp(), false);
             }
             return new DefaultShareLink(shareInfo, targetProxy.getTimestamp(), false);
@@ -488,6 +500,9 @@ public class DefaultShareService implements ShareService {
                 if (false == permission.isGroup() && LINK_PERMISSION_BITS == permission.getBits()) {
                     boolean includeSubfolders = false;
                     if(permission instanceof SubfolderAwareTargetPermission) {
+                        if (((SubfolderAwareTargetPermission) permission).getSystem() != 0) {
+                            continue;
+                        }
                         includeSubfolders = ((SubfolderAwareTargetPermission) permission).getType() == FolderPermissionType.LEGATOR.getTypeNumber();
                     }
                     entities.put(I(permission.getEntity()), includeSubfolders);
@@ -496,17 +511,17 @@ public class DefaultShareService implements ShareService {
             if (0 < entities.size()) {
                 UserService userService = requireService(UserService.class);
                 ModuleSupport moduleSupport = null;
-                for (Integer entity : entities.keySet()) {
+                for (Entry<Integer, Boolean> entry : entities.entrySet()) {
                     User user;
                     if (null != connectionHelper) {
-                        user = userService.getUser(connectionHelper.getConnection(), entity.intValue(), context);
+                        user = userService.getUser(connectionHelper.getConnection(), entry.getKey().intValue(), context);
                     } else {
-                        user = userService.getUser(entity.intValue(), context);
+                        user = userService.getUser(entry.getKey().intValue(), context);
                     }
                     if (ShareTool.isAnonymousGuest(user)) {
                         moduleSupport = requireService(ModuleSupport.class, moduleSupport);
                         ShareTarget dstTarget = moduleSupport.adjustTarget(proxy.getTarget(), session, user.getId());
-                        return new DefaultShareInfo(services, context.getContextId(), user, proxy.getTarget(), dstTarget, proxy.getTargetPath(), entities.get(entity));
+                        return new DefaultShareInfo(services, context.getContextId(), user, proxy.getTarget(), dstTarget, proxy.getTargetPath(), entry.getValue());
                     }
                 }
             }
@@ -1203,7 +1218,7 @@ public class DefaultShareService implements ShareService {
             /*
              * apply new permission entity for this target
              */
-            TargetPermission targetPermission = new SubfolderAwareTargetPermission(shareInfo.getGuest().getGuestID(), false, recipient.getBits(), FolderPermissionType.LEGATOR.getTypeNumber(), null);
+            TargetPermission targetPermission = new SubfolderAwareTargetPermission(shareInfo.getGuest().getGuestID(), false, recipient.getBits(), FolderPermissionType.LEGATOR.getTypeNumber(), null, 0);
 
             targetProxy.applyPermissions(Collections.singletonList(targetPermission));
             /*

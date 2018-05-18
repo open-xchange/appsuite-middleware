@@ -17,7 +17,7 @@ BuildRequires: java-1_8_0-openjdk-devel
 BuildRequires: java-1.8.0-openjdk-devel
 %endif
 Version:        @OXVERSION@
-%define         ox_release 3
+%define         ox_release 5
 Release:        %{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GPL-2.0
@@ -75,6 +75,10 @@ perl -pi -e 's;(^.*?)\s+(.*/(twitter)\.properties)$;$1 %%%attr(640,root,open-xch
 %dir /opt/open-xchange/etc/
 
 %changelog
+* Thu Apr 19 2018 Marcus Klein <marcus.klein@open-xchange.com>
+Fifth preview of 7.10.0 release
+* Tue Apr 03 2018 Marcus Klein <marcus.klein@open-xchange.com>
+Fourth preview of 7.10.0 release
 * Tue Feb 20 2018 Marcus Klein <marcus.klein@open-xchange.com>
 Third preview of 7.10.0 release
 * Fri Feb 02 2018 Marcus Klein <marcus.klein@open-xchange.com>

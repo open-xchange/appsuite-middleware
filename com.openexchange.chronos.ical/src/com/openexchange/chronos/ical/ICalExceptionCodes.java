@@ -50,6 +50,7 @@
 package com.openexchange.chronos.ical;
 
 import static com.openexchange.chronos.ical.ICalExceptionMessages.CONVERSION_FAILED_MSG;
+import static com.openexchange.chronos.ical.ICalExceptionMessages.INVALID_CALENDAR_CONTENT_MSG;
 import static com.openexchange.chronos.ical.ICalExceptionMessages.NO_CALENDAR_FOUND_MSG;
 import static com.openexchange.chronos.ical.ICalExceptionMessages.PARSER_ERROR_MSG;
 import static com.openexchange.chronos.ical.ICalExceptionMessages.TRUNCATED_RESULTS_MSG;
@@ -97,6 +98,11 @@ public enum ICalExceptionCodes implements DisplayableOXExceptionCode {
      * <li>Import truncated after %1$d objects (%2$d available)</li>
      */
     TRUNCATED_RESULTS("Import truncated after %1$d objects (%2$d available)", TRUNCATED_RESULTS_MSG, Category.CATEGORY_TRUNCATED, 6),
+    /**
+     * <li>The given iCalendar source does not contain valid content and cannot be processed.</li>
+     * <li>The calendar source does not contain valid content</li>
+     */
+    INVALID_CALENDAR_CONTENT("The calendar source does not contain valid content", INVALID_CALENDAR_CONTENT_MSG, Category.CATEGORY_USER_INPUT, 7),
 
     ;
 

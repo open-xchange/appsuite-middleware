@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the Open-Xchange, Inc. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2020 Open-Xchange, Inc.
+ *     Copyright (C) 2016-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -145,5 +145,26 @@ public interface CalendarUtilities {
      * @return The comparator
      */
     Comparator<Event> getComparator(SortOrder[] sortOrders, TimeZone timeZone);
+
+    /**
+     * Selects a well-known and valid timezone based on a client-supplied timezone, using different fallbacks if no exactly matching
+     * timezone is available.
+     *
+     * @param calendarUserId The identifier of the calendar user
+     * @param timeZone The timezone as supplied by the client
+     * @param originalTimeZone The original timezone in case of updates, or <code>null</code> if not available
+     * @return The selected timezone, or <code>null</code> if passed timezone reference was <code>null</code>
+     */
+    TimeZone selectTimeZone(int calendarUserId, TimeZone timeZone, TimeZone originalTimeZone) throws OXException;
+
+    /**
+     * Checks and adjusts the timezones of the event's start- and end-time (in case they are <i>set</i>) to match well-known & valid
+     * timezones, using different fallbacks if no exactly matching timezone is available.
+     *
+     * @param calendarUserId The identifier of the user to get the fallback timezone from
+     * @param event The event to set the timezones in
+     * @param originalEvent The original event, or <code>null</code> if not applicable
+     */
+    void adjustTimeZones(int calendarUserId, Event event, Event originalEvent) throws OXException;
 
 }

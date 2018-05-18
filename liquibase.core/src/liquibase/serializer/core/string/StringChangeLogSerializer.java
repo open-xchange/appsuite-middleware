@@ -1,3 +1,4 @@
+
 package liquibase.serializer.core.string;
 
 import java.io.File;
@@ -20,7 +21,7 @@ public class StringChangeLogSerializer implements ChangeLogSerializer {
 
     @Override
     public String[] getValidFileExtensions() {
-        return new String[]{"txt"};
+        return new String[] { "txt" };
     }
 
     @Override
@@ -30,7 +31,7 @@ public class StringChangeLogSerializer implements ChangeLogSerializer {
 
     private String serializeObject(LiquibaseSerializable objectToSerialize, int indent) {
         try {
-            StringBuffer buffer = new StringBuffer();
+            StringBuilder buffer = new StringBuilder();
             buffer.append("[");
 
             SortedSet<String> values = new TreeSet<String>();
@@ -51,7 +52,7 @@ public class StringChangeLogSerializer implements ChangeLogSerializer {
                             String valueString = value.toString();
                             if (value instanceof Double || value instanceof Float) { //java 6 adds additional zeros to the end of doubles and floats
                                 if (valueString.contains(".")) {
-                                    valueString = valueString.replaceFirst("0*$","");
+                                    valueString = valueString.replaceFirst("0*$", "");
                                 }
                             }
                             values.add(indent(indent) + field + "=\"" + valueString + "\"");
@@ -66,7 +67,7 @@ public class StringChangeLogSerializer implements ChangeLogSerializer {
                 buffer.append("\n");
             }
             buffer.append(indent(indent - 1)).append("]");
-            return buffer.toString().replace("\r\n", "\n").replace("\r", "\n"); //standardize all newline chars
+            return buffer.toString().replace("\r?\n", "\n"); //standardize all newline chars
 
         } catch (Exception e) {
             throw new UnexpectedLiquibaseException(e);
@@ -83,18 +84,23 @@ public class StringChangeLogSerializer implements ChangeLogSerializer {
             return "[]";
         }
 
-        String returnString = "[\n";
+        StringBuilder returnStringBuilder = new StringBuilder("[\n");
+        boolean first = true;
         for (Object object : collection) {
-            if (object instanceof LiquibaseSerializable) {
-                returnString += indent(indent) + serializeObject((LiquibaseSerializable) object, indent + 1) + ",\n";
+            if (first) {
+                first = false;
             } else {
-                returnString += indent(indent) + object.toString() + ",\n";
+                returnStringBuilder.append(",\n");
+            }
+            if (object instanceof LiquibaseSerializable) {
+                returnStringBuilder.append(indent(indent)).append(serializeObject((LiquibaseSerializable) object, indent + 1));
+            } else {
+                returnStringBuilder.append(indent(indent)).append(object.toString());
             }
         }
-        returnString = returnString.replaceFirst(",$", "");
-        returnString += indent(indent - 1) + "]";
+        returnStringBuilder.append(indent(indent - 1)).append("]");
 
-        return returnString;
+        return returnStringBuilder.toString();
 
     }
 
@@ -103,15 +109,15 @@ public class StringChangeLogSerializer implements ChangeLogSerializer {
             return "[]";
         }
 
-        String returnString = "[\n";
+        StringBuilder returnStringBuilder = new StringBuilder("[\n");
         for (Object object : collection) {
             if (object instanceof LiquibaseSerializable) {
-                returnString += indent(indent) + serializeObject((LiquibaseSerializable) object, indent + 1) + ",\n";
+                returnStringBuilder.append(indent(indent)).append(serializeObject((LiquibaseSerializable) object, indent + 1)).append(",\n");
             } else {
-                returnString += indent(indent) + object.toString() + ",\n";
+                returnStringBuilder.append(indent(indent)).append(object.toString()).append(",\n");
             }
         }
-        returnString = returnString.replaceFirst(",$", "");
+        String returnString = returnStringBuilder.toString().replaceFirst(",$", "");
         returnString += indent(indent - 1) + "]";
 
         return returnString;
@@ -123,11 +129,11 @@ public class StringChangeLogSerializer implements ChangeLogSerializer {
             return "[]";
         }
 
-        String returnString = "{\n";
+        StringBuilder returnStringBuilder = new StringBuilder("{\n");
         for (Object key : new TreeSet(collection.keySet())) {
-            returnString += indent(indent) + key.toString() + "=\"" + collection.get(key) + "\",\n";
+            returnStringBuilder.append(indent(indent)).append(key.toString()).append("=\"").append(collection.get(key)).append("\",\n");
         }
-        returnString = returnString.replaceFirst(",$", "");
+        String returnString = returnStringBuilder.toString().replaceFirst(",$", "");
         returnString += indent(indent - 1) + "}";
 
         return returnString;

@@ -57,12 +57,14 @@ import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.context.ContextService;
 import com.openexchange.jslob.JSlobEntry;
 import com.openexchange.net.ssl.config.UserAwareSSLConfigurationService;
 import com.openexchange.net.ssl.config.impl.internal.UserAwareSSLConfigurationImpl;
 import com.openexchange.net.ssl.config.impl.jslob.AcceptUntrustedCertificatesJSLobEntry;
+import com.openexchange.net.ssl.config.impl.jslob.UserCanManageOwnCertificatesJSLobEntry;
 import com.openexchange.osgi.Tools;
 import com.openexchange.user.UserService;
 
@@ -80,6 +82,7 @@ public class UserAwareSSLConfigurationServiceRegisterer implements ServiceTracke
     private UserService userService = null;
     private ContextService contextService = null;
     private List<ServiceRegistration<?>> registrations = null;
+    private ConfigurationService configService;
 
     /**
      * Initializes a new {@link UserAwareSSLConfigurationServiceRegisterer}.
@@ -87,9 +90,10 @@ public class UserAwareSSLConfigurationServiceRegisterer implements ServiceTracke
      * @param factory The config-cascade service
      * @param context The bundle context
      */
-    public UserAwareSSLConfigurationServiceRegisterer(ConfigViewFactory factory, BundleContext context) {
+    public UserAwareSSLConfigurationServiceRegisterer(ConfigViewFactory factory, ConfigurationService configService, BundleContext context) {
         super();
         this.factory = factory;
+        this.configService = configService;
         this.context = context;
     }
 
@@ -161,13 +165,15 @@ public class UserAwareSSLConfigurationServiceRegisterer implements ServiceTracke
             return;
         }
 
-        UserAwareSSLConfigurationImpl userAwareSSLConfigurationImpl = new UserAwareSSLConfigurationImpl(userService, contextService, factory);
-        AcceptUntrustedCertificatesJSLobEntry jsLobEntry = new AcceptUntrustedCertificatesJSLobEntry(contextService, userAwareSSLConfigurationImpl);
+        UserAwareSSLConfigurationImpl userAwareSSLConfigurationImpl = new UserAwareSSLConfigurationImpl(userService, contextService, configService, factory);
+        AcceptUntrustedCertificatesJSLobEntry acceptUntrustedCertsJSLobEntry = new AcceptUntrustedCertificatesJSLobEntry(contextService, userAwareSSLConfigurationImpl);
+        UserCanManageOwnCertificatesJSLobEntry userCanManageOwnCertsJSLobEntry = new UserCanManageOwnCertificatesJSLobEntry(userAwareSSLConfigurationImpl);
 
         registrations = new ArrayList<>(2);
         this.registrations = registrations;
         registrations.add(context.registerService(UserAwareSSLConfigurationService.class, userAwareSSLConfigurationImpl, null));
-        registrations.add(context.registerService(JSlobEntry.class, jsLobEntry, null));
+        registrations.add(context.registerService(JSlobEntry.class, acceptUntrustedCertsJSLobEntry, null));
+        registrations.add(context.registerService(JSlobEntry.class, userCanManageOwnCertsJSLobEntry, null));
     }
 
     private void optUnregister() {

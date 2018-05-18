@@ -73,7 +73,7 @@ public class UserApi {
     private String session;
     private Integer calUser;
     private FoldersApi foldersApi;
-    private FindApi findApi;
+    private final FindApi findApi;
     private JSlobApi jslob;
     private ChronosApi chronosApi;
     private EnhancedChronosApi enhancedChronosApi;
@@ -85,13 +85,16 @@ public class UserApi {
     private int enhancedCalUser;
 
     /**
-     * Initialises a new {@link UserApi}.
+     * Initializes a new {@link UserApi}.
      *
-     * @param client
-     * @param user
+     * @param client The normal client
+     * @param enhancedApiClient The enhanced client
+     * @param user The user
+     * @param performLogin Whether to perform login for both clients
+     *
      * @throws Exception
      */
-    public UserApi(ApiClient client, EnhancedApiClient enhancedApiClient, TestUser user) throws Exception {
+    public UserApi(ApiClient client, EnhancedApiClient enhancedApiClient, TestUser user, boolean performLogin) throws Exception {
         this.client = client;
         this.client.setConnectTimeout(java.lang.Math.toIntExact(TimeUnit.MINUTES.toMillis(5)));
         this.enhancedApiClient = enhancedApiClient;
@@ -102,13 +105,19 @@ public class UserApi {
         foldersApi = new FoldersApi(client);
         setEnhancedChronosApi(new EnhancedChronosApi(enhancedApiClient));
 
-        LoginResponse login = login(user.getLogin(), user.getPassword(), client);
-        this.calUser = login.getUserId();
-        this.session = login.getSession();
-
-        login = login(user.getLogin(), user.getPassword(), enhancedApiClient);
-        this.enhancedCalUser = login.getUserId();
-        this.enhancedSession = login.getSession();
+        if (performLogin) {
+            LoginResponse login = login(user.getLogin(), user.getPassword(), client);
+            this.calUser = login.getUserId();
+            this.session = login.getSession();
+            login = login(user.getLogin(), user.getPassword(), enhancedApiClient);
+            this.enhancedCalUser = login.getUserId();
+            this.enhancedSession = login.getSession();
+        } else {
+            this.calUser = client.getUserId();
+            this.session = client.getSession();
+            this.enhancedCalUser = enhancedApiClient.getUserId();
+            this.enhancedSession = enhancedApiClient.getSession();
+        }
     }
 
     /**
@@ -247,7 +256,7 @@ public class UserApi {
 
     /**
      * Returns the findApi
-     * 
+     *
      * @return The findApi
      */
     public FindApi getFindApi() {

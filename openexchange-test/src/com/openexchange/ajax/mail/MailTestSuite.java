@@ -77,7 +77,6 @@ import com.openexchange.test.concurrent.ParallelSuite;
     SearchTest.class,
     SendTest.class,
     Send2Test.class,
-    ThreadSortTest.class,
     UpdateMailTest.class,
     ViewTest.class,
     AllAliasTest.class,

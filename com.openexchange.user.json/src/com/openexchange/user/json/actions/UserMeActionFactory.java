@@ -49,7 +49,6 @@
 
 package com.openexchange.user.json.actions;
 
-import java.util.Collection;
 import java.util.Map;
 import com.google.common.collect.ImmutableMap;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
@@ -92,11 +91,6 @@ public final class UserMeActionFactory implements AJAXActionServiceFactory {
             throw AjaxExceptionCodes.UNKNOWN_ACTION.create( action);
         }
         return retval;
-    }
-
-    @Override
-    public Collection<? extends AJAXActionService> getSupportedServices() {
-        return java.util.Collections.unmodifiableCollection(actions.values());
     }
 
     /**

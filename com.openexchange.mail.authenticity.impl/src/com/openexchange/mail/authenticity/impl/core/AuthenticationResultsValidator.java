@@ -54,7 +54,6 @@ import javax.mail.internet.InternetAddress;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.authenticity.AllowedAuthServId;
 import com.openexchange.mail.dataobjects.MailAuthenticityResult;
-import com.openexchange.session.Session;
 
 /**
  * {@link AuthenticationResultsValidator} - Parses and validates the <code>Authentication-Results</code> headers and <code>From</code> header of an E-Mail.
@@ -69,12 +68,11 @@ public interface AuthenticationResultsValidator {
      * returns the overall {@link MailAuthenticityResult}
      *
      * @param authenticationHeaders The <code>Authentication-Results</code> headers
-     * @param fromHeader The <code>From</code> header
      * @param allowedAuthServIds The allowed authserv-ids
-     * @param session The session providing user data
+     * @param fromHeader The <code>From</code> header
      * @return The overall {@link MailAuthenticityResult}
      * @throws OXException if the allowed authserv-ids cannot be retrieved from the configuration or any other parsing error occurs
      */
-    MailAuthenticityResult parseHeaders(List<String> authenticationHeaders, InternetAddress from, List<AllowedAuthServId> allowedAuthServIds, Session session) throws OXException;
+    MailAuthenticityResult parseHeaders(List<String> authenticationHeaders, InternetAddress from, List<AllowedAuthServId> allowedAuthServIds) throws OXException;
 
 }

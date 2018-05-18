@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="Build bundle">
+
+    <description>
+        All YAML documentation files are installed into the system under /opt/open-xchange/documentation/etc for use with the configuration
+        documentation tool.
+    </description>
+
+    <!-- customizable values -->
+    <property name="destDir" value=""/><!-- Necessary to build the bundles into a distro package -->
+    <property name="prefix" value="/opt/open-xchange"/><!-- Installation path on destination system -->
+
+    <!-- Constants -->
+    <property name="configYamlDir" value="config"/>
+
+    <!-- Install Constants -->
+    <property name="configYamlInstallDir" value="${prefix}/documentation/etc"/>
+
+    <target name="setVersion"/>
+
+    <target name="install">
+        <mkdir dir="${destDir}/${configYamlInstallDir}"/>
+        <copy todir="${destDir}/${configYamlInstallDir}">
+            <fileset dir="${basedir}/${configYamlDir}">
+                <include name="*.yml"/>
+            </fileset>
+        </copy>
+    </target>
+
+    <target name="build" depends="install"/>
+
+    <target name="dist">
+        <property name="destinationDir" value="${packageDir}/${projectName}"/>
+        <mkdir dir="${destinationDir}"/>
+        <copy todir="${destinationDir}">
+            <fileset dir="${basedir}">
+                <include name="build.xml"/>
+                <include name="config/**"/>
+                <exclude name="config/template.yml"/>
+            </fileset>
+        </copy>
+    </target>
+
+    <target name="clean"/>
+
+</project>

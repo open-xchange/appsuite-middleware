@@ -50,6 +50,7 @@
 package com.openexchange.chronos.itip.handler;
 
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -120,11 +121,7 @@ public class ITipHandler implements CalendarHandler {
 
     @Override
     public void handle(CalendarEvent event) {
-        boolean suppress = event.getCalendarParameters() != null && event.getCalendarParameters().contains(CalendarParameters.PARAMETER_SUPPRESS_ITIP) && event.getCalendarParameters().get(CalendarParameters.PARAMETER_SUPPRESS_ITIP, Boolean.class).booleanValue();
-        if (suppress) {
-            return;
-        }
-        if (event.getAccountId() != CalendarAccount.DEFAULT_ACCOUNT.getAccountId()) {
+        if (!shouldHandle(event)) {
             return;
         }
 
@@ -140,19 +137,45 @@ public class ITipHandler implements CalendarHandler {
             }
 
             if (updates.size() > 0) {
+                Set<UpdateResult> ignore = new HashSet<>();
                 for (UpdateResult update : updates) {
-                    handleUpdate(update, updates, event);
+                    if (ignore.contains(update)) {
+                        continue;
+                    }
+                    handleUpdate(update, updates, ignore, event);
                 }
             }
 
             if (deletions.size() > 0) {
+                Set<DeleteResult> ignore = new HashSet<>();
                 for (DeleteResult delete : deletions) {
-                    handleDelete(delete, deletions, event);
+                    if (ignore.contains(delete)) {
+                        continue;
+                    }
+                    handleDelete(delete, deletions, ignore, event);
                 }
             }
         } catch (OXException oe) {
             LOG.error("Unable to handle CalendarEvent", oe);
         }
+    }
+
+    private boolean shouldHandle(CalendarEvent event) {
+        if (event == null || event.getAccountId() != CalendarAccount.DEFAULT_ACCOUNT.getAccountId()) {
+            return false;
+        }
+
+        if (event.getCalendarParameters() != null) {
+
+            if (event.getCalendarParameters().contains(CalendarParameters.PARAMETER_SUPPRESS_ITIP)) {
+                Boolean suppress = event.getCalendarParameters().get(CalendarParameters.PARAMETER_SUPPRESS_ITIP, Boolean.class);
+                if (suppress != null && suppress.booleanValue()) {
+                    return false;
+                }
+            }
+        }
+
+        return true;
     }
 
     private void handleCreate(CreateResult create, List<CreateResult> creations, List<UpdateResult> updates, CalendarEvent event) throws OXException {
@@ -162,7 +185,7 @@ public class ITipHandler implements CalendarHandler {
             List<CreateResult> group = creations.stream().filter(c -> master.getUpdate().getId().equals(c.getCreatedEvent().getSeriesId())).collect(Collectors.toList());
             // Handle as update
             for (CreateResult c : group) {
-                handle(event, State.Type.MODIFIED, master.getOriginal(), c.getCreatedEvent(), null);
+                handle(event, State.Type.NEW, master.getOriginal(), c.getCreatedEvent(), null);
             }
             // Remove master to avoid additional mail
             updates.remove(master);
@@ -171,7 +194,7 @@ public class ITipHandler implements CalendarHandler {
         }
     }
 
-    private void handleUpdate(UpdateResult update, List<UpdateResult> updates, CalendarEvent event) throws OXException {
+    private void handleUpdate(UpdateResult update, List<UpdateResult> updates, Set<UpdateResult> ignore, CalendarEvent event) throws OXException {
         List<UpdateResult> exceptions = Collections.emptyList();
 
         if (CalendarUtils.isSeriesMaster(update.getUpdate()) && update.containsAnyChangeOf(EXCEPTION_DELETE)) {
@@ -204,7 +227,10 @@ public class ITipHandler implements CalendarHandler {
             // Check for series update
             // Get all events of the series
             String seriesId = update.getUpdate().getSeriesId();
-            List<UpdateResult> eventGroup = updates.stream().filter(u -> seriesId.equals(u.getUpdate().getSeriesId())).collect(Collectors.toList());
+            List<UpdateResult> eventGroup = updates.stream()
+                .filter(u -> !ignore.contains(u))
+                .filter(u -> seriesId.equals(u.getUpdate().getSeriesId()))
+                .collect(Collectors.toList());
 
             // Check if there is a group to handle
             if (eventGroup.size() > 1) {
@@ -214,19 +240,19 @@ public class ITipHandler implements CalendarHandler {
                     UpdateResult masterUpdate = master.get();
                     if (eventGroup.stream().filter(u -> u.containsAnyChangeOf(SERIES_UPDATE)).collect(Collectors.toList()).size() == eventGroup.size()) {
                         // Series update, remove those items from the update list and the master from the exceptions
-                        updates.removeAll(eventGroup);
+                        ignore.addAll(eventGroup);
                         eventGroup.remove(masterUpdate);
 
                         // Set for processing
                         update = masterUpdate;
                         exceptions = eventGroup;
                     } else {
-                        Set<EventField> fields = masterUpdate.getUpdatedFields();
+                        Set<EventField> fields = new HashSet<>(masterUpdate.getUpdatedFields());
                         fields.remove(EventField.TIMESTAMP);
                         fields.remove(EventField.LAST_MODIFIED);
                         if (fields.isEmpty()) {
                             // Exception update, no update on master
-                            updates.remove(masterUpdate);
+                            ignore.add(masterUpdate);
                         }
                     }
                 }
@@ -237,14 +263,17 @@ public class ITipHandler implements CalendarHandler {
         handle(event, State.Type.MODIFIED, update.getOriginal(), update.getUpdate(), exceptions.stream().map(UpdateResult::getUpdate).collect(Collectors.toList()));
     }
 
-    private void handleDelete(DeleteResult delete, List<DeleteResult> deletions, CalendarEvent event) throws OXException {
+    private void handleDelete(DeleteResult delete, List<DeleteResult> deletions, Set<DeleteResult> ignore, CalendarEvent event) throws OXException {
         List<DeleteResult> exceptions = Collections.emptyList();
 
         // Check for series update
         if (delete.getOriginal().containsSeriesId()) {
             // Get all events of the series
             String seriesId = delete.getOriginal().getSeriesId();
-            List<DeleteResult> eventGroup = deletions.stream().filter(u -> seriesId.equals(u.getOriginal().getSeriesId())).collect(Collectors.toList());
+            List<DeleteResult> eventGroup = deletions.stream()
+                .filter(u -> !ignore.contains(u))
+                .filter(u -> seriesId.equals(u.getOriginal().getSeriesId()))
+                .collect(Collectors.toList());
 
             // Check if there is a group to handle
             if (eventGroup.size() > 1) {
@@ -252,7 +281,7 @@ public class ITipHandler implements CalendarHandler {
                 Optional<DeleteResult> master = eventGroup.stream().filter(u -> seriesId.equals(u.getOriginal().getId())).findFirst();
                 if (master.isPresent() && CalendarUtils.isSeriesMaster(master.get().getOriginal())) {
                     // Series update, remove those items from the update list and the master from the exceptions
-                    deletions.removeAll(eventGroup);
+                    ignore.addAll(eventGroup);
                     eventGroup.remove(master.get());
 
                     // Set for processing
@@ -280,14 +309,14 @@ public class ITipHandler implements CalendarHandler {
             NotificationMail mail;
             switch (type) {
                 case NEW:
-                    mail = generator.generateCreateMailFor(notificationParticipant);
-                    break;
-                case MODIFIED:
                     if (CalendarUtils.isSeriesMaster(original) && CalendarUtils.isSeriesException(update)) {
                         mail = generator.generateCreateExceptionMailFor(notificationParticipant);
                     } else {
-                        mail = generator.generateUpdateMailFor(notificationParticipant);
+                        mail = generator.generateCreateMailFor(notificationParticipant);
                     }
+                    break;
+                case MODIFIED:
+                    mail = generator.generateUpdateMailFor(notificationParticipant);
                     break;
                 case DELETED:
                     mail = generator.generateDeleteMailFor(notificationParticipant);
@@ -299,7 +328,7 @@ public class ITipHandler implements CalendarHandler {
                 if (mail.getStateType() == null) {
                     mail.setStateType(type);
                 }
-                if (null != exceptions) {
+                if (null != exceptions && null != mail.getMessage()) {
                     // Set exceptions
                     for (Event exception : exceptions) {
                         mail.getMessage().addException(exception);

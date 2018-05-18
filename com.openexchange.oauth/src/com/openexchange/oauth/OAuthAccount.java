@@ -96,4 +96,12 @@ public interface OAuthAccount extends OAuthToken {
      * @return an unmodifiable {@link Set} with all enabled {@link OAuthScope}s for this {@link OAuthAccount}
      */
     Set<OAuthScope> getEnabledScopes();
+
+    /**
+     * Returns the user's identity for this {@link OAuthAccount}
+     * 
+     * @return the user's identity for this {@link OAuthAccount} or <code>null</code>
+     *         if no identity is set yet
+     */
+    String getUserIdentity();
 }

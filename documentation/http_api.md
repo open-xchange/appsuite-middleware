@@ -1,7 +1,7 @@
 ---
 title: HTTP-API
 description:
-icon: fa-puzzle-piece
+icon: fa-exchange
 ---
 
 The http api can be found here: [Detailed HTTP API](https://documentation.open-xchange.com/components/middleware/http{{ site.baseurl }}/index.html)

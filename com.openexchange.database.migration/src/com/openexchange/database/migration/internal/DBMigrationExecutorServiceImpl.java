@@ -188,7 +188,7 @@ public class DBMigrationExecutorServiceImpl implements DBMigrationExecutorServic
     }
 
     /**
-     * Gets some textual information about any resent locks for a database migration.
+     * Gets some textual information about any recent locks for a database migration.
      *
      * @param migration The migration to get the locks for
      * @return The database migration locks
@@ -201,7 +201,7 @@ public class DBMigrationExecutorServiceImpl implements DBMigrationExecutorServic
             connection = connectionProvider.get();
             liquibase = LiquibaseHelper.prepareLiquibase(connection, migration);
             ByteArrayOutputStream os = new ByteArrayOutputStream();
-            PrintStream ps = new PrintStream(os);
+            PrintStream ps = new PrintStream(os, false, "UTF8");
             liquibase.reportLocks(ps);
             return os.toString("UTF8");
         } catch (LiquibaseException e) {

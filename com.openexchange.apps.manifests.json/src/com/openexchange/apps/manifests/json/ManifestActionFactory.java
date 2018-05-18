@@ -49,7 +49,6 @@
 
 package com.openexchange.apps.manifests.json;
 
-import java.util.Collection;
 import java.util.Map;
 import com.google.common.collect.ImmutableMap;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
@@ -74,11 +73,6 @@ public class ManifestActionFactory implements AJAXActionServiceFactory {
         actions.put("all", new AllAction( manifestBuilder));
         actions.put("config", new ConfigAction(services, manifestBuilder));
         this.actions = actions.build();
-    }
-
-    @Override
-    public Collection<?> getSupportedServices() {
-        return actions.values();
     }
 
     @Override

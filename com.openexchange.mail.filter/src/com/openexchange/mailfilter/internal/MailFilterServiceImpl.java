@@ -336,6 +336,9 @@ public final class MailFilterServiceImpl implements MailFilterService, Reloadabl
 
                 ClientRulesAndRequire clientRulesAndReq = sieveTextFilter.splitClientRulesAndRequire(rules.getRulelist(), null, rules.isError());
                 RuleAndPosition rightRule = getRightRuleForUniqueId(clientRulesAndReq.getRules(), uid);
+                if (rightRule == null) {
+                    throw MailFilterExceptionCode.NO_SUCH_ID.create(uid, credentials.getUserid(), credentials.getContextid());
+                }
 
                 // Check redirect limit
                 checkRedirects(rule, credentials);
@@ -393,7 +396,7 @@ public final class MailFilterServiceImpl implements MailFilterService, Reloadabl
                 for (int uid : uids) {
                     RuleAndPosition deletedrule = getRightRuleForUniqueId(rules, uid);
                     if (deletedrule == null) {
-                        throw MailFilterExceptionCode.BAD_POSITION.create(uid);
+                        throw MailFilterExceptionCode.NO_SUCH_ID.create(uid, credentials.getUserid(), credentials.getContextid());
                     }
                     rules.remove(deletedrule.rule);
                 }
@@ -835,7 +838,7 @@ public final class MailFilterServiceImpl implements MailFilterService, Reloadabl
     /**
      * Checks the amount of redirect rules in the specified {@link Rule} and compares
      * those with the 'max_redirect' size (if available) from the Sieve server
-     * 
+     *
      * @param rule The {@link Rule}
      * @param credentials The {@link Credentials}
      * @throws OXException if the redirect commands in the specified {@link Rule} exceed

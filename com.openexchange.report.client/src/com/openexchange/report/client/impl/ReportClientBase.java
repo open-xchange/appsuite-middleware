@@ -498,9 +498,9 @@ public class ReportClientBase extends AbstractJMXTools {
                     if (null != shortName) {
                         final int bit = f.getInt(clazz);
                         if ((bit & accCombi) == bit) {
-                            System.out.printf("%c[32m%35s: on%c[0m\n", I(27), shortName, I(27));
+                            System.out.printf("%c[32m%35s: on%c[0m%n", I(27), shortName, I(27));
                         } else {
-                            System.out.printf("%c[31m%35s: off%c[0m\n", I(27), shortName, I(27));
+                            System.out.printf("%c[31m%35s: off%c[0m%n", I(27), shortName, I(27));
                         }
                     }
                 }

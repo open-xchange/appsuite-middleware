@@ -94,7 +94,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.FolderService;
 import com.openexchange.folderstorage.FolderServiceDecorator;
 import com.openexchange.java.Strings;
-import com.openexchange.server.ServiceLookup;
+import com.openexchange.oauth.OAuthExceptionCodes;
 import com.openexchange.session.Session;
 
 /**
@@ -115,14 +115,13 @@ public class GoogleCalendarAccess extends BasicCachingCalendarAccess {
     /**
      * Initializes a new {@link GoogleCalendarAccess}.
      *
-     * @param services The {@link ServiceLookup} instance
      * @param session The user session
      * @param account The calendar account
      * @param parameters The calendar parameters
      * @throws OXException
      */
-    public GoogleCalendarAccess(ServiceLookup services, Session session, CalendarAccount account, CalendarParameters parameters, boolean checkConfig) throws OXException {
-        super(services, session, account, parameters);
+    public GoogleCalendarAccess(Session session, CalendarAccount account, CalendarParameters parameters, boolean checkConfig) throws OXException {
+        super(session, account, parameters);
         refreshInterval = GoogleCalendarConfig.getResfrehInterval(session);
         requestTimeout = GoogleCalendarConfig.getRetryOnErrorInterval(session);
         try {
@@ -130,25 +129,13 @@ public class GoogleCalendarAccess extends BasicCachingCalendarAccess {
         } catch (JSONException e) {
             throw CalendarExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
-        try {
-            init(checkConfig);
-        } catch (OXException e) {
-            // ignore exception for now
-        }
+        init(checkConfig);
     }
 
     private void init(boolean checkConfig) throws OXException {
         if (!initialized) {
-            try {
-                oauthAccess.initialize();
-                initialized = true;
-            } catch (OXException e) {
-                /**
-                 * Initialization of the oauthAccess failed. Stopping initialization of the GoogleCalendarAccess.
-                 * Set refreshInterval to minimum.
-                 */
-                throw GoogleExceptionCodes.OAUTH_INITIALIZATION_FAILED.create(e);
-            }
+            oauthAccess.initialize();
+            initialized = true;
 
             if (checkConfig) {
                 initCalendarFolder(session);
@@ -311,7 +298,7 @@ public class GoogleCalendarAccess extends BasicCachingCalendarAccess {
 
     @Override
     public long getRetryAfterErrorInterval(OXException e) {
-        if (e == null || e.getExceptionCode() == null || CalendarExceptionCodes.AUTH_FAILED.equals(e) || GoogleExceptionCodes.OAUTH_INITIALIZATION_FAILED.equals(e)) {
+        if (e == null || e.getExceptionCode() == null || CalendarExceptionCodes.AUTH_FAILED.equals(e) || OAuthExceptionCodes.OAUTH_ACCESS_TOKEN_INVALID.getPrefix().equals(e.getPrefix())) {
             return BasicCachingCalendarConstants.MINIMUM_DEFAULT_RETRY_AFTER_ERROR_INTERVAL;
         }
         return requestTimeout;

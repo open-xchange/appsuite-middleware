@@ -56,6 +56,7 @@ import java.io.StringReader;
 import java.io.StringWriter;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -1093,7 +1094,7 @@ public class WebSSOProviderImpl implements SAMLWebSSOProvider {
         }
 
         try {
-            Element responseElement = openSAML.getParserPool().parse(new ByteArrayInputStream(responseXML.getBytes())).getDocumentElement();
+            Element responseElement = openSAML.getParserPool().parse(new ByteArrayInputStream(responseXML.getBytes(StandardCharsets.UTF_8))).getDocumentElement();
             XMLObject unmarshalledResponse = openSAML.getUnmarshallerFactory().getUnmarshaller(responseElement).unmarshall(responseElement);
             if (!(unmarshalledResponse instanceof Response)) {
                 throw SAMLExceptionCode.UNMARSHALLING_ERROR.create("XML was not a valid Response element");

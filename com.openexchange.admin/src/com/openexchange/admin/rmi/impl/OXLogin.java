@@ -50,7 +50,6 @@
 package com.openexchange.admin.rmi.impl;
 
 import java.rmi.RemoteException;
-import org.osgi.framework.BundleContext;
 import com.openexchange.admin.plugins.OXUserPluginInterface;
 import com.openexchange.admin.rmi.OXLoginInterface;
 import com.openexchange.admin.rmi.dataobjects.Context;
@@ -75,16 +74,13 @@ public class OXLogin extends OXCommonImpl implements OXLoginInterface {
 
     private final static org.slf4j.Logger LOGGER = org.slf4j.LoggerFactory.getLogger(OXLogin.class);
 
-    private final BundleContext context;
-
-    public OXLogin(final BundleContext context) throws RemoteException, StorageException {
+    public OXLogin() throws RemoteException, StorageException {
         super();
-        this.context = context;
         LOGGER.info("Class loaded: {}", this.getClass().getName());
     }
 
     @Override
-    public void login(final Context ctx, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException,DatabaseUpdateException {
+    public void login(final Context ctx, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException {
         BasicAuthenticator.createNonPluginAwareAuthenticator().doUserAuthentication(auth, ctx);
         triggerUpdateProcess(ctx);
     }

@@ -14,7 +14,7 @@ BuildRequires: java-1_8_0-openjdk-devel
 BuildRequires: java-1.8.0-openjdk-devel
 %endif
 Version:       @OXVERSION@
-%define        ox_release 3
+%define        ox_release 5
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -71,10 +71,9 @@ export NO_BRP_CHECK_BYTECODE_VERSION=true
 ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} -f build/build.xml clean build
 
 %post
-
+. /opt/open-xchange/lib/oxfunctions.sh
 if [ ${1:-0} -eq 2 ]; then
     # only when updating
-    . /opt/open-xchange/lib/oxfunctions.sh
 
     # prevent bash from expanding, see bug 13316
     GLOBIGNORE='*'
@@ -153,8 +152,11 @@ if [ ${1:-0} -eq 2 ]; then
     expression='# webdavxml (interface for OXtender for Microsoft Outlook, used by KDE for synchronization)'
     $(contains "^${expression}$" $PFILE) && sed -i "s/^${expression}$/${expression} [DEPRECATED]/" $PFILE
 
-    ox_update_permissions "/opt/open-xchange/etc/mpasswd" root:open-xchange 640
+    # SoftwareChange_Request-147
+    ox_remove_property CREATE_CONTEXT_USE_UNIT /opt/open-xchange/etc/plugin/hosting.properties
+
 fi
+ox_update_permissions "/opt/open-xchange/etc/mpasswd" root:open-xchange 640
 
 %clean
 %{__rm} -rf %{buildroot}
@@ -178,6 +180,10 @@ fi
 %doc com.openexchange.admin.rmi/javadoc
 
 %changelog
+* Thu Apr 19 2018 Marcus Klein <marcus.klein@open-xchange.com>
+Fifth preview of 7.10.0 release
+* Tue Apr 03 2018 Marcus Klein <marcus.klein@open-xchange.com>
+Fourth preview of 7.10.0 release
 * Tue Feb 20 2018 Marcus Klein <marcus.klein@open-xchange.com>
 Third preview of 7.10.0 release
 * Fri Feb 02 2018 Marcus Klein <marcus.klein@open-xchange.com>

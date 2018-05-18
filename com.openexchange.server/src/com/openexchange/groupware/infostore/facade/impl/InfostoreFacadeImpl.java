@@ -82,6 +82,7 @@ import com.openexchange.file.storage.FileStorageFileAccess.IDTuple;
 import com.openexchange.file.storage.FileStorageUtility;
 import com.openexchange.file.storage.composition.FileID;
 import com.openexchange.filestore.FileStorage;
+import com.openexchange.filestore.FileStorageCodes;
 import com.openexchange.filestore.Info;
 import com.openexchange.filestore.QuotaFileStorage;
 import com.openexchange.filestore.QuotaFileStorageService;
@@ -377,17 +378,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
         if (false == permission.canReadObject()) {
             throw InfostoreExceptionCodes.NO_READ_PERMISSION.create();
         }
-        /*
-         * get & return file from storage
-         */
-        if (null == metadata.getFilestoreLocation()) {
-            return Streams.EMPTY_INPUT_STREAM;
-        }
-        FileStorage fileStorage = getFileStorage(permission.getFolderOwner(), session.getContextId());
-        if (0 == offset && -1 == length) {
-            return new SizeKnowingInputStream(fileStorage.getFile(metadata.getFilestoreLocation()), metadata.getFileSize());
-        }
-        return new SizeKnowingInputStream(fileStorage.getFile(metadata.getFilestoreLocation(), offset, length), length);
+        return getDocument(session, permission.getFolderOwner(), metadata, offset, length);
     }
 
     /**
@@ -831,6 +822,51 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
         }
 
         return storageService.getQuotaFileStorage(folderOwner, contextId, Info.drive());
+    }
+
+    /**
+     * Loads a specific file from the storage.
+     *
+     * @param session The session
+     * @param folderOwner The actual folder owner to choose the target filestore
+     * @param filestoreLocation The filestore location of the document to load
+     * @param offset The start offset in bytes to read from the document, or <code>0</code> to start from the beginning
+     * @param length The number of bytes to read from the document, or <code>-1</code> to read the stream until the end
+     * @return An input stream for the content
+     */
+    protected InputStream getDocument(ServerSession session, int folderOwner, DocumentMetadata metadata, long offset, long length) throws OXException {
+        /*
+         * get & return file from storage
+         */
+        if (null == metadata.getFilestoreLocation()) {
+            return Streams.EMPTY_INPUT_STREAM;
+        }
+        FileStorage fileStorage = getFileStorage(folderOwner, session.getContextId());
+        if (0 == offset && -1 == length) {
+            return new SizeKnowingInputStream(fileStorage.getFile(metadata.getFilestoreLocation()), metadata.getFileSize());
+        }
+        try {
+            return new SizeKnowingInputStream(fileStorage.getFile(metadata.getFilestoreLocation(), offset, length), length);
+        } catch (OXException e) {
+            if (FileStorageCodes.INVALID_RANGE.equals(e)) {
+                Object[] args = e.getLogArgs();
+                if (null != args && 3 < args.length && Long.class.isInstance(args[3])) {
+                    long actualSize = ((Long) args[3]).longValue();
+                    if (actualSize != metadata.getFileSize()) {
+                        LOG.debug("Detected invalid file size {} in stored metadata for file {}", L(length), I(metadata.getId()), e);
+                        try {
+                            DocumentMetadataImpl updatedMetadata = new DocumentMetadataImpl(metadata);
+                            updatedMetadata.setFileSize(actualSize);
+                            perform(new UpdateVersionAction(this, QUERIES, session.getContext(), updatedMetadata, metadata, new Metadata[] { Metadata.FILE_SIZE_LITERAL }, metadata.getSequenceNumber(), session), true);
+                            LOG.info("Auto-corrected invalid file size in stored metadata for file {}", I(metadata.getId()));
+                        } catch (Exception x) {
+                            LOG.warn("Error auto-correcting invalid file size in stored metadata for file {}", I(metadata.getId()), x);
+                        }
+                    }
+                }
+            }
+            throw e;
+        }
     }
 
     private Metadata[] nonNull(final DocumentMetadata document) {

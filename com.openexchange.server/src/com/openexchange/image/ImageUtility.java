@@ -60,6 +60,7 @@ import org.slf4j.Logger;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.AJAXUtility;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
 import com.openexchange.ajax.requesthandler.crypto.CryptographicServiceAuthenticationFactory;
 import com.openexchange.ajax.requesthandler.oauth.OAuthConstants;
 import com.openexchange.dispatcher.DispatcherPrefixService;
@@ -223,12 +224,13 @@ public final class ImageUtility {
         final String id = requestData.getParameter(AJAXServlet.PARAMETER_ID);
         final String imageId = requestData.getParameter(AJAXServlet.PARAMETER_UID);
         final String timestamp = requestData.getParameter(AJAXServlet.PARAMETER_TIMESTAMP);
+        final boolean decrypt = AJAXRequestDataTools.parseBoolParameter(requestData.getParameter("decrypt"));
 
         String auth = null;
         {
             ServiceLookup services = Services.getServiceLookup();
             CryptographicServiceAuthenticationFactory cryptoService = null == services ? null : services.getOptionalService(CryptographicServiceAuthenticationFactory.class);
-            if (cryptoService != null) {
+            if (cryptoService != null && decrypt) {
                 try {
                     auth = cryptoService.createAuthenticationFrom(requestData);
                 } catch (OXException e) {

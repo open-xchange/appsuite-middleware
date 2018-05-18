@@ -2,6 +2,7 @@
 package com.openexchange.ajax.infostore.apiclient;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -16,6 +17,13 @@ import com.openexchange.junit.Assert;
 import com.openexchange.testing.httpclient.models.InfoItemData;
 import com.openexchange.tools.io.IOTools;
 
+/**
+ *
+ * {@link UploadActionTest}
+ *
+ * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+ * @since v7.10.0
+ */
 public class UploadActionTest extends InfostoreApiClientTest {
 
     public static final int SIZE = 15; // Size of the large file in Megabytes
@@ -29,26 +37,20 @@ public class UploadActionTest extends InfostoreApiClientTest {
     @Test
     public void testUpload() throws Exception {
         final File file = new File(AJAXConfig.getProperty(AJAXConfig.Property.TEST_DIR), "ox.jpg");
-        String id = uploadInfoItem(file, "image/jpeg");
+        String id = uploadInfoItem(file, MIME_IMAGE_JPG);
 
         InfoItemData item = getItem(id);
-        assertEquals(item.getTitle(), file.getName());
-        assertEquals(item.getDescription(), file.getName());
-        assertEquals("1", item.getVersion());
-        assertEquals("image/jpeg", item.getFileMimetype());
+        checkFile(file, item, "1", MIME_IMAGE_JPG);
     }
 
     @Test
     public void testUploadEmptyFile_considerEmptyUpdate() throws Exception {
 
         final File file = File.createTempFile("infostore-new-test", ".txt");
-        String id = uploadInfoItem(file, "text/plain");
+        String id = uploadInfoItem(file, MIME_TEXT_PLAIN);
 
         InfoItemData item = getItem(id);
-        assertEquals(item.getTitle(), file.getName());
-        assertEquals(item.getDescription(), file.getName());
-        assertEquals("1", item.getVersion());
-        assertEquals("text/plain", item.getFileMimetype());
+        checkFile(file, item, "1", MIME_TEXT_PLAIN);
         assertTrue(file.delete());
     }
 
@@ -71,10 +73,10 @@ public class UploadActionTest extends InfostoreApiClientTest {
         }
 
         try {
-            uploadInfoItem(file, "text/plain");
+            uploadInfoItem(file, MIME_TEXT_PLAIN);
             fail();
         } catch (Throwable e) {
-            assertTrue(e instanceof AssertionError);
+            assertFalse(e instanceof AssertionError);
         }
     }
 
@@ -83,15 +85,12 @@ public class UploadActionTest extends InfostoreApiClientTest {
     public void testVersionCommentForNewDocument() throws Exception {
 
         final File file = new File(AJAXConfig.getProperty(AJAXConfig.Property.TEST_DIR), "ox.jpg");
-        String id = uploadInfoItem(null, file, "image/jpeg", "my comment");
+        String id = uploadInfoItem(null, file, MIME_IMAGE_JPG, "my comment");
 
         InfoItemData item = getItem(id);
-        assertEquals(item.getTitle(), file.getName());
-        assertEquals(item.getDescription(), file.getName());
-        assertEquals("1", item.getVersion());
+        checkFile(file, item, "1", MIME_IMAGE_JPG);
         assertEquals(Integer.valueOf(1), item.getNumberOfVersions());
         assertEquals("my comment", item.getVersionComment());
-        assertEquals("image/jpeg", item.getFileMimetype());
     }
 
     // Bug 4120
@@ -99,15 +98,12 @@ public class UploadActionTest extends InfostoreApiClientTest {
     public void testUniqueFilenamesOnUpload() throws Exception {
 
         final File file = new File(AJAXConfig.getProperty(AJAXConfig.Property.TEST_DIR), "ox.jpg");
-        String id = uploadInfoItem(file, "image/jpeg");
+        String id = uploadInfoItem(file, MIME_IMAGE_JPG);
 
         InfoItemData item = getItem(id);
-        assertEquals(item.getTitle(), file.getName());
-        assertEquals(item.getDescription(), file.getName());
-        assertEquals("1", item.getVersion());
-        assertEquals("image/jpeg", item.getFileMimetype());
+        checkFile(file, item, "1", MIME_IMAGE_JPG);
 
-        String id2 = uploadInfoItem(file, "image/jpeg");
+        String id2 = uploadInfoItem(file, MIME_IMAGE_JPG);
         InfoItemData item2 = getItem(id2);
         assertNotEquals(file.getName(), item2.getFilename());
     }
@@ -131,14 +127,11 @@ public class UploadActionTest extends InfostoreApiClientTest {
         // upload chunks
         String id = null;
         for (int x = 0; x < numOfChunks; x++) {
-            id = uploadInfoItem(id, file, "image/jpeg", null, chunks[x], Long.valueOf(x * chunkSize), Long.valueOf(all.length));
+            id = uploadInfoItem(id, file, MIME_IMAGE_JPG, null, chunks[x], Long.valueOf(x * chunkSize), Long.valueOf(all.length));
         }
 
         InfoItemData item = getItem(id);
-        assertEquals(item.getTitle(), file.getName());
-        assertEquals(item.getDescription(), file.getName());
-        assertEquals("1", item.getVersion());
-        assertEquals("image/jpeg", item.getFileMimetype());
+        checkFile(file, item, "1", MIME_IMAGE_JPG);
     }
 
     /*
@@ -149,24 +142,25 @@ public class UploadActionTest extends InfostoreApiClientTest {
     public void testBasicUpdate() throws Exception {
 
         final File file = new File(AJAXConfig.getProperty(AJAXConfig.Property.TEST_DIR), "ox.jpg");
-        String id = uploadInfoItem(file, "image/jpeg");
+        String id = uploadInfoItem(file, MIME_IMAGE_JPG);
 
         InfoItemData item = getItem(id);
-        assertEquals(item.getTitle(), file.getName());
-        assertEquals(item.getDescription(), file.getName());
-        assertEquals("1", item.getVersion());
-        assertEquals("image/jpeg", item.getFileMimetype());
+        checkFile(file, item, "1", MIME_IMAGE_JPG);
 
         final File file2 = File.createTempFile("infostore-new-test", ".txt");
-        String id2 = uploadInfoItem(id, file2, "text/plain", "version number 2");
+        String id2 = uploadInfoItem(id, file2, MIME_TEXT_PLAIN, "version number 2");
         Assert.assertEquals(id, id2);
 
         item = getItem(id2);
-        assertEquals(file2.getName(), item.getTitle());
-        assertEquals(file2.getName(), item.getDescription());
-        assertEquals("2", item.getVersion());
+        checkFile(file2, item, "2", MIME_TEXT_PLAIN);
         assertEquals(Integer.valueOf(2), item.getNumberOfVersions());
-        assertEquals("text/plain", item.getFileMimetype());
+    }
+
+    private void checkFile(File file, InfoItemData item, String version, String mimetype) {
+        assertEquals(file.getName(), item.getTitle());
+        assertEquals(file.getName(), item.getFilename());
+        assertEquals(version, item.getVersion());
+        assertEquals(mimetype, item.getFileMimetype());
     }
 
 }

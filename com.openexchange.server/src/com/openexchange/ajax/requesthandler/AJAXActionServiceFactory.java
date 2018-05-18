@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.requesthandler;
 
-import com.openexchange.documentation.AnnotatedServices;
 import com.openexchange.exception.OXException;
 
 /**
@@ -57,7 +56,7 @@ import com.openexchange.exception.OXException;
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public interface AJAXActionServiceFactory extends AnnotatedServices {
+public interface AJAXActionServiceFactory {
 
     /**
      * Creates the action service for performing the request.

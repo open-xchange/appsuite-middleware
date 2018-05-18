@@ -102,7 +102,7 @@ public class Column extends AbstractDatabaseObject {
 
 
     @Override
-    public int compareTo(Object other) {
+    public int compareTo(DatabaseObject other) {
         Column o = (Column) other;
         try {
             //noinspection UnusedAssignment
@@ -129,8 +129,12 @@ public class Column extends AbstractDatabaseObject {
     @Override
     public boolean equals(Object o) {
         try {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
+            if (this == o) {
+                return true;
+            }
+            if (o == null || getClass() != o.getClass()) {
+                return false;
+            }
 
             Column column = (Column) o;
 
@@ -201,8 +205,8 @@ public class Column extends AbstractDatabaseObject {
     }
 
     public static class AutoIncrementInformation {
-        private BigInteger startWith;
-        private BigInteger incrementBy;
+        private final BigInteger startWith;
+        private final BigInteger incrementBy;
 
         public AutoIncrementInformation() {
             this(1,1);

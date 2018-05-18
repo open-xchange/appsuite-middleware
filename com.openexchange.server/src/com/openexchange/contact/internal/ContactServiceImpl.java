@@ -75,14 +75,11 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.search.ContactSearchObject;
-import com.openexchange.objectusecount.ObjectUseCountService;
-import com.openexchange.objectusecount.SetArguments;
 import com.openexchange.search.CompositeSearchTerm;
 import com.openexchange.search.CompositeSearchTerm.CompositeOperation;
 import com.openexchange.search.SearchTerm;
 import com.openexchange.search.SingleSearchTerm.SingleOperation;
 import com.openexchange.server.impl.EffectivePermission;
-import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.threadpool.AbstractTask;
 import com.openexchange.threadpool.ThreadPoolService;
@@ -237,6 +234,7 @@ public class ContactServiceImpl extends DefaultContactService {
         Contact updatedContact = new Contact();
         ContactMapper.getInstance().mergeDifferences(updatedContact, storedContact);
         ContactMapper.getInstance().mergeDifferences(updatedContact, delta);
+        delta.removeUseCount();
         /*
          * pass through to storage
          */
@@ -268,13 +266,6 @@ public class ContactServiceImpl extends DefaultContactService {
                 targetStorage.delete(session, targetFolderId, Integer.toString(storedContact.getObjectID()),
                         storedContact.getLastModified());
                 throw e;
-            }
-        }
-        if (delta.containsUseCount()) {
-            ObjectUseCountService service = ServerServiceRegistry.getInstance().getService(ObjectUseCountService.class);
-            if (null != service) {
-                SetArguments arguments = new SetArguments.Builder(Integer.parseInt(objectID), Integer.parseInt(targetFolderId), delta.getUseCount()).build();
-                service.setObjectUseCount(session, arguments);
             }
         }
         /*
@@ -354,17 +345,11 @@ public class ContactServiceImpl extends DefaultContactService {
         Contact updatedContact = new Contact();
         ContactMapper.getInstance().mergeDifferences(updatedContact, storedContact);
         ContactMapper.getInstance().mergeDifferences(updatedContact, delta);
+        delta.removeUseCount(); // use counts are handled by use count service
         /*
          * pass through to storage
          */
         storage.update(session, folderID, objectID, delta, lastRead);
-        if (delta.containsUseCount()) {
-            ObjectUseCountService service = ServerServiceRegistry.getInstance().getService(ObjectUseCountService.class);
-            if (null != service) {
-                SetArguments arguments = new SetArguments.Builder(Integer.parseInt(objectID), Integer.parseInt(folderID), delta.getUseCount()).build();
-                service.setObjectUseCount(session, arguments);
-            }
-        }
         /*
          * merge back differences to supplied contact
          */
@@ -879,7 +864,11 @@ public class ContactServiceImpl extends DefaultContactService {
             queryFields = new QueryFields(fields);
         } else {
             // restrict queried fields
-            queryFields = new QueryFields(fields, LIMITED_USER_FIELDS);
+            if (Tools.getUserPermissionBits(session).hasWebMail()) {
+                queryFields = new QueryFields(fields, LIMITED_USER_FIELDS);
+            } else {
+                queryFields = new QueryFields(fields, LIMITED_USER_FIELDS_NO_MAIL);
+            }
         }
         if (null == sortOptions) {
             sortOptions = SortOptions.EMPTY;
@@ -892,7 +881,7 @@ public class ContactServiceImpl extends DefaultContactService {
         if (null == userIDs || 0 == userIDs.length) {
             searchTerm.addSearchTerm(Tools.createContactFieldTerm(
                 ContactField.INTERNAL_USERID, SingleOperation.GREATER_THAN, Integer.valueOf(0)));
-        } else if (null != userIDs && 1 == userIDs.length) {
+        } else if (1 == userIDs.length) {
             searchTerm.addSearchTerm(Tools.createContactFieldTerm(
                 ContactField.INTERNAL_USERID, SingleOperation.EQUALS, Integer.valueOf(userIDs[0])));
         } else {
@@ -930,7 +919,11 @@ public class ContactServiceImpl extends DefaultContactService {
             queryFields = new QueryFields(fields);
         } else {
             // restrict queried fields
-            queryFields = new QueryFields(fields, LIMITED_USER_FIELDS);
+            if (Tools.getUserPermissionBits(session).hasWebMail()) {
+                queryFields = new QueryFields(fields, LIMITED_USER_FIELDS);
+            } else {
+                queryFields = new QueryFields(fields, LIMITED_USER_FIELDS_NO_MAIL);
+            }
         }
         if (null == sortOptions) {
             sortOptions = SortOptions.EMPTY;

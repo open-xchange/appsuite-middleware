@@ -93,13 +93,13 @@ public class RestrictedAttendeePermissionsTest extends AbstractAttendeeTest {
     @Test
     public void testAttendeeAlarmsChanges() throws Exception {
         // attendee should be able to adjust his alarms
-        EventData expectedEventData = eventManager.createEvent(EventFactory.createSingleTwoHourEvent(defaultUserApi.getCalUser(), "testAddSingleAlarm"));
+        EventData expectedEventData = eventManager.createEvent(EventFactory.createSingleTwoHourEvent(defaultUserApi.getCalUser(), "testAddSingleAlarm", folderId));
         String expectedEventId = expectedEventData.getId();
 
         expectedEventData.setAttendees(addAdditionalAttendee(expectedEventData));
-        eventManager.updateEvent(expectedEventData);
+        eventManager.updateEvent(expectedEventData, false, false);
 
-        EventData eventToUpdate = eventManager2.getEvent(expectedEventId);
+        EventData eventToUpdate = eventManager2.getEvent(null, expectedEventId);
 
         assertEquals(2, eventToUpdate.getAttendees().size());
         eventManager2.setLastTimeStamp(eventManager.getLastTimeStamp());
@@ -114,11 +114,11 @@ public class RestrictedAttendeePermissionsTest extends AbstractAttendeeTest {
     @Test
     public void testAttendeeRemoveFromEvent() throws Exception {
         // attendee should be able to remove himself from an event
-        EventData expectedEventData = eventManager.createEvent(EventFactory.createSingleTwoHourEvent(defaultUserApi.getCalUser(), "testAttendeeRemoveSingle"));
+        EventData expectedEventData = eventManager.createEvent(EventFactory.createSingleTwoHourEvent(defaultUserApi.getCalUser(), "testAttendeeRemoveSingle", folderId));
         String expectedEventId = expectedEventData.getId();
 
         expectedEventData.setAttendees(addAdditionalAttendee(expectedEventData));
-        EventData updatedEvent = eventManager.updateEvent(expectedEventData);
+        EventData updatedEvent = eventManager.updateEvent(expectedEventData, false, false);
 
         List<Attendee> attendeeList = updatedEvent.getAttendees();
         assertEquals(2, attendeeList.size());
@@ -131,7 +131,7 @@ public class RestrictedAttendeePermissionsTest extends AbstractAttendeeTest {
 
         eventManager2.deleteEvent(event);
 
-        expectedEventData = eventManager.getEvent(expectedEventId);
+        expectedEventData = eventManager.getEvent(folderId, expectedEventId);
         assertNotNull(expectedEventData);
         assertEquals(1, expectedEventData.getAttendees().size());
     }
@@ -139,38 +139,40 @@ public class RestrictedAttendeePermissionsTest extends AbstractAttendeeTest {
     @Test
     public void testAttendeeParticipationStatus() throws Exception {
         // attendee should be able to change his participation status
-        EventData expectedEventData = eventManager.createEvent(EventFactory.createSingleTwoHourEvent(defaultUserApi.getCalUser(), "testParticipationSingle"));
+        EventData expectedEventData = eventManager.createEvent(EventFactory.createSingleTwoHourEvent(defaultUserApi.getCalUser(), "testParticipationSingle", folderId));
         String expectedEventId = expectedEventData.getId();
 
         expectedEventData.setAttendees(addAdditionalAttendee(expectedEventData));
-        EventData updatedEvent = eventManager.updateEvent(expectedEventData);
+        EventData updatedEvent = eventManager.updateEvent(expectedEventData, false, false);
 
-        EventData eventToUpdate = eventManager2.getEvent(expectedEventId);
+        EventData eventToUpdate = eventManager2.getEvent(null, expectedEventId);
 
         assertEquals(2, eventToUpdate.getAttendees().size());
         eventManager2.setLastTimeStamp(eventManager.getLastTimeStamp());
         eventManager2.updateAttendee(expectedEventId, createAttendeeAndAlarm(eventToUpdate, user2.getCalUser()), false);
 
-        updatedEvent = eventManager.getEvent(expectedEventId);
+        updatedEvent = eventManager.getEvent(folderId, expectedEventId);
 
         assertNotNull(updatedEvent.getAttendees());
         assertEquals(2, updatedEvent.getAttendees().size());
-        assertEquals("ACCEPTED", updatedEvent.getAttendees().get(0).getPartStat());
-        assertEquals("TENTATIVE", updatedEvent.getAttendees().get(1).getPartStat());
+        int accepted = updatedEvent.getAttendees().get(0).getEntity() == defaultUserApi.getCalUser() ? 0 : 1;
+        assertEquals("ACCEPTED", updatedEvent.getAttendees().get(accepted).getPartStat());
+        assertEquals("TENTATIVE", updatedEvent.getAttendees().get(accepted == 0 ? 1 : 0).getPartStat());
     }
 
     @Test
     public void testAttendeePermissionRestrictions() throws Exception {
         // attendee should not be able to do anything else
-        EventData expectedEventData = eventManager.createEvent(EventFactory.createSingleTwoHourEvent(defaultUserApi.getCalUser(), "testPermissionSingle"));
+        EventData expectedEventData = eventManager.createEvent(EventFactory.createSingleTwoHourEvent(defaultUserApi.getCalUser(), "testPermissionSingle", folderId));
         String expectedEventId = expectedEventData.getId();
         expectedEventData.setAttendees(addAdditionalAttendee(expectedEventData));
         EventData updatedEvent = eventManager.updateEvent(expectedEventData);
+        EventData event2 = eventManager2.getEvent(null, expectedEventId);
         Calendar start = Calendar.getInstance();
         start.setTimeInMillis(System.currentTimeMillis());
-        updatedEvent.setStartDate(DateTimeUtil.getDateTime(start));
+        event2.setStartDate(DateTimeUtil.getDateTime(start));
         try {
-            updatedEvent = eventManager2.updateEvent(updatedEvent, true);
+            updatedEvent = eventManager2.updateEvent(event2, true, false);
             fail("No exception was thrown");
         } catch (ChronosApiException e) {
             assertNotNull(e);

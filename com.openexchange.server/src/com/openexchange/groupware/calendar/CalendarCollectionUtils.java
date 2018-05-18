@@ -50,10 +50,6 @@
 
 package com.openexchange.groupware.calendar;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
@@ -61,15 +57,10 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.TimeZone;
-import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.calendar.old.CalendarCollectionFieldMapper;
 import com.openexchange.groupware.calendar.old.RecurringCalculation;
 import com.openexchange.groupware.calendar.old.RecurringResult;
-import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.CalendarObject;
-import com.openexchange.groupware.contexts.Context;
-import com.openexchange.tools.sql.DBUtils;
 
 /**
  * {@link CalendarCollectionUtils} - Provides calculation routines for recurring calendar items.
@@ -712,35 +703,4 @@ public final class CalendarCollectionUtils {
         return false;
     }
 
-    private static final String SQL_TITLE = "SELECT " + CalendarCollectionFieldMapper.getFieldName(Appointment.TITLE) + " FROM prg_dates AS pd WHERE cid = ? AND " + CalendarCollectionFieldMapper.getFieldName(Appointment.OBJECT_ID) + " = ?";
-
-    /**
-     * Gets the appointment's title associated with given object ID in given context.
-     *
-     * @param objectId The object ID
-     * @param ctx The context
-     * @return The appointment's title or <code>null</code>
-     * @throws OXException If determining appointment's title fails
-     */
-    @Deprecated
-    public static String getAppointmentTitle(final int objectId, final Context ctx) throws OXException {
-        final Connection con = Database.get(ctx, false);
-        PreparedStatement stmt = null;
-        ResultSet rs = null;
-        try {
-            stmt = con.prepareStatement(SQL_TITLE);
-            int pos = 1;
-            stmt.setInt(pos++, ctx.getContextId());
-            stmt.setInt(pos++, objectId);
-            rs = stmt.executeQuery();
-            if (rs.next()) {
-                return rs.getString(1);
-            }
-            return null;
-        } catch (final SQLException e) {
-            throw OXCalendarExceptionCodes.CALENDAR_SQL_ERROR.create(e, new Object[0]);
-        } finally {
-            DBUtils.closeResources(rs, stmt, con, true, ctx);
-        }
-    }
 }

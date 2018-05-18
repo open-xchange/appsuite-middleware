@@ -83,7 +83,7 @@ public class IsPublished implements AdditionalFolderField {
     private static final TIntSet ID_BLACKLIST;
     static {
         final TIntSet set = new TIntHashSet(10);
-        set.add(FolderObject.SYSTEM_GLOBAL_FOLDER_ID);
+        /*set.add(FolderObject.SYSTEM_GLOBAL_FOLDER_ID);*/  // finally dropped
         set.add(FolderObject.SYSTEM_LDAP_FOLDER_ID);
         set.add(FolderObject.SYSTEM_PRIVATE_FOLDER_ID);
         set.add(FolderObject.SYSTEM_PUBLIC_FOLDER_ID);

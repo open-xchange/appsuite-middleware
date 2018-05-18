@@ -55,6 +55,7 @@ import java.util.Date;
 import java.util.List;
 import com.openexchange.folderstorage.BasicPermission;
 import com.openexchange.folderstorage.FolderPermissionType;
+import com.openexchange.folderstorage.ImmutableTypePermission;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.Permissions;
 import com.openexchange.folderstorage.UserizedFolder;
@@ -218,7 +219,7 @@ public class FolderTargetProxy extends AbstractTargetProxy {
         @Override
         public Permission convert(TargetPermission permission) {
             if(permission instanceof SubfolderAwareTargetPermission) {
-                BasicPermission result = new BasicPermission(permission.getEntity(), permission.isGroup(), permission.getBits());
+                BasicPermission result = new ImmutableTypePermission(permission.getEntity(), permission.isGroup(), permission.getBits());
                 result.setType(FolderPermissionType.getType(((SubfolderAwareTargetPermission) permission).getType()));
                 return result;
             }
@@ -227,7 +228,7 @@ public class FolderTargetProxy extends AbstractTargetProxy {
 
         @Override
         public TargetPermission convert(Permission permission) {
-            return new SubfolderAwareTargetPermission(permission.getEntity(), permission.isGroup(), getBits(permission), null != permission.getType() ? permission.getType().getTypeNumber() : FolderPermissionType.NORMAL.getTypeNumber(), permission.getPermissionLegator());
+            return new SubfolderAwareTargetPermission(permission.getEntity(), permission.isGroup(), getBits(permission), null != permission.getType() ? permission.getType().getTypeNumber() : FolderPermissionType.NORMAL.getTypeNumber(), permission.getPermissionLegator(), permission.getSystem());
         }
     };
 

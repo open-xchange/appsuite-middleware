@@ -99,8 +99,7 @@ public final class CheckPermissionOnRemove extends CheckPermission {
      * @param lastModified The last-modified time stamp
      * @throws OXException If checking for possible non-visible subfolders fails
      */
-    public void checkPermissionsOnUpdate(final int folderId, final OCLPermission[] removedPerms, final long lastModified)
-            throws OXException {
+    public void checkPermissionsOnUpdate(final int folderId, final OCLPermission[] removedPerms, final long lastModified) throws OXException {
         try {
             /*
              * Remove system permissions from previous parent
@@ -150,8 +149,7 @@ public final class CheckPermissionOnRemove extends CheckPermission {
         }
     }
 
-    private void hasVisibleSibling(final int parent, final int exclude, final int origin, final int entity, final boolean isGroup,
-            final TIntObjectMap<ToDoPermission> toRemove) throws OXException, OXException, SQLException {
+    private void hasVisibleSibling(final int parent, final int exclude, final int origin, final int entity, final boolean isGroup, final TIntObjectMap<ToDoPermission> toRemove) throws OXException, OXException, SQLException {
         if (parent < FolderObject.MIN_FOLDER_ID) {
             /*
              * Stop recursive check

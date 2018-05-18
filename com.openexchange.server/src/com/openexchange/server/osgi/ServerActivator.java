@@ -60,6 +60,7 @@ import java.util.List;
 import javax.activation.MailcapCommandMap;
 import javax.management.ObjectName;
 import javax.servlet.ServletException;
+import org.json.FileBackedJSONStringProvider;
 import org.json.JSONObject;
 import org.json.JSONValue;
 import org.osgi.framework.BundleActivator;
@@ -171,6 +172,7 @@ import com.openexchange.i18n.I18nService;
 import com.openexchange.id.IDGeneratorService;
 import com.openexchange.imagetransformation.ImageTransformationService;
 import com.openexchange.jslob.ConfigTreeEquivalent;
+import com.openexchange.json.FileBackedJSONStringProviderImpl;
 import com.openexchange.lock.LockService;
 import com.openexchange.lock.impl.LockServiceImpl;
 import com.openexchange.log.Slf4jLogger;
@@ -683,6 +685,7 @@ public final class ServerActivator extends HousekeepingActivator {
         registerService(Reloadable.class, GenericReloadable.getInstance());
         registerService(Reloadable.class, ResponseWriter.getReloadable());
         registerService(CharsetProvider.class, new CustomCharsetProvider());
+        registerService(FileBackedJSONStringProvider.class, new FileBackedJSONStringProviderImpl());
         final GroupService groupService = new GroupServiceImpl();
         registerService(GroupService.class, groupService);
         ServerServiceRegistry.getInstance().addService(GroupService.class, groupService);
@@ -905,6 +908,7 @@ public final class ServerActivator extends HousekeepingActivator {
             }
             LoginServlet.setRampUpServices(null);
             UploadUtility.shutDown();
+            super.stopBundle();
         } finally {
             started.set(false);
             CONTEXT = null;
@@ -930,6 +934,7 @@ public final class ServerActivator extends HousekeepingActivator {
         http.registerServlet("/drive", new com.openexchange.webdav.Infostore(), null, null);
         http.registerServlet("/servlet/webdav.infostore", new com.openexchange.webdav.Infostore(), null, null);
         http.registerServlet("/servlet/webdav.drive", new com.openexchange.webdav.Infostore(), null, null);
+        http.registerServlet("/servlet/webdav.version", new com.openexchange.webdav.version(), null, null);
         // http.registerServlet(prefix+"tasks", new com.openexchange.ajax.Tasks(), null, null);
         // http.registerServlet(prefix+"contacts", new com.openexchange.ajax.Contact(), null, null);
         // http.registerServlet(prefix+"mail", new com.openexchange.ajax.Mail(), null, null);

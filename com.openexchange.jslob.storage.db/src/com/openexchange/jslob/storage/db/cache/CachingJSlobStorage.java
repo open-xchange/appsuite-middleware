@@ -437,7 +437,9 @@ public final class CachingJSlobStorage implements JSlobStorage, Runnable {
             if (object instanceof JSlobReference) {
                 ImmutableJSlob jslob = ((JSlobReference) object).jslob;
                 if (null == jslob) {
-                    throw JSlobExceptionCodes.NOT_FOUND_EXT.create(id.getServiceId(), Integer.valueOf(id.getUser()), Integer.valueOf(id.getContext()));
+                    cache.removeFromGroup(id, groupName(id));
+                    toLoad.add(id);
+                    continue;
                 }
                 map.put(id.getId(), jslob.clone());
             } else {

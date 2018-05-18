@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the Open-Xchange, Inc. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2020 Open-Xchange, Inc.
+ *     Copyright (C) 2016-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -61,11 +61,14 @@ import static com.openexchange.chronos.impl.Utils.isResolveOccurrences;
 import static com.openexchange.chronos.impl.Utils.mapEventOccurrences;
 import java.sql.Connection;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.EnumSet;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import com.openexchange.chronos.Alarm;
@@ -84,9 +87,7 @@ import com.openexchange.chronos.impl.Utils;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.exception.OXException;
-import com.openexchange.folderstorage.type.PrivateType;
 import com.openexchange.folderstorage.type.PublicType;
-import com.openexchange.folderstorage.type.SharedType;
 
 /**
  * {@link ResultTracker}
@@ -102,6 +103,7 @@ public class ResultTracker {
     private final long timestamp;
     private final InternalCalendarResult result;
     private final SelfProtection protection;
+    private final Map<CalendarFolder, Map<String, Event>> originalUserizedEvents;
 
     /**
      * Initializes a new {@link ResultTracker}.
@@ -111,13 +113,14 @@ public class ResultTracker {
      * @param folder The calendar folder representing the current view on the events
      * @param timestamp The timestamp to apply for the result
      */
-    public ResultTracker(CalendarStorage storage, CalendarSession session, CalendarFolder folder, long timestamp, SelfProtection protection) throws OXException {
+    public ResultTracker(CalendarStorage storage, CalendarSession session, CalendarFolder folder, long timestamp, SelfProtection protection) {
         super();
         this.storage = storage;
         this.session = session;
         this.folder = folder;
         this.timestamp = timestamp;
         this.protection = protection;
+        this.originalUserizedEvents = new HashMap<CalendarFolder, Map<String, Event>>();
         this.result = new InternalCalendarResult(session, getCalendarUserId(folder), folder);
     }
 
@@ -128,6 +131,21 @@ public class ResultTracker {
      */
     public InternalCalendarResult getResult() {
         return result;
+    }
+
+    /**
+     * Remembers data of a an original event before it is updated to speed up the generation of <i>userized</i> event results afterwards.
+     *
+     * @param originalEvent The original event to remember
+     */
+    public void rememberOriginalEvent(Event originalEvent) throws OXException {
+        if (includeAllFolderViews(session)) {
+            for (CalendarFolder visibleFolder : getVisibleFolderViews(originalEvent)) {
+                rememberOriginalUserizedEvent(visibleFolder, originalEvent);
+            }
+        } else {
+            rememberOriginalUserizedEvent(folder, originalEvent);
+        }
     }
 
     /**
@@ -322,15 +340,7 @@ public class ResultTracker {
         if (PublicType.getInstance().equals(folder.getType()) || false == CalendarUtils.isGroupScheduled(event)) {
             return Collections.singletonList(folder);
         }
-        List<CalendarFolder> visibleFolders = Utils.getVisibleFolders(session, PrivateType.getInstance(), SharedType.getInstance());
-        List<CalendarFolder> folderViews = new ArrayList<CalendarFolder>();
-        for (String folderId : getPersonalFolderIds(event.getAttendees())) {
-            CalendarFolder matchingFolder = visibleFolders.stream().filter(folder -> folderId.equals(folder.getId())).findAny().orElse(null);
-            if (null != matchingFolder) {
-                folderViews.add(matchingFolder);
-            }
-        }
-        return folderViews;
+        return getVisibleFolderViews(getPersonalFolderIds(event.getAttendees()));
     }
 
     /**
@@ -352,17 +362,15 @@ public class ResultTracker {
         } else {
             affectedFolderIds.addAll(getPersonalFolderIds(updatedEvent.getAttendees()));
         }
-        if (1 == affectedFolderIds.size() && affectedFolderIds.iterator().next().equals(folder.getId())) {
-            return Collections.singletonList(folder);
-        }
-        List<CalendarFolder> visibleFolders = Utils.getVisibleFolders(session);
+        return getVisibleFolderViews(affectedFolderIds);
+    }
+
+    private List<CalendarFolder> getVisibleFolderViews(Collection<String> affectedFolderIds) throws OXException {
         List<CalendarFolder> folderViews = new ArrayList<CalendarFolder>();
-        for (String folderId : affectedFolderIds) {
-            CalendarFolder matchingFolder = visibleFolders.stream().filter(folder -> folderId.equals(folder.getId())).findAny().orElse(null);
-            if (null != matchingFolder) {
-                folderViews.add(matchingFolder);
-            }
+        if (affectedFolderIds.remove(folder.getId())) {
+            folderViews.add(folder);
         }
+        folderViews.addAll(Utils.getVisibleFolders(session, affectedFolderIds));
         return folderViews;
     }
 
@@ -385,6 +393,10 @@ public class ResultTracker {
      * @return The original userized version of the event
      */
     private Event getOriginalUserizedEvent(Event event, CalendarFolder folder) throws OXException {
+        Event originalUserizedEvent = optOriginalUserizedEvent(folder, event.getId());
+        if (null != originalUserizedEvent) {
+            return originalUserizedEvent;
+        }
         Connection oldConnection = session.get(AbstractStorageOperation.PARAM_CONNECTION, Connection.class);
         session.set(AbstractStorageOperation.PARAM_CONNECTION, null);
         try {
@@ -400,6 +412,24 @@ public class ResultTracker {
         }
     }
 
+    private Event optOriginalUserizedEvent(CalendarFolder folder, String eventId) {
+        Map<String, Event> userizedEventsById = originalUserizedEvents.get(folder);
+        return null != userizedEventsById ? userizedEventsById.get(eventId) : null;
+    }
+
+    private void rememberOriginalUserizedEvent(CalendarFolder folder, Event originalEvent) throws OXException {
+        if (isInFolder(originalEvent, folder)) {
+            Map<String, Event> userizedEventsById = originalUserizedEvents.get(folder);
+            if (null == userizedEventsById) {
+                userizedEventsById = new HashMap<String, Event>();
+                originalUserizedEvents.put(folder, userizedEventsById);
+            }
+            if (false == userizedEventsById.containsKey(originalEvent.getId())) {
+                userizedEventsById.put(originalEvent.getId(), userize(originalEvent, folder));
+            }
+        }
+    }
+
     /**
      * Creates a <i>userized</i> version of an event, representing a specific user's point of view on the event data. This includes
      * <ul>
@@ -407,8 +437,6 @@ public class ResultTracker {
      * current session's user is neither creator, nor attendee of the event.</li>
      * <li>selecting the appropriate parent folder identifier for the specific user</li>
      * <li>generate and apply event flags</li>
-     * <li>apply <i>userized</i> versions of change- and delete-exception dates in the series master event based on the user's actual
-     * attendance</li>
      * <li>taking over the user's personal list of alarms for the event</li>
      * </ul>
      *
@@ -429,8 +457,6 @@ public class ResultTracker {
      * current session's user is neither creator, nor attendee of the event.</li>
      * <li>selecting the appropriate parent folder identifier for the specific user</li>
      * <li>generate and apply event flags</li>
-     * <li>apply <i>userized</i> versions of change- and delete-exception dates in the series master event based on the user's actual
-     * attendance</li>
      * <li>taking over the user's personal list of alarms for the event</li>
      * </ul>
      *
@@ -442,8 +468,33 @@ public class ResultTracker {
      * @see Utils#applyExceptionDates
      * @see Utils#anonymizeIfNeeded
      */
-    private Event userize(CalendarSession session, CalendarStorage storage, Event event, int forUser) throws OXException {
-        if (isSeriesMaster(event)) {
+    Event userize(CalendarSession session, CalendarStorage storage, Event event, int forUser) throws OXException {
+        return userize(session, storage, event, forUser, false);
+    }
+
+    /**
+     * Creates a <i>userized</i> version of an event, representing a specific user's point of view on the event data. This includes
+     * <ul>
+     * <li><i>anonymization</i> of restricted event data in case the event it is not marked as {@link Classification#PUBLIC}, and the
+     * current session's user is neither creator, nor attendee of the event.</li>
+     * <li>selecting the appropriate parent folder identifier for the specific user</li>
+     * <li>generate and apply event flags</li>
+     * <li>optionally apply <i>userized</i> versions of change- and delete-exception dates in the series master event based on the user's actual
+     * attendance</li>
+     * <li>taking over the user's personal list of alarms for the event</li>
+     * </ul>
+     *
+     * @param storage The calendar storage to use
+     * @param session The calendar session
+     * @param event The event to userize
+     * @param forUser The identifier of the user in whose point of view the event should be adjusted
+     * @param applyExceptionDates <code>true</code> to apply individual exception dates for series master events, <code>false</code> if not needed
+     * @return The <i>userized</i> event
+     * @see Utils#applyExceptionDates
+     * @see Utils#anonymizeIfNeeded
+     */
+    private Event userize(CalendarSession session, CalendarStorage storage, Event event, int forUser, boolean applyExceptionDates) throws OXException {
+        if (applyExceptionDates && isSeriesMaster(event)) {
             event = applyExceptionDates(storage, event, forUser);
         }
         final List<Alarm> alarms = storage.getAlarmStorage().loadAlarms(event, forUser);

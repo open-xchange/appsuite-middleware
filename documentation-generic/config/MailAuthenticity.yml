@@ -34,6 +34,28 @@ properties:
       file: mailAuthenticity.properties
       packageName: open-xchange-mail-authenticity
       tags: ["Mail Authenticity","Mail"]
+    - key: com.openexchange.mail.authenticity.logRawHeaders
+      description: |
+        Specifies whether the raw headers of the mail messages will be logged in the DEBUG level
+      defaultValue: false
+      version: 7.10.0
+      reloadable: true
+      configcascadeAware: false
+      file: mailAuthenticity.properties
+      packageName: open-xchange-mail-authenticity
+      tags: ["Mail Authenticity","Mail"]
+    - key: com.openexchange.mail.authenticity.considerDMARCPolicy
+      description: |
+        Defines whether the policy of the DMARC mechanism will be considered when determining the overall result. 
+        If this property is enabled, then in case the DMARC mechanism defines a policy and that policy is 'NONE', 
+        then the DMARC mechanism result will not be taken into consideration and will not influence the overall result.
+      defaultValue: false
+      version: 7.10.0
+      reloadable: true
+      configcascadeAware: false
+      file: mailAuthenticity.properties
+      packageName: open-xchange-mail-authenticity
+      tags: ["Mail Authenticity","Mail"]
     - key: com.openexchange.mail.authenticity.trusted.tenants
       description: |
         A comma separated list of tenants.
@@ -153,9 +175,9 @@ properties:
         <pre>
         custom_rules:
           rule_name1:
-            spf_status: PASS | FAIL | NEUTRAL | NONE
+            spf_status: (PASS | FAIL | NEUTRAL | NONE) {,(PASS | FAIL | NEUTRAL | NONE)} | ANY
             spf_domain: <domain>
-            dkim_status: PASS | FAIL | NEUTRAL | NONE
+            dkim_status: (PASS | FAIL | NEUTRAL | NONE) {,(PASS | FAIL | NEUTRAL | NONE)} | ANY
             dkim_domain: <domain>
             from_domain: <domain>
             result: PASS | FAIL | NEUTRAL | NONE
@@ -174,6 +196,19 @@ properties:
             spf_status: PASS
             spf_domain: xyz.com
             dkim_status: PASS
+            dkim_domain: xyz.com
+            from_domain: other.com
+            result: PASS
+        </pre>
+
+        Another example using both mutiple stati at once and the <code>ANY</code> group which maps to all known stati:
+        
+        <pre>
+        custom_rules:
+          rule_for_domain_xyz:
+            spf_status: PASS, NEUTRAL, NONE
+            spf_domain: xyz.com
+            dkim_status: ANY
             dkim_domain: xyz.com
             from_domain: other.com
             result: PASS

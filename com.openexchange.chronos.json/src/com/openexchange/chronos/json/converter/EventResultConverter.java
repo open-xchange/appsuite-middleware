@@ -69,6 +69,7 @@ import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.Converter;
 import com.openexchange.ajax.requesthandler.ResultConverter;
+import com.openexchange.ajax.writer.GroupWriter;
 import com.openexchange.chronos.CalendarUserType;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
@@ -80,6 +81,8 @@ import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.contact.ContactService;
 import com.openexchange.contacts.json.mapping.ContactMapper;
 import com.openexchange.exception.OXException;
+import com.openexchange.group.Group;
+import com.openexchange.group.GroupService;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.tools.mappings.json.JsonMapping;
@@ -182,17 +185,29 @@ public class EventResultConverter implements ResultConverter {
                 ServerSession serverSession = ServerSessionAdapter.valueOf(session);
                 while(iterator.hasNext()) {
                     JSONObject attendee = (JSONObject) iterator.next();
-
-                    if(attendee.has(ChronosJsonFields.Attendee.ENTITY) && attendee.getString(ChronosJsonFields.Attendee.CU_TYPE).equals(CalendarUserType.INDIVIDUAL.getValue())) {
-                        contactsToLoad.put(I(attendee.getInt(ChronosJsonFields.Attendee.ENTITY)), attendee);
+                    int entity = attendee.optInt(ChronosJsonFields.Attendee.ENTITY);
+                    if (0 >= entity) {
+                        continue;
                     }
-
-                    if(attendee.has(ChronosJsonFields.Attendee.ENTITY) && attendee.getString(ChronosJsonFields.Attendee.CU_TYPE).equals(CalendarUserType.RESOURCE.getValue())) {
+                    CalendarUserType cuType = new CalendarUserType(attendee.optString(ChronosJsonFields.Attendee.CU_TYPE, CalendarUserType.INDIVIDUAL.getValue()));
+                    if (CalendarUserType.INDIVIDUAL.matches(cuType)) {
+                        contactsToLoad.put(I(entity), attendee);
+                    } else if (CalendarUserType.ROOM.matches(cuType) || CalendarUserType.RESOURCE.matches(cuType)) {
                         try {
-                            Resource resource = requireService(ResourceService.class, services).getResource(I(attendee.getInt(ChronosJsonFields.Attendee.ENTITY)), serverSession.getContext());
+                            Resource resource = requireService(ResourceService.class, services).getResource(entity, serverSession.getContext());
                             attendee.put(ChronosJsonFields.Attendee.RESOURCE, ResourceWriter.writeResource(resource));
                         } catch (OXException e) {
                             LOG.warn("Error getting underlying resource for attendee {}", attendee, e);
+                        }
+                    } else if (CalendarUserType.GROUP.matches(cuType)) {
+
+                        try {
+                            JSONObject jsonObject = new JSONObject();
+                            Group group = requireService(GroupService.class, services).getGroup(serverSession.getContext(), entity);
+                            new GroupWriter().writeGroup(group, jsonObject);
+                            attendee.put(ChronosJsonFields.Attendee.GROUP, jsonObject);
+                        } catch (OXException e) {
+                            LOG.warn("Error getting underlying group for attendee {}", attendee, e);
                         }
                     }
                 }

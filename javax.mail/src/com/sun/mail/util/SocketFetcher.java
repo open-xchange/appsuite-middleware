@@ -373,8 +373,9 @@ public class SocketFetcher {
 	    proxyPort = PropUtil.getIntProperty(props,
 					prefix + ".proxy.port", proxyPort);
 	    err = "Using web proxy host, port: " + proxyHost + ", " + proxyPort;
-	    if (logger.isLoggable(Level.FINER))
-		logger.finer("web proxy host " + proxyHost + ", port " + proxyPort);
+	    if (logger.isLoggable(Level.FINER)) {
+            logger.finer("web proxy host " + proxyHost + ", port " + proxyPort);
+        }
 	} else if ((socksHost =
 		    props.getProperty(prefix + ".socks.host", null)) != null) {
 	    int i = socksHost.indexOf(':');
@@ -429,9 +430,9 @@ public class SocketFetcher {
     }
 	try {
 	    logger.finest("connecting...");
-	    if (proxyHost != null)
-		proxyConnect(socket, proxyHost, proxyPort, host, port, cto);
-	    else if (cto >= 0) {
+	    if (proxyHost != null) {
+            proxyConnect(socket, proxyHost, proxyPort, host, port, cto);
+        } else if (cto >= 0) {
             socket.connect(new InetSocketAddress(address, port), cto);
         } else {
             socket.connect(new InetSocketAddress(address, port));
@@ -472,6 +473,8 @@ public class SocketFetcher {
         }
 	    overriddenSocket = socket;
 	    socket = ssf.createSocket(overriddenSocket, host, port, true);
+	    // Socket successfully layered over existing socket
+	    overriddenSocket = null;
 	    sf = ssf;
 	}
 
@@ -486,7 +489,6 @@ public class SocketFetcher {
 	 */
 	Socket returnMe = socket;
 	socket = null;
-	overriddenSocket = null;
     return returnMe;
 	} finally {
 	    close(overriddenSocket, socket);
@@ -876,8 +878,9 @@ public class SocketFetcher {
             }
 		    }
 		}
-		if (foundName)	// found a name, but no match
-		    return false;
+		if (foundName) {
+            return false;
+        }
 	    }
 	} catch (CertificateParsingException ex) {
 	    // ignore it
@@ -941,26 +944,29 @@ public class SocketFetcher {
 				String proxyHost, int proxyPort,
 				String host, int port, int cto)
 				throws IOException {
-	if (logger.isLoggable(Level.FINE))
-	    logger.fine("connecting through proxy " +
+	if (logger.isLoggable(Level.FINE)) {
+        logger.fine("connecting through proxy " +
 			proxyHost + ":" + proxyPort + " to " +
 			host + ":" + port);
-	if (cto >= 0)
-	    socket.connect(new InetSocketAddress(proxyHost, proxyPort), cto);
-	else
-	    socket.connect(new InetSocketAddress(proxyHost, proxyPort));
+    }
+	if (cto >= 0) {
+        socket.connect(new InetSocketAddress(proxyHost, proxyPort), cto);
+    } else {
+        socket.connect(new InetSocketAddress(proxyHost, proxyPort));
+    }
 	PrintStream os = new PrintStream(socket.getOutputStream(), false,
         StandardCharsets.UTF_8.name());
     os.print("CONNECT " + host + ":" + port + " HTTP/1.1\r\n");
     os.print("Host: " + host + ":" + port + "\r\n\r\n");
 	os.flush();
 	BufferedReader r = new BufferedReader(new InputStreamReader(
-						socket.getInputStream()));
+						socket.getInputStream(), StandardCharsets.UTF_8));
 	String line;
 	boolean first = true;
 	while ((line = r.readLine()) != null) {
-	    if (line.length() == 0)
-		break;
+	    if (line.length() == 0) {
+            break;
+        }
 	    logger.finest(line);
 	    if (first) {
 		StringTokenizer st = new StringTokenizer(line);

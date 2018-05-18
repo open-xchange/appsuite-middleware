@@ -97,7 +97,7 @@ abstract class AbstractExtensionHandler {
         this.parameters = parameters;
         this.searchOptions = new SearchOptions(parameters);
         LeanConfigurationService leanConfigurationService = Services.getService(LeanConfigurationService.class);
-        this.selfProtection = SelfProtectionFactory.createSelfProtection(session, leanConfigurationService);
+        this.selfProtection = SelfProtectionFactory.createSelfProtection(leanConfigurationService);
     }
 
     /**

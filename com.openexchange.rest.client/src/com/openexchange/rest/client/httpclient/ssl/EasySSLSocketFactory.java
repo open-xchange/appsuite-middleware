@@ -137,7 +137,7 @@ public class EasySSLSocketFactory implements ConnectionSocketFactory {
 
     @Override
     public boolean equals(final Object obj) {
-        return obj != null && obj.getClass().equals(EasySSLSocketFactory.class);
+        return obj != null && this.getClass().isInstance(obj);
     }
 
     @Override

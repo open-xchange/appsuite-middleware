@@ -1908,7 +1908,7 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
         // Almost the same code as shutdown()
         final SecurityManager security = System.getSecurityManager();
         if (security != null) {
-            java.security.AccessController.checkPermission(shutdownPerm);
+            security.checkPermission(shutdownPerm);
         }
 
         boolean fullyTerminated = false;

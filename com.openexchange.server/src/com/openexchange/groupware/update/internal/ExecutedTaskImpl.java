@@ -50,6 +50,7 @@
 package com.openexchange.groupware.update.internal;
 
 import java.util.Date;
+import java.util.UUID;
 import com.openexchange.groupware.update.ExecutedTask;
 
 /**
@@ -62,18 +63,22 @@ public class ExecutedTaskImpl implements ExecutedTask {
     private final String taskName;
     private final boolean successful;
     private final Date lastModified;
+    private final UUID uuid;
 
     /**
      * Initializes a new {@link ExecutedTaskImpl}.
+     * 
      * @param lastModified when the task has been executed lately
      * @param successful if the task was executed successfully
      * @param taskName full class name of the update task
+     * @param uuid the {@link UUID} of the update task
      */
-    public ExecutedTaskImpl(String taskName, boolean successful, Date lastModified) {
+    public ExecutedTaskImpl(String taskName, boolean successful, Date lastModified, UUID uuid) {
         super();
         this.taskName = taskName;
         this.successful = successful;
         this.lastModified = lastModified;
+        this.uuid = uuid;
     }
 
     @Override
@@ -89,6 +94,11 @@ public class ExecutedTaskImpl implements ExecutedTask {
     @Override
     public boolean isSuccessful() {
         return successful;
+    }
+
+    @Override
+    public UUID getUUID() {
+        return uuid;
     }
 
     @Override
@@ -109,5 +119,4 @@ public class ExecutedTaskImpl implements ExecutedTask {
         }
         return thisLastModified.compareTo(otherLastModified);
     }
-
 }

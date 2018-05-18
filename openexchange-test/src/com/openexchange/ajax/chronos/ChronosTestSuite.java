@@ -77,10 +77,11 @@ import com.openexchange.test.concurrent.ParallelSuite;
     TimezoneAlarmTriggerTest.class,
     ICalEventImportExportTest.class,
     RestrictedAttendeePermissionsTest.class,
-    BasicICalCalendarProviderTest.class
+    BasicICalCalendarProviderTest.class,
+    ICalImportAccessTest.class
     // @formatter:on
 
 })
 public class ChronosTestSuite {
-
+  // empty
 }

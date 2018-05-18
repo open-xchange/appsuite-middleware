@@ -55,7 +55,6 @@ import com.openexchange.ajax.subscribe.test.AllSubscriptionsTest;
 import com.openexchange.ajax.subscribe.test.DeleteSubscriptionTest;
 import com.openexchange.ajax.subscribe.test.ListSubscriptionsTest;
 import com.openexchange.ajax.subscribe.test.NewSubscriptionTest;
-import com.openexchange.ajax.subscribe.test.RefreshSubscriptionTest;
 import com.openexchange.ajax.subscribe.test.SubscriptionFolderIconTest;
 import com.openexchange.ajax.subscribe.test.UpdateSubscriptionTest;
 import com.openexchange.test.concurrent.ParallelSuite;
@@ -72,7 +71,6 @@ import com.openexchange.test.concurrent.ParallelSuite;
     ListSubscriptionsTest.class,
     AllSubscriptionsTest.class,
     UpdateSubscriptionTest.class,
-    RefreshSubscriptionTest.class,
     SubscriptionFolderIconTest.class,
 
 })

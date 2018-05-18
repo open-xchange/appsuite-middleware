@@ -192,6 +192,7 @@ public final class InlineImageDataSource implements ImageDataSource {
                 // Try to get authentication from Image URL, else from session
                 String auth = imageLocation.getAuth() == null ? crypto.getAuthTokenFromSession(session) : crypto.getTokenValueFromString(imageLocation.getAuth());
                 if (auth != null) {
+                    sb.append("&decrypt=true");
                     sb.append("&cryptoAuth=").append(URLEncoder.encode(auth, "UTF-8"));
                     sb.append("&session=").append(session.getSessionID());
                 }

@@ -59,14 +59,21 @@ public final class TaskInfo implements Comparable<TaskInfo> {
 
     private final String taskName;
     private final String schema;
+    private final int hashCode;
 
     /**
      * Initializes a new {@link TaskInfo}.
      */
-    public TaskInfo(final String taskName, final String schema) {
+    public TaskInfo(String taskName, String schema) {
         super();
         this.taskName = taskName;
         this.schema = schema;
+
+        int prime = 31;
+        int result = 1;
+        result = prime * result + ((schema == null) ? 0 : schema.hashCode());
+        result = prime * result + ((taskName == null) ? 0 : taskName.hashCode());
+        hashCode = result;
     }
 
     /**
@@ -93,4 +100,47 @@ public final class TaskInfo implements Comparable<TaskInfo> {
         return 0 == res ? taskName.compareTo(o.taskName) : res;
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see java.lang.Object#hashCode()
+     */
+    @Override
+    public int hashCode() {
+        return hashCode;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see java.lang.Object#equals(java.lang.Object)
+     */
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final TaskInfo other = (TaskInfo) obj;
+        if (schema == null) {
+            if (other.schema != null) {
+                return false;
+            }
+        } else if (!schema.equals(other.schema)) {
+            return false;
+        }
+        if (taskName == null) {
+            if (other.taskName != null) {
+                return false;
+            }
+        } else if (!taskName.equals(other.taskName)) {
+            return false;
+        }
+        return true;
+    }
 }

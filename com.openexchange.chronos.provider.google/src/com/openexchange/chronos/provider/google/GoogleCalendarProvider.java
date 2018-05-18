@@ -155,7 +155,7 @@ public class GoogleCalendarProvider extends BasicCachingCalendarProvider {
             throw CalendarExceptionCodes.INVALID_CONFIGURATION.create(e, userConfig);
         }
         OAuthService oAuthService = requireService(OAuthService.class, services);
-        oAuthService.getAccount(oauthId, session, session.getUserId(), session.getContextId());
+        oAuthService.getAccount(session, oauthId);
         /*
          * prepare & return checked proposed settings based on client-supplied settings
          */
@@ -207,7 +207,7 @@ public class GoogleCalendarProvider extends BasicCachingCalendarProvider {
 
     @Override
     public BasicCalendarAccess connect(Session session, CalendarAccount account, CalendarParameters parameters) throws OXException {
-        return new GoogleCalendarAccess(services, session, account, parameters, true);
+        return new GoogleCalendarAccess(session, account, parameters, true);
     }
 
     @Override
@@ -235,7 +235,7 @@ public class GoogleCalendarProvider extends BasicCachingCalendarProvider {
         }
 
         // Check existing google account
-        oAuthService.getAccount(accountId, session, session.getUserId(), session.getContextId());
+        oAuthService.getAccount(session, accountId);
 
         JSONObject internalConfig = new JSONObject();
         try {
@@ -274,7 +274,7 @@ public class GoogleCalendarProvider extends BasicCachingCalendarProvider {
         }
 
         // Check existing google account
-        oAuthService.getAccount(accountId, session, session.getUserId(), session.getContextId());
+        oAuthService.getAccount(session, accountId);
 
         try {
             updated.put(GoogleCalendarConfigField.OAUTH_ID, accountId);

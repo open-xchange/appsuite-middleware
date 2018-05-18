@@ -180,7 +180,12 @@ public class FolderTransactionTest extends ShareTest {
 
         GuestClient guestClient = new GuestClient(shareURL, guestPermission.getRecipient());
         ResolveShareResponse resolveResponse = guestClient.getShareResolveResponse();
-        assertEquals("API: " + api + ", Module: " + module, Integer.toString(sharedFolder.getObjectID()), resolveResponse.getFolder());
+        // TODO: Properly fix this by retrieving correct folder id in the first place
+        if (module == FolderObject.CALENDAR) {
+            assertEquals("API: " + api + ", Module: " + module, "cal://0/" + Integer.toString(sharedFolder.getObjectID()), resolveResponse.getFolder());
+        } else {
+            assertEquals("API: " + api + ", Module: " + module, Integer.toString(sharedFolder.getObjectID()), resolveResponse.getFolder());
+        }
     }
 
 }

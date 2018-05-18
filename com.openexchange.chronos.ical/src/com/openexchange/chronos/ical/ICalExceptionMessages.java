@@ -68,6 +68,8 @@ public class ICalExceptionMessages implements LocalizableStrings {
     public static final String VALIDATION_FAILED_MSG = "Validation failed: %1$s";
 
     public static final String TRUNCATED_RESULTS_MSG = "Not all of the objects could be imported due to a configured limitation.";
+    
+    public static final String INVALID_CALENDAR_CONTENT_MSG = "The given iCalendar source does not contain valid content and cannot be processed.";
 
     /**
      * Initializes a new {@link ICalExceptionMessages}.

@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the Open-Xchange, Inc. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2020 Open-Xchange, Inc.
+ *     Copyright (C) 2016-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -51,6 +51,7 @@ package com.openexchange.chronos.impl.performer;
 
 import static com.openexchange.chronos.common.AlarmUtils.filterRelativeTriggers;
 import static com.openexchange.chronos.common.CalendarUtils.contains;
+import static com.openexchange.chronos.common.CalendarUtils.isInternal;
 import static com.openexchange.chronos.common.CalendarUtils.isSeriesException;
 import static com.openexchange.chronos.common.CalendarUtils.isSeriesMaster;
 import static com.openexchange.chronos.common.CalendarUtils.matches;
@@ -61,6 +62,7 @@ import static com.openexchange.folderstorage.Permission.DELETE_ALL_OBJECTS;
 import static com.openexchange.folderstorage.Permission.DELETE_OWN_OBJECTS;
 import static com.openexchange.folderstorage.Permission.NO_PERMISSIONS;
 import static com.openexchange.folderstorage.Permission.READ_FOLDER;
+import static com.openexchange.java.Autoboxing.L;
 import static com.openexchange.java.Autoboxing.i;
 import java.util.Collections;
 import java.util.List;
@@ -71,6 +73,7 @@ import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.AttendeeField;
 import com.openexchange.chronos.CalendarUser;
 import com.openexchange.chronos.Event;
+import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.ParticipationStatus;
 import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.common.mapping.AttendeeMapper;
@@ -109,10 +112,11 @@ public class UpdateAttendeePerformer extends AbstractUpdatePerformer {
      * @param eventId The identifier of the event to update the attendee in
      * @param recurrenceId The recurrence identifier of the occurrence to update, or <code>null</code> if no specific occurrence is targeted
      * @param attendee The attendee data to update
+     * @param alarms The alarms to update, or <code>null</code> to not change alarms, or an empty array to delete any existing alarms
      * @param clientTimestamp The client timestamp to catch concurrent modifications, or <code>null</code> to skip checks
      * @return The result
      */
-    public InternalCalendarResult perform(String eventId, RecurrenceId recurrenceId, Attendee attendee, Long clientTimestamp) throws OXException {
+    public InternalCalendarResult perform(String eventId, RecurrenceId recurrenceId, Attendee attendee, List<Alarm> alarms, Long clientTimestamp) throws OXException {
         /*
          * load original event data & check permissions
          */
@@ -136,12 +140,21 @@ public class UpdateAttendeePerformer extends AbstractUpdatePerformer {
             Check.noConflicts(storage, session, originalEvent, Collections.singletonList(resolvedAttendee));
         }
         /*
-         * perform update & return result
+         * perform update
          */
         if (null == recurrenceId) {
             updateAttendee(originalEvent, originalAttendee, attendee);
         } else {
             updateAttendee(originalEvent, originalAttendee, attendee, recurrenceId);
+        }
+        /*
+         * also update alarms as needed
+         */
+        if (null != alarms) {
+            if (false == isInternal(originalAttendee)) {
+                throw CalendarExceptionCodes.FORBIDDEN_ATTENDEE_CHANGE.create(eventId, originalAttendee, EventField.ALARMS);
+            }
+            new UpdateAlarmsPerformer(this).perform(eventId, recurrenceId, alarms.isEmpty() ? null : alarms, L(timestamp.getTime()));
         }
         return resultTracker.getResult();
     }
@@ -183,6 +196,7 @@ public class UpdateAttendeePerformer extends AbstractUpdatePerformer {
         /*
          * prepare update
          */
+        resultTracker.rememberOriginalEvent(originalEvent);
         Attendee attendeeUpdate = prepareAttendeeUpdate(originalEvent, originalAttendee, attendee);
         if (attendeeUpdate.containsFolderID()) {
             /*
@@ -203,6 +217,7 @@ public class UpdateAttendeePerformer extends AbstractUpdatePerformer {
              * also 'touch' the series master in case of an exception update
              */
             Event originalMasterEvent = loadEventData(originalEvent.getSeriesId());
+            resultTracker.rememberOriginalEvent(originalMasterEvent);
             touch(originalEvent.getSeriesId());
             Event updatedMasterEvent = loadEventData(originalEvent.getSeriesId());
             resultTracker.trackUpdate(originalMasterEvent, updatedMasterEvent);
@@ -221,6 +236,8 @@ public class UpdateAttendeePerformer extends AbstractUpdatePerformer {
                 Attendee originalExceptionAttendee = Check.attendeeExists(originalExceptionEvent, attendee);
                 updateAttendee(originalExceptionEvent, originalExceptionAttendee, attendee);
             } else {
+
+                Map<Integer, List<Alarm>> alarms = storage.getAlarmStorage().loadAlarms(originalSeriesMaster);
                 /*
                  * update for new change exception; prepare & insert a plain exception first, based on the original data from the master
                  */
@@ -237,6 +254,7 @@ public class UpdateAttendeePerformer extends AbstractUpdatePerformer {
                 /*
                  * perform the attendee update & add new change exception date to series master event
                  */
+                resultTracker.rememberOriginalEvent(newExceptionEvent);
                 Attendee attendeeUpdate = prepareAttendeeUpdate(newExceptionEvent, originalAttendee, attendee);
                 if (null != attendeeUpdate) {
                     storage.getAttendeeStorage().updateAttendee(newExceptionEvent.getId(), attendeeUpdate);
@@ -245,11 +263,11 @@ public class UpdateAttendeePerformer extends AbstractUpdatePerformer {
                 /*
                  * add change exception date to series master & track results
                  */
+                resultTracker.rememberOriginalEvent(originalSeriesMaster);
                 addChangeExceptionDate(originalSeriesMaster, recurrenceId);
                 Event updatedMasterEvent = loadEventData(originalSeriesMaster.getId());
                 resultTracker.trackUpdate(originalSeriesMaster, updatedMasterEvent);
 
-                Map<Integer, List<Alarm>> alarms = storage.getAlarmStorage().loadAlarms(updatedMasterEvent);
                 storage.getAlarmTriggerStorage().deleteTriggers(originalSeriesMaster.getId());
                 storage.getAlarmTriggerStorage().insertTriggers(updatedMasterEvent, alarms);
             }

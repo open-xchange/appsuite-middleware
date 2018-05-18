@@ -87,14 +87,17 @@ public class UserContextDeleteListener extends ContextDelete {
         try {
             stmt = writeCon.createStatement();
 
-            stmt.addBatch("DELETE FROM login2user WHERE cid=" + ctx.getContextId());
-            stmt.addBatch("DELETE FROM user_setting_server WHERE cid=" + ctx.getContextId());
-            stmt.addBatch("DELETE FROM user_setting_mail WHERE cid=" + ctx.getContextId());
-            stmt.addBatch("DELETE FROM user_setting_admin WHERE cid=" + ctx.getContextId());
-            stmt.addBatch("DELETE FROM user_configuration WHERE cid=" + ctx.getContextId());
-            stmt.addBatch("DELETE FROM user_alias WHERE cid=" + ctx.getContextId());
-            stmt.addBatch("DELETE FROM user_attribute WHERE cid=" + ctx.getContextId());
-            stmt.addBatch("DELETE FROM user WHERE cid=" + ctx.getContextId());
+            StringBuilder sb = new StringBuilder(48).append("DELETE FROM ");
+            int contextId = ctx.getContextId();
+
+            stmt.addBatch(craftStatement("login2user", contextId, sb));
+            stmt.addBatch(craftStatement("user_setting_server", contextId, sb));
+            stmt.addBatch(craftStatement("user_setting_mail", contextId, sb));
+            stmt.addBatch(craftStatement("user_setting_admin", contextId, sb));
+            stmt.addBatch(craftStatement("user_configuration", contextId, sb));
+            stmt.addBatch(craftStatement("user_alias", contextId, sb));
+            stmt.addBatch(craftStatement("user_attribute", contextId, sb));
+            stmt.addBatch(craftStatement("user", contextId, sb));
 
             stmt.executeBatch();
         } catch (final SQLException e) {
@@ -103,4 +106,12 @@ public class UserContextDeleteListener extends ContextDelete {
             Databases.closeSQLStuff(stmt);
         }
     }
+
+    private String craftStatement(String tableName, int contextId, StringBuilder sb) {
+        int reslen = sb.length();
+        String stmt = sb.append(tableName).append(" WHERE cid=").append(contextId).toString();
+        sb.setLength(reslen);
+        return stmt;
+    }
+
 }

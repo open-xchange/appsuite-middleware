@@ -69,7 +69,6 @@ import com.openexchange.groupware.infostore.InfostoreExceptionCodes;
 import com.openexchange.groupware.infostore.InfostoreFacade;
 import com.openexchange.groupware.infostore.InfostoreFolderPath;
 import com.openexchange.groupware.infostore.utils.Metadata;
-import com.openexchange.java.Streams;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.arrays.Arrays;
 import com.openexchange.tools.session.ServerSession;
@@ -109,16 +108,7 @@ public class EventFiringInfostoreFacadeImpl extends InfostoreFacadeImpl implemen
             throw InfostoreExceptionCodes.NO_READ_PERMISSION.create();
         }
 
-        com.openexchange.filestore.FileStorage fs = getFileStorage(infoPerm.getFolderOwner(), session.getContextId());
-        InputStream document;
-        if (dm.getFilestoreLocation() == null) {
-            document = Streams.newByteArrayInputStream(new byte[0]);
-        } else if (0 == offset && -1 == length) {
-            document = fs.getFile(dm.getFilestoreLocation());
-        } else {
-            document = fs.getFile(dm.getFilestoreLocation(), offset, length);
-        }
-
+        InputStream document = getDocument(session, infoPerm.getFolderOwner(), dm, offset, length);
         fireEvent(FileStorageEventHelper.buildAccessEvent(session, SERVICE_ID, ACCOUNT_ID, getFolderID(dm), getFileID(dm), dm.getFileName()));
         return document;
     }

@@ -16,8 +16,8 @@ import com.openexchange.tools.io.IOUtils;
  */
 public class AsciiArmoredKeyParser implements KeyParser {
 
-    private final String REGEX_PUBLIC_ASC = "(-----BEGIN PGP PUBLIC KEY BLOCK-----.*?-----END PGP PUBLIC KEY BLOCK-----)";
-    private final String REGEX_PRIVATE_ASC = "(-----BEGIN PGP PRIVATE KEY BLOCK-----.*?-----END PGP PRIVATE KEY BLOCK-----)";
+    private final static String REGEX_PUBLIC_ASC = "(-----BEGIN PGP PUBLIC KEY BLOCK-----.*?-----END PGP PUBLIC KEY BLOCK-----)";
+    private final static String REGEX_PRIVATE_ASC = "(-----BEGIN PGP PRIVATE KEY BLOCK-----.*?-----END PGP PRIVATE KEY BLOCK-----)";
 
     private List<String> getPublicKeysFromString(String s) {
         ArrayList<String> ret = new ArrayList<String>();
@@ -54,9 +54,6 @@ public class AsciiArmoredKeyParser implements KeyParser {
         }
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.pgp.keys.parsing.impl.KeyParser#parse(java.lang.String)
-     */
     @Override
     public KeyRingParserResult parse(String data) throws IOException {
         if (data != null && !data.isEmpty()) {

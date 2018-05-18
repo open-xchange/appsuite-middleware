@@ -136,7 +136,6 @@ public class TransformImageAction implements IFileResponseRendererAction {
         private final BasicTransformedImage m_transformedImage;
     }
 
-
     /**
      * Initializes a new {@link TransformImageAction}.
      */
@@ -153,7 +152,9 @@ public class TransformImageAction implements IFileResponseRendererAction {
         m_scalerReference.set(scaler);
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.openexchange.ajax.requesthandler.responseRenderers.actions.IFileResponseRendererAction#call(com.openexchange.ajax.requesthandler.responseRenderers.actions.IDataWrapper)
      */
     @Override
@@ -203,10 +204,7 @@ public class TransformImageAction implements IFileResponseRendererAction {
         final String eTag = result.getHeader("ETag");
         String cacheKey = null;
 
-        if ((null != cache) &&
-            !isEmpty(eTag) &&
-            cache.isEnabledFor(session.getContextId(), session.getUserId()) &&
-            AJAXRequestDataTools.parseBoolParameter("cache", request, true)) {
+        if ((null != cache) && !isEmpty(eTag) && cache.isEnabledFor(session.getContextId(), session.getUserId()) && AJAXRequestDataTools.parseBoolParameter("cache", request, true)) {
 
             cacheKey = ResourceCaches.generatePreviewCacheKey(eTag, request, AbstractPreviewResultConverter.getUserLanguage(session));
         }
@@ -467,7 +465,9 @@ public class TransformImageAction implements IFileResponseRendererAction {
                             final ThresholdFileHolder optImageFileHolder = ((transformedImageFile instanceof ThresholdFileHolder) ? (ThresholdFileHolder) transformedImageFile : null);
                             final long size = transformedImage.getSize();
 
-                            writeCachedResource(session, cacheKey, xformParams.getImageMimeType(), transformedImage, optImageFileHolder, fileName, size);
+                            if (transformedImage.getTransformationExpenses() == ImageTransformations.HIGH_EXPENSE) {
+                                writeCachedResource(session, cacheKey, xformParams.getImageMimeType(), transformedImage, optImageFileHolder, fileName, size);
+                            }
 
                             if (null == optImageFileHolder) {
                                 // Returning  new file holder having image-transformation content
@@ -483,7 +483,7 @@ public class TransformImageAction implements IFileResponseRendererAction {
                         if (LOG.isDebugEnabled()) {
                             try {
                                 LOG.error("Unable to transform image from {}. Unparseable image file is written to disk at: {}", repetitiveFile.getName(), writeBrokenImage2Disk(repetitiveFile, tmpDirReference).getPath(), e);
-                            } catch (@SuppressWarnings("unused") final Exception excp) {
+                            } catch (final Exception excp) {
                                 LOG.error("Unable to transform image from {}", repetitiveFile.getName(), e);
                             }
                         } else {
@@ -499,7 +499,7 @@ public class TransformImageAction implements IFileResponseRendererAction {
                     }
                 }
 
-                if (resultFile != repetitiveFile)  {
+                if (resultFile != repetitiveFile) {
                     Streams.close(repetitiveFile);
                 }
             }
@@ -628,12 +628,7 @@ public class TransformImageAction implements IFileResponseRendererAction {
      * @return The target content type, falling back to <code>image/jpeg</code> for unknown or mostly unsupported content types
      */
     private static String getTargetMimeType(String sourceMimeType) {
-        return (Strings.isNotEmpty(sourceMimeType) &&
-            ("image/bmp".equals(sourceMimeType) ||
-             "image/gif".equals(sourceMimeType) ||
-             "image/png".equals(sourceMimeType))) ?
-                 sourceMimeType :
-                     "image/jpeg";
+        return (Strings.isNotEmpty(sourceMimeType) && ("image/bmp".equals(sourceMimeType) || "image/gif".equals(sourceMimeType) || "image/png".equals(sourceMimeType))) ? sourceMimeType : "image/jpeg";
     }
 
     private static Boolean isAnimatedGif(String sourceFormatName, IFileHolder repetitiveFile) throws IOException, OXException {

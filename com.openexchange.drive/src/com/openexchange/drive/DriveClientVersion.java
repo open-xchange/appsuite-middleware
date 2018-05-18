@@ -49,6 +49,8 @@
 
 package com.openexchange.drive;
 
+import java.util.Arrays;
+
 /**
  * {@link DriveClientVersion}
  *
@@ -63,6 +65,7 @@ public class DriveClientVersion implements Comparable<DriveClientVersion> {
 
     private final String version;
     private final int[] versionParts;
+    private final int hashCode;
 
     /**
      * Initializes a new {@link DriveClientVersion}.
@@ -77,7 +80,7 @@ public class DriveClientVersion implements Comparable<DriveClientVersion> {
         }
         this.version = version;
         String[] parts = version.split("\\.");
-        this.versionParts = new int[parts.length];
+        versionParts = new int[parts.length];
         try {
             for (int i = 0; i < parts.length; i++) {
                 versionParts[i] = Integer.parseInt(parts[i]);
@@ -85,6 +88,12 @@ public class DriveClientVersion implements Comparable<DriveClientVersion> {
         } catch (NumberFormatException e) {
             throw new IllegalArgumentException(version, e);
         }
+
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + version.hashCode();
+        result = prime * result + Arrays.hashCode(versionParts);
+        hashCode = result;
     }
 
     /**
@@ -119,4 +128,33 @@ public class DriveClientVersion implements Comparable<DriveClientVersion> {
         return version;
     }
 
+    @Override
+    public int hashCode() {
+        return hashCode;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        DriveClientVersion other = (DriveClientVersion) obj;
+        if (version == null) {
+            if (other.version != null) {
+                return false;
+            }
+        } else if (!version.equals(other.version)) {
+            return false;
+        }
+        if (!Arrays.equals(versionParts, other.versionParts)) {
+            return false;
+        }
+        return true;
+    }
 }

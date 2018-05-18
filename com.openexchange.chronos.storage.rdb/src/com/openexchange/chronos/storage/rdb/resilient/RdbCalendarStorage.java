@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the Open-Xchange, Inc. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2020 Open-Xchange, Inc.
+ *     Copyright (C) 2016-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -53,6 +53,7 @@ import static com.openexchange.chronos.common.CalendarUtils.ID_COMPARATOR;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+import com.openexchange.chronos.exception.ProblemSeverity;
 import com.openexchange.chronos.storage.AlarmStorage;
 import com.openexchange.chronos.storage.AlarmTriggerStorage;
 import com.openexchange.chronos.storage.AttachmentStorage;
@@ -75,6 +76,7 @@ public class RdbCalendarStorage implements CalendarStorage {
     private final CalendarStorage delegate;
     private final RdbEventStorage eventStorage;
     private final RdbAttendeeStorage attendeeStorage;
+    private final RdbAlarmStorage alarmStorage;
 
     /**
      * Initializes a new {@link RdbCalendarStorage}.
@@ -83,12 +85,15 @@ public class RdbCalendarStorage implements CalendarStorage {
      * @param delegate The delegate storage
      * @param handleTruncations <code>true</code> to automatically handle data truncation warnings, <code>false</code>, otherwise
      * @param handleIncorrectStrings <code>true</code> to automatically handle incorrect string warnings, <code>false</code>, otherwise
+     * @param unsupportedDataThreshold The threshold defining up to which severity unsupported data errors can be ignored, or
+     *            <code>null</code> to not ignore any unsupported data error at all
      */
-    public RdbCalendarStorage(ServiceLookup services, CalendarStorage delegate, boolean handleTruncations, boolean handleIncorrectStrings) {
+    public RdbCalendarStorage(ServiceLookup services, CalendarStorage delegate, boolean handleTruncations, boolean handleIncorrectStrings, ProblemSeverity unsupportedDataThreshold) {
         super();
         this.delegate = delegate;
-        this.eventStorage = new RdbEventStorage(services, delegate.getEventStorage(), handleTruncations, handleIncorrectStrings);
-        this.attendeeStorage = new RdbAttendeeStorage(services, delegate.getAttendeeStorage(), handleTruncations, handleIncorrectStrings);
+        this.eventStorage = new RdbEventStorage(services, delegate.getEventStorage(), handleTruncations, handleIncorrectStrings, unsupportedDataThreshold);
+        this.attendeeStorage = new RdbAttendeeStorage(services, delegate.getAttendeeStorage(), handleTruncations, handleIncorrectStrings, unsupportedDataThreshold);
+        this.alarmStorage = new RdbAlarmStorage(services, delegate.getAlarmStorage(), handleTruncations, handleIncorrectStrings, unsupportedDataThreshold);
     }
 
     @Override
@@ -98,7 +103,7 @@ public class RdbCalendarStorage implements CalendarStorage {
 
     @Override
     public AlarmStorage getAlarmStorage() {
-        return delegate.getAlarmStorage();
+        return alarmStorage;
     }
 
     @Override
@@ -131,6 +136,7 @@ public class RdbCalendarStorage implements CalendarStorage {
         Map<String, List<OXException>> warnings = new TreeMap<String, List<OXException>>(ID_COMPARATOR);
         warnings.putAll(eventStorage.getWarnings());
         warnings.putAll(attendeeStorage.getWarnings());
+        warnings.putAll(alarmStorage.getWarnings());
         warnings.putAll(delegate.getWarnings());
         return warnings;
     }
@@ -140,6 +146,7 @@ public class RdbCalendarStorage implements CalendarStorage {
         Map<String, List<OXException>> warnings = new TreeMap<String, List<OXException>>(ID_COMPARATOR);
         warnings.putAll(eventStorage.getAndFlushWarnings());
         warnings.putAll(attendeeStorage.getAndFlushWarnings());
+        warnings.putAll(alarmStorage.getAndFlushWarnings());
         warnings.putAll(delegate.getAndFlushWarnings());
         return warnings;
     }

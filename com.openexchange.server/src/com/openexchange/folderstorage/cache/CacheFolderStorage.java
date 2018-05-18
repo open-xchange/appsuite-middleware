@@ -124,7 +124,6 @@ import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.threadpool.ThreadPools;
 import com.openexchange.threadpool.ThreadPools.TrackableCallable;
 import com.openexchange.threadpool.behavior.AbortBehavior;
-import com.openexchange.tools.oxfolder.OXFolderExceptionCode;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
 import com.openexchange.userconf.UserPermissionService;
@@ -988,6 +987,9 @@ public final class CacheFolderStorage implements ReinitializableFolderStorage, F
             if (!realTreeId.equals(treeId)) {
                 StorageParameters parameters = newStorageParameters(storageParameters);
                 FolderStorage folderStorage = registry.getFolderStorage(realTreeId, folderId);
+                if (folderStorage == null) {
+                    throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(realTreeId, folderId);
+                }
                 boolean started = folderStorage.startTransaction(parameters, false);
                 try {
                     realParentId = folderStorage.getFolder(realTreeId, folderId, parameters).getParentID();
@@ -1360,6 +1362,10 @@ public final class CacheFolderStorage implements ReinitializableFolderStorage, F
      * @throws OXException
      */
     protected Folder getRefFromCache(String treeId, String folderId, StorageParameters params) throws OXException {
+        if (folderId == null) {
+            LOG.info("Unable to retrieve folder reference from cache as the folder identifier is 'null'.");
+            return null;
+        }
         int contextId = params.getContextId();
         /*
          * Try global cache key
@@ -1942,17 +1948,6 @@ public final class CacheFolderStorage implements ReinitializableFolderStorage, F
 
     private Folder loadFolder(String treeId, String folderId, StorageType storageType, boolean readWrite, StorageParameters storageParameters) throws OXException {
         return loadFolder0(treeId, folderId, storageType, readWrite, storageParameters);
-    }
-
-    private Folder optLoadFolder(String treeId, String folderId, StorageType storageType, boolean readWrite, StorageParameters storageParameters) throws OXException {
-        try {
-            return loadFolder0(treeId, folderId, storageType, readWrite, storageParameters);
-        } catch (OXException e) {
-            if (OXFolderExceptionCode.NOT_EXISTS.equals(e) || FolderExceptionErrorMessage.NOT_FOUND.equals(e)) {
-                return null;
-            }
-            throw e;
-        }
     }
 
     private Folder loadFolder0(String treeId, String folderId, StorageType storageType, boolean readWrite, StorageParameters storageParameters) throws OXException {

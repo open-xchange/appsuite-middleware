@@ -85,14 +85,11 @@ import com.openexchange.mail.permission.MailPermission;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.session.Session;
-import com.sun.mail.iap.ProtocolException;
 import com.sun.mail.imap.ACL;
 import com.sun.mail.imap.DefaultFolder;
 import com.sun.mail.imap.IMAPFolder;
 import com.sun.mail.imap.IMAPStore;
 import com.sun.mail.imap.Rights;
-import com.sun.mail.imap.protocol.IMAPProtocol;
-import com.sun.mail.imap.protocol.ListInfo;
 
 /**
  * {@link IMAPFolderConverter} - Converts an instance of {@link IMAPFolder} to an instance of {@link MailFolder}.
@@ -149,13 +146,6 @@ public final class IMAPFolderConverter {
 
     private static final String ATTRIBUTE_NO_INFERIORS = "\\noinferiors";
 
-    private static final String ATTRIBUTE_DRAFTS = "\\drafts";
-    private static final String ATTRIBUTE_JUNK = "\\junk";
-    private static final String ATTRIBUTE_SENT = "\\sent";
-    private static final String ATTRIBUTE_TRASH = "\\trash";
-
-    // private static final String ATTRIBUTE_HAS_NO_CHILDREN = "\\HasNoChildren";
-
     /**
      * Prevent instantiation
      */
@@ -204,45 +194,6 @@ public final class IMAPFolderConverter {
     private static final DefaultFolderType[] TYPES = {
         DefaultFolderType.DRAFTS, DefaultFolderType.SENT, DefaultFolderType.SPAM, DefaultFolderType.TRASH,
         DefaultFolderType.CONFIRMED_SPAM, DefaultFolderType.CONFIRMED_HAM, DefaultFolderType.INBOX };
-
-    private static final class Key {
-
-        private final StackTraceElement[] stackTrace;
-
-        public Key(final StackTraceElement[] stackTrace) {
-            super();
-            this.stackTrace = stackTrace;
-        }
-
-        @Override
-        public int hashCode() {
-            final int prime = 31;
-            int result = 1;
-            result = prime * result + Arrays.hashCode(stackTrace);
-            return result;
-        }
-
-        @Override
-        public boolean equals(final Object obj) {
-            if (this == obj) {
-                return true;
-            }
-            if (obj == null) {
-                return false;
-            }
-            if (getClass() != obj.getClass()) {
-                return false;
-            }
-            final Key other = (Key) obj;
-            if (!Arrays.equals(stackTrace, other.stackTrace)) {
-                return false;
-            }
-            return true;
-        }
-
-    }
-
-    // private static final ConcurrentMap<Key, Object> M = new NonBlockingHashMap<Key, Object>();
 
     private static final boolean DO_STATUS = false;
 
@@ -338,18 +289,6 @@ public final class IMAPFolderConverter {
                  * -------------------------##################------------------------
                  * -------------------------------------------------------------------
                  */
-                // final StackTraceElement[] stackTrace = new Throwable().getStackTrace();
-                // final Key key = new Key(stackTrace);
-                // if (null == M.putIfAbsent(key, TYPES)) {
-                // final Throwable t = new Throwable();
-                // t.setStackTrace(stackTrace);
-                // t.printStackTrace(System.out);
-                // }
-                /*-
-                 * -------------------------------------------------------------------
-                 * -------------------------##################------------------------
-                 * -------------------------------------------------------------------
-                 */
                 if (exists) {
                     final Set<String> attrs = listEntry.getAttributes();
                     if (null != attrs && !attrs.isEmpty()) {
@@ -406,10 +345,12 @@ public final class IMAPFolderConverter {
                         mailFolder.setDefaultFolderType(DefaultFolderType.INBOX);
                     } else if (isDefaultFoldersChecked(session, accountId)) {
                         final String[] defaultMailFolders = getDefaultMailFolders(session, accountId);
-                        for (int i = 0; i < defaultMailFolders.length && !mailFolder.isDefaultFolder(); i++) {
-                            if (imapFullName.equals(defaultMailFolders[i])) {
-                                mailFolder.setDefaultFolder(true);
-                                mailFolder.setDefaultFolderType(TYPES[i]);
+                        if(defaultMailFolders != null) {
+                            for (int i = 0; i < defaultMailFolders.length && !mailFolder.isDefaultFolder(); i++) {
+                                if (imapFullName.equals(defaultMailFolders[i])) {
+                                    mailFolder.setDefaultFolder(true);
+                                    mailFolder.setDefaultFolderType(TYPES[i]);
+                                }
                             }
                         }
                         if (!mailFolder.containsDefaultFolder()) {
@@ -584,25 +525,6 @@ public final class IMAPFolderConverter {
         return ownRights;
     }
 
-    private static void checkSubfoldersByCommands(final IMAPFolder imapFolder, final IMAPMailFolder mailFolder, final String fullname, final char separator, final boolean checkSubscribed) throws MessagingException {
-        final ListInfo[] li = (ListInfo[]) imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
-
-            @Override
-            public Object doCommand(final IMAPProtocol protocol) throws ProtocolException {
-                final String pattern = mailFolder.isRootFolder() ? "%" : new StringBuilder().append(fullname).append(separator).append('%').toString();
-                if (checkSubscribed) {
-                    return protocol.lsub("", pattern);
-                }
-                return protocol.list("", pattern);
-            }
-        });
-        if (checkSubscribed) {
-            mailFolder.setSubscribedSubfolders((li != null) && (li.length > 0));
-        } else {
-            mailFolder.setSubfolders((li != null) && (li.length > 0));
-        }
-    }
-
     private static IMAPMailFolder convertRootFolder(final DefaultFolder rootFolder, final Session session, final IMAPConfig imapConfig) throws OXException {
         try {
             final IMAPMailFolder mailFolder = new IMAPMailFolder();
@@ -764,23 +686,6 @@ public final class IMAPFolderConverter {
         mailFolder.addPermission(mailFolder.getOwnPermission());
     }
 
-    /**
-     * Adds empty ACL permission to specified mail folder for given user.
-     *
-     * @param sessionUser The session user
-     * @param mailFolder The mail folder
-     */
-    private static void addEmptyACL(final int sessionUser, final MailFolder mailFolder) {
-        final ACLPermission aclPerm = new ACLPermission();
-        aclPerm.setEntity(sessionUser);
-        aclPerm.setAllPermission(
-            OCLPermission.NO_PERMISSIONS,
-            OCLPermission.NO_PERMISSIONS,
-            OCLPermission.NO_PERMISSIONS,
-            OCLPermission.NO_PERMISSIONS);
-        mailFolder.addPermission(aclPerm);
-    }
-
     private static boolean isUnknownEntityError(final OXException e) {
         final int code = e.getCode();
         return (e.isPrefix("ACL") && (Entity2ACLExceptionCode.RESOLVE_USER_FAILED.getNumber() == code)) || (e.isPrefix("USR") && (LdapExceptionCode.USER_NOT_FOUND.getNumber() == code));
@@ -801,7 +706,6 @@ public final class IMAPFolderConverter {
         {
             final String[] userFolders = NamespaceFoldersCache.getUserNamespaces(imapStore, true, session, accountId);
             if (userFolders.length > 0) {
-                // final char sep = ListLsubCache.getSeparator(accountId, imapStore, session);
                 for (int i = 0; i < userFolders.length; i++) {
                     if (userFolders[i].startsWith(fullName)) {
                         return true;

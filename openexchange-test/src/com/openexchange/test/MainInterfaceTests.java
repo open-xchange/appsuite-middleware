@@ -97,7 +97,6 @@ import com.openexchange.test.concurrent.ParallelSuite;
     com.openexchange.grizzly.GrizzlyTestSuite.class,
 
     com.openexchange.ajax.resource.ResourceSuite.class,
-    com.openexchange.ajax.roundtrip.pubsub.PubSubSuite.class,
     /*
      * TODO Enable the following test again. But this requires fixing the server. Currently the request fails.
      * com.openexchange.webdav.client.NaughtyClientTest.class,

@@ -46,6 +46,7 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+
 package com.openexchange.jsieve.commands;
 
 import java.util.ArrayList;
@@ -70,12 +71,12 @@ public class Rule implements Comparable<Rule> {
     private ArrayList<Command> commands;
 
     public Rule() {
-        this.commands = new ArrayList<Command>();
+        commands = new ArrayList<Command>();
     }
 
     public Rule(final RuleComment name, final ArrayList<Command> commands) {
         super();
-        this.ruleComment = name;
+        ruleComment = name;
         this.commands = commands;
     }
 
@@ -109,15 +110,15 @@ public class Rule implements Comparable<Rule> {
 
     public Rule(final RuleComment name, final ArrayList<Command> command, final boolean commented) {
         super();
-        this.ruleComment = name;
-        this.commands = command;
+        ruleComment = name;
+        commands = command;
         this.commented = commented;
     }
 
     public Rule(final RuleComment name, final ArrayList<Command> command, final int linenumber, final boolean commented) {
         super();
-        this.ruleComment = name;
-        this.commands = command;
+        ruleComment = name;
+        commands = command;
         this.linenumber = linenumber;
         this.commented = commented;
     }
@@ -145,7 +146,7 @@ public class Rule implements Comparable<Rule> {
     }
 
     public final ArrayList<Command> getCommands() {
-        if(commands == null) {
+        if (commands == null) {
             commands = new ArrayList<Command>();
         }
         return commands;
@@ -153,15 +154,16 @@ public class Rule implements Comparable<Rule> {
 
     /**
      * A convenience method to get the require command if one is contained
+     * 
      * @return the require command or null if none is contained
      */
     public final RequireCommand getRequireCommand() {
         // If a require command is contained here it is located at the first position
-        if (null == this.commands) {
+        if (null == commands) {
             return null;
         }
-        if (!this.commands.isEmpty()) {
-            final Command command = this.commands.get(0);
+        if (!commands.isEmpty()) {
+            final Command command = commands.get(0);
             if (command instanceof RequireCommand) {
                 final RequireCommand requirecmd = (RequireCommand) command;
                 return requirecmd;
@@ -172,13 +174,14 @@ public class Rule implements Comparable<Rule> {
 
     /**
      * A convenience method to get the if command if one is contained
+     * 
      * @return the if command or null if none is contained
      */
     public final IfCommand getIfCommand() {
-        if (null == this.commands) {
+        if (null == commands) {
             return null;
         }
-        for (final Command command : this.commands) {
+        for (final Command command : commands) {
             if (command instanceof IfCommand) {
                 final IfCommand ifcommand = (IfCommand) command;
                 return ifcommand;
@@ -189,6 +192,7 @@ public class Rule implements Comparable<Rule> {
 
     /**
      * A convenience method to get the test command if one is contained
+     * 
      * @return the test command or null if none is contained
      */
     public final TestCommand getTestCommand() {
@@ -202,14 +206,15 @@ public class Rule implements Comparable<Rule> {
 
     /**
      * A convenience method for directly accessing the unique id
+     * 
      * @return -1 if there is no unique id for this rule; a value > -1 otherwise
      */
     public int getUniqueId() {
-        if (null == this.ruleComment) {
+        if (null == ruleComment) {
             return -1;
         }
 
-        return this.ruleComment.getUniqueid();
+        return ruleComment.getUniqueid();
     }
 
     public final void setRuleComments(final RuleComment ruleComment) {
@@ -294,12 +299,91 @@ public class Rule implements Comparable<Rule> {
 
     @Override
     public String toString() {
-        return "Name: " + ((null != this.ruleComment && null != this.ruleComment.getRulename()) ? this.ruleComment.getRulename() : null) + ": " + this.commands;
+        return "Name: " + ((null != ruleComment && null != ruleComment.getRulename()) ? ruleComment.getRulename() : null) + ": " + commands;
     }
 
     @Override
     public int compareTo(final Rule o) {
-        return Integer.valueOf(this.linenumber).compareTo(Integer.valueOf(o.linenumber));
+        return Integer.valueOf(linenumber).compareTo(Integer.valueOf(o.linenumber));
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see java.lang.Object#hashCode()
+     */
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((commands == null) ? 0 : commands.hashCode());
+        result = prime * result + (commented ? 1231 : 1237);
+        result = prime * result + endlinenumber;
+        result = prime * result + ((errormsg == null) ? 0 : errormsg.hashCode());
+        result = prime * result + linenumber;
+        result = prime * result + position;
+        result = prime * result + ((ruleComment == null) ? 0 : ruleComment.hashCode());
+        result = prime * result + ((text == null) ? 0 : text.hashCode());
+        return result;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see java.lang.Object#equals(java.lang.Object)
+     */
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        Rule other = (Rule) obj;
+        if (commands == null) {
+            if (other.commands != null) {
+                return false;
+            }
+        } else if (!commands.equals(other.commands)) {
+            return false;
+        }
+        if (commented != other.commented) {
+            return false;
+        }
+        if (endlinenumber != other.endlinenumber) {
+            return false;
+        }
+        if (errormsg == null) {
+            if (other.errormsg != null) {
+                return false;
+            }
+        } else if (!errormsg.equals(other.errormsg)) {
+            return false;
+        }
+        if (linenumber != other.linenumber) {
+            return false;
+        }
+        if (position != other.position) {
+            return false;
+        }
+        if (ruleComment == null) {
+            if (other.ruleComment != null) {
+                return false;
+            }
+        } else if (!ruleComment.equals(other.ruleComment)) {
+            return false;
+        }
+        if (text == null) {
+            if (other.text != null) {
+                return false;
+            }
+        } else if (!text.equals(other.text)) {
+            return false;
+        }
+        return true;
+    }
 }

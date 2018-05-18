@@ -128,6 +128,7 @@ import com.openexchange.test.concurrent.ParallelSuite;
     Bug37927Test.class,
     Bug38782Test.class,
     Bug50739Test.class,
+    Bug58023Test.class,
 })
 public final class TaskTestSuite {
 }

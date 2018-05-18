@@ -63,3 +63,5 @@ properties:
     type: object
     description: Contains additional metadata for items in the "maildrive" file storage.
     readOnly: true
+required:
+  - folder_id

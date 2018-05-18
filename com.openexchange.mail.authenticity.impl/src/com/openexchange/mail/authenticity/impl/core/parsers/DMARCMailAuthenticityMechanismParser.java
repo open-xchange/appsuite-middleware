@@ -50,6 +50,9 @@
 package com.openexchange.mail.authenticity.impl.core.parsers;
 
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import com.openexchange.java.Strings;
 import com.openexchange.mail.authenticity.mechanism.AuthenticityMechanismResult;
 import com.openexchange.mail.authenticity.mechanism.DefaultMailAuthenticityMechanism;
 import com.openexchange.mail.authenticity.mechanism.MailAuthenticityMechanismResult;
@@ -96,6 +99,34 @@ public class DMARCMailAuthenticityMechanismParser extends AbstractMailAuthentici
         result.setReason(mechResult.getDisplayName());
         result.setDomainMatch(domainMatch);
         result.addProperty("from_domain", result.getDomain());
+        result.addProperty("policy", extractPolicy(mechanismName));
         return result;
+    }
+
+    private static final Pattern POLICY_MATCHER = Pattern.compile("([a-zA-Z]+(\\s+)?=(\\s+)?[a-zA-Z]+\\s?)+");
+
+    /**
+     * Extracts the optional policy of the DMARC mechanism
+     * 
+     * @param mechComment The mechanism comment
+     * @return the policy if present, otherwise an empty string
+     */
+    private String extractPolicy(String mechComment) {
+        Matcher m = POLICY_MATCHER.matcher(mechComment);
+        if (!m.find()) {
+            return "";
+        }
+        String comment = m.group();
+        String[] p = Strings.splitByWhitespaces(comment);
+        for (String s : p) {
+            String[] split = Strings.splitBy(s, '=', true);
+            if (split.length != 2) {
+                continue;
+            }
+            if (split[0].equalsIgnoreCase("p")) {
+                return split[1];
+            }
+        }
+        return "";
     }
 }

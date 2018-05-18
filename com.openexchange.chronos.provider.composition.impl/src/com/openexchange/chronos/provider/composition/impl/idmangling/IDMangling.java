@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the Open-Xchange, Inc. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2020 Open-Xchange, Inc.
+ *     Copyright (C) 2016-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -57,6 +57,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -70,6 +71,7 @@ import com.openexchange.chronos.provider.CalendarAccount;
 import com.openexchange.chronos.provider.CalendarFolder;
 import com.openexchange.chronos.provider.basic.BasicCalendarAccess;
 import com.openexchange.chronos.provider.groupware.GroupwareCalendarFolder;
+import com.openexchange.chronos.service.ErrorAwareCalendarResult;
 import com.openexchange.chronos.service.EventConflict;
 import com.openexchange.chronos.service.EventID;
 import com.openexchange.chronos.service.EventsResult;
@@ -268,7 +270,7 @@ public class IDMangling {
     }
 
     /**
-     * Gets a map of events results result equipped with unique composite identifiers representing results from a specific calendar account.
+     * Gets a map of events results equipped with unique composite identifiers representing results from a specific calendar account.
      *
      * @param relativeResults The event results from the account
      * @param accountId The identifier of the account
@@ -281,6 +283,24 @@ public class IDMangling {
         Map<String, EventsResult> results = new HashMap<String, EventsResult>(relativeResults.size());
         for (Map.Entry<String, EventsResult> entry : relativeResults.entrySet()) {
             results.put(getUniqueFolderId(accountId, entry.getKey()), new IDManglingEventsResult(entry.getValue(), accountId));
+        }
+        return results;
+    }
+
+    /**
+     * Gets a map of calendar results equipped with unique composite identifiers representing results from a specific calendar account.
+     *
+     * @param relativeResults The results from the account
+     * @param accountId The identifier of the account
+     * @return The calendar result representations with unique identifiers
+     */
+    public static Map<EventID, ErrorAwareCalendarResult> withUniqueEventIDs(Map<EventID, ErrorAwareCalendarResult> relativeResults, int accountId) {
+        if (null == relativeResults || relativeResults.isEmpty()) {
+            return relativeResults;
+        }
+        Map<EventID, ErrorAwareCalendarResult> results = new HashMap<EventID, ErrorAwareCalendarResult>(relativeResults.size());
+        for (Entry<EventID, ErrorAwareCalendarResult> entry : relativeResults.entrySet()) {
+            results.put(getUniqueId(accountId, entry.getKey()), new IDManglingErrorAwareCalendarResult(entry.getValue(), accountId));
         }
         return results;
     }
@@ -369,6 +389,32 @@ public class IDMangling {
             }
         }
         return foldersPerAccountId;
+    }
+
+    /**
+     * Gets the relative representation of a list of unique composite event identifiers, mapped to their associated account identifier.
+     * <p/>
+     * Event IDs whose folder denotes one of the {@link IDMangling#ROOT_FOLDER_IDS} are passed as-is implicitly, mapped to the default account.
+     *
+     * @param eventIds The event ids with unique composite folder identifiers, e.g. <code>cal://4/35</code>
+     * @param errorsPerEventId A map to track possible errors that occurred when parsing the supplied identifiers
+     * @return Event identifiers with relative folder identifiers, mapped to their associated calendar account identifier
+     */
+    public static Map<Integer, List<EventID>> getRelativeEventIdsPerAccountId(List<EventID> uniqueEventIds, Map<EventID, OXException> errorsPerEventId) {
+        if (null == uniqueEventIds || uniqueEventIds.isEmpty()) {
+            return Collections.emptyMap();
+        }
+        Map<Integer, List<EventID>> eventIdsPerAccountId = new HashMap<Integer, List<EventID>>(uniqueEventIds.size());
+        for (EventID uniqueEventId : uniqueEventIds) {
+            try {
+                Integer accountId = I(getAccountId(uniqueEventId.getFolderID()));
+                EventID relativeEventId = getRelativeId(uniqueEventId);
+                com.openexchange.tools.arrays.Collections.put(eventIdsPerAccountId, accountId, relativeEventId);
+            } catch (OXException | IllegalArgumentException e) {
+                errorsPerEventId.put(uniqueEventId, CalendarExceptionCodes.UNSUPPORTED_FOLDER.create(e, uniqueEventId, null));
+            }
+        }
+        return eventIdsPerAccountId;
     }
 
     /**

@@ -172,6 +172,9 @@ public class WebClientInfoProvider implements ClientInfoProvider {
                 if (Strings.isNotEmpty(os)) {
                     os = os.toLowerCase();
                 }
+                if (Strings.isNotEmpty(os) && "os x".equals(os)) {
+                    os = OS_FAMILY_MACOS;
+                }
                 String osVersionMajor = operatingSystem.getVersionNumber().getMajor();
                 String osVersionMinor = operatingSystem.getVersionNumber().getMinor();
                 switch (os) {

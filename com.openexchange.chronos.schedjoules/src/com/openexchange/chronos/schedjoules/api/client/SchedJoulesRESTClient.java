@@ -260,7 +260,7 @@ public class SchedJoulesRESTClient implements Closeable {
         try {
             request.setURI(new URI(scheme, baseUrl, path, query, null));
             request.addHeader(HttpHeaders.ACCEPT, acceptHeader);
-            if (!Strings.isEmpty(eTag)) {
+            if (Strings.isNotEmpty(eTag)) {
                 request.addHeader(HttpHeaders.IF_NONE_MATCH, eTag);
             }
             if (lastModified > 0) {

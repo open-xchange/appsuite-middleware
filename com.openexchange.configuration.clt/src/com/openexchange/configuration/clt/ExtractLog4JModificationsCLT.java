@@ -136,6 +136,9 @@ public class ExtractLog4JModificationsCLT {
             properties.putAll(extractRootLevel(original, document));
             // Write output
             final OutputStream os = determineOutput(!cmd.hasOption('o'), cmd.getOptionValue('o'));
+            if (os == null) {
+                return 1;
+            }
             try {
                 properties.store(os, "file-logging.properties");
             } finally {

@@ -85,18 +85,6 @@ public class RemoveGuestPermissionTest extends ShareTest {
         testUpdateSharedFolder(randomFolderAPI(), module, randomGuestPermission(module));
     }
 
-    @Test
-    public void testDeleteSharedFolderRandomly() throws Exception {
-        int module = randomModule();
-        testDeleteSharedFolder(randomFolderAPI(), module, getDefaultFolder(module), randomGuestPermission(module), false);
-    }
-
-    @Test
-    public void testHardDeleteSharedFolderRandomly() throws Exception {
-        int module = randomModule();
-        testDeleteSharedFolder(randomFolderAPI(), module, getDefaultFolder(module), randomGuestPermission(module), true);
-    }
-
     public void noTestUpdateSharedFolderExtensively() throws Exception {
         for (EnumAPI api : TESTED_FOLDER_APIS) {
             for (OCLGuestPermission guestPermission : TESTED_PERMISSIONS) {

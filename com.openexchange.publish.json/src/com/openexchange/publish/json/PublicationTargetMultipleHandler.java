@@ -150,7 +150,7 @@ public class PublicationTargetMultipleHandler implements MultipleHandler {
             }
         }
         final String[] columns = getColumns(request);
-        final JSONArray json = new PublicationTargetWriter(createTranslator(session)).writeJSONArray(targets, columns, session.getUser(), session.getUserPermissionBits());
+        final JSONArray json = new PublicationTargetWriter(createTranslator(session)).writeJSONArray(targets == null ? Collections.emptyList() : targets, columns, session.getUser(), session.getUserPermissionBits());
         return json;
     }
 

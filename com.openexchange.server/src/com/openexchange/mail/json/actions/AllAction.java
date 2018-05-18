@@ -384,25 +384,6 @@ public final class AllAction extends AbstractMailAction implements MailRequestSh
             } finally {
                 SearchIterators.close(it);
             }
-            if (filterApplied && (null != fromToIndices)) {
-                final int fromIndex = fromToIndices[0];
-                int toIndex = fromToIndices[1];
-                final int sz = mails.size();
-                if ((fromIndex) > sz) {
-                    /*
-                     * Return empty iterator if start is out of range
-                     */
-                    mails = Collections.emptyList();
-                } else {
-                    /*
-                     * Reset end index if out of range
-                     */
-                    if (toIndex >= sz) {
-                        toIndex = sz;
-                    }
-                    mails = mails.subList(fromIndex, toIndex);
-                }
-            }
             final AJAXRequestResult result = new AJAXRequestResult(mails, "mail").setDurationByStart(start);
             result.setResponseProperty("cached", Boolean.valueOf(cache));
             if (warnings != null) {

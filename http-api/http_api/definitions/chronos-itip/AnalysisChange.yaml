@@ -1,0 +1,43 @@
+type: object
+properties:
+  introduction:
+    type: string
+    title: Introduction
+    description: An introduction for this change to be displayed to the user.
+  type:
+    type: string
+    title: Type
+    description: The change type.
+    enum:
+      - CREATE
+      - UPDATE
+      - DELETE
+      - CREATE_DELETE_EXCEPTION
+  exception:
+    type: boolean
+    title: Exception
+    description: A boolean idicating if this is about a series exception.
+  newEvent:
+    description: The new event defined by the given ical.
+    $ref: ../chronos/EventData.yaml
+  currentEvent:
+    description: The current event as it already exists in the system.
+    $ref: ../chronos/EventData.yaml
+  masterEvent:
+    description: The master event in case this is an exception.
+    $ref: ../chronos/EventData.yaml
+  deletedEvent:
+    description: The deleted event.
+    $ref: ../chronos/EventData.yaml
+  conflicts:
+    type: array
+    title: Exceptions
+    description: The events that would conflict with this change.
+    items:
+      $ref: ../chronos/ConflictDataRaw.yaml
+  diffDescription:
+    type: array
+    title: Diff descriptions
+    description: The human readable information describing the differences between the changed and the current event.
+    items:
+      type: string

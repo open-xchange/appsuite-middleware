@@ -87,7 +87,7 @@ public class Activator extends HousekeepingActivator {
         final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(Activator.class);
         try {
             closeTrackers();
-            cleanUp();
+            super.stopBundle();
             log.info("Stopped bundle: com.openexchange.admin.user.copy");
         } catch (final Exception e) {
             log.error("Error stopping bundle: com.openexchange.admin.user.copy", e);

@@ -70,6 +70,7 @@ public class Messages implements LocalizableStrings {
     public static final String ADD_WOULD_OVERWRITE_EXISTING_EXCEPTION = "The organizer would like to change the occurrence of a recurrence on a day that already contains such a change. The server can only store one change for a series per day.";
     public static final String CANCEL_UNKNOWN_APPOINTMENT = "The organizer would like to cancel an appointment that could not be found.";
     public static final String CHANGE_PARTICIPANT_STATE_IN_UNKNOWN_APPOINTMENT = "An attendee wanted to change his/her participant state in an appointment that could not be found. Probably the appointment was already canceled.";
+    public static final String CHANGE_PARTICIPANT_STATE_IN_DELETED_APPOINTMENT = "An attendee wanted to change his/her participant state in an appointment that was already deleted.";
     public static final String OLD_UPDATE = "This is an update to an appointment that has been changed in the meantime. Best ignore it.";
     public static final String COUNTER_UNKNOWN_APPOINTMENT = "An attendee wants to change an appointment that could not be found. Probably the appointment was deleted. Best ignore it.";
     public static final String DECLINED_COUNTER_PROPOSAL = "The organizer declined your counter proposal for the appointment.";
@@ -98,9 +99,12 @@ public class Messages implements LocalizableStrings {
     public static final String REFRESH_INTRO = "%1$s would like to be brought up to date about the appointment %2$s. Please send another invitation.";
 
     /**
-     * Example: "UserXY has accepted the invitation"
+     * Examples:
+     * <p>"UserXY has accepted the invitation"
+     * <p>"UserXY has declined the invitation"
+     * <p>"UserXY has tentatively accepted the invitation"
      */
-    public static final String ACCEPT_INTRO = "%1$s has %2$s the invitation:";
+    public static final String STATUS_CHANGED_INTRO = "%1$s has %2$s the invitation:";
 
     /**
      * Example: "UserXY has accepted the invitation on behalf of UserAB"
@@ -113,11 +117,6 @@ public class Messages implements LocalizableStrings {
     public static final String ACCEPT_ON_YOUR_BEHALF_INTRO = "%1$s has %2$s the invitation on your behalf:";
 
     /**
-     * Example: "UserXY has declined the invitation"
-     */
-    public static final String DECLINE_INTRO = "%1$s has %2$s the invitation:";
-
-    /**
      * Example: "UserXY has declined the invitation on behalf of UserAB"
      */
     public static final String DECLINE_ON_BEHALF_INTRO = "%1$s has %2$s the invitation on behalf of %3$s:";
@@ -126,11 +125,6 @@ public class Messages implements LocalizableStrings {
      * Example: "UserXY has declined the invitation on your behalf"
      */
     public static final String DECLINE_ON_YOUR_BEHALF_INTRO = "%1$s has %2$s the invitation on your behalf:";
-
-    /**
-     * Example: "UserXY has tentatively accepted the invitation"
-     */
-    public static final String TENTATIVE_INTRO = "%1$s has %2$s the invitation:";
 
     /**
      * Example: "UserXY has tentatively accepted the invitation on behalf of UserAB"
@@ -265,6 +259,12 @@ public class Messages implements LocalizableStrings {
     public static final String HAS_REMOVED_RESOURCE = "The resource %1$s is no longer reserved for the appointment";
 
     public static final String HAS_RESCHEDULED = "The appointment was rescheduled. Original date: %1$s. New date: %2$s";
+
+    public static final String HAS_RESCHEDULED_TIMEZONE = "The timezone of the appointment was changed. Original timezone: %1$s. New timezone: %2$s";
+
+    public static final String HAS_RESCHEDULED_TIMEZONE_START_DATE = "The timezone of the appointments start date was changed. Original timezone: %1$s. New timezone: %2$s";
+
+    public static final String HAS_RESCHEDULED_TIMEZONE_END_DATE = "The timezone of the appointments end date was changed. Original timezone: %1$s. New timezone: %2$s";
 
     public static final String ASK_RESCHEDULE = "Reschedule the event. Original date: %1$s. New date: %2$s";
 

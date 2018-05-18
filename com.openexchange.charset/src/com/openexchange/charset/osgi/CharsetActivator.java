@@ -159,11 +159,11 @@ public final class CharsetActivator extends HousekeepingActivator implements Ser
             }
             collectionCharsetProvider = null;
             LOG.info("Collection charset provider replaced with former standard/external charset provider. Charset bundle successfully stopped");
+            super.stopBundle();
         } catch (final Throwable t) {
             LOG.error("", t);
         } finally {
             collectionCharsetProvider = null;
-            cleanUp();
         }
     }
 

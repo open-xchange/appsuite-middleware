@@ -44,4 +44,4 @@
           An json object containing the deleted event if the deletion was successfull. In case of errors the responsible fields in the response are
           filled (see [Error handling](#error-handling)).
         schema:
-          $ref: "#/definitions/ChronosCalendarResultResponse"
+          $ref: "#/definitions/ChronosMultipleCalendarResultResponse"

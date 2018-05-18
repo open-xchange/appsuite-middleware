@@ -50,7 +50,8 @@
 package com.openexchange.chronos.itip.generators;
 
 import java.util.List;
-
+import com.openexchange.chronos.itip.ITipMethod;
+import com.openexchange.chronos.itip.ITipRole;
 import com.openexchange.exception.OXException;
 
 /**
@@ -60,36 +61,147 @@ import com.openexchange.exception.OXException;
  */
 public interface ITipMailGenerator {
 
+    /**
+     * Generates an invitation mail to a new event for given participant.
+     * 
+     * @param participant The {@link NotificationParticipant} to send a mail to
+     * @return A {@link NotificationMail}
+     * @throws OXException If mail can't be created or rendered
+     * @see ITipMethod#REQUEST
+     */
     NotificationMail generateCreateMailFor(NotificationParticipant participant) throws OXException;
 
+    /**
+     * Generates a mail to updated an existing event for given participant.
+     * 
+     * @param participant The {@link NotificationParticipant} to send a mail to
+     * @return A {@link NotificationMail}
+     * @throws OXException If mail can't be created or rendered
+     * @see ITipMethod#REQUEST
+     */
     NotificationMail generateUpdateMailFor(NotificationParticipant participant) throws OXException;
 
+    /**
+     * Generates a deletion mail of an deleted event for given participant.
+     * 
+     * @param participant The {@link NotificationParticipant} to send a mail to
+     * @return A {@link NotificationMail}
+     * @throws OXException If mail can't be created or rendered
+     * @see ITipMethod#CANCEL
+     */
     NotificationMail generateDeleteMailFor(NotificationParticipant participant) throws OXException;
 
+    /**
+     * Generates a invitation mail to a new created event exception for given participant.
+     * 
+     * @param participant The {@link NotificationParticipant} to send a mail to
+     * @return A {@link NotificationMail}
+     * @throws OXException If mail can't be created or rendered
+     * @see ITipMethod#REQUEST
+     */
     NotificationMail generateCreateExceptionMailFor(NotificationParticipant participant) throws OXException;
 
-	NotificationMail generateRefreshMailFor(NotificationParticipant p) throws OXException;
+    /**
+     * Generates a refresh mail for given participant.
+     * 
+     * @param participant The {@link NotificationParticipant} to send a mail to
+     * @return A {@link NotificationMail}
+     * @throws OXException If mail can't be created or rendered
+     * @see ITipMethod#REFRESH
+     */
+    NotificationMail generateRefreshMailFor(NotificationParticipant participant) throws OXException;
 
-	NotificationMail generateDeclineCounterMailFor(NotificationParticipant p) throws OXException;
+    /**
+     * Generates a decline counter mail to given participant.
+     * 
+     * @param participant The {@link NotificationParticipant} to send a mail to
+     * @return A {@link NotificationMail}
+     * @throws OXException If mail can't be created or rendered
+     * @see ITipMethod#DECLINECOUNTER
+     */
+    NotificationMail generateDeclineCounterMailFor(NotificationParticipant participant) throws OXException;
 
-	NotificationMail generateCreateMailFor(String email) throws OXException;
+    /**
+     * Generates an invitation mail to a new event for given participant.
+     * 
+     * @param email The mail address of the participant to send a mail to
+     * @return A {@link NotificationMail}
+     * @throws OXException If mail can't be created or rendered
+     * @see ITipMethod#REQUEST
+     */
+    NotificationMail generateCreateMailFor(String email) throws OXException;
 
+    /**
+     * Generates a mail to updated an existing event for given participant.
+     * 
+     * @param email The mail address of the participant to send a mail to
+     * @return A {@link NotificationMail}
+     * @throws OXException If mail can't be created or rendered
+     * @see ITipMethod#REQUEST
+     */
     NotificationMail generateUpdateMailFor(String email) throws OXException;
 
+    /**
+     * Generates a deletion mail of an deleted event for given participant.
+     * 
+     * @param email The mail address of the participant to send a mail to
+     * @return A {@link NotificationMail}
+     * @throws OXException If mail can't be created or rendered
+     * @see ITipMethod#CANCEL
+     */
     NotificationMail generateDeleteMailFor(String email) throws OXException;
 
+    /**
+     * Generates a invitation mail to a new created event exception for given participant.
+     * 
+     * @param email The mail address of the participant to send a mail to
+     * @return A {@link NotificationMail}
+     * @throws OXException If mail can't be created or rendered
+     * @see ITipMethod#REQUEST
+     */
     NotificationMail generateCreateExceptionMailFor(String email) throws OXException;
 
-	NotificationMail generateRefreshMailFor(String email) throws OXException;
+    /**
+     * Generates a refresh mail for given participant.
+     * 
+     * @param email The mail address of the participant to send a mail to
+     * @return A {@link NotificationMail}
+     * @throws OXException If mail can't be created or rendered
+     * @see ITipMethod#REFRESH
+     */
+    NotificationMail generateRefreshMailFor(String email) throws OXException;
 
-	NotificationMail generateDeclineCounterMailFor(String email) throws OXException;
+    /**
+     * Generates a decline counter mail to given participant.
+     * 
+     * @param email The mail address of the participant to send a mail to
+     * @return A {@link NotificationMail}
+     * @throws OXException If mail can't be created or rendered
+     * @see ITipMethod#DECLINECOUNTER
+     */
+    NotificationMail generateDeclineCounterMailFor(String email) throws OXException;
 
-	List<NotificationParticipant> getRecipients();
+    /**
+     * Get all recipients to send a mail to.
+     * 
+     * @return A {@link List} of all {@link NotificationParticipant}s
+     * @see NotificationParticipantResolver#resolveAllRecipients(com.openexchange.chronos.Event, com.openexchange.chronos.Event, com.openexchange.groupware.ldap.User, com.openexchange.groupware.ldap.User, com.openexchange.groupware.contexts.Context,
+     *      com.openexchange.session.Session, com.openexchange.chronos.CalendarUser)
+     */
+    List<NotificationParticipant> getRecipients();
 
+    /**
+     * If the user has the role of the {@link ITipRole#ORGANIZER}
+     * 
+     * @return <code>true</code> if the user is the organizer, <code>false</code> otherwise
+     */
     boolean userIsTheOrganizer();
 
-	void noActor();
-
-
+    /**
+     * Clones the current actor and set {@link NotificationParticipant#setVirtual(boolean)} to <code>true</code>.
+     * 
+     * Efficiently enables mail generation for the current actor/user.
+     */
+    void noActor();
 
 }

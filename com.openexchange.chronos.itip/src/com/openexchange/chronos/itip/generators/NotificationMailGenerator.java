@@ -154,8 +154,8 @@ public class NotificationMailGenerator implements ITipMailGenerator {
         this.calendarUtilities = Services.getService(CalendarUtilities.class);
 
         this.recipients = resolver.resolveAllRecipients(original, updated, user, onBehalfOf, ctx, session, principal);
-        this.participants = resolver.getAllParticipants(this.recipients, updated, user, ctx);
-        this.resources = resolver.getResources(updated, ctx);
+        this.participants = resolver.getAllParticipants(this.recipients, updated);
+        this.resources = resolver.getResources(updated);
 
         for (final NotificationParticipant participant : recipients) {
             if (participant.hasRole(ITipRole.ORGANIZER)) {
@@ -946,7 +946,7 @@ public class NotificationMailGenerator implements ITipMailGenerator {
 
         @Override
         public NotificationMail generateDeleteMailFor(final NotificationParticipant participant) throws OXException {
-            if (participant.hasRole(ITipRole.ORGANIZER)) {                
+            if (participant.hasRole(ITipRole.ORGANIZER) && false == ParticipationStatus.DECLINED.equals(actor.getConfirmStatus())) {
                 return stateChanged(reply(participant, ParticipationStatus.DECLINED), ParticipationStatus.DECLINED);
             }
             return null;
@@ -1027,7 +1027,7 @@ public class NotificationMailGenerator implements ITipMailGenerator {
                     identifier = onBehalfOf.getIdentifier();
                 }
                 for (ItemUpdate<Attendee, AttendeeField> updatedItem : updatedItems) {
-                    if (updatedItem.getUpdate().getEntity() == identifier && updatedItem.getUpdatedFields().contains(AttendeeField.PARTSTAT)) {
+                    if (updatedItem.getUpdate().getEntity() == identifier && (updatedItem.getUpdatedFields().contains(AttendeeField.PARTSTAT) || updatedItem.getUpdatedFields().contains(AttendeeField.COMMENT))) {
                         confirmStatus = updatedItem.getUpdate().getPartStat();
                         return (stateChanged = Boolean.TRUE).booleanValue();
                     }

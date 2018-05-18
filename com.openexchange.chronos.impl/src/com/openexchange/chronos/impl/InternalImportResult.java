@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the Open-Xchange, Inc. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2020 Open-Xchange, Inc.
+ *     Copyright (C) 2016-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,9 +49,10 @@
 
 package com.openexchange.chronos.impl;
 
+import java.util.Collection;
 import java.util.List;
+import com.openexchange.chronos.Event;
 import com.openexchange.chronos.service.CalendarEvent;
-import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.CalendarResult;
 import com.openexchange.chronos.service.EventID;
 import com.openexchange.chronos.service.ImportResult;
@@ -63,9 +64,24 @@ import com.openexchange.exception.OXException;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public class InternalImportResult {
+public class InternalImportResult extends InternalCalendarResult {
 
-    private final InternalCalendarResult calendarResult;
+    @Override
+    public boolean equals(Object obj) {
+        return delegate.equals(obj);
+    }
+
+    @Override
+    public int hashCode() {
+        return delegate.hashCode();
+    }
+
+    @Override
+    public String toString() {
+        return delegate.toString();
+    }
+
+    private final InternalCalendarResult delegate;
     private final ImportResult importResult;
 
     /**
@@ -95,35 +111,16 @@ public class InternalImportResult {
     /**
      * Initializes a new {@link InternalImportResult}.
      *
-     * @param calendarResult The corresponding calendar result
+     * @param delegate The corresponding calendar result
      * @param eventID The identifier of the imported event, or <code>null</code> if no event was created
      * @param index The sequential index of the event in the source data, or <code>0</code> if unknown
      * @param warnings A list of (non-fatal) warnings that occurred during import, or an empty list if there are none
      * @param error A (fatal) error that prevented the event from being stored successfully, or <code>null</code> if there is none
      */
-    private InternalImportResult(InternalCalendarResult calendarResult, EventID eventID, int index, List<OXException> warnings, OXException error) {
-        super();
-        this.calendarResult = calendarResult;
+    private InternalImportResult(InternalCalendarResult delegate, EventID eventID, int index, List<OXException> warnings, OXException error) {
+        super(delegate.getSession(), delegate.getCalendarUserId(), delegate.getFolder());
+        this.delegate = delegate;
         this.importResult = new DefaultImportResult(getUserizedResult(), eventID, index, warnings, error);
-    }
-
-    /**
-     * Gets the calendar event representing the system-wide view on the performed calendar changes.
-     *
-     * @param parameters Additional calendar parameters, or <code>null</code> if not available
-     * @return The calendar event
-     */
-    public CalendarEvent getCalendarEvent(CalendarParameters parameters) {
-        return calendarResult.getCalendarEvent(parameters);
-    }
-
-    /**
-     * Gets the <i>userized</i> calendar result representing the acting client's point of view on the performed changes.
-     *
-     * @return The calendar result
-     */
-    public CalendarResult getUserizedResult() {
-        return calendarResult.getUserizedResult();
     }
 
     /**
@@ -133,6 +130,72 @@ public class InternalImportResult {
      */
     public ImportResult getImportResult() {
         return importResult;
+    }
+
+    /**
+     * Gets the calendar event representing the system-wide view on the performed calendar changes.
+     *
+     * @param parameters Additional calendar parameters, or <code>null</code> if not available
+     * @return The calendar event
+     */
+    @Override
+    public CalendarEvent getCalendarEvent() {
+        return delegate.getCalendarEvent();
+    }
+
+    /**
+     * Gets the <i>userized</i> calendar result representing the acting client's point of view on the performed changes.
+     *
+     * @return The calendar result
+     */
+    @Override
+    public CalendarResult getUserizedResult() {
+        return delegate.getUserizedResult();
+    }
+
+    @Override
+    public void addAffectedFolderIds(String folderId, Collection<? extends String> folderIds) {
+        delegate.addAffectedFolderIds(folderId, folderIds);
+    }
+
+    @Override
+    public void addAffectedFolderIds(String folderId, Collection<? extends String> folderIds, Collection<? extends String> otherFolderIds) {
+        delegate.addAffectedFolderIds(folderId, folderIds, otherFolderIds);
+    }
+
+    @Override
+    public InternalCalendarResult addPlainDeletion(long timestamp, Event event) {
+        return delegate.addPlainDeletion(timestamp, event);
+    }
+
+    @Override
+    public InternalCalendarResult addUserizedDeletion(long timestamp, Event event) {
+        return delegate.addUserizedDeletion(timestamp, event);
+    }
+
+    @Override
+    public InternalCalendarResult addPlainCreation(Event createdEvent) {
+        return delegate.addPlainCreation(createdEvent);
+    }
+
+    @Override
+    public InternalCalendarResult addUserizedCreation(Event createdEvent) {
+        return delegate.addUserizedCreation(createdEvent);
+    }
+
+    @Override
+    public InternalCalendarResult addUserizedCreations(List<Event> createdEvents) {
+        return delegate.addUserizedCreations(createdEvents);
+    }
+
+    @Override
+    public InternalCalendarResult addPlainUpdate(Event originalEvent, Event updatedEvent) throws OXException {
+        return delegate.addPlainUpdate(originalEvent, updatedEvent);
+    }
+
+    @Override
+    public InternalCalendarResult addUserizedUpdate(Event originalEvent, Event updatedEvent) throws OXException {
+        return delegate.addUserizedUpdate(originalEvent, updatedEvent);
     }
 
 }

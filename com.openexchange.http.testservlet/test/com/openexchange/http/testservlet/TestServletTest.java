@@ -111,26 +111,14 @@ public class TestServletTest {
 
     @Test(timeout = 500)
      public void testDoGet_ThreadSleepNotExecuted_ReturnedWithin2000ms() throws ServletException, IOException {
-        this.testServlet = new TestServlet() {
-
-            @Override
-            public String getBody(HttpServletRequest req) {
-                return "theBody";
-            }
-        };
+        this.testServlet = new TestServlet();
 
         this.testServlet.doGet(this.httpServletRequest, this.httpServletResponse);
     }
 
     @Test(timeout = 500)
      public void testDoPut_ThreadSleepNotExecuted_ReturnedWithin2000ms() throws ServletException, IOException {
-        this.testServlet = new TestServlet() {
-
-            @Override
-            public String getBody(HttpServletRequest req) {
-                return "theBody";
-            }
-        };
+        this.testServlet = new TestServlet();
 
         this.testServlet.doPut(this.httpServletRequest, this.httpServletResponse);
     }

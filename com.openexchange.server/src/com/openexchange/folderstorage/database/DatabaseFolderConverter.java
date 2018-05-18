@@ -156,6 +156,8 @@ public final class DatabaseFolderConverter {
                 return retval;
             }
         });
+        /*-
+         *  // finally dropped
         m.put(FolderObject.SYSTEM_GLOBAL_FOLDER_ID, new FolderConverter() {
 
             @Override
@@ -166,6 +168,7 @@ public final class DatabaseFolderConverter {
                 return retval;
             }
         });
+        */
         CONVERTERS = m;
     }
 

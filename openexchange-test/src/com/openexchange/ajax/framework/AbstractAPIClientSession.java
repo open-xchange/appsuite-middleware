@@ -51,11 +51,11 @@ package com.openexchange.ajax.framework;
 
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.ConcurrentHashSet;
 import com.openexchange.test.pool.TestContextPool;
 import com.openexchange.test.pool.TestUser;
 import com.openexchange.testing.httpclient.invoker.ApiClient;
@@ -74,7 +74,8 @@ public abstract class AbstractAPIClientSession extends AbstractClientSession {
 
     protected LoginApi loginApi;
     protected ApiClient apiClient;
-    private Set<ApiClient> apiClients;
+
+    private Set<ApiClient> apiClients = new ConcurrentHashSet<>(1);
 
     /**
      * Default constructor.
@@ -98,9 +99,6 @@ public abstract class AbstractAPIClientSession extends AbstractClientSession {
     }
 
     protected void rememberClient(ApiClient client) {
-        if (apiClients == null) {
-            apiClients = new HashSet<>(1);
-        }
         apiClients.add(client);
     }
 
@@ -146,17 +144,17 @@ public abstract class AbstractAPIClientSession extends AbstractClientSession {
      * </p>
      *
      * @param client to logout
-     * @param loggin Whether to log an error or not
+     * @param logging Whether to log an error or not
      * @return <code>null</code> to prepare client for garbage collection
      */
-    protected final ApiClient logoutClient(ApiClient client, boolean loggin) {
+    protected final ApiClient logoutClient(ApiClient client, boolean logging) {
         try {
             if (client != null) {
                 client.logout();
                 LOG.info("Logout succesfull for user " + client.getUser());
             }
         } catch (Exception e) {
-            if (loggin) {
+            if (logging) {
                 LOG.error("Unable to correctly tear down test setup.", e);
             }
         }
@@ -217,6 +215,7 @@ public abstract class AbstractAPIClientSession extends AbstractClientSession {
             newClient = new ApiClient();
             setBasePath(newClient);
             newClient.setUserAgent("ox-test-client");
+            newClient.login(user.getLogin(), user.getPassword());
         } catch (Exception e) {
             LOG.error("Could not generate new client for user {} in context {} ", user.getUser(), user.getContext());
             throw new OXException();

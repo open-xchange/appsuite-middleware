@@ -49,8 +49,6 @@
 
 package com.openexchange.chronos.availability.json;
 
-import java.util.Collection;
-import java.util.Collections;
 import java.util.Map;
 import com.google.common.collect.ImmutableMap;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
@@ -76,16 +74,6 @@ public class AvailabilityActionFactory implements AJAXActionServiceFactory {
         actions.put("set", new SetAction(services));
         actions.put("get", new GetAction(services));
         this.actions = actions.build();
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.documentation.AnnotatedServices#getSupportedServices()
-     */
-    @Override
-    public Collection<?> getSupportedServices() {
-        return Collections.unmodifiableCollection(actions.values());
     }
 
     /*

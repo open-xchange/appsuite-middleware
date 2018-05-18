@@ -69,8 +69,6 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.regex.Matcher;
-import javax.activation.DataHandler;
 import javax.mail.Address;
 import javax.mail.Message.RecipientType;
 import javax.mail.MessagingException;
@@ -123,7 +121,6 @@ import com.openexchange.mail.mime.MimeMailException;
 import com.openexchange.mail.mime.MimeMailExceptionCode;
 import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.mail.mime.converters.MimeMessageConverter;
-import com.openexchange.mail.mime.datasource.MimeMessageDataSource;
 import com.openexchange.mail.mime.utils.MimeMessageUtility;
 import com.openexchange.mail.transport.MailTransport;
 import com.openexchange.mail.transport.MimeSupport;
@@ -664,7 +661,7 @@ abstract class AbstractSMTPTransport extends MailTransport implements MimeSuppor
                         if (null != oauthService) {
                             OAuthAccount oAuthAccount;
                             try {
-                                oAuthAccount = oauthService.getAccount(account.getTransportOAuthId(), session, session.getUserId(), session.getContextId());
+                                oAuthAccount = oauthService.getAccount(session, account.getTransportOAuthId());
                             } catch (Exception x) {
                                 LOG.warn("Failed to load transport-associated OAuth account", x);
                                 oAuthAccount = null;
@@ -684,7 +681,7 @@ abstract class AbstractSMTPTransport extends MailTransport implements MimeSuppor
                             OAuthService oauthService = Services.optService(OAuthService.class);
                             if (null != oauthService) {
                                 try {
-                                    OAuthAccount oAuthAccount = oauthService.getAccount(mailAccount.getMailOAuthId(), session, session.getUserId(), session.getContextId());
+                                    OAuthAccount oAuthAccount = oauthService.getAccount(session, mailAccount.getMailOAuthId());
                                     throw MailExceptionCode.MAIL_TRANSPORT_DISABLED_OAUTH.create(smtpConfig.getServer(), smtpConfig.getLogin(), I(session.getUserId()), I(session.getContextId()), oAuthAccount.getDisplayName());
                                 } catch (Exception x) {
                                     LOG.warn("Failed to load mail-associated OAuth account", x);
@@ -727,6 +724,9 @@ abstract class AbstractSMTPTransport extends MailTransport implements MimeSuppor
                 }
             }
         } catch (javax.mail.AuthenticationFailedException e) {
+            if (accountId == Account.DEFAULT_ID) {
+                LOG.warn("", e);
+            }
             throw MimeMailExceptionCode.TRANSPORT_INVALID_CREDENTIALS.create(e, smtpConfig.getServer(), e.getMessage());
         } catch (MessagingException e) {
             if (MimeMailException.isSSLHandshakeException(e)) {
@@ -777,7 +777,8 @@ abstract class AbstractSMTPTransport extends MailTransport implements MimeSuppor
                 throw e;
             }
 
-            if (smtpConfig.getAccountId() != MailAccount.DEFAULT_ID) {
+            boolean isPrimaryAccount = smtpConfig.getAccountId() == MailAccount.DEFAULT_ID;
+            if (false == isPrimaryAccount) {
                 AbstractTask<Void> task = new AbstractTask<Void>() {
 
                     @Override
@@ -796,7 +797,7 @@ abstract class AbstractSMTPTransport extends MailTransport implements MimeSuppor
                 throw MailExceptionCode.AUTH_TYPE_NOT_SUPPORTED.create(smtpConfig.getAuthType().getName(), smtpConfig.getServer());
             }
 
-            if (smtpConfig.getAccountId() == MailAccount.DEFAULT_ID) {
+            if (isPrimaryAccount) {
                 AuthenticationFailedHandlerService handlerService = Services.getService(AuthenticationFailedHandlerService.class);
                 if (handlerService != null) {
                     OXException oxe = MimeMailExceptionCode.TRANSPORT_INVALID_CREDENTIALS.create(e, smtpConfig.getServer(), e.getMessage());
@@ -823,7 +824,7 @@ abstract class AbstractSMTPTransport extends MailTransport implements MimeSuppor
                         LOG.warn("Detected failed OAuth authentication, but unable to handle as needed service {} is missing", OAuthService.class.getSimpleName());
                     } else {
                         try {
-                            OAuthAccount oAuthAccount = oauthService.getAccount(oauthAccountId, session, session.getUserId(), session.getContextId());
+                            OAuthAccount oAuthAccount = oauthService.getAccount(session, oauthAccountId);
                             API api = oAuthAccount.getAPI();
                             Throwable cause = e.getCause();
                             throw OAuthExceptionCodes.OAUTH_ACCESS_TOKEN_INVALID.create(cause, api.getName(), I(oAuthAccount.getId()), I(session.getUserId()), I(session.getContextId()));
@@ -910,7 +911,7 @@ abstract class AbstractSMTPTransport extends MailTransport implements MimeSuppor
                 if (Account.DEFAULT_ID == accountId) {
                     addPrimaryAddressHeader(smtpMessage, smtpConfig.getSMTPProperties());
                 }
-                
+
                 // Check if security settings are given and if properly handled
                 if (securitySettings != null && securitySettings.anythingSet()) {
                     if (false == listenerChain.checkSettings(securitySettings, session)) {
@@ -1003,16 +1004,7 @@ abstract class AbstractSMTPTransport extends MailTransport implements MimeSuppor
             } catch (MessagingException e) {
                 exception = e;
                 Exception nextException = e.getNextException();
-                if (nextException instanceof javax.activation.UnsupportedDataTypeException) {
-                    // Check for "no object DCH for MIME type xxxxx/yyyy"
-                    final String message = nextException.getMessage();
-                    if (message.toLowerCase().indexOf("no object dch") >= 0) {
-                        // Not able to recover from JAF's "no object DCH for MIME type xxxxx/yyyy" error
-                        // Perform the alternative transport with custom JAF DataHandler
-                        LOG.warn(message.replaceFirst("[dD][cC][hH]", Matcher.quoteReplacement("javax.activation.DataContentHandler")));
-                        return transportAlt(messageToSend, recipients, transport, smtpConfig);
-                    }
-                } else if (nextException instanceof IOException) {
+                if (nextException instanceof IOException) {
                     if (nextException.getMessage().equals("Maximum message size is exceeded.")) {
                         throw MailExceptionCode.MAX_MESSAGE_SIZE_EXCEEDED.create(getSize(getMaxMailSize(), 0, false, true));
                     }
@@ -1407,32 +1399,6 @@ abstract class AbstractSMTPTransport extends MailTransport implements MimeSuppor
         return userId;
     }
 
-    private MimeMessage transportAlt(final MimeMessage smtpMessage, final Address[] recipients, final Transport transport, final SMTPConfig smtpConfig) throws OXException {
-        try {
-            final MimeMessageDataSource dataSource = new MimeMessageDataSource(smtpMessage, smtpConfig, smtpConfig.getSession());
-            smtpMessage.setDataHandler(new DataHandler(dataSource));
-            if (!transport.isConnected()) {
-                connectTransport(transport, smtpConfig);
-            }
-            doTransport(smtpMessage, recipients, transport);
-            logMessageTransport(smtpMessage, smtpConfig);
-            invokeLater(new Runnable() {
-
-                @Override
-                public void run() {
-                    try {
-                        dataSource.cleanUp();
-                    } catch (final Exception e) {
-                        // Ignore
-                    }
-                }
-            });
-            return smtpMessage;
-        } catch (final MessagingException me) {
-            throw handleMessagingException(me, smtpConfig);
-        }
-    }
-
     private String authEncode(final String s) throws OXException {
         String tmp = s;
         if (tmp != null) {
@@ -1567,7 +1533,7 @@ abstract class AbstractSMTPTransport extends MailTransport implements MimeSuppor
 
     /**
      * Add the primary address header to outgoing mails if 'com.openexchange.smtp.setPrimaryAddressHeader' is set and valid.
-     * 
+     *
      * @param message The message to send
      * @param properties The {@link ISMTPProperties} to get the option from
      * @throws OXException If user can't be loaded
@@ -1615,13 +1581,11 @@ abstract class AbstractSMTPTransport extends MailTransport implements MimeSuppor
         @Override
         public void messageNotDelivered(TransportEvent e) {
             fillAddressesFromEvent(e);
-
         }
 
         @Override
         public void messageDelivered(TransportEvent e) {
             fillAddressesFromEvent(e);
-
         }
 
         private void fillAddressesFromEvent(TransportEvent e) {

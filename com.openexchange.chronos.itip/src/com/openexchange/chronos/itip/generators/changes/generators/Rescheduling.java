@@ -50,8 +50,8 @@
 package com.openexchange.chronos.itip.generators.changes.generators;
 
 import java.text.DateFormat;
-import java.util.Arrays;
 import java.util.Date;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.TimeZone;
@@ -81,25 +81,28 @@ public class Rescheduling implements ChangeDescriptionGenerator {
 
     @Override
     public List<Sentence> getDescriptions(Context ctx, Event original, Event updated, ITipEventUpdate diff, Locale locale, TimeZone timezone) {
-        String msg = Messages.HAS_RESCHEDULED;
-
-        return Arrays.asList(new Sentence(msg).add(timeString(original, diff, locale, timezone), ArgumentType.ORIGINAL).add(updatedTimeString(updated, diff, locale, timezone), ArgumentType.UPDATED));
+        List<Sentence> sentences = handleChangedTimeZones(original, updated);
+        if (timeChanged(original, updated)) {
+            String msg = Messages.HAS_RESCHEDULED;
+            sentences.add(new Sentence(msg).add(timeString(original, diff, locale, timezone), ArgumentType.ORIGINAL).add(updatedTimeString(updated, diff, locale, timezone), ArgumentType.UPDATED));
+        }
+        return sentences;
     }
 
-    private String timeString(Event appointment, ITipEventUpdate diff, Locale locale, TimeZone timezone) {
+    private String timeString(Event event, ITipEventUpdate diff, Locale locale, TimeZone timezone) {
         Format format = chooseFormat(diff, timezone);
-        if (differentDays(appointment.getStartDate(), appointment.getEndDate(), timezone)) {
+        if (differentDays(event.getStartDate(), event.getEndDate(), timezone)) {
             format = Format.DIFFERENT_DAYS;
         }
-        return time(format, appointment, locale, timezone);
+        return time(format, event, locale, timezone);
     }
 
-    private String updatedTimeString(Event appointment, ITipEventUpdate diff, Locale locale, TimeZone timezone) {
+    private String updatedTimeString(Event event, ITipEventUpdate diff, Locale locale, TimeZone timezone) {
         Format format = chooseFormat(diff, timezone);
-        if (differentDays(appointment.getStartDate(), appointment.getEndDate(), timezone)) {
+        if (differentDays(event.getStartDate(), event.getEndDate(), timezone)) {
             format = Format.DIFFERENT_DAYS;
         }
-        return updatedTime(format, appointment, locale, timezone);
+        return updatedTime(format, event, locale, timezone);
     }
 
     private String updatedTime(Format format, Event updated, Locale locale, TimeZone timezone) {
@@ -206,4 +209,43 @@ public class Rescheduling implements ChangeDescriptionGenerator {
         return FIELDS;
     }
 
+    private List<Sentence> handleChangedTimeZones(Event original, Event updated) {
+        List<Sentence> sentences = new LinkedList<>();
+        if (null != original) {
+            String defaultValue = "UTC";
+            String originalStartId = notNull(original, original.getStartDate(), original.getStartDate().getTimeZone()) ? original.getStartDate().getTimeZone().getID() : defaultValue;
+            String originalEndId = notNull(original, original.getEndDate(), original.getEndDate().getTimeZone()) ? original.getEndDate().getTimeZone().getID() : defaultValue;
+            String updatedStartId = notNull(updated, updated.getStartDate(), updated.getStartDate().getTimeZone()) ? updated.getStartDate().getTimeZone().getID() : defaultValue;
+            String updatedEndId = notNull(updated, updated.getEndDate(), updated.getEndDate().getTimeZone()) ? updated.getEndDate().getTimeZone().getID() : defaultValue;
+
+            // Both dates were the same and changed to the same?
+            if (originalStartId.equals(originalEndId) && updatedStartId.equals(updatedEndId)) {
+                if (false == originalStartId.equals(updatedStartId)) {
+                    sentences.add(new Sentence(Messages.HAS_RESCHEDULED_TIMEZONE).add(originalStartId, ArgumentType.ORIGINAL).add(updatedStartId, ArgumentType.UPDATED));
+                }
+            } else {
+                // Separate start and end date sentences
+                if (false == originalStartId.equals(updatedStartId)) {
+                    sentences.add(new Sentence(Messages.HAS_RESCHEDULED_TIMEZONE_START_DATE).add(originalStartId, ArgumentType.ORIGINAL).add(updatedStartId, ArgumentType.UPDATED));
+                }
+                if (false == originalEndId.equals(updatedEndId)) {
+                    sentences.add(new Sentence(Messages.HAS_RESCHEDULED_TIMEZONE_END_DATE).add(originalEndId, ArgumentType.ORIGINAL).add(updatedEndId, ArgumentType.UPDATED));
+                }
+            }
+        }
+        return sentences;
+    }
+
+    private boolean notNull(Object... o) {
+        for (Object obj : o) {
+            if (null == obj) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private boolean timeChanged(Event original, Event update) {
+        return false == (original.getStartDate().getTimestamp() == update.getStartDate().getTimestamp() && original.getEndDate().getTimestamp() == update.getEndDate().getTimestamp());
+    }
 }

@@ -9,7 +9,7 @@ import liquibase.util.StringUtils;
 
 public abstract class AbstractDatabaseObject implements DatabaseObject {
 
-    private Map<String, Object> attributes = new HashMap<String, Object>();
+    private final Map<String, Object> attributes = new HashMap<String, Object>();
 
     private UUID snapshotId;
 
@@ -40,7 +40,7 @@ public abstract class AbstractDatabaseObject implements DatabaseObject {
     }
 
     @Override
-    public int compareTo(Object o) {
+    public int compareTo(DatabaseObject o) {
         return this.getName().compareTo(((AbstractDatabaseObject) o).getName());
     }
 

@@ -97,7 +97,6 @@ public class SerializedCachingLoader {
         } catch (final InterruptedException e) {
             // Keep interrupted status
             Thread.currentThread().interrupt();
-            LOG.error("", e);
             return loader.load();
         }
         // Lock acquired & replicated cache
@@ -128,6 +127,7 @@ public class SerializedCachingLoader {
                 retval = (T) tmp;
             }
         } catch (final InterruptedException e) {
+            Thread.currentThread().interrupt();
             LOG.error(e.getMessage(), e);
         } finally {
             lock.unlock();

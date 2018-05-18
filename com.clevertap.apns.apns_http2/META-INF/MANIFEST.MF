@@ -5,7 +5,7 @@ Bundle-SymbolicName: com.clevertap.apns.apns_http2
 Bundle-Version: 1.0.2
 Bundle-Vendor: https://clevertap.com
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
-Bundle-ClassPath: lib/apns-http2-1.0.2.jar,
+Bundle-ClassPath: lib/apns-http2-1.0.3.jar,
  .
 Import-Package: com.fasterxml.jackson.annotation,
  javax.annotation,
@@ -108,6 +108,6 @@ Import-Package: com.fasterxml.jackson.annotation,
  org.xml.sax,
  org.xml.sax.ext,
  org.xml.sax.helpers
-Export-Package: com.clevertap.apns;version="1.0.2",
- com.clevertap.apns.clients;version="1.0.2",
- com.clevertap.apns.exceptions;version="1.0.2"
+Export-Package: com.clevertap.apns;version="1.0.3",
+ com.clevertap.apns.clients;version="1.0.3",
+ com.clevertap.apns.exceptions;version="1.0.3"

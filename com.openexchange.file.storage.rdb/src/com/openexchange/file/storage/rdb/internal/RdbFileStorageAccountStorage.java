@@ -473,20 +473,83 @@ public class RdbFileStorageAccountStorage implements FileStorageAccountStorage, 
      * @param session The session
      * @throws OXException If delete operation fails
      */
-    public void deleteAccounts(final String serviceId, final FileStorageAccount[] accounts, final int[] genericConfIds, final Session session) throws OXException {
-        final DatabaseService databaseService = getService(CLAZZ_DB);
-        /*
-         * Writable connection
-         */
-        final int contextId = session.getContextId();
-        final Connection wc = databaseService.getWritable(contextId);
-        boolean rollback = false;
+    public void deleteAccounts(String serviceId, FileStorageAccount[] accounts, int[] genericConfIds, Session session) throws OXException {
+        ConnectionProvider connectionProvider;
+        {
+            Connection con = (Connection) session.getParameter("__file.storage.delete.connection");
+            if (null != con) {
+                try {
+                    if (Databases.isInTransaction(con)) {
+                        // Given connection is already in transaction. Invoke & return immediately.
+                        deleteAccounts(serviceId, accounts, genericConfIds, session, con);
+                        return;
+                    }
+                } catch (SQLException e) {
+                    throw FileStorageExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+                }
+
+                // Use given connection
+                connectionProvider = new InstanceConnectionProvider(con);
+            } else {
+                // Acquire a connection using DatabaseService
+                DatabaseService databaseService = getService(CLAZZ_DB);
+                int contextId = session.getContextId();
+                connectionProvider = new DatabaseServiceConnectionProvider(contextId, databaseService);
+            }
+        }
+        
+        // Acquire connection & invoke
+        Connection con = connectionProvider.getConnection();
+        int rollback = 0;
         try {
-            Databases.startTransaction(wc); // BEGIN
-            rollback = true;
+            con.setAutoCommit(false); // BEGIN
+            rollback = 1;
+
+            deleteAccounts(serviceId, accounts, genericConfIds, session, con);
+
+            con.commit(); // COMMIT
+            rollback = 2;
+        } catch (SQLException e) {
+            throw FileStorageExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+        } catch (RuntimeException e) {
+            throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        } finally {
+            if (rollback > 0) {
+                if (rollback == 1) {
+                    Databases.rollback(con); // ROLL-BACK
+                }
+                Databases.autocommit(con);
+            }
+            connectionProvider.ungetConnection(con);
+        }
+    }
+
+    /**
+     * Deletes specified accounts using given connection.
+     *
+     * @param serviceId The service identifier
+     * @param accounts The accounts to delete
+     * @param genericConfIds The associated identifiers of generic configuration
+     * @param session The session
+     * @param con the read-write connection to use
+     * @throws OXException If delete operation fails
+     */
+    public void deleteAccounts(String serviceId, FileStorageAccount[] accounts, int[] genericConfIds, Session session, Connection con) throws OXException {
+        if (null == con) {
+            deleteAccounts(serviceId, accounts, genericConfIds, session);
+            return;
+        }
+        
+        try {
+            int contextId = session.getContextId();
+            int userId = session.getUserId();
+            Context context = getContext(session);
+            final DeleteListenerRegistry deleteListenerRegistry = DeleteListenerRegistry.getInstance();
             for (int i = 0; i < accounts.length; i++) {
                 final FileStorageAccount account = accounts[i];
                 final int accountId = Integer.parseInt(account.getId());
+                Map<String, Object> properties = account.getConfiguration();
+                deleteListenerRegistry.triggerOnBeforeDeletion(session, accountId, properties, con);
                 /*
                  * Delete account configuration using generic conf
                  */
@@ -494,10 +557,10 @@ public class RdbFileStorageAccountStorage implements FileStorageAccountStorage, 
                     GenericConfigurationStorageService genericConfStorageService = getService(CLAZZ_GEN_CONF);
                     int genericConfId = genericConfIds[i];
                     if (genericConfId <= 0) {
-                        genericConfId = optGenericConfId(contextId, session.getUserId(), serviceId, accountId, wc);
+                        genericConfId = optGenericConfId(contextId, userId, serviceId, accountId, con);
                     }
                     if (genericConfId > 0) {
-                        genericConfStorageService.delete(wc, getContext(session), genericConfId);
+                        genericConfStorageService.delete(con, context, genericConfId);
                     }
                 }
                 /*
@@ -505,29 +568,22 @@ public class RdbFileStorageAccountStorage implements FileStorageAccountStorage, 
                  */
                 PreparedStatement stmt = null;
                 try {
-                    stmt = wc.prepareStatement(SQL_DELETE);
+                    stmt = con.prepareStatement(SQL_DELETE);
                     int pos = 1;
                     stmt.setInt(pos++, contextId);
-                    stmt.setInt(pos++, session.getUserId());
+                    stmt.setInt(pos++, userId);
                     stmt.setString(pos++, serviceId);
                     stmt.setInt(pos, accountId);
                     stmt.executeUpdate();
+                    deleteListenerRegistry.triggerOnAfterDeletion(session, accountId, properties, con);
                 } finally {
                     Databases.closeSQLStuff(stmt);
                 }
             }
-            wc.commit(); // COMMIT
-            rollback = false;
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw FileStorageExceptionCodes.SQL_ERROR.create(e, e.getMessage());
-        } catch (final Exception e) {
+        } catch (RuntimeException e) {
             throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
-        } finally {
-            if (rollback) {
-                Databases.rollback(wc); // ROLL-BACK
-            }
-            Databases.autocommit(wc);
-            databaseService.backWritable(contextId, wc);
         }
     }
 
@@ -889,4 +945,69 @@ public class RdbFileStorageAccountStorage implements FileStorageAccountStorage, 
             deleteAccounts(serviceId, accountsToDelete.toArray(new FileStorageAccount[accountsToDelete.size()]), confIdsToDelete.toArray(), session);
         }
     }
+
+    // --------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+    /** Simple helper class to acquire/release a connection */
+    private static interface ConnectionProvider {
+
+        /**
+         * Gets the connection to use
+         *
+         * @return The connection
+         * @throws OXException If connection cannot be obtained
+         */
+        Connection getConnection() throws OXException;
+
+        /**
+         * Ungets previously acquired connection.
+         *
+         * @param con The connection to unget
+         */
+        void ungetConnection(Connection con);
+
+    }
+
+    private static class DatabaseServiceConnectionProvider implements ConnectionProvider {
+
+        private final int contextId;
+        private final DatabaseService databaseService;
+
+        DatabaseServiceConnectionProvider(int contextId, DatabaseService databaseService) {
+            super();
+            this.contextId = contextId;
+            this.databaseService = databaseService;
+        }
+
+        @Override
+        public Connection getConnection() throws OXException {
+            return databaseService.getWritable(contextId);
+        }
+
+        @Override
+        public void ungetConnection(Connection con) {
+            databaseService.backWritable(contextId, con);
+        }
+    }
+
+    private static class InstanceConnectionProvider implements ConnectionProvider {
+
+        private final Connection con;
+
+        InstanceConnectionProvider(Connection con) {
+            super();
+            this.con = con;
+        }
+
+        @Override
+        public Connection getConnection() throws OXException {
+            return con;
+        }
+
+        @Override
+        public void ungetConnection(Connection con) {
+            // Nothing to do
+        }
+    }
+
 }

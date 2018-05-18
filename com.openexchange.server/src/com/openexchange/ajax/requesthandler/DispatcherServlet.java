@@ -238,7 +238,7 @@ public class DispatcherServlet extends SessionServlet {
     /**
      * The default <code>AJAXRequestDataTools</code>.
      */
-    protected final AJAXRequestDataTools defaultRequestDataTools;
+    protected final transient AJAXRequestDataTools defaultRequestDataTools;
 
     /**
      * The line separator.
@@ -548,6 +548,19 @@ public class DispatcherServlet extends SessionServlet {
 
     @Override
     protected void handleOXException(OXException e, HttpServletRequest req, HttpServletResponse resp) throws IOException {
+        if (AjaxExceptionCodes.HTTP_ERROR.equals(e)) {
+            Object[] logArgs = e.getLogArgs();
+            Object statusMsg = logArgs.length > 1 ? logArgs[1] : null;
+            int sc = ((Integer) logArgs[0]).intValue();
+            sendErrorAndPage(sc, null == statusMsg ? null : statusMsg.toString(), resp);
+            Throwable cause = e.getNonOXExceptionCause();
+            if (null == cause) {
+                logException(e, LogLevel.DEBUG, sc);
+            } else {
+                logException(e);
+            }
+            return;
+        }
         if (AjaxExceptionCodes.MISSING_PARAMETER.equals(e)) {
             // E.g. "Accept: application/json, text/javascript, ..."
             if (isJsonResponseExpected(req, true)) {
@@ -562,19 +575,6 @@ public class DispatcherServlet extends SessionServlet {
         if (AjaxExceptionCodes.BAD_REQUEST.equals(e)) {
             sendErrorAndPage(HttpServletResponse.SC_BAD_REQUEST, e.getMessage(), resp);
             logException(e, LogLevel.DEBUG, HttpServletResponse.SC_BAD_REQUEST);
-            return;
-        }
-        if (AjaxExceptionCodes.HTTP_ERROR.equals(e)) {
-            Object[] logArgs = e.getLogArgs();
-            Object statusMsg = logArgs.length > 1 ? logArgs[1] : null;
-            int sc = ((Integer) logArgs[0]).intValue();
-            sendErrorAndPage(sc, null == statusMsg ? null : statusMsg.toString(), resp);
-            Throwable cause = e.getNonOXExceptionCause();
-            if (null == cause) {
-                logException(e, LogLevel.DEBUG, sc);
-            } else {
-                logException(e);
-            }
             return;
         }
 

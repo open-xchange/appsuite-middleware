@@ -54,7 +54,11 @@ import static org.junit.Assert.assertNotNull;
 import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
+import org.apache.jackrabbit.webdav.client.methods.OptionsMethod;
+import org.junit.AssumptionViolatedException;
+import org.junit.Before;
 import org.junit.Test;
+import com.openexchange.dav.StatusCodes;
 import com.openexchange.dav.caldav.CalDAVTest;
 import com.openexchange.dav.caldav.ICalResource;
 import com.openexchange.dav.caldav.ical.SimpleICal.Component;
@@ -66,6 +70,22 @@ import com.openexchange.groupware.calendar.TimeTools;
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 public class AvailabilityTest extends CalDAVTest {
+
+    @Override
+    @Before
+    public void setUp() throws Exception {
+        super.setUp();
+        OptionsMethod options = null;
+        try {
+            options = new OptionsMethod(getBaseUri());
+            assertEquals("unexpected http status", StatusCodes.SC_OK, super.getWebDAVClient().executeMethod(options));
+            assertResponseHeaders(new String[] { "calendar-availability" }, "DAV", options);
+        } catch (AssertionError e) {
+            throw new AssumptionViolatedException("\"calendar-availability\" not supported.", e);
+        } finally {
+            release(options);
+        }
+    }
 
     /**
      * Simple test that simulates the creation of an availability block

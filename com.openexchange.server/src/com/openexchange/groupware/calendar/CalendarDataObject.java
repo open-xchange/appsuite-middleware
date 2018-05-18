@@ -65,7 +65,7 @@ import com.openexchange.java.Strings;
 
 /**
  * CalendarDataObject
- * 
+ *
  * @author <a href="mailto:martin.kauss@open-xchange.org">Martin Kauss</a>
  */
 public class CalendarDataObject extends Appointment {
@@ -94,7 +94,7 @@ public class CalendarDataObject extends Appointment {
 
     private boolean externalOrganizer;
 
-    
+
     /**
      * Checks if specified UTC date increases day in month if adding given time
      * zone's offset.
@@ -109,7 +109,7 @@ public class CalendarDataObject extends Appointment {
     private static boolean exceedsHourOfDay(final long millis, final String timeZoneID) {
         return exceedsHourOfDay(millis, getTimeZone(timeZoneID));
     }
-    
+
     private static final Map<String, TimeZone> zoneCache = new ConcurrentHashMap<String, TimeZone>();
 
     private static TimeZone getTimeZone(final String ID) {
@@ -144,7 +144,11 @@ public class CalendarDataObject extends Appointment {
         if (until != null) {
             final long mod = until.getTime() % Constants.MILLI_DAY;
             if (mod != 0) {
-                if (exceedsHourOfDay(until.getTime(), getTimezoneFallbackUTC())) {
+                String tzn = getTimezone();
+                if(tzn == null) {
+                    tzn = "UTC";
+                }
+                if (exceedsHourOfDay(until.getTime(), tzn)) {
                     until.setTime((((until.getTime() - mod) + Constants.MILLI_DAY)));
                 } else {
                     until.setTime(until.getTime() - mod);

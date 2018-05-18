@@ -103,16 +103,18 @@ import com.openexchange.tools.sql.SearchStrings;
 public class SearchEngineImpl extends DBService {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(SearchEngineImpl.class);
-    private final InfostoreSecurityImpl security = new InfostoreSecurityImpl();
+    private final InfostoreSecurityImpl security;
 
     private static final String[] SEARCH_FIELDS = new String[] { "infostore_document.title", "infostore_document.url", "infostore_document.description", "infostore_document.categories", "infostore_document.filename", "infostore_document.file_version_comment" };
 
     public SearchEngineImpl() {
         super(null);
+        security = new InfostoreSecurityImpl();
     }
 
     public SearchEngineImpl(final DBProvider provider) {
         super();
+        security = new InfostoreSecurityImpl();
         setProvider(provider);
         security.setProvider(provider);
     }

@@ -183,22 +183,4 @@ public class OAuthServiceTest {
             }
         }
     }
-
-    @Test
-    public void testGetTestServiceWithoutPermission() throws Exception {
-        AJAXClient client2 = null;
-        try {
-            client2 = new AJAXClient(user2);
-            OAuthServicesResponse response = client2.execute(new GetOAuthServiceRequest(TESTSERVICE, false));
-            Assert.assertTrue("Response should contain error", response.hasError());
-            // We expect com.openexchange.oauth.OAuthExceptionCodes.UNKNOWN_OAUTH_SERVICE_META_DATA
-            OXException e = response.getException();
-            Assert.assertEquals("An unexpected error occurred: " + e.getMessage(), "OAUTH-0004", e.getErrorCode());
-        } finally {
-            if (client2 != null) {
-                client2.logout();
-            }
-        }
-    }
-
 }

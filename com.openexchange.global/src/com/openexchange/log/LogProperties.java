@@ -292,6 +292,12 @@ public final class LogProperties {
          */
         LOGIN_VERSION("com.openexchange.login.version"),
         /**
+         * The resolved login name, which is supposed to be looked-up in '<code>login2user</code>' table
+         * <p>
+         * com.openexchange.login.resolvedLogin
+         */
+        LOGIN_RESOLVED_LOGIN("com.openexchange.login.resolvedLogin"),
+        /**
          * com.openexchange.hostname
          */
         HOSTNAME("com.openexchange.hostname"),

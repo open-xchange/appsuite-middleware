@@ -78,11 +78,11 @@ import com.openexchange.java.Strings;
  */
 public class CreateSchema extends BasicCommandlineOptions {
 
-    private final char OPT_DB_ID_SHORT = 'i';
-    private final String OPT_DB_ID_LONG = "id";
-    private final String OPT_DB_ID_DESCRIPTION = "An optional database id";
-    private final String USAGE = "-A <masteradmin> -P <password> [-i <db_id>] [--csv]";
-    private final String DESCRIPTION = "Creates additional database schemata, which can be used for the creation of contexts.\n ---=== /!\\ ===--- NOTE: In order to use that schema for a new context, the returned schema name is supposed to be used for the \"schema\" option ---=== /!\\ ===--- ";
+    private static final char OPT_DB_ID_SHORT = 'i';
+    private static final String OPT_DB_ID_LONG = "id";
+    private static final String OPT_DB_ID_DESCRIPTION = "An optional database id";
+    private static final String USAGE = "-A <masteradmin> -P <password> [-i <db_id>] [--csv]";
+    private static final String DESCRIPTION = "Creates additional database schemata, which can be used for the creation of contexts.\n ---=== /!\\ ===--- NOTE: In order to use that schema for a new context, the returned schema name is supposed to be used for the \"schema\" option ---=== /!\\ ===--- ";
 
     private CLIOption optDBIdOption;
     private static final List<String> COLUMNS;
@@ -126,7 +126,7 @@ public class CreateSchema extends BasicCommandlineOptions {
             Database db = oxUtil.createSchema(creds, id);
 
             if (null == parser.getOptionValue(this.csvOutputOption)) {
-                System.out.printf("Created a new schema with name \"%s\" in database with id %s \n", db.getScheme(), db.getId());
+                System.out.printf("Created a new schema with name \"%s\" in database with id %s %n", db.getScheme(), db.getId());
                 return;
             }
 

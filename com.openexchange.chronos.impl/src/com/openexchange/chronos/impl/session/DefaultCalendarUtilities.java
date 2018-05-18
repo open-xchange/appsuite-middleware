@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the Open-Xchange, Inc. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2020 Open-Xchange, Inc.
+ *     Copyright (C) 2016-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -55,8 +55,10 @@ import java.util.TimeZone;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
+import com.openexchange.chronos.common.mapping.DefaultEventUpdate;
 import com.openexchange.chronos.common.mapping.EventMapper;
-import com.openexchange.chronos.common.mapping.EventUpdateImpl;
+import com.openexchange.chronos.impl.Consistency;
+import com.openexchange.chronos.impl.Utils;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.CalendarUtilities;
 import com.openexchange.chronos.service.EntityResolver;
@@ -102,7 +104,7 @@ public class DefaultCalendarUtilities implements CalendarUtilities {
 
     @Override
     public EventUpdate compare(Event original, Event update, boolean considerUnset, EventField... ignoredFields) throws OXException {
-        return new EventUpdateImpl(original, update, considerUnset, ignoredFields);
+        return new DefaultEventUpdate(original, update, considerUnset, ignoredFields);
     }
 
     @Override
@@ -216,6 +218,16 @@ public class DefaultCalendarUtilities implements CalendarUtilities {
                 return comparison;
             }
         };
+    }
+
+    @Override
+    public TimeZone selectTimeZone(int calendarUserId, TimeZone timeZone, TimeZone originalTimeZone) throws OXException {
+        return Utils.selectTimeZone(session, calendarUserId, timeZone, originalTimeZone);
+    }
+
+    @Override
+    public void adjustTimeZones(int calendarUserId, Event event, Event originalEvent) throws OXException {
+        Consistency.adjustTimeZones(session, calendarUserId, event, originalEvent);
     }
 
 }

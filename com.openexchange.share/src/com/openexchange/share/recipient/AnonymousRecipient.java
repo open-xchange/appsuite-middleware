@@ -59,6 +59,8 @@ import java.util.Date;
  */
 public class AnonymousRecipient extends ShareRecipient {
 
+    private static final long serialVersionUID = -6939532786908091158L;
+
     private String password;
     private Date expiryDate;
 
@@ -71,7 +73,7 @@ public class AnonymousRecipient extends ShareRecipient {
 
     /**
      * Initializes a new {@link AnonymousRecipient}.
-     * 
+     *
      * @param bits The permission bits to set
      * @param password The password to set, or <code>null</code> for no password
      * @param expiryDate The expiration date, or <code>null</code> if not set

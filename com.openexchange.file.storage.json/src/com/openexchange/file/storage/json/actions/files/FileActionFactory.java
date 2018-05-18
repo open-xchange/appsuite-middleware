@@ -49,7 +49,6 @@
 
 package com.openexchange.file.storage.json.actions.files;
 
-import java.util.Collection;
 import java.util.Map;
 import com.google.common.collect.ImmutableMap;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
@@ -112,11 +111,6 @@ public class FileActionFactory implements AJAXActionServiceFactory {
 
         actions.put("restore", new RestoreAction());
         this.actions = actions.build();
-    }
-
-    @Override
-    public Collection<? extends AJAXActionService> getSupportedServices() {
-        return java.util.Collections.unmodifiableCollection(actions.values());
     }
 
     @Override

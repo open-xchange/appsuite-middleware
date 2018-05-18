@@ -446,7 +446,7 @@ public class GuestClient extends AJAXClient {
         /*
          * get folder
          */
-        GetResponse getResponse = execute(new GetRequest(EnumAPI.OX_NEW, Integer.valueOf(folderID)));
+        GetResponse getResponse = execute(new GetRequest(EnumAPI.OX_NEW, folderID));
         FolderObject folder = getResponse.getFolder();
         folder.setLastModified(getResponse.getTimestamp());
         /*

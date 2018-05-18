@@ -49,7 +49,9 @@
 
 package com.openexchange.oauth.impl.access.impl;
 
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -64,9 +66,9 @@ import com.openexchange.oauth.access.OAuthAccessRegistry;
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class OAuthAccessRegistryImpl implements OAuthAccessRegistry, Iterable<OAuthAccess> {
+public class OAuthAccessRegistryImpl implements OAuthAccessRegistry, Iterable<Map<Integer, OAuthAccess>> {
 
-    private final ConcurrentMap<OAuthAccessKey, OAuthAccess> map;
+    private final ConcurrentMap<OAuthAccessKey, Map<Integer, OAuthAccess>> map;
     private final String serviceId;
 
     /**
@@ -84,22 +86,37 @@ public class OAuthAccessRegistryImpl implements OAuthAccessRegistry, Iterable<OA
     }
 
     @Override
-    public Iterator<OAuthAccess> iterator() {
+    public Iterator<Map<Integer, OAuthAccess>> iterator() {
         return map.values().iterator();
     }
 
     @Override
-    public OAuthAccess addIfAbsent(int contextId, int userId, OAuthAccess oauthAccess) {
-        return map.putIfAbsent(new OAuthAccessKey(contextId, userId), oauthAccess);
+    public OAuthAccess addIfAbsent(int contextId, int userId, int oauthAccountId, OAuthAccess oauthAccess) {
+        synchronized (map) {
+            OAuthAccessKey key = new OAuthAccessKey(contextId, userId);
+            Map<Integer, OAuthAccess> accesses = map.getOrDefault(key, new HashMap<>());
+            OAuthAccess existingAccess = accesses.get(oauthAccountId);
+            if (existingAccess != null) {
+                return existingAccess;
+            }
+            accesses.put(oauthAccountId, oauthAccess);
+            map.put(key, accesses);
+            return oauthAccess;
+        }
     }
 
     @Override
-    public <V> OAuthAccess addIfAbsent(int contextId, int userId, OAuthAccess oauthAccess, Callable<V> executeIfAdded) throws OXException {
-        OAuthAccessKey key = new OAuthAccessKey(contextId, userId);
-        OAuthAccess existing = map.putIfAbsent(key, oauthAccess);
-        if (null != existing) {
-            // There is already such an OAuthAccess instance
-            return existing;
+    public <V> OAuthAccess addIfAbsent(int contextId, int userId, int oauthAccountId, OAuthAccess oauthAccess, Callable<V> executeIfAdded) throws OXException {
+        synchronized (map) {
+            OAuthAccessKey key = new OAuthAccessKey(contextId, userId);
+            Map<Integer, OAuthAccess> accesses = map.getOrDefault(key, new HashMap<>());
+            OAuthAccess existingAccess = accesses.get(oauthAccountId);
+            if (existingAccess != null) {
+                return existingAccess;
+            }
+
+            accesses.put(oauthAccountId, oauthAccess);
+            map.put(key, accesses);
         }
 
         // Execute task (if any) since given OAuthAccess instance was added
@@ -117,28 +134,55 @@ public class OAuthAccessRegistryImpl implements OAuthAccessRegistry, Iterable<OA
     }
 
     @Override
-    public boolean contains(int contextId, int userId) {
-        return map.containsKey(new OAuthAccessKey(contextId, userId));
+    public boolean contains(int contextId, int userId, int oauthAccountId) {
+        synchronized (map) {
+            Map<Integer, OAuthAccess> accesses = map.get(new OAuthAccessKey(contextId, userId));
+            if (accesses == null || accesses.isEmpty()) {
+                return false;
+            }
+            return accesses.containsKey(oauthAccountId);
+        }
     }
 
     @Override
-    public OAuthAccess get(int contextId, int userId) {
-        return map.get(new OAuthAccessKey(contextId, userId));
+    public OAuthAccess get(int contextId, int userId, int oauthAccountId) {
+        synchronized (map) {
+            Map<Integer, OAuthAccess> accesses = map.get(new OAuthAccessKey(contextId, userId));
+            if (accesses == null || accesses.isEmpty()) {
+                return null;
+            }
+            return accesses.get(oauthAccountId);
+        }
     }
 
     @Override
     public boolean removeIfLast(int contextId, int userId) {
-        OAuthAccess access = map.remove(new OAuthAccessKey(contextId, userId));
-        if (null == access) {
-            return false;
+        synchronized (map) {
+            Map<Integer, OAuthAccess> accesses = map.remove(new OAuthAccessKey(contextId, userId));
+            if (null == accesses) {
+                return false;
+            }
+            for (OAuthAccess access : accesses.values()) {
+                access.dispose();
+            }
+            return true;
         }
-        access.dispose();
-        return true;
     }
 
     @Override
-    public boolean purgeUserAccess(int contextId, int userId) {
-        return map.remove(new OAuthAccessKey(contextId, userId)) != null;
+    public boolean purgeUserAccess(int contextId, int userId, int oauthAccountId) {
+        synchronized (map) {
+            OAuthAccessKey key = new OAuthAccessKey(contextId, userId);
+            Map<Integer, OAuthAccess> accesses = map.get(key);
+            if (accesses == null || accesses.isEmpty()) {
+                return false;
+            }
+            boolean purged = accesses.remove(oauthAccountId) != null;
+            if (accesses.isEmpty()) {
+                map.remove(key);
+            }
+            return purged;
+        }
     }
 
     @Override

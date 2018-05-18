@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the Open-Xchange, Inc. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2020 Open-Xchange, Inc.
+ *     Copyright (C) 2016-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -101,7 +101,7 @@ public abstract class ICalAttachmentMapping<T extends CalendarComponent, U> exte
             removeProperties(component, Property.ATTACH); //TODO: merge?
             for (Attachment attachment : attachments) {
                 try {
-                    component.getProperties().add(exportAttachment(attachment, parameters, warnings));
+                    component.getProperties().add(exportAttachment(attachment, warnings));
                 } catch (URISyntaxException | OXException e) {
                     addConversionWarning(warnings, e, Property.ATTACH, e.getMessage());
                 }
@@ -117,7 +117,7 @@ public abstract class ICalAttachmentMapping<T extends CalendarComponent, U> exte
             for (Iterator<?> iterator = properties.iterator(); iterator.hasNext();) {
                 Attach property = (Attach) iterator.next();
                 try {
-                    attachments.add(importAttachment(property, parameters, warnings));
+                    attachments.add(importAttachment(property, warnings));
                 } catch (OXException e) {
                     addConversionWarning(warnings, e, Property.ATTACH, e.getMessage());
                 }
@@ -128,7 +128,7 @@ public abstract class ICalAttachmentMapping<T extends CalendarComponent, U> exte
         }
     }
 
-    private Attach exportAttachment(Attachment attachment, ICalParameters parameters, List<OXException> warnings) throws URISyntaxException, OXException {
+    private Attach exportAttachment(Attachment attachment, List<OXException> warnings) throws URISyntaxException, OXException {
         Attach property = new Attach();
         if (null != attachment.getData()) {
             InputStream inputStream = null;
@@ -158,20 +158,17 @@ public abstract class ICalAttachmentMapping<T extends CalendarComponent, U> exte
         return property;
     }
 
-    private Attachment importAttachment(Attach property, ICalParameters parameters, List<OXException> warnings) throws OXException {
+    private Attachment importAttachment(Attach property, List<OXException> warnings) throws OXException {
         Attachment attachment = new Attachment();
         if (null != property.getBinary()) {
             ThresholdFileHolder fileHolder = new ThresholdFileHolder();
-            boolean error = true; // pessimistic
             try {
                 fileHolder.write(property.getBinary());
                 attachment.setData(fileHolder);
                 property.setBinary(null);
-                error = false;
+                fileHolder = null;
             } finally {
-                if (error) {
-                    Streams.close(fileHolder);
-                }
+                Streams.close(fileHolder);
             }
         } else if (null != property.getUri()) {
             attachment.setUri(property.getUri().toString());

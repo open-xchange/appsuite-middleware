@@ -61,7 +61,8 @@ import com.openexchange.groupware.container.Contact;
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
 public class SplitBirthdayFieldsSetter extends AbstractContactSwitcherWithDelegate {
-    private final int NOT_SET = Integer.MAX_VALUE;
+
+    private static final int NOT_SET = Integer.MAX_VALUE;
     private int month = NOT_SET;
     private int day = NOT_SET;
     private int year = NOT_SET;

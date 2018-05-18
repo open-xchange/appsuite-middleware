@@ -219,6 +219,12 @@ public class ContactMergerator implements SearchIterator<Contact>{
     }
 
     private static final class ExceptionTransporter extends RuntimeException {
+
+        /**
+         * serialVersionUID
+         */
+        private static final long serialVersionUID = 1L;
+
         public OXException e;
 
 

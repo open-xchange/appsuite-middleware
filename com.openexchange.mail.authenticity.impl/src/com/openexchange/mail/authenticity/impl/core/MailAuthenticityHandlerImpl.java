@@ -106,6 +106,7 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
     private final Collection<MailField> requiredMailFields;
     private final Cache<UserAndContext, List<AllowedAuthServId>> authServIdsCache;
     private final CustomRuleChecker checker;
+    private final AuthenticationResultsValidator validator;
 
     /**
      * Initializes a new {@link MailAuthenticityHandlerImpl} with ranking of <code>0</code> (zero).
@@ -129,6 +130,7 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
         this.ranking = ranking;
         authServIdsCache = CacheBuilder.newBuilder().maximumSize(65536).expireAfterWrite(30, TimeUnit.MINUTES).build();
         requiredMailFields = ImmutableList.of(MailField.FROM);
+        validator = new StandardAuthenticationResultsValidator(services);
         this.checker = checker;
     }
 
@@ -144,8 +146,8 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
      *
      * @return The parser/validator instance
      */
-    protected AuthenticationResultsValidator getValidator() {
-        return StandardAuthenticationResultsValidator.getInstance();
+    public AuthenticationResultsValidator getValidator() {
+        return validator;
     }
 
     @Override
@@ -158,15 +160,14 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
         final HeaderCollection headerCollection = mailMessage.getHeaders();
         final String[] authHeaders = headerCollection.getHeader(MessageHeaders.HDR_AUTHENTICATION_RESULTS);
         if (authHeaders == null || authHeaders.length == 0) {
-            // Pass on to custom handlers
-            mailMessage.setAuthenticityResult(MailAuthenticityResult.NEUTRAL_RESULT);
+            // No 'Authentication-Results header' - set overall status to 'none'
+            mailMessage.setAuthenticityResult(MailAuthenticityResult.NONE_RESULT);
             logMetrics(mailMessage.getMessageId(), Collections.emptyList(), mailMessage.getAuthenticityResult());
             return;
         }
 
         final InternetAddress[] from = mailMessage.getFrom();
         if (from == null || from.length == 0) {
-            // Pass on to custom handlers
             mailMessage.setAuthenticityResult(MailAuthenticityResult.NEUTRAL_RESULT);
             logMetrics(mailMessage.getMessageId(), Arrays.asList(authHeaders), mailMessage.getAuthenticityResult());
             return;
@@ -176,7 +177,7 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
         MailAuthenticityResult authenticityResult = MailAuthenticityResult.NOT_ANALYZED_RESULT;
         try {
             AuthenticationResultsValidator validator = getValidator();
-            authenticityResult = validator.parseHeaders(headers, from[0], getAllowedAuthServIds(session), session);
+            authenticityResult = validator.parseHeaders(headers, from[0], getAllowedAuthServIds(session));
         } catch (Exception e) {
             LOGGER.error("An error occurred during parsing the '{}' header of mail {} in folder {}", MessageHeaders.HDR_AUTHENTICATION_RESULTS, mailMessage.getMailId(), mailMessage.getFolder(), e);
         }

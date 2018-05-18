@@ -124,6 +124,8 @@ import com.openexchange.test.concurrent.ParallelSuite;
     Bug55653Test.class,
     Bug57203Test.class,
     Bug57313Test.class,
+    Bug57858Test.class,
+    Bug58154Test.class,
 }) // @formatter:on
 public final class CalDAVBugSuite {
 

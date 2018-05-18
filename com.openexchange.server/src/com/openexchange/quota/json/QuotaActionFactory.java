@@ -49,7 +49,6 @@
 
 package com.openexchange.quota.json;
 
-import java.util.Collection;
 import java.util.Map;
 import org.osgi.framework.BundleContext;
 import com.google.common.collect.ImmutableMap;
@@ -87,10 +86,5 @@ public class QuotaActionFactory implements AJAXActionServiceFactory {
     @Override
     public AJAXActionService createActionService(final String action) throws OXException {
         return actions.get(action);
-    }
-
-    @Override
-    public Collection<? extends AJAXActionService> getSupportedServices() {
-        return java.util.Collections.unmodifiableCollection(actions.values());
     }
 }

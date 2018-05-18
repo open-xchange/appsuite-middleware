@@ -68,7 +68,6 @@ import java.util.EnumMap;
 import java.util.EnumSet;
 import java.util.Enumeration;
 import java.util.List;
-import java.util.regex.Pattern;
 import javax.mail.Flags;
 import javax.mail.Folder;
 import javax.mail.Header;
@@ -1451,7 +1450,7 @@ public final class MimeMessageConverter {
         {
             MailMessageFieldFiller attachmentFiller = new MailMessageFieldFiller() {
 
-                private final String multipart = "multipart/";
+                private static final String multipart = "multipart/";
 
                 @Override
                 public void fillField(final MailConfig mailConfig, final MailMessage mailMessage, final Message msg) throws MessagingException, OXException {
@@ -2105,6 +2104,7 @@ public final class MimeMessageConverter {
             }
         } catch (final Exception e) {
             // Ignore
+            LOG.debug("{}", e.getMessage(), e);
         }
         return null;
     }
@@ -2500,12 +2500,16 @@ public final class MimeMessageConverter {
      */
     public static HeaderCollection loadHeaders(final InputStream inputStream) throws IOException {
         final ByteArrayOutputStream out = new UnsynchronizedByteArrayOutputStream(DEFAULT_MESSAGE_SIZE);
-        final byte[] bbuf = new byte[DEFAULT_MESSAGE_SIZE];
-        int read = -1;
-        while ((read = inputStream.read(bbuf, 0, bbuf.length)) > 0) {
-            out.write(bbuf, 0, read);
+        try {
+            final byte[] bbuf = new byte[DEFAULT_MESSAGE_SIZE];
+            int read = -1;
+            while ((read = inputStream.read(bbuf, 0, bbuf.length)) > 0) {
+                out.write(bbuf, 0, read);
+            }
+            return loadHeaders(out.toByteArray());
+        } finally {
+            out.close();
         }
-        return loadHeaders(out.toByteArray());
     }
 
     /**
@@ -2517,10 +2521,8 @@ public final class MimeMessageConverter {
      * @return The parsed headers as a {@link HeaderCollection collection}.
      */
     public static HeaderCollection loadHeaders(final byte[] bytes) {
-        return loadHeaders(new String(bytes, Charsets.ISO_8859_1));
+        return MimeMessageUtility.loadHeaders(new String(bytes, Charsets.ISO_8859_1));
     }
-
-    private static final Pattern PATTERN_PARSE_HEADER = Pattern.compile("(\\S+):\\p{Blank}?(.*)(?:(?:\r?\n)|(?:$))");
 
     /**
      * Parses given message source's headers into a {@link HeaderCollection collection} until EOF or 2 subsequent CRLFs occur.

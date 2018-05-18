@@ -131,9 +131,9 @@ import net.fortuna.ical4j.model.property.Version;
  * </p>
  */
 public class HCalendarParser implements CalendarParser {
-    
+
     private static final Log LOG = LogFactory.getLog(HCalendarParser.class);
-    
+
     private static final DocumentBuilderFactory BUILDER_FACTORY;
     private static final XPath XPATH = XPathFactory.newInstance().newXPath();
     private static final XPathExpression XPATH_METHOD;
@@ -241,6 +241,7 @@ public class HCalendarParser implements CalendarParser {
     /**
      * {@inheritDoc}
      */
+    @Override
     public void parse(InputStream in, ContentHandler handler) throws IOException, ParserException {
         parse(new InputSource(in), handler);
     }
@@ -248,6 +249,7 @@ public class HCalendarParser implements CalendarParser {
     /**
      * {@inheritDoc}
      */
+    @Override
     public void parse(Reader in, ContentHandler handler) throws IOException, ParserException {
         parse(new InputSource(in), handler);
     }
@@ -288,16 +290,18 @@ public class HCalendarParser implements CalendarParser {
         ArrayList elements = new ArrayList();
         for (int i = 0; i < nodes.getLength(); i++) {
             Node n = nodes.item(i);
-            if (n instanceof Element)
-                elements.add((Element) n);
+            if (n instanceof Element) {
+                elements.add(n);
+            }
         }
         return elements;
     }
 
     private static Element findElement(XPathExpression expr, Object context) throws ParserException {
         Node n = findNode(expr, context);
-        if (n == null || (!(n instanceof Element)))
+        if (n == null || (!(n instanceof Element))) {
             return null;
+        }
         return (Element) n;
     }
 
@@ -330,8 +334,9 @@ public class HCalendarParser implements CalendarParser {
         // vcalendar element. In this case, we should probably only process
         // that element and log a warning about skipping the others.
 
-        if (LOG.isDebugEnabled())
+        if (LOG.isDebugEnabled()) {
             LOG.debug("Building calendar");
+        }
 
         handler.startCalendar();
 
@@ -363,8 +368,9 @@ public class HCalendarParser implements CalendarParser {
     }
 
     private void buildEvent(Element element, ContentHandler handler) throws ParserException {
-        if (LOG.isDebugEnabled())
+        if (LOG.isDebugEnabled()) {
             LOG.debug("Building event");
+        }
 
         handler.startComponent(Component.VEVENT);
 
@@ -399,11 +405,13 @@ public class HCalendarParser implements CalendarParser {
     }
 
     private void buildProperty(Element element, String propName, ContentHandler handler) throws ParserException {
-        if (element == null)
+        if (element == null) {
             return;
+        }
 
-        if (LOG.isDebugEnabled())
+        if (LOG.isDebugEnabled()) {
             LOG.debug("Building property " + propName);
+        }
 
         String className = className(propName);
         String elementName = element.getLocalName().toLowerCase();
@@ -415,52 +423,64 @@ public class HCalendarParser implements CalendarParser {
             // instead of the contents of the element, which instead provide a
             // human presentable version of the value."
             value = element.getAttribute("title");
-            if (StringUtils.isBlank(value))
+            if (StringUtils.isBlank(value)) {
                 throw new ParserException("Abbr element '" + className + "' requires a non-empty title", -1);
-            if (LOG.isDebugEnabled())
+            }
+            if (LOG.isDebugEnabled()) {
                 LOG.debug("Setting value '" + value + "' from title attribute");
+            }
         } else if (isHeaderElement(elementName)) {
             // try title first. if that's not set, fall back to text content.
             value = element.getAttribute("title");
             if (!StringUtils.isBlank(value)) {
-                if (LOG.isDebugEnabled())
+                if (LOG.isDebugEnabled()) {
                     LOG.debug("Setting value '" + value + "' from title attribute");
+                }
             } else {
                 value = getTextContent(element);
-                if (LOG.isDebugEnabled())
+                if (LOG.isDebugEnabled()) {
                     LOG.debug("Setting value '" + value + "' from text content");
+                }
             }
         } else if (elementName.equals("a") && isUrlProperty(propName)) {
             value = element.getAttribute("href");
-            if (StringUtils.isBlank(value))
+            if (StringUtils.isBlank(value)) {
                 throw new ParserException("A element '" + className + "' requires a non-empty href", -1);
-            if (LOG.isDebugEnabled())
+            }
+            if (LOG.isDebugEnabled()) {
                 LOG.debug("Setting value '" + value + "' from href attribute");
+            }
         } else if (elementName.equals("img")) {
             if (isUrlProperty(propName)) {
                 value = element.getAttribute("src");
-                if (StringUtils.isBlank(value))
+                if (StringUtils.isBlank(value)) {
                     throw new ParserException("Img element '" + className + "' requires a non-empty src", -1);
-                if (LOG.isDebugEnabled())
+                }
+                if (LOG.isDebugEnabled()) {
                     LOG.debug("Setting value '" + value + "' from src attribute");
+                }
             } else {
                 value = element.getAttribute("alt");
-                if (StringUtils.isBlank(value))
+                if (StringUtils.isBlank(value)) {
                     throw new ParserException("Img element '" + className + "' requires a non-empty alt", -1);
-                if (LOG.isDebugEnabled())
+                }
+                if (LOG.isDebugEnabled()) {
                     LOG.debug("Setting value '" + value + "' from alt attribute");
+                }
             }
         } else {
             value = getTextContent(element);
             if (!StringUtils.isBlank(value)) {
-                if (LOG.isDebugEnabled())
+                if (LOG.isDebugEnabled()) {
                     LOG.debug("Setting value '" + value + "' from text content");
+                }
             }
         }
 
         if (StringUtils.isBlank(value)) {
-            if (LOG.isDebugEnabled())
+            if (LOG.isDebugEnabled()) {
                 LOG.debug("Skipping property with empty value");
+            }
             return;
         }
 
@@ -473,11 +493,12 @@ public class HCalendarParser implements CalendarParser {
                 Date date = icalDate(value);
                 value = date.toString();
 
-                if (!(date instanceof DateTime))
+                if (!(date instanceof DateTime)) {
                     try {
                         handler.parameter(Parameter.VALUE, Value.DATE.getValue());
                     } catch (Exception e) {
                     }
+                }
             } catch (ParseException e) {
                 throw new ParserException("Malformed date value for element '" + className + "'", -1, e);
             }
@@ -485,11 +506,12 @@ public class HCalendarParser implements CalendarParser {
 
         if (isTextProperty(propName)) {
             String lang = element.getAttributeNS(XMLConstants.XML_NS_URI, "lang");
-            if (!StringUtils.isBlank(lang))
+            if (!StringUtils.isBlank(lang)) {
                 try {
                     handler.parameter(Parameter.LANGUAGE, lang);
                 } catch (Exception e) {
                 }
+            }
         }
 
         // XXX: other parameters?
@@ -549,11 +571,14 @@ public class HCalendarParser implements CalendarParser {
             try {
                 // for some reason Date's pattern matches yyyy-MM-dd, so
                 // don't check it if we find -
-                if (original.indexOf('-') == -1)
+                if (original.indexOf('-') == -1) {
                     return new Date(original);
+                }
             } catch (Exception e) {
             }
-            return new Date(HCAL_DATE_FORMAT.parse(original));
+            synchronized (HCAL_DATE_FORMAT) {
+                return new Date(HCAL_DATE_FORMAT.parse(original));
+            }
         }
 
         try {
@@ -566,8 +591,9 @@ public class HCalendarParser implements CalendarParser {
 
         String normalized = null;
 
-        if (LOG.isDebugEnabled())
+        if (LOG.isDebugEnabled()) {
             LOG.debug("normalizing date-time " + original);
+        }
 
         // 2002-10-09T19:00:00Z
         if (original.charAt(original.length() - 1) == 'Z') {
@@ -583,7 +609,10 @@ public class HCalendarParser implements CalendarParser {
             normalized = original;
         }
 
-        DateTime dt = new DateTime(HCAL_DATE_TIME_FORMAT.parse(normalized));
+        DateTime dt;
+        synchronized (HCAL_DATE_TIME_FORMAT) {
+            dt = new DateTime(HCAL_DATE_TIME_FORMAT.parse(normalized));
+        }
 
         // hCalendar does not specify a representation for timezone ids
         // or any other sort of timezone information. the best it does is

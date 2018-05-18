@@ -67,21 +67,27 @@ import com.openexchange.kerberos.impl.KerberosServiceImpl;
 public class KerberosServiceRegisterer implements ServiceTrackerCustomizer<ConfigurationService, ConfigurationService> {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(KerberosServiceRegisterer.class);
+
     private final BundleContext context;
     private ServiceRegistration<KerberosService> registration;
     private KerberosServiceImpl impl;
 
+    /**
+     * Initializes a new {@link KerberosServiceRegisterer}.
+     *
+     * @param context The bundle context to use
+     */
     public KerberosServiceRegisterer(BundleContext context) {
         super();
         this.context = context;
     }
 
     @Override
-    public ConfigurationService addingService(ServiceReference<ConfigurationService> reference) {
-        final ConfigurationService configService = context.getService(reference);
-        final boolean configured = KerberosConfiguration.configure(configService);
-        if (configured) {
-            impl = new KerberosServiceImpl(KerberosConfiguration.getModuleName(), KerberosConfiguration.getUserModuleName());
+    public synchronized ConfigurationService addingService(ServiceReference<ConfigurationService> reference) {
+        ConfigurationService configService = context.getService(reference);
+        KerberosConfiguration kerberosConfiguration = KerberosConfiguration.configure(configService);
+        if (kerberosConfiguration.isConfigured()) {
+            impl = new KerberosServiceImpl(kerberosConfiguration.getModuleName(), kerberosConfiguration.getUserModuleName());
             try {
                 impl.login();
                 registration = context.registerService(KerberosService.class, impl, null);
@@ -98,7 +104,7 @@ public class KerberosServiceRegisterer implements ServiceTrackerCustomizer<Confi
     }
 
     @Override
-    public void removedService(ServiceReference<ConfigurationService> reference, ConfigurationService service) {
+    public synchronized void removedService(ServiceReference<ConfigurationService> reference, ConfigurationService service) {
         if (null != registration) {
             registration.unregister();
             registration = null;

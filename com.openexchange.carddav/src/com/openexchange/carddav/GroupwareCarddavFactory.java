@@ -90,6 +90,7 @@ import com.openexchange.webdav.protocol.WebdavCollection;
 import com.openexchange.webdav.protocol.WebdavPath;
 import com.openexchange.webdav.protocol.WebdavProtocolException;
 import com.openexchange.webdav.protocol.WebdavResource;
+import com.openexchange.webdav.protocol.helpers.AbstractResource;
 
 /**
  * {@link GroupwareCarddavFactory}
@@ -158,7 +159,11 @@ public class GroupwareCarddavFactory extends DAVFactory {
             /*
              * get child resource from parent collection by name
              */
-            return mixin(new RootCollection(this).getChild(url.parent().name()).getChild(url.name()));
+            AbstractResource child = new RootCollection(this).getChild(url.parent().name()).getChild(url.name());
+            if (child == null) {
+                throw WebdavProtocolException.Code.GENERAL_ERROR.create(url, HttpServletResponse.SC_NOT_FOUND);
+            }
+            return mixin(child);
         } else {
             return resolveCollection(url);
         }

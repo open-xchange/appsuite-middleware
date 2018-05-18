@@ -51,9 +51,13 @@ public class MailUploadQuotaCheckerTest {
         PowerMockito.when(ServerConfig.getLong((Property) Matchers.any())).thenReturn(quotaFromFile);
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
      public void testMailUploadQuotaCheckerUserSettingMail_userSettingsNull_throwException() {
-        this.mailUploadQuotaChecker = new MailUploadQuotaChecker(null);
+        try {
+            this.mailUploadQuotaChecker = new MailUploadQuotaChecker(null);
+        } catch (IllegalArgumentException e) {
+            Assert.fail("No exception was expected");
+        }
     }
 
      @Test

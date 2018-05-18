@@ -103,6 +103,7 @@ public class DriveJsonActivator extends AJAXModuleActivator {
         getService(DriveEventService.class).registerPublisher(ListenerRegistrar.getInstance());
         track(LongPollingListenerFactory.class, new ServiceTrackerCustomizer<LongPollingListenerFactory, LongPollingListenerFactory>() {
 
+            @SuppressWarnings("synthetic-access")
             @Override
             public LongPollingListenerFactory addingService(ServiceReference<LongPollingListenerFactory> serviceReference) {
                 LongPollingListenerFactory service = context.getService(serviceReference);
@@ -120,6 +121,7 @@ public class DriveJsonActivator extends AJAXModuleActivator {
                 // nothing to do
             }
 
+            @SuppressWarnings("synthetic-access")
             @Override
             public void removedService(ServiceReference<LongPollingListenerFactory> serviceReference, LongPollingListenerFactory service) {
                 try {

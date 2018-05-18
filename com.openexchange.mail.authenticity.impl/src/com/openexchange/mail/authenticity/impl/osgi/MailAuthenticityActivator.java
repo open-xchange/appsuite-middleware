@@ -77,6 +77,7 @@ import com.openexchange.mail.authenticity.impl.trusted.internal.TrustedMailServi
 import com.openexchange.mailaccount.UnifiedInboxManagement;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.threadpool.ThreadPoolService;
+import com.openexchange.timer.TimerService;
 
 /**
  * {@link MailAuthenticityActivator}
@@ -100,31 +101,29 @@ public class MailAuthenticityActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { LeanConfigurationService.class, ConfigurationService.class, UnifiedInboxManagement.class, ThreadPoolService.class };
+        return new Class<?>[] { LeanConfigurationService.class, ConfigurationService.class, UnifiedInboxManagement.class, ThreadPoolService.class, TimerService.class };
     }
 
     @Override
     protected void startBundle() throws Exception {
         final BundleContext context = this.context;
         // It is OK to pass service references since 'stopOnServiceUnavailability' returns 'true'
-        final MailAuthenticityHandlerRegistryImpl registry = new MailAuthenticityHandlerRegistryImpl(getService(LeanConfigurationService.class), context);
+        LeanConfigurationService leanConfigService = getService(LeanConfigurationService.class);
+
+        MailAuthenticityHandlerRegistryImpl registry = new MailAuthenticityHandlerRegistryImpl(leanConfigService, context);
         registerService(MailAuthenticityHandlerRegistry.class, registry);
 
-        LeanConfigurationService leanConfigService = getService(LeanConfigurationService.class);
-        if (leanConfigService.getBooleanProperty(MailAuthenticityProperty.LOG_METRICS)) {
-            registerService(MailAuthenticityMetricLogger.class, new MailAuthenticityMetricFileLogger());
-            trackService(MailAuthenticityMetricLogger.class);
-        }
+        registerService(MailAuthenticityMetricLogger.class, new MailAuthenticityMetricFileLogger(leanConfigService));
+        trackService(MailAuthenticityMetricLogger.class);
 
         track(MailAuthenticityHandler.class, registry);
         openTrackers();
 
-        ConfigurationService configurationService = getService(ConfigurationService.class);
-        TrustedMailServiceImpl authenticationHandler = new TrustedMailServiceImpl(configurationService);
+        TrustedMailServiceImpl authenticationHandler = new TrustedMailServiceImpl(this);
         registerService(ForcedReloadable.class, authenticationHandler);
         CustomRuleChecker ruleChecker = new CustomRuleChecker(leanConfigService);
         registerService(Reloadable.class, ruleChecker);
-        final MailAuthenticityHandlerImpl handlerImpl = new MailAuthenticityHandlerImpl(authenticationHandler, this, ruleChecker);
+        MailAuthenticityHandlerImpl handlerImpl = new MailAuthenticityHandlerImpl(authenticationHandler, this, ruleChecker);
         registerService(MailAuthenticityHandler.class, handlerImpl);
         registerService(Reloadable.class, new ConfigReloader(registry, handlerImpl));
 

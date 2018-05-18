@@ -53,6 +53,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
+import com.openexchange.exception.OXException;
 import com.openexchange.resource.Resource;
 import com.openexchange.resource.json.ResourceParser;
 
@@ -78,10 +79,10 @@ public final class ResourceGetResponse extends AbstractAJAXResponse {
      * Gets the resource received through GET request
      *
      * @return The resource received through GET request
-     * @throws JSONException
-     *             If a JSON error occurs
+     * @throws OXException If data is null or reading from JSON object fails
+     * @throws JSONException If JSONObject cannot be created
      */
-    public Resource getResource() throws JSONException {
+    public Resource getResource() throws JSONException, OXException {
         return ResourceParser.parseResource(new JSONObject(getResponse().getData().toString()));
     }
 }

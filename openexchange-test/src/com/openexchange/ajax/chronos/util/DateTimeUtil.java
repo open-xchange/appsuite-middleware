@@ -72,19 +72,6 @@ import com.openexchange.testing.httpclient.models.DateTimeData;
 public final class DateTimeUtil {
 
     /**
-     * Thread local {@link SimpleDateFormat} using <code>yyyyMMdd'T'HHmmss</code> as pattern.
-     */
-    private static final ThreadLocal<SimpleDateFormat> BASIC_FORMATER = new ThreadLocal<SimpleDateFormat>() {
-
-        @Override
-        protected SimpleDateFormat initialValue() {
-            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd'T'HHmmss");
-            dateFormat.setTimeZone(TimeZones.UTC);
-            return dateFormat;
-        }
-    };
-
-    /**
      * Thread local {@link SimpleDateFormat} using <code>yyyyMMdd'T'HHmmss'Z'</code> as pattern.
      */
     private static final ThreadLocal<SimpleDateFormat> ZULU_FORMATER = new ThreadLocal<SimpleDateFormat>() {
@@ -99,7 +86,7 @@ public final class DateTimeUtil {
 
     /**
      * Parses the specified millisecond timestamp into a proper {@link DateTimeData} in ZULU format
-     * 
+     *
      * @param millis The millisecond timestamp
      * @return The {@link DateTimeData}
      */
@@ -115,7 +102,7 @@ public final class DateTimeUtil {
 
     /**
      * Gets the Zulu date from the specified timestamp
-     * 
+     *
      * @param millis The timestamp
      * @return The Zulu {@link Date}
      * @throws ParseException if a parsing error occurs
@@ -126,7 +113,7 @@ public final class DateTimeUtil {
 
     /**
      * Formats the specified {@link Date} into ZULU format
-     * 
+     *
      * @param date The date to format
      * @return The string representation of the date
      */
@@ -136,7 +123,7 @@ public final class DateTimeUtil {
 
     /**
      * Parses the specified time string into a {@link Date} object using the ZULU format
-     * 
+     *
      * @param time The time
      * @return The {@link Date}
      * @throws ParseException if a parsing error occurs
@@ -147,7 +134,7 @@ public final class DateTimeUtil {
 
     /**
      * Parses the specified {@link DateTimeData} into a {@link Date} object using the ZULU format
-     * 
+     *
      * @param time The time
      * @return The {@link Date}
      * @throws ParseException if a parsing error occurs
@@ -158,18 +145,22 @@ public final class DateTimeUtil {
 
     /**
      * Parses the specified {@link DateTimeData} object to a {@link Date} object
-     * 
+     *
      * @param time The {@link DateTimeData} object
      * @return The {@link Date} object
      * @throws ParseException if a parsing error occurs
      */
     public static Date parseDateTime(DateTimeData time) throws ParseException {
-        return BASIC_FORMATER.get().parse(time.getValue());
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd'T'HHmmss");
+        if(time.getTzid() != null) {
+            dateFormat.setTimeZone(TimeZone.getTimeZone(time.getTzid()));
+        }
+        return dateFormat.parse(time.getValue());
     }
 
     /**
      * Parses the specified millisecond timestamp into a proper {@link DateTimeData} format
-     * 
+     *
      * @param millis The millisecond timestamp
      * @return The {@link DateTimeData}
      */
@@ -179,7 +170,7 @@ public final class DateTimeUtil {
 
     /**
      * Parses the specified {@link Calendar} into a proper {@link DateTimeData} format
-     * 
+     *
      * @param cal The {@link Calendar}
      * @return The {@link DateTimeData}
      */
@@ -190,7 +181,7 @@ public final class DateTimeUtil {
     /**
      * Parses the specified millisecond timestamp into a proper {@link DateTimeData} format
      * in the specified time-zone.
-     * 
+     *
      * @param timezoneId The time-zone identifier
      * @param millis The millisecond timestamp
      * @return The {@link DateTimeData}
@@ -200,27 +191,35 @@ public final class DateTimeUtil {
         result.setTzid(timezoneId);
 
         Date date = new Date(millis);
-        result.setValue(BASIC_FORMATER.get().format(date));
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd'T'HHmmss");
+        if(timezoneId != null) {
+            dateFormat.setTimeZone(TimeZone.getTimeZone(timezoneId));
+        }
+        result.setValue(dateFormat.format(date));
 
         return result;
     }
 
     /**
      * Adds the specified millisecond timestamp to the specified {@link DateTimeData}
-     * 
+     *
      * @param data The {@link DateTimeData}
      * @param millis The timestamp to add
      * @return The new {@link DateTimeData}
      * @throws ParseException if a parsing error occurs
      */
     public static DateTimeData incrementDateTimeData(DateTimeData data, long millis) throws ParseException {
-        Date date = BASIC_FORMATER.get().parse(data.getValue());
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd'T'HHmmss");
+        if(data.getTzid() != null) {
+            dateFormat.setTimeZone(TimeZone.getTimeZone(data.getTzid()));
+        }
+        Date date = dateFormat.parse(data.getValue());
         return getDateTime(data.getTzid(), date.getTime() + millis);
     }
 
     /**
      * Adds the specified amount of days in the specified {@link Date} in the specified {@link TimeZone}
-     * 
+     *
      * @param localtimeZone the {@link TimeZone}
      * @param localDate The {@link Date}
      * @param datesToAdd The amount of days to add
@@ -239,7 +238,7 @@ public final class DateTimeUtil {
 
     /**
      * Returns an {@link Calendar} object with time set to today 12 o clock and timezone set to 'utc'
-     * 
+     *
      * @return The calendar
      */
     public static Calendar getUTCCalendar() {
@@ -254,7 +253,7 @@ public final class DateTimeUtil {
 
     /**
      * Gets the daylight saving date from the specified {@link TimeZone} and the specified year
-     * 
+     *
      * @param tz The {@link TimeZone}
      * @param year The year
      * @return The {@link Calendar} with the daylight saving date

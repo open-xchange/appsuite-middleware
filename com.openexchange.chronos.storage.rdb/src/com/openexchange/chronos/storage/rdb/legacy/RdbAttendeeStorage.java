@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the Open-Xchange, Inc. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2020 Open-Xchange, Inc.
+ *     Copyright (C) 2016-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -368,7 +368,7 @@ public class RdbAttendeeStorage extends RdbStorage implements AttendeeStorage {
                      */
                     attendees.add(userAttendee);
                 } else {
-                    int[] groupIDs = findGroupIDs(eventId, internalAttendees, userAttendee.getEntity());
+                    int[] groupIDs = findGroupIDs(internalAttendees, userAttendee.getEntity());
                     if (null != groupIDs && 0 < groupIDs.length) {
                         /*
                          * suitable group membership(s) found, apply in "member" property
@@ -462,7 +462,7 @@ public class RdbAttendeeStorage extends RdbStorage implements AttendeeStorage {
         }
     }
 
-    private int[] findGroupIDs(String eventId, List<Attendee> internalAttendees, int member) throws OXException {
+    private int[] findGroupIDs(List<Attendee> internalAttendees, int member) throws OXException {
         Set<Integer> groupIDs = new HashSet<Integer>();
         for (Attendee groupAttendee : filter(internalAttendees, Boolean.TRUE, CalendarUserType.GROUP)) {
             try {
@@ -483,7 +483,7 @@ public class RdbAttendeeStorage extends RdbStorage implements AttendeeStorage {
         return I2i(groupIDs);
     }
 
-    private void prefetchEntities(Collection<List<Attendee>> internalAttendees, Collection<List<Attendee>> userAttendees) throws OXException {
+    private void prefetchEntities(Collection<List<Attendee>> internalAttendees, Collection<List<Attendee>> userAttendees) {
         if (null != internalAttendees && null != userAttendees) {
             List<Attendee> attendees = new ArrayList<Attendee>();
             for (List<Attendee> attendeeList : internalAttendees) {
@@ -543,7 +543,7 @@ public class RdbAttendeeStorage extends RdbStorage implements AttendeeStorage {
         return updated;
     }
 
-    private static int updateAttendees(Connection connection, int contextID, int objectID, List<Attendee> attendees) throws OXException {
+    private int updateAttendees(Connection connection, int contextID, int objectID, List<Attendee> attendees) throws OXException {
         int updated = 0;
         for (Attendee attendee : attendees) {
             if (false == CalendarUtils.isInternal(attendee)) {
@@ -612,7 +612,7 @@ public class RdbAttendeeStorage extends RdbStorage implements AttendeeStorage {
         return updated;
     }
 
-    private static int insertOrReplaceDateExternal(Connection connection, String tableName, boolean replace, int contextID, int objectID, Attendee attendee) throws SQLException, OXException {
+    private int insertOrReplaceDateExternal(Connection connection, String tableName, boolean replace, int contextID, int objectID, Attendee attendee) throws OXException {
         String sql = new StringBuilder()
             .append(replace ? "REPLACE" : "INSERT").append(" INTO ").append(tableName)
             .append(" (cid,objectId,mailAddress,displayName,confirm,reason) VALUES (?,?,?,?,?,?);")
@@ -631,7 +631,7 @@ public class RdbAttendeeStorage extends RdbStorage implements AttendeeStorage {
         }
     }
 
-    private static int insertOrReplaceDatesMembers(Connection connection, String tableName, boolean replace, int contextID, int objectID, Attendee attendee) throws OXException {
+    private int insertOrReplaceDatesMembers(Connection connection, String tableName, boolean replace, int contextID, int objectID, Attendee attendee) throws OXException {
         InternalAttendeeMapper mapper = InternalAttendeeMapper.getInstance();
         AttendeeField[] mappedFields = mapper.getMappedFields();
         String sql = new StringBuilder()
@@ -651,7 +651,7 @@ public class RdbAttendeeStorage extends RdbStorage implements AttendeeStorage {
         }
     }
 
-    private static int insertOrReplaceDateRights(Connection connection, String tableName, boolean replace, int contextID, int objectID, int entity, Attendee attendee) throws SQLException, OXException {
+    private int insertOrReplaceDateRights(Connection connection, String tableName, boolean replace, int contextID, int objectID, int entity, Attendee attendee) throws OXException {
         String sql = new StringBuilder()
             .append(replace ? "REPLACE" : "INSERT").append(" INTO ").append(tableName)
             .append(" (object_id,cid,id,type,ma,dn) VALUES (?,?,?,?,?,?);")
@@ -677,11 +677,11 @@ public class RdbAttendeeStorage extends RdbStorage implements AttendeeStorage {
         }
     }
 
-    private static int insertTombstoneAttendees(Connection connection, int contextID, int objectID, List<Attendee> attendees) throws SQLException, OXException {
+    private int insertTombstoneAttendees(Connection connection, int contextID, int objectID, List<Attendee> attendees) throws OXException {
         return insertOrReplaceAttendees(connection, true, true, contextID, objectID, attendees);
     }
 
-    private static int insertOrReplaceAttendees(Connection connection, boolean deleted, boolean replace, int contextID, int objectID, List<Attendee> attendees) throws SQLException, OXException {
+    private int insertOrReplaceAttendees(Connection connection, boolean deleted, boolean replace, int contextID, int objectID, List<Attendee> attendees) throws OXException {
         int updated = 0;
         Set<Integer> usedEntities = new HashSet<Integer>();
         for (Attendee attendee : attendees) {
@@ -707,7 +707,7 @@ public class RdbAttendeeStorage extends RdbStorage implements AttendeeStorage {
         return updated;
     }
 
-    private static Map<String, List<Attendee>> selectInternalAttendeeData(Connection connection, int contextID, String objectIDs[], boolean tombstones) throws SQLException, OXException {
+    private static Map<String, List<Attendee>> selectInternalAttendeeData(Connection connection, int contextID, String objectIDs[], boolean tombstones) throws SQLException {
         Map<String, List<Attendee>> attendeesByObjectId = new HashMap<String, List<Attendee>>(objectIDs.length);
         StringBuilder stringBuilder = new StringBuilder()
             .append("SELECT object_id,id,type,ma,dn FROM ")
@@ -769,7 +769,7 @@ public class RdbAttendeeStorage extends RdbStorage implements AttendeeStorage {
         return attendeesByObjectId;
     }
 
-    private static Map<String, List<Attendee>> selectExternalAttendeeData(Connection connection, int contextID, String objectIDs[]) throws SQLException, OXException {
+    private static Map<String, List<Attendee>> selectExternalAttendeeData(Connection connection, int contextID, String objectIDs[]) throws SQLException {
         Map<String, List<Attendee>> attendeesByObjectId = new HashMap<String, List<Attendee>>(objectIDs.length);
         String sql;
         if (1 == objectIDs.length) {

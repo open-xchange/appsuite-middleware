@@ -105,21 +105,24 @@ public class CachingCalendarAccountStorage implements CalendarAccountStorage {
     }
 
     @Override
-    public void insertAccount(CalendarAccount account) throws OXException {
-        delegate.insertAccount(account);
+    public CalendarAccount insertAccount(CalendarAccount account) throws OXException {
+        CalendarAccount newAccount = delegate.insertAccount(account);
         invalidateAccount(account.getUserId(), -1);
+        return newAccount;
     }
 
     @Override
-    public void insertAccount(CalendarAccount account, int maxAccounts) throws OXException {
-        delegate.insertAccount(account, maxAccounts);
+    public CalendarAccount insertAccount(CalendarAccount account, int maxAccounts) throws OXException {
+        CalendarAccount newAccount = delegate.insertAccount(account, maxAccounts);
         invalidateAccount(account.getUserId(), -1);
+        return newAccount;
     }
 
     @Override
-    public void updateAccount(CalendarAccount account, long clientTimestamp) throws OXException {
-        delegate.updateAccount(account, clientTimestamp);
+    public CalendarAccount updateAccount(CalendarAccount account, long clientTimestamp) throws OXException {
+        CalendarAccount updatedAccount = delegate.updateAccount(account, clientTimestamp);
         invalidateAccount(account.getUserId(), account.getAccountId());
+        return updatedAccount;
     }
 
     @Override

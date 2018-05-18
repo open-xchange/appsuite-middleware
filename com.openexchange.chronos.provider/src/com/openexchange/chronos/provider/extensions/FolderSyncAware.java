@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the Open-Xchange, Inc. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2020 Open-Xchange, Inc.
+ *     Copyright (C) 2016-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -50,8 +50,10 @@
 package com.openexchange.chronos.provider.extensions;
 
 import java.util.List;
+import java.util.Map;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.service.CalendarParameters;
+import com.openexchange.chronos.service.EventsResult;
 import com.openexchange.chronos.service.UpdatesResult;
 import com.openexchange.exception.OXException;
 
@@ -96,7 +98,7 @@ public interface FolderSyncAware extends SyncAware {
      * typically matches the event's UID or filename property. The lookup is performed within a specific folder in a case-sensitive way.
      * If an event series with overridden instances is matched, the series master event will be the first event in the returned list.
      * <p/>
-     * It is also possible that that only overridden instances of an event series are returned, which may be the case for <i>detached</i>
+     * It is also possible that only overridden instances of an event series are returned, which may be the case for <i>detached</i>
      * instances where the user has no access to the corresponding series master event.
      * <p/>
      * The following calendar parameters are evaluated:
@@ -110,5 +112,26 @@ public interface FolderSyncAware extends SyncAware {
      * @see <a href="https://tools.ietf.org/html/rfc4791#section-4.1">RFC 4791, section 4.1</a>
      */
     List<Event> resolveResource(String folderId, String resourceName) throws OXException;
+
+    /**
+     * Resolves multiple events (and any overridden instances or <i>change exceptions</i>) by their externally used resource name, which
+     * typically matches the event's UID or filename property. The lookup is performed within a specific folder in a case-sensitive way.
+     * If an event series with overridden instances is matched, the series master event will be the first event in the returned list of
+     * the corresponding events result.
+     * <p/>
+     * It is also possible that only overridden instances of an event series are returned, which may be the case for <i>detached</i>
+     * instances where the user has no access to the corresponding series master event.
+     * <p/>
+     * The following calendar parameters are evaluated:
+     * <ul>
+     * <li>{@link CalendarParameters#PARAMETER_FIELDS}</li>
+     * </ul>
+     *
+     * @param folderId The identifier of the folder to resolve the resource names in
+     * @param resourceNames The resource names to resolve
+     * @return The resolved event(s), mapped to their corresponding resource name
+     * @see <a href="https://tools.ietf.org/html/rfc4791#section-4.1">RFC 4791, section 4.1</a>
+     */
+    Map<String, EventsResult> resolveResources(String folderId, List<String> resourceNames) throws OXException;
 
 }

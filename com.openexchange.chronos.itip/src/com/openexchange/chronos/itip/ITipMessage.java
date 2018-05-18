@@ -50,11 +50,11 @@
 package com.openexchange.chronos.itip;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import com.openexchange.chronos.Event;
-import edu.emory.mathcs.backport.java.util.Collections;
 
 /**
  * 
@@ -187,7 +187,6 @@ public class ITipMessage {
      * 
      * @return the Iterable
      */
-    @SuppressWarnings("unchecked")
     public Iterable<Event> exceptions() {
         return Collections.unmodifiableList(exceptions);
     }

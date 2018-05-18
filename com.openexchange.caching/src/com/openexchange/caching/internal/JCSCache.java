@@ -270,7 +270,10 @@ public final class JCSCache extends AbstractCache implements Cache, SupportsLoca
         final int length = keys.length;
         final List<Serializable> list = new ArrayList<Serializable>(length);
         for (int i = 0; i < length; i++) {
-            list.add(cacheControl.get((Serializable) keys[i]).getVal());
+            ICacheElement element = cacheControl.get((Serializable) keys[i]);
+            if(element != null) {
+                list.add(element.getVal());
+            }
         }
 
         return list;

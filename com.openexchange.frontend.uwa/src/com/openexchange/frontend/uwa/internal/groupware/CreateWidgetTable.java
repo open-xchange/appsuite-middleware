@@ -59,11 +59,22 @@ import com.openexchange.database.AbstractCreateTableImpl;
  */
 public class CreateWidgetTable extends AbstractCreateTableImpl {
 
-    private static final String CREATE = "CREATE TABLE uwaWidget (cid INT4 UNSIGNED NOT NULL, user INT4 UNSIGNED DEFAULT null, id VARCHAR(128) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL, autorefresh BOOL, standalone BOOL, title VARCHAR(128), url VARCHAR(128), visible BOOL, protected BOOL, parameters TEXT, PRIMARY KEY (cid, id), INDEX (cid, user))  ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci";
-
     @Override
     protected String[] getCreateStatements() {
-        return new String[]{CREATE};
+        return new String[]{"CREATE TABLE uwaWidget "
+            + "(cid INT4 UNSIGNED NOT NULL, "
+            + "user INT4 UNSIGNED DEFAULT null, "
+            + "id VARCHAR(128) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL, "
+            + "autorefresh BOOL, "
+            + "standalone BOOL, "
+            + "title VARCHAR(128), "
+            + "url VARCHAR(128), "
+            + "visible BOOL, "
+            + "protected BOOL, "
+            + "parameters TEXT, "
+            + "PRIMARY KEY (cid, id), "
+            + "INDEX (cid, user)) "
+            + "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci"};
     }
 
     @Override

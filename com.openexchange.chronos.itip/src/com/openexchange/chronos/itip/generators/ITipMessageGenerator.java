@@ -61,6 +61,15 @@ import com.openexchange.exception.OXException;
  */
 public interface ITipMessageGenerator {
 
+    /**
+     * Generate a human readable diff description for the given events
+     * 
+     * @param original The original {@link Event}
+     * @param updated The updated {@link Event}
+     * @param session The current {@link CalendarSession}
+     * @return A human readable and translated {@link ITipMessage}
+     * @throws OXException In case message can't be generated
+     */
     ITipMessage generate(Event original, Event updated, CalendarSession session) throws OXException;
 
 }

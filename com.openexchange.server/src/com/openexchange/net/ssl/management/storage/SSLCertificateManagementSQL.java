@@ -55,6 +55,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collections;
 import java.util.List;
+import org.apache.commons.codec.digest.DigestUtils;
 import com.google.common.collect.ImmutableList;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.database.Databases;
@@ -141,6 +142,7 @@ public class SSLCertificateManagementSQL {
             int index = 1;
             preparedStatement.setInt(index++, contextId);
             preparedStatement.setInt(index++, userId);
+            preparedStatement.setString(index++, DigestUtils.sha256Hex(certificate.getHostName()));
             preparedStatement.setString(index++, certificate.getHostName());
             preparedStatement.setString(index++, certificate.getFingerprint());
             preparedStatement.setBoolean(index++, certificate.isTrusted());
@@ -208,7 +210,7 @@ public class SSLCertificateManagementSQL {
             int index = 1;
             preparedStatement.setInt(index++, contextId);
             preparedStatement.setInt(index++, userId);
-            preparedStatement.setString(index++, hostname);
+            preparedStatement.setString(index++, DigestUtils.sha256Hex(hostname));
             preparedStatement.setString(index++, fingerprint);
 
             resultSet = preparedStatement.executeQuery();
@@ -307,7 +309,7 @@ public class SSLCertificateManagementSQL {
             int index = 1;
             preparedStatement.setInt(index++, contextId);
             preparedStatement.setInt(index++, userId);
-            preparedStatement.setString(index++, hostname);
+            preparedStatement.setString(index++, DigestUtils.sha256Hex(hostname));
             preparedStatement.setString(index++, fingerprint);
 
             preparedStatement.executeUpdate();
@@ -386,7 +388,7 @@ public class SSLCertificateManagementSQL {
             int index = 1;
             preparedStatement.setInt(index++, contextId);
             preparedStatement.setInt(index++, userId);
-            preparedStatement.setString(index++, hostname);
+            preparedStatement.setString(index++, DigestUtils.sha256Hex(hostname));
             preparedStatement.setString(index++, fingerprint);
 
             resultSet = preparedStatement.executeQuery();
@@ -428,7 +430,7 @@ public class SSLCertificateManagementSQL {
             int index = 1;
             preparedStatement.setInt(index++, contextId);
             preparedStatement.setInt(index++, userId);
-            preparedStatement.setString(index++, hostname);
+            preparedStatement.setString(index++, DigestUtils.sha256Hex(hostname));
             preparedStatement.setString(index++, fingerprint);
 
             resultSet = preparedStatement.executeQuery();

@@ -49,12 +49,7 @@
 
 package com.openexchange.jump.json;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import com.google.common.collect.ImmutableMap;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
@@ -87,19 +82,6 @@ public class JumpActionFactory implements AJAXActionServiceFactory {
     @Override
     public AJAXActionService createActionService(final String action) {
         return actions.get(action);
-    }
-
-    @Override
-    public Collection<?> getSupportedServices() {
-        final List<AbstractJumpAction> values = new LinkedList<AbstractJumpAction>();
-
-        for (final Entry<String,AbstractJumpAction> entry : actions.entrySet()) {
-            if (!"dummy".equals(entry.getKey())) {
-                values.add(entry.getValue());
-            }
-        }
-
-        return Collections.unmodifiableCollection(values);
     }
 
 }

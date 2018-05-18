@@ -163,7 +163,8 @@ public class TransformImageClientAction extends TransformImageAction {
             if (isValid()) {
                 try {
                     IImageClient imageClient = this.m_imageClient.get();
-                    final InputStream imageInputStm = imageClient.getImage(cacheKey, "auto", Integer.toString(session.getContext().getContextId()));
+                    final String requestFormatString = getRequestFormatString(xformParams, "auto");
+                    final InputStream imageInputStm = imageClient.getImage(cacheKey, requestFormatString, Integer.toString(session.getContext().getContextId()));
 
                     if (null != imageInputStm) {
                         ret = new FileHolder(imageInputStm, -1, xformParams.getImageMimeType(), cacheKey);
@@ -211,20 +212,19 @@ public class TransformImageClientAction extends TransformImageAction {
             if (null != srcImageStm) {
                 try {
                     final IImageClient imageClient = this.m_imageClient.get();
-                    final InputStream resultImageStm = imageClient.cacheAndGetImage(cacheKey, "auto", srcImageStm, getContextIdString(session));
+                    final String requestFormatString = getRequestFormatString(xformParams, "auto");
+                    final InputStream resultImageStm = imageClient.cacheAndGetImage(cacheKey, requestFormatString, srcImageStm, getContextIdString(session));
                     if (null != resultImageStm) {
                         try {
-                            final ThresholdFileHolder imageData = new ThresholdFileHolder();
+                            ThresholdFileHolder imageData = new ThresholdFileHolder();
                             try {
                                 imageData.write(resultImageStm);
                                 imageData.setContentType(xformParams.getImageMimeType());
                                 imageData.setName(cacheKey);
                                 ret = new FileHolderBasicTransformedImage(imageData, xformParams);
+                                imageData = null; // Avoid rpemature closing
                             } finally {
-                                if (null == ret) {
-                                    // FileHolderBasicTransformedImage reference is null, apparently an error occurred. Therefore close ThresholdFileHolder since not needed anymore.
-                                    Streams.close(imageData);
-                                }
+                                Streams.close(imageData);
                             }
                         } finally {
                             Streams.close(resultImageStm);
@@ -247,6 +247,19 @@ public class TransformImageClientAction extends TransformImageAction {
 
     private static String getContextIdString(@NonNull final ServerSession session) {
         return Integer.toString(session.getContext().getContextId());
+    }
+
+    /**
+     * @param xformParams
+     * @param targetFormat
+     * @return
+     */
+    private static String getRequestFormatString(@NonNull final TransformImageParameters xformParams, final String targetFormat) {
+        final String ret = xformParams.getFormatString();
+
+        return (isNotEmpty(targetFormat)) ?
+            ret.replaceFirst("^[a-zA-Z]*:", targetFormat + ":") :
+                ret;
     }
 
     // - Members ---------------------------------------------------------------

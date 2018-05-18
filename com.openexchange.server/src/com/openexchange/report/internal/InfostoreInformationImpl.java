@@ -260,19 +260,19 @@ public class InfostoreInformationImpl implements InfostoreInformationService {
      * @return a where query with all contextIds/userIds like in the example
      */
     private String buildWhereClause(Map<Integer, List<Integer>> usersInContext, String userIdColumn) {
-        String whereQuery = " WHERE (";
+        StringBuilder whereQuery = new StringBuilder(" WHERE (");
         boolean isFirst = true;
         for (Map.Entry<Integer, List<Integer>> currentContext : usersInContext.entrySet()) {
             String contextUserQuery = buildWhereQueryCtxsUsrs(currentContext.getKey(), currentContext.getValue(), userIdColumn);
             if (isFirst) {
-                whereQuery += contextUserQuery;
+                whereQuery.append(contextUserQuery);
                 isFirst = false;
             } else {
-                whereQuery += " OR " + contextUserQuery;
+                whereQuery.append(" OR ").append(contextUserQuery);
             }
         }
-        whereQuery += ")";
-        return whereQuery;
+        whereQuery.append(")");
+        return whereQuery.toString();
     }
 
     private Map<Integer, String> buildMultipleWhereClause(Map<PoolAndSchema, Map<Integer,List<Integer>>> dbContextToUserBash, String userIdColumn) {

@@ -136,7 +136,7 @@ public abstract class OXContextCommonImpl extends OXCommonImpl {
             throw invalidDataException;
         }
 
-        new BasicAuthenticator(context).doAuthentication(auth);
+        BasicAuthenticator.createPluginAwareAuthenticator().doAuthentication(auth);
 
         LOGGER.debug("{} - {}", ctx, admin_user);
 

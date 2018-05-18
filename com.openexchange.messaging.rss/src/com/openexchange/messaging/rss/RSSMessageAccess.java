@@ -66,6 +66,7 @@ import org.xml.sax.InputSource;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.AllocatingStringWriter;
 import com.openexchange.java.Streams;
+import com.openexchange.mail.mime.ContentType;
 import com.openexchange.messaging.IndexRange;
 import com.openexchange.messaging.MessagingAccountManager;
 import com.openexchange.messaging.MessagingContent;
@@ -306,6 +307,17 @@ public class RSSMessageAccess extends RSSCommon implements MessagingMessageAcces
                 urlConnection.setConnectTimeout(2500);
                 urlConnection.setReadTimeout(2500);
                 urlConnection.connect();
+                String charset = null;
+                {
+                    String contentType = urlConnection.getHeaderField("Content-Type");
+                    if (null != contentType) {
+                        try {
+                            charset = new ContentType(contentType).getCharsetParameter();
+                        } catch (OXException ox) {
+                            throw new FeedException("Cannot parse Content-Type header: ``" + contentType + "\u00b4\u00b4", ox);
+                        }
+                    }
+                }
                 in = urlConnection.getInputStream();
                 /*
                  * Read from stream
@@ -320,8 +332,16 @@ public class RSSMessageAccess extends RSSCommon implements MessagingMessageAcces
                 /*
                  * Ensure well-formed
                  */
-                final TagNode htmlNode = HTML_CLEANER.clean(new String(tmp.toByteArray())); // No charset needed???
-                tmp = null;
+                TagNode htmlNode;
+                {
+                    String htmlContent = new String(tmp.toByteArray(), null == charset ? "UTF-8" : charset);
+                    tmp = null;
+                    htmlNode = HTML_CLEANER.clean(htmlContent);
+                    if (htmlNode == null) {
+                        return input.build(new InputSource(new UnsynchronizedStringReader(htmlContent)));
+                    }
+                    htmlContent = null;
+                }
                 final AllocatingStringWriter writer = new AllocatingStringWriter(initLen);
                 SERIALIZER.write(htmlNode, writer, "UTF-8");
                 final StringBuilder builder = writer.getAllocator();

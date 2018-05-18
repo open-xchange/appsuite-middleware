@@ -51,8 +51,6 @@ package com.openexchange.tools.oxfolder.memory;
 
 import java.util.LinkedList;
 import java.util.List;
-import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.tools.oxfolder.OXFolderProperties;
 import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;
 
@@ -63,7 +61,7 @@ import gnu.trove.set.hash.TIntHashSet;
  */
 public final class ConditionTree {
 
-    private static final int SYSTEM_GLOBAL_FOLDER_ID = FolderObject.SYSTEM_GLOBAL_FOLDER_ID;
+    /*private static final int SYSTEM_GLOBAL_FOLDER_ID = FolderObject.SYSTEM_GLOBAL_FOLDER_ID;*/ // finally dropped
 
     static final Condition CONDITION_ADMIN = new Condition() {
 
@@ -93,7 +91,7 @@ public final class ConditionTree {
 
     private final TIntSet folderIds;
     private final List<Permission> permissions;
-    private final boolean ignoreSharedAddressbook;
+    /*private final boolean ignoreSharedAddressbook;*/ // finally dropped
     private final long stamp;
 
     /**
@@ -103,7 +101,7 @@ public final class ConditionTree {
         super();
         folderIds = new TIntHashSet();
         permissions = new LinkedList<Permission>();
-        ignoreSharedAddressbook = OXFolderProperties.isIgnoreSharedAddressbook();
+        /*ignoreSharedAddressbook = OXFolderProperties.isIgnoreSharedAddressbook();*/ // finally dropped
         stamp = System.currentTimeMillis();
     }
 
@@ -123,9 +121,12 @@ public final class ConditionTree {
      * @param p The permission associated with a certain entity
      */
     public void insert(Permission p) {
+        /*-
+         *
         if (ignoreSharedAddressbook && (SYSTEM_GLOBAL_FOLDER_ID == p.fuid)) {
             return;
         }
+        */
         if (CONDITION_FOLDER_VISIBLE.fulfilled(p)) {
             folderIds.add(p.fuid);
             permissions.add(p);

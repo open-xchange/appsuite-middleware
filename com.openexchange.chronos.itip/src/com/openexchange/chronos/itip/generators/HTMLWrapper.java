@@ -49,11 +49,10 @@
 
 package com.openexchange.chronos.itip.generators;
 
-import org.apache.commons.lang.StringEscapeUtils;
+import org.apache.commons.text.StringEscapeUtils;
 import com.openexchange.chronos.ParticipationStatus;
 import com.openexchange.chronos.compat.ShownAsTransparency;
 import com.openexchange.chronos.itip.generators.changes.PassthroughWrapper;
-import com.openexchange.groupware.container.Appointment;
 
 /**
  * {@link HTMLWrapper}
@@ -139,7 +138,7 @@ public class HTMLWrapper extends PassthroughWrapper {
     }
 
     private String escapeHtml(String string) {
-        return StringEscapeUtils.escapeHtml(string);
+        return StringEscapeUtils.escapeHtml4(string);
     }
 
 }

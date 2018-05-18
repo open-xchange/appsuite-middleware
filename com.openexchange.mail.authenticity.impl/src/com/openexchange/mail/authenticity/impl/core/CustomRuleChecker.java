@@ -49,6 +49,8 @@
 
 package com.openexchange.mail.authenticity.impl.core;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
@@ -65,6 +67,7 @@ import com.openexchange.config.lean.DefaultProperty;
 import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.config.lean.Property;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Strings;
 import com.openexchange.mail.authenticity.MailAuthenticityExceptionCodes;
 import com.openexchange.mail.authenticity.MailAuthenticityResultKey;
 import com.openexchange.mail.authenticity.MailAuthenticityStatus;
@@ -107,26 +110,59 @@ public class CustomRuleChecker implements Reloadable{
     @SuppressWarnings("unchecked")
     protected List<Rule> load(String yml) throws OXException {
         ConfigurationService configService = Services.getService(ConfigurationService.class);
-        Map<String, Object> map = get(configService.getYaml(yml), Map.class, yml);
+        Object yaml = configService.getYaml(yml);
+        if (null == yaml) {
+            return Collections.emptyList();
+        }
+
+        Map<String, Object> map = get(yaml, Map.class, yml);
         map = get(map.get("custom_rules"), Map.class, yml);
         ImmutableList.Builder<Rule> rules = ImmutableList.builder();
         for (Object o : map.values()) {
             Map<String, String> ruleMap = get(o, Map.class, yml);
-            rules.add(new Rule( ruleMap.get("spf_status"),
+            rules.add(new Rule( toList(ruleMap.get("spf_status")),
                                 ruleMap.get("spf_domain"),
-                                ruleMap.get("dkim_status"),
+                                toList(ruleMap.get("dkim_status")),
                                 ruleMap.get("dkim_domain"),
-                                ruleMap.get("result"),
-                                ruleMap.get("from_domain")));
+                                ruleMap.get("from_domain"),
+                                ruleMap.get("result")));
         }
         return rules.build();
+    }
+
+    private static final String ANY_VALUE = "any";
+    private static final List<String> ALL_STATI;
+
+    static {
+        ArrayList<String> tmp = new ArrayList<String>();
+        tmp.add("fail");
+        tmp.add("neutral");
+        tmp.add("none");
+        tmp.add("pass");
+        ALL_STATI = Collections.unmodifiableList(tmp);
+    }
+
+    private List<String> toList(String input) {
+        if (Strings.isEmpty(input)) {
+            return null;
+        }
+        input = input.toLowerCase();
+        if (ANY_VALUE.equals(input)) {
+            return ALL_STATI;
+        }
+        String[] splitByComma = Strings.splitByComma(input);
+        List<String> result = new ArrayList<>();
+        for(String str: splitByComma) {
+            result.add(str);
+        }
+        return result;
     }
 
 
     @SuppressWarnings("unchecked")
     private <T> T get(Object o, Class<T> clazz, String ymlName) throws OXException {
         if (false == clazz.isInstance(o)) {
-            throw MailAuthenticityExceptionCodes.UNEXPECTED_ERROR.create("The YAML structure of file " + ymlName + " is invalid.");
+            throw MailAuthenticityExceptionCodes.UNEXPECTED_ERROR.create("The YAML structure of file \"" + ymlName + "\" is invalid.");
         }
 
         return (T) o;
@@ -201,9 +237,9 @@ public class CustomRuleChecker implements Reloadable{
      */
     private static class Rule {
 
-        private final String spfStatus;
+        private final List<String> spfStati;
         private final String spfDomain;
-        private final String dkimStatus;
+        private final List<String> dkimStati;
         private final String dkimDomain;
         private final String result;
         private final String fromDomain;
@@ -211,7 +247,7 @@ public class CustomRuleChecker implements Reloadable{
         /**
          * Initializes a new {@link Rule}.
          *
-         * @param spfStatus The optional SPF status
+         * @param spfStati The optional SPF status
          * @param spfDomain The SPF domain in case spfStatus is set
          * @param dkimStatus The optional DKIM status
          * @param dkimDomain The DKIM domain in case dkimStatus is set
@@ -219,20 +255,20 @@ public class CustomRuleChecker implements Reloadable{
          * @param result The new result in case of match or null to fall-back to 'PASS'
          * @throws OXException
          */
-        Rule(String spfStatus, String spfDomain, String dkimStatus, String dkimDomain, String fromDomain, String result) throws OXException {
+        Rule(List<String> spfStati, String spfDomain, List<String> dkimStati, String dkimDomain, String fromDomain, String result) throws OXException {
             super();
-            this.spfStatus = spfStatus;
+            this.spfStati = spfStati;
             this.spfDomain = spfDomain;
-            this.dkimStatus = dkimStatus;
+            this.dkimStati = dkimStati;
             this.dkimDomain = dkimDomain;
             this.fromDomain = fromDomain;
             this.result = result;
 
-            if ((spfStatus != null && spfDomain == null) || (dkimStatus != null && dkimDomain == null)) {
+            if ((spfStati != null && spfDomain == null) || (dkimStati != null && dkimDomain == null)) {
                 throw MailAuthenticityExceptionCodes.UNEXPECTED_ERROR.create("The mail authenticity custom rule is invalid.");
             }
 
-            if (spfStatus == null && dkimStatus == null) {
+            if (spfStati == null && dkimStati == null) {
                 throw MailAuthenticityExceptionCodes.UNEXPECTED_ERROR.create("The mail authenticity custom rule is invalid. Missing either a spf value or a dkim value.");
             }
         }
@@ -248,12 +284,12 @@ public class CustomRuleChecker implements Reloadable{
                 return false;
             }
 
-            if (spfStatus != null) {
+            if (spfStati != null) {
                 boolean spfFound = false;
                 for (MailAuthenticityMechanismResult mechResult : results) {
 
                     if (DefaultMailAuthenticityMechanism.SPF.equals(mechResult.getMechanism())) {
-                        if (spfStatus != null && !mechResult.getResult().getDisplayName().equalsIgnoreCase(spfStatus)) {
+                        if (spfStati != null && !spfStati.contains(mechResult.getResult().getDisplayName().toLowerCase())) {
                             return false;
                         }
                         if (spfDomain != null && !mechResult.getDomain().equalsIgnoreCase(spfDomain)) {
@@ -268,11 +304,11 @@ public class CustomRuleChecker implements Reloadable{
                 }
             }
 
-            if (dkimStatus != null) {
+            if (dkimStati != null) {
                 boolean skimFound = false;
                 for (MailAuthenticityMechanismResult mechResult : results) {
                     if (DefaultMailAuthenticityMechanism.DKIM.equals(mechResult.getMechanism())) {
-                        if (dkimStatus != null && !mechResult.getResult().getDisplayName().equalsIgnoreCase(dkimStatus)) {
+                        if (dkimStati != null && !dkimStati.contains(mechResult.getResult().getDisplayName().toLowerCase())) {
                             return false;
                         }
                         if (dkimDomain != null && !mechResult.getDomain().equalsIgnoreCase(dkimDomain)) {
@@ -286,7 +322,7 @@ public class CustomRuleChecker implements Reloadable{
                     return false;
                 }
             }
-            Object attribute = result.getAttribute(MailAuthenticityResultKey.FROM_DOMAIN);
+            Object attribute = result.getAttribute(MailAuthenticityResultKey.FROM_HEADER_DOMAIN);
             if (attribute != null && fromDomain != null && !attribute.toString().equalsIgnoreCase(fromDomain)) {
                 return false;
             }

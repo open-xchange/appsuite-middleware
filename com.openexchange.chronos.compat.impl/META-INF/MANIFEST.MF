@@ -5,8 +5,7 @@ Bundle-SymbolicName: com.openexchange.chronos.compat.impl
 Bundle-Version: 7.10.0
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
-Import-Package: com.openexchange.caching,
- com.openexchange.chronos,
+Import-Package: com.openexchange.chronos,
  com.openexchange.chronos.common,
  com.openexchange.chronos.exception,
  com.openexchange.chronos.service,

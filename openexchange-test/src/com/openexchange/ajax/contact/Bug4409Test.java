@@ -49,6 +49,8 @@ public class Bug4409Test extends AbstractContactTest {
          */
         getResponse = getClient().execute(new GetRequest(contact, tz));
         assertNull(getResponse.getImageUrl());
+
+        Thread.sleep(2000); // give some time for the resource cache invalidation
         /*
          * try to access previous image location
          */

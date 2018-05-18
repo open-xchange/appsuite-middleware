@@ -60,7 +60,7 @@ import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.AttendeeField;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
-import com.openexchange.chronos.common.mapping.EventUpdateImpl;
+import com.openexchange.chronos.common.mapping.DefaultEventUpdate;
 import com.openexchange.chronos.service.CollectionUpdate;
 import com.openexchange.chronos.service.EventUpdate;
 import com.openexchange.chronos.service.ItemUpdate;
@@ -75,20 +75,28 @@ import com.openexchange.exception.OXException;
  */
 public class ITipEventUpdate implements EventUpdate {
 
+    private final static Set<AttendeeField> IGNOREES = new HashSet<>(4);
+    {
+        IGNOREES.add(AttendeeField.EXTENDED_PARAMETERS);
+        IGNOREES.add(AttendeeField.CN);
+        IGNOREES.add(AttendeeField.CU_TYPE);
+        IGNOREES.add(AttendeeField.ENTITY);
+    }
+
     private EventUpdate delegate;
 
     public ITipEventUpdate(Event originalEvent, Event updatedEvent, boolean considerUnset, EventField... ignoredFields) throws OXException {
         // Make sure EventField.EXTENDED_PROPERTIES is contained in ignordeFields.
         if (ignoredFields == null || ignoredFields.length == 0) {
-            this.delegate = new EventUpdateImpl(originalEvent, updatedEvent, considerUnset, EventField.EXTENDED_PROPERTIES);
+            this.delegate = new DefaultEventUpdate(originalEvent, updatedEvent, considerUnset, IGNOREES, EventField.EXTENDED_PROPERTIES);
         } else {
             if (Arrays.stream(ignoredFields).anyMatch(x -> x == EventField.EXTENDED_PROPERTIES)) {
-                this.delegate = new EventUpdateImpl(originalEvent, updatedEvent, considerUnset, ignoredFields);
+                this.delegate = new DefaultEventUpdate(originalEvent, updatedEvent, considerUnset, IGNOREES, ignoredFields);
             } else {
                 EventField[] fields = new EventField[ignoredFields.length + 1];
                 System.arraycopy(ignoredFields, 0, fields, 0, ignoredFields.length);
                 fields[fields.length - 1] = EventField.EXTENDED_PROPERTIES;
-                this.delegate = new EventUpdateImpl(originalEvent, updatedEvent, considerUnset, fields);
+                this.delegate = new DefaultEventUpdate(originalEvent, updatedEvent, considerUnset, IGNOREES, fields);
             }
         }
     }
@@ -197,6 +205,7 @@ public class ITipEventUpdate implements EventUpdate {
         for (ItemUpdate<Attendee, AttendeeField> updatedItem : updatedItems) {
             Set<AttendeeField> temp = new HashSet<>(updatedItem.getUpdatedFields());
             temp.remove(AttendeeField.PARTSTAT);
+            temp.remove(AttendeeField.COMMENT);
             if (!temp.isEmpty()) {
                 return false;
             }
@@ -263,6 +272,32 @@ public class ITipEventUpdate implements EventUpdate {
         Set<AttendeeField> updatedFields = new HashSet<>(attendeeUpdate.getUpdatedFields());
         updatedFields.remove(AttendeeField.PARTSTAT);
         if (!updatedFields.isEmpty()) {
+            return false;
+        }
+
+        return true;
+    }
+
+    public boolean isAboutCertainParticipantsRemoval(int userId) {
+        if (getAttendeeUpdates() == null || getAttendeeUpdates().isEmpty()) {
+            return false;
+        }
+
+        CollectionUpdate<Attendee, AttendeeField> attendeeUpdates = getAttendeeUpdates();
+
+        if (attendeeUpdates.getAddedItems() != null && !attendeeUpdates.getAddedItems().isEmpty()) {
+            return false;
+        }
+
+        if (attendeeUpdates.getUpdatedItems() != null && !attendeeUpdates.getUpdatedItems().isEmpty()) {
+            return false;
+        }
+
+        if (attendeeUpdates.getRemovedItems() == null || attendeeUpdates.getRemovedItems().size() != 1) {
+            return false;
+        }
+
+        if (attendeeUpdates.getRemovedItems().get(0).getEntity() != userId) {
             return false;
         }
 

@@ -1,10 +1,8 @@
 type: object
 properties:
-  id:
-    type: string
-    description: Object ID
-  path:
+  $ref: ../common/CommonResponseData.yaml
+  data:
     type: array
-    description: Folder path from restored file down to root folder
+    description: The restored items
     items:
-      $ref: "#/definitions/InfoFolderPathData"
+      $ref: "#/definitions/InfoItemsRestoreResponseData"

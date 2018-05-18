@@ -86,6 +86,7 @@ import com.openexchange.login.LoginRampUpService;
 import com.openexchange.login.LoginResult;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
+import com.openexchange.sessiond.impl.ThreadLocalSessionHolder;
 import com.openexchange.threadpool.AbstractTask;
 import com.openexchange.threadpool.ThreadPools;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
@@ -201,6 +202,7 @@ public abstract class AbstractLoginRequestHandler implements LoginRequestHandler
         // Perform the login
         final Response response = new Response();
         LoginResult result = null;
+        ServerSession serverSession = null;
         try {
             // Do the login...
             {
@@ -272,7 +274,7 @@ public abstract class AbstractLoginRequestHandler implements LoginRequestHandler
 
             // Remember User-Agent
             session.setParameter(USER_AGENT, req.getHeader(USER_AGENT));
-            ServerSession serverSession = ServerSessionAdapter.valueOf(session);
+            serverSession = ServerSessionAdapter.valueOf(session);
 
             // Trigger client-specific ramp-up
             Future<JSONObject> optRampUp = rampUpAsync(serverSession, req);
@@ -366,6 +368,7 @@ public abstract class AbstractLoginRequestHandler implements LoginRequestHandler
             LOG.error("", oje);
             response.setException(oje);
         }
+
         try {
             if (response.hasError() || null == result) {
                 final Locale locale;
@@ -384,7 +387,11 @@ public abstract class AbstractLoginRequestHandler implements LoginRequestHandler
 
             Session session = result.getSession();
             // Store associated session
-            SessionUtility.rememberSession(req, new ServerSessionAdapter(session));
+            if (null == serverSession) {
+                serverSession = new ServerSessionAdapter(session);
+            }
+            SessionUtility.rememberSession(req, serverSession);
+            ThreadLocalSessionHolder.getInstance().setSession(serverSession);
 
             // Set cookies
             if (null == cookiesSetter) {
@@ -408,6 +415,8 @@ public abstract class AbstractLoginRequestHandler implements LoginRequestHandler
             LOG.error(LoginServlet.RESPONSE_ERROR, e);
             LoginServlet.sendError(resp);
             return false;
+        } finally {
+            ThreadLocalSessionHolder.getInstance().clear();
         }
         return false;
     }

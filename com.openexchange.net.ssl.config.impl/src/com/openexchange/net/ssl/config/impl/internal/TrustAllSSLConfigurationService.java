@@ -62,10 +62,23 @@ import com.openexchange.net.ssl.config.TrustLevel;
  */
 public class TrustAllSSLConfigurationService implements SSLConfigurationService {
 
+    private static final TrustAllSSLConfigurationService INSTANCE = new TrustAllSSLConfigurationService();
+
+    /**
+     * Gets the singleton instance.
+     *
+     * @return The instance
+     */
+    public static TrustAllSSLConfigurationService getInstance() {
+        return INSTANCE;
+    }
+
+    // ------------------------------------------------------------------------------------------------------------------
+
     /**
      * Initializes a new {@link TrustAllSSLConfigurationService}.
      */
-    public TrustAllSSLConfigurationService() {
+    private TrustAllSSLConfigurationService() {
         super();
     }
 

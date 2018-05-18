@@ -85,13 +85,10 @@ public class SearchAction extends AbstractSchedJoulesAction implements AJAXActio
     public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
         // Get the mandatory 'query' parameter
         String query = requestData.nonEmptyParameter(SchedJoulesSearchParameter.QUERY);
-        // Get optional 'maxRows' parameter
+        // Get optional 'maxRows', 'language', 'countryId' and 'categoryId' parameters
         int maxRows = requestData.getIntParameter(SchedJoulesSearchParameter.MAX_ROWS);
-        // Get the optional 'language' parameter
         String locale = getLanguage(requestData, session);
-        // Get the optional 'countryId' parameter
         int countryId = requestData.getIntParameter(SchedJoulesSearchParameter.COUNTRY_ID);
-        // Get the optional 'categoryId' parameter
         int categoryId = requestData.getIntParameter(SchedJoulesSearchParameter.CATEGORY_ID);
 
         // Execute

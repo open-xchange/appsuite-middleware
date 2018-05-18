@@ -138,7 +138,7 @@ public class W3CDOMStreamReader extends AbstractDOMStreamReader<Node, Node> {
                 } else if (prefix.length() > 0 && "xmlns".equals(prefix)) {
                     frame.uris.add(value);
                     frame.prefixes.add(localName);
-                } else if (name.startsWith("xmlns:")) {
+                } else if (name != null && name.startsWith("xmlns:")) {
                     prefix = name.substring(6);
                     frame.uris.add(value);
                     frame.prefixes.add(prefix);

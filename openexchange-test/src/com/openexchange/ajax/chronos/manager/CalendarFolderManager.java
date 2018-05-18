@@ -81,7 +81,7 @@ public class CalendarFolderManager extends AbstractManager {
     public static final String CALENDAR_MODULE = "calendar";
     public static final String EVENT_MODULE = "event";
 
-    private List<String> folderIds;
+    private final List<String> folderIds;
 
     private final FoldersApi foldersApi;
     private final UserApi userApi;
@@ -101,7 +101,7 @@ public class CalendarFolderManager extends AbstractManager {
      */
     public void cleanUp() {
         try {
-            foldersApi.deleteFolders(userApi.getSession(), folderIds, TREE_ID, System.currentTimeMillis(), CALENDAR_MODULE, true, false, false);
+            foldersApi.deleteFolders(userApi.getSession(), folderIds, TREE_ID, null, CALENDAR_MODULE, true, false, false);
         } catch (ApiException e) {
             System.err.println("Could not clean up the calendar folders for user " + userApi.getCalUser() + ": " + e.getMessage());
             e.printStackTrace();
@@ -109,7 +109,7 @@ public class CalendarFolderManager extends AbstractManager {
     }
 
     /**
-     * 
+     *
      * @param module
      * @param providerId
      * @param title
@@ -125,7 +125,7 @@ public class CalendarFolderManager extends AbstractManager {
 
     /**
      * Creates a folder for the specified module and provider
-     * 
+     *
      * @param module The module
      * @param providerId The provider identifier
      * @param config The configuration
@@ -151,7 +151,7 @@ public class CalendarFolderManager extends AbstractManager {
 
     /**
      * Retrieves the folder with the specified identifier
-     * 
+     *
      * @param folderId The folder identifier
      * @return the {@link FolderData}
      * @throws ApiException if an API error is occurred
@@ -163,7 +163,7 @@ public class CalendarFolderManager extends AbstractManager {
 
     /**
      * Retrieves the folder with the specified identifier
-     * 
+     *
      * @param folderId The folder identifier
      * @return the {@link FolderData}
      * @throws ApiException if an API error is occurred
@@ -175,12 +175,12 @@ public class CalendarFolderManager extends AbstractManager {
             assertNotNull("An error was expected", response.getError());
             throw new ChronosApiException(response.getCode(), response.getError());
         }
-        return checkResponse(response.getError(), response.getErrorDesc(), response).getData();
+        return checkResponse(response.getError(), response.getErrorDesc(), response.getCategories(), response).getData();
     }
 
     /**
      * Updates the folder with the specified identifier
-     * 
+     *
      * @param defaultFolderId The folder identifier
      * @return The {@link FolderUpdateResponse}
      * @throws ApiException if an API error is occurred
@@ -192,7 +192,7 @@ public class CalendarFolderManager extends AbstractManager {
 
     /**
      * Updates the folder with the specified identifier
-     * 
+     *
      * @param defaultFolderId The folder identifier
      * @return The {@link FolderUpdateResponse}
      * @throws ApiException if an API error is occurred
@@ -202,33 +202,32 @@ public class CalendarFolderManager extends AbstractManager {
         FolderBody body = new FolderBody();
         body.setFolder(folderData);
 
-        FolderUpdateResponse response = foldersApi.updateFolder(userApi.getSession(), folderData.getId(), System.currentTimeMillis(), body, false, TREE_ID, CALENDAR_MODULE, true);
+        FolderUpdateResponse response = foldersApi.updateFolder(userApi.getSession(), folderData.getId(), folderData.getLastModifiedUtc(), body, false, TREE_ID, CALENDAR_MODULE, true);
         if (expectedException) {
             assertNotNull("An error was expected", response.getError());
             throw new ChronosApiException(response.getCode(), response.getError());
         }
-        return checkResponse(response.getError(), response.getErrorDesc(), response);
+        return checkResponse(response.getError(), response.getErrorDesc(), response.getCategories(), response);
     }
 
     /**
      * Deletes the folder with the specified identifier
-     * 
+     *
      * @param folderId The folder identifier
      * @throws ApiException if an API error is occurred
      */
     public void deleteFolder(String folderId) throws ApiException {
-        foldersApi.deleteFolders(userApi.getSession(), Collections.singletonList(folderId), TREE_ID, System.currentTimeMillis(), CALENDAR_MODULE, true, false, false);
-        folderIds.remove(folderId);
+        this.deleteFolders(Collections.singletonList(folderId));
     }
 
     /**
      * Deletes the folders with the specified identifier
-     * 
+     *
      * @param defaultFolderId The folder identifiers
      * @throws ApiException if an API error is occurred
      */
     public void deleteFolders(List<String> folders) throws ApiException {
-        foldersApi.deleteFolders(userApi.getSession(), folders, TREE_ID, System.currentTimeMillis(), CALENDAR_MODULE, true, false, false);
+        foldersApi.deleteFolders(userApi.getSession(), folders, TREE_ID, null, CALENDAR_MODULE, true, false, false);
         for (String folder : folders) {
             folderIds.remove(folder);
         }
@@ -242,7 +241,7 @@ public class CalendarFolderManager extends AbstractManager {
      * @throws ApiException if an API error is occurred
      */
     private FolderUpdateResponse handleCreation(FolderUpdateResponse response) {
-        FolderUpdateResponse data = checkResponse(response.getError(), response.getErrorDesc(), response);
+        FolderUpdateResponse data = checkResponse(response.getError(), response.getErrorDesc(), response.getCategories(), response);
         folderIds.add(data.getData());
         return data;
     }

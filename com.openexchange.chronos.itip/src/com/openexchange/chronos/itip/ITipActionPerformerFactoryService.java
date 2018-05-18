@@ -59,6 +59,19 @@ import java.util.Collection;
  * @since v7.10.0
  */
 public interface ITipActionPerformerFactoryService {
+
+    /**
+     * Get a {@link ITipActionPerformer} for the action
+     * 
+     * @param action The {@link ITipAction} to get a performer for
+     * @return {@link ITipActionPerformer} for the given action
+     */
     public ITipActionPerformer getPerformer(ITipAction action);
+
+    /**
+     * Get a {@link Collection} of all supported {@link ITipAction}s
+     * 
+     * @return All supported actions
+     */
     public Collection<ITipAction> getSupportedActions();
 }

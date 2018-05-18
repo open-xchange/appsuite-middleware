@@ -64,7 +64,9 @@ public class AddColumnGenerator extends AbstractSqlGenerator<AddColumnStatement>
 
         if (statement.isAutoIncrement() && database.supportsAutoIncrement()) {
             AutoIncrementConstraint autoIncrementConstraint = statement.getAutoIncrementConstraint();
-        	alterTable += " " + database.getAutoIncrementClause(autoIncrementConstraint.getStartWith(), autoIncrementConstraint.getIncrementBy());
+            if (null != autoIncrementConstraint) {
+                alterTable += " " + database.getAutoIncrementClause(autoIncrementConstraint.getStartWith(), autoIncrementConstraint.getIncrementBy());
+            }
         }
 
         if (!statement.isNullable()) {

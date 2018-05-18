@@ -299,7 +299,7 @@ public class ExtAccountFolderField implements AdditionalFolderField {
                                 // * METADATA INBOX/QUARANTAINE (/shared/vendor/vendor.dovecot/ext-account NIL /shared/vendor/vendor.dovecot/alias NIL)
                                 String fullName = ir.readAtomString();
                                 String[] metadatas = ir.readAtomStringList();
-                                int length = metadatas.length;
+                                int length = metadatas == null ? -1 : metadatas.length;
                                 int index = 0;
 
                                 String extAccount = null;

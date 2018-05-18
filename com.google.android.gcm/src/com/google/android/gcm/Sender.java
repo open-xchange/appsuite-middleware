@@ -560,7 +560,10 @@ public class Sender {
     return (Number) value;
   }
 
-  class CustomParserException extends RuntimeException {
+  static class CustomParserException extends RuntimeException {
+
+    private static final long serialVersionUID = -1048457366720136244L;
+
     CustomParserException(String message) {
       super(message);
     }

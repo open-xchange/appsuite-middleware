@@ -78,9 +78,9 @@ public enum TaskExceptionCode implements DisplayableOXExceptionCode {
     /** SQL Problem. */
     SQL_ERROR("SQL Problem.", Category.CATEGORY_ERROR, 5),
 
-    /** Folder %1$s (%2$d) is not a task folder. */
-    NOT_TASK_FOLDER("Folder %1$s (%2$d) is not a task folder.", TaskExceptionMessage.NOT_TASK_FOLDER_MSG,
-        Category.CATEGORY_PERMISSION_DENIED, 6),
+    /** Folder %1$d cannot be found */
+    FOLDER_NOT_FOUND("Folder %1$d cannot be found.", TaskExceptionMessage.FOLDER_NOT_FOUND_MSG,
+        Category.CATEGORY_USER_INPUT, 6),
 
     /**
      * Edit conflict. Your change cannot be completed because somebody else has

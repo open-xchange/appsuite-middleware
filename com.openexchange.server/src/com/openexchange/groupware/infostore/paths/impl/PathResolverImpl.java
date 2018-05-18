@@ -109,7 +109,7 @@ public class PathResolverImpl extends AbstractPathResolver implements URLCache {
             return relative(relativeToFolder, cache.get(documentId), session);
         }
 
-        final DocumentMetadata dm = database.getDocumentMetadata(documentId, InfostoreFacade.CURRENT_VERSION, session);
+        final DocumentMetadata dm = database.getDocumentMetadata(-1, documentId, InfostoreFacade.CURRENT_VERSION, session);
         if(dm.getFileName() == null || dm.getFileName().equals("")) {
             throw InfostoreExceptionCodes.DOCUMENT_CONTAINS_NO_FILE.create(Integer.valueOf(documentId));
         }
@@ -238,6 +238,7 @@ public class PathResolverImpl extends AbstractPathResolver implements URLCache {
                             stmt.setInt(1, session.getContextId());
                             stmt.setInt(2, parentId);
                             stmt.setString(3, component);
+                            rs.close();
                             rs = stmt.executeQuery();
                             found = false;
                             int id = 0;
@@ -269,7 +270,7 @@ public class PathResolverImpl extends AbstractPathResolver implements URLCache {
             }
             return new ResolvedImpl(current,parentId, false);
         } catch (final SQLException x) {
-            throw InfostoreExceptionCodes.SQL_PROBLEM.create(x, stmt.toString());
+            throw InfostoreExceptionCodes.SQL_PROBLEM.create(x, stmt != null ? stmt.toString() : "");
         } finally {
             close(stmt,rs);
             releaseReadConnection(session.getContext(),con);

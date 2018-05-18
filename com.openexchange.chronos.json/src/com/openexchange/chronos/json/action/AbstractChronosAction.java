@@ -60,11 +60,14 @@ import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_RANG
 import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_RANGE_START;
 import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_UPDATE_CACHE;
 import java.util.AbstractMap;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
+import java.util.List;
 import java.util.Map.Entry;
 import java.util.Set;
 import org.dmfs.rfc5545.DateTime;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.AJAXServlet;
@@ -82,6 +85,7 @@ import com.openexchange.java.Strings;
 import com.openexchange.java.util.TimeZones;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
+import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 
 /**
  * {@link AbstractChronosAction}
@@ -215,6 +219,29 @@ public abstract class AbstractChronosAction implements AJAXActionService {
         String optRecurrenceId = jsonObject.optString(PARAM_RECURRENCE_ID, null);
         String optRecurrenceRange = jsonObject.optString(PARAM_RECURRENCE_RANGE, null);
         return getEventID(folderId, objectId, optRecurrenceId, optRecurrenceRange);
+    }
+
+    /**
+     * Parses an array of full event identifiers, i.e. a JSON array with json object elements having the properties
+     * {@link AJAXServlet#PARAMETER_ID}, {@link AJAXServlet#PARAMETER_FOLDERID} and optionally
+     * {@link AbstractChronosAction#PARAM_RECURRENCE_ID}.
+     *
+     * @param jsonArray The json array off full event identifiers to parse
+     * @return The parsed full event identifiers
+     */
+    protected List<EventID> parseEventIDs(JSONArray jsonArray) throws OXException {
+        if (null == jsonArray) {
+            return null;
+        }
+        List<EventID> eventIDs = new ArrayList<>(jsonArray.length());
+        for (int i = 0; i < jsonArray.length(); i++) {
+            try {
+                eventIDs.add(parseIdParameter(jsonArray.getJSONObject(i)));
+            } catch (JSONException e) {
+                throw OXJSONExceptionCodes.JSON_READ_ERROR.create(e, e.getMessage());
+            }
+        }
+        return eventIDs;
     }
 
     protected long parseClientTimestamp(AJAXRequestData requestData) throws OXException {

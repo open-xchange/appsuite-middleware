@@ -53,7 +53,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
@@ -65,11 +64,8 @@ import org.junit.runners.BlockJUnit4ClassRunner;
 import com.openexchange.ajax.chronos.factory.EventFactory;
 import com.openexchange.ajax.chronos.manager.ICalImportExportManager;
 import com.openexchange.ajax.chronos.util.DateTimeUtil;
-import com.openexchange.configuration.asset.Asset;
-import com.openexchange.configuration.asset.AssetType;
 import com.openexchange.java.Strings;
 import com.openexchange.testing.httpclient.models.EventData;
-import com.openexchange.testing.httpclient.models.EventId;
 import com.openexchange.testing.httpclient.models.InfoItemExport;
 
 /**
@@ -79,19 +75,7 @@ import com.openexchange.testing.httpclient.models.InfoItemExport;
  * @since v7.10.0
  */
 @RunWith(BlockJUnit4ClassRunner.class)
-public class ICalEventImportExportTest extends AbstractChronosTest {
-
-    private List<EventData> getEventData(String fileName) throws Exception {
-        String response = importICalFile(fileName);
-        List<EventId> eventIds = importExportManager.parseImportJSONResponseToEventIds(response);
-        eventManager.rememberEventIds(eventIds);
-        return eventManager.listEvents(eventIds);
-    }
-
-    private String importICalFile(String fileName) throws Exception {
-        Asset asset = assetManager.getAsset(AssetType.ics, fileName);
-        return importExportManager.importICalFile(defaultUserApi.getSession(), defaultFolderId, new File(asset.getAbsolutePath()), true, false);
-    }
+public class ICalEventImportExportTest extends AbstractImportExportTest {
 
     @Test
     public void testFolderEventExport() throws Exception {
@@ -110,7 +94,7 @@ public class ICalEventImportExportTest extends AbstractChronosTest {
         addInfoItemExport(itemList, expectedEventData.getFolder(), expectedEventData.getId());
         eventData.add(expectedEventData);
 
-        Calendar start = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+        Calendar start = Calendar.getInstance(TimeZone.getTimeZone("Europe/Berlin"));
         start.setTimeInMillis(System.currentTimeMillis());
         Calendar end = Calendar.getInstance(TimeZone.getTimeZone("Europe/Berlin"));
         end.setTimeInMillis(System.currentTimeMillis() + TimeUnit.DAYS.toMillis(10));
@@ -124,17 +108,10 @@ public class ICalEventImportExportTest extends AbstractChronosTest {
         assertEventData(eventData, iCalExport);
     }
 
-
-    private void addInfoItemExport(List<InfoItemExport> itemList, String folderId, String objectId) {
-        InfoItemExport item = new InfoItemExport();
-        item.folderId(folderId);
-        item.id(objectId);
-        itemList.add(item);
-    }
-
     @Test
     public void testSingleEventImport() throws Exception {
-        List<EventData> eventData = getEventData(ICalImportExportManager.SINGLE_IMPORT_ICS);
+
+        List<EventData> eventData = parseEventData(getImportResponse(ICalImportExportManager.SINGLE_IMPORT_ICS));
         assertEquals(1, eventData.size());
         assertEquals(ICalImportExportManager.SINGLE_IMPORT_ICS_SUMMARY, eventData.get(0).getSummary());
         assertEquals(ICalImportExportManager.SINGLE_IMPORT_ICS_UID, eventData.get(0).getUid());
@@ -142,15 +119,15 @@ public class ICalEventImportExportTest extends AbstractChronosTest {
 
     @Test
     public void testSeriesEventImport() throws Exception {
-        List<EventData> eventData = getEventData(ICalImportExportManager.SERIES_IMPORT_ICS);
+        List<EventData> eventData = parseEventData(getImportResponse(ICalImportExportManager.SERIES_IMPORT_ICS));
         assertEquals(1, eventData.size());
         assertEquals(ICalImportExportManager.SERIES_IMPORT_ICS_SUMMARY, eventData.get(0).getSummary());
         assertEquals(ICalImportExportManager.SERIES_IMPORT_ICS_UID, eventData.get(0).getUid());
     }
 
-    @Test//TODO fix
+    @Test
     public void testICalEventRecurrenceImport() throws Exception {
-        List<EventData> eventData = getEventData(ICalImportExportManager.RECURRENCE_IMPORT_ICS);
+        List<EventData> eventData = parseEventData(getImportResponse(ICalImportExportManager.RECURRENCE_IMPORT_ICS));
         assertFalse(eventData.isEmpty());
         for (EventData event : eventData) {
             assertEquals(ICalImportExportManager.RECURRENCE_IMPORT_ICS_SUMMARY, event.getSummary());
@@ -163,14 +140,14 @@ public class ICalEventImportExportTest extends AbstractChronosTest {
 
     @Test
     public void testICalEventImportUIDHandling() throws Exception {
-        getEventData(ICalImportExportManager.RECURRENCE_IMPORT_ICS);
+        parseEventData(getImportResponse(ICalImportExportManager.RECURRENCE_IMPORT_ICS));
         String response = importICalFile(ICalImportExportManager.RECURRENCE_IMPORT_ICS);
         assertTrue(response.contains("The appointment could not be created due to another conflicting appointment with the same unique identifier"));
     }
 
     @Test
     public void testICalImportExportRoundTrip() throws Exception {
-        List<EventData> eventData = getEventData(ICalImportExportManager.SERIES_IMPORT_ICS);
+        List<EventData> eventData = parseEventData(getImportResponse(ICalImportExportManager.SERIES_IMPORT_ICS));
         assertEquals(1, eventData.size());
         assertEquals(ICalImportExportManager.SERIES_IMPORT_ICS_SUMMARY, eventData.get(0).getSummary());
         assertEquals(ICalImportExportManager.SERIES_IMPORT_ICS_UID, eventData.get(0).getUid());
@@ -181,12 +158,5 @@ public class ICalEventImportExportTest extends AbstractChronosTest {
         String iCalExport = importExportManager.exportICalBatchFile(defaultUserApi.getSession(), itemList);
         assertNotNull(iCalExport);
         assertEventData(eventData, iCalExport);
-    }
-
-    private void assertEventData(List<EventData> eventData, String iCalExport) {
-        for (EventData event : eventData) {
-            assertTrue(iCalExport.contains(event.getUid()));
-            assertTrue(iCalExport.contains(event.getSummary()));
-        }
     }
 }

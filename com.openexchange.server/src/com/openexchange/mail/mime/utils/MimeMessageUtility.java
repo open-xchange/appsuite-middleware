@@ -63,8 +63,6 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PipedOutputStream;
 import java.io.UnsupportedEncodingException;
-import java.nio.charset.Charset;
-import java.nio.charset.UnsupportedCharsetException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -108,9 +106,7 @@ import javax.mail.internet.MimePart;
 import javax.mail.internet.MimeUtility;
 import javax.mail.internet.ParseException;
 import javax.mail.util.ByteArrayDataSource;
-import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.binary.Base64;
-import org.apache.commons.codec.net.QuotedPrintableCodec;
 import org.apache.james.mime4j.io.LineReaderInputStream;
 import org.apache.james.mime4j.io.LineReaderInputStreamAdaptor;
 import org.apache.james.mime4j.stream.DefaultFieldBuilder;
@@ -723,17 +719,6 @@ public final class MimeMessageUtility {
         }
     }
 
-    /*
-     * Multipart subtype constants
-     */
-    private static final String MULTI_SUBTYPE_ALTERNATIVE = "ALTERNATIVE";
-
-    private static final String MULTI_SUBTYPE_RELATED = "RELATED";
-
-    private static final String MULTI_SUBTYPE_MIXED = "MIXED";
-
-    //     private static final String MULTI_SUBTYPE_SIGNED = "SIGNED";
-
     /**
      * Checks if given multipart contains (file) attachments
      *
@@ -810,7 +795,7 @@ public final class MimeMessageUtility {
 
         if (part.getContentType().toLowerCase().startsWith("multipart/")) {
             Multipart multipart = getMultipartContentFrom(part);
-            if (null != multipart) {                
+            if (null != multipart) {
                 int count = multipart.getCount();
                 return hasAttachments0(multipart, count);
             }
@@ -1031,10 +1016,6 @@ public final class MimeMessageUtility {
         boolean isPadded() {
             return value.charAt(value.length() - 1) == '=';
         }
-
-        String asEncodedWord() {
-            return new StringBuilder(value.length() + 8).append("=?").append(charset).append("?B?").append(value).append("?=").toString();
-        }
     }
 
     private static String decodeMultiEncodedHeader0(final String headerValue, final boolean unfold) {
@@ -1251,43 +1232,6 @@ public final class MimeMessageUtility {
         }
     }
 
-    private static String handleUnsupportedEncoding(String transferEncoding, String encodedValue) {
-        // Extract raw bytes through decoding with passed transfer-encoding
-        byte[] rawBytes;
-        if ("Q".equalsIgnoreCase(transferEncoding)) {
-            try {
-                rawBytes = QuotedPrintableCodec.decodeQuotedPrintable(Charsets.toAsciiBytes(encodedValue));
-            } catch (final DecoderException e) {
-                /*
-                 * Invalid quoted-printable
-                 */
-                LOG.warn("Cannot decode quoted-printable", e);
-                return encodedValue;
-            }
-        } else if ("B".equalsIgnoreCase(transferEncoding)) {
-            rawBytes = Base64.decodeBase64(Charsets.toAsciiBytes(encodedValue));
-        } else {
-            /*
-             * Unknown transfer-encoding; just return current match
-             */
-            LOG.warn("Unknown transfer-encoding: {}", transferEncoding);
-            return encodedValue;
-        }
-
-        // Auto-detect charset from raw bytes
-        String detectedCharset = CharsetDetector.detectCharset(new UnsynchronizedByteArrayInputStream(rawBytes));
-
-        try {
-            return new String(rawBytes, Charsets.forName(detectedCharset));
-        } catch (final UnsupportedCharsetException e) {
-            /*
-             * Even detected charset is unknown... giving up
-             */
-            LOG.warn("Unknown character-encoding: {}", detectedCharset);
-            return encodedValue;
-        }
-    }
-
     /**
      * Checks if given raw header contains non-ascii characters.
      *
@@ -1455,7 +1399,8 @@ public final class MimeMessageUtility {
     }
 
     private static String qencode(final char toEncode, final String charset) {
-        if (!Charset.isSupported(charset)) {
+        if (!CharsetDetector.isValid(charset)) {
+            LOG.warn("Illegal or unsupported charset name: {}", charset);
             return String.valueOf(toEncode);
         }
         final StringBuilder retval = new StringBuilder(4);
@@ -2071,11 +2016,11 @@ public final class MimeMessageUtility {
      */
     public static String extractHeader(final String headerName, final InputStream inputStream, final boolean closeStream) throws IOException {
         boolean close = closeStream;
+        final UnsynchronizedByteArrayOutputStream buffer = new UnsynchronizedByteArrayOutputStream(BUFSIZE);
         try {
             /*
              * Gather bytes until empty line, EOF or matching header found
              */
-            final UnsynchronizedByteArrayOutputStream buffer = new UnsynchronizedByteArrayOutputStream(BUFSIZE);
             int start = 0;
             int i = -1;
             boolean firstColonFound = false;
@@ -2147,6 +2092,7 @@ public final class MimeMessageUtility {
             if (close) {
                 Streams.close(inputStream);
             }
+            Streams.close(buffer);
         }
     }
 
@@ -2261,7 +2207,7 @@ public final class MimeMessageUtility {
             /*
              * Write headers
              */
-            for (@SuppressWarnings("unchecked") final Enumeration<String> hdrLines = p.getNonMatchingHeaderLines(null); hdrLines.hasMoreElements();) {
+            for (final Enumeration<String> hdrLines = p.getNonMatchingHeaderLines(null); hdrLines.hasMoreElements();) {
                 los.writeln(hdrLines.nextElement());
             }
             /*
@@ -3520,7 +3466,7 @@ public final class MimeMessageUtility {
         String dateString = mimeMessage.getHeader("Date", null);
         return parseDate(dateString);
     }
-    
+
     private static Date parseDate(String dateString ) {
         Date result = null;
         if (dateString != null) {

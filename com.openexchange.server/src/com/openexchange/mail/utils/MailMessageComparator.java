@@ -421,7 +421,7 @@ public final class MailMessageComparator implements Comparator<MailMessage> {
                 if (cl2 <= 0) {
                     return 1;
                 }
-                return (cl1 < cl2 ? -1 : (cl1 == cl2 ? 0 : 1));
+                return (cl1 < cl2 ? 1 : (cl1 == cl2 ? 0 : -1));
             }
 
             @Override
@@ -439,7 +439,7 @@ public final class MailMessageComparator implements Comparator<MailMessage> {
                 if (cl2 <= 0) {
                     return -1;
                 }
-                return (cl1 < cl2 ? 1 : (cl1 == cl2 ? 0 : -1));
+                return (cl1 < cl2 ? -1 : (cl1 == cl2 ? 0 : 1));
             }
 
             @Override
@@ -451,11 +451,11 @@ public final class MailMessageComparator implements Comparator<MailMessage> {
                 if (msg.getColorLabel() > 0) {
                     return msg.getColorLabel();
                 }
-                
+
                 if (flaggingColor == null) {
                     return 0;
                 }
-                
+
                 return msg.isFlagged() ? flaggingColor : 0;
             }
         });

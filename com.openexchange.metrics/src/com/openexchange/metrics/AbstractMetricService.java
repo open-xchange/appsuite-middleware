@@ -49,12 +49,12 @@
 
 package com.openexchange.metrics;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
+import java.util.Queue;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ConcurrentMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -79,7 +79,7 @@ public abstract class AbstractMetricService implements MetricService {
     private final Map<MetricType, MetricRegisterer> registerers;
     private final Map<MetricType, MetricServiceListenerNotifier> listenerNotifiersOnAdd;
     private final Map<MetricType, MetricServiceListenerNotifier> listenerNotifiersOnRemove;
-    private final List<MetricServiceListener> listeners;
+    private final Queue<MetricServiceListener> listeners;
 
     /**
      * Initialises a new {@link AbstractMetricService}.
@@ -87,12 +87,12 @@ public abstract class AbstractMetricService implements MetricService {
     public AbstractMetricService() {
         super();
         metrics = new ConcurrentHashMap<>();
-        registerers = new HashMap<>();
-        listeners = new ArrayList<>();
+        registerers = new ConcurrentHashMap<>();
+        listeners = new ConcurrentLinkedQueue<>();
 
         Map<MetricType, MetricServiceListenerNotifier> l = new HashMap<>();
         l.put(MetricType.COUNTER, (listener, metric, descriptor) -> listener.onCounterAdded(descriptor, (Counter) metric));
-        l.put(MetricType.GAUGE, (listener, metric, descriptor) -> listener.onGaugeAdded(descriptor, (Gauge) metric));
+        l.put(MetricType.GAUGE, (listener, metric, descriptor) -> listener.onGaugeAdded(descriptor, (Gauge<?>) metric));
         l.put(MetricType.HISTOGRAM, (listener, metric, descriptor) -> listener.onHistogramAdded(descriptor, (Histogram) metric));
         l.put(MetricType.METER, (listener, metric, descriptor) -> listener.onMeterAdded(descriptor, (Meter) metric));
         l.put(MetricType.TIMER, (listener, metric, descriptor) -> listener.onTimerAdded(descriptor, (Timer) metric));
@@ -111,7 +111,7 @@ public abstract class AbstractMetricService implements MetricService {
 
     /**
      * Adds the specified registerer to the local registry.
-     * 
+     *
      * @param metricType The {@link MetricType}
      * @param registerer The registerer
      */
@@ -121,20 +121,21 @@ public abstract class AbstractMetricService implements MetricService {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.metrics.MetricService#addListener(com.openexchange.metrics.jmx.MetricServiceListener)
      */
     @Override
     public void addListener(MetricServiceListener listener) {
-        listeners.add(listener);
-        for (MetricInformation metricInformation : metrics.values()) {
-            notifyListenersOnAdd(metricInformation);
+        if (listeners.offer(listener)) {
+            for (MetricInformation metricInformation : metrics.values()) {
+                notifyListenersOnAdd(metricInformation);
+            }
         }
     }
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.metrics.MetricService#removeListener(com.openexchange.metrics.jmx.MetricServiceListener)
      */
     @Override
@@ -145,7 +146,7 @@ public abstract class AbstractMetricService implements MetricService {
     /**
      * Registers a new metric with the specified {@link MetricDescriptor} or gets
      * an already existing one
-     * 
+     *
      * @param descriptor The {@link MetricDescriptor}
      * @return The newly registered {@link Metric} or an already existing one
      * @throws IllegalArgumentException if the {@link MetricDescriptor} is <code>null</code> or
@@ -177,7 +178,7 @@ public abstract class AbstractMetricService implements MetricService {
 
     /**
      * Remove the specified metric
-     * 
+     *
      * @param metricDescriptor
      */
     protected void remove(MetricDescriptor metricDescriptor) {
@@ -194,7 +195,7 @@ public abstract class AbstractMetricService implements MetricService {
 
     /**
      * Notifies all listeners about the specified added {@link Metric}
-     * 
+     *
      * @param descriptor The {@link MetricDescriptor}
      * @param metric The added {@link Metric}
      */
@@ -206,7 +207,7 @@ public abstract class AbstractMetricService implements MetricService {
 
     /**
      * Notifies all listeners about the specified removed {@link Metric}
-     * 
+     *
      * @param descriptor The {@link MetricDescriptor}
      * @param metric The added {@link Metric}
      */
@@ -218,7 +219,7 @@ public abstract class AbstractMetricService implements MetricService {
 
     /**
      * Notifies the specified listener
-     * 
+     *
      * @param notifiers The notifiers
      * @param listener The listener
      * @param metric The {@link Metric}

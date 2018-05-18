@@ -138,7 +138,7 @@ public class MobileApiFacadeMessageGenerator implements PushMessageGenerator {
                 String path = MessageDataUtil.getPath(messageData);
                 int unread = MessageDataUtil.getUnread(messageData);
 
-                if (false == Strings.isEmpty(subject)) {
+                if (false == Strings.isEmpty(subject) && false == Strings.isEmpty(sender)) {
                     // Non-silent push
                     StringBuilder sb = new StringBuilder(sender);
                     sb.append("\n");
@@ -157,6 +157,7 @@ public class MobileApiFacadeMessageGenerator implements PushMessageGenerator {
                         payload.addSound(config.getApnSoundFile());
                     }
 
+                    payload.addCategory("new-message-category");
                     payload.setContentAvailable(false);
                 } else {
                     // Silent push

@@ -74,7 +74,7 @@ import com.openexchange.session.Session;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 
 /**
- * 
+ *
  * {@link CalendarITipIntegrationUtility}
  *
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
@@ -125,7 +125,6 @@ public class CalendarITipIntegrationUtility implements ITipIntegrationUtility {
     }
 
     private void applyEventData(final CalendarSession session, CalendarStorage storage, Event event) throws OXException {
-        event.setFlags(CalendarUtils.getFlags(event, session.getUserId()));
         event.setAttendees(storage.getAttendeeStorage().loadAttendees(event.getId()));
         for (Attendee attendee : event.getAttendees()) {
             if (attendee.getEntity() == session.getUserId()) {
@@ -139,6 +138,7 @@ public class CalendarITipIntegrationUtility implements ITipIntegrationUtility {
         if (null != attachments && false == attachments.isEmpty()) {
             event.setAttachments(attachments);
         }
+        event.setFlags(CalendarUtils.getFlags(event, session.getUserId()));
     }
 
     @Override
@@ -202,7 +202,7 @@ public class CalendarITipIntegrationUtility implements ITipIntegrationUtility {
         external.setComment(change.getNewMessage());
         external.setPartStat(change.getNewStatus());
 
-        session.getCalendarService().updateAttendee(session, new EventID(event.getFolderId(), event.getId()), external, event.getLastModified().getTime());
+        session.getCalendarService().updateAttendee(session, new EventID(event.getFolderId(), event.getId()), external, null, event.getLastModified().getTime());
     }
 
     @Override

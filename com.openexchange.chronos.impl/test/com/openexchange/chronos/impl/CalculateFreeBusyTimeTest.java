@@ -101,8 +101,8 @@ public class CalculateFreeBusyTimeTest extends AbstractCombineTest {
     private CalendarAvailabilityService calendarAvailabilityService;
 
     // Base interval 01/01/2017 - 30/06/2017
-    private Date from = PropsFactory.createDate(2017, 0, 1);
-    private Date until = PropsFactory.createDate(2017, 5, 30);
+    private final Date from = PropsFactory.createDate(2017, 0, 1);
+    private final Date until = PropsFactory.createDate(2017, 5, 30);
 
     /**
      * Initialises a new {@link CalculateFreeBusyTimeTest}.
@@ -114,6 +114,7 @@ public class CalculateFreeBusyTimeTest extends AbstractCombineTest {
     /**
      * Initialise mocks
      */
+    @Override
     @Before
     public void init() throws OXException {
         super.init();
@@ -147,10 +148,10 @@ public class CalculateFreeBusyTimeTest extends AbstractCombineTest {
      * <li>Calculate the combinedAvailableTimes</li>
      * <li>Mock the previous method call with the real result</li>
      * </ul>
-     * 
+     *
      * This intermediate step is required in order to feed the {@link FreeBusyPerformer}
      * with the correct combined times from the {@link CalendarAvailabilityService}
-     * 
+     *
      * This call has to happen AFTER setting up each individual test case and BEFORE the
      * {@link FreeBusyPerformer#performCalculateFreeBusyTime(List, Date, Date)} call happens
      */

@@ -60,6 +60,7 @@ import com.openexchange.chronos.Event;
 import com.openexchange.chronos.json.converter.CalendarResultConverter;
 import com.openexchange.chronos.json.oauth.ChronosOAuthScope;
 import com.openexchange.chronos.provider.composition.IDBasedCalendarAccess;
+import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.CalendarResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.oauth.provider.resourceserver.annotations.OAuthAction;
@@ -94,7 +95,10 @@ public class NewAction extends ChronosAction {
     @Override
     protected AJAXRequestResult perform(IDBasedCalendarAccess calendarAccess, AJAXRequestData requestData) throws OXException {
         String folderId = requestData.requireParameter(AJAXServlet.PARAMETER_FOLDERID);
-        Event event = parseEvent(calendarAccess.getSession(), requestData);
+        Event event = parseEvent(requestData);
+        if (false == calendarAccess.contains(CalendarParameters.PARAMETER_TRACK_ATTENDEE_USAGE)) {
+            calendarAccess.set(CalendarParameters.PARAMETER_TRACK_ATTENDEE_USAGE, Boolean.TRUE);
+        }
         try {
             CalendarResult calendarResult = calendarAccess.createEvent(folderId, event);
             return new AJAXRequestResult(calendarResult, new Date(calendarResult.getTimestamp()), CalendarResultConverter.INPUT_FORMAT);

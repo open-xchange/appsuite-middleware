@@ -76,6 +76,11 @@ public enum MailAuthenticityResultKey {
      */
     FROM_DOMAIN("from_domain"),
     /**
+     * Defines if there is a domain mismatch between the domain of the 
+     * mechanism and the domain from the 'From' header  
+     */
+    DOMAN_MISMATCH("domain_mismatch"),
+    /**
      * Defines the {@link MailAuthenticityMechanismResult}s that were
      * collected during the evaluation process of the e-mail.
      */

@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the Open-Xchange, Inc. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2020 Open-Xchange, Inc.
+ *     Copyright (C) 2016-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -50,16 +50,12 @@
 package com.openexchange.chronos.impl.session;
 
 import static com.openexchange.chronos.common.CalendarUtils.extractEMailAddress;
-import static com.openexchange.chronos.common.CalendarUtils.filter;
 import static com.openexchange.chronos.common.CalendarUtils.isInternal;
 import static com.openexchange.chronos.common.CalendarUtils.optTimeZone;
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.I2i;
 import static com.openexchange.java.Autoboxing.i;
 import static com.openexchange.java.Autoboxing.i2I;
-import java.io.UnsupportedEncodingException;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -77,12 +73,7 @@ import com.openexchange.chronos.ParticipationStatus;
 import com.openexchange.chronos.ResourceId;
 import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
-import com.openexchange.chronos.impl.osgi.Services;
-import com.openexchange.chronos.service.CalendarResult;
-import com.openexchange.chronos.service.CreateResult;
 import com.openexchange.chronos.service.EntityResolver;
-import com.openexchange.chronos.service.UpdateResult;
-import com.openexchange.contactcollector.ContactCollectorService;
 import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.group.Group;
@@ -93,17 +84,12 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.tools.alias.UserAliasUtility;
 import com.openexchange.java.Strings;
 import com.openexchange.java.util.TimeZones;
-import com.openexchange.objectusecount.BatchIncrementArguments;
-import com.openexchange.objectusecount.BatchIncrementArguments.Builder;
-import com.openexchange.objectusecount.IncrementArguments;
-import com.openexchange.objectusecount.ObjectUseCountService;
 import com.openexchange.resource.Resource;
 import com.openexchange.resource.ResourceService;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.session.Session;
 import com.openexchange.tools.arrays.Arrays;
+import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.session.ServerSession;
-import com.openexchange.tools.session.ServerSessionAdapter;
 import com.openexchange.user.UserService;
 
 /**
@@ -121,6 +107,7 @@ public class DefaultEntityResolver implements EntityResolver {
     private final Map<Integer, Group> knownGroups;
     private final Map<Integer, User> knownUsers;
     private final Map<Integer, Resource> knownResources;
+    private final Map<Integer, FolderObject> knownFolders;
 
     /**
      * Initializes a new {@link DefaultEntityResolver}.
@@ -156,6 +143,7 @@ public class DefaultEntityResolver implements EntityResolver {
         knownUsers = new HashMap<Integer, User>();
         knownGroups = new HashMap<Integer, Group>();
         knownResources = new HashMap<Integer, Resource>();
+        knownFolders = new HashMap<Integer, FolderObject>();
     }
 
     @Override
@@ -217,6 +205,11 @@ public class DefaultEntityResolver implements EntityResolver {
     @Override
     public Locale getLocale(int userID) throws OXException {
         return getUser(userID).getLocale();
+    }
+
+    @Override
+    public int getContactId(int userID) throws OXException {
+        return getUser(userID).getContactId();
     }
 
     @Override
@@ -403,52 +396,7 @@ public class DefaultEntityResolver implements EntityResolver {
         knownGroups.clear();
         knownResources.clear();
         knownUsers.clear();
-    }
-
-    @Override
-    public void trackAttendeeUsage(CalendarResult result) {
-        Session session = result.getSession();
-        List<Attendee> attendees = getAddedAttendees(result);
-        if (null == attendees || attendees.isEmpty() || null == session) {
-            return;
-        }
-        /*
-         * build increment arguments for the use count service for all added attendees
-         */
-        boolean collectEmailAddresses = isCollectEmailAddresses(session);
-        List<IncrementArguments> incrementArguments = getUseCountIncrementArguments(session, attendees, collectEmailAddresses);
-        if (0 < incrementArguments.size()) {
-            ObjectUseCountService useCountService = Services.getService(ObjectUseCountService.class);
-            if (null == useCountService) {
-                LOG.debug("{} not available, skipping use count incrementation.", ObjectUseCountService.class);
-            } else {
-                /*
-                 * do increment each use count
-                 */
-                try {
-                    for (IncrementArguments arguments : incrementArguments) {
-                        useCountService.incrementObjectUseCount(session, arguments);
-                    }
-                } catch (OXException e) {
-                    LOG.warn("Error incrementing object use count", e);
-                }
-            }
-        }
-        if (collectEmailAddresses) {
-            /*
-             * gather collectible addresses from external attendees & pass to contact collector (use count incrementation for already
-             * existing contacts can be performed from there)
-             */
-            List<InternetAddress> collectibleAddresses = getCollectibleAddresses(attendees);
-            if (0 < collectibleAddresses.size()) {
-                ContactCollectorService contactCollectorService = Services.getService(ContactCollectorService.class);
-                if (null == contactCollectorService) {
-                    LOG.debug("{} not available, skipping use count incrementation.", ContactCollectorService.class);
-                } else {
-                    contactCollectorService.memorizeAddresses(collectibleAddresses, true, session);
-                }
-            }
-        }
+        knownFolders.clear();
     }
 
     private Group getGroup(int entity) throws OXException {
@@ -530,6 +478,39 @@ public class DefaultEntityResolver implements EntityResolver {
             knownResources.put(id, resource);
         }
         return resource;
+    }
+
+    /**
+     * Gets a folder by its identifier.
+     *
+     * @param id The identifier of the folder to get
+     * @return The folder
+     */
+    public FolderObject getFolder(int id) throws OXException {
+        Integer iD = I(id);
+        FolderObject folder = knownFolders.get(iD);
+        if (null == folder) {
+            folder = loadFolder(iD);
+            knownFolders.put(iD, folder);
+        }
+        return folder;
+    }
+
+    /**
+     * Optionally gets a folder by its identifier, if it exists.
+     *
+     * @param id The identifier of the folder to get
+     * @return The folder, or <code>null</code> it doesn't exist
+     */
+    public FolderObject optFolder(int id) throws OXException {
+        try {
+            return getFolder(id);
+        } catch (OXException e) {
+            if (CalendarExceptionCodes.FOLDER_NOT_FOUND.equals(e)) {
+                return null;
+            }
+            throw e;
+        }
     }
 
     private Attendee applyEntityData(Attendee attendee, User user, AttendeeField... fields) throws OXException {
@@ -770,83 +751,14 @@ public class DefaultEntityResolver implements EntityResolver {
         }
     }
 
-    /**
-     * Prepares a list of internet addresses for use with the contact collector service.
-     *
-     * @param attendees The attendees to get the addresses for
-     * @return The list of addresses, or an empty list if no suitable attendees contained
-     */
-    private List<InternetAddress> getCollectibleAddresses(List<Attendee> attendees) {
-        if (null == attendees || 0 == attendees.size()) {
-            return Collections.emptyList();
-        }
-        List<InternetAddress> addresses = new ArrayList<InternetAddress>(attendees.size());
-        for (Attendee attendee : filter(attendees, Boolean.FALSE, CalendarUserType.INDIVIDUAL)) {
-            try {
-                InternetAddress address = new InternetAddress(extractEMailAddress(attendee.getUri()));
-                if (null != attendee.getCn()) {
-                    address.setPersonal(attendee.getCn());
-                }
-                addresses.add(address);
-            } catch (AddressException | UnsupportedEncodingException e) {
-                LOG.warn("Error constructing internet address for attendee {}, skipping contact collection.", attendee, e);
-            }
-        }
-        return addresses;
-    }
-
-    /**
-     * Prepares a list of increment arguments for the supplied list of attendees for use with the object use count service.
-     *
-     * @param session The underlying calendar session
-     * @param attendees The attendees to get the increment arguments for
-     * @param skipExternals <code>true</code> to only consider <i>internal</i> attendees, <code>false</code>, otherwise
-     * @return The increment arguments, or an empty list if no suitable attendees contained
-     */
-    private List<IncrementArguments> getUseCountIncrementArguments(Session session, List<Attendee> attendees, boolean skipExternals) {
-        if (null == attendees || 0 == attendees.size()) {
-            return Collections.emptyList();
-        }
-        List<IncrementArguments> argumentsList = new ArrayList<IncrementArguments>(attendees.size());
-        /*
-         * add arguments for all internal attendees (by global addressbook entry)
-         */
-        Builder batchIncrementArgumentsBuilder = new BatchIncrementArguments.Builder();
-        for (Attendee attendee : filter(attendees, Boolean.TRUE, CalendarUserType.INDIVIDUAL)) {
-            if (session.getUserId() != attendee.getEntity() && null == attendee.getMember()) {
-                try {
-                    batchIncrementArgumentsBuilder.add(getUser(attendee.getEntity()).getContactId(), FolderObject.SYSTEM_LDAP_FOLDER_ID);
-                } catch (OXException e) {
-                    LOG.warn("Error retrieving internal user {} for use count increment; skipping.", I(attendee.getEntity()));
-                }
-            }
-        }
-        BatchIncrementArguments batchIncrementArguments = batchIncrementArgumentsBuilder.build();
-        if (false == batchIncrementArguments.getCounts().isEmpty()) {
-            argumentsList.add(batchIncrementArguments);
-        }
-        /*
-         * add arguments for all external attendees (by e-mail address)
-         */
-        if (false == skipExternals) {
-            for (Attendee attendee : filter(attendees, Boolean.FALSE, CalendarUserType.INDIVIDUAL)) {
-                argumentsList.add(new IncrementArguments.Builder(extractEMailAddress(attendee.getUri())).build());
-            }
-        }
-        return argumentsList;
-    }
-
-    /**
-     * Gets a value indicating whether collection of e-mail addresses is enabled or not.
-     *
-     * @return <code>true</code> if collecting e-mail address is enabled, <code>false</code>, otherwise
-     */
-    private boolean isCollectEmailAddresses(Session session) {
+    private FolderObject loadFolder(int id) throws OXException {
         try {
-            return ServerSessionAdapter.valueOf(session).getUserConfiguration().isCollectEmailAddresses();
+            return new OXFolderAccess(context).getFolderObject(id);
         } catch (OXException e) {
-            LOG.warn("Error getting user configuration to query if collection of e-mail addresses is enabled, assuming \"false\"");
-            return false;
+            if ("FLD-0008".equals(e.getErrorCode())) {
+                throw CalendarExceptionCodes.FOLDER_NOT_FOUND.create(e, String.valueOf(id));
+            }
+            throw e;
         }
     }
 
@@ -868,29 +780,6 @@ public class DefaultEntityResolver implements EntityResolver {
      */
     private static String getEMail(User user) {
         return user.getMail();
-    }
-
-    /**
-     * Gets a list of newly added attendees from each "create"- and "update" result included in the supplied calendar result.
-     *
-     * @param result The calendar result to extract the new attendees from
-     * @return The newly added attendees, or <code>null</code> if there are none
-     */
-    private static List<Attendee> getAddedAttendees(CalendarResult result) {
-        if (null == result || result.getCreations().isEmpty() && result.getUpdates().isEmpty()) {
-            return null;
-        }
-        List<Attendee> attendees = new ArrayList<Attendee>();
-        for (CreateResult createResult : result.getCreations()) {
-            List<Attendee> newAttendees = createResult.getCreatedEvent().getAttendees();
-            if (null != newAttendees) {
-                attendees.addAll(newAttendees);
-            }
-        }
-        for (UpdateResult updateResult : result.getUpdates()) {
-            attendees.addAll(updateResult.getAttendeeUpdates().getAddedItems());
-        }
-        return attendees.isEmpty() ? null : attendees;
     }
 
 }

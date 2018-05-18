@@ -80,7 +80,7 @@ public abstract class CalendarUserMapping<T extends CalendarUser, O> extends Def
 
     @Override
     public void deserialize(JSONObject from, O to) throws JSONException, OXException {
-        JSONObject jsonObject = (JSONObject) from.opt(getAjaxName());
+        JSONObject jsonObject = from.optJSONObject(getAjaxName());
         set(to, null == jsonObject ? null : deserialize(jsonObject, newInstance()));
     }
 

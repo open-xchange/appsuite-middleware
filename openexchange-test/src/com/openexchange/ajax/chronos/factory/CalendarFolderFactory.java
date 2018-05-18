@@ -105,7 +105,7 @@ public final class CalendarFolderFactory {
             config.setItemId(Integer.toString((int) value));
         });
         configMappers.put(CalendarFolderConfig.REFRESH_INTERVAL, (config, value) -> {
-            config.setRefreshInterval(Integer.toString((int) value));
+            config.setRefreshInterval((int) value);
         });
         configMappers.put(CalendarFolderConfig.LOCALE, (config, value) -> {
             config.setLocale((String) value);

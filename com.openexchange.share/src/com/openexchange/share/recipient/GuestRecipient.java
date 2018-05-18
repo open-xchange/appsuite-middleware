@@ -57,6 +57,8 @@ package com.openexchange.share.recipient;
  */
 public class GuestRecipient extends ShareRecipient {
 
+    private static final long serialVersionUID = -1684289453388992393L;
+
     private String emailAddress;
     private String displayName;
     private String contactID;

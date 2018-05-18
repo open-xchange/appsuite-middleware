@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the Open-Xchange, Inc. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2020 Open-Xchange, Inc.
+ *     Copyright (C) 2016-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -56,10 +56,13 @@ import static com.openexchange.chronos.common.CalendarUtils.getExceptionDateUpda
 import static com.openexchange.chronos.common.CalendarUtils.getUserIDs;
 import static com.openexchange.chronos.common.CalendarUtils.hasExternalOrganizer;
 import static com.openexchange.chronos.common.CalendarUtils.isAllDay;
+import static com.openexchange.chronos.common.CalendarUtils.isAttendeeSchedulingResource;
 import static com.openexchange.chronos.common.CalendarUtils.isOpaqueTransparency;
+import static com.openexchange.chronos.common.CalendarUtils.isSeriesException;
 import static com.openexchange.chronos.common.CalendarUtils.isSeriesMaster;
 import static com.openexchange.chronos.common.CalendarUtils.matches;
 import static com.openexchange.chronos.impl.Check.requireUpToDateTimestamp;
+import static com.openexchange.java.Autoboxing.b;
 import static com.openexchange.java.Autoboxing.i;
 import static com.openexchange.tools.arrays.Collections.isNullOrEmpty;
 import java.util.ArrayList;
@@ -86,6 +89,7 @@ import com.openexchange.chronos.impl.Check;
 import com.openexchange.chronos.impl.InternalCalendarResult;
 import com.openexchange.chronos.impl.Role;
 import com.openexchange.chronos.impl.Utils;
+import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.CollectionUpdate;
 import com.openexchange.chronos.service.EventUpdate;
@@ -152,8 +156,14 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
         if (null == recurrenceId && updatedEventData.containsRecurrenceId()) {
             recurrenceId = updatedEventData.getRecurrenceId();
         }
-        if (isSeriesMaster(originalEvent) && null != recurrenceId) {
-            updateRecurrence(originalEvent, recurrenceId, updatedEventData);
+        if (null != recurrenceId) {
+            if (isSeriesMaster(originalEvent)) {
+                updateRecurrence(originalEvent, recurrenceId, updatedEventData);
+            } else if (isSeriesException(originalEvent) && recurrenceId.equals(originalEvent.getRecurrenceId())) {
+                updateEvent(originalEvent, updatedEventData);
+            } else {
+                throw CalendarExceptionCodes.INVALID_RECURRENCE_ID.create(String.valueOf(recurrenceId), null);
+            }
         } else {
             updateEvent(originalEvent, updatedEventData);
         }
@@ -201,6 +211,7 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
             /*
              * update for new change exception; prepare & insert a plain exception first, based on the original data from the master
              */
+            Map<Integer, List<Alarm>> alarms = storage.getAlarmStorage().loadAlarms(originalSeriesMaster);
             Event newExceptionEvent = prepareException(originalSeriesMaster, recurrenceId);
             Check.quotaNotExceeded(storage, session);
             storage.getEventStorage().insertEvent(newExceptionEvent);
@@ -220,11 +231,11 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
             /*
              * add change exception date to series master & track results
              */
+            resultTracker.rememberOriginalEvent(originalSeriesMaster);
             addChangeExceptionDate(originalSeriesMaster, recurrenceId);
             Event updatedMasterEvent = loadEventData(originalSeriesMaster.getId());
             resultTracker.trackUpdate(originalSeriesMaster, updatedMasterEvent);
 
-            Map<Integer, List<Alarm>> alarms = storage.getAlarmStorage().loadAlarms(updatedMasterEvent);
             storage.getAlarmTriggerStorage().deleteTriggers(originalSeriesMaster.getId());
             storage.getAlarmTriggerStorage().insertTriggers(updatedMasterEvent, alarms);
         }
@@ -241,7 +252,8 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
         /*
          * check if folder view on event is allowed as needed
          */
-        if (false == assumeExternalOrganizerUpdate(originalEvent, eventData)) {
+        boolean assumeExternalOrganizerUpdate = assumeExternalOrganizerUpdate(originalEvent, eventData);
+        if (false == assumeExternalOrganizerUpdate) {
             Check.eventIsInFolder(originalEvent, folder);
         }
         /*
@@ -256,18 +268,27 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
         /*
          * prepare event update & check conflicts as needed
          */
+        EventField[] consideredFields;
+        if (isAttendeeSchedulingResource(originalEvent, calendarUserId) &&
+            b(session.get(CalendarParameters.PARAMETER_IGNORE_FORBIDDEN_ATTENDEE_CHANGES, Boolean.class, Boolean.FALSE))) {
+            consideredFields = new EventField[] {
+                EventField.ALARMS, EventField.ATTENDEES, EventField.TRANSP, EventField.DELETE_EXCEPTION_DATES, EventField.CREATED, EventField.TIMESTAMP, EventField.LAST_MODIFIED
+            };
+        } else {
+            consideredFields = null;
+        }
         List<Event> originalChangeExceptions = isSeriesMaster(originalEvent) ? loadExceptionData(originalEvent.getId()) : null;
         EventUpdateProcessor eventUpdate = new EventUpdateProcessor(
-            session, folder, originalEvent, originalChangeExceptions, eventData, timestamp, Arrays.add(SKIPPED_FIELDS, ignoredFields));
+            session, folder, originalEvent, originalChangeExceptions, eventData, timestamp, consideredFields, Arrays.add(SKIPPED_FIELDS, ignoredFields));
         if (needsConflictCheck(eventUpdate)) {
             Check.noConflicts(storage, session, eventUpdate.getUpdate(), eventUpdate.getAttendeeUpdates().previewChanges());
         }
         /*
          * check permissions & update event data in storage, checking permissions as required
          */
-        storeEventUpdate(originalEvent, eventUpdate.getDelta(), eventUpdate.getUpdatedFields());
-        storeAttendeeUpdates(originalEvent, eventUpdate.getAttendeeUpdates());
-        storeAttachmentUpdates(originalEvent, eventUpdate.getAttachmentUpdates());
+        storeEventUpdate(originalEvent, eventUpdate.getDelta(), eventUpdate.getUpdatedFields(), assumeExternalOrganizerUpdate);
+        storeAttendeeUpdates(originalEvent, eventUpdate.getAttendeeUpdates(), assumeExternalOrganizerUpdate);
+        storeAttachmentUpdates(originalEvent, eventUpdate.getAttachmentUpdates(), assumeExternalOrganizerUpdate);
         /*
          * update passed alarms for calendar user, apply default alarms for newly added internal user attendees
          */
@@ -290,8 +311,14 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
             resultTracker.trackDeletion(originalEvent);
             resultTracker.trackCreation(updatedEvent);
         }
-        Map<Integer, List<Alarm>> alarms = storage.getAlarmStorage().loadAlarms(updatedEvent);
-        storage.getAlarmTriggerStorage().deleteTriggers(originalEvent.getId());
+        Map<Integer, List<Alarm>> alarms;
+        if (eventUpdate.containsAnyChangeOf(new EventField[] { EventField.START_DATE, EventField.END_DATE })) {
+            storage.getAlarmTriggerStorage().deleteTriggers(originalEvent.getId());
+            alarms = storage.getAlarmStorage().loadAlarms(updatedEvent);
+        } else {
+            alarms = storage.getAlarmStorage().loadAlarms(updatedEvent);
+            storage.getAlarmTriggerStorage().deleteTriggers(originalEvent.getId());
+        }
         storage.getAlarmTriggerStorage().insertTriggers(updatedEvent, alarms);
         /*
          * recursively perform pending updates of change exceptions, too
@@ -321,7 +348,7 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
      *
      * @param originalEvent The original event
      * @param updatedEvent The updated event
-     * @return <code>true</code> if the check should be performed, <code>false</code>, otherwise
+     * @return <code>true</code> if an external organizer update can be assumed, <code>false</code>, otherwise
      * @see <a href="https://bugs.open-xchange.com/show_bug.cgi?id=29566#c12">Bug 29566</a>,
      *      <a href="https://bugs.open-xchange.com/show_bug.cgi?id=23181"/>Bug 23181</a>
      */
@@ -340,7 +367,7 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
      * @param attendeeHelper The attendee helper for the update
      * @return <code>true</code> if conflict checks should take place, <code>false</code>, otherwise
      */
-    private boolean needsConflictCheck(EventUpdate eventUpdate) throws OXException {
+    private boolean needsConflictCheck(EventUpdate eventUpdate) {
         if (eventUpdate.getUpdatedFields().contains(EventField.START_DATE) &&
             eventUpdate.getUpdate().getStartDate().before(eventUpdate.getOriginal().getStartDate())) {
             /*
@@ -422,9 +449,10 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
      * @param originalEvent The event being updated
      * @param deltaEvent The delta event providing the updated event data
      * @param updatedFields The actually updated fields
+     * @param assumeExternalOrganizerUpdate <code>true</code> if an external organizer update can be assumed, <code>false</code>, otherwise
      * @return <code>true</code> if there were changes, <code>false</code>, otherwise
      */
-    private boolean storeEventUpdate(Event originalEvent, Event deltaEvent, Set<EventField> updatedFields) throws OXException {
+    private boolean storeEventUpdate(Event originalEvent, Event deltaEvent, Set<EventField> updatedFields, boolean assumeExternalOrganizerUpdate) throws OXException {
         HashSet<EventField> updatedEventFields = new HashSet<EventField>(updatedFields);
         updatedEventFields.removeAll(java.util.Arrays.asList(EventField.ATTACHMENTS, EventField.ALARMS, EventField.ATTENDEES));
         if (updatedEventFields.isEmpty()) {
@@ -439,9 +467,9 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
             break;
         }
         if (realChange) {
-            requireWritePermissions(originalEvent);
+            requireWritePermissions(originalEvent, assumeExternalOrganizerUpdate);
         } else {
-            requireWritePermissions(originalEvent, session.getEntityResolver().prepareUserAttendee(calendarUserId));
+            requireWritePermissions(originalEvent, session.getEntityResolver().prepareUserAttendee(calendarUserId), assumeExternalOrganizerUpdate);
         }
         storage.getEventStorage().updateEvent(deltaEvent);
         return true;
@@ -453,9 +481,10 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
      *
      * @param originalEvent The event the attendees are updated for
      * @param attachmentUpdates The attendee updates to persist
+     * @param assumeExternalOrganizerUpdate <code>true</code> if an external organizer update can be assumed, <code>false</code>, otherwise
      * @return <code>true</code> if there were changes, <code>false</code>, otherwise
      */
-    private boolean storeAttendeeUpdates(Event originalEvent, CollectionUpdate<Attendee, AttendeeField> attendeeUpdates) throws OXException {
+    private boolean storeAttendeeUpdates(Event originalEvent, CollectionUpdate<Attendee, AttendeeField> attendeeUpdates, boolean assumeExternalOrganizerUpdate) throws OXException {
         if (attendeeUpdates.isEmpty()) {
             return false;
         }
@@ -464,7 +493,7 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
          */
         List<Attendee> removedItems = attendeeUpdates.getRemovedItems();
         if (0 < removedItems.size()) {
-            requireWritePermissions(originalEvent, removedItems);
+            requireWritePermissions(originalEvent, removedItems, assumeExternalOrganizerUpdate);
             storage.getEventStorage().insertEventTombstone(storage.getUtilities().getTombstone(originalEvent, timestamp, calendarUser));
             storage.getAttendeeStorage().insertAttendeeTombstones(originalEvent.getId(), storage.getUtilities().getTombstones(removedItems));
             storage.getAttendeeStorage().deleteAttendees(originalEvent.getId(), removedItems);
@@ -479,17 +508,17 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
             for (ItemUpdate<Attendee, AttendeeField> attendeeToUpdate : updatedItems) {
                 Attendee originalAttendee = attendeeToUpdate.getOriginal();
                 Attendee newAttendee = AttendeeMapper.getInstance().copy(originalAttendee, null, (AttendeeField[]) null);
-                AttendeeMapper.getInstance().copy(attendeeToUpdate.getUpdate(), newAttendee, AttendeeField.RSVP, AttendeeField.COMMENT, AttendeeField.PARTSTAT, AttendeeField.ROLE);
+                AttendeeMapper.getInstance().copy(attendeeToUpdate.getUpdate(), newAttendee, AttendeeField.RSVP, AttendeeField.COMMENT, AttendeeField.PARTSTAT, AttendeeField.ROLE, AttendeeField.EXTENDED_PARAMETERS);
                 attendeesToUpdate.add(newAttendee);
             }
-            requireWritePermissions(originalEvent, attendeesToUpdate);
+            requireWritePermissions(originalEvent, attendeesToUpdate, assumeExternalOrganizerUpdate);
             storage.getAttendeeStorage().updateAttendees(originalEvent.getId(), attendeesToUpdate);
         }
         /*
          * perform attendee inserts
          */
         if (0 < attendeeUpdates.getAddedItems().size()) {
-            requireWritePermissions(originalEvent);
+            requireWritePermissions(originalEvent, assumeExternalOrganizerUpdate);
             storage.getAttendeeStorage().insertAttendees(originalEvent.getId(), attendeeUpdates.getAddedItems());
         }
         return true;
@@ -501,13 +530,14 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
      *
      * @param originalEvent The event the attachments are updated for
      * @param attachmentUpdates The attachment updates to persist
+     * @param assumeExternalOrganizerUpdate <code>true</code> if an external organizer update can be assumed, <code>false</code>, otherwise
      * @return <code>true</code> if there were changes, <code>false</code>, otherwise
      */
-    private boolean storeAttachmentUpdates(Event originalEvent, SimpleCollectionUpdate<Attachment> attachmentUpdates) throws OXException {
+    private boolean storeAttachmentUpdates(Event originalEvent, SimpleCollectionUpdate<Attachment> attachmentUpdates, boolean assumeExternalOrganizerUpdate) throws OXException {
         if (attachmentUpdates.isEmpty()) {
             return false;
         }
-        requireWritePermissions(originalEvent);
+        requireWritePermissions(originalEvent, assumeExternalOrganizerUpdate);
         if (0 < attachmentUpdates.getRemovedItems().size()) {
             storage.getAttachmentStorage().deleteAttachments(session.getSession(), folder.getId(), originalEvent.getId(), attachmentUpdates.getRemovedItems());
         }

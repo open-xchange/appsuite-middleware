@@ -1,12 +1,13 @@
 package liquibase.serializer.core.yaml;
 
-import java.beans.IntrospectionException;
 import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -139,7 +140,7 @@ public class YamlChangeLogSerializer implements ChangeLogSerializer {
 
 
         @Override
-        protected Set<Property> getProperties(Class<? extends Object> type) throws IntrospectionException {
+        protected Set<Property> getProperties(Class<? extends Object> type) {
             Set<Property> returnSet = new HashSet<Property>();
             LiquibaseSerializable serialzableType = null;
             try {
@@ -176,6 +177,16 @@ public class YamlChangeLogSerializer implements ChangeLogSerializer {
             @Override
             public Object get(Object object) {
                 return ((LiquibaseSerializable) object).getSerializableFieldValue(getName());
+            }
+
+            @Override
+            public List<Annotation> getAnnotations() {
+                return Collections.emptyList();
+            }
+
+            @Override
+            public <A extends Annotation> A getAnnotation(Class<A> annotationType) {
+                return null;
             }
         }
 

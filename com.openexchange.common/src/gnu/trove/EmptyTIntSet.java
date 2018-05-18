@@ -49,6 +49,7 @@
 
 package gnu.trove;
 
+import java.io.Serializable;
 import java.util.Collection;
 import java.util.NoSuchElementException;
 import gnu.trove.iterator.TIntIterator;
@@ -60,7 +61,9 @@ import gnu.trove.set.TIntSet;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class EmptyTIntSet implements TIntSet {
+public final class EmptyTIntSet implements TIntSet, Serializable {
+
+    private static final long serialVersionUID = 912737656030728279L;
 
     private static final EmptyTIntSet INSTANCE = new EmptyTIntSet();
 
@@ -73,30 +76,16 @@ public final class EmptyTIntSet implements TIntSet {
         return INSTANCE;
     }
 
-    private final TIntIterator emptyIter;
+    // -------------------------------------------------------------------------------
+
+    private final transient EmptyTIntIterator emptyIter;
 
     /**
      * Initializes a new {@link EmptyTIntSet}.
      */
     private EmptyTIntSet() {
         super();
-        emptyIter = new TIntIterator() {
-
-            @Override
-            public void remove() {
-                //
-            }
-
-            @Override
-            public boolean hasNext() {
-                return false;
-            }
-
-            @Override
-            public int next() {
-                throw new NoSuchElementException();
-            }
-        };
+        emptyIter = new EmptyTIntIterator();
     }
 
     @Override
@@ -212,6 +201,30 @@ public final class EmptyTIntSet implements TIntSet {
     @Override
     public boolean forEach(final TIntProcedure procedure) {
         return true;
+    }
+
+    private static class EmptyTIntIterator implements TIntIterator, Serializable {
+
+        private static final long serialVersionUID = 1L;
+
+        EmptyTIntIterator() {
+            super();
+        }
+
+        @Override
+        public void remove() {
+            // Nothing to do
+        }
+
+        @Override
+        public boolean hasNext() {
+            return false;
+        }
+
+        @Override
+        public int next() {
+            throw new NoSuchElementException();
+        }
     }
 
 }

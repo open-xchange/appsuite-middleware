@@ -467,13 +467,6 @@ public abstract class AbstractPreviewResultConverter implements ResultConverter 
     /**
      * Finds the first occurrence of the pattern in the text.
      */
-    private int indexOf(final byte[] data, final byte[] pattern, final int[] computeFailure) {
-        return indexOf(data, pattern, 0, computeFailure);
-    }
-
-    /**
-     * Finds the first occurrence of the pattern in the text.
-     */
     private int indexOf(byte[] data, final byte[] pattern, int fromIndex, int[] computedFailure) {
         final int[] failure = null == computedFailure ? computeFailure(pattern) : computedFailure;
         int j = 0;

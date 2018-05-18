@@ -68,7 +68,9 @@ import org.junit.runners.Suite.SuiteClasses;
     HourlyTest.class,
     MultipleTimeZonesHourly.class,
     DeleteExceptions.class,
-    ChangeExceptions.class
+    ChangeExceptions.class,
+    com.openexchange.chronos.recurrence.compat.RecurrenceTests.class,
+    com.openexchange.chronos.recurrence.compat.RecurrencePositionTest.class
 })
 public class UnitTests {
 

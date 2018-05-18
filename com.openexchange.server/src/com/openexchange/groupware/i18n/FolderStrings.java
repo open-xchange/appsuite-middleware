@@ -67,7 +67,7 @@ public class FolderStrings implements LocalizableStrings {
 
     public static final String SYSTEM_FOLDER_NAME = "System";
 
-    public static final String SYSTEM_GLOBAL_FOLDER_NAME = "Shared address book";
+    /*public static final String SYSTEM_GLOBAL_FOLDER_NAME = "Shared address book";*/ // finally dropped
 
     public static final String SYSTEM_LDAP_FOLDER_NAME = "Global address book";
 

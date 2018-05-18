@@ -50,7 +50,6 @@
 package com.openexchange.ajax.mail;
 
 import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.kata.Cleanable;
 import com.openexchange.ajax.mail.actions.DeleteRequest;
 
 /**
@@ -60,7 +59,7 @@ import com.openexchange.ajax.mail.actions.DeleteRequest;
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  *
  */
-public class MailCleaner implements Cleanable {
+public class MailCleaner {
 
     private TestMail mail;
     private AJAXClient client;
@@ -92,7 +91,6 @@ public class MailCleaner implements Cleanable {
         this.mail = mail;
     }
 
-    @Override
     public void cleanUp() throws Exception {
         if (null != mail) {
             DeleteRequest request = new DeleteRequest(mail, true);

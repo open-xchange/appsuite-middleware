@@ -76,6 +76,7 @@ import com.openexchange.push.mail.notify.osgi.Services;
 import com.openexchange.push.mail.notify.util.DelayedNotification;
 import com.openexchange.push.mail.notify.util.MailNotifyDelayQueue;
 import com.openexchange.push.mail.notify.util.SimpleKey;
+import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.sessiond.SessiondServiceExtended;
@@ -106,8 +107,9 @@ public final class MailNotifyPushListenerRegistry {
 
     /**
      * Initializes a new {@link MailNotifyPushListenerRegistry}.
+     * @throws OXException When {@link TimerService} is missing
      */
-    public MailNotifyPushListenerRegistry(boolean useOXLogin, boolean useEmailAddress) {
+    public MailNotifyPushListenerRegistry(boolean useOXLogin, boolean useEmailAddress) throws OXException {
         super();
         mboxId2Listener = new ConcurrentHashMap<String, MailNotifyPushListener>(2048);
         this.useOXLogin = useOXLogin;
@@ -116,6 +118,9 @@ public final class MailNotifyPushListenerRegistry {
 
         // Timer task
         TimerService timerService = Services.optService(TimerService.class);
+        if (null == timerService) {
+            throw ServiceExceptionCode.absentService(TimerService.class);
+        }
         final org.slf4j.Logger log = LOG;
         Runnable r = new Runnable() {
 

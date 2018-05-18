@@ -19,6 +19,7 @@ package org.apache.felix.eventadmin.impl.tasks;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.atomic.AtomicInteger;
 import org.apache.felix.eventadmin.impl.util.LogWrapper;
 
 
@@ -31,11 +32,11 @@ import org.apache.felix.eventadmin.impl.util.LogWrapper;
 public class DefaultThreadPool
 {
 
-    private ExecutorService executor;
+    private volatile ExecutorService executor;
 
     private final ThreadFactory threadFactory;
 
-    private int oldSize = -1;
+    private final AtomicInteger oldSize = new AtomicInteger(-1);
 
     /**
      * Create a new pool.
@@ -82,9 +83,9 @@ public class DefaultThreadPool
      */
     public synchronized void configure(final int poolSize)
     {
-        if ( oldSize != poolSize)
+        if ( oldSize.get() != poolSize)
         {
-            oldSize = poolSize;
+            oldSize.set(poolSize);
             final ExecutorService oldService = this.executor;
             this.executor = Executors.newFixedThreadPool(poolSize, threadFactory);
             if ( oldService != null )
@@ -99,7 +100,7 @@ public class DefaultThreadPool
      */
     public int getPoolSize()
     {
-    	return oldSize;
+    	return oldSize.get();
     }
 
     /**
@@ -108,7 +109,11 @@ public class DefaultThreadPool
      */
     public void close()
     {
-        this.executor.shutdownNow();
+        ExecutorService executor = this.executor;
+        if (null != executor)
+        {            
+            executor.shutdownNow();
+        }
     }
 
     /**
@@ -119,7 +124,11 @@ public class DefaultThreadPool
     {
         try
         {
-            this.executor.submit(task);
+            ExecutorService executor = this.executor;
+            if (null != executor)
+            {                
+                executor.submit(task);
+            }
         }
         catch (final Throwable t)
         {

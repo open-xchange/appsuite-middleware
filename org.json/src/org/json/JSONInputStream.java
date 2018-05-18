@@ -51,10 +51,12 @@ package org.json;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.Reader;
 import java.util.Iterator;
 import java.util.Map.Entry;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import org.apache.commons.codec.binary.Base64InputStream;
 import org.json.helpers.UnsynchronizedByteArrayOutputStream;
 
 /**
@@ -130,15 +132,73 @@ public final class JSONInputStream extends InputStream {
             return true;
         }
 
-        private void writeValue(final Object value) throws IOException {
-            if (value instanceof JSONValue) {
-                nested = new JSONInputStream((JSONValue) value, charset);
-            } else if (value instanceof String) {
+        private void writeValue(final Object v) throws IOException {
+            if (null == v || JSONObject.NULL.equals(v)) {
+                out.write(toAsciiBytes("null"));
+            } else if (v instanceof JSONValue) {
+                nested = new JSONInputStream((JSONValue) v, charset);
+            } else if (v instanceof JSONBinary) {
+                InputStream binary = null;
+                Base64InputStream encoder = null;
+                try {
+                    final JSONBinary jsonBinary = (JSONBinary) v;
+                    binary = jsonBinary.getBinary();
+
+                    out.write('"');
+                    encoder = new Base64InputStream(binary, true, 0, null);
+                    byte[] buf = new byte[8192];
+                    for (int read; (read = encoder.read(buf, 0, 8192)) > 0;) {
+                        out.write(buf, 0, read);
+                    }
+                    out.write('"');
+                } finally {
+                    closeInstances(encoder, binary);
+                }
+            } else if (v instanceof JSONString) {
+                String s = ((JSONString) v).toJSONString();
                 out.write('"');
-                out.write(toAsciiBytes(toAscii(value.toString())));
+                out.write(toAsciiBytes(toAscii(s)));
                 out.write('"');
+            } else if (v instanceof Reader) {
+                Reader reader = new JSONStringEncoderReader((Reader) v);
+                try {
+                    out.write('"'); // String start
+
+                    int buflen = 8192;
+                    char[] cbuf = new char[buflen];
+                    int off = 0;
+                    for (int read; (read = reader.read(cbuf, off, buflen)) > 0;) {
+                        char lastChar = cbuf[read - 1];
+                        byte[] bytesToWrite;
+                        if (Character.isHighSurrogate(lastChar)) {
+                            bytesToWrite = toAsciiBytes(toAscii(new String(cbuf, 0, read - 1)));
+                            off = 1;
+                            cbuf[0] = lastChar;
+                        } else {
+                            bytesToWrite = toAsciiBytes(toAscii(new String(cbuf, 0, read)));
+                            off = 0;
+                        }
+                        out.write(bytesToWrite);
+
+                    }
+
+                    out.write('"'); // String end
+                } finally {
+                    closeInstances(reader);
+                }
+            } else if (v instanceof Number) {
+                try {
+                    out.write(toAsciiBytes(JSONObject.numberToString((Number) v)));
+                } catch (JSONException e) {
+                    throw new IOException(e.getMessage(), e);
+                }
+            } else if (v instanceof Boolean) {
+                out.write(toAsciiBytes(((Boolean) v).booleanValue() ? "true" : "false"));
             } else {
-                out.write(toAsciiBytes(null == value ? "null" : value.toString()));
+                // Write as String value
+                out.write('"');
+                out.write(toAsciiBytes(toAscii(v.toString())));
+                out.write('"');
             }
         }
 
@@ -229,6 +289,25 @@ public final class JSONInputStream extends InputStream {
             } while (m.find());
             m.appendTail(sb);
             return sb.toString();
+        }
+
+        /**
+         * Closes given <code>java.io.Closeable</code> instance (if non-<code>null</code>).
+         *
+         * @param closeable The <code>java.io.Closeable</code> instance
+         */
+        protected void closeInstances(final java.io.Closeable... closeables) {
+            if (null != closeables && closeables.length > 0) {
+                for (java.io.Closeable closeable : closeables) {
+                    if (null != closeable) {
+                        try {
+                            closeable.close();
+                        } catch (final Exception e) {
+                            // Ignore
+                        }
+                    }
+                }
+            }
         }
 
     }

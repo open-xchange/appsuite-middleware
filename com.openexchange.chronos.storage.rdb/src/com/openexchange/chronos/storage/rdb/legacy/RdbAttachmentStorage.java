@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the Open-Xchange, Inc. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2020 Open-Xchange, Inc.
+ *     Copyright (C) 2016-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -300,7 +300,7 @@ public class RdbAttachmentStorage extends RdbStorage implements AttachmentStorag
         return Attachments.getInstance(dbProvider, true);
     }
 
-    private static Map<String, List<Attachment>> selectAttachments(Connection connection, int contextID, String[] objectIDs) throws SQLException, OXException {
+    private static Map<String, List<Attachment>> selectAttachments(Connection connection, int contextID, String[] objectIDs) throws SQLException {
         Map<String, List<Attachment>> attachmentsById = new HashMap<String, List<Attachment>>();
         String sql = new StringBuilder()
             .append("SELECT attached,id,file_mimetype,file_size,filename,file_id,creation_date FROM prg_attachment ")
@@ -329,7 +329,7 @@ public class RdbAttachmentStorage extends RdbStorage implements AttachmentStorag
         return attachmentsById;
     }
 
-    private static Map<String, Boolean> selectHasAttachments(Connection connection, int contextID, String[] eventIds) throws SQLException, OXException {
+    private static Map<String, Boolean> selectHasAttachments(Connection connection, int contextID, String[] eventIds) throws SQLException {
         if (null == eventIds || 0 == eventIds.length) {
             return Collections.emptyMap();
         }

@@ -70,7 +70,6 @@ import com.openexchange.testing.httpclient.models.EventData;
 @RunWith(BlockJUnit4ClassRunner.class)
 public class BasicAlarmTest extends AbstractAlarmTest {
 
-    private String newFolderId;
 
     /**
      * Initializes a new {@link BasicAlarmTest}.
@@ -79,19 +78,13 @@ public class BasicAlarmTest extends AbstractAlarmTest {
         super();
     }
 
-    @Override
-    public void setUp() throws Exception {
-        super.setUp();
-        newFolderId = createAndRememberNewFolder(defaultUserApi, defaultUserApi.getSession(), getDefaultFolder(), defaultUserApi.getCalUser());
-    }
-
     /**
      * Tests the creation an event with a single alarm
      */
     @Test
     public void testCreateSingleAlarm() throws Exception {
-        EventData expectedEventData = eventManager.createEvent(EventFactory.createSingleEventWithSingleAlarm(defaultUserApi.getCalUser(), "testCreateSingleAlarm", AlarmFactory.createDisplayAlarm("-PT15M")));
-        getAndAssertAlarms(expectedEventData, 1);
+        EventData expectedEventData = eventManager.createEvent(EventFactory.createSingleEventWithSingleAlarm(defaultUserApi.getCalUser(), "testCreateSingleAlarm", AlarmFactory.createDisplayAlarm("-PT15M"), folderId));
+        getAndAssertAlarms(expectedEventData, 1, folderId);
     }
 
     /**
@@ -100,19 +93,21 @@ public class BasicAlarmTest extends AbstractAlarmTest {
     @Test
     public void testAddSingleAlarm() throws Exception {
         // Create an event without an alarm
-        EventData expectedEventData = eventManager.createEvent(EventFactory.createSingleTwoHourEvent(defaultUserApi.getCalUser(), "testAddSingleAlarm"));
-        EventData actualEventData = getAndAssertAlarms(expectedEventData, 0);
+        EventData expectedEventData = eventManager.createEvent(EventFactory.createSingleTwoHourEvent(defaultUserApi.getCalUser(), "testAddSingleAlarm", folderId));
+        EventData actualEventData = getAndAssertAlarms(expectedEventData, 0, folderId);
 
         // Create the alarm as a delta for the event
         EventData updateData = new EventData();
         updateData.setAlarms(Collections.singletonList(AlarmFactory.createDisplayAlarm("-PT30M")));
         updateData.setId(actualEventData.getId());
+        updateData.setLastModified(actualEventData.getLastModified());
+        updateData.setFolder(folderId);
 
         // Update the event and add the alarm
         expectedEventData = eventManager.updateEvent(updateData);
 
         // Assert that the alarm was successfully added
-        getAndAssertAlarms(expectedEventData, 1);
+        getAndAssertAlarms(expectedEventData, 1, folderId);
     }
 
     /**
@@ -120,16 +115,18 @@ public class BasicAlarmTest extends AbstractAlarmTest {
      */
     @Test
     public void testChangeAlarmTime() throws Exception {
-        EventData expectedEventData = eventManager.createEvent(EventFactory.createSingleEventWithSingleAlarm(defaultUserApi.getCalUser(), "testChangeAlarmTime", AlarmFactory.createDisplayAlarm("-PT15M")));
-        EventData actualEventData = getAndAssertAlarms(expectedEventData, 1);
+        EventData expectedEventData = eventManager.createEvent(EventFactory.createSingleEventWithSingleAlarm(defaultUserApi.getCalUser(), "testChangeAlarmTime", AlarmFactory.createDisplayAlarm("-PT15M"), folderId));
+        EventData actualEventData = getAndAssertAlarms(expectedEventData, 1, folderId);
 
         EventData updateData = new EventData();
         updateData.setAlarms(Collections.singletonList(AlarmFactory.createDisplayAlarm("-PT30M")));
         updateData.setId(actualEventData.getId());
+        updateData.setLastModified(actualEventData.getLastModified());
+        updateData.setFolder(folderId);
 
         expectedEventData = eventManager.updateEvent(updateData);
 
-        actualEventData = getAndAssertAlarms(expectedEventData, 1);
+        actualEventData = getAndAssertAlarms(expectedEventData, 1, folderId);
         assertEquals("-PT30M", actualEventData.getAlarms().get(0).getTrigger().getDuration());
     }
 
@@ -140,8 +137,8 @@ public class BasicAlarmTest extends AbstractAlarmTest {
      */
     @Test
     public void testDifferentAlarmTypes() throws Exception {
-        EventData expectedEventData = eventManager.createEvent(EventFactory.createSingleTwoHourEvent(defaultUserApi.getCalUser(), "testDifferentAlarmTypes"));
-        EventData actualEventData = getAndAssertAlarms(expectedEventData, 0);
+        EventData expectedEventData = eventManager.createEvent(EventFactory.createSingleTwoHourEvent(defaultUserApi.getCalUser(), "testDifferentAlarmTypes", folderId));
+        EventData actualEventData = getAndAssertAlarms(expectedEventData, 0, folderId);
 
         // Test display alarm
         {
@@ -150,10 +147,12 @@ public class BasicAlarmTest extends AbstractAlarmTest {
             EventData updateData = new EventData();
             updateData.setAlarms(Collections.singletonList(alarm));
             updateData.setId(actualEventData.getId());
+            updateData.setLastModified(actualEventData.getLastModified());
+            updateData.setFolder(folderId);
 
             expectedEventData = eventManager.updateEvent(updateData);
 
-            actualEventData = getAndAssertAlarms(expectedEventData, 1);
+            actualEventData = getAndAssertAlarms(expectedEventData, 1, folderId);
 
             Alarm changedAlarm = actualEventData.getAlarms().get(0);
             alarm.setUid(changedAlarm.getUid());
@@ -167,10 +166,12 @@ public class BasicAlarmTest extends AbstractAlarmTest {
             EventData updateData = new EventData();
             updateData.setAlarms(Collections.singletonList(alarm));
             updateData.setId(actualEventData.getId());
+            updateData.setLastModified(actualEventData.getLastModified());
+            updateData.setFolder(folderId);
 
             expectedEventData = eventManager.updateEvent(updateData);
 
-            actualEventData = getAndAssertAlarms(expectedEventData, 1);
+            actualEventData = getAndAssertAlarms(expectedEventData, 1, folderId);
 
             Alarm changedAlarm = actualEventData.getAlarms().get(0);
             alarm.setUid(changedAlarm.getUid());
@@ -183,10 +184,12 @@ public class BasicAlarmTest extends AbstractAlarmTest {
             EventData updateData = new EventData();
             updateData.setAlarms(Collections.singletonList(alarm));
             updateData.setId(actualEventData.getId());
+            updateData.setLastModified(actualEventData.getLastModified());
+            updateData.setFolder(folderId);
 
             expectedEventData = eventManager.updateEvent(updateData);
 
-            actualEventData = getAndAssertAlarms(expectedEventData, 1);
+            actualEventData = getAndAssertAlarms(expectedEventData, 1, folderId);
 
             Alarm changedAlarm = actualEventData.getAlarms().get(0);
             alarm.setUid(changedAlarm.getUid());

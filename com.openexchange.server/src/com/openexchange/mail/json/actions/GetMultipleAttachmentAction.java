@@ -114,8 +114,10 @@ public final class GetMultipleAttachmentAction extends AbstractMailAction {
             /*
              * Remove duplicate attachment ids
              */
-            Set<String> attachmentIds = new LinkedHashSet<>(Arrays.asList(sequenceIds));
-            sequenceIds = attachmentIds.toArray(new String[attachmentIds.size()]);
+            if (sequenceIds != null) {
+                Set<String> attachmentIds = new LinkedHashSet<>(Arrays.asList(sequenceIds));
+                sequenceIds = attachmentIds.toArray(new String[attachmentIds.size()]);
+            }
 
             /*
              * Get mail interface

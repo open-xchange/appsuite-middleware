@@ -609,9 +609,11 @@ public final class StructureMailMessageParser {
                         part.setHeader(MessageHeaders.HDR_MIME_VERSION, "1.0");
                         {
                             final net.fortuna.ical4j.model.Component vEvent = calendar.getComponents().getComponent(net.fortuna.ical4j.model.Component.VEVENT);
-                            final Property summary = vEvent.getProperties().getProperty(net.fortuna.ical4j.model.Property.SUMMARY);
-                            if (summary != null) {
-                                part.setFileName(new StringBuilder(MimeUtility.encodeText(summary.getValue().replaceAll("\\s", "_"), MailProperties.getInstance().getDefaultMimeCharset(), "Q")).append(".ics").toString());
+                            if (null != vEvent) {
+                                final Property summary = vEvent.getProperties().getProperty(net.fortuna.ical4j.model.Property.SUMMARY);
+                                if (summary != null) {
+                                    part.setFileName(new StringBuilder(MimeUtility.encodeText(summary.getValue().replaceAll("\\s", "_"), MailProperties.getInstance().getDefaultMimeCharset(), "Q")).append(".ics").toString());
+                                }
                             }
                         }
                         /*

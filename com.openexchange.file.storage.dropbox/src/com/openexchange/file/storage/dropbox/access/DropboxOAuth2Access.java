@@ -104,8 +104,8 @@ public class DropboxOAuth2Access extends AbstractOAuthAccess {
     public void initialize() throws OXException {
         final OAuthService oAuthService = DropboxServices.getService(OAuthService.class);
         try {
-            final OAuthAccount oauthAccount = oAuthService.getAccount(getAccountId(), getSession(), getSession().getUserId(), getSession().getContextId());
-            verifyAccount(oauthAccount, OXScope.drive);
+            final OAuthAccount oauthAccount = oAuthService.getAccount(getSession(), getAccountId());
+            verifyAccount(oauthAccount, oAuthService, OXScope.drive);
             HttpRequestor httpRequestor = new ApacheHttpClientHttpRequestor(ApacheHttpClientHttpRequestor.defaultApacheHttpClient());
             DbxRequestConfig config = new DbxRequestConfig(DropboxConfiguration.getInstance().getProductName(), null, httpRequestor);
             String accessToken = oauthAccount.getToken();

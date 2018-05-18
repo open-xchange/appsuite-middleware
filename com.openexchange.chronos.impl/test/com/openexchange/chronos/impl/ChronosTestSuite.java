@@ -52,6 +52,7 @@ package com.openexchange.chronos.impl;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
+import com.openexchange.chronos.impl.performer.UpdatesPerformerTest;
 
 /**
  * {@link ChronosTestSuite}
@@ -61,8 +62,9 @@ import org.junit.runners.Suite.SuiteClasses;
 @RunWith(Suite.class)
 @SuiteClasses({
     //@formatter:off
-    CombineAvailabilitiesTest.class, 
-    CalculateFreeBusyTimeTest.class
+    CombineAvailabilitiesTest.class,
+    CalculateFreeBusyTimeTest.class,
+    UpdatesPerformerTest.class
     //@formatter:on
 })
 public class ChronosTestSuite {

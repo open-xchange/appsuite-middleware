@@ -139,7 +139,10 @@ public class PacketProcessor {
                                 rememberInpuStream.startRemembering();
                                 while(inputStream.read(GARBAGE_SINK, 0, STREAM_BUFFER_SIZE) > 0) {
                                     final byte[] buffer = rememberInpuStream.getBuffer();
-                                    out.write(buffer, 0, buffer.length);
+                                    byte[] modified = handler.handlePacketData(packet, buffer);
+                                    if(modified != null) {
+                                        out.write(modified, 0, modified.length);
+                                    }
                                     rememberInpuStream.resetBuffer();
                                 }
                             } finally {

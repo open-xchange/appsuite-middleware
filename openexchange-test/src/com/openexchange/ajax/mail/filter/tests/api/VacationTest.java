@@ -52,6 +52,7 @@ package com.openexchange.ajax.mail.filter.tests.api;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import org.junit.Before;
 import com.openexchange.ajax.mail.filter.api.dao.Rule;
 import com.openexchange.ajax.mail.filter.api.dao.action.Vacation;
 import com.openexchange.ajax.mail.filter.api.dao.test.AllOfTest;
@@ -74,6 +75,11 @@ public class VacationTest extends AbstractMailFilterTest {
      */
     public VacationTest() {
         super();
+    }
+
+    @Before
+    public void setup() throws Exception {
+        mailFilterAPI.deleteScript();
     }
 
     /**
@@ -113,9 +119,9 @@ public class VacationTest extends AbstractMailFilterTest {
             expected = new Rule();
             expected.setName("Vacation Notice");
             expected.setFlags(new String[] { "vacation" });
-            expected.setActive(false);
+            expected.setActive(true);
 
-            Vacation vacation = new Vacation(1, Collections.singletonList("dsfa"), "123", "123");
+            Vacation vacation = new Vacation(1, Collections.singletonList("123@invalid.com"), "123", "123");
             expected.addAction(vacation);
             expected.setTest(new TrueTest());
 

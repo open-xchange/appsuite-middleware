@@ -51,7 +51,6 @@ package com.openexchange.subscribe.dav.tonline.de.osgi;
 
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.subscribe.SubscribeService;
-import com.openexchange.subscribe.crawler.CrawlerBlacklister;
 import com.openexchange.subscribe.dav.tonline.de.TOnlineDeSubscribeService;
 
 /**
@@ -76,14 +75,6 @@ public class TOnlineDeSubscribeActivator extends HousekeepingActivator {
 
     @Override
     protected void startBundle() throws Exception {
-        CrawlerBlacklister blacklister = new CrawlerBlacklister() {
-
-            @Override
-            public String getCrawlerId() {
-                return "com.openexchange.subscribe.crawler.t-online.de";
-            }
-        };
-        registerService(CrawlerBlacklister.class, blacklister, null);
         TOnlineDeSubscribeService subscribeService = new TOnlineDeSubscribeService(this);
         registerService(SubscribeService.class, subscribeService, null);
     }

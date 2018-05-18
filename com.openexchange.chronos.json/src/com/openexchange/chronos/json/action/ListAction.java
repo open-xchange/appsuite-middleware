@@ -52,23 +52,19 @@ package com.openexchange.chronos.json.action;
 import static com.openexchange.chronos.common.CalendarUtils.getMaximumTimestamp;
 import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_FIELDS;
 import static com.openexchange.tools.arrays.Collections.unmodifiableSet;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import org.json.JSONArray;
-import org.json.JSONException;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.json.converter.EventResultConverter;
 import com.openexchange.chronos.json.oauth.ChronosOAuthScope;
 import com.openexchange.chronos.provider.composition.IDBasedCalendarAccess;
-import com.openexchange.chronos.service.EventID;
 import com.openexchange.exception.OXException;
 import com.openexchange.oauth.provider.resourceserver.annotations.OAuthAction;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
-import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 
 /**
  *
@@ -102,18 +98,8 @@ public class ListAction extends ChronosAction {
         if (data == null || !(data instanceof JSONArray)) {
             throw AjaxExceptionCodes.ILLEGAL_REQUEST_BODY.create();
         }
-        JSONArray ids = (JSONArray) data;
-        try {
-            List<EventID> eventIDs = new ArrayList<>(ids.length());
-            for (int x = 0; x < ids.length(); x++) {
-                eventIDs.add(parseIdParameter(ids.getJSONObject(x)));
-            }
-            List<Event> events = calendarAccess.getEvents(eventIDs);
-            return new AJAXRequestResult(events, getMaximumTimestamp(events), EventResultConverter.INPUT_FORMAT);
-        } catch (JSONException e) {
-            throw OXJSONExceptionCodes.JSON_READ_ERROR.create(e, e.getMessage());
-        }
-
+        List<Event> events = calendarAccess.getEvents(parseEventIDs((JSONArray) data));
+        return new AJAXRequestResult(events, getMaximumTimestamp(events), EventResultConverter.INPUT_FORMAT);
     }
 
 }

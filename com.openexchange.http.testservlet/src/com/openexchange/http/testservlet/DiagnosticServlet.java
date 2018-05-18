@@ -61,6 +61,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import com.google.common.collect.ImmutableMap;
 import com.openexchange.diagnostics.DiagnosticService;
 import com.openexchange.java.Strings;
 import com.openexchange.osgi.ShutDownRuntimeException;
@@ -110,7 +111,7 @@ public class DiagnosticServlet extends HttpServlet {
 
         /**
          * Returns an unmodifiable {@link List} of all available {@link ServletParameter}s
-         * 
+         *
          * @return an unmodifiable {@link List} of all available {@link ServletParameter}s
          */
         public static List<String> getParameters() {
@@ -119,8 +120,8 @@ public class DiagnosticServlet extends HttpServlet {
     }
 
     private static final long serialVersionUID = 9099870094224041974L;
-    private ServiceLookup services;
 
+    private final ServiceLookup services;
     private final Map<ServletParameter, BiConsumer<DiagnosticService, StringBuilder>> pageInjectors;
 
     /**
@@ -135,7 +136,7 @@ public class DiagnosticServlet extends HttpServlet {
         pi.put(ServletParameter.ciphersuites, (diagnosticService, page) -> writeList(diagnosticService.getCipherSuites(), page));
         pi.put(ServletParameter.protocols, (diagnosticService, page) -> writeList(diagnosticService.getProtocols(), page));
         pi.put(ServletParameter.version, (diagnosticService, page) -> page.append(diagnosticService.getVersion()).append("\n"));
-        pageInjectors = Collections.unmodifiableMap(pi);
+        pageInjectors = ImmutableMap.copyOf(pi);
     }
 
     /**
@@ -188,7 +189,7 @@ public class DiagnosticServlet extends HttpServlet {
 
     /**
      * Writes and flushes a bad request with the specified error message and writes the possible {@link ServletParameter}s
-     * 
+     *
      * @param resp The {@link HttpServletResponse}
      * @param errorMessage The error message to write
      * @param page The {@link StringBuilder} holding the page content
@@ -200,7 +201,7 @@ public class DiagnosticServlet extends HttpServlet {
 
     /**
      * Writes and flushes a bad request with the specified error message
-     * 
+     *
      * @param resp The {@link HttpServletResponse}
      * @param errorMessage The error message to write
      * @param page The {@link StringBuilder} holding the page content
@@ -213,7 +214,7 @@ public class DiagnosticServlet extends HttpServlet {
 
     /**
      * Writes and flushes an erroneous request with the specified error message and the specified status code
-     * 
+     *
      * @param resp The {@link HttpServletResponse}
      * @param statusCode The status code
      * @param errorMessage The error message to write
@@ -235,7 +236,7 @@ public class DiagnosticServlet extends HttpServlet {
 
     /**
      * Writes the specified {@link List} to the specified page as <code>&lt;ul&gt;&lt;li&gt;...&lt;/li&gt;&lt;/ul&gt</code> list
-     * 
+     *
      * @param list The {@link List} to write
      * @param page The {@link StringBuilder} holding the page content
      */
@@ -249,7 +250,7 @@ public class DiagnosticServlet extends HttpServlet {
 
     /**
      * Writes the header of the page
-     * 
+     *
      * @param resp The {@link HttpServletResponse}
      * @param page The {@link StringBuilder} holding the page content
      * @param servletParameter The {@link ServletParameter}
@@ -266,9 +267,9 @@ public class DiagnosticServlet extends HttpServlet {
 
     /**
      * Writes the footer of the page
-     * 
+     *
      * @param page The {@link StringBuilder} holding the page content
-     * 
+     *
      */
     private void writeFooter(StringBuilder page) {
         page.append("</body>\n</html>");
@@ -276,7 +277,7 @@ public class DiagnosticServlet extends HttpServlet {
 
     /**
      * Flushes the content to the stream
-     * 
+     *
      * @param resp The {@link HttpServletResponse}
      * @param page The {@link StringBuilder} holding the page content
      * @throws IOException if an I/O error occurs while flushing the page
@@ -289,7 +290,7 @@ public class DiagnosticServlet extends HttpServlet {
 
     /**
      * Writes the status and content of a bad request
-     * 
+     *
      * @param resp The {@link HttpServletResponse}
      * @param int the status code to return
      */

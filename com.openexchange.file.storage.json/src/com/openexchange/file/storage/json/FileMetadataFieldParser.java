@@ -93,18 +93,21 @@ public class FileMetadataFieldParser {
         }
         switch(field) {
         case CATEGORIES: {
-            if(String.class.isInstance(val)) {
+            if (val == null) {
+                return null;
+            }
+            if (String.class.isInstance(val)) {
                 return val;
             }
             return categories((JSONArray) val);
         }
         case META:
-            if (value == null || value == JSONObject.NULL) {
+            if (value == null) {
                 return null;
             }
             return JSONCoercion.coerceToNative(value);
         case OBJECT_PERMISSIONS:
-            if (null == val || JSONObject.NULL.equals(val)) {
+            if (null == val) {
                 return null;
             }
             JSONArray jsonArray = (JSONArray) val;

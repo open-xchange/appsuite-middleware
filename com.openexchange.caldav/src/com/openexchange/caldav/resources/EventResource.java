@@ -72,8 +72,6 @@ import com.openexchange.chronos.ical.ICalService;
 import com.openexchange.chronos.provider.composition.IDBasedCalendarAccess;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.CalendarResult;
-import com.openexchange.chronos.service.CalendarUtilities;
-import com.openexchange.chronos.service.EntityResolver;
 import com.openexchange.chronos.service.EventID;
 import com.openexchange.dav.DAVProtocol;
 import com.openexchange.dav.DAVUserAgent;
@@ -484,7 +482,6 @@ public class EventResource extends DAVObjectResource<Event> {
 
             @Override
             protected Void perform(IDBasedCalendarAccess access) throws OXException {
-                access.set(CalendarParameters.PARAMETER_CHECK_CONFLICTS, Boolean.FALSE);
                 long clientTimestamp = object.getTimestamp();
                 if (null != patchedImport.getEvent() && false == Tools.isPhantomMaster(object)) {
                     /*
@@ -496,8 +493,6 @@ public class EventResource extends DAVObjectResource<Event> {
                         LOG.debug("{}: Master event {} not updated.", getUrl(), eventID);
                     } else {
                         clientTimestamp = result.getTimestamp();
-                        EntityResolver entityResolver = factory.requireService(CalendarUtilities.class).getEntityResolver(factory.getContext().getContextId());
-                        entityResolver.trackAttendeeUsage(result);
                     }
                 }
                 /*
@@ -510,8 +505,6 @@ public class EventResource extends DAVObjectResource<Event> {
                         LOG.debug("{}: Exception {} not updated.", getUrl(), eventID);
                     } else {
                         clientTimestamp = result.getTimestamp();
-                        EntityResolver entityResolver = factory.requireService(CalendarUtilities.class).getEntityResolver(factory.getContext().getContextId());
-                        entityResolver.trackAttendeeUsage(result);
                     }
                 }
                 return null;
@@ -541,8 +534,6 @@ public class EventResource extends DAVObjectResource<Event> {
                 }
                 Event createdEvent = result.getCreations().get(0).getCreatedEvent();
                 long clientTimestamp = result.getTimestamp();
-                EntityResolver entityResolver = factory.requireService(CalendarUtilities.class).getEntityResolver(factory.getContext().getContextId());
-                entityResolver.trackAttendeeUsage(result);
                 /*
                  * create exceptions
                  */
@@ -553,8 +544,6 @@ public class EventResource extends DAVObjectResource<Event> {
                         LOG.warn("{}: No exception created.", getUrl());
                         throw new PreconditionException(DAVProtocol.CAL_NS.getURI(), "valid-calendar-object-resource", url, HttpServletResponse.SC_FORBIDDEN);
                     }
-                    clientTimestamp = result.getTimestamp();
-                    entityResolver.trackAttendeeUsage(result);
                 }
                 return createdEvent;
             }
@@ -634,7 +623,8 @@ public class EventResource extends DAVObjectResource<Event> {
                     return access.updateEvent(eventID, caldavImport.getEvent(), clientTimestamp);
                 }
             }.execute(factory.getSession());
-            if (0 < result.getUpdates().size()) {
+            if (0 < result.getCreations().size()) {
+                // event is "created" afterwards from user's point of view
                 return Boolean.FALSE;
             }
         }

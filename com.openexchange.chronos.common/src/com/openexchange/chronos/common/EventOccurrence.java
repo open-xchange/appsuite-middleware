@@ -54,7 +54,6 @@ import org.dmfs.rfc5545.DateTime;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.UnmodifiableEvent;
-import com.openexchange.chronos.common.CalendarUtils;
 
 /**
  * {@link EventOccurrence}
@@ -109,6 +108,16 @@ public class EventOccurrence extends UnmodifiableEvent {
     @Override
     public boolean containsEndDate() {
         return true;
+    }
+
+    @Override
+    public SortedSet<RecurrenceId> getRecurrenceDates() {
+        return null;
+    }
+
+    @Override
+    public boolean containsRecurrenceDates() {
+        return false;
     }
 
     @Override

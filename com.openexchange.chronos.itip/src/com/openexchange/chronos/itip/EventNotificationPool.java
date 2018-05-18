@@ -55,17 +55,19 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.locks.ReentrantLock;
 import com.openexchange.chronos.Attendee;
+import com.openexchange.chronos.AttendeeField;
 import com.openexchange.chronos.CalendarUser;
-import com.openexchange.chronos.CalendarUserType;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
-import com.openexchange.chronos.common.CalendarUtils;
+import com.openexchange.chronos.common.mapping.AttendeeMapper;
 import com.openexchange.chronos.common.mapping.EventMapper;
 import com.openexchange.chronos.itip.generators.ITipMailGenerator;
 import com.openexchange.chronos.itip.generators.NotificationMail;
@@ -356,7 +358,6 @@ public class EventNotificationPool implements EventNotificationPoolService, Runn
             this.principal = principal;
             if (this.original == null) {
                 this.original = original;
-                this.mostRecent = newEvent;
                 this.session = session;
             }
             if (this.session.getUserId() != original.getOrganizer().getEntity() && session.getUserId() == original.getOrganizer().getEntity()) {
@@ -423,8 +424,9 @@ public class EventNotificationPool implements EventNotificationPoolService, Runn
                 generator.noActor();
             }
             List<NotificationParticipant> recipients = generator.getRecipients();
+            Set<Integer> selfRemoved = getSelfRemoved();
             for (NotificationParticipant participant : recipients) {
-                if (isAlreadyInformed(participant, mostRecent, I(session.getContextId()))) {
+                if (selfRemoved.contains(I(participant.getIdentifier())) || isAlreadyInformed(participant, mostRecent, I(session.getContextId()))) {
                     continue; // Skip this participant. He was already informed about the exact same event.
                 }
 
@@ -441,9 +443,10 @@ public class EventNotificationPool implements EventNotificationPoolService, Runn
                 generator.noActor();
             }
             List<NotificationParticipant> recipients = generator.getRecipients();
+            Set<Integer> selfRemoved = getSelfRemoved();
             for (NotificationParticipant participant : recipients) {
                 if (!participant.isExternal()) {
-                    if (isAlreadyInformed(participant, mostRecent, I(session.getContextId()))) {
+                    if (selfRemoved.contains(I(participant.getIdentifier())) || isAlreadyInformed(participant, mostRecent, I(session.getContextId()))) {
                         continue; // Skip this participant. He was already informed about the exact same event.
                     }
 
@@ -462,6 +465,16 @@ public class EventNotificationPool implements EventNotificationPoolService, Runn
                 return diff.getUpdatedFields().isEmpty();
             }
             return false;
+        }
+
+        private Set<Integer> getSelfRemoved() throws OXException {
+            Set<Integer> retval = new HashSet<>();
+            for (Update u : updates) {
+                if (u.getDiff().isAboutCertainParticipantsRemoval(u.getSession().getUserId())) {
+                    retval.add(I(u.getSession().getUserId()));
+                }
+            }
+            return retval;
         }
 
         private boolean moreThanOneUserActed() {
@@ -508,8 +521,10 @@ public class EventNotificationPool implements EventNotificationPoolService, Runn
                 Event newEvent = userScopedUpdate[1].getNewEvent();
                 ITipMailGenerator generator = generatorFactory.create(oldEvent, newEvent, session, userScopedUpdate[0].getSharedFolderOwner(), principal);
                 List<NotificationParticipant> recipients = generator.getRecipients();
+                Set<Integer> selfRemoved = getSelfRemoved();
                 for (NotificationParticipant participant : recipients) {
-                    if (participant.isExternal() && !participant.hasRole(ITipRole.ORGANIZER)) {
+                    if (selfRemoved.contains(I(participant.getIdentifier())) || (participant.isExternal() && !participant.hasRole(ITipRole.ORGANIZER))) {
+                        // Skip external attendees or internal users that removed themselves
                         continue;
                     }
                     NotificationMail mail = generator.generateUpdateMailFor(participant);
@@ -520,38 +535,13 @@ public class EventNotificationPool implements EventNotificationPoolService, Runn
             }
         }
 
-        private void copyParticipantStates(Event src, Event dest) {
-            Map<String, Attendee> oldStates = new HashMap<>();
-            if (src.getAttendees() != null) {
-                for (Attendee up : src.getAttendees()) {
-                    if (up.getCuType().equals(CalendarUserType.INDIVIDUAL)) {
-                        if (CalendarUtils.isInternal(up)) {
-                            oldStates.put(String.valueOf(up.getEntity()), up);
-                        } else {
-                            oldStates.put(up.getEMail(), up);
-                        }
-                    }
+        private void copyParticipantStates(Event src, Event dest) throws OXException {
+            if (null != src.getAttendees() && null != dest.getAttendees()) {
+                List<Attendee> originalAttendees = new LinkedList<>();
+                for (Attendee a : src.getAttendees()) {
+                    originalAttendees.add(AttendeeMapper.getInstance().copy(a, new Attendee(), (AttendeeField[]) null));
                 }
-            }
-
-            if (dest.getAttendees() != null) {
-                List<Attendee> newAttendees = new ArrayList<>(dest.getAttendees().size());
-                for (Attendee p : dest.getAttendees()) {
-                    if (p.getCuType().equals(CalendarUserType.INDIVIDUAL)) {
-                        Attendee oup;
-                        if (CalendarUtils.isInternal(p)) {
-                            oup = oldStates.get(String.valueOf(p.getEntity()));
-                        } else {
-                            oup = oldStates.get(p.getEMail());
-                        }
-                        Attendee up = new Attendee();
-                        up.setPartStat(oup.getPartStat());
-                        up.setComment(oup.getComment());
-                    } else {
-                        newAttendees.add(p);
-                    }
-                }
-                dest.setAttendees(newAttendees);
+                dest.setAttendees(originalAttendees);
             }
         }
 
@@ -565,10 +555,13 @@ public class EventNotificationPool implements EventNotificationPoolService, Runn
             copyParticipantStates(original, facsimile);
 
             ITipMailGenerator generator = generatorFactory.create(facsimile, mostRecent, session, -1, principal);
-            generator.noActor();
+            if (moreThanOneUserActed()) {
+                generator.noActor();
+            }
             List<NotificationParticipant> recipients = generator.getRecipients();
+            Set<Integer> selfRemoved = getSelfRemoved();
             for (NotificationParticipant participant : recipients) {
-                if (participant.isExternal()) {
+                if (participant.isExternal() || selfRemoved.contains(I(participant.getIdentifier()))) {
                     continue;
                 }
                 NotificationMail mail = generator.generateUpdateMailFor(participant);

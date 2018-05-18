@@ -106,12 +106,6 @@ public class AddGuestPermissionTest extends ShareTest {
         }
     }
 
-    @Test
-    public void testUpdateSharedFolderWithCascadingPermissionsRandomly() throws Exception {
-        int module = randomModule();
-        testUpdateSharedFolderWithCascadingPermissions(randomFolderAPI(), module, getDefaultFolder(module), randomGuestPermission(module));
-    }
-
     public void noTestUpdateSharedFolderWithCascadingPermissionsExtensively() throws Exception {
         for (EnumAPI api : TESTED_FOLDER_APIS) {
             for (OCLGuestPermission guestPermission : TESTED_PERMISSIONS) {

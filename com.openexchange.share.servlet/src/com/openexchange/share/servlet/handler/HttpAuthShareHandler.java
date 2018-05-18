@@ -176,13 +176,13 @@ public abstract class HttpAuthShareHandler extends AbstractShareHandler {
         if (e.isNotFound()) {
             return HttpServletResponse.SC_NOT_FOUND;
         }
-        if (e.isNoPermission() || OXExceptionCode.CATEGORY_PERMISSION_DENIED.equals(e.getErrorCode())) {
+        if (e.isNoPermission() || OXExceptionCode.CATEGORY_PERMISSION_DENIED.equals(e.getCategory())) {
             return HttpServletResponse.SC_FORBIDDEN;
         }
-        if (OXExceptionCode.CATEGORY_SERVICE_DOWN.equals(e.getErrorCode())) {
+        if (OXExceptionCode.CATEGORY_SERVICE_DOWN.equals(e.getCategory())) {
             return HttpServletResponse.SC_SERVICE_UNAVAILABLE;
         }
-        if (e.isConflict() || OXExceptionCode.CATEGORY_CONFLICT.equals(e.getErrorCode())) {
+        if (e.isConflict() || OXExceptionCode.CATEGORY_CONFLICT.equals(e.getCategory())) {
             return HttpServletResponse.SC_CONFLICT;
         }
         switch (e.getErrorCode()) {

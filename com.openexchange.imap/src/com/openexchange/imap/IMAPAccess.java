@@ -141,6 +141,7 @@ import com.sun.mail.imap.GreetingListener;
 import com.sun.mail.imap.IMAPFolder;
 import com.sun.mail.imap.IMAPStore;
 import com.sun.mail.imap.JavaIMAPStore;
+import com.sun.mail.imap.Rights;
 
 /**
  * {@link IMAPAccess} - Establishes an IMAP access and provides access to storages.
@@ -595,7 +596,8 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
                  * Check read access
                  */
                 final ACLExtension aclExtension = imapConfig.getACLExtension();
-                if (!aclExtension.aclSupport() || aclExtension.canRead(IMAPFolderConverter.getOwnRights(imapFolder, session, imapConfig))) {
+                Rights ownRights = IMAPFolderConverter.getOwnRights(imapFolder, session, imapConfig);
+                if (!aclExtension.aclSupport() || (ownRights != null && aclExtension.canRead(ownRights))) {
                     retval = IMAPFolderConverter.getUnreadCount(imapFolder);
                 } else {
                     // ACL support AND no read access
@@ -837,7 +839,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
                 /*
                  * Check for a SocketTimeoutException
                  */
-                if (tmpDownEnabled && MimeMailException.isTimeoutException(e)) {
+                if (tmpDownEnabled && MimeMailException.isTimeoutOrConnectException(e)) {
                     /*
                      * Remember a timed-out IMAP server on connect attempt
                      */

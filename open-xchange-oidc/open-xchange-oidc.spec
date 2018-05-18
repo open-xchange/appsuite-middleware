@@ -14,7 +14,7 @@ BuildRequires: java-1_8_0-openjdk-devel
 BuildRequires: java-1.8.0-openjdk-devel
 %endif
 Version:       @OXVERSION@
-%define        ox_release 0
+%define        ox_release 2
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -55,5 +55,9 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 %config(noreplace) /opt/open-xchange/etc/hazelcast/oidcLogoutInfos.properties
 
 %changelog
-* Mon Jan 15 2018 Vitali Sjablow <vitali.sjablow@open-xchange.com>
+* Thu Apr 19 2018 Marcus Klein <marcus.klein@open-xchange.com>
+Fifth preview of 7.10.0 release
+* Tue Apr 03 2018 Marcus Klein <marcus.klein@open-xchange.com>
+Fourth preview of 7.10.0 release
+* Thu Feb 01 2018 Marcus Klein <marcus.klein@open-xchange.com>
 Initial release

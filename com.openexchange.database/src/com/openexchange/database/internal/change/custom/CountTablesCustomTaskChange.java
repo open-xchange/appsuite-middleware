@@ -50,6 +50,8 @@
 package com.openexchange.database.internal.change.custom;
 
 import static com.openexchange.database.Databases.closeSQLStuff;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.DriverManager;
@@ -172,6 +174,8 @@ public class CountTablesCustomTaskChange implements CustomTaskChange, CustomTask
             logger.info("Count tables successfully initialized");
         } catch (SQLException e) {
             throw new CustomChangeException("SQL error", e);
+        } catch (NoConnectionToDatabaseException e) {
+            throw new CustomChangeException(e.getMessage(), e);
         }
     }
 
@@ -411,7 +415,7 @@ public class CountTablesCustomTaskChange implements CustomTaskChange, CustomTask
         }
     }
 
-    private void checkDBPoolSchemaCountConsistency(Connection configCon) throws SQLException {
+    private void checkDBPoolSchemaCountConsistency(Connection configCon) throws SQLException, NoConnectionToDatabaseException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
@@ -483,8 +487,15 @@ public class CountTablesCustomTaskChange implements CustomTaskChange, CustomTask
             Map<DB, Set<String>> db2ExistingSchemas = new LinkedHashMap<>(db2ReferencedSchemas.size());
             {
                 for (DB db : db2ReferencedSchemas.keySet()) {
-                    List<String> schemas = listDatabases(db.name, db.url, db.driver, db.login, db.password);
-                    db2ExistingSchemas.put(db, new LinkedHashSet<>(schemas));
+                    try {
+                        List<String> schemas = listDatabases(db.name, db.url, db.driver, db.login, db.password);
+                        db2ExistingSchemas.put(db, new LinkedHashSet<>(schemas));
+                    } catch (NoConnectionToDatabaseException e) {
+                        if (db2ReferencedSchemas.containsKey(db)) {
+                            throw e;
+                        }
+                        // Ignore...
+                    }
                 }
             }
 
@@ -704,7 +715,7 @@ public class CountTablesCustomTaskChange implements CustomTaskChange, CustomTask
         }
     }
 
-    private List<String> listDatabases(String name, String url, String driver, String login, String password) throws  SQLException {
+    private List<String> listDatabases(String name, String url, String driver, String login, String password) throws  SQLException, NoConnectionToDatabaseException {
         Connection con = getSimpleSQLConnectionFor(url, driver, login, password);
         try {
             return listDatabases(con, name);
@@ -739,7 +750,7 @@ public class CountTablesCustomTaskChange implements CustomTaskChange, CustomTask
         }
     }
 
-    private static Connection getSimpleSQLConnectionFor(String url, String driver, String login, String password) throws SQLException {
+    private static Connection getSimpleSQLConnectionFor(String url, String driver, String login, String password) throws NoConnectionToDatabaseException {
         String passwd = "";
         if (password != null) {
             passwd = password;
@@ -756,7 +767,9 @@ public class CountTablesCustomTaskChange implements CustomTaskChange, CustomTask
 
             return DriverManager.getConnection(url, defaults);
         } catch (ClassNotFoundException e) {
-            throw new SQLException("No such driver class: " + driver, e);
+            throw new NoConnectionToDatabaseException("Database " + extractHostName(url) + " is not accessible: No such driver class: " + driver, e);
+        } catch (SQLException e) {
+            throw new NoConnectionToDatabaseException("Database " + extractHostName(url) + " is not accessible: " + e.getMessage(), e);
         }
     }
 
@@ -781,6 +794,7 @@ public class CountTablesCustomTaskChange implements CustomTaskChange, CustomTask
         final String driver;
         final String login;
         final String password;
+        int hash = 0;
 
         DB(int dbId, String name, String url, String driver, String login, String password) {
             super();
@@ -790,6 +804,31 @@ public class CountTablesCustomTaskChange implements CustomTaskChange, CustomTask
             this.driver = driver;
             this.login = login;
             this.password = password;
+        }
+
+        @Override
+        public int hashCode() {
+            int h = hash;
+            if (h == 0) {
+                h = 31 * 1 + dbId;
+                hash = h;
+            }
+            return h;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj) {
+                return true;
+            }
+            if (!(obj instanceof DB)) {
+                return false;
+            }
+            DB other = (DB) obj;
+            if (dbId != other.dbId) {
+                return false;
+            }
+            return true;
         }
     }
 
@@ -802,6 +841,35 @@ public class CountTablesCustomTaskChange implements CustomTaskChange, CustomTask
             super();
             this.dbId = dbId;
             this.schema = schema;
+        }
+    }
+
+    private static final class NoConnectionToDatabaseException extends Exception {
+
+        private static final long serialVersionUID = 8820076916162330786L;
+
+        NoConnectionToDatabaseException(String message, Throwable cause) {
+            super(message, cause);
+        }
+
+    }
+
+    private static String extractHostName(String jdbcUrl) {
+        if (null == jdbcUrl) {
+            return null;
+        }
+
+        String urlToParse = jdbcUrl;
+        if (urlToParse.startsWith("jdbc:")) {
+            urlToParse = urlToParse.substring(5);
+        }
+
+        try {
+            return new URI(urlToParse).getHost();
+        } catch (URISyntaxException e) {
+            int start = urlToParse.indexOf("://");
+            int end = urlToParse.indexOf('/', start + 1);
+            return urlToParse.substring(start + 3, end);
         }
     }
 

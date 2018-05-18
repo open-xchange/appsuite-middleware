@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the Open-Xchange, Inc. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2020 Open-Xchange, Inc.
+ *     Copyright (C) 2016-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -63,13 +63,13 @@ import org.apache.http.HttpEntity;
 import org.apache.http.HttpHeaders;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
+import org.apache.http.NoHttpResponseException;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.client.utils.DateUtils;
 import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.util.EntityUtils;
 import com.openexchange.auth.info.AuthInfo;
 import com.openexchange.auth.info.AuthType;
 import com.openexchange.chronos.ical.ICalParameters;
@@ -169,15 +169,11 @@ public class ICalFeedClient {
         ICalService iCalService = Services.getService(ICalService.class);
         ICalParameters parameters = iCalService.initParameters();
         parameters.set(ICalParameters.IGNORE_UNSET_PROPERTIES, Boolean.TRUE);
-        InputStream inputStream = null;
-        try {
-            inputStream = Streams.bufferedInputStreamFor(httpEntity.getContent());
+        try (InputStream inputStream = Streams.bufferedInputStreamFor(httpEntity.getContent())) {
             return iCalService.importICal(inputStream, parameters);
         } catch (UnsupportedOperationException | IOException e) {
             LOG.error("Error while processing the retrieved information:{}.", e.getMessage(), e);
             throw ICalProviderExceptionCodes.UNEXPECTED_FEED_ERROR.create(iCalFeedConfig.getFeedUrl(), e.getMessage());
-        } finally {
-            Streams.close(inputStream);
         }
     }
 
@@ -203,7 +199,7 @@ public class ICalFeedClient {
         } catch (ClientProtocolException e) {
             LOG.error("Error while processing the retrieved information:{}.", e.getMessage(), e);
             throw ICalProviderExceptionCodes.CLIENT_PROTOCOL_ERROR.create(e, e.getMessage());
-        } catch (UnknownHostException e) {
+        } catch (UnknownHostException | NoHttpResponseException e) {
             LOG.debug("Error while processing the retrieved information:{}.", e.getMessage(), e);
             throw ICalProviderExceptionCodes.NO_FEED.create(e, iCalFeedConfig.getFeedUrl());
         } catch (IOException e) {
@@ -221,7 +217,7 @@ public class ICalFeedClient {
         if (entity == null) {
             return response;
         }
-        long contentLength = httpResponse.getEntity().getContentLength();
+        long contentLength = entity.getContentLength();
         String contentLength2 = response.getContentLength();
 
         long allowedFeedSize = ICalCalendarProviderProperties.allowedFeedSize();
@@ -244,7 +240,7 @@ public class ICalFeedClient {
         // Assert the 4xx codes
         switch (statusCode) {
             case HttpStatus.SC_UNAUTHORIZED:
-                throw unauthorizedException(httpResponse, iCalFeedConfig.getFeedUrl(), iCalFeedConfig.getAuthInfo());
+                throw unauthorizedException(httpResponse);
             case HttpStatus.SC_NOT_FOUND:
                 throw ICalProviderExceptionCodes.NO_FEED.create(iCalFeedConfig.getFeedUrl());
         }
@@ -261,11 +257,10 @@ public class ICalFeedClient {
                 return statusCode;
         }
         if (statusCode >= 500 && statusCode <= 599) {
-            throw ICalProviderExceptionCodes.REMOTE_SERVER_ERROR.create(httpResponse.getStatusLine());
+            throw ICalProviderExceptionCodes.REMOTE_SERVER_ERROR.create(String.valueOf(httpResponse.getStatusLine()));
         }
         return statusCode;
     }
-
 
     /**
      * Resets given HTTP request
@@ -278,24 +273,6 @@ public class ICalFeedClient {
                 request.reset();
             } catch (final Exception e) {
                 // Ignore
-            }
-        }
-    }
-
-    /**
-     * Ensures that the entity content is fully consumed and the content stream, if exists, is closed silently.
-     *
-     * @param response The HTTP response to consume and close
-     */
-    protected static void consume(HttpResponse response) {
-        if (null != response) {
-            HttpEntity entity = response.getEntity();
-            if (null != entity) {
-                try {
-                    EntityUtils.consume(entity);
-                } catch (Exception e) {
-                    // Ignore
-                }
             }
         }
     }
@@ -353,11 +330,12 @@ public class ICalFeedClient {
      * Prepares an appropriate exception for a response with status <code>401 Unauthorized</code>.
      *
      * @param response The HTTP response to generate the exception for
-     * @param feedUrl The requested feed URL
-     * @param authInfo The authentication info used for the feed
      * @return An appropriate {@link OXException}
      */
-    private static OXException unauthorizedException(HttpResponse response, String feedUrl, AuthInfo authInfo) {
+    private OXException unauthorizedException(HttpResponse response) {
+        String feedUrl = iCalFeedConfig.getFeedUrl();
+        AuthInfo authInfo = iCalFeedConfig.getAuthInfo();
+        
         boolean hadCredentials = null != authInfo && (Strings.isNotEmpty(authInfo.getPassword()) || Strings.isNotEmpty(authInfo.getToken()));
         String realm = getFirstHeaderElement(response, HttpHeaders.WWW_AUTHENTICATE, "Basic realm");
         if (null != realm && realm.contains("Share/Anonymous/")) {
@@ -365,17 +343,20 @@ public class ICalFeedClient {
              * anonymous, password-protected share
              */
             if (hadCredentials) {
-                return ICalProviderExceptionCodes.PASSWORD_WRONG.create(feedUrl, response.getStatusLine(), realm);
+                return ICalProviderExceptionCodes.PASSWORD_WRONG.create(feedUrl, String.valueOf(response.getStatusLine()), realm);
             }
-            return ICalProviderExceptionCodes.PASSWORD_REQUIRED.create(feedUrl, response.getStatusLine(), realm);
+            return ICalProviderExceptionCodes.PASSWORD_REQUIRED.create(feedUrl, String.valueOf(response.getStatusLine()), realm);
         }
         /*
          * generic credentials required, otherwise
          */
         if (hadCredentials) {
-            return ICalProviderExceptionCodes.CREDENTIALS_WRONG.create(feedUrl, response.getStatusLine(), realm);
+            if (iCalFeedConfig.getLastUpdated() > 0 || Strings.isNotEmpty(iCalFeedConfig.getEtag())) {
+                return ICalProviderExceptionCodes.CREDENTIALS_CHANGED.create(feedUrl, String.valueOf(response.getStatusLine()), realm);
+            }
+            return ICalProviderExceptionCodes.CREDENTIALS_WRONG.create(feedUrl, String.valueOf(response.getStatusLine()), realm);
         }
-        return ICalProviderExceptionCodes.CREDENTIALS_REQUIRED.create(feedUrl, response.getStatusLine(), realm);
+        return ICalProviderExceptionCodes.CREDENTIALS_REQUIRED.create(feedUrl, String.valueOf(response.getStatusLine()), realm);
     }
 
     private static String getFirstHeaderElement(HttpResponse response, String headerName, String elementName) {

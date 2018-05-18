@@ -166,7 +166,11 @@ public class AllAction implements AJAXActionService {
                 JSONObject jDeviceInfo = new JSONObject(3);
                 jDeviceInfo.put("displayName", info.getDisplayName(locale));
                 JSONObject jOS = new JSONObject(2);
-                jOS.put("name", info.getOSFamily());
+                if ("os x".equals(info.getOSFamily())) {
+                    jOS.put("name", "macos");
+                } else {
+                    jOS.put("name", info.getOSFamily());
+                }
                 jOS.put("version", info.getOSVersion());
                 jDeviceInfo.put("os", jOS);
                 JSONObject jClient = new JSONObject(4);

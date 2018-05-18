@@ -49,7 +49,6 @@
 
 package com.openexchange.importexport.actions;
 
-import java.util.Collection;
 import java.util.Map;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
@@ -75,11 +74,6 @@ public abstract class AbstractIEActionFactory implements AJAXActionServiceFactor
     public AJAXActionService createActionService(final String action) throws OXException {
         final Format format = Format.getFormatByConstantName(action);
         return format == null ? null : getActions().get(format);
-    }
-
-    @Override
-    public Collection<? extends AJAXActionService> getSupportedServices() {
-        return java.util.Collections.unmodifiableCollection(getActions().values());
     }
 
 }

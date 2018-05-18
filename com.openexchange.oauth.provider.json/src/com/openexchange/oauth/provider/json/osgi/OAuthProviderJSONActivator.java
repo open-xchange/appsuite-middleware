@@ -96,9 +96,12 @@ public class OAuthProviderJSONActivator extends AJAXModuleActivator {
                             if (serverSession.isAnonymous() || serverSession.getUser().isGuest()) {
                                 return false;
                             }
-                            return getService(OAuthResourceService.class).isProviderEnabled(session.getContextId(), session.getUserId());
+                            OAuthResourceService oAuthResourceService = getService(OAuthResourceService.class);
+                            if (oAuthResourceService == null) {
+                                return false;
+                            }
+                            return oAuthResourceService.isProviderEnabled(session.getContextId(), session.getUserId());
                         }
-
                         return true;
                     }
                 });

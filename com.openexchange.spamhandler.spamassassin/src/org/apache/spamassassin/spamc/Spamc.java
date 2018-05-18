@@ -30,6 +30,7 @@ import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.UnknownHostException;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -38,9 +39,12 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.regex.Pattern;
 import java.util.zip.Deflater;
 import javax.net.ssl.SSLSocketFactory;
+import com.google.common.collect.ImmutableMap;
 import com.openexchange.java.Streams;
 
 /**
@@ -1126,8 +1130,8 @@ public class Spamc {
 
         try {
             out = socket.getOutputStream();
-            in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-            out.write(query.getBytes());
+            in = new BufferedReader(new InputStreamReader(socket.getInputStream(), StandardCharsets.UTF_8));
+            out.write(query.getBytes(StandardCharsets.UTF_8));
             out.flush();
             socket.shutdownOutput();
             String s;
@@ -1306,7 +1310,7 @@ public class Spamc {
 
             File configFile = null;
             for (int i = 0; i < args.length; i++) {
-                if (ConfigOption.SHORT_ARG.equals(args[i]) || ConfigOption.LONG_ARG.equals(args[i])) {
+                if ("-F".equals(args[i]) || "--config".equals(args[i])) {
                     if ((i + 1) >= (args.length - 1)) {
                         throw new NoArgumentException(i, args[i].length() - 1, args[i]);
                     }
@@ -1378,7 +1382,7 @@ public class Spamc {
                 System.out.println(response.getProcessedMessage());
             }
             int status;
-            if (Spamc.useExitCode) {
+            if (Spamc.useExitCode.get()) {
                 if (response.isSpam()) {
                     status = ExitCodes.EX_ISSPAM;
                 } else {
@@ -1450,6 +1454,9 @@ public class Spamc {
             String tokens[];
             while (reader.ready()) {
                 line = reader.readLine();
+                if(line == null) {
+                    break;
+                }
                 if (line.length() > 0 && (line.charAt(0) == '#' || line.charAt(0) == '\r' || line.charAt(0) == '\n')) {
                     continue;
                 }
@@ -1497,38 +1504,33 @@ public class Spamc {
         }
     }
 
-    private static void printVersion() {
+    static void printVersion() {
         System.out.print("SpamAssassin Client version " + Spamc.class.getPackage().getImplementationVersion() + "\n");
         if (sslPackage != null) {
             System.out.print("  compiled with SSL support (" + sslPackage.getImplementationVersion() + ")\n");
         }
     }
 
-    private static void printUsage() {
+    static void printUsage() {
         printVersion();
-        System.out.print("\n" + "Usage: " + Spamc.getSimpleClassName() + " [options] [" + PipeToOption.SHORT_ARG + " command [args]] < message\n" + "\n" + "Options:\n" + "  " + DestinationOption.SHORT_ARG + ", " + DestinationOption.LONG_ARG + " host[,host2]\n" + "                      Specify one or more hosts to connect to.\n" + "                      [default: " + DEFAULT_HOST + "]\n" + "  " + RandomizeOption.SHORT_ARG + " , " + RandomizeOption.LONG_ARG + "    Randomize IP addresses for the looked-up\n" + "                      hostname.\n" + "  " + PortOption.SHORT_ARG + ", " + PortOption.LONG_ARG + " port     Specify port for connection to spamd.\n" + "                      [default: " + DEFAULT_PORT + "]\n" + "  " + SSLOption.SHORT_ARG + ", " + SSLOption.LONG_ARG + "           Use SSL to talk to spamd.\n" + "  " + SocketOption.SHORT_ARG + ", " + SocketOption.LONG_ARG + " path   Connect to spamd via UNIX domain sockets.\n" + "  " + ConfigOption.SHORT_ARG + ", " + ConfigOption.LONG_ARG + " path   Use this configuration file.\n" + "  " + TimeoutOption.SHORT_ARG + ", " + TimeoutOption.LONG_ARG + " timeout\n" + "                      Timeout in seconds for communications to\n" + "                      spamd. [default: " + DEFAULT_TIMEOUT_SECONDS + "]\n" + "  " + ConnectRetriesOption.LONG_ARG + " retries\n" + "                      Try connecting to spamd this many times\n" + "                      [default: " + DEFAULT_CONNECT_RETRIES + "]\n" + "  " + RetrySleepOption.LONG_ARG + " sleep Sleep for this time between attempts to\n" + "                      connect to spamd, in seconds [default: " + DEFAULT_RETRY_SLEEP_SECONDS + "]\n" + "  " + MaxSizeOption.SHORT_ARG + ", " + MaxSizeOption.LONG_ARG + " size Specify maximum message size, in bytes.\n" + "                      [default: " + (DEFAULT_MAX_SIZE_BYTES / BYTES_PER_KB) + "k]\n" + "  " + UsernameOption.SHORT_ARG + ", " + UsernameOption.LONG_ARG + " username\n" + "                      User for spamd to process this message under.\n" + "                      [default: current user]\n" + "  " + LearnTypeOption.SHORT_ARG + ", " + LearnTypeOption.LONG_ARG + " learntype\n" + "                      Learn message as " + LearnTypeOption.SPAM + ", " + LearnTypeOption.HAM + " or " + LearnTypeOption.FORGET + " to\n" + "                      forget or unlearn the message.\n" + "  " + ReportTypeOption.SHORT_ARG + ", " + ReportTypeOption.LONG_ARG + " reporttype\n" + "                      Report message to collaborative filtering\n" + "                      databases.  Report type should be '" + ReportTypeOption.REPORT + "' for\n" + "                      spam or '" + ReportTypeOption.REVOKE + "' for ham.\n" + "  " + BSMTPOption.BSMTP_1 + ", " + BSMTPOption.BSMTP_2 + "         Assume input is a single BSMTP-formatted\n" + "                      message.\n" + "  " + CheckOption.SHORT_ARG + ", " + CheckOption.LONG_ARG + "         Just print the summary line and set an exit\n" + "                      code.\n" + "  " + TestsOption.SHORT_ARG + ", " + TestsOption.LONG_ARG + "         Just print the names of the tests hit.\n" + "  " + FullSpamOption.SHORT_ARG + ", " + FullSpamOption.LONG_ARG + "     Print full report for messages identified as\n" + "                      spam.\n" + "  " + FullOption.SHORT_ARG + ", " + FullOption.LONG_ARG + "          Print full report for all messages.\n" + "  " + HeadersOption.LONG_ARG + "           Rewrite only the message headers.\n" + "  " + ExitCodeOption.SHORT_ARG + ", " + ExitCodeOption.LONG_ARG + "      Filter as normal, and set an exit code.\n" + "  " + NoSafeFallbackOption.SHORT_ARG + ", " + NoSafeFallbackOption.LONG_ARG + "\n" + "                      Don't fallback safely.\n" + "  " + LogToStderrOption.SHORT_ARG + ", " + LogToStderrOption.LONG_ARG + " Log errors and warnings to stderr.\n" + "  " + PipeToOption.SHORT_ARG + ", " + PipeToOption.LONG_ARG + " command [args]\n" + "                      Pipe the output to the given command instead\n" + "                      of stdout. This must be the last option.\n" + "  " + HelpOption.SHORT_ARG + ", " + HelpOption.LONG_ARG + "          Print this help message and exit.\n" + "  " + VersionOption.SHORT_ARG + ", " + VersionOption.LONG_ARG + "       Print spamc version and exit.\n" + "  " + KeepAliveOption.SHORT_ARG + "                  Keepalive check of spamd.\n" + "  " + CompressOption.SHORT_ARG + "                  Compress mail message sent to spamd.\n" + "  " + SafeFallbackOption.SHORT_ARG + "                  (Now default, ignored.)\n" + "\n");
+        System.out.print("\n" + "Usage: " + Spamc.getSimpleClassName() + " [options] [" + "-e" + " command [args]] < message\n" + "\n" + "Options:\n" + "  " + "-d" + ", " + "--dest" + " host[,host2]\n" + "                      Specify one or more hosts to connect to.\n" + "                      [default: " + DEFAULT_HOST + "]\n" + "  " + "-H" + " , " + "--randomize" + "    Randomize IP addresses for the looked-up\n" + "                      hostname.\n" + "  " + "-p" + ", " + "--port" + " port     Specify port for connection to spamd.\n" + "                      [default: " + DEFAULT_PORT + "]\n" + "  " + "-S" + ", " + "--ssl" + "           Use SSL to talk to spamd.\n" + "  " + "-U" + ", " + "--socket" + " path   Connect to spamd via UNIX domain sockets.\n" + "  " + "-F" + ", " + "--config" + " path   Use this configuration file.\n" + "  " + "-t" + ", " + "--timeout" + " timeout\n" + "                      Timeout in seconds for communications to\n" + "                      spamd. [default: " + DEFAULT_TIMEOUT_SECONDS + "]\n" + "  " + "--connect-retries" + " retries\n" + "                      Try connecting to spamd this many times\n" + "                      [default: " + DEFAULT_CONNECT_RETRIES + "]\n" + "  " + "--retry-sleep" + " sleep Sleep for this time between attempts to\n" + "                      connect to spamd, in seconds [default: " + DEFAULT_RETRY_SLEEP_SECONDS + "]\n" + "  " + "-s" + ", " + "--max-size" + " size Specify maximum message size, in bytes.\n" + "                      [default: " + (DEFAULT_MAX_SIZE_BYTES / BYTES_PER_KB) + "k]\n" + "  " + "-u" + ", " + "--username" + " username\n" + "                      User for spamd to process this message under.\n" + "                      [default: current user]\n" + "  " + "-L" + ", " + "--learntype" + " learntype\n" + "                      Learn message as " + LearnTypeOption.SPAM + ", " + LearnTypeOption.HAM + " or " + LearnTypeOption.FORGET + " to\n" + "                      forget or unlearn the message.\n" + "  " + "-C" + ", " + "--reporttype" + " reporttype\n" + "                      Report message to collaborative filtering\n" + "                      databases.  Report type should be '" + ReportTypeOption.REPORT + "' for\n" + "                      spam or '" + ReportTypeOption.REVOKE + "' for ham.\n" + "  " + "-B" + ", " + "--bsmtp" + "         Assume input is a single BSMTP-formatted\n" + "                      message.\n" + "  " + "-c" + ", " + "--check" + "         Just print the summary line and set an exit\n" + "                      code.\n" + "  " + "-y" + ", " + "--tests" + "         Just print the names of the tests hit.\n" + "  " + "-r" + ", " + "--full-spam" + "     Print full report for messages identified as\n" + "                      spam.\n" + "  " + "-R" + ", " + "--full" + "          Print full report for all messages.\n" + "  " + "--headers" + "           Rewrite only the message headers.\n" + "  " + "-E" + ", " + "--exitcode" + "      Filter as normal, and set an exit code.\n" + "  " + "-x" + ", " + "--no-safe-fallback" + "\n" + "                      Don't fallback safely.\n" + "  " + "-l" + ", " + "--log-to-stderr" + " Log errors and warnings to stderr.\n" + "  " + "-e" + ", " + "--pipe-to" + " command [args]\n" + "                      Pipe the output to the given command instead\n" + "                      of stdout. This must be the last option.\n" + "  " + "-h" + ", " + "--help" + "          Print this help message and exit.\n" + "  " + "-V" + ", " + "--version" + "       Print spamc version and exit.\n" + "  " + "-K" + "                  Keepalive check of spamd.\n" + "  " + "-z" + "                  Compress mail message sent to spamd.\n" + "  " + "-f" + "                  (Now default, ignored.)\n" + "\n");
 
     }
 
     private static abstract class AbstractOption {
 
-        protected static final String SHORT_ARG = null;
-
-        protected static final String LONG_ARG = null;
-
-        private String shortName;
-
+        private final String shortName;
         private final String longName;
-
         private final boolean hasArgument;
 
         protected AbstractOption(final String longName, final boolean hasArgument) {
-            this.longName = longName;
-            this.hasArgument = hasArgument;
+            this(null, longName, hasArgument);
         }
 
         protected AbstractOption(final String shortName, final String longName, final boolean hasArgument) {
-            this(longName, hasArgument);
+            super();
+            this.longName = longName;
+            this.hasArgument = hasArgument;
             this.shortName = shortName;
         }
 
@@ -1570,12 +1572,8 @@ public class Spamc {
 
     private static class DestinationOption extends AbstractOption {
 
-        private static final String SHORT_ARG = "-d";
-
-        private static final String LONG_ARG = "--dest";
-
-        protected DestinationOption() {
-            super(DestinationOption.SHORT_ARG, DestinationOption.LONG_ARG, true);
+        DestinationOption() {
+            super("-d", "--dest", true);
         }
 
         @Override
@@ -1589,14 +1587,8 @@ public class Spamc {
 
     private static class RandomizeOption extends AbstractOption {
 
-        private static final String SHORT_ARG = "-H";
-
-        private static final String LONG_ARG = "--randomize";
-
-        private final static long FLAG = 1 << 23;
-
-        protected RandomizeOption() {
-            super(SHORT_ARG, LONG_ARG, false);
+        RandomizeOption() {
+            super("-H", "--randomize", false);
         }
 
         @Override
@@ -1609,12 +1601,8 @@ public class Spamc {
 
     private static class PortOption extends AbstractOption {
 
-        private static final String SHORT_ARG = "-p";
-
-        private static final String LONG_ARG = "--port";
-
-        protected PortOption() {
-            super(SHORT_ARG, LONG_ARG, true);
+        PortOption() {
+            super("-p", "--port", true);
         }
 
         @Override
@@ -1627,15 +1615,11 @@ public class Spamc {
 
     private static class SSLOption extends AbstractOption {
 
-        private static final String SHORT_ARG = "-S";
-
-        private static final String LONG_ARG = "--ssl";
-
         // option flags, copied from libspamc.h
         private final static long FLAG = 1 << 27;
 
-        protected SSLOption() {
-            super(SHORT_ARG, LONG_ARG, false);
+        SSLOption() {
+            super("-S", "--ssl", false);
         }
 
         @Override
@@ -1647,12 +1631,8 @@ public class Spamc {
 
     private static class SocketOption extends AbstractOption {
 
-        private static final String SHORT_ARG = "-U";
-
-        private static final String LONG_ARG = "--socket";
-
-        protected SocketOption() {
-            super(SHORT_ARG, LONG_ARG, true);
+        SocketOption() {
+            super("-U", "--socket", true);
         }
 
         @Override
@@ -1666,23 +1646,15 @@ public class Spamc {
 
     private static class ConfigOption extends AbstractOption {
 
-        private static final String SHORT_ARG = "-F";
-
-        private static final String LONG_ARG = "--config";
-
-        protected ConfigOption() {
-            super(SHORT_ARG, LONG_ARG, true);
+        ConfigOption() {
+            super("-F", "--config", true);
         }
     }
 
     private static class TimeoutOption extends AbstractOption {
 
-        private static final String SHORT_ARG = "-t";
-
-        private static final String LONG_ARG = "--timeout";
-
-        protected TimeoutOption() {
-            super(SHORT_ARG, LONG_ARG, true);
+        TimeoutOption() {
+            super("-t", "--timeout", true);
         }
 
         @Override
@@ -1695,10 +1667,8 @@ public class Spamc {
 
     private static class ConnectRetriesOption extends AbstractOption {
 
-        private static final String LONG_ARG = "--connect-retries";
-
-        protected ConnectRetriesOption() {
-            super(LONG_ARG, true);
+        ConnectRetriesOption() {
+            super("--connect-retries", true);
         }
 
         @Override
@@ -1711,10 +1681,8 @@ public class Spamc {
 
     private static class RetrySleepOption extends AbstractOption {
 
-        private static final String LONG_ARG = "--retry-sleep";
-
-        protected RetrySleepOption() {
-            super(LONG_ARG, true);
+        RetrySleepOption() {
+            super("--retry-sleep", true);
         }
 
         @Override
@@ -1727,12 +1695,8 @@ public class Spamc {
 
     private static class MaxSizeOption extends AbstractOption {
 
-        private static final String SHORT_ARG = "-s";
-
-        private static final String LONG_ARG = "--max-size";
-
-        protected MaxSizeOption() {
-            super(SHORT_ARG, LONG_ARG, true);
+        MaxSizeOption() {
+            super("-s", "--max-size", true);
         }
 
         @Override
@@ -1745,12 +1709,8 @@ public class Spamc {
 
     private static class UsernameOption extends AbstractOption {
 
-        private static final String SHORT_ARG = "-u";
-
-        private static final String LONG_ARG = "--username";
-
-        protected UsernameOption() {
-            super(SHORT_ARG, LONG_ARG, true);
+        UsernameOption() {
+            super("-u", "--username", true);
         }
 
         @Override
@@ -1763,20 +1723,16 @@ public class Spamc {
 
     private static class LearnTypeOption extends AbstractOption {
 
-        private static final String SHORT_ARG = "-L";
-
-        private static final String LONG_ARG = "--learntype";
-
         private static final String FORGET = "forget";
 
         private static final String HAM = "ham";
 
         private static final String SPAM = "spam";
 
-        protected final static long FLAG = 1 << 21;
+        final static long FLAG = 1 << 21;
 
-        protected LearnTypeOption() {
-            super(SHORT_ARG, LONG_ARG, true);
+        LearnTypeOption() {
+            super("-L", "--learntype", true);
         }
 
         @Override
@@ -1792,18 +1748,14 @@ public class Spamc {
 
     private static class ReportTypeOption extends AbstractOption {
 
-        private static final String SHORT_ARG = "-C";
-
-        private static final String LONG_ARG = "--reporttype";
-
         private static final String REPORT = "report";
 
         private static final String REVOKE = "revoke";
 
-        protected final static long FLAG = 1 << 20;
+        final static long FLAG = 1 << 20;
 
-        protected ReportTypeOption() {
-            super(SHORT_ARG, LONG_ARG, true);
+        ReportTypeOption() {
+            super("-C", "--reporttype", true);
         }
 
         @Override
@@ -1819,14 +1771,10 @@ public class Spamc {
 
     private static class BSMTPOption extends AbstractOption {
 
-        private static final String BSMTP_1 = "-B";
-
-        private static final String BSMTP_2 = "--bsmtp";
-
         private static final long FLAG = 1;
 
-        protected BSMTPOption() {
-            super(BSMTPOption.BSMTP_1, BSMTPOption.BSMTP_2, false);
+        BSMTPOption() {
+            super("-B", "--bsmtp", false);
         }
 
         protected void apply(final Spamc spamc) {
@@ -1840,33 +1788,25 @@ public class Spamc {
 
     private static class CheckOption extends AbstractOption {
 
-        private static final String SHORT_ARG = "-c";
+        final static long FLAG = 1 << 29;
 
-        private static final String LONG_ARG = "--check";
-
-        protected final static long FLAG = 1 << 29;
-
-        protected CheckOption() {
-            super(SHORT_ARG, LONG_ARG, false);
+        CheckOption() {
+            super("-c", "--check", false);
         }
 
         @Override
         protected long apply(final Spamc spamc, final long flags) {
-            Spamc.useExitCode = true;
+            Spamc.useExitCode.set(true);
             return flags | FLAG;
         }
     }
 
     private static class TestsOption extends AbstractOption {
 
-        private static final String SHORT_ARG = "-y";
-
-        private static final String LONG_ARG = "--tests";
-
         private final static long FLAG = 1 << 24;
 
-        protected TestsOption() {
-            super(SHORT_ARG, LONG_ARG, false);
+        TestsOption() {
+            super("-y", "--tests", false);
         }
 
         @Override
@@ -1877,14 +1817,10 @@ public class Spamc {
 
     private static class FullSpamOption extends AbstractOption {
 
-        private static final String SHORT_ARG = "-r";
+        final static long FLAG = 1 << 25;
 
-        private static final String LONG_ARG = "--full-spam";
-
-        protected final static long FLAG = 1 << 25;
-
-        protected FullSpamOption() {
-            super(SHORT_ARG, LONG_ARG, false);
+        FullSpamOption() {
+            super("-r", "--full-spam", false);
         }
 
         @Override
@@ -1895,14 +1831,10 @@ public class Spamc {
 
     private static class FullOption extends AbstractOption {
 
-        private static final String SHORT_ARG = "-R";
+        final static long FLAG = 1 << 26;
 
-        private static final String LONG_ARG = "--full";
-
-        protected final static long FLAG = 1 << 26;
-
-        protected FullOption() {
-            super(SHORT_ARG, LONG_ARG, false);
+        FullOption() {
+            super("-R", "--full", false);
         }
 
         @Override
@@ -1913,12 +1845,10 @@ public class Spamc {
 
     private static class HeadersOption extends AbstractOption {
 
-        private static final String LONG_ARG = "--headers";
+        final static long FLAG = 1 << 15;
 
-        protected final static long FLAG = 1 << 15;
-
-        protected HeadersOption() {
-            super(HeadersOption.LONG_ARG, false);
+        HeadersOption() {
+            super("--headers", false);
         }
 
         @Override
@@ -1927,31 +1857,23 @@ public class Spamc {
         }
     }
 
-    private static boolean useExitCode = false;
+    static final AtomicBoolean useExitCode = new AtomicBoolean(false);
 
     private static class ExitCodeOption extends AbstractOption {
 
-        private static final String SHORT_ARG = "-E";
-
-        private static final String LONG_ARG = "--exitcode";
-
-        protected ExitCodeOption() {
-            super(SHORT_ARG, LONG_ARG, false);
+        ExitCodeOption() {
+            super("-E", "--exitcode", false);
         }
 
         protected void apply(final Spamc spamc) {
-            Spamc.useExitCode = true;
+            Spamc.useExitCode.set(true);
         }
     }
 
     private static class NoSafeFallbackOption extends AbstractOption {
 
-        private static final String SHORT_ARG = "-x";
-
-        private static final String LONG_ARG = "--no-safe-fallback";
-
-        protected NoSafeFallbackOption() {
-            super(SHORT_ARG, LONG_ARG, false);
+        NoSafeFallbackOption() {
+            super("-x", "--no-safe-fallback", false);
         }
 
         @Override
@@ -1963,14 +1885,10 @@ public class Spamc {
 
     private static class LogToStderrOption extends AbstractOption {
 
-        private static final String SHORT_ARG = "-l";
+        final static long FLAG = 1 << 22;
 
-        private static final String LONG_ARG = "--log-to-stderr";
-
-        protected final static long FLAG = 1 << 22;
-
-        protected LogToStderrOption() {
-            super(SHORT_ARG, LONG_ARG, false);
+        LogToStderrOption() {
+            super("-l", "--log-to-stderr", false);
         }
 
         @Override
@@ -1981,23 +1899,15 @@ public class Spamc {
 
     private static class PipeToOption extends AbstractOption {
 
-        private static final String SHORT_ARG = "-e";
-
-        private static final String LONG_ARG = "--pipe-to";
-
-        protected PipeToOption() {
-            super(SHORT_ARG, LONG_ARG, true);
+        PipeToOption() {
+            super("-e", "--pipe-to", true);
         }
     }
 
     private static class VersionOption extends AbstractOption {
 
-        private static final String SHORT_ARG = "-V";
-
-        private static final String LONG_ARG = "--version";
-
-        protected VersionOption() {
-            super(SHORT_ARG, LONG_ARG, false);
+        VersionOption() {
+            super("-V", "--version", false);
         }
 
         protected void apply(final Spamc ignored) {
@@ -2017,12 +1927,8 @@ public class Spamc {
 
     private static class HelpOption extends AbstractOption {
 
-        private static final String SHORT_ARG = "-h";
-
-        private static final String LONG_ARG = "--help";
-
         protected HelpOption() {
-            super(SHORT_ARG, LONG_ARG, false);
+            super("-h", "--help", false);
         }
 
         protected void apply(final Spamc ignored) {
@@ -2042,12 +1948,10 @@ public class Spamc {
 
     private static class CompressOption extends AbstractOption {
 
-        private static final String SHORT_ARG = "-z";
+        final static long FLAG = 1 << 16;
 
-        protected final static long FLAG = 1 << 16;
-
-        protected CompressOption() {
-            super(SHORT_ARG, false);
+        CompressOption() {
+            super("-z", false);
         }
 
         @Override
@@ -2059,23 +1963,19 @@ public class Spamc {
 
     private static class SafeFallbackOption extends AbstractOption {
 
-        private static final String SHORT_ARG = "-f";
+        final static long FLAG = 1 << 28;
 
-        protected final static long FLAG = 1 << 28;
-
-        protected SafeFallbackOption() {
-            super(SHORT_ARG, false);
+        SafeFallbackOption() {
+            super("-f", false);
         }
     }
 
     private static class KeepAliveOption extends AbstractOption {
 
-        private static final String SHORT_ARG = "-K";
+        final static long FLAG = 1 << 19;
 
-        protected final static long FLAG = 1 << 19;
-
-        protected KeepAliveOption() {
-            super(SHORT_ARG, false);
+        KeepAliveOption() {
+            super("-K", false);
         }
 
         @Override
@@ -2084,67 +1984,68 @@ public class Spamc {
         }
     }
 
-    private static Collection<AbstractOption> options = null;
+    private static class SpamcOptions {
 
-    private static Map<String, AbstractOption> shortArgumentsMap = null;
+        final Map<String, AbstractOption> shortArgumentsMap;
+        final Map<String, AbstractOption> longArgumentsMap;
 
-    private static Map<String, AbstractOption> longArgumentsMap = null;
-
-    private static synchronized void initOptions() {
-        if (options == null) {
-            options = new ArrayList<AbstractOption>();
-            options.add(new DestinationOption());
-            options.add(new RandomizeOption());
-            options.add(new PortOption());
-            options.add(new SSLOption());
-            options.add(new SocketOption());
-            options.add(new ConfigOption());
-            options.add(new TimeoutOption());
-            options.add(new ConnectRetriesOption());
-            options.add(new RetrySleepOption());
-            options.add(new MaxSizeOption());
-            options.add(new UsernameOption());
-            options.add(new LearnTypeOption());
-            options.add(new ReportTypeOption());
-            options.add(new BSMTPOption());
-            options.add(new CheckOption());
-            options.add(new TestsOption());
-            options.add(new FullSpamOption());
-            options.add(new FullOption());
-            options.add(new HeadersOption());
-            options.add(new ExitCodeOption());
-            options.add(new NoSafeFallbackOption());
-            options.add(new LogToStderrOption());
-            options.add(new PipeToOption());
-            options.add(new HelpOption());
-            options.add(new VersionOption());
-            options.add(new CompressOption());
-            options.add(new KeepAliveOption());
-
-            // store all short and long argument names as map keys so that
-            // we will have a fast index to them when parsing the command
-            // line
-            final Iterator<AbstractOption> iterator = options.iterator();
-            AbstractOption option;
-            if (shortArgumentsMap == null) {
-                shortArgumentsMap = new HashMap<>();
-            }
-            if (longArgumentsMap == null) {
-                longArgumentsMap = new HashMap<>();
-            }
-            while (iterator.hasNext()) {
-                option = iterator.next();
-                if (option.getShortName() != null) {
-                    shortArgumentsMap.put(option.getShortName(), option);
-                }
-                if (option.getLongName() != null) {
-                    longArgumentsMap.put(option.getLongName(), option);
-                }
-            }
+        SpamcOptions(Map<String, AbstractOption> shortArgumentsMap, Map<String, AbstractOption> longArgumentsMap) {
+            super();
+            this.shortArgumentsMap = ImmutableMap.copyOf(shortArgumentsMap);
+            this.longArgumentsMap = ImmutableMap.copyOf(longArgumentsMap);
         }
     }
 
+    private static SpamcOptions createOptions() {
+        Collection<AbstractOption> options = new ArrayList<AbstractOption>(32);
+        options.add(new DestinationOption());
+        options.add(new RandomizeOption());
+        options.add(new PortOption());
+        options.add(new SSLOption());
+        options.add(new SocketOption());
+        options.add(new ConfigOption());
+        options.add(new TimeoutOption());
+        options.add(new ConnectRetriesOption());
+        options.add(new RetrySleepOption());
+        options.add(new MaxSizeOption());
+        options.add(new UsernameOption());
+        options.add(new LearnTypeOption());
+        options.add(new ReportTypeOption());
+        options.add(new BSMTPOption());
+        options.add(new CheckOption());
+        options.add(new TestsOption());
+        options.add(new FullSpamOption());
+        options.add(new FullOption());
+        options.add(new HeadersOption());
+        options.add(new ExitCodeOption());
+        options.add(new NoSafeFallbackOption());
+        options.add(new LogToStderrOption());
+        options.add(new PipeToOption());
+        options.add(new HelpOption());
+        options.add(new VersionOption());
+        options.add(new CompressOption());
+        options.add(new KeepAliveOption());
+
+        // store all short and long argument names as map keys so that
+        // we will have a fast index to them when parsing the command
+        // line
+        Map<String, AbstractOption> shortArgumentsMap = new HashMap<>(options.size());
+        Map<String, AbstractOption> longArgumentsMap = new HashMap<>(options.size());
+        for (AbstractOption option : options) {
+            if (option.getShortName() != null) {
+                shortArgumentsMap.put(option.getShortName(), option);
+            }
+            if (option.getLongName() != null) {
+                longArgumentsMap.put(option.getLongName(), option);
+            }
+        }
+
+        return new SpamcOptions(shortArgumentsMap, longArgumentsMap);
+    }
+
     private static class UsageException extends Exception {
+
+        private static final long serialVersionUID = -2852631284561061184L;
 
         protected UsageException() {
             super();
@@ -2157,11 +2058,10 @@ public class Spamc {
 
     private static class ArgumentUsageException extends UsageException {
 
+        private static final long serialVersionUID = 3473869403464966828L;
+
         private int argumentIndex = -1;
-
         private int charIndex = -1;
-
-        private String message = "";
 
         protected ArgumentUsageException() {
             super();
@@ -2173,23 +2073,20 @@ public class Spamc {
             this.charIndex = charIndex;
         }
 
-        protected ArgumentUsageException(final int argumentIndex, final int charIndex, final String message) {
-            this(argumentIndex, charIndex);
-            this.message = message;
-        }
-
         protected String getMessagePrefix() {
             return "Error in argument " + (argumentIndex + 1) + ", char " + (charIndex + 1) + ": ";
         }
 
         @Override
         public String getMessage() {
-            return getMessagePrefix() + message;
+            return getMessagePrefix();
         }
 
     }
 
     private static class OptionNotFoundException extends ArgumentUsageException {
+
+        private static final long serialVersionUID = -4806428789728756802L;
 
         private String option;
 
@@ -2209,6 +2106,8 @@ public class Spamc {
     }
 
     private static class NoArgumentException extends ArgumentUsageException {
+
+        private static final long serialVersionUID = -8957133343189214627L;
 
         private String option;
 
@@ -2301,39 +2200,38 @@ public class Spamc {
         public static final int EX_TOOBIG = 866;
     }
 
-    private static String learnType = null;
+    private static final AtomicReference<String> learnType = new AtomicReference<String>();
 
-    private static void setLearnType(final String learnType) {
-        Spamc.learnType = learnType;
+    static void setLearnType(final String learnType) {
+        Spamc.learnType.set(learnType);
     }
 
     private static String getLearnType() {
-        return Spamc.learnType;
+        return Spamc.learnType.get();
     }
 
-    private static String reportType = null;
+    private static final AtomicReference<String> reportType = new AtomicReference<String>();
 
-    private static void setReportType(final String reportType) {
-        Spamc.reportType = reportType;
+    static void setReportType(final String reportType) {
+        Spamc.reportType.set(reportType);
     }
 
     private static String getReportType() {
-        return Spamc.reportType;
+        return Spamc.reportType.get();
     }
 
     private static long readArgs(final Spamc spamc, final String[] args) throws UsageException {
         // default to safe fallback
         long flags = SafeFallbackOption.FLAG;
-        if (options == null) {
-            initOptions();
-        }
+        SpamcOptions spamcOptions = createOptions();
+        Map<String, AbstractOption> shortArgumentsMap = spamcOptions.shortArgumentsMap;
+        Map<String, AbstractOption> longArgumentsMap = spamcOptions.longArgumentsMap;
 
         String optionalArg = null;
         AbstractOption option;
         for (int i = 0; i < args.length; i++) {
             if ((i + 1) < args.length) {
-                // get the next argument, which could be the option for this
-                // argument
+                // get the next argument, which could be the option for this argument
                 optionalArg = args[i + 1];
             } else {
                 optionalArg = null;

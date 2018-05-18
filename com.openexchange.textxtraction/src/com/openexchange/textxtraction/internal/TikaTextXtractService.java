@@ -55,18 +55,22 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.HashSet;
+import java.io.StringReader;
 import java.util.Locale;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
 import org.apache.commons.io.IOUtils;
 import org.apache.tika.Tika;
 import org.apache.tika.config.TikaConfig;
 import org.apache.tika.exception.TikaException;
-import org.joox.JOOX;
-import org.joox.Match;
+import org.w3c.dom.Document;
+import org.xml.sax.InputSource;
+import com.google.common.collect.ImmutableSet;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Strings;
 import com.openexchange.textxtraction.AbstractTextXtractService;
 import com.openexchange.textxtraction.DelegateTextXtraction;
 import com.openexchange.textxtraction.TextXtractExceptionCodes;
@@ -82,27 +86,23 @@ import net.htmlparser.jericho.Source;
  */
 public class TikaTextXtractService extends AbstractTextXtractService {
 
-    static final Set<String> PARSERS = new HashSet<String>();
-
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(TikaTextXtractService.class);
 
     private static final Object PRESENT = new Object();
 
+    static final Set<String> PARSERS = ImmutableSet.of(
+        "org.apache.tika.parser.html.HtmlParser",
+        "org.apache.tika.parser.microsoft.OfficeParser",
+        "org.apache.tika.parser.microsoft.ooxml.OOXMLParser",
+        "org.apache.tika.parser.odf.OpenDocumentParser",
+        "org.apache.tika.parser.pdf.PDFParser",
+        "org.apache.tika.parser.rtf.RTFParser",
+        "org.apache.tika.parser.txt.TXTParser",
+        "org.apache.tika.parser.xml.DcXMLParser");
+
     private final ConcurrentMap<DelegateTextXtraction, Object> delegatees;
 
-    Tika tika = null;
-
-    static {
-        PARSERS.add("org.apache.tika.parser.html.HtmlParser");
-        PARSERS.add("org.apache.tika.parser.microsoft.OfficeParser");
-        PARSERS.add("org.apache.tika.parser.microsoft.ooxml.OOXMLParser");
-        PARSERS.add("org.apache.tika.parser.odf.OpenDocumentParser");
-        PARSERS.add("org.apache.tika.parser.pdf.PDFParser");
-        PARSERS.add("org.apache.tika.parser.rtf.RTFParser");
-        PARSERS.add("org.apache.tika.parser.txt.TXTParser");
-        PARSERS.add("org.apache.tika.parser.xml.DcXMLParser");
-    }
-
+    final Tika tika;
 
     /**
      * Initializes a new {@link TikaTextXtractService}.
@@ -112,19 +112,41 @@ public class TikaTextXtractService extends AbstractTextXtractService {
         super();
         delegatees = new ConcurrentHashMap<DelegateTextXtraction, Object>(4, 0.9f, 1);
 
-        Match configMatch = JOOX.$("config");
-        for (String parser : PARSERS) {
-            configMatch.append(JOOX.$("parser").attr("class", parser));
+        Document document;
+        {
+            try {
+                StringBuilder xmlBuilder = new StringBuilder(512);
+                xmlBuilder.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>").append(Strings.getLineSeparator());
+                xmlBuilder.append("<properties>").append(Strings.getLineSeparator());
+                xmlBuilder.append("  <parsers>").append(Strings.getLineSeparator());
+                for (String parser : PARSERS) {
+                    xmlBuilder.append("    <parser class=\"").append(parser).append("\"/>").append(Strings.getLineSeparator());
+                }
+                xmlBuilder.append("  </parsers>").append(Strings.getLineSeparator());
+                xmlBuilder.append("</properties>").append(Strings.getLineSeparator());
+
+                DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+                DocumentBuilder builder = factory.newDocumentBuilder();
+                document = builder.parse(new InputSource(new StringReader( xmlBuilder.toString())));
+            } catch (RuntimeException e) {
+                throw e;
+            } catch (Exception e) {
+                throw new IllegalArgumentException("Failed to build Tika config document", e);
+            }
         }
 
+        Tika tika;
         try {
-            TikaConfig config = new TikaConfig(configMatch.document());
+            TikaConfig config = new TikaConfig(document);
             tika = new Tika(config);
         } catch (TikaException e) {
             LOG.error("", e);
+            tika = null;
         } catch (IOException e) {
             LOG.error("", e);
+            tika = null;
         }
+        this.tika = tika;
     }
 
     /**

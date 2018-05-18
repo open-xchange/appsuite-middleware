@@ -51,9 +51,11 @@ package com.openexchange.appsuite;
 
 import java.util.Collection;
 import java.util.Collections;
+import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.Dispatcher;
 import com.openexchange.login.DefaultAppSuiteLoginRampUp;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link AppSuiteLoginRampUp}
@@ -95,8 +97,11 @@ public class AppSuiteLoginRampUp extends DefaultAppSuiteLoginRampUp {
 
     private static final class OnboardingDevicesContribution extends AbstractDispatcherContribution {
 
+        private final String moduleName;
+
         OnboardingDevicesContribution(Dispatcher ox) {
             super(ox);
+            moduleName = "onboarding";
         }
 
         @Override
@@ -111,12 +116,17 @@ public class AppSuiteLoginRampUp extends DefaultAppSuiteLoginRampUp {
 
         @Override
         protected String getModule() {
-            return "onboarding";
+            return moduleName;
         }
 
         @Override
         protected String getAction() {
             return "devices";
+        }
+
+        @Override
+        protected boolean isApplicable(ServerSession session, AJAXRequestData loginRequest, Dispatcher ox) {
+            return null != ox.lookupFactory(moduleName);
         }
     }
 }

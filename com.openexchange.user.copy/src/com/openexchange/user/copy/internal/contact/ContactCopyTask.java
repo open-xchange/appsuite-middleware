@@ -75,6 +75,7 @@ import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.DistributionListEntryObject;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.impl.IDGenerator;
+import com.openexchange.java.Strings;
 import com.openexchange.java.util.UUIDs;
 import com.openexchange.user.copy.CopyUserTaskService;
 import com.openexchange.user.copy.ObjectMapping;
@@ -526,7 +527,7 @@ public class ContactCopyTask implements CopyUserTaskService {
         for (final ContactField field : ContactField.values()) {
             if (field.isDBField()) {
                 final String fieldName = field.getDbName();
-                if (fieldName != null && fieldName != "" && !dbFields.contains(fieldName)) {
+                if (Strings.isNotEmpty(fieldName) && !dbFields.contains(fieldName)) {
                     fields.add(field);
                     dbFields.add(field.getDbName());
                 }

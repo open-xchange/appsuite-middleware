@@ -63,7 +63,7 @@ import com.openexchange.oauth.provider.resourceserver.OAuthAccess;
 import com.openexchange.tools.session.ServerSession;
 
 /**
- * The {@link CalDAV} servlet. It delegates all calls to the CaldavPerformer
+ * The {@link CardDAV} servlet. It delegates all calls to the CaldavPerformer
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */

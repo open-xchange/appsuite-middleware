@@ -1006,23 +1006,11 @@ public class ParticipantNotify implements TaskEventInterface2 {
             final Date[] changeExcs = newObj.getChangeException();
             if (newObj.containsChangeExceptions() || changeExcs != null) {
                 changeExceptionsReplacement = new ChangeExceptionsReplacement(changeExcs);
-                final String recurrenceTitle;
-                if (isChangeException(newObj) && null != (recurrenceTitle = getRecurrenceTitle(newObj, session.getContext()))) {
-                    changeExceptionsReplacement.setChangeException(true);
-                    changeExceptionsReplacement.setRecurrenceTitle(recurrenceTitle);
-                } else {
-                    changeExceptionsReplacement.setChanged(isUpdate ? (oldObj == null ? false : !compareDates(changeExcs, oldObj.getChangeException())) : false);
-                }
+                changeExceptionsReplacement.setChanged(isUpdate ? (oldObj == null ? false : !compareDates(changeExcs, oldObj.getChangeException())) : false);
             } else if (oldObj != null && oldObj.containsChangeExceptions()) {
                 final Date[] oldChangeExcs = oldObj.getChangeException();
                 changeExceptionsReplacement = new ChangeExceptionsReplacement(oldChangeExcs);
-                final String recurrenceTitle;
-                if (oldChangeExcs != null && isChangeException(oldObj) && null != (recurrenceTitle = getRecurrenceTitle(oldObj, session.getContext()))) {
-                    changeExceptionsReplacement.setChangeException(true);
-                    changeExceptionsReplacement.setRecurrenceTitle(recurrenceTitle);
-                } else {
-                    changeExceptionsReplacement.setChanged(false);
-                }
+                changeExceptionsReplacement.setChanged(false);
             } else {
                 changeExceptionsReplacement = new ChangeExceptionsReplacement(changeExcs);
                 changeExceptionsReplacement.setChanged(false);
@@ -1137,7 +1125,10 @@ public class ParticipantNotify implements TaskEventInterface2 {
         }
 
         if ((isUpdate || ParticipantNotify.isStatusUpdate(state)) && organizer != null) {
-            addSingleParticipant(getExternalParticipant(new ExternalUserParticipant(organizer), session), participantSet, resourceSet, receivers, all, false);
+            EmailableParticipant externalParticipant = getExternalParticipant(new ExternalUserParticipant(organizer), session);
+            if (externalParticipant != null) {
+                addSingleParticipant(externalParticipant, participantSet, resourceSet, receivers, all, false);
+            }
         }
     }
 
@@ -1743,22 +1734,4 @@ public class ParticipantNotify implements TaskEventInterface2 {
         return null != state && (State.Type.ACCEPTED.equals(state.getType()) || State.Type.DECLINED.equals(state.getType()) || State.Type.TENTATIVELY_ACCEPTED.equals(state.getType()) || State.Type.NONE_ACCEPTED.equals(state.getType()));
     }
 
-    /**
-     * Gets the recurrence master's title of specified event.
-     *
-     * @param appointment The change exception
-     * @param ctx The context
-     * @return The recurrence master's title or <code>null</code>.
-     */
-    private static String getRecurrenceTitle(final CalendarObject appointment, final Context ctx) {
-        final int recurrenceId = appointment.getRecurrenceID();
-        if (recurrenceId <= 0) {
-            return null;
-        }
-        try {
-            return CalendarCollectionUtils.getAppointmentTitle(recurrenceId, ctx);
-        } catch (final OXException e) {
-            return null;
-        }
-    }
 }

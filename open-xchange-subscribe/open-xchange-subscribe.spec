@@ -14,7 +14,7 @@ BuildRequires: java-1_8_0-openjdk-devel
 BuildRequires: java-1.8.0-openjdk-devel
 %endif
 Version:       @OXVERSION@
-%define        ox_release 3
+%define        ox_release 5
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -24,18 +24,6 @@ Source:        %{name}_%{version}.orig.tar.bz2
 Summary:       The Open-Xchange backend subscribe extension
 Autoreqprov:   no
 Requires:      open-xchange-oauth >= @OXVERSION@
-Provides:      open-xchange-subscribe-crawler = %{version}
-Obsoletes:     open-xchange-subscribe-crawler < %{version}
-Provides:      open-xchange-subscribe-json = %{version}
-Obsoletes:     open-xchange-subscribe-json < %{version}
-Provides:      open-xchange-subscribe-linkedin = %{version}
-Obsoletes:     open-xchange-subscribe-linkedin < %{version}
-Provides:      open-xchange-subscribe-microformats = %{version}
-Obsoletes:     open-xchange-subscribe-microformats < %{version}
-Provides:      open-xchange-subscribe-msn = %{version}
-Obsoletes:     open-xchange-subscribe-msn < %{version}
-Provides:      open-xchange-subscribe-yahoo = %{version}
-Obsoletes:     open-xchange-subscribe-yahoo < %{version}
 
 %description
 Adds the feature to subscribe to third party services or
@@ -65,23 +53,6 @@ if [ ${1:-0} -eq 2 ]; then
     # SoftwareChange_Request-2470
     ox_add_property com.openexchange.subscribe.microformats.createModifyEnabled false /opt/open-xchange/etc/microformatSubscription.properties
 
-    # SoftwareChange_Request-2670
-    pfile=/opt/open-xchange/etc/crawler.properties
-    rm -f /opt/open-xchange/etc/crawlers/t-online.yml
-    ox_remove_property com.openexchange.subscribe.crawler.t-online.de $pfile
-    ox_remove_property com.openexchange.subscribe.crawler.t-online.de.autorunInterval $pfile
-
-    # SoftwareChange_Request-2865
-    ox_remove_property com.openexchange.subscribe.crawler.yahoocom /opt/open-xchange/etc/crawler.properties
-    ox_remove_property com.openexchange.subscribe.crawler.gmx.autorunInterval /opt/open-xchange/etc/crawler.properties
-    ox_remove_property com.openexchange.subscribe.crawler.t-online.de.autorunInterval /opt/open-xchange/etc/crawler.properties
-    ox_add_property com.openexchange.subscribe.crawler.web.de.autorunInterval 1d /opt/open-xchange/etc/crawler.properties
-    VALUE=$( ox_read_property com.openexchange.subscribe.crawler.webde.autorunInterval /opt/open-xchange/etc/crawler.properties )
-    if [ "" != "$VALUE" ]; then
-        ox_set_property com.openexchange.subscribe.crawler.web.de.autorunInterval "$VALUE" /opt/open-xchange/etc/crawler.properties
-    fi
-    ox_remove_property com.openexchange.subscribe.crawler.webde.autorunInterval /opt/open-xchange/etc/crawler.properties
-
     # SoftwareChange_Request-2942
     ox_add_property com.openexchange.subscribe.socialplugin.xing.autorunInterval 1d /opt/open-xchange/etc/xingsubscribe.properties
 fi
@@ -96,9 +67,6 @@ fi
 %dir /opt/open-xchange/osgi/bundle.d/
 /opt/open-xchange/osgi/bundle.d/*
 %dir /opt/open-xchange/etc/
-%dir %attr(755,open-xchange,root) /opt/open-xchange/etc/crawlers/
-%attr(644,open-xchange,root) /opt/open-xchange/etc/crawlers/*
-%config(noreplace) /opt/open-xchange/etc/crawler.properties
 %config(noreplace) /opt/open-xchange/etc/microformatSubscription.properties
 %config(noreplace) /opt/open-xchange/etc/xingsubscribe.properties
 %config(noreplace) /opt/open-xchange/etc/yahoosubscribe.properties
@@ -106,6 +74,10 @@ fi
 %doc docs/
 
 %changelog
+* Thu Apr 19 2018 Marcus Klein <marcus.klein@open-xchange.com>
+Fifth preview of 7.10.0 release
+* Tue Apr 03 2018 Marcus Klein <marcus.klein@open-xchange.com>
+Fourth preview of 7.10.0 release
 * Tue Feb 20 2018 Marcus Klein <marcus.klein@open-xchange.com>
 Third preview of 7.10.0 release
 * Fri Feb 02 2018 Marcus Klein <marcus.klein@open-xchange.com>

@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the Open-Xchange, Inc. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2020 Open-Xchange, Inc.
+ *     Copyright (C) 2016-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -189,7 +189,7 @@ public class Compat {
      * @param event The event to adjust
      * @return The adjusted event data to store
      */
-    public static Event adjustPriorInsert(RdbEventStorage eventStorage, Connection connection, Event event) throws OXException, SQLException {
+    public static Event adjustPriorInsert(RdbEventStorage eventStorage, Connection connection, Event event) {
         Event eventData = adjustPriorSave(eventStorage, connection, event);
         /*
          * derive created- / modified-by from calendar user if required
@@ -211,11 +211,11 @@ public class Compat {
      * @param event The event to adjust
      * @return The adjusted event data to store
      */
-    public static Event adjustPriorUpdate(RdbEventStorage eventStorage, Connection connection, Event event) throws OXException, SQLException {
+    public static Event adjustPriorUpdate(RdbEventStorage eventStorage, Connection connection, Event event) {
         return adjustPriorSave(eventStorage, connection, event);
     }
 
-    private static Event adjustPriorSave(RdbEventStorage eventStorage, Connection connection, Event event) throws OXException, SQLException {
+    private static Event adjustPriorSave(RdbEventStorage eventStorage, Connection connection, Event event) {
         return new StoredEvent(eventStorage, connection, event);
     }
 
@@ -293,7 +293,7 @@ public class Compat {
             if (null != recurrenceData) {
                 int recurrencePosition = ((StoredRecurrenceId) event.getRecurrenceId()).getRecurrencePosition();
                 try {
-                    recurrenceId = getRecurrenceID(Services.getService(RecurrenceService.class), recurrenceData, recurrencePosition);
+                    recurrenceId = getRecurrenceID(Services.getService(RecurrenceService.class, true), recurrenceData, recurrencePosition);
                 } catch (OXException e) {
                     if (false == "CAL-4061".equals(e.getErrorCode())) {
                         throw e;

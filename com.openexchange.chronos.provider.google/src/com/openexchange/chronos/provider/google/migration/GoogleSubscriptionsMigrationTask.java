@@ -50,6 +50,9 @@
 package com.openexchange.chronos.provider.google.migration;
 
 import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -81,6 +84,8 @@ import com.openexchange.groupware.update.TaskAttributes;
 import com.openexchange.groupware.update.UpdateConcurrency;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
 import com.openexchange.groupware.update.WorkingLevel;
+import com.openexchange.java.Strings;
+import com.openexchange.oauth.OAuthAccountStorage;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.subscribe.AbstractSubscribeService;
 import com.openexchange.subscribe.AdministrativeSubscriptionStorage;
@@ -118,6 +123,11 @@ public class GoogleSubscriptionsMigrationTask extends UpdateTaskAdapter {
             throw ServiceExceptionCode.absentService(ContextService.class);
         }
 
+        OAuthAccountStorage oauthAccountStorage = Services.getService(OAuthAccountStorage.class);
+        if (oauthAccountStorage == null) {
+            throw ServiceExceptionCode.absentService(OAuthAccountStorage.class);
+        }
+
         Connection writeCon = params.getConnection();
         int[] contextsInSameSchema = params.getContextsInSameSchema();
 
@@ -137,16 +147,22 @@ public class GoogleSubscriptionsMigrationTask extends UpdateTaskAdapter {
                 Subscription sub = iterator.next();
                 boolean inserted = false;
                 try {
-                    Object oauthAccount = sub.getConfiguration().get("account");
-                    if (oauthAccount == null) {
+                    Object oauthAccountId = sub.getConfiguration().get("account");
+                    if (oauthAccountId == null) {
                         // Skip bad configured subscriptions
                         iterator.remove();
                         continue;
                     }
+
                     JSONObject internalConfig = new JSONObject();
-                    internalConfig.put(GoogleCalendarConfigField.OAUTH_ID, oauthAccount);
+                    internalConfig.put(GoogleCalendarConfigField.OAUTH_ID, oauthAccountId);
                     JSONObject userConfig = new JSONObject(internalConfig);
                     internalConfig.put(GoogleCalendarConfigField.OLD_FOLDER, sub.getFolderId());
+
+                    String accountDisplayName = getAccountDisplayName(sub.getUserId(), ctx.getContextId(), oauthAccountId, writeCon);
+                    if (Strings.isNotEmpty(accountDisplayName)) {
+                        internalConfig.put("name", accountDisplayName);
+                    }
 
                     int id = calendarStorage.getAccountStorage().nextId();
                     calendarStorage.getAccountStorage().insertAccount(new DefaultCalendarAccount(GoogleCalendarProvider.PROVIDER_ID, id, sub.getUserId(), internalConfig, userConfig, new Date()));
@@ -194,6 +210,44 @@ public class GoogleSubscriptionsMigrationTask extends UpdateTaskAdapter {
         }
     }
 
+    /**
+     * Get the oauth account's display name
+     * 
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @param accountId The account identifier
+     * @param connection The connection
+     * @return The account's display name or an empty string
+     */
+    private String getAccountDisplayName(int userId, int contextId, Object accountId, Connection connection) {
+        if (!(accountId instanceof String) && !(accountId instanceof Integer)) {
+            return "";
+        }
+        int oauthAccountId;
+        try {
+            oauthAccountId = (accountId instanceof String) ? Integer.parseInt((String) accountId) : (int) accountId;
+        } catch (NumberFormatException | ClassCastException e) {
+            // Continue
+            LOG.debug("{}", e.getMessage(), e);
+            return "";
+        }
+
+        try (PreparedStatement stmt = connection.prepareStatement("SELECT displayName FROM oauthAccounts WHERE cid = ? AND user = ? and id = ?")) {
+            stmt.setInt(1, contextId);
+            stmt.setInt(2, userId);
+            stmt.setInt(3, oauthAccountId);
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getString(1);
+                }
+            }
+        } catch (SQLException e) {
+            // Continue
+            LOG.debug("{}", e.getMessage(), e);
+        }
+        return "";
+    }
+
     private Set<Integer> getUserFromPermissions(Permission[] permissions, GroupService groupService, Context ctx) {
         Set<Integer> result = new HashSet<Integer>(permissions.length);
         for (Permission perm : permissions) {
@@ -217,7 +271,7 @@ public class GoogleSubscriptionsMigrationTask extends UpdateTaskAdapter {
 
     @Override
     public String[] getDependencies() {
-        return new String[] { "com.openexchange.chronos.storage.rdb.groupware.ChronosCreateTableTask", "com.openexchange.groupware.update.tasks.AddSharedParentFolderToFolderPermissionTableUpdateTask", "com.openexchange.groupware.update.tasks.AddTypeToFolderPermissionTableUpdateTask","com.openexchange.groupware.update.tasks.AddOriginColumnToInfostoreDocumentTables" };
+        return new String[] { "com.openexchange.chronos.storage.rdb.groupware.ChronosCreateTableTask", "com.openexchange.groupware.update.tasks.AddSharedParentFolderToFolderPermissionTableUpdateTask", "com.openexchange.groupware.update.tasks.AddTypeToFolderPermissionTableUpdateTask", "com.openexchange.groupware.update.tasks.AddOriginColumnToInfostoreDocumentTables", "com.openexchange.tools.oxfolder.property.sql.CreateFolderUserPropertyTask" };
     }
 
     @Override

@@ -92,7 +92,6 @@ import com.openexchange.mail.mime.MimeType2ExtMap;
 import com.openexchange.mail.mime.MimeTypes;
 import com.openexchange.mail.mime.datasource.FileDataSource;
 import com.openexchange.mail.mime.datasource.MessageDataSource;
-import com.openexchange.mail.mime.datasource.MimeMessageDataSource;
 import com.openexchange.mail.mime.utils.MimeMessageUtility;
 import com.openexchange.mail.transport.MailTransport;
 import com.openexchange.mail.utils.MessageUtility;
@@ -655,29 +654,6 @@ public class MailObject {
             }
         } catch (final MessagingException e) {
             throw MimeMailException.handleMessagingException(e);
-        }
-    }
-
-    private MimeMessageDataSource writeTo(final MimeMessage msg, final ByteArrayOutputStream bos) throws IOException, MessagingException {
-        try {
-            msg.writeTo(bos);
-            return null;
-        } catch (final javax.activation.UnsupportedDataTypeException e) {
-            // Check for "no object DCH for MIME type xxxxx/yyyy"
-            if (com.openexchange.java.Strings.toLowerCase(e.getMessage()).indexOf("no object dch") >= 0) {
-                // Not able to recover from JAF's "no object DCH for MIME type xxxxx/yyyy" error
-                // Perform the alternative transport with custom JAF DataHandler
-                LOG.warn(e.getMessage().replaceFirst("[dD][cC][hH]", Matcher.quoteReplacement("javax.activation.DataContentHandler")));
-                try {
-                    final MimeMessageDataSource dataSource = new MimeMessageDataSource(msg);
-                    bos.reset();
-                    dataSource.writeTo(bos);
-                    return dataSource;
-                } catch (final Exception ignore) {
-                    // Ignore
-                }
-            }
-            throw e;
         }
     }
 

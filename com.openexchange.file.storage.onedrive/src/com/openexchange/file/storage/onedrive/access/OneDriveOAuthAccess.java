@@ -122,20 +122,21 @@ public class OneDriveOAuthAccess extends AbstractOAuthAccess {
         synchronized (this) {
             int oauthAccountId = getAccountId();
             OAuthAccount liveconnectOAuthAccount;
+            OAuthService oAuthService = Services.getService(OAuthService.class);
             {
-                OAuthService oAuthService = Services.getService(OAuthService.class);
-                liveconnectOAuthAccount = oAuthService.getAccount(oauthAccountId, getSession(), getSession().getUserId(), getSession().getContextId());
-                verifyAccount(liveconnectOAuthAccount, OXScope.drive);
+                liveconnectOAuthAccount = oAuthService.getAccount(getSession(), oauthAccountId);
             }
             setOAuthAccount(liveconnectOAuthAccount);
 
             OAuthAccount newAccount = recreateTokenIfExpired(liveconnectOAuthAccount, getSession());
             if (newAccount != null) {
                 setOAuthAccount(newAccount);
+                liveconnectOAuthAccount = newAccount;
             }
-
+            verifyAccount(liveconnectOAuthAccount, oAuthService, OXScope.drive);
             setOAuthClient(new OAuthClient<>(HttpClients.getHttpClient("Open-Xchange OneDrive Client"), getOAuthAccount().getToken()));
         }
+        
     }
 
     @Override

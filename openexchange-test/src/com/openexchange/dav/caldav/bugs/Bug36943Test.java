@@ -98,11 +98,11 @@ public class Bug36943Test extends CalDAVTest {
         /*
          * verify appointment on server
          */
-        String expectedTitle = summary.replaceAll("\uD83D\uDCA9", "");
+        String correctedTitle = summary.replaceAll("\uD83D\uDCA9", "");
         Appointment appointment = getAppointment(uid);
         assertNotNull("appointment not found on server", appointment);
         rememberForCleanUp(appointment);
-        assertEquals("Title wrong", expectedTitle, appointment.getTitle());
+        assertTrue("Title wrong", correctedTitle.equals(appointment.getTitle()) || summary.equals(appointment.getTitle()));
         /*
          * verify appointment on client
          */
@@ -110,7 +110,7 @@ public class Bug36943Test extends CalDAVTest {
         assertNotNull("No VEVENT in iCal found", iCalResource.getVEvent());
         assertEquals("UID wrong", uid, iCalResource.getVEvent().getUID());
         assertNotNull("No SUMMARY in iCal found", iCalResource.getVEvent().getSummary());
-        assertEquals("SUMMARY wrong", expectedTitle, iCalResource.getVEvent().getSummary());
+        assertTrue("SUMMARY wrong", correctedTitle.equals(iCalResource.getVEvent().getSummary()) || summary.equals(iCalResource.getVEvent().getSummary()));
     }
 
     @Test
@@ -128,10 +128,10 @@ public class Bug36943Test extends CalDAVTest {
         /*
          * verify task on server
          */
-        String expectedTitle = summary.replaceAll("\uD83D\uDCA9", "");
+        String correctedTitle = summary.replaceAll("\uD83D\uDCA9", "");
         Task task = getTask(folderID, uid);
         assertNotNull("task not found on server", task);
-        assertEquals("Title wrong", expectedTitle, task.getTitle());
+        assertTrue("Title wrong", correctedTitle.equals(task.getTitle()) || summary.equals(task.getTitle()));
         /*
          * verify appointment on client
          */
@@ -139,7 +139,7 @@ public class Bug36943Test extends CalDAVTest {
         assertNotNull("No VTODO in iCal found", iCalResource.getVTodo());
         assertEquals("UID wrong", uid, iCalResource.getVTodo().getUID());
         assertNotNull("No SUMMARY in iCal found", iCalResource.getVTodo().getSummary());
-        assertEquals("SUMMARY wrong", expectedTitle, iCalResource.getVTodo().getSummary());
+        assertTrue("SUMMARY wrong", correctedTitle.equals(iCalResource.getVTodo().getSummary()) || summary.equals(iCalResource.getVTodo().getSummary()));
     }
 
     @Test
@@ -156,10 +156,13 @@ public class Bug36943Test extends CalDAVTest {
         /*
          * verify calendar on server
          */
-        String expectedName = name.replaceAll("\uD83D\uDCA9", "");
-        FolderObject folder = super.getCalendarFolder(expectedName);
+        String replacedName = name.replaceAll("\uD83D\uDCA9", "");
+        FolderObject folder = super.getCalendarFolder(replacedName);
+        if (null == folder) {
+            folder = getCalendarFolder(name);
+        }
         assertNotNull("folder not found on server", folder);
-        assertEquals("folder name wrong", expectedName, folder.getFolderName());
+        assertTrue("folder name wrong", replacedName.equals(folder.getFolderName()) || name.equals(folder.getFolderName()));
         /*
          * verify calendar on client
          */
@@ -174,11 +177,11 @@ public class Bug36943Test extends CalDAVTest {
         MultiStatusResponse folderResponse = null;
         for (MultiStatusResponse response : responses) {
             if (response.getPropertyNames(HttpServletResponse.SC_OK).contains(PropertyNames.DISPLAYNAME)) {
-                if (expectedName.equals(super.extractTextContent(PropertyNames.DISPLAYNAME, response))) {
+                String displayName = extractTextContent(PropertyNames.DISPLAYNAME, response);
+                if (replacedName.equals(displayName) || name.equals(displayName)) {
                     folderResponse = response;
                     break;
                 }
-
             }
         }
         assertNotNull("no response for new folder", folderResponse);
@@ -205,11 +208,11 @@ public class Bug36943Test extends CalDAVTest {
         MultiStatusResponse folderResponse = null;
         for (MultiStatusResponse response : responses) {
             if (response.getPropertyNames(HttpServletResponse.SC_OK).contains(PropertyNames.DISPLAYNAME)) {
-                if (originalName.equals(super.extractTextContent(PropertyNames.DISPLAYNAME, response))) {
+                String displayName = extractTextContent(PropertyNames.DISPLAYNAME, response);
+                if (originalName.equals(displayName)) {
                     folderResponse = response;
                     break;
                 }
-
             }
         }
         assertNotNull("no response for new folder", folderResponse);
@@ -226,16 +229,19 @@ public class Bug36943Test extends CalDAVTest {
                 setRequestEntity(new CustomXmlRequestEntity(requestBody, "UTF-16"));
             }
         };
-        responses = super.getWebDAVClient().doPropPatch(propPatch, StatusCodes.SC_MULTISTATUS);
+        responses = getWebDAVClient().doPropPatch(propPatch, StatusCodes.SC_MULTISTATUS);
         assertNotNull("got no response", responses);
         assertTrue("got no response", 0 < responses.length);
         /*
          * verify calendar folder on server
          */
-        String expectedName = newName.replaceAll("\uD83D\uDCA9", "");
-        folder = getCalendarFolder(expectedName);
+        String replacedName = newName.replaceAll("\uD83D\uDCA9", "");
+        folder = getCalendarFolder(replacedName);
+        if (null == folder) {
+            folder = getCalendarFolder(newName);
+        }
         assertNotNull("folder not found on server", folder);
-        assertEquals("folder name wrong", expectedName, folder.getFolderName());
+        assertTrue("folder name wrong", replacedName.equals(folder.getFolderName()) || newName.equals(folder.getFolderName()));
         /*
          * verify calendar on client
          */
@@ -250,11 +256,11 @@ public class Bug36943Test extends CalDAVTest {
         folderResponse = null;
         for (MultiStatusResponse response : responses) {
             if (response.getPropertyNames(HttpServletResponse.SC_OK).contains(PropertyNames.DISPLAYNAME)) {
-                if (expectedName.equals(super.extractTextContent(PropertyNames.DISPLAYNAME, response))) {
+                String displayName = extractTextContent(PropertyNames.DISPLAYNAME, response);
+                if (replacedName.equals(displayName) || newName.equals(displayName)) {
                     folderResponse = response;
                     break;
                 }
-
             }
         }
         assertNotNull("no response for renamed folder", folderResponse);

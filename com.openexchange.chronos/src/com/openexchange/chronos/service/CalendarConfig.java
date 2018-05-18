@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the Open-Xchange, Inc. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2020 Open-Xchange, Inc.
+ *     Copyright (C) 2016-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -146,5 +146,23 @@ public interface CalendarConfig {
      * @return <code>true</code> if the URI checks are disabled, <code>false</code>, otherwise
      */
     boolean isSkipExternalAttendeeURIChecks();
+
+    /**
+     * Gets a value indicating whether attendee changes to events located in <i>private</i> or <i>shared</i> folders should be restricted
+     * according to <a href="https://tools.ietf.org/html/rfc6638#section-3.2.2.1">RFC 6638, section 3.2.2.1</a> or not, which effectively
+     * restricts any changes to the calendar scheduling resource to be performed by the organizer only.
+     *
+     * @return <code>true</code> if allowed attendee changes should be restricted, <code>false</code>, otherwise
+     */
+    boolean isRestrictAllowedAttendeeChanges();
+
+    /**
+     * Gets a value indicating whether attendee changes to events located in <i>public</i> folders should be restricted according to
+     * <a href="https://tools.ietf.org/html/rfc6638#section-3.2.2.1">RFC 6638, section 3.2.2.1</a> or not, which effectively restricts
+     * any changes to the calendar scheduling resource to be performed by the organizer only.
+     *
+     * @return <code>true</code> if allowed attendee changes should be restricted, <code>false</code>, otherwise
+     */
+    boolean isRestrictAllowedAttendeeChangesPublic();
 
 }

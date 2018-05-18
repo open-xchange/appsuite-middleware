@@ -67,6 +67,7 @@ import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.ldap.RdbUserStorage.ValuePair;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.lock.LockService;
+import com.openexchange.log.LogProperties;
 import com.openexchange.passwordmechs.IPasswordMech;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.user.internal.mapping.UserMapper;
@@ -98,6 +99,19 @@ public class CachingUserStorage extends UserStorage {
         this.delegate = delegate;
     }
 
+    private void handleOXException(OXException e, int contextId, Cache cache) {
+        if (UserExceptionCode.USER_NOT_FOUND.equals(e)) {
+            String uid = LogProperties.get(LogProperties.Name.LOGIN_RESOLVED_LOGIN);
+            if (null != uid) {
+                try {
+                    cache.remove(cache.newCacheKey(contextId, uid));
+                } catch (Exception x) {
+                    LOG.trace("Failed to remove from cache", x);
+                }
+            }
+        }
+    }
+
     @Override
     public boolean isGuest(int userId, int contextId) throws OXException {
         CacheService cacheService = ServerServiceRegistry.getInstance().getService(CacheService.class);
@@ -121,9 +135,12 @@ public class CachingUserStorage extends UserStorage {
                 return ((User) object).isGuest();
             }
 
-            User user = delegate.getUser(userId, ContextStorage.getInstance().getContext(contextId));
+            User user = delegate.getUser(userId, contextId);
             cache.put(key, user, false);
             return user.isGuest();
+        } catch (OXException e) {
+            handleOXException(e, contextId, cache);
+            throw e;
         } finally {
             lock.unlock();
         }
@@ -155,6 +172,9 @@ public class CachingUserStorage extends UserStorage {
             User user = delegate.getUser(userId, context);
             cache.put(key, user, false);
             return user.isGuest();
+        } catch (OXException e) {
+            handleOXException(e, context.getContextId(), cache);
+            throw e;
         } finally {
             lock.unlock();
         }
@@ -186,6 +206,9 @@ public class CachingUserStorage extends UserStorage {
             User user = delegate.getUser(uid, context);
             cache.put(key, user, false);
             return user;
+        } catch (OXException e) {
+            handleOXException(e, context.getContextId(), cache);
+            throw e;
         } finally {
             lock.unlock();
         }
@@ -217,6 +240,9 @@ public class CachingUserStorage extends UserStorage {
             User user = delegate.getUser(context, userId, con);
             cache.put(key, user, false);
             return user;
+        } catch (OXException e) {
+            handleOXException(e, context.getContextId(), cache);
+            throw e;
         } finally {
             lock.unlock();
         }
@@ -265,6 +291,9 @@ public class CachingUserStorage extends UserStorage {
             User user = delegate.getUser(userId, context);
             cache.put(cacheService.newCacheKey(contextId, userId), user, false);
             return user;
+        } catch (OXException e) {
+            handleOXException(e, contextId, cache);
+            throw e;
         } finally {
             lock.unlock();
         }
@@ -483,7 +512,8 @@ public class CachingUserStorage extends UserStorage {
     public int getUserId(final String uid, final Context context) throws OXException {
         final CacheService cacheService = ServerServiceRegistry.getInstance().getService(CacheService.class);
         if (null == cacheService) {
-            return delegate.getUserId(uid, context);
+            int userId = delegate.getUserId(uid, context);
+            return userId;
         }
         // try {
         final Cache cache = cacheService.getCache(REGION_NAME);
@@ -507,6 +537,7 @@ public class CachingUserStorage extends UserStorage {
             LOG.trace("Cache HIT. Context: {} User: {}", context.getContextId(), uid);
             identifier = tmp.intValue();
         }
+        LogProperties.put(LogProperties.Name.LOGIN_RESOLVED_LOGIN, uid);
         return identifier;
     }
 

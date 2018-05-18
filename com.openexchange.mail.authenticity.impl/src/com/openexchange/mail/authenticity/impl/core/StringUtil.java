@@ -140,7 +140,7 @@ final class StringUtil {
 
         String VALUE = "(?:" + quotedString + "|" + token + ")(?: " + comment + ")?";
 
-        REGEX_PAIR = Pattern.compile("([a-zA-Z0-9-._]+)=(" + VALUE + ")( |;|$)");
+        REGEX_PAIR = Pattern.compile("([a-zA-Z0-9-._]+)=[\"]?(" + VALUE + ")[\"]?( |;|$)");
     }
 
     /**
@@ -156,7 +156,6 @@ final class StringUtil {
             add(kv, kv, collector);
             return collector;
         }
-
         Matcher m = REGEX_PAIR.matcher(element);
         while (m.find()) {
             String key = m.group(1);

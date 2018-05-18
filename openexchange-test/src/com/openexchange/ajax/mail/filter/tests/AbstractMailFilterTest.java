@@ -232,6 +232,10 @@ public class AbstractMailFilterTest extends AbstractAJAXSession {
         rulesToDelete.add(ruleId);
     }
 
+    protected void forgetRules() {
+        rulesToDelete.clear();
+    }
+
     /**
      * Gets all rules and asserts with the expectedRules list
      *

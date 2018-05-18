@@ -1811,8 +1811,10 @@ public class MimeMessageFiller {
                                 int size = mail.getEnclosedCount();
                                 for (int i = 0; null == imagePart && i < size; i++) {
                                     MailPart part = mail.getEnclosedMailPart(i);
-                                    if (ComposedPartType.REFERENCE.equals(((ComposedMailPart) part).getType()) && contentId.equals(part.getContentId())) {
-                                        imagePart = part;
+                                    if (part instanceof ComposedMailPart) {
+                                        if (ComposedPartType.REFERENCE.equals(((ComposedMailPart) part).getType()) && contentId.equals(part.getContentId())) {
+                                            imagePart = part;
+                                        }
                                     }
                                 }
 

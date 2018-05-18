@@ -63,6 +63,9 @@ public class Protocol {
 	public static final int SC_LOCKED = 423;
 	public static final int SC_MULTISTATUS = 207;
 
+    /** HTTP/1.1 507 Insufficient Storage */
+    public static final int SC_INSUFFICIENT_STORAGE = 507;
+
 	public static final Namespace DAV_NS = Namespace.getNamespace("D","DAV:");
 
 
@@ -74,7 +77,7 @@ public class Protocol {
 		private final String name;
 		private final String namespace;
 
-		private Property(final int id, final String namespace, final String name) {
+		Property(final int id, final String namespace, final String name) {
 			this.id = id;
 			this.name = name;
 			this.namespace = namespace;

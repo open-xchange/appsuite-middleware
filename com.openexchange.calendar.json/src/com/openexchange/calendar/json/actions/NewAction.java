@@ -110,6 +110,9 @@ public final class NewAction extends AppointmentAction {
         if (false == appointment.getIgnoreConflicts()) {
             session.set(CalendarParameters.PARAMETER_CHECK_CONFLICTS, Boolean.TRUE);
         }
+        if (false == session.contains(CalendarParameters.PARAMETER_TRACK_ATTENDEE_USAGE)) {
+            session.set(CalendarParameters.PARAMETER_TRACK_ATTENDEE_USAGE, Boolean.TRUE);
+        }
         Event event = getEventConverter(session).getEvent(appointment, null);
         String folderID = String.valueOf(appointment.getParentFolderID());
         CalendarResult result;
@@ -121,7 +124,6 @@ public final class NewAction extends AppointmentAction {
             }
             throw e;
         }
-        session.getEntityResolver().trackAttendeeUsage(result);
         JSONObject resultObject = new JSONObject(1);
         if (0 < result.getCreations().size()) {
             resultObject.put(DataFields.ID, result.getCreations().get(0).getCreatedEvent().getId());

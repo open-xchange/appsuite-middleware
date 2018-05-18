@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the Open-Xchange, Inc. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2020 Open-Xchange, Inc.
+ *     Copyright (C) 2016-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -290,7 +290,7 @@ public abstract class RdbStorage extends CalendarStorageWarnings {
      * @param table The name of the targeted database table, or <code>null</code> if not available
      * @return The OX exception
      */
-    protected static <O, E extends Enum<E>> OXException asOXException(SQLException e, DbMapper<O, E> mapper, O object, Connection connection, String table) {
+    protected <O, E extends Enum<E>> OXException asOXException(SQLException e, DbMapper<O, E> mapper, O object, Connection connection, String table) {
         return asOXException(e, mapper, null == object ? null : Collections.singleton(object), connection, table);
     }
 
@@ -304,7 +304,7 @@ public abstract class RdbStorage extends CalendarStorageWarnings {
      * @param table The name of the targeted database table, or <code>null</code> if not available
      * @return The OX exception
      */
-    protected static <O, E extends Enum<E>> OXException asOXException(SQLException e, DbMapper<O, E> mapper, Collection<O> objects, Connection connection, String table) {
+    protected <O, E extends Enum<E>> OXException asOXException(SQLException e, DbMapper<O, E> mapper, Collection<O> objects, Connection connection, String table) {
         if (IncorrectStringSQLException.class.isInstance(e)) {
             IncorrectStringSQLException incorrectStringException = (IncorrectStringSQLException) e;
             /*
@@ -419,23 +419,20 @@ public abstract class RdbStorage extends CalendarStorageWarnings {
         return stringBuilder.toString();
     }
 
-    private static <O, E extends Enum<E>> MappedIncorrectString<O> getMappedIncorrectString(IncorrectStringSQLException e, DbMapper<O, E> mapper) {
+    private <O, E extends Enum<E>> MappedIncorrectString<O> getMappedIncorrectString(IncorrectStringSQLException e, DbMapper<O, E> mapper) {
         if (null != mapper && null != e) {
             E field = mapper.getMappedField(e.getColumn());
             if (null != field) {
-                try {
-                    DbMapping<? extends Object, O> mapping = mapper.get(field);
-                    String readableName = mapping.getReadableName(mapper.newInstance());
-                    return new MappedIncorrectString<O>(mapping, e.getIncorrectString(), readableName);
-                } catch (OXException x) {
-                    LOG.warn("Error deriving mapping for incorrect string", x);
+                DbMapping<? extends Object, O> mapping = mapper.opt(field);
+                if (null != mapping) {
+                    return new MappedIncorrectString<O>(mapping, e.getIncorrectString(), getReadableName(field, mapping));
                 }
             }
         }
         return null;
     }
 
-    private static <O, E extends Enum<E>> List<MappedTruncation<O>> getMappedTruncations(DataTruncation e, DbMapper<O, E> mapper, Collection<O> objects, Connection connection, String table) {
+    private <O, E extends Enum<E>> List<MappedTruncation<O>> getMappedTruncations(DataTruncation e, DbMapper<O, E> mapper, Collection<O> objects, Connection connection, String table) {
         if (null != mapper && null != objects && null != table && null != e) {
             String[] truncatedColumns = DBUtils.parseTruncatedFields(e);
             if (null == truncatedColumns || 0 == truncatedColumns.length) {
@@ -455,18 +452,15 @@ public abstract class RdbStorage extends CalendarStorageWarnings {
         return null;
     }
 
-    private static <O, E extends Enum<E>> MappedTruncation<O> getMappedTruncation(DbMapper<O, E> mapper, O object, Connection connection, String table, String column) {
+    private <O, E extends Enum<E>> MappedTruncation<O> getMappedTruncation(DbMapper<O, E> mapper, O object, Connection connection, String table, String column) {
         E field = mapper.getMappedField(column);
         if (null != field) {
-            try {
-                DbMapping<? extends Object, O> mapping = mapper.get(field);
+            DbMapping<? extends Object, O> mapping = mapper.opt(field);
+            if (null != mapping) {
                 Object value = mapping.get(object);
                 int maximumSize = getMaximumSize(connection, table, column);
                 int actualSize = null != value && String.class.isInstance(value) ? Charsets.getBytes((String) value, Charsets.UTF_8).length : 0;
-                String readableName = mapping.getReadableName(object);
-                return new MappedTruncation<O>(mapping, maximumSize, actualSize, readableName);
-            } catch (OXException x) {
-                LOG.warn("Error deriving mapping for truncated attribute", x);
+                return new MappedTruncation<O>(mapping, maximumSize, actualSize, getReadableName(field, mapping));
             }
         }
         return null;

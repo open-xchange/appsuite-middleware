@@ -216,6 +216,7 @@ public class FileFieldSet extends AbstractFileFieldSwitcher {
         return ret(args);
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public Object meta(Object... args) {
         if(args[1] instanceof Map<?,?>) {
@@ -224,6 +225,7 @@ public class FileFieldSet extends AbstractFileFieldSwitcher {
         return null;
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public Object objectPermissions(Object... args) {
         if(args[1] instanceof List<?>) {
@@ -240,7 +242,13 @@ public class FileFieldSet extends AbstractFileFieldSwitcher {
 
     @Override
     public Object origin(Object... args) {
-        md(args).setOrigin((FolderPath) args[1]);
+        if (args[1] instanceof FolderPath) {
+            md(args).setOrigin((FolderPath) args[1]);
+        } else if(args[1] != null) {
+            md(args).setOrigin(FolderPath.parseFrom(args[1].toString()));
+        } else {
+            md(args).setOrigin(null);
+        }
         return null;
     }
 

@@ -142,27 +142,28 @@ public final class CachingUserSettingMailStorage extends UserSettingMailStorage 
             Connection writeCon = writeConArg;
             boolean closeCon = false;
             PreparedStatement stmt = null;
-            ResultSet rs = null;
-            boolean insert = false;
-            Connection tmpCon = null;
-            try {
-                tmpCon = DBPool.pickup(ctx);
-                stmt = tmpCon.prepareStatement("SELECT 1 FROM user_setting_mail WHERE cid = ? AND user = ?");
-                stmt.setInt(1, ctx.getContextId());
-                stmt.setInt(2, user);
-                rs = stmt.executeQuery();
-                insert = (!rs.next());
-            } finally {
-                closeResources(rs, stmt, tmpCon, true, ctx);
-                rs = null;
-                stmt = null;
-                tmpCon = null;
-            }
             try {
                 if (writeCon == null) {
                     writeCon = DBPool.pickupWriteable(ctx);
                     closeCon = true;
                 }
+
+                boolean insert;
+                {
+                    ResultSet rs = null;
+                    try {
+                        stmt = writeCon.prepareStatement("SELECT 1 FROM user_setting_mail WHERE cid = ? AND user = ?");
+                        stmt.setInt(1, ctx.getContextId());
+                        stmt.setInt(2, user);
+                        rs = stmt.executeQuery();
+                        insert = (!rs.next());
+                    } finally {
+                        closeResources(rs, stmt, null, true, ctx);
+                        rs = null;
+                        stmt = null;
+                    }
+                }
+
                 if (insert) {
                     stmt = getInsertStmt(usm, user, ctx, writeCon);
                 } else {
@@ -171,7 +172,7 @@ public final class CachingUserSettingMailStorage extends UserSettingMailStorage 
                 stmt.executeUpdate();
                 saveSignatures(usm, user, ctx, writeCon);
             } finally {
-                closeResources(rs, stmt, closeCon ? writeCon : null, false, ctx);
+                closeResources(null, stmt, closeCon ? writeCon : null, false, ctx);
             }
             usm.setModifiedDuringSession(false);
 

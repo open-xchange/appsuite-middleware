@@ -190,6 +190,9 @@ public class ObjectUseCountServiceImpl implements ObjectUseCountService {
                         for (String mail : mailAddresses) {
                             ContactSearchObject search = new ContactSearchObject();
                             search.setEmail1(mail);
+                            search.setEmail2(mail);
+                            search.setEmail3(mail);
+                            search.setOrSearch(true);
                             SearchIterator<Contact> it = contactService.searchContacts(session, search);
                             try {
                                 while (it.hasNext()) {

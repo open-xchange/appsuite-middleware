@@ -138,7 +138,7 @@ public class Bug22451Test extends CalDAVTest {
         /*
          * verify appointments on server
          */
-        List<Appointment> updates = super.getManager().updates(parse(getDefaultFolderID()), clientLastModified, false);
+        List<Appointment> updates = super.getManager().updates(parse(getDefaultFolderID()), clientLastModified, true);
         assertNotNull("no updates found on server", updates);
         assertTrue("no updated appointments on server", 0 < updates.size());
         for (Appointment appointment : appointments) {

@@ -59,6 +59,7 @@ import org.json.JSONWriter;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.ObjectPermission;
 import com.openexchange.groupware.infostore.DocumentMetadata;
+import com.openexchange.groupware.infostore.InfostoreFolderPath;
 import com.openexchange.groupware.infostore.utils.Metadata;
 import com.openexchange.groupware.infostore.utils.MetadataSwitcher;
 import com.openexchange.java.Strings;
@@ -420,7 +421,10 @@ public class InfostoreWriter extends TimedWriter<DocumentMetadata> {
         @Override
         public Object origin() {
             // This is a legacy class... Don't care
-            writeString(dm.getOriginFolderPath().toString());
+            InfostoreFolderPath originFolderPath = dm.getOriginFolderPath();
+            if (null != originFolderPath) {
+                writeString(originFolderPath.toString());
+            }
             return null;
         }
     }

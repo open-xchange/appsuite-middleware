@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the Open-Xchange, Inc. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2020 Open-Xchange, Inc.
+ *     Copyright (C) 2016-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -324,6 +324,7 @@ public interface CalendarService {
      * <ul>
      * <li>{@link CalendarParameters#PARAMETER_CHECK_CONFLICTS}</li>
      * <li>{@link CalendarParameters#PARAMETER_NOTIFICATION}</li>
+     * <li>{@link CalendarParameters#PARAMETER_TRACK_ATTENDEE_USAGE}</li>
      * </ul>
      *
      * @param session The calendar session
@@ -340,6 +341,8 @@ public interface CalendarService {
      * <ul>
      * <li>{@link CalendarParameters#PARAMETER_CHECK_CONFLICTS}</li>
      * <li>{@link CalendarParameters#PARAMETER_NOTIFICATION}</li>
+     * <li>{@link CalendarParameters#PARAMETER_TRACK_ATTENDEE_USAGE}</li>
+     * <li>{@link CalendarParameters#PARAMETER_IGNORE_FORBIDDEN_ATTENDEE_CHANGES}</li>
      * </ul>
      *
      * @param session The calendar session
@@ -357,6 +360,7 @@ public interface CalendarService {
      * <ul>
      * <li>{@link CalendarParameters#PARAMETER_CHECK_CONFLICTS}</li>
      * <li>{@link CalendarParameters#PARAMETER_NOTIFICATION}</li>
+     * <li>{@link CalendarParameters#PARAMETER_TRACK_ATTENDEE_USAGE}</li>
      * </ul>
      *
      * @param session The calendar session
@@ -399,10 +403,11 @@ public interface CalendarService {
      * @param session The calendar session
      * @param eventID The identifier of the event to update
      * @param attendee The attendee to update
+     * @param alarms The alarms to update, or <code>null</code> to not change alarms, or an empty array to delete any existing alarms
      * @param clientTimestamp The last timestamp / sequence number known by the client to catch concurrent updates
      * @return The update result
      */
-    CalendarResult updateAttendee(CalendarSession session, EventID eventID, Attendee attendee, long clientTimestamp) throws OXException;
+    CalendarResult updateAttendee(CalendarSession session, EventID eventID, Attendee attendee, List<Alarm> alarms, long clientTimestamp) throws OXException;
 
     /**
      * Updates the user's personal alarms of a specific event, independently of the user's write access permissions for the corresponding

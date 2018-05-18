@@ -563,7 +563,10 @@ public class CSVContactImporter extends AbstractImporter {
                 }
                 return null;
             }
-            return bestParser.parse(readLines(fileHolder.getStream(), bestCharset, false, maxLines));
+            if (null == bestParser) {
+                return null;
+            }
+            return bestParser.parse(readLines(fileHolder.getStream(), detectedCharset != null ? detectedCharset : bestCharset, false, maxLines));
         } finally {
             Streams.close(fileHolder);
         }

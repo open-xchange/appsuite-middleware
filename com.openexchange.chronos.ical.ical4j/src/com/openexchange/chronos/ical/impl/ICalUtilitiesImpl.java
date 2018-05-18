@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the Open-Xchange, Inc. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2020 Open-Xchange, Inc.
+ *     Copyright (C) 2016-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -116,7 +116,7 @@ public class ICalUtilitiesImpl implements ICalUtilities {
         }
         parameters = getParametersOrDefault(parameters);
         ComponentList alarmComponents = exportAlarms(alarms, parameters, new ArrayList<OXException>());
-        exportComponents(outputStream, alarmComponents, parameters);
+        exportComponents(outputStream, alarmComponents);
     }
 
     @Override
@@ -132,10 +132,10 @@ public class ICalUtilitiesImpl implements ICalUtilities {
         }
         parameters = getParametersOrDefault(parameters);
         ComponentList timeZoneComponents = exportTimeZones(timeZoneIDs, parameters, new ArrayList<OXException>());
-        exportComponents(outputStream, timeZoneComponents, parameters);
+        exportComponents(outputStream, timeZoneComponents);
     }
 
-    private ComponentList exportAlarms(List<Alarm> alarms, ICalParameters parameters, List<OXException> warnings) throws OXException {
+    private ComponentList exportAlarms(List<Alarm> alarms, ICalParameters parameters, List<OXException> warnings) {
         if (null == alarms) {
             return null;
         }
@@ -146,13 +146,13 @@ public class ICalUtilitiesImpl implements ICalUtilities {
         return components;
     }
 
-    private VAlarm exportAlarm(Alarm alarm, ICalParameters parameters, List<OXException> warnings) throws OXException {
+    private VAlarm exportAlarm(Alarm alarm, ICalParameters parameters, List<OXException> warnings) {
         VAlarm vAlarm = mapper.exportAlarm(alarm, parameters, warnings);
         ICalUtils.removeProperties(vAlarm, parameters.get(ICalParameters.IGNORED_PROPERTIES, String[].class));
         return vAlarm;
     }
 
-    private ComponentList exportTimeZones(List<String> timeZoneIDs, ICalParameters parameters, List<OXException> warnings) throws OXException {
+    private ComponentList exportTimeZones(List<String> timeZoneIDs, ICalParameters parameters, List<OXException> warnings) {
         if (null == timeZoneIDs) {
             return null;
         }
@@ -163,7 +163,7 @@ public class ICalUtilitiesImpl implements ICalUtilities {
         return components;
     }
 
-    private VTimeZone exportTimeZone(String timeZoneID, ICalParameters parameters, List<OXException> warnings) throws OXException {
+    private VTimeZone exportTimeZone(String timeZoneID, ICalParameters parameters, List<OXException> warnings) {
         TimeZoneRegistry timeZoneRegistry = parameters.get(ICalParametersImpl.TIMEZONE_REGISTRY, TimeZoneRegistry.class);
         net.fortuna.ical4j.model.TimeZone timeZone = timeZoneRegistry.getTimeZone(timeZoneID);
         if (null != timeZone) {

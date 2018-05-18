@@ -1,8 +1,10 @@
-# S3 Storage Monitoring Metrics
+---
+title: S3 Storage Monitoring Metrics
+---
 
-With version 7.10.0 the OX middleware exposes monitoring metrics for the S3 object storage via JMX.
+The OX middleware now exposes monitoring metrics for the S3 object storage via JMX.
 
-## How to enable
+# How to enable
 
 The metric collection can be simply enabled with the following property:
 
@@ -10,14 +12,14 @@ The metric collection can be simply enabled with the following property:
 com.openexchange.filestore.s3.metricCollection=true
 ```
 
-## What's Collected
+# What's Collected
 
 Two type of metrics are collected: 
 
  * the amount of HTTP requests per HTTP method
  * the throughput (separated to upload and download rates)
 
-### HTTP Requests per HTTP Method
+## HTTP Requests per HTTP Method
 
 For every HTTP method a `timer` metric is created which provides different distributions for the amount of requests it collects. The rate unit is set to events per second. The different distributions are:
 
@@ -38,7 +40,7 @@ For every HTTP method a `timer` metric is created which provides different distr
 
 Each HTTP method registers its own MBean dynamically, meaning that until metrics are collected it will not appear in the JMX list.
 
-### Throughput
+## Throughput
 
 For the throughput there are two `meter` metrics registered, one for download and one for upload. The rate unit is set to bytes per second. The different distributions are:
 
@@ -48,13 +50,13 @@ For the throughput there are two `meter` metrics registered, one for download an
  * 5 minute rate
  * 15 minute rate
 
-## Monitoring Endpoints
+# Monitoring Endpoints
 
 The mbeans are registered under the main `com.openexchange.metrics` mbean. The `s3` storage sub-component contains all relevant mbeans.
 
 For every HTTP method there is a `com.openexchange.metrics:name=RequestTimes.<HTTP_METHOD_NAME>,type=s3` endpoint and for the throughput the `com.openexchange.metrics:name=S3UploadThroughput,type=s3` and `com.openexchange.metrics:name=S3DownloadThroughput,type=s3` for upload and download respectively.
 
-## Fetching Value
+# Fetching Value
 
 To fetch the metrics for a specific HTTP method via Jolokia, say for `PUT` you can issue the command:
 

@@ -89,9 +89,9 @@ public final class AllAction extends AbstractOAuthAJAXActionService {
             final OAuthService oAuthService = getOAuthService();
             final List<OAuthAccount> accounts;
             if (null == serviceId) {
-                accounts = oAuthService.getAccounts(session, session.getUserId(), session.getContextId());
+                accounts = oAuthService.getAccounts(session);
             } else {
-                accounts = oAuthService.getAccounts(serviceId, session, session.getUserId(), session.getContextId());
+                accounts = oAuthService.getAccounts(session, serviceId);
             }
             /*
              * Write accounts as a JSON array
@@ -105,7 +105,7 @@ public final class AllAction extends AbstractOAuthAJAXActionService {
              */
             return new AJAXRequestResult(jsonArray);
         } catch (final JSONException e) {
-            throw AjaxExceptionCodes.JSON_ERROR.create( e, e.getMessage());
+            throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
         }
     }
 

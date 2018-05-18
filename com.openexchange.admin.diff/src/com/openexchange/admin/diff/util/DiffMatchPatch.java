@@ -76,7 +76,7 @@ public class DiffMatchPatch {
   /**
    * The number of bits in an int.
    */
-  private short Match_MaxBits = 32;
+  private final short Match_MaxBits = 32;
 
   /**
    * Internal class for returning results from diff_linesToChars().
@@ -1023,9 +1023,9 @@ public class DiffMatchPatch {
   }
 
   // Define some regex patterns for matching boundaries.
-  private Pattern BLANKLINEEND
+  private final Pattern BLANKLINEEND
       = Pattern.compile("\\n\\r?\\n\\Z", Pattern.DOTALL);
-  private Pattern BLANKLINESTART
+  private final Pattern BLANKLINESTART
       = Pattern.compile("\\A\\r?\\n\\r?\\n", Pattern.DOTALL);
 
   /**
@@ -2026,60 +2026,61 @@ public LinkedList<Patch> patch_make(String text1, String text2,
    * @param patches Array of Patch objects.
    * @return The padding string added to each side.
    */
-  public String patch_addPadding(LinkedList<Patch> patches) {
-    short paddingLength = this.Patch_Margin;
-    String nullPadding = "";
-    for (short x = 1; x <= paddingLength; x++) {
-      nullPadding += String.valueOf((char) x);
-    }
+    public String patch_addPadding(LinkedList<Patch> patches) {
+        short paddingLength = this.Patch_Margin;
 
-    // Bump all the patches forward.
-    for (Patch aPatch : patches) {
-      aPatch.start1 += paddingLength;
-      aPatch.start2 += paddingLength;
-    }
+        StringBuilder builder = new StringBuilder();
+        for (short x = 1; x <= paddingLength; x++) {
+            builder.append(x);
+        }
+        String nullPadding = builder.toString();
 
-    // Add some padding on start of first diff.
-    Patch patch = patches.getFirst();
-    LinkedList<Diff> diffs = patch.diffs;
-    if (diffs.isEmpty() || diffs.getFirst().operation != Operation.EQUAL) {
-      // Add nullPadding equality.
-      diffs.addFirst(new Diff(Operation.EQUAL, nullPadding));
-      patch.start1 -= paddingLength;  // Should be 0.
-      patch.start2 -= paddingLength;  // Should be 0.
-      patch.length1 += paddingLength;
-      patch.length2 += paddingLength;
-    } else if (paddingLength > diffs.getFirst().text.length()) {
-      // Grow first equality.
-      Diff firstDiff = diffs.getFirst();
-      int extraLength = paddingLength - firstDiff.text.length();
-      firstDiff.text = nullPadding.substring(firstDiff.text.length())
-          + firstDiff.text;
-      patch.start1 -= extraLength;
-      patch.start2 -= extraLength;
-      patch.length1 += extraLength;
-      patch.length2 += extraLength;
-    }
+        // Bump all the patches forward.
+        for (Patch aPatch : patches) {
+            aPatch.start1 += paddingLength;
+            aPatch.start2 += paddingLength;
+        }
 
-    // Add some padding on end of last diff.
-    patch = patches.getLast();
-    diffs = patch.diffs;
-    if (diffs.isEmpty() || diffs.getLast().operation != Operation.EQUAL) {
-      // Add nullPadding equality.
-      diffs.addLast(new Diff(Operation.EQUAL, nullPadding));
-      patch.length1 += paddingLength;
-      patch.length2 += paddingLength;
-    } else if (paddingLength > diffs.getLast().text.length()) {
-      // Grow last equality.
-      Diff lastDiff = diffs.getLast();
-      int extraLength = paddingLength - lastDiff.text.length();
-      lastDiff.text += nullPadding.substring(0, extraLength);
-      patch.length1 += extraLength;
-      patch.length2 += extraLength;
-    }
+        // Add some padding on start of first diff.
+        Patch patch = patches.getFirst();
+        LinkedList<Diff> diffs = patch.diffs;
+        if (diffs.isEmpty() || diffs.getFirst().operation != Operation.EQUAL) {
+            // Add nullPadding equality.
+            diffs.addFirst(new Diff(Operation.EQUAL, nullPadding));
+            patch.start1 -= paddingLength;  // Should be 0.
+            patch.start2 -= paddingLength;  // Should be 0.
+            patch.length1 += paddingLength;
+            patch.length2 += paddingLength;
+        } else if (paddingLength > diffs.getFirst().text.length()) {
+            // Grow first equality.
+            Diff firstDiff = diffs.getFirst();
+            int extraLength = paddingLength - firstDiff.text.length();
+            firstDiff.text = nullPadding.substring(firstDiff.text.length()) + firstDiff.text;
+            patch.start1 -= extraLength;
+            patch.start2 -= extraLength;
+            patch.length1 += extraLength;
+            patch.length2 += extraLength;
+        }
 
-    return nullPadding;
-  }
+        // Add some padding on end of last diff.
+        patch = patches.getLast();
+        diffs = patch.diffs;
+        if (diffs.isEmpty() || diffs.getLast().operation != Operation.EQUAL) {
+            // Add nullPadding equality.
+            diffs.addLast(new Diff(Operation.EQUAL, nullPadding));
+            patch.length1 += paddingLength;
+            patch.length2 += paddingLength;
+        } else if (paddingLength > diffs.getLast().text.length()) {
+            // Grow last equality.
+            Diff lastDiff = diffs.getLast();
+            int extraLength = paddingLength - lastDiff.text.length();
+            lastDiff.text += nullPadding.substring(0, extraLength);
+            patch.length1 += extraLength;
+            patch.length2 += extraLength;
+        }
+
+        return nullPadding;
+    }
 
   /**
    * Look through the patches and break up any which are longer than the

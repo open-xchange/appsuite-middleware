@@ -73,6 +73,7 @@ import com.openexchange.conversion.DataArguments;
 import com.openexchange.conversion.DataProperties;
 import com.openexchange.conversion.DataSource;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Streams;
 import com.openexchange.osgi.RankingAwareNearRegistryServiceTracker;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
@@ -80,7 +81,7 @@ import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSessionAdapter;
 
 /**
- * 
+ *
  * {@link AbstractITipAction}
  *
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
@@ -110,17 +111,17 @@ public abstract class AbstractITipAction extends AppointmentAction {
         final String timezoneParameter = request.getParameter("timezone");
         TimeZone outputTimeZone = timezoneParameter == null ? tz : TimeZone.getTimeZone(timezoneParameter);
 
-        final Map<String, String> mailHeader = new HashMap<String, String>();
-        final InputStream stream = getInputStreamAndFillMailHeader(request.getRequest(), session, mailHeader);
-        final List<ITipAnalysis> analysis = analyzer.analyze(stream, request.getParameter("descriptionFormat"), session, mailHeader);
-        Object result;
+        InputStream stream = null;
         try {
-            result = process(analysis, request.getRequest(), session, outputTimeZone);
+            Map<String, String> mailHeader = new HashMap<String, String>();
+            stream = getInputStreamAndFillMailHeader(request.getRequest(), session, mailHeader);
+            List<ITipAnalysis> analysis = analyzer.analyze(stream, request.getParameter("descriptionFormat"), session, mailHeader);
+            return new AJAXRequestResult(process(analysis, request.getRequest(), session, outputTimeZone), new Date());
         } catch (final JSONException e) {
             throw AjaxExceptionCodes.JSON_ERROR.create(e);
+        } finally {
+            Streams.close(stream);
         }
-
-        return new AJAXRequestResult(result, new Date());
     }
 
     private ITipAnalyzerService getAnalyzerService() throws OXException {
@@ -145,8 +146,8 @@ public abstract class AbstractITipAction extends AppointmentAction {
             final Object data = request.getData();
             if (data != null) {
                 final JSONObject body = (JSONObject) data;
-                for (final String string : body.keySet()) {
-                    dataArguments.put(string, body.opt(string).toString());
+                for (final Map.Entry<String, Object> entry : body.entrySet()) {
+                    dataArguments.put(entry.getKey(), entry.getValue().toString());
                 }
             } else {
                 for (final Map.Entry<String, String> entry : request.getParameters().entrySet()) {

@@ -54,6 +54,7 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.file.storage.CompositeFileStorageAccountManagerProvider;
+import com.openexchange.file.storage.FileStorageAccountDeleteListener;
 import com.openexchange.file.storage.FileStorageAccountManagerProvider;
 import com.openexchange.file.storage.FileStorageService;
 import com.openexchange.file.storage.googledrive.GoogleDriveConstants;
@@ -75,6 +76,7 @@ public final class GoogleDriveServiceRegisterer implements ServiceTrackerCustomi
     private ServiceRegistration<FileStorageService> serviceRegistration; // guarded by synchronized
     private ServiceRegistration<OAuthAccountDeleteListener> listenerRegistration; // guarded by synchronized
     private ServiceRegistration<OAuthAccountAssociationProvider> associationProviderRegistration; // guarded by synchronized
+    private ServiceRegistration<FileStorageAccountDeleteListener> deleteListenerRegistration;
 
     /**
      * Initializes a new {@link GoogleDriveServiceRegisterer}.
@@ -106,7 +108,7 @@ public final class GoogleDriveServiceRegisterer implements ServiceTrackerCustomi
                 this.serviceRegistration = context.registerService(FileStorageService.class, service, null);
                 this.listenerRegistration = context.registerService(OAuthAccountDeleteListener.class, service, null);
                 this.associationProviderRegistration = context.registerService(OAuthAccountAssociationProvider.class, new GoogleDriveOAuthAccountAssociationProvider(service), null);
-
+                this.deleteListenerRegistration = context.registerService(FileStorageAccountDeleteListener.class, service, null);
                 this.service = service;
                 this.provider = provider;
             } else {

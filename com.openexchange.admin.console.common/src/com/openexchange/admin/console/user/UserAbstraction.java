@@ -102,7 +102,7 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
 
     }
 
-    protected class MethodAndNames {
+    protected static class MethodAndNames {
 
         private Method method = null;
 
@@ -2461,6 +2461,7 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
         setModuleAccessOptions(admp, false, true);
     }
 
+    @SuppressWarnings("unused")
     protected void setModuleAccessOptions(final AdminParser admp, final boolean required, final boolean extended) {
         // TODO: The default values should be dynamically generated from the setting in the core
         this.accessCalendarOption = setLongOpt(admp, OPT_ACCESS_CALENDAR, "on/off", "Calendar module (Default is off)", true, false, true);

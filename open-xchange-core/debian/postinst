@@ -20,6 +20,7 @@ set -e
 . /opt/open-xchange/lib/oxfunctions.sh
 
 postFix() {
+    # e.g 7.8.4-26 -> 784
     local version=${1%-*}
     version=${version//[-.]/}
 
@@ -39,7 +40,7 @@ postFix() {
     ox_add_property com.openexchange.publish.createModifyEnabled false /opt/open-xchange/etc/publications.properties
 
     # SoftwareChange_Request-2541
-    if dpkg --compare-versions "7.8.0-0" gt-nl "$2"; then
+    if dpkg --compare-versions "7.8.0-0" gt-nl "$1"; then
         VALUE=$(ox_read_property com.openexchange.hazelcast.maxOperationTimeout /opt/open-xchange/etc/hazelcast.properties)
         if [ "5000" = "$VALUE" ]; then
             ox_set_property com.openexchange.hazelcast.maxOperationTimeout 30000 /opt/open-xchange/etc/hazelcast.properties
@@ -47,7 +48,7 @@ postFix() {
     fi
 
     # SoftwareChange_Request-2546
-    if dpkg --compare-versions "7.6.2-0" gt-nl "$2"; then
+    if dpkg --compare-versions "7.6.2-0" gt-nl "$1"; then
         VALUE=$(ox_read_property com.openexchange.push.allowedClients /opt/open-xchange/etc/mail-push.properties)
         if [ "\"USM-EAS*\", \"USM-JSON*\"" = "$VALUE" ]; then
             ox_set_property com.openexchange.push.allowedClients "\"USM-EAS*\", \"USM-JSON*\", \"open-xchange-mailapp\"" /opt/open-xchange/etc/mail-push.properties
@@ -59,7 +60,7 @@ postFix() {
     ox_add_property com.openexchange.push.credstorage.rdb false /opt/open-xchange/etc/mail-push.properties
 
     # SoftwareChange_Request-2549
-    if dpkg --compare-versions "7.6.2-0" gt-nl "$2"; then
+    if dpkg --compare-versions "7.6.2-0" gt-nl "$1"; then
         VALUE=$(ox_read_property com.openexchange.IPCheckWhitelist /opt/open-xchange/etc/server.properties)
         if [ "" = "$VALUE" ]; then
             ox_set_property com.openexchange.IPCheckWhitelist "\"open-xchange-mailapp\"" /opt/open-xchange/etc/server.properties
@@ -179,7 +180,7 @@ EOF
     ox_add_property com.openexchange.connector.networkSslListenerPort 8010 /opt/open-xchange/etc/server.properties
 
     # SoftwareChange_Request-3254
-    if dpkg --compare-versions "7.8.2-0" gt-nl "$2"; then
+    if dpkg --compare-versions "7.8.2-0" gt-nl "$1"; then
         VALUE=$(ox_read_property com.openexchange.mail.account.blacklist /opt/open-xchange/etc/mail.properties)
         if [ "" = "$VALUE" ]; then
             ox_set_property com.openexchange.mail.account.blacklist "127.0.0.1-127.255.255.255,localhost" /opt/open-xchange/etc/mail.properties
@@ -269,7 +270,7 @@ EOF
     ox_add_property com.openexchange.mail.compose.share.preview.timeout 1000 /opt/open-xchange/etc/mail-compose.properties
 
     # SoftwareChange_Request-3637
-    if dpkg --compare-versions "7.8.3-0" gt-nl "$2"; then
+    if dpkg --compare-versions "7.8.3-0" gt-nl "$1"; then
         VALUE=$(ox_read_property com.openexchange.connector.maxRequestParameters /opt/open-xchange/etc/server.properties)
         if [ "30" = "$VALUE" ]; then
             ox_set_property com.openexchange.connector.maxRequestParameters 1000 /opt/open-xchange/etc/server.properties
@@ -287,7 +288,7 @@ d
     fi
 
     # SoftwareChange_Request-3784
-    if dpkg --compare-versions "7.8.4-0" gt-nl "$2"; then
+    if dpkg --compare-versions "7.8.4-0" gt-nl "$1"; then
         VALUE=$(ox_read_property com.openexchange.IPCheckWhitelist /opt/open-xchange/etc/server.properties)
         if [ "\"open-xchange-mailapp\"" = "$VALUE" ]; then
             ox_set_property com.openexchange.IPCheckWhitelist "\"open-xchange-mailapp\", \"open-xchange-mobile-api-facade\"" /opt/open-xchange/etc/server.properties
@@ -484,6 +485,23 @@ EOF
 
     # SoftwareChange_Request-82
     ox_remove_property com.openexchange.caching.jcs.enabled /opt/open-xchange/etc/cache.properties
+
+    # SoftwareChange_Request-151
+    if dpkg --compare-versions "7.10.0-0" gt-nl "$1"; then
+      VALUE=$(ox_read_property com.openexchange.push.allowedClients /opt/open-xchange/etc/mail-push.properties)
+      if [ "\"USM-EAS*\", \"USM-JSON*\", \"open-xchange-mailapp\"" = "${VALUE}" ]; then
+        ox_set_property com.openexchange.push.allowedClients "${VALUE}, \"open-xchange-mobile-api-facade*\"" /opt/open-xchange/etc/mail-push.properties
+      fi
+    fi
+
+    # SoftwareChange_Request-160
+    whlipr=/opt/open-xchange/etc/whitelist.properties
+    ox_add_property html.style.webkit-box-sizing '""' ${whlipr}
+    ox_add_property html.style.moz-box-sizing '""' ${whlipr}
+    ox_add_property html.style.box-sizing '"border-box"' ${whlipr}
+    ox_add_property html.style.-webkit-box-sizing '"border-box"' ${whlipr}
+    ox_add_property html.style.-moz-box-sizing '"border-box"' ${whlipr}
+
 }
 
 setConfigFilePermissions() {

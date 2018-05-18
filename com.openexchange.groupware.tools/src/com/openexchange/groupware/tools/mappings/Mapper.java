@@ -108,7 +108,7 @@ public interface Mapper<O, E extends Enum<E>> extends Factory<O>, ArrayFactory<E
      * @param update The updated object
      * @return The different fields, or an empty array if there are no differences
      */
-    E[] getDifferentFields(O original, O update) throws OXException;
+    E[] getDifferentFields(O original, O update);
 
     /**
      * Determines the differences between one object and another one. Only <i>set</i> properties in the second object are considered.
@@ -119,7 +119,7 @@ public interface Mapper<O, E extends Enum<E>> extends Factory<O>, ArrayFactory<E
      * @param ignoredFields Fields to ignore when determining the differences
      * @return The different fields, or an empty set if there are no differences
      */
-    Set<E> getDifferentFields(O original, O update, boolean considerUnset, E... ignoredFields) throws OXException;
+    Set<E> getDifferentFields(O original, O update, boolean considerUnset, E... ignoredFields);
 
 	/**
      * Gets an array of all mapped fields that are set in the supplied object.

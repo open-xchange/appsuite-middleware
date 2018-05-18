@@ -563,8 +563,7 @@ public final class Databases {
      * @throws SQLException In case the character set cannot be determined
      */
     private static String readCharacterSet(Connection connection) throws SQLException {
-        try (PreparedStatement stmt = connection.prepareStatement("SHOW VARIABLES LIKE 'character_set_connection';");
-            ResultSet resultSet = stmt.executeQuery()) {
+        try (PreparedStatement stmt = connection.prepareStatement("SHOW VARIABLES LIKE 'character_set_connection';"); ResultSet resultSet = stmt.executeQuery()) {
             if (false == resultSet.next()) {
                 throw new SQLException("Unable to determine 'character_set_connection'");
             }
@@ -574,4 +573,22 @@ public final class Databases {
         }
     }
 
+    /**
+     * Checks whether the specified {@link Connection} is in a transaction mode.
+     * 
+     * @param connection The {@link Connection}
+     * @return <code>true</code> if the {@link Connection} is in a transaction mode; <code>false</code> otherwise
+     * @throws SQLException In case any SQL error occurs
+     * @throws IllegalArgumentException if the {@link Connection} is <code>null</code>
+     * @throws IllegalStateException if the {@link Connection} is already closed
+     */
+    public static boolean isInTransaction(Connection connection) throws SQLException {
+        if (connection == null) {
+            throw new IllegalArgumentException("The connection can not be 'null'.");
+        }
+        if (connection.isClosed()) {
+            throw new IllegalStateException("The connection is already closed.");
+        }
+        return false == connection.getAutoCommit();
+    }
 }

@@ -117,7 +117,7 @@ public abstract class DefaultMapper<O, E extends Enum<E>> implements Mapper<O, E
     }
 
     @Override
-    public E[] getDifferentFields(O original, O update) throws OXException {
+    public E[] getDifferentFields(O original, O update) {
         if (null == original) {
             throw new IllegalArgumentException("original");
         }
@@ -135,7 +135,7 @@ public abstract class DefaultMapper<O, E extends Enum<E>> implements Mapper<O, E
     }
 
     @Override
-    public Set<E> getDifferentFields(O original, O update, boolean considerUnset, E... ignoredFields) throws OXException {
+    public Set<E> getDifferentFields(O original, O update, boolean considerUnset, E... ignoredFields) {
         if (null == original) {
             throw new IllegalArgumentException("original");
         }

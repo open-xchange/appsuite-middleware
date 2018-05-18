@@ -1,10 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
 	<classpathentry kind="src" path="src"/>
-	<classpathentry exported="true" kind="lib" path="lib/spring-beans-4.2.4.RELEASE.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/spring-core-4.2.4.RELEASE.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/joox-1.2.0.jar" sourcepath="lib/source/joox-1.2.0-sources.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/jdom-2.0.5.jar" sourcepath="lib/source/jdom-2.0.5-sources.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/joox-1.5.0.jar" sourcepath="lib/source/joox-1.5.0-sources.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/jdom2-2.0.6.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/spring-beans-5.0.6.RELEASE.jar" sourcepath="lib/source/spring-beans-5.0.6.RELEASE-sources.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/spring-jcl-5.0.6.RELEASE.jar" sourcepath="lib/source/spring-jcl-5.0.6.RELEASE-sources.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/spring-core-5.0.6.RELEASE.jar" sourcepath="lib/source/spring-core-5.0.6.RELEASE-sources.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/annotations-13.0.jar" sourcepath="lib/source/annotations-13.0-sources.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/javax.inject-1.jar" sourcepath="lib/source/javax.inject-1-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/stax-1.2.0.jar" sourcepath="lib/source/stax-src-1.2.0.zip"/>
 	<classpathentry exported="true" kind="lib" path="lib/org.dynamicjava.stax-api-1.0.jar" sourcepath="lib/source/org.dynamicjava.stax-api-1.0-src.zip"/>
 	<classpathentry kind="con" path="org.eclipse.pde.core.requiredPlugins"/>

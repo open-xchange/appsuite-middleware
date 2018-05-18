@@ -49,7 +49,6 @@
 
 package com.openexchange.group.json;
 
-import java.util.Collection;
 import java.util.Map;
 import com.google.common.collect.ImmutableMap;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
@@ -82,11 +81,6 @@ public class GroupActionFactory implements AJAXActionServiceFactory {
         actions.put("search", new com.openexchange.group.json.actions.SearchAction(services));
         actions.put("updates", new com.openexchange.group.json.actions.UpdatesAction(services));
         this.actions = actions.build();
-    }
-
-    @Override
-    public Collection<? extends AJAXActionService> getSupportedServices() {
-        return java.util.Collections.unmodifiableCollection(actions.values());
     }
 
     @Override

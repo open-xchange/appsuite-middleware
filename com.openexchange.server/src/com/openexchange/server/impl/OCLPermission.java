@@ -654,7 +654,8 @@ public class OCLPermission implements Permission, Cloneable, Serializable, OXClo
         final OCLPermission op = (OCLPermission) other;
         return (entity == op.entity) && (fuid == op.fuid) && (fp == op.fp) && (orp == op.orp) && (owp == op.owp)
                 && (odp == op.odp) && (folderAdmin == op.folderAdmin) && (groupPermission == op.groupPermission)
-                && (system == op.system) && (type == op.type) && (legator == op.legator);
+                && (system == op.system) && (type == op.type)
+                && ((legator != null && legator.equals(op.legator)) || (legator == null && op.legator == null));
     }
 
     @Override

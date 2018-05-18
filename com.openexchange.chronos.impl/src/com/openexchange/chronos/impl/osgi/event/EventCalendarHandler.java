@@ -99,6 +99,9 @@ public class EventCalendarHandler implements CalendarHandler {
 
     @Override
     public void handle(CalendarEvent event) {
+        if (event == null) {
+            return;
+        }
         try {
             // Check for new events
             if (false == event.getCreations().isEmpty()) {

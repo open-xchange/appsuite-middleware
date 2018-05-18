@@ -21,8 +21,8 @@ public class ChangeFactory {
 
     private static ChangeFactory instance;
 
-    private Map<String, SortedSet<Class<? extends Change>>> registry = new ConcurrentHashMap<String, SortedSet<Class<? extends Change>>>();
-    private Map<Class<? extends Change>, ChangeMetaData> metaDataByClass = new ConcurrentHashMap<Class<? extends Change>, ChangeMetaData>();
+    private final Map<String, SortedSet<Class<? extends Change>>> registry = new ConcurrentHashMap<String, SortedSet<Class<? extends Change>>>();
+    private final Map<Class<? extends Change>, ChangeMetaData> metaDataByClass = new ConcurrentHashMap<Class<? extends Change>, ChangeMetaData>();
 
     private ChangeFactory() {
     }
@@ -51,7 +51,7 @@ public class ChangeFactory {
     /**
      * Reset the ChangeFactory so it reloads the registry on the next call to @{link #getInstance()}. Mainly used in testing
      */
-    public static void reset() {
+    public static synchronized void reset() {
         instance = null;
     }
 

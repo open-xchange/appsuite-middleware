@@ -155,6 +155,7 @@ import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.java.CallerRunsCompletionService;
 import com.openexchange.java.Collators;
+import com.openexchange.java.Strings;
 import com.openexchange.java.util.Tools;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.server.impl.OCLPermission;
@@ -1734,7 +1735,7 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage,
 
             final Date millis = new Date();
 
-            final FolderObject updateMe = getFolderObject(folderId, context, con, storageParameters);
+            final FolderObject updateMe = new FolderObject();
             updateMe.setObjectID(folderId);
             updateMe.setDefaultFolder(false);
             {
@@ -1787,7 +1788,6 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage,
             Permission[] perms = folder.getPermissions();
             UpdatedFolderHandler handler = updatedFolderHandlerFor(storageParameters);
             final OXFolderManager folderManager = OXFolderManager.getInstance(session, Collections.singleton(handler), con, con);
-            boolean isUpdated = false;
             if (null != perms) {
                 final OCLPermission[] oclPermissions = new OCLPermission[perms.length];
                 for (int i = 0; i < perms.length; i++) {
@@ -1799,16 +1799,13 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage,
             } else {
                 ConfigurationService configurationService = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
                 boolean applyParentPermissions = configurationService.getBoolProperty("com.openexchange.folderstorage.inheritParentPermissions", false);
-                if (applyParentPermissions && isInPublicTree(updateMe, context, con, storageParameters)) {
+                if (applyParentPermissions && isInPublicTree(folder.getParentID(), context, con, storageParameters)) {
                     FolderObject parent = getFolderObject(updateMe.getParentFolderID(), context, con, storageParameters);
                     inheritPublicFolderPermissions(updateMe, parent, context, con, storageParameters, folderManager, millis);
-                    isUpdated = true;
                 }
             }
+            folderManager.updateFolder(updateMe, true, StorageParametersUtility.isHandDownPermissions(storageParameters), millis.getTime());
 
-            if (!isUpdated) {
-                folderManager.updateFolder(updateMe, true, StorageParametersUtility.isHandDownPermissions(storageParameters), millis.getTime());
-            }
             // Handle warnings
             final List<OXException> warnings = folderManager.getWarnings();
             if (null != warnings) {
@@ -1918,18 +1915,19 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage,
         }
     }
 
-    private boolean isInPublicTree(FolderObject folder, Context context, Connection con, StorageParameters storageParameters) throws OXException {
-        int parentId = folder.getParentFolderID();
-        while(true) {
-            if (parentId == FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID || parentId == FolderObject.SYSTEM_PRIVATE_FOLDER_ID || parentId == FolderObject.SYSTEM_ROOT_FOLDER_ID) {
-                return false;
-            }
+    private boolean isInPublicTree(String folderParentId, Context context, Connection con, StorageParameters storageParameters) throws OXException {
+        if (Strings.isEmpty(folderParentId)) {
+            return false;
+        }
+        int parentId = Integer.parseInt(folderParentId);
+        while(parentId > 0) {
             if (parentId == FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID || parentId == FolderObject.SYSTEM_PUBLIC_FOLDER_ID) {
                 return true;
             }
             FolderObject parent = getFolderObject(parentId, context, con, storageParameters);
             parentId = parent.getParentFolderID();
         }
+        return false;
     }
 
     @Override
@@ -2602,12 +2600,19 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage,
                     if (null != lastParentPermissions) {
                         for (Permission p : lastParentPermissions) {
                             if (p.getEntity() != storageParameters.getUserId()) {
-                                toRestore.addPermission(newOCLPermissionFor(p));
+                                OCLPermission newOCLPermission = newOCLPermissionFor(p);
+                                if(newOCLPermission.getType().equals(FolderPermissionType.LEGATOR)) {
+                                    // Change LEGATOR permissions to inherited permissions
+                                    newOCLPermission.setType(FolderPermissionType.INHERITED);
+                                    newOCLPermission.setPermissionLegator(String.valueOf(folderId));
+                                }
+                                toRestore.addPermission(newOCLPermission);
                             }
                         }
                     }
                     String restoredFolderName = OXFolderSQL.getUnusedFolderName(toRestore.getFolderName(), folderId, storageParameters);
                     toRestore.setFolderName(restoredFolderName);
+                    storageParameters.getDecorator().put("permissions", "inherit");
                     updateFolder(new DatabaseFolder(toRestore), storageParameters);
                 } catch (OXException e) {
                     if ("FLD".equals(e.getPrefix()) && 6 == e.getCode()) {

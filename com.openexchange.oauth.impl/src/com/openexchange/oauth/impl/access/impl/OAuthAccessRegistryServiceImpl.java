@@ -49,6 +49,7 @@
 
 package com.openexchange.oauth.impl.access.impl;
 
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicReference;
@@ -71,7 +72,7 @@ public class OAuthAccessRegistryServiceImpl implements OAuthAccessRegistryServic
      */
     public OAuthAccessRegistryServiceImpl() {
         super();
-        mapRef = new AtomicReference<ConcurrentMap<String,OAuthAccessRegistryImpl>>(new ConcurrentHashMap<String, OAuthAccessRegistryImpl>());
+        mapRef = new AtomicReference<ConcurrentMap<String, OAuthAccessRegistryImpl>>(new ConcurrentHashMap<String, OAuthAccessRegistryImpl>());
     }
 
     @Override
@@ -116,14 +117,15 @@ public class OAuthAccessRegistryServiceImpl implements OAuthAccessRegistryServic
         ConcurrentMap<String, OAuthAccessRegistryImpl> map = mapRef.getAndSet(null);
         if (null != map) {
             for (OAuthAccessRegistryImpl registry : map.values()) {
-                for (OAuthAccess oAuthAccess : registry) {
-                    if (null != oAuthAccess) {
-                        oAuthAccess.dispose();
+                for (Map<Integer, OAuthAccess> accesses : registry) {
+                    for (OAuthAccess oAuthAccess : accesses.values()) {
+                        if (null != oAuthAccess) {
+                            oAuthAccess.dispose();
+                        }
                     }
                 }
             }
             map.clear();
         }
     }
-
 }

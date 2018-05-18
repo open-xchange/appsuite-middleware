@@ -64,55 +64,46 @@ import com.openexchange.exception.OXException;
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias 'Tierlieb' Prinz</a>
  *
  */
-public class ContactSwitcherForBooleans extends	AbstractContactSwitcherWithDelegate {
+public class ContactSwitcherForBooleans extends AbstractContactSwitcherWithDelegate {
 
-	public String[] trueValues = {"y", "yes", "true" , "privat", "private", "priv\u00e9", "1"};
+    public String[] trueValues = { "y", "yes", "true", "privat", "private", "priv\u00e9", "1" };
 
-	public Object[] determineBooleanValue(final Object[] objects){
-		final Object obj = objects[1];
+    public Object[] determineBooleanValue(final Object[] objects) {
+        final Object obj = objects[1];
 
-		boolean boolValue = false;
-		//check strings
-		try {
-			final String comp = (String) obj;
-			for(final String trueVal : trueValues){
-				if(trueVal.equals(comp.toLowerCase())){
-					boolValue = true;
-				}
-			}
-		} catch(final ClassCastException e){
-			//do nothing, keep on trying
-		}
+        Boolean boolValue = Boolean.FALSE;
+        if (obj instanceof String) {
+            //check strings
+            String comp = (String) obj;
+            for (final String trueVal : trueValues) {
+                if (trueVal.equals(comp.toLowerCase())) {
+                    boolValue = Boolean.TRUE;
+                }
+            }
+        } else if (obj instanceof Boolean) {
+            //check boolean object
+            boolValue = (Boolean) obj;
+        } else if (obj instanceof Integer) {
+            // check Integer object
+            final Integer comp = (Integer) obj;
+            if (comp.compareTo(Integer.valueOf(0)) > 0) {
+                boolValue = Boolean.TRUE;
+            }
+        }
 
-		//check boolean object
-		try {
-			boolValue = (Boolean) obj;
-		} catch(final ClassCastException e){
-			//do nothing, keep on trying
-		}
-		// check Integer object
-		try {
-			final Integer comp = (Integer) obj;
-			if(comp.compareTo(0) > 0 ){
-				boolValue = true;
-			}
-		} catch(final ClassCastException e){
-			//do nothing, keep on trying
-		}
+        objects[1] = boolValue;
+        return objects;
 
-		objects[1] = boolValue;
-		return objects;
+    }
 
-	}
+    @Override
+    public Object privateflag(final Object... objects) throws OXException {
+        return delegate.privateflag(determineBooleanValue(objects));
+    }
 
-	@Override
-	public Object privateflag(final Object... objects) throws OXException {
-		return delegate.privateflag( determineBooleanValue(objects) );
-	}
-
-	@Override
-	public Object markasdistributionlist(Object[] objects) throws OXException {
-		return delegate.markasdistributionlist( determineBooleanValue(objects));
-	}
+    @Override
+    public Object markasdistributionlist(Object[] objects) throws OXException {
+        return delegate.markasdistributionlist(determineBooleanValue(objects));
+    }
 
 }

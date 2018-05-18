@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the Open-Xchange, Inc. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2020 Open-Xchange, Inc.
+ *     Copyright (C) 2016-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -84,6 +84,15 @@ public class UpdateAlarmsPerformer extends AbstractUpdatePerformer {
     }
 
     /**
+     * Initializes a new {@link UpdateAlarmsPerformer}, taking over the settings from another update performer.
+     *
+     * @param updatePerformer The update performer to take over the settings from
+     */
+    protected UpdateAlarmsPerformer(AbstractUpdatePerformer updatePerformer) {
+        super(updatePerformer);
+    }
+
+    /**
      * Performs the alarm update in an event.
      *
      * @param objectId The identifier of the event to update the alarms for
@@ -109,11 +118,12 @@ public class UpdateAlarmsPerformer extends AbstractUpdatePerformer {
         if (null != clientTimestamp) {
             requireUpToDateTimestamp(originalEvent, clientTimestamp.longValue());
         }
-        List<Alarm> originalAlarms = storage.getAlarmStorage().loadAlarms(originalEvent, session.getUserId());
+        resultTracker.rememberOriginalEvent(originalEvent);
+        List<Alarm> originalAlarms = storage.getAlarmStorage().loadAlarms(originalEvent, calendarUserId);
         /*
          * perform alarm update & track results
          */
-        if (updateAlarms(originalEvent, session.getUserId(), originalAlarms, alarms)) {
+        if (updateAlarms(originalEvent, calendarUserId, originalAlarms, alarms)) {
             touch(originalEvent.getId());
             resultTracker.trackUpdate(originalEvent, loadEventData(originalEvent.getId()));
         }

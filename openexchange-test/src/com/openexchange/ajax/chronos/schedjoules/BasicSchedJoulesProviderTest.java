@@ -209,7 +209,7 @@ public class BasicSchedJoulesProviderTest extends AbstractSchedJoulesProviderTes
     @Test
     public void testChangeToInvalidRefreshInterval() throws Exception {
         FolderData folderData = createFolder(CALENDAR_THREE, folderName);
-        folderData.getComOpenexchangeCalendarConfig().setRefreshInterval("123");
+        folderData.getComOpenexchangeCalendarConfig().setRefreshInterval(123);
         try {
             folderManager.updateFolder(folderData, true);
             fail("No exception was thrown");

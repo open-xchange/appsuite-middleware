@@ -121,7 +121,7 @@ public class UploadAction extends AbstractWriteAction {
         String saveAction = "none";
         if (null != newId && request.extendedResponse()) {
             File metadata = fileAccess.getFileMetadata(newId, FileStorageFileAccess.CURRENT_VERSION);
-            FileID id = new FileID(FileStorageFileAccess.NEW); // file.getId());
+            FileID id = new FileID(newId);
             if (null != originalFileName && !originalFileName.equals(metadata.getFileName())) {
                 saveAction = "rename";
             } else if (fileAccess.supports(id.getService(), id.getAccountId(), FileStorageCapability.FILE_VERSIONS) && 1 < metadata.getNumberOfVersions()) {

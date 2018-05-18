@@ -139,7 +139,7 @@ public class ShareRedirectUtils {
         if (null != item) {
             redirectLink = P_ITEM.matcher(redirectLink).replaceAll(Matcher.quoteReplacement(item));
         }
-        redirectLink = P_STORE.matcher(redirectLink).replaceAll(loginConfig.isSessiondAutoLogin(host) ? "true" : "false");
+        redirectLink = P_STORE.matcher(redirectLink).replaceAll(loginConfig.isSessiondAutoLogin(host, session) ? "true" : "false");
         return redirectLink;
     }
 

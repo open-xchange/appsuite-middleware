@@ -55,6 +55,9 @@ import java.io.FileNotFoundException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.security.AccessController;
+import java.security.PrivilegedActionException;
+import java.security.PrivilegedExceptionAction;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -70,27 +73,39 @@ public class ResourceBundleDiscoverer extends FileDiscoverer {
     }
 
     public List<ResourceBundle> getResourceBundles() throws java.util.MissingResourceException {
-        final String[] files = getFilesFromLanguageFolder(".jar");
+        String[] files = getFilesFromLanguageFolder(".jar");
         if (files.length == 0) {
             return Collections.emptyList();
         }
-        final List<ResourceBundle> list = new ArrayList<ResourceBundle>(files.length);
-        for (final String file : files) {
-            Locale l = null;
 
+        List<ResourceBundle> list = new ArrayList<ResourceBundle>(files.length);
+        for (String file : files) {
             try {
-                l = getLocale(file);
+                Locale l = getLocale(file);
 
-                final URLClassLoader ul = new URLClassLoader(new URL[] { new URL("file:" + getDirectory() + File.separator + file) });
-                final ResourceBundle rc = ResourceBundle.getBundle("com.openexchange.groupware.i18n.ServerMessages", l, ul);
+                URLClassLoader ul = AccessController.doPrivileged(new PrivilegedExceptionAction<URLClassLoader>() {
+
+                    @Override
+                    public URLClassLoader run() throws MalformedURLException {
+                        return new URLClassLoader(new URL[] { new URL("file:" + getDirectory() + File.separator + file) });
+                    }
+                });
+                ResourceBundle rc = ResourceBundle.getBundle("com.openexchange.groupware.i18n.ServerMessages", l, ul);
 
                 list.add(rc);
 
-            } catch (final java.util.MissingResourceException mr) {
+            } catch (PrivilegedActionException e) {
+                Exception exception = e.getException();
+                if (exception instanceof MalformedURLException) {
+                    LOG.error("Cannot load file: {}", file);
+                } else {
+                    LOG.error("Not permitted to access file: {}", file, exception);
+                }
+            } catch (java.util.MissingResourceException mr) {
                 LOG.error("Unable to init Language Bundle! This file seems to be broken: {}", file);
                 throw mr;
-            } catch (final MalformedURLException e) {
-                LOG.error("Cannot load file: {}", file);
+            } catch (RuntimeException e) {
+                LOG.error("Runtime error while loading file: {}", file, e);
             }
         }
         return list;

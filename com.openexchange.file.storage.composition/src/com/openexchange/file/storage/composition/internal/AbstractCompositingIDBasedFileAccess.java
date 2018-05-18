@@ -152,7 +152,7 @@ import com.openexchange.tx.TransactionAwares;
  */
 public abstract class AbstractCompositingIDBasedFileAccess extends AbstractCompositingIDBasedAccess implements IDBasedFileAccess {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AbstractCompositingIDBasedFileAccess.class);
+    static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AbstractCompositingIDBasedFileAccess.class);
 
     /** The empty {@link TimedResult} */
     private static final TimedResult<File> EMPTY_TIMED_RESULT = Results.emptyTimedResult();
@@ -455,6 +455,9 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractCompo
                 result = ((FileStorageRangeFileAccess) fileAccess).getDocuments(folderID.getFolderId(), addIDColumns(columns), sort, order, range);
             } else {
                 result = fileAccess.getDocuments(folderID.getFolderId(), addIDColumns(columns), sort, order);
+                if (result == null) {
+                    return EMPTY_TIMED_RESULT;
+                }
                 result = slice(result, range);
             }
 
@@ -720,7 +723,7 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractCompo
         } else if (1 == versions.length && FileStorageFileAccess.CURRENT_VERSION == versions[0]) {
             List<IDTuple> result = access.removeDocument(Collections.singletonList(
                 new IDTuple(fileID.getFolderId(), fileID.getFileId())), FileStorageFileAccess.DISTANT_FUTURE);
-            notRemoved = 0 < result.size() ? versions : new String[0];
+            notRemoved = null != result && 0 < result.size() ? versions : new String[0];
         } else {
             notRemoved = versions;
         }
@@ -744,7 +747,7 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractCompo
                 /*
                  * Reload the document to get it's folder id.
                  */
-                File fileMetadata = access.getFileMetadata(fileFolder, objectId, FileStorageFileAccess.CURRENT_VERSION);
+                File fileMetadata = access.getFileMetadata(FileStorageFileAccess.ALL_FOLDERS, objectId, FileStorageFileAccess.CURRENT_VERSION);
                 fileName = fileMetadata.getFileName();
                 folderID = new FolderID(serviceId, accountId, fileMetadata.getFolderId());
             } else {
@@ -833,6 +836,7 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractCompo
             return idTuple;
         }
 
+        @SuppressWarnings("unused")
         public List<FileStorageObjectPermission> getAddedPermissions() {
             return addedPermissions;
         }
@@ -984,18 +988,19 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractCompo
         }
 
         /*
-         * Update without move
+         * update without move, perform save operation (using service-relative identifiers) & return resulting composite identifier
          */
-        document.setFolderId(targetFolderID.getFolderId());
-        document.setId(sourceFileID.getFileId());
-        SaveResult result = saveDelegation.call(getFileAccess(serviceID, accountID));
+        document.setFolderId(sourceIDTuple.getFolder());
+        document.setId(sourceIDTuple.getId());
+        SaveResult result = saveDelegation.call(fileAccess);
         IDTuple idTuple = result.getIDTuple();
-        FileID newFileID = new FileID(serviceID, accountID, idTuple.getFolder(), idTuple.getId());
+        FileID newID = new FileID(serviceID, accountID, idTuple.getFolder(), idTuple.getId());
         FolderID newFolderID = new FolderID(serviceID, accountID, idTuple.getFolder());
-        String newId = newFileID.toUniqueID();
+        document.setId(newID.toUniqueID());
+        document.setFolderId(newFolderID.toUniqueID());
         postEvent(FileStorageEventHelper.buildUpdateEvent(
-            session, serviceID, accountID, newFolderID.toUniqueID(), newId, document.getFileName()));
-        return newId;
+            session, serviceID, accountID, newFolderID.toUniqueID(), newID.toUniqueID(), document.getFileName()));
+        return newID.toUniqueID();
     }
 
     /**

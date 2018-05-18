@@ -85,10 +85,10 @@ public final class TrackerActivator extends HousekeepingActivator {
 
     @Override
     public void stopBundle() throws Exception {
-        closeTrackers();
         if (secretService != null) {
             secretService.close();
         }
+        super.stopBundle();
     }
 
     @Override

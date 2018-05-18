@@ -675,7 +675,7 @@ exclude_secret_ox_config_files() {
     local _ox_config_copy=${1}
     local _tmp_exclude_status=$(mktemp)
     local _exclude_status=$(normalize_path ${TMP}/${LOGDIR}/ox-configs-exclude)
-    local _whitelist='\.properties.*$|\.yml$|\.xml$|\.yaml$|\.sh$|\.ccf$|\.types$|\.sql$|\.txt$|\.name$|\.perfMap$|folder-reserved-names|readerengine.*list'
+    local _whitelist='\.properties.*$|\.yml$|\.xml$|\.yaml$|\.sh$|\.ccf$|\.types$|\.sql$|\.txt$|\.name$|\.perfMap$|folder-reserved-names|readerengine.*list|\.conf$'
     find ${_ox_config_copy} -type f | \
         egrep -v "${_whitelist}" | \
         sed 's| |// |g' >> ${_tmp_exclude_status}

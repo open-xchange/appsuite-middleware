@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the Open-Xchange, Inc. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2020 Open-Xchange, Inc.
+ *     Copyright (C) 2016-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,16 +49,13 @@
 
 package com.openexchange.chronos.service;
 
-import java.util.List;
-import com.openexchange.exception.OXException;
-
 /**
  * {@link ImportResult}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public interface ImportResult extends CalendarResult {
+public interface ImportResult extends ErrorAwareCalendarResult {
 
     /**
      * Get the sequential index of the imported event in the source data, or <code>0</code> if unknown
@@ -66,20 +63,6 @@ public interface ImportResult extends CalendarResult {
      * @return The sequential index of the event in the source data, or <code>0</code> if unknown
      */
     int getIndex();
-
-    /**
-     * Gets the (fatal) error that prevented the event from being stored successfully, or <code>null</code> if there is none
-     *
-     * @return The (fatal) error that prevented the event from being stored successfully, or <code>null</code> if there is none
-     */
-    OXException getError();
-
-    /**
-     * Gets the list of (non-fatal) warnings that occurred during import, or an empty list if there are none
-     *
-     * @return The list of (non-fatal) warnings that occurred during import, or an empty list if there are none
-     */
-    List<OXException> getWarnings();
 
     /**
      * Gets the identifier of the imported event, or <code>null</code> if no event was created

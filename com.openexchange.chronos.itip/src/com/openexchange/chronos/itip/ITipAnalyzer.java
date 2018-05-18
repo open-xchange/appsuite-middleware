@@ -61,7 +61,22 @@ import com.openexchange.exception.OXException;
  */
 public interface ITipAnalyzer {
 
+    /**
+     * The methods the analyzer is capable of handling
+     * 
+     * @return A {@link List} of {@link ITipMethod} that can be handled.
+     */
     public List<ITipMethod> getMethods();
 
-    public ITipAnalysis analyze(ITipMessage message, Map<String, String> header, String style, CalendarSession session) throws OXException;
+    /**
+     * Analyzes an {@link ITipMessage} for specific {@link ITipMethod}s. See {@link #getMethods()}.
+     * 
+     * @param message The {@link ITipMessage} to analyze
+     * @param header Mail header key-value pairs. Can influence the analyzer to use, if special handling for some clients are necessary, etc.
+     * @param format The format to use. <code>html</code> for a {@link com.openexchange.chronos.itip.generators.HTMLWrapper}, else a {@link com.openexchange.chronos.itip.generators.changes.PassthroughWrapper} is used
+     * @param session The {@link CalendarSession}
+     * @return An {@link ITipAnalysis} for the given message
+     * @throws OXException Various
+     */
+    public ITipAnalysis analyze(ITipMessage message, Map<String, String> header, String format, CalendarSession session) throws OXException;
 }

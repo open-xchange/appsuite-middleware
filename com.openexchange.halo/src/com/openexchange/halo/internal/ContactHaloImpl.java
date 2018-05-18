@@ -127,7 +127,7 @@ public class ContactHaloImpl implements ContactHalo {
         if (!dataSource.isAvailable(session)) {
             throw HaloExceptionCodes.UNAVAILABLE_PROVIDER.create(provider);
         }
-        if (!(contact.getInternalUserId() > 0) && !contact.containsEmail1() & !contact.containsEmail2() & !contact.containsEmail3()) {
+        if (!(contact.getInternalUserId() > 0) && !contact.containsEmail1() && !contact.containsEmail2() && !contact.containsEmail3()) {
             throw HaloExceptionCodes.INVALID_CONTACT.create();
         }
         return dataSource.investigate(buildQuery(contact, session, true), req, session);

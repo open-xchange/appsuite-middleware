@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the Open-Xchange, Inc. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2020 Open-Xchange, Inc.
+ *     Copyright (C) 2016-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -50,6 +50,7 @@
 package com.openexchange.chronos.storage.operation;
 
 import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.java.Autoboxing.L;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -101,7 +102,7 @@ public abstract class CalendarStorageOperation<T> {
      * @param dbService A reference to the database service
      * @param contextId The context identifier
      */
-    protected CalendarStorageOperation(DatabaseService dbService, int contextId) throws OXException {
+    protected CalendarStorageOperation(DatabaseService dbService, int contextId) {
         this(dbService, contextId, DEFAULT_RETRIES, null);
     }
 
@@ -113,7 +114,7 @@ public abstract class CalendarStorageOperation<T> {
      * @param maxRetries The maximum number of retry attempts when encountering recoverable storage errors, or <code>0</code> for no retries
      * @param optConnection An optional <i>outer</i> database connection to use
      */
-    protected CalendarStorageOperation(DatabaseService dbService, int contextId, int maxRetries, Connection optConnection) throws OXException {
+    protected CalendarStorageOperation(DatabaseService dbService, int contextId, int maxRetries, Connection optConnection) {
         super();
         this.dbService = dbService;
         this.contextId = contextId;
@@ -173,7 +174,7 @@ public abstract class CalendarStorageOperation<T> {
      */
     public T executeQuery() throws OXException {
         if (null != foreignConnection) {
-            return call(initStorage(new SimpleDBProvider(foreignConnection, null), DBTransactionPolicy.NO_TRANSACTIONS));
+            return execute(new SimpleDBProvider(foreignConnection, null), DBTransactionPolicy.NO_TRANSACTIONS);
         }
         return doExecuteQuery();
     }
@@ -185,7 +186,7 @@ public abstract class CalendarStorageOperation<T> {
      */
     public T executeUpdate() throws OXException {
         if (null != foreignConnection) {
-            return call(initStorage(new SimpleDBProvider(foreignConnection, foreignConnection), DBTransactionPolicy.NO_TRANSACTIONS));
+            return execute(new SimpleDBProvider(foreignConnection, foreignConnection), DBTransactionPolicy.NO_TRANSACTIONS);
         }
         while (true) {
             try {
@@ -207,7 +208,7 @@ public abstract class CalendarStorageOperation<T> {
         try {
             readConnection = dbService.getReadOnly(contextId);
             onConnection(readConnection);
-            return call(initStorage(new SimpleDBProvider(readConnection, null), DBTransactionPolicy.NO_TRANSACTIONS));
+            return execute(new SimpleDBProvider(readConnection, null), DBTransactionPolicy.NO_TRANSACTIONS);
         } finally {
             onConnection(null);
             if (null != readConnection) {
@@ -223,7 +224,7 @@ public abstract class CalendarStorageOperation<T> {
             writeConnection = dbService.getWritable(contextId);
             writeConnection.setAutoCommit(false);
             onConnection(writeConnection);
-            T result = call(initStorage(new SimpleDBProvider(writeConnection, writeConnection), DBTransactionPolicy.NO_TRANSACTIONS));
+            T result = execute(new SimpleDBProvider(writeConnection, writeConnection), DBTransactionPolicy.NO_TRANSACTIONS);
             writeConnection.commit();
             committed = true;
             return result;
@@ -247,6 +248,16 @@ public abstract class CalendarStorageOperation<T> {
                     dbService.backWritable(contextId, writeConnection);
                 }
             }
+        }
+    }
+
+    private T execute(DBProvider dbProvider, DBTransactionPolicy txPolicy) throws OXException {
+        CalendarStorage storage = initStorage(dbProvider, txPolicy);
+        long start = System.currentTimeMillis();
+        try {
+            return call(storage);
+        } finally {
+            LOG.trace("Calendar storage operation finished after {}ms.", L(System.currentTimeMillis() - start));
         }
     }
 

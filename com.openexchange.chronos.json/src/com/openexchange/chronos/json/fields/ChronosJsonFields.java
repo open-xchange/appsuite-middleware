@@ -153,6 +153,10 @@ public class ChronosJsonFields {
      */
     public static final String RECURRENCE_ID = "recurrenceId";
     /**
+     * The recurrence dates of the event. See {@link Event#getRecurrenceDates()}
+     */
+    public static final String RECURRENCE_DATES = "recurrenceDates";
+    /**
      * The change exception dates of the event. See {@link Event#getChangeExceptionDates()}
      */
     public static final String CHANGE_EXCEPTION_DATES = "changeExceptionDates";
@@ -277,6 +281,10 @@ public class ChronosJsonFields {
          * The resource of the attendee.
          */
         public static final String RESOURCE = "resource";
+        /**
+         * The group of the attendee.
+         */
+        public static final String GROUP = "group";
 
     }
 

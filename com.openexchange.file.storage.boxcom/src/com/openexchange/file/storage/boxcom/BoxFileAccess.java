@@ -942,7 +942,7 @@ public class BoxFileAccess extends AbstractBoxResourceAccess implements Thumbnai
 
         static {
             BoxFileField[] boxFileFields = BoxFileField.values();
-            String[] allFields = new String[boxFileFields.length];
+            allFields = new String[boxFileFields.length];
             int index = 0;
             for (BoxFileField bxField : boxFileFields) {
                 allFields[index++] = bxField.getBoxField();

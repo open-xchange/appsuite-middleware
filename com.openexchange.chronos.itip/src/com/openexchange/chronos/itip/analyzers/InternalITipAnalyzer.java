@@ -53,6 +53,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import com.openexchange.chronos.Event;
 import com.openexchange.chronos.itip.ITipAnalysis;
 import com.openexchange.chronos.itip.ITipAnnotation;
 import com.openexchange.chronos.itip.ITipIntegrationUtility;
@@ -84,9 +85,11 @@ public class InternalITipAnalyzer extends AbstractITipAnalyzer {
     @Override
     public ITipAnalysis analyze(ITipMessage message, Map<String, String> header, TypeWrapper wrapper, Locale locale, User user, Context ctx, CalendarSession session) throws OXException {
         ITipAnalysis analysis = new ITipAnalysis();
+        Event event = message.getEvent();
+        session.getUtilities().adjustTimeZones(message.getOwner() > 0 ? message.getOwner() : session.getUserId(), event, null);
 
         ITipAnnotation annotation = new ITipAnnotation(Messages.INTERNAL_MAIL, locale);
-        annotation.setEvent(message.getEvent());
+        annotation.setEvent(event);
         analysis.addAnnotation(annotation);
 
         return analysis;
