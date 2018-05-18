@@ -3,7 +3,7 @@ Bundle-ManifestVersion: 2
 Bundle-Name: Chronos calendar provider service defintions
 Bundle-SymbolicName: com.openexchange.chronos.provider
 Bundle-Version: 7.10.0
-Bundle-Vendor: Open-Xchange Inc.
+Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Import-Package: com.google.common.io,
  com.openexchange.ajax.fileholder,

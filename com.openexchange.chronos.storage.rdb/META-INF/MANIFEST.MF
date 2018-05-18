@@ -3,7 +3,7 @@ Bundle-ManifestVersion: 2
 Bundle-Name: The chronos RDB storage bundle
 Bundle-SymbolicName: com.openexchange.chronos.storage.rdb
 Bundle-Version: 7.10.0
-Bundle-Vendor: Open-Xchange Inc.
+Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Import-Package: com.github.mangstadt.vinnie,
  com.github.mangstadt.vinnie.io,
