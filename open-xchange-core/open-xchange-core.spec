@@ -1275,6 +1275,9 @@ ox_comment html.tag.input add /opt/open-xchange/etc/whitelist.properties
 # SoftwareChange_Request-3934
 ox_comment html.style.list-style-image add /opt/open-xchange/etc/whitelist.properties
 
+# SoftwareChange_Request-175
+ox_add_property com.openexchange.server.migrationRedirectURL "" /opt/open-xchange/etc/server.properties
+
 PROTECT="configdb.properties mail.properties management.properties oauth-provider.properties secret.properties secrets sessiond.properties tokenlogin-secrets"
 for FILE in $PROTECT
 do
