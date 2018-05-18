@@ -89,6 +89,7 @@ import com.openexchange.pgp.core.exceptions.PGPCoreExceptionCodes;
 public class PGPEncrypter {
 
     private static final int BUFFERSIZE = 256;
+    private boolean withIntegrityPacket = true;
 
     /**
      * Encrypts data
@@ -108,6 +109,17 @@ public class PGPEncrypter {
             (PGPSecretKey) null /* do not sign */,
             null /* no signing password required */,
             recipientsKeys);
+    }
+
+    /**
+     * Enables or disabled adding MDC for integrity validation
+     *
+     * @param withIntegrityPacket true, to add a MDC packet, false otherwise
+     * @return this
+     */
+    PGPEncrypter setWithIntegrityPacket(boolean withIntegrityPacket) {
+        this.withIntegrityPacket = withIntegrityPacket;
+        return this;
     }
 
     /**
@@ -157,7 +169,7 @@ public class PGPEncrypter {
         //Initialize encrypting
         BcPGPDataEncryptorBuilder builder = new BcPGPDataEncryptorBuilder(PGPEncryptedData.AES_256);
         builder.setSecureRandom(new SecureRandom());
-        builder.setWithIntegrityPacket(true);
+        builder.setWithIntegrityPacket(withIntegrityPacket);
 
         //Adding recipients
         PGPEncryptedDataGenerator encryptedDataGenerator = new PGPEncryptedDataGenerator(builder);
