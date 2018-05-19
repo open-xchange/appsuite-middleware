@@ -192,10 +192,16 @@ public final class ManagedFileManagementImpl implements ManagedFileManagement {
                         // Expired if deleted OR time-to-live has elapsed
                         int optTimeToLive = cur.optTimeToLive();
                         long timeElapsed = now - cur.getLastAccess();
-                        if (cur.isDeleted() || (timeElapsed > (optTimeToLive > 0 ? optTimeToLive : time2live))) {
-                            File file = cur.getFilePlain();
-                            String fname = null != file && file.exists() ? file.getName() : "";
-                            cur.delete();
+                        
+                        File file = cur.getFilePlain();
+                        if (false == file.exists()) {
+                            // File does no more exist
+                            String fname = file.getName();
+                            filesIter.remove();
+                            logger.debug("Removed deleted managed file {}, id {}", fname, cur.getID());
+                        } else if (timeElapsed > (optTimeToLive > 0 ? optTimeToLive : time2live)) {
+                            String fname = file.getName();
+                            cur.deletePlain();
                             filesIter.remove();
                             logger.debug("Removed expired managed file {}, id {}", fname, cur.getID());
                         } else {

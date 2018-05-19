@@ -3,7 +3,7 @@ Bundle-ManifestVersion: 2
 Bundle-Name: The chronos common bundle
 Bundle-SymbolicName: com.openexchange.chronos.common
 Bundle-Version: 7.10.0
-Bundle-Vendor: Open-Xchange Inc.
+Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ClassPath: .,
  lib/vinnie-2.0.0.jar,
