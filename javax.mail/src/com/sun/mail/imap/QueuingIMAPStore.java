@@ -81,6 +81,7 @@ import javax.mail.Session;
 import javax.mail.URLName;
 import javax.security.auth.Subject;
 import org.slf4j.Logger;
+import com.sun.mail.iap.CommandFailedException;
 import com.sun.mail.iap.ConnectQuotaExceededException;
 import com.sun.mail.iap.ProtocolException;
 import com.sun.mail.imap.protocol.IMAPProtocol;
@@ -391,6 +392,10 @@ public class QueuingIMAPStore extends IMAPStore {
                 @Override
                 public Object run() throws Exception {
                     p.sasllogin(saslMechanisms, m_saslRealm, authzid, u, pw);
+                    if (!p.isAuthenticated()) {
+                        throw new CommandFailedException(
+                                    "SASL authentication failed");
+                    }
                     return null;
                 }
             });
