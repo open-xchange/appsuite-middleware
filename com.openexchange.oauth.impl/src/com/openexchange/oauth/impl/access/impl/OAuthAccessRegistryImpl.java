@@ -180,13 +180,7 @@ public class OAuthAccessRegistryImpl implements OAuthAccessRegistry {
         }
 
         synchronized (accesses) {
-            if (accesses.isInvalid()) {
-                return removeIfLast(contextId, userId);
-            }
-
-            for (OAuthAccess access : accesses.allAccesses()) {
-                access.dispose();
-            }
+            accesses.invalidate();
             return true;
         }
     }
