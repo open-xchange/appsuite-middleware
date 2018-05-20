@@ -65,7 +65,6 @@ import com.sun.mail.util.BASE64DecoderStream;
 import com.sun.mail.util.BASE64EncoderStream;
 import com.sun.mail.util.MailLogger;
 import com.sun.mail.util.PropUtil;
-import com.sun.mail.util.Reference;
 
 /**
  * This class contains a single method that does authentication using
@@ -73,7 +72,7 @@ import com.sun.mail.util.Reference;
  * J2SE 1.5.  Eventually it should be merged into IMAPProtocol.java.
  */
 
-public class IMAPSaslAuthenticator implements SaslAuthenticatorWithReference {
+public class IMAPSaslAuthenticator implements SaslAuthenticator {
 
     private IMAPProtocol pr;
     private String name;
@@ -103,14 +102,8 @@ public class IMAPSaslAuthenticator implements SaslAuthenticatorWithReference {
     }
 
     public boolean authenticate(String[] mechs, final String realm,
-        final String authzid, final String u,
-        final String p) throws ProtocolException {
-        return authenticate(mechs, realm, authzid, u, p, null);
-    }
-
-    public boolean authenticate(String[] mechs, final String realm,
 				final String authzid, final String u,
-				final String p, final Reference<Exception> optErrorRef) throws ProtocolException {
+				final String p) throws ProtocolException {
 
 	synchronized (pr) {	// authenticate method should be synchronized
 	List<Response> v = new ArrayList<Response>();
@@ -194,8 +187,6 @@ public class IMAPSaslAuthenticator implements SaslAuthenticatorWithReference {
 	    tag = pr.writeCommand("AUTHENTICATE", args);
 	} catch (Exception ex) {
 	    logger.log(Level.FINE, "SASL AUTHENTICATE Exception", ex);
-	    if (null != optErrorRef)
-	        optErrorRef.setValue(ex);
 	    return false;
 	}
 

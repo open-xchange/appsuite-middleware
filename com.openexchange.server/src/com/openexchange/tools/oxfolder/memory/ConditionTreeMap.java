@@ -76,6 +76,7 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.threadpool.AbstractTask;
+import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.threadpool.ThreadPools;
 import com.openexchange.tools.oxfolder.OXFolderBatchLoader;
 import com.openexchange.tools.oxfolder.OXFolderExceptionCode;
@@ -738,7 +739,12 @@ public final class ConditionTreeMap {
         // Put to cache asynchronously with a separate list
         if (cacheEnabled) {
             final List<FolderObject> tmp = new ArrayList<FolderObject>(loaded);
-            ThreadPools.getThreadPool().submit(new AbstractTask<Void>() {
+            ThreadPoolService threadPoolService = ThreadPools.getThreadPool();
+            if (threadPoolService == null) {
+                LOG.debug("The Thread Pool Service is absent (probably due to server shutdown.");
+                return;
+            }
+            threadPoolService.submit(new AbstractTask<Void>() {
 
                 @Override
                 public Void call() throws Exception {

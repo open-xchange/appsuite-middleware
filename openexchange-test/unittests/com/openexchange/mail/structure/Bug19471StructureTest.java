@@ -80,7 +80,7 @@ import com.openexchange.server.services.ServerServiceRegistry;
  */
 @RunWith(PowerMockRunner.class)
 @PowerMockIgnore("javax.management.*")
-@PrepareForTest(ServerServiceRegistry.class)
+@PrepareForTest({ ServerServiceRegistry.class })
 public class Bug19471StructureTest extends AbstractMailTest {
 
     //@formatter:off
@@ -254,15 +254,18 @@ public class Bug19471StructureTest extends AbstractMailTest {
     @Mock
     private ServerServiceRegistry serviceRegistry;
 
+    @Mock
+    private ICalService service;
+
     @Before
-    public void setup() {
+    public void setUp() throws Exception {
+        super.setUp();
         MockitoAnnotations.initMocks(this);
     }
 
     @Test
     @PrepareForTest(ServerServiceRegistry.class)
     public void testMIMEStructure() {
-        ICalService service = PowerMockito.mock(ICalService.class);
         ICalUtilities icalUtils = new ICalUtilitiesImpl(new ICalMapper());
         PowerMockito.when(service.getUtilities()).thenReturn(icalUtils);
 
@@ -288,7 +291,6 @@ public class Bug19471StructureTest extends AbstractMailTest {
 
                 assertTrue("Body object is not a JSON object.", (bodyObject instanceof JSONArray));
                 jsonBodyArray = (JSONArray) bodyObject;
-
             }
 
             JSONObject icalObject = jsonBodyArray.getJSONObject(1);
@@ -300,5 +302,4 @@ public class Bug19471StructureTest extends AbstractMailTest {
             fail(e.getMessage());
         }
     }
-
 }
