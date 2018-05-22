@@ -57,7 +57,7 @@ import java.lang.annotation.Target;
 import com.openexchange.groupware.update.UpdateTaskV2;
 
 /**
- * {@link ExcludableUpdateTask} - Marks an {@link UpdateTaskV2} as 'excludable'.
+ * {@link NamespaceAwareUpdateTask} - Marks an {@link UpdateTaskV2} as 'excludable'.
  * 
  * @see {@link UpdateTaskCollection} and {@link ExcludedList}
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
@@ -66,7 +66,7 @@ import com.openexchange.groupware.update.UpdateTaskV2;
 @Inherited
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
-public @interface ExcludableUpdateTask {
+public @interface NamespaceAwareUpdateTask {
 
     /**
      * Returns the namespace of the excludable update task(s)

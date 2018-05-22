@@ -153,28 +153,42 @@ class UpdateTaskCollection {
         return retval;
     }
 
+    /**
+     * Returns a {@link List} of {@link UpdateTaskV2} tasks without the excluded ones
+     * 
+     * @return a {@link List} of {@link UpdateTaskV2} tasks without the excluded ones
+     */
     List<UpdateTaskV2> getListWithoutExcludes() {
         List<UpdateTaskV2> retval = getFullList();
         for (String excluded : ExcludedList.getInstance().getTaskList()) {
             // Matching must be done based on task class name.
-            Iterator<UpdateTaskV2> iter = retval.iterator();
-            while (iter.hasNext()) {
-                Class<? extends UpdateTaskV2> clazz = iter.next().getClass();
-                if (excluded.equals(clazz.getName())) {
-                    iter.remove();
-                } else {
-                    ExcludableUpdateTask annotation = clazz.getAnnotation(ExcludableUpdateTask.class);
-                    if (annotation == null) {
-                        continue;
-                    }
-                    String namespace = annotation.namespace();
-                    if (ExcludedList.getInstance().getExcludedNamespaces().contains(namespace)) {
-                        iter.remove();
-                    }
-                }
-            }
+            excludeTask(retval, excluded);
         }
         return retval;
+    }
+
+    /**
+     * 
+     * @param retval
+     * @param excluded
+     */
+    private void excludeTask(List<UpdateTaskV2> retval, String excluded) {
+        Iterator<UpdateTaskV2> iter = retval.iterator();
+        while (iter.hasNext()) {
+            Class<? extends UpdateTaskV2> clazz = iter.next().getClass();
+            if (excluded.equals(clazz.getName())) {
+                iter.remove();
+                continue;
+            }
+            NamespaceAwareUpdateTask annotation = clazz.getAnnotation(NamespaceAwareUpdateTask.class);
+            if (annotation == null) {
+                continue;
+            }
+            String namespace = annotation.namespace();
+            if (ExcludedList.getInstance().getExcludedNamespaces().contains(namespace)) {
+                iter.remove();
+            }
+        }
     }
 
     private List<UpdateTaskV2> getFullList() {

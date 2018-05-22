@@ -65,7 +65,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.update.internal.ExcludableUpdateTask;
+import com.openexchange.groupware.update.internal.NamespaceAwareUpdateTask;
 import com.openexchange.java.Strings;
 import com.openexchange.tools.update.Column;
 import com.openexchange.tools.update.Tools;
@@ -84,7 +84,7 @@ import com.openexchange.tools.update.Tools;
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @since v7.10.0
  */
-@ExcludableUpdateTask(namespace = "com.openexchange.groupware.update.utf8mb4")
+@NamespaceAwareUpdateTask(namespace = "com.openexchange.groupware.update.utf8mb4")
 public abstract class AbstractConvertUtf8ToUtf8mb4Task extends UpdateTaskAdapter {
 
     private static final org.slf4j.Logger LOGGER = org.slf4j.LoggerFactory.getLogger(AbstractConvertUtf8ToUtf8mb4Task.class);
