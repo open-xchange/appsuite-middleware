@@ -71,7 +71,8 @@ public final class CreateOAuthAccountTable extends AbstractCreateTableImpl {
         "serviceId VARCHAR(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL," +
         "scope VARCHAR(767) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL," +
         "identity VARCHAR(767) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL," +
-        "PRIMARY KEY (cid, id)" +
+        "PRIMARY KEY (cid, id)," +
+        "KEY `identity` identity(191)" + 
         ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci";
 
     public CreateOAuthAccountTable() {

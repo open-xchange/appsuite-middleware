@@ -49,6 +49,9 @@
 
 package com.openexchange.oauth.impl.internal.groupware;
 
+import java.sql.Connection;
+import java.sql.SQLException;
+import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.SimpleConvertUtf8ToUtf8mb4UpdateTask;
 
 /**
@@ -63,5 +66,15 @@ public class OAuthAccountsTableUtf8Mb4UpdateTask extends SimpleConvertUtf8ToUtf8
      */
     public OAuthAccountsTableUtf8Mb4UpdateTask() {
         super(DropForeignKeyFromOAuthAccountTask.class, "oauthAccounts");
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.groupware.update.SimpleConvertUtf8ToUtf8mb4UpdateTask#before(com.openexchange.groupware.update.PerformParameters, java.sql.Connection)
+     */
+    @Override
+    protected void before(PerformParameters params, Connection connection) throws SQLException {
+        recreateKey(connection, "oauthAccounts", new String[] { "identity" }, new int[] { 191 });
     }
 }
