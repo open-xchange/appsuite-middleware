@@ -85,6 +85,6 @@ public final class ChangeIPTest extends AbstractAJAXSession {
         assertTrue("Change IP response contains wrong data.", response1.hasCorrectResponse());
         final RefreshSecretRequest request2 = new RefreshSecretRequest(true);
         final RefreshSecretResponse response2 = getClient().execute(request2);
-        assertTrue("Refresh request should be denied because of wrong IP.", response2.hasError());
+        assertFalse("Refresh request should pass, because localhost is inside whitelisted ip-range.", response2.hasError());
     }
 }
