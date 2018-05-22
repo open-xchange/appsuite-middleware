@@ -1,3 +1,9 @@
+open-xchange-pns-transport-websockets (7.10.0-6) stable; urgency=medium
+
+  * Sixth preview of 7.10.0 release
+
+ -- Thorben Betten <thorben.betten@open-xchange.com>  Fri, 18 May 2018 12:54:37 +0200
+
 open-xchange-pns-transport-websockets (7.10.0-5) stable; urgency=medium
 
   * Fifth preview of 7.10.0 release

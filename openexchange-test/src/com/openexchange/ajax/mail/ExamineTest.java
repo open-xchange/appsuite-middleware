@@ -64,7 +64,6 @@ import org.junit.Test;
 import com.openexchange.ajax.folder.Create;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.InsertRequest;
-import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.UserValues;
 import com.openexchange.ajax.mail.actions.ExamineRequest;
 import com.openexchange.ajax.mail.actions.ExamineResponse;
@@ -105,8 +104,6 @@ public class ExamineTest extends AbstractMailTest {
 
     @Test
     public void testExamineTest() throws OXException, IOException, JSONException {
-
-        AJAXClient client = getClient();
         UserValues values = getClient().getValues();
         String folder = values.getInboxFolder();
 

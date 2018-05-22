@@ -3,7 +3,7 @@ Bundle-ManifestVersion: 2
 Bundle-Name: The chronos API bundle
 Bundle-SymbolicName: com.openexchange.chronos
 Bundle-Version: 7.10.0
-Bundle-Vendor: Open-Xchange Inc.
+Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Import-Package: com.openexchange.ajax.fileholder,
  com.openexchange.exception,

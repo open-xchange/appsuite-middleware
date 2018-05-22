@@ -130,8 +130,8 @@ public final class BoundaryAwareIMAPStoreContainer extends UnboundedIMAPStoreCon
             // Do not forget to release previously acquired permit
             final Limiter tmp = limiter;
             if (null != tmp) {
+                tmp.release();
                 synchronized (tmp) {
-                    tmp.release();
                     tmp.notifyAll();
                     LOG.debug("BoundaryAwareIMAPStoreContainer.backStore(): Released -- {}", tmp);
                 }

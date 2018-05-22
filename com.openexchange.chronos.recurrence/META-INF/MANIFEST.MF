@@ -4,7 +4,7 @@ Bundle-Name: Recurrence Service Bundle
 Bundle-SymbolicName: com.openexchange.chronos.recurrence
 Bundle-Version: 7.10.0
 Bundle-Activator: com.openexchange.chronos.recurrence.osgi.Activator
-Bundle-Vendor: Open-Xchange Inc.
+Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Import-Package: com.openexchange.chronos,
  com.openexchange.chronos.common,

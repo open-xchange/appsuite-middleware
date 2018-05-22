@@ -53,7 +53,6 @@ import static org.apache.commons.lang.StringUtils.isNotEmpty;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.zip.Adler32;
 import java.util.zip.CheckedInputStream;
@@ -108,13 +107,11 @@ public class TransformImageClientAction extends TransformImageAction {
 
         IImageClient imageClient = this.m_imageClient.get();
         if (null != imageClient) {
-            if (!(ret = m_clientStatusValid.get())) {
-                try {
-                    m_clientStatusValid.set(ret = imageClient.isConnected());
-                } catch (OXException e) {
-                    // only tracing here
-                    LOG.trace(Throwables.getRootCause(e).getMessage());
-                }
+            try {
+                ret = imageClient.isConnected();
+            } catch (OXException e) {
+                // only tracing here
+                LOG.trace(Throwables.getRootCause(e).getMessage());
             }
         }
 
@@ -265,8 +262,6 @@ public class TransformImageClientAction extends TransformImageAction {
     // - Members ---------------------------------------------------------------
 
     private final AtomicReference<IImageClient> m_imageClient = new AtomicReference<>(null);
-
-    private final AtomicBoolean m_clientStatusValid = new AtomicBoolean(false);
 
     // - Helper classes --------------------------------------------------------
 

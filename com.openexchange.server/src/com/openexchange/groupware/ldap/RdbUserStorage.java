@@ -1396,7 +1396,16 @@ public class RdbUserStorage extends UserStorage {
                     //FIXME: javadoc claims to return null if not found...
                     throw LdapExceptionCode.NO_USER_BY_MAIL.create(email).setPrefix("USR");
                 }
-                return getUser(context, con, new int[] { userId })[0];
+                User user = getUser(context, con, new int[] { userId })[0];
+                if (!includeGuests && user.getCreatedBy() != 0) {
+                    //FIXME: javadoc claims to return null if not found...
+                    throw LdapExceptionCode.NO_USER_BY_MAIL.create(email).setPrefix("USR");
+                }
+                if (excludeUsers && user.getCreatedBy() <= 0) {
+                    //FIXME: javadoc claims to return null if not found...
+                    throw LdapExceptionCode.NO_USER_BY_MAIL.create(email).setPrefix("USR");
+                }
+                return user;
             } catch (OXException e) {
                 if (com.openexchange.groupware.ldap.UserExceptionCode.USER_NOT_FOUND.equals(e)) {
                     //FIXME: javadoc claims to return null if not found...

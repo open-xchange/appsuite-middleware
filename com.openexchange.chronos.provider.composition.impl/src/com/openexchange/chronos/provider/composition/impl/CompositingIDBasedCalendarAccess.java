@@ -732,8 +732,8 @@ public class CompositingIDBasedCalendarAccess extends AbstractCompositingIDBased
     public void deleteFolder(String folderId, long clientTimestamp) throws OXException {
         int accountId = getAccountId(folderId);
         try {
-            CalendarAccess calendarAccess = getAccess(accountId);
-            if (FolderCalendarAccess.class.isInstance(calendarAccess)) {
+            if (isFolderCalendarProvider(accountId)) {
+                CalendarAccess calendarAccess = getAccess(accountId);
                 /*
                  * delete folder in calendar account
                  */

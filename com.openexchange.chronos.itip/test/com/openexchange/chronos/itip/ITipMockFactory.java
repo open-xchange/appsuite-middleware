@@ -102,7 +102,7 @@ public final class ITipMockFactory {
     public static CalendarUtilities mockUtilities() throws OXException {
         CalendarUtilities utilities = Mockito.mock(CalendarUtilities.class);
         Mockito.when(utilities.copyEvent(Matchers.any(), Matchers.any())).then((i) -> {
-            return EventMapper.getInstance().copy(i.getArgumentAt(0, Event.class), new Event(), (EventField[]) i.getArguments()[1]);
+            return EventMapper.getInstance().copy(i.getArgument(0), new Event(), (EventField[]) i.getArguments()[1]);
         });
         return utilities;
     }

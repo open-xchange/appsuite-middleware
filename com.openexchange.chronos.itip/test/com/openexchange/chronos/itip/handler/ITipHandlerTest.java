@@ -49,6 +49,7 @@
 
 package com.openexchange.chronos.itip.handler;
 
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
@@ -80,18 +81,14 @@ public class ITipHandlerTest {
 
     @Test
     public void testHandle_eventNull_return() {
-        handler.handle(null);
-
-        Mockito.verify(calendarEvent, Mockito.never()).getAccountId(); // verifies skipping method
+        Assert.assertFalse(handler.shouldHandle(null));
     }
 
     @Test
     public void testHandle_calendarParametersNull_process() {
         Mockito.when(calendarEvent.getCalendarParameters()).thenReturn(null);
 
-        handler.handle(calendarEvent);
-
-        Mockito.verify(calendarEvent, Mockito.atLeastOnce()).getAccountId(); // verifies skipping method
+        Assert.assertTrue(handler.shouldHandle(calendarEvent));
     }
 
     @Test
@@ -99,9 +96,7 @@ public class ITipHandlerTest {
         Mockito.when(calendarEvent.getCalendarParameters()).thenReturn(calendarParameters);
         Mockito.when(calendarParameters.contains(CalendarParameters.PARAMETER_SUPPRESS_ITIP)).thenReturn(Boolean.FALSE);
 
-        handler.handle(calendarEvent);
-
-        Mockito.verify(calendarEvent, Mockito.atLeastOnce()).getAccountId(); // verifies skipping method
+        Assert.assertTrue(handler.shouldHandle(calendarEvent));
     }
 
     @Test
@@ -110,9 +105,7 @@ public class ITipHandlerTest {
         Mockito.when(calendarParameters.contains(CalendarParameters.PARAMETER_SUPPRESS_ITIP)).thenReturn(Boolean.TRUE);
         Mockito.when(calendarParameters.get(CalendarParameters.PARAMETER_SUPPRESS_ITIP, Boolean.class)).thenReturn(Boolean.FALSE);
 
-        handler.handle(calendarEvent);
-
-        Mockito.verify(calendarEvent, Mockito.atLeastOnce()).getAccountId(); // verifies skipping method
+        Assert.assertTrue(handler.shouldHandle(calendarEvent));
     }
 
     @Test
@@ -121,9 +114,7 @@ public class ITipHandlerTest {
         Mockito.when(calendarParameters.contains(CalendarParameters.PARAMETER_SUPPRESS_ITIP)).thenReturn(Boolean.TRUE);
         Mockito.when(calendarParameters.get(CalendarParameters.PARAMETER_SUPPRESS_ITIP, Boolean.class)).thenReturn(Boolean.TRUE);
 
-        handler.handle(calendarEvent);
-
-        Mockito.verify(calendarEvent, Mockito.never()).getAccountId(); // verifies skipping method
+        Assert.assertFalse(handler.shouldHandle(calendarEvent));
     }
 
 }
