@@ -124,6 +124,7 @@ import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.threadpool.ThreadPools;
 import com.openexchange.threadpool.ThreadPools.TrackableCallable;
 import com.openexchange.threadpool.behavior.AbortBehavior;
+import com.openexchange.tools.oxfolder.OXFolderExceptionCode;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
 import com.openexchange.userconf.UserPermissionService;
@@ -1719,6 +1720,9 @@ public final class CacheFolderStorage implements ReinitializableFolderStorage, F
         }
         boolean isMove = null != folder.getParentID();
         String oldParentId = storageVersion.getParentID();
+        if(oldParentId == null){
+            throw OXFolderExceptionCode.UNKNOWN_EXCEPTION.create("Missing old parent id");
+        }
         {
             UpdatePerformer updatePerformer = newUpdatePerformer(storageParameters);
             updatePerformer.setCheck4Duplicates(false);
