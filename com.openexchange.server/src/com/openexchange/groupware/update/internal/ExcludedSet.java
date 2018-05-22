@@ -50,7 +50,6 @@
 package com.openexchange.groupware.update.internal;
 
 import java.io.IOException;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.Map.Entry;
 import java.util.Properties;
@@ -59,10 +58,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.ConfigurationServices;
-import com.openexchange.config.lean.DefaultProperty;
-import com.openexchange.config.lean.LeanConfigurationService;
-import com.openexchange.config.lean.Property;
-import com.openexchange.java.Strings;
 
 /**
  * This class contains the list of excluded update tasks. The configuration can be done by the configuration file
@@ -75,10 +70,7 @@ public class ExcludedSet implements UpdateTaskSet<String> {
 
     private static final Logger LOG = LoggerFactory.getLogger(ExcludedSet.class);
 
-    private static final String PROPERTY_DEFAULT = "";
-    private static final Property PROPERTY = DefaultProperty.valueOf("com.openexchange.groupware.update.excludedUpdateTasks", PROPERTY_DEFAULT);
     private static final ExcludedSet SINGLETON = new ExcludedSet();
-
     private static final String CONFIG_FILE_NAME = "excludedupdatetasks.properties";
 
     private final Set<String> taskSet = new HashSet<String>();
@@ -118,24 +110,6 @@ public class ExcludedSet implements UpdateTaskSet<String> {
     }
 
     /**
-     * Loads the property <code>com.openexchange.groupware.update.excludedUpdateTasks</code>
-     * 
-     * @param leanConfig The {@link LeanConfigurationService} to load the property
-     */
-    public void loadExcludedNamespaces(LeanConfigurationService leanConfig) {
-        String namespaces = leanConfig.getProperty(PROPERTY);
-        String[] split = Strings.splitByComma(namespaces);
-        if (split == null) {
-            return;
-        }
-        Set<String> en = new HashSet<>();
-        for (String s : split) {
-            excludedNamespaces.add(s);
-        }
-        excludedNamespaces = Collections.unmodifiableSet(en);
-    }
-
-    /**
      * Returns an unmodifiable {@link Set} with all excluded update task namespaces
      * 
      * @return an unmodifiable {@link Set} with all excluded update task namespaces
@@ -147,5 +121,15 @@ public class ExcludedSet implements UpdateTaskSet<String> {
     @Override
     public Set<String> getTaskSet() {
         return taskSet;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.groupware.update.internal.UpdateTaskSet#containsTask(java.lang.Object)
+     */
+    @Override
+    public boolean containsTask(String task) {
+        return taskSet.contains(task);
     }
 }

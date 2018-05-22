@@ -55,6 +55,7 @@ import com.openexchange.groupware.update.UpdateTaskV2;
 /**
  * {@link UpdateTaskSet}
  *
+ * @param <T> The type of task
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
 interface UpdateTaskSet<T> {
@@ -65,4 +66,12 @@ interface UpdateTaskSet<T> {
      * @return a {@link Set} with all {@link UpdateTaskV2} tasks
      */
     Set<T> getTaskSet();
+
+    /**
+     * Determines whether the specified task {@link T} is contained in this {@link UpdateTaskSet}
+     * 
+     * @param task The task
+     * @return <code>true</code> if the task is contained; <code>false</code> otherwise
+     */
+    boolean containsTask(T task);
 }

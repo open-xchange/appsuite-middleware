@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2016-2020 OX Software GmbH
+ *     Copyright (C) 2018-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,88 +49,74 @@
 
 package com.openexchange.groupware.update.internal;
 
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
-import com.openexchange.groupware.update.UpdateTaskV2;
+import com.openexchange.config.lean.DefaultProperty;
+import com.openexchange.config.lean.LeanConfigurationService;
+import com.openexchange.config.lean.Property;
+import com.openexchange.java.Strings;
 
 /**
- * {@link DynamicSet} - Registry for {@link UpdateTask update tasks}.
+ * {@link NamespaceAwareExcludedSet}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @since v7.10.0
  */
-public final class DynamicSet implements UpdateTaskSet<UpdateTaskV2> {
+public class NamespaceAwareExcludedSet implements UpdateTaskSet<String> {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(DynamicSet.class);
+    private static final String PROPERTY_DEFAULT = "";
+    private static final Property PROPERTY = DefaultProperty.valueOf("com.openexchange.groupware.update.excludedUpdateTasks", PROPERTY_DEFAULT);
+    private Set<String> excludedNamespaces = new HashSet<>();
 
-    private static final DynamicSet SINGLETON = new DynamicSet();
+    private static final NamespaceAwareExcludedSet SINGLETON = new NamespaceAwareExcludedSet();
 
-    /**
-     * Gets the singleton instance of {@link DynamicSet}.
-     *
-     * @return The singleton instance
-     */
-    public static DynamicSet getInstance() {
+    public static NamespaceAwareExcludedSet getInstance() {
         return SINGLETON;
     }
 
-    /*-
-     * -------------------------------- Member section --------------------------------
-     */
-
-    private final ConcurrentMap<Class<? extends UpdateTaskV2>, UpdateTaskV2> taskRegistry = new ConcurrentHashMap<Class<? extends UpdateTaskV2>, UpdateTaskV2>();
-
     /**
-     * Initializes a new {@link DynamicSet}.
+     * Initialises a new {@link NamespaceAwareExcludedSet}.
      */
-    private DynamicSet() {
+    public NamespaceAwareExcludedSet() {
         super();
     }
 
     /**
-     * Adds the specified update task to this registry.
+     * Loads the property <code>com.openexchange.groupware.update.excludedUpdateTasks</code>
      * 
-     * @param updateTask The {@link UpdateTaskV2} task to add
-     * @return <code>true</code> if the task was successfully registered; <code>false</code>
-     *         if the same task was previously registered.
+     * @param leanConfig The {@link LeanConfigurationService} to load the property
      */
-    public boolean addUpdateTask(final UpdateTaskV2 updateTask) {
-        final boolean added = (null == taskRegistry.putIfAbsent(updateTask.getClass(), updateTask));
-        if (added) {
-            UpdateTaskCollection.getInstance().dirtyVersion();
-        } else {
-            LOG.error("Update task \"{}\" is already registered.", updateTask.getClass().getName());
+    public void loadExcludedNamespaces(LeanConfigurationService leanConfig) {
+        String namespaces = leanConfig.getProperty(PROPERTY);
+        String[] split = Strings.splitByComma(namespaces);
+        if (split == null) {
+            return;
         }
-        return added;
+        Set<String> en = new HashSet<>();
+        for (String s : split) {
+            excludedNamespaces.add(s);
+        }
+        excludedNamespaces = Collections.unmodifiableSet(en);
     }
 
-    /**
-     * Removes specified update task from this registry.
-     *
-     * @param updateTask The update task
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.groupware.update.internal.UpdateTaskSet#getTaskSet()
      */
-    public void removeUpdateTask(final UpdateTaskV2 updateTask) {
-        final UpdateTaskV2 removed = taskRegistry.remove(updateTask.getClass());
-        if (null == removed) {
-            LOG.error("Update task \"{}\" is unknown and could not be deregistered.", updateTask.getClass().getName());
-        } else {
-            UpdateTaskCollection.getInstance().dirtyVersion();
-        }
-    }
-
     @Override
-    public Set<UpdateTaskV2> getTaskSet() {
-        final Set<UpdateTaskV2> retval = new HashSet<UpdateTaskV2>(taskRegistry.size());
-        retval.addAll(taskRegistry.values());
-        return retval;
+    public Set<String> getTaskSet() {
+        return excludedNamespaces;
     }
-    
-    /* (non-Javadoc)
+
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.openexchange.groupware.update.internal.UpdateTaskSet#containsTask(java.lang.Object)
      */
     @Override
-    public boolean containsTask(UpdateTaskV2 task) {
-        return taskRegistry.containsKey(task.getClass());
+    public boolean containsTask(String task) {
+        return excludedNamespaces.contains(task);
     }
 }

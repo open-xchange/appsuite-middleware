@@ -189,7 +189,7 @@ class UpdateTaskCollection {
                 continue;
             }
             String namespace = annotation.namespace();
-            if (ExcludedSet.getInstance().getExcludedNamespaces().contains(namespace)) {
+            if (NamespaceAwareExcludedSet.getInstance().containsTask(namespace)) {
                 iter.remove();
             }
         }

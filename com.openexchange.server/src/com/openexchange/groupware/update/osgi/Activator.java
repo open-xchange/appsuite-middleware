@@ -58,6 +58,7 @@ import com.openexchange.groupware.update.UpdateTaskProviderService;
 import com.openexchange.groupware.update.internal.CreateUpdateTaskTable;
 import com.openexchange.groupware.update.internal.ExcludedSet;
 import com.openexchange.groupware.update.internal.InternalList;
+import com.openexchange.groupware.update.internal.NamespaceAwareExcludedSet;
 import com.openexchange.groupware.update.tasks.objectpermission.ObjectPermissionCreateTableService;
 import com.openexchange.groupware.update.tasks.objectusagecount.CreateObjectUseCountTableService;
 import com.openexchange.osgi.HousekeepingActivator;
@@ -87,7 +88,7 @@ public class Activator extends HousekeepingActivator {
         final LeanConfigurationService leanConfigService = getService(LeanConfigurationService.class);
 
         ExcludedSet.getInstance().configure(configService);
-        ExcludedSet.getInstance().loadExcludedNamespaces(leanConfigService);
+        NamespaceAwareExcludedSet.getInstance().loadExcludedNamespaces(leanConfigService);
         try {
             InternalList.getInstance().start();
         } catch (Error e) {
