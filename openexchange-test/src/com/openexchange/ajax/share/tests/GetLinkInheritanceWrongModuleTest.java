@@ -110,8 +110,13 @@ public class GetLinkInheritanceWrongModuleTest extends AbstractAPIClientSession 
 
     @Override
     public void tearDown() throws Exception {
-        super.tearDown();
+        A = null;
+        B = null;
+        C = null;
+        D = null;
+        E = null;
         folderManager.cleanUp();
+        super.tearDown();
     }
 
     @Test
