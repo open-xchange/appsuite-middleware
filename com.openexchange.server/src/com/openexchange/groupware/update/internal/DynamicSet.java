@@ -79,7 +79,7 @@ public final class DynamicSet implements UpdateTaskSet<UpdateTaskV2> {
      * -------------------------------- Member section --------------------------------
      */
 
-    private final ConcurrentMap<Class<? extends UpdateTaskV2>, UpdateTaskV2> taskList = new ConcurrentHashMap<Class<? extends UpdateTaskV2>, UpdateTaskV2>();
+    private final ConcurrentMap<Class<? extends UpdateTaskV2>, UpdateTaskV2> taskRegistry = new ConcurrentHashMap<Class<? extends UpdateTaskV2>, UpdateTaskV2>();
 
     /**
      * Initializes a new {@link DynamicSet}.
@@ -96,7 +96,7 @@ public final class DynamicSet implements UpdateTaskSet<UpdateTaskV2> {
      *         if the same task was previously registered.
      */
     public boolean addUpdateTask(final UpdateTaskV2 updateTask) {
-        final boolean added = (null == taskList.putIfAbsent(updateTask.getClass(), updateTask));
+        final boolean added = (null == taskRegistry.putIfAbsent(updateTask.getClass(), updateTask));
         if (added) {
             UpdateTaskCollection.getInstance().dirtyVersion();
         } else {
@@ -111,7 +111,7 @@ public final class DynamicSet implements UpdateTaskSet<UpdateTaskV2> {
      * @param updateTask The update task
      */
     public void removeUpdateTask(final UpdateTaskV2 updateTask) {
-        final UpdateTaskV2 removed = taskList.remove(updateTask.getClass());
+        final UpdateTaskV2 removed = taskRegistry.remove(updateTask.getClass());
         if (null == removed) {
             LOG.error("Update task \"{}\" is unknown and could not be deregistered.", updateTask.getClass().getName());
         } else {
@@ -121,8 +121,8 @@ public final class DynamicSet implements UpdateTaskSet<UpdateTaskV2> {
 
     @Override
     public Set<UpdateTaskV2> getTaskSet() {
-        final Set<UpdateTaskV2> retval = new HashSet<UpdateTaskV2>(taskList.size());
-        retval.addAll(taskList.values());
+        final Set<UpdateTaskV2> retval = new HashSet<UpdateTaskV2>(taskRegistry.size());
+        retval.addAll(taskRegistry.values());
         return retval;
     }
 }

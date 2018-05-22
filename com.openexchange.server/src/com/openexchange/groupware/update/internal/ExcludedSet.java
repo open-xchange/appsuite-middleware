@@ -81,7 +81,7 @@ public class ExcludedSet implements UpdateTaskSet<String> {
 
     private static final String CONFIG_FILE_NAME = "excludedupdatetasks.properties";
 
-    private final Set<String> taskList = new HashSet<String>();
+    private final Set<String> taskSet = new HashSet<String>();
     private Set<String> excludedNamespaces = new HashSet<>();
 
     private ExcludedSet() {
@@ -93,11 +93,11 @@ public class ExcludedSet implements UpdateTaskSet<String> {
     }
 
     public void configure(ConfigurationService configService) {
-        taskList.clear();
+        taskSet.clear();
         Properties props = loadProperties(configService);
         for (Entry<Object, Object> entry : props.entrySet()) {
             String className = entry.getKey().toString().trim();
-            taskList.add(className);
+            taskSet.add(className);
         }
         UpdateTaskCollection.getInstance().dirtyVersion();
     }
@@ -146,6 +146,6 @@ public class ExcludedSet implements UpdateTaskSet<String> {
 
     @Override
     public Set<String> getTaskSet() {
-        return taskList;
+        return taskSet;
     }
 }
