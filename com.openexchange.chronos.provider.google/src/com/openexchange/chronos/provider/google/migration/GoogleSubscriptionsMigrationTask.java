@@ -81,6 +81,7 @@ import com.openexchange.groupware.update.TaskAttributes;
 import com.openexchange.groupware.update.UpdateConcurrency;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
 import com.openexchange.groupware.update.WorkingLevel;
+import com.openexchange.oauth.OAuthAccountStorage;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.subscribe.AbstractSubscribeService;
 import com.openexchange.subscribe.AdministrativeSubscriptionStorage;
@@ -118,6 +119,11 @@ public class GoogleSubscriptionsMigrationTask extends UpdateTaskAdapter {
             throw ServiceExceptionCode.absentService(ContextService.class);
         }
 
+        OAuthAccountStorage oauthAccountStorage = Services.getService(OAuthAccountStorage.class);
+        if (oauthAccountStorage == null) {
+            throw ServiceExceptionCode.absentService(OAuthAccountStorage.class);
+        }
+
         Connection writeCon = params.getConnection();
         int[] contextsInSameSchema = params.getContextsInSameSchema();
 
@@ -137,16 +143,19 @@ public class GoogleSubscriptionsMigrationTask extends UpdateTaskAdapter {
                 Subscription sub = iterator.next();
                 boolean inserted = false;
                 try {
-                    Object oauthAccount = sub.getConfiguration().get("account");
-                    if (oauthAccount == null) {
+                    Object oauthAccountId = sub.getConfiguration().get("account");
+                    if (oauthAccountId == null) {
                         // Skip bad configured subscriptions
                         iterator.remove();
                         continue;
                     }
+
                     JSONObject internalConfig = new JSONObject();
-                    internalConfig.put(GoogleCalendarConfigField.OAUTH_ID, oauthAccount);
+                    internalConfig.put(GoogleCalendarConfigField.OAUTH_ID, oauthAccountId);
                     JSONObject userConfig = new JSONObject(internalConfig);
                     internalConfig.put(GoogleCalendarConfigField.OLD_FOLDER, sub.getFolderId());
+
+                    internalConfig.put("name", "Google Calendar");
 
                     int id = calendarStorage.getAccountStorage().nextId();
                     calendarStorage.getAccountStorage().insertAccount(new DefaultCalendarAccount(GoogleCalendarProvider.PROVIDER_ID, id, sub.getUserId(), internalConfig, userConfig, new Date()));
@@ -217,7 +226,7 @@ public class GoogleSubscriptionsMigrationTask extends UpdateTaskAdapter {
 
     @Override
     public String[] getDependencies() {
-        return new String[] { "com.openexchange.chronos.storage.rdb.groupware.ChronosCreateTableTask", "com.openexchange.groupware.update.tasks.AddSharedParentFolderToFolderPermissionTableUpdateTask", "com.openexchange.groupware.update.tasks.AddTypeToFolderPermissionTableUpdateTask","com.openexchange.groupware.update.tasks.AddOriginColumnToInfostoreDocumentTables", "com.openexchange.tools.oxfolder.property.sql.CreateFolderUserPropertyTask" };
+        return new String[] { "com.openexchange.chronos.storage.rdb.groupware.ChronosCreateTableTask", "com.openexchange.groupware.update.tasks.AddSharedParentFolderToFolderPermissionTableUpdateTask", "com.openexchange.groupware.update.tasks.AddTypeToFolderPermissionTableUpdateTask", "com.openexchange.groupware.update.tasks.AddOriginColumnToInfostoreDocumentTables", "com.openexchange.tools.oxfolder.property.sql.CreateFolderUserPropertyTask" };
     }
 
     @Override

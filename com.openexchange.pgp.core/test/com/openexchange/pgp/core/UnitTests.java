@@ -64,7 +64,8 @@ import org.junit.runners.Suite.SuiteClasses;
     PGPEncrypterDecrypterTest.class,
     PGPSignVerifyTests.class,
     ModifyRecipientTest.class,
-    ExtractSessionPaketTest.class
+    ExtractSessionPaketTest.class,
+    PGPIntegrityCheckTests.class
 })
 public class UnitTests {
 

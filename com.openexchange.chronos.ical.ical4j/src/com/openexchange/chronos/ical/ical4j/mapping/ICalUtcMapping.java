@@ -102,7 +102,7 @@ public abstract class ICalUtcMapping<T extends Component, U> extends AbstractICa
 	public void importICal(T component, U object, ICalParameters parameters, List<OXException> warnings) {
 		UtcProperty property = (UtcProperty) component.getProperty(propertyName);
         if (null != property) {
-            setValue(object, property.getDateTime());
+            setValue(object, property.getDate());
         } else if (false == isIgnoreUnsetProperties(parameters)) {
             setValue(object, null);
         }

@@ -107,7 +107,10 @@ public class RelaceAllRecipientsPacketProcessorHandler implements PacketProcesso
         Packet rawPacket = packet.getBcPacket();
         // If first pass, add all needed new recipients to the sesion header
         if (rawPacket instanceof PublicKeyEncSessionPacket) {
-            if (alreadyProcessed) return null;  // We only process the first EncSessionPacket, all the rest are removed
+            if (alreadyProcessed)
+             {
+                return null;  // We only process the first EncSessionPacket, all the rest are removed
+            }
             List<PGPPacket> ret = new ArrayList<PGPPacket>(Arrays.asList(new PGPPacket[] { }));
 
             //Decrypt the session data
@@ -136,5 +139,13 @@ public class RelaceAllRecipientsPacketProcessorHandler implements PacketProcesso
             return ret.toArray(new PGPPacket[ret.size()]);
         }
         return new PGPPacket[] { packet };
+    }
+
+    /* (non-Javadoc)
+     * @see com.openexchange.pgp.core.packethandling.PacketProcessorHandler#modifyPacketData(com.openexchange.pgp.core.packethandling.PGPPacket, byte[])
+     */
+    @Override
+    public byte[] handlePacketData(PGPPacket packet, byte[] packetData) {
+        return packetData;
     }
 }

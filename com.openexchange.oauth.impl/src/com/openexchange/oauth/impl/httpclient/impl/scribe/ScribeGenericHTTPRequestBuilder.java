@@ -55,17 +55,6 @@ import org.apache.commons.httpclient.URIException;
 import org.apache.commons.httpclient.util.URIUtil;
 import org.scribe.builder.ServiceBuilder;
 import org.scribe.builder.api.Api;
-import org.scribe.builder.api.BoxApi;
-import org.scribe.builder.api.DropBoxApi;
-import org.scribe.builder.api.FlickrApi;
-import org.scribe.builder.api.Google2Api;
-import org.scribe.builder.api.LinkedInApi;
-import org.scribe.builder.api.MsLiveConnectApi;
-import org.scribe.builder.api.TumblrApi;
-import org.scribe.builder.api.TwitterApi;
-import org.scribe.builder.api.VkontakteApi;
-import org.scribe.builder.api.XingApi;
-import org.scribe.builder.api.YahooApi;
 import org.scribe.model.OAuthRequest;
 import org.scribe.model.Token;
 import org.scribe.model.Verb;
@@ -103,9 +92,7 @@ public abstract class ScribeGenericHTTPRequestBuilder<T extends HTTPGenericReque
         headers = new TreeMap<String, String>();
         this.coreBuilder = coreBuilder;
         provider = getProvider(coreBuilder.getApi());
-        scribeOAuthService =
-            new ServiceBuilder().provider(getProvider(coreBuilder.getApi())).apiKey(coreBuilder.getApiKey()).apiSecret(
-                coreBuilder.getSecret()).build();
+        scribeOAuthService = new ServiceBuilder().provider(getProvider(coreBuilder.getApi())).apiKey(coreBuilder.getApiKey()).apiSecret(coreBuilder.getSecret()).build();
     }
 
     /**
@@ -124,38 +111,10 @@ public abstract class ScribeGenericHTTPRequestBuilder<T extends HTTPGenericReque
      */
     protected static Class<? extends Api> getProvider(final API api) {
         KnownApi stdApi = KnownApi.getApiByServiceId(api.getServiceId());
-        if(stdApi==null){
+        if (stdApi == null) {
             throw new IllegalStateException("Unsupported API type: " + api);
         }
-        switch (stdApi) {
-            case LINKEDIN:
-                return LinkedInApi.class;
-            case TWITTER:
-                return TwitterApi.class;
-            case YAHOO:
-                return YahooApi.class;
-            case TUMBLR:
-                return TumblrApi.class;
-            case FLICKR:
-                return FlickrApi.class;
-            case DROPBOX:
-                return DropBoxApi.class;
-            case XING:
-                return XingApi.class;
-            case GOOGLE:
-                return Google2Api.class;
-            case BOX_COM:
-                return BoxApi.class;
-            case MS_LIVE_CONNECT:
-                return MsLiveConnectApi.class;
-            case VKONTAKTE:
-                return VkontakteApi.class;
-            // Add new API enums above
-
-            case OTHER: // fall-through
-            default:
-        }
-        throw new IllegalStateException("Unsupported API type: " + api);
+        return stdApi.getApiClass();
     }
 
     @SuppressWarnings("unchecked")

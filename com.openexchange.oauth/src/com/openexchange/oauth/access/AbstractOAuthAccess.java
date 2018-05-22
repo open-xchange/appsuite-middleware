@@ -49,13 +49,17 @@
 
 package com.openexchange.oauth.access;
 
+import java.util.Collections;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.oauth.API;
+import com.openexchange.oauth.DefaultOAuthAccount;
 import com.openexchange.oauth.OAuthAccount;
+import com.openexchange.oauth.OAuthConstants;
 import com.openexchange.oauth.OAuthExceptionCodes;
+import com.openexchange.oauth.OAuthService;
 import com.openexchange.oauth.OAuthUtil;
 import com.openexchange.oauth.scope.OXScope;
 import com.openexchange.session.Session;
@@ -107,20 +111,31 @@ public abstract class AbstractOAuthAccess implements OAuthAccess {
      * Verifies the specified {@link OAuthAccount} over validity:
      * <ul>
      * <li>accessToken exists?</li>
+     * <li>specified scopes are both available and enabled?</li>
+     * <li>the user identity is set? (lazy update)</li>
      * </ul>
      *
      * @param account The {@link OAuthAccount} to check for validity
+     * @param oauthService The {@link OAuthService}
      * @param scopes The scopes that are required to be available and enabled as well
      * @throws OXException if the account is not valid
      */
-    protected void verifyAccount(OAuthAccount account, OXScope... scopes) throws OXException {
+    protected void verifyAccount(OAuthAccount account, OAuthService oauthService, OXScope... scopes) throws OXException {
         // Verify that the account has an access token
         if (Strings.isEmpty(account.getToken())) {
             API api = account.getAPI();
             throw OAuthExceptionCodes.OAUTH_ACCESS_TOKEN_INVALID.create(api.getName(), account.getId(), session.getUserId(), session.getContextId());
         }
 
+        // Verify that scopes are available and enabled
         OAuthUtil.checkScopesAvailableAndEnabled(account, session, scopes);
+
+        // Verify if the account has the user identity set, lazy update
+        if (Strings.isEmpty(account.getUserIdentity())) {
+            String userIdentity = account.getMetaData().getUserIdentity(session, account.getId(), account.getToken(), account.getSecret());
+            ((DefaultOAuthAccount) account).setUserIdentity(userIdentity);
+            oauthService.updateAccount(session, account.getId(), Collections.singletonMap(OAuthConstants.ARGUMENT_IDENTITY, userIdentity));
+        }
 
         // Other checks?
     }
@@ -187,24 +202,7 @@ public abstract class AbstractOAuthAccess implements OAuthAccess {
      * @throws IllegalArgumentException If the configuration is <code>null</code>, or if the account identifier is not present, or is present but cannot be parsed as an integer
      */
     protected int getAccountId(Map<String, Object> configuration) {
-        if (null == configuration) {
-            throw new IllegalArgumentException("The configuration cannot be 'null'");
-        }
-
-        Object accountId = configuration.get("account");
-        if (null == accountId) {
-            throw new IllegalArgumentException("The account identifier is missing from the configuration");
-        }
-
-        if (accountId instanceof Integer) {
-            return ((Integer) accountId).intValue();
-        }
-
-        try {
-            return Integer.parseInt(accountId.toString());
-        } catch (NumberFormatException e) {
-            throw new IllegalArgumentException("The account identifier '" + accountId.toString() + "' cannot be parsed as an integer.", e);
-        }
+        return OAuthUtil.getAccountId(configuration);
     }
 
     /**

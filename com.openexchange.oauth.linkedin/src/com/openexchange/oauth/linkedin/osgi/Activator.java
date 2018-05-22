@@ -64,7 +64,7 @@ import com.openexchange.oauth.OAuthServiceMetaData;
 import com.openexchange.oauth.linkedin.LinkedInOAuthScope;
 import com.openexchange.oauth.linkedin.LinkedInService;
 import com.openexchange.oauth.linkedin.LinkedInServiceImpl;
-import com.openexchange.oauth.linkedin.OAuthServiceMetaDataLinkedInImpl;
+import com.openexchange.oauth.linkedin.LinkedInOAuthServiceMetaData;
 import com.openexchange.oauth.scope.OAuthScopeRegistry;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.rest.client.endpointpool.EndpointManagerFactory;
@@ -100,7 +100,7 @@ public class Activator extends HousekeepingActivator {
     protected synchronized void startBundle() throws Exception {
         org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(Activator.class);
 
-        final OAuthServiceMetaDataLinkedInImpl linkedInMetaDataService = new OAuthServiceMetaDataLinkedInImpl(this);
+        final LinkedInOAuthServiceMetaData linkedInMetaDataService = new LinkedInOAuthServiceMetaData(this);
         registerService(OAuthServiceMetaData.class, linkedInMetaDataService, null);
         registerService(Reloadable.class, linkedInMetaDataService);
         logger.info("OAuthServiceMetaData for LinkedIn was started");

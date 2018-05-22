@@ -55,6 +55,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import org.scribe.builder.ServiceBuilder;
+import org.scribe.builder.api.Api;
+import org.scribe.builder.api.BoxApi;
 import org.scribe.model.Token;
 import org.scribe.model.Verifier;
 import org.scribe.oauth.OAuthService;

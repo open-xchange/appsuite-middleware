@@ -61,7 +61,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.http.deferrer.DeferringURLService;
 import com.openexchange.oauth.OAuthServiceMetaData;
 import com.openexchange.oauth.scope.OAuthScopeRegistry;
-import com.openexchange.oauth.twitter.OAuthServiceMetaDataTwitterImpl;
+import com.openexchange.oauth.twitter.TwitterOAuthServiceMetaData;
 import com.openexchange.oauth.twitter.TwitterOAuthScope;
 import com.openexchange.oauth.twitter.TwitterOAuthServiceRegistry;
 import com.openexchange.osgi.HousekeepingActivator;
@@ -98,7 +98,7 @@ public final class TwitterOAuthActivator extends HousekeepingActivator {
             /*
              * Register service
              */
-            final OAuthServiceMetaDataTwitterImpl service = new OAuthServiceMetaDataTwitterImpl(this);
+            final TwitterOAuthServiceMetaData service = new TwitterOAuthServiceMetaData(this);
             registerService(OAuthServiceMetaData.class, service);
             registerService(Reloadable.class, service);
 

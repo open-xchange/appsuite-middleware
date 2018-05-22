@@ -104,7 +104,7 @@ public abstract class AbstractLinkedinDataSource implements HaloContactDataSourc
         int uid = session.getUserId();
         int cid = session.getContextId();
         if (getOauthService().getMetaDataRegistry().containsService(KnownApi.LINKEDIN.getFullName(), uid, cid)) {
-            return !getOauthService().getAccounts(KnownApi.LINKEDIN.getFullName(), session, uid, cid).isEmpty();
+            return !getOauthService().getAccounts(session, KnownApi.LINKEDIN.getFullName()).isEmpty();
         }
 
         return false;

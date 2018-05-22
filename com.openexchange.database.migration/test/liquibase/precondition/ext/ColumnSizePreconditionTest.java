@@ -55,8 +55,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.ArgumentMatchers;
 import org.mockito.InjectMocks;
-import org.mockito.Matchers;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
@@ -109,7 +109,8 @@ public class ColumnSizePreconditionTest {
         Mockito.when(resultSetMock.getString("COLUMN_NAME")).thenReturn(columnName);
         Mockito.when(resultSetMock.getInt("COLUMN_SIZE")).thenReturn(new Integer(expectedSize));
 
-        Mockito.when(databaseMetaData.getColumns(Matchers.anyString(), Matchers.anyString(), Matchers.anyString(), Matchers.anyString())).thenReturn(resultSetMock);
+        Mockito.when(databaseMetaData.getColumns(ArgumentMatchers.anyString(), ArgumentMatchers.anyString(), ArgumentMatchers.anyString(), ArgumentMatchers.anyString())).thenReturn(resultSetMock);
+        Mockito.when(databaseMetaData.getColumns(ArgumentMatchers.isNull(), ArgumentMatchers.isNull(), ArgumentMatchers.isNull(), ArgumentMatchers.isNull())).thenReturn(resultSetMock);
 
         Mockito.when(resultSetMock.next()).thenReturn(true).thenReturn(true).thenReturn(false);
     }

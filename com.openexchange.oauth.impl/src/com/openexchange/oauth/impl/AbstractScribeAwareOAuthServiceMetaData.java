@@ -52,31 +52,47 @@ package com.openexchange.oauth.impl;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import javax.net.ssl.SSLHandshakeException;
 import javax.xml.ws.handler.MessageContext.Scope;
+import org.scribe.builder.ServiceBuilder;
+import org.scribe.model.OAuthRequest;
+import org.scribe.model.Request;
+import org.scribe.model.RequestTuner;
+import org.scribe.model.Response;
+import org.scribe.model.Token;
+import org.scribe.oauth.OAuthService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Interests;
 import com.openexchange.config.Reloadable;
 import com.openexchange.config.Reloadables;
+import com.openexchange.exception.ExceptionUtils;
+import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
+import com.openexchange.net.ssl.exception.SSLExceptionCode;
 import com.openexchange.oauth.API;
 import com.openexchange.oauth.KnownApi;
 import com.openexchange.oauth.OAuthConfigurationProperty;
+import com.openexchange.oauth.OAuthExceptionCodes;
 import com.openexchange.oauth.scope.OAuthScope;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.session.Session;
 
 /**
  * {@link AbstractScribeAwareOAuthServiceMetaData}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public abstract class AbstractScribeAwareOAuthServiceMetaData extends AbstractOAuthServiceMetaData implements ScribeAware, Reloadable {
+public abstract class AbstractScribeAwareOAuthServiceMetaData extends AbstractOAuthServiceMetaData implements ScribeAware, OAuthIdentityAware, Reloadable {
+
+    private static final String DEFAULT_CONTENT_TYPE = "application/json";
+    protected static final String EMPTY_CONTENT_TYPE = " ";
 
     protected final ServiceLookup services;
-
     private final List<OAuthPropertyID> propertyNames;
-
     private static final String PROP_PREFIX = "com.openexchange.oauth";
-
     private final API api;
 
     /**
@@ -148,6 +164,86 @@ public abstract class AbstractScribeAwareOAuthServiceMetaData extends AbstractOA
         return api;
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.oauth.OAuthServiceMetaData#getUserIdentity(java.lang.String)
+     */
+    @Override
+    public String getUserIdentity(Session session, int accountId, String accessToken, String accessSecret) throws OXException {
+        // Contact the OAuth provider and fetch the identity of the current logged in user
+        OAuthService scribeService = new ServiceBuilder().provider(getScribeService()).apiKey(getAPIKey(session)).apiSecret(getAPISecret(session)).build();
+        OAuthRequest request = new OAuthRequest(getIdentityHTTPMethod(), getIdentityURL(accessToken));
+        request.addHeader("Content-Type", getContentType());
+        scribeService.signRequest(new Token(accessToken, accessSecret), request);
+        Response response = execute(request);
+
+        int responseCode = response.getCode();
+        String body = response.getBody();
+        if (responseCode == 403) {
+            throw OAuthExceptionCodes.OAUTH_ACCESS_TOKEN_INVALID.create(getId(), accountId, session.getUserId(), session.getContextId());
+        }
+        if (responseCode >= 400 && responseCode <= 499) {
+            throw OAuthExceptionCodes.DENIED_BY_PROVIDER.create(body);
+        }
+
+        final Matcher matcher = compileIdentityPattern(getIdentityFieldName()).matcher(body);
+        if (matcher.find()) {
+            return matcher.group(1);
+        }
+        throw OAuthExceptionCodes.CANNOT_GET_USER_IDENTITY.create(getId());
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.oauth.impl.OAuthIdentityAware#getContentType()
+     */
+    @Override
+    public String getContentType() {
+        return DEFAULT_CONTENT_TYPE;
+    }
+
+    /**
+     * Compiles the pattern that will be used to extract the identity of the user
+     * from the identity response.
+     * 
+     * @param fieldName The field name that contains the identity of the user in the identity response
+     * @return The compiled {@link Pattern}
+     */
+    private Pattern compileIdentityPattern(String fieldName) {
+        return Pattern.compile("\"" + fieldName + "\":\\s*\"(\\S*?)\"");
+    }
+
+    /**
+     * Executes specified request and returns its response.
+     *
+     * @param request The request
+     * @return The response
+     * @throws OXException If executing request fails
+     */
+    private Response execute(OAuthRequest request) throws OXException {
+        try {
+            return request.send(RequestTunerExtension.getInstance());
+        } catch (org.scribe.exceptions.OAuthException e) {
+            // Handle Scribe's org.scribe.exceptions.OAuthException (inherits from RuntimeException)
+            if (ExceptionUtils.isEitherOf(e, SSLHandshakeException.class)) {
+                List<Object> displayArgs = new ArrayList<>(2);
+                displayArgs.add(SSLExceptionCode.extractArgument(e, "fingerprint"));
+                displayArgs.add(getIdentityURL("** obfuscated **"));
+                throw SSLExceptionCode.UNTRUSTED_CERTIFICATE.create(e, displayArgs.toArray(new Object[] {}));
+            }
+
+            Throwable cause = e.getCause();
+            if (cause instanceof java.net.SocketTimeoutException) {
+                // A socket timeout
+                throw OAuthExceptionCodes.CONNECT_ERROR.create(cause, new Object[0]);
+            }
+
+            throw OAuthExceptionCodes.OAUTH_ERROR.create(e, e.getMessage());
+        }
+    }
+
     /**
      * Get the property identifier
      *
@@ -161,4 +257,34 @@ public abstract class AbstractScribeAwareOAuthServiceMetaData extends AbstractOA
      * @return A collection with extra property names
      */
     protected abstract Collection<OAuthPropertyID> getExtraPropertyNames();
+
+    /**
+     * {@link RequestTunerExtension}
+     */
+    private static final class RequestTunerExtension extends RequestTuner {
+
+        private static final RequestTunerExtension INSTANCE = new RequestTunerExtension();
+
+        /**
+         * Returns the instance of the {@link RequestTuner}
+         * 
+         * @return the instance of the {@link RequestTuner}
+         */
+        static final RequestTuner getInstance() {
+            return INSTANCE;
+        }
+
+        /**
+         * Initialises a new {@link AbstractScribeAwareOAuthServiceMetaData.RequestTunerExtension}.
+         */
+        public RequestTunerExtension() {
+            super();
+        }
+
+        @Override
+        public void tune(Request request) {
+            request.setConnectTimeout(5, TimeUnit.SECONDS);
+            request.setReadTimeout(30, TimeUnit.SECONDS);
+        }
+    }
 }

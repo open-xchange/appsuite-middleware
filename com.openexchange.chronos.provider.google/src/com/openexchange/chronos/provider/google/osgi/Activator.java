@@ -64,6 +64,7 @@ import com.openexchange.group.GroupService;
 import com.openexchange.groupware.update.DefaultUpdateTaskProviderService;
 import com.openexchange.groupware.update.UpdateTaskProviderService;
 import com.openexchange.oauth.OAuthAccountDeleteListener;
+import com.openexchange.oauth.OAuthAccountStorage;
 import com.openexchange.oauth.OAuthService;
 import com.openexchange.oauth.OAuthServiceMetaDataRegistry;
 import com.openexchange.osgi.HousekeepingActivator;
@@ -76,7 +77,7 @@ public class Activator extends HousekeepingActivator {
     protected Class<?>[] getNeededServices() {
         //@formatter:off
         return new Class[] {
-            OAuthService.class, OAuthServiceMetaDataRegistry.class, CalendarAccountService.class, AdministrativeCalendarAccountService.class, LeanConfigurationService.class, RecurrenceService.class,
+            OAuthService.class, OAuthServiceMetaDataRegistry.class, OAuthAccountStorage.class, CalendarAccountService.class, AdministrativeCalendarAccountService.class, LeanConfigurationService.class, RecurrenceService.class,
             // The services below are only required by migration
             GenericConfigurationStorageService.class, CalendarStorageFactory.class, ContextService.class, FolderUserPropertyStorage.class, GroupService.class, UserService.class, FolderService.class
         };

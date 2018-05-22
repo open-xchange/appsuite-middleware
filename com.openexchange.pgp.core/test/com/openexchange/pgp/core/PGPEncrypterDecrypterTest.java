@@ -137,8 +137,9 @@ public class PGPEncrypterDecrypterTest extends AbstractPGPTest {
         //Decrypting the data
         InputStream encryptedDataInput = new ByteArrayInputStream(encryptedData.toByteArray());
         ByteArrayOutputStream decryptedData = new ByteArrayOutputStream();
-        List<PGPSignatureVerificationResult> verifyResults =
-            new PGPDecrypter(keyRetrievalStrategy).decrypt(encryptedDataInput, decryptedData, TEST_IDENTITY_NAME, TEST_IDENTITY_PASSWORD);
+        PGPDecryptionResult result = new PGPDecrypter(keyRetrievalStrategy).decrypt(encryptedDataInput, decryptedData, TEST_IDENTITY_NAME,
+            TEST_IDENTITY_PASSWORD);
+        List<PGPSignatureVerificationResult> verifyResults = result.getSignatureVerificationResults();
         Assert.assertTrue("Verification results should be empty for non signed data", verifyResults.isEmpty());
         Assert.assertArrayEquals("Decrypted data should be equals to plaintext data", decryptedData.toByteArray(), testData);
 
@@ -159,8 +160,9 @@ public class PGPEncrypterDecrypterTest extends AbstractPGPTest {
         //Decrypting the data
         InputStream encryptedDataInput = new ByteArrayInputStream(encryptedData.toByteArray());
         ByteArrayOutputStream decryptedData = new ByteArrayOutputStream();
-        List<PGPSignatureVerificationResult> verifyResults =
-            new PGPDecrypter(keyRetrievalStrategy).decrypt(encryptedDataInput, decryptedData, TEST_IDENTITY_NAME, TEST_IDENTITY_PASSWORD);
+        PGPDecryptionResult result =
+                new PGPDecrypter(keyRetrievalStrategy).decrypt(encryptedDataInput, decryptedData, TEST_IDENTITY_NAME, TEST_IDENTITY_PASSWORD);
+        List<PGPSignatureVerificationResult> verifyResults = result.getSignatureVerificationResults();
         Assert.assertEquals("We should have obtained one verification result", 1, verifyResults.size());
         Assert.assertTrue("Signature should have been verified",verifyResults.get(0).isVerified());
         Assert.assertArrayEquals("Decrypted data should be equals to plaintext data", decryptedData.toByteArray(), testData);
@@ -177,8 +179,7 @@ public class PGPEncrypterDecrypterTest extends AbstractPGPTest {
 
         //Trying to decrypt emtpy data should result in an OXException
         InputStream nonPGPData = new ByteArrayInputStream(new byte[] {});
-        List<PGPSignatureVerificationResult> verifyRestults =
-            new PGPDecrypter(keyRetrievalStrategy).decrypt(nonPGPData, new ByteArrayOutputStream(), TEST_IDENTITY_NAME, TEST_IDENTITY_PASSWORD);
+        new PGPDecrypter(keyRetrievalStrategy).decrypt(nonPGPData, new ByteArrayOutputStream(), TEST_IDENTITY_NAME, TEST_IDENTITY_PASSWORD);
     }
 
     @Test
@@ -201,8 +202,7 @@ public class PGPEncrypterDecrypterTest extends AbstractPGPTest {
         //Decrypting the data
         InputStream encryptedDataInput = new ByteArrayInputStream(encryptedData.toByteArray());
         ByteArrayOutputStream decryptedData = new ByteArrayOutputStream();
-        List<PGPSignatureVerificationResult> verifyResults =
-            new PGPDecrypter(noKeyFoundRetrievalStrategy).decrypt(encryptedDataInput, decryptedData, TEST_IDENTITY_NAME, TEST_IDENTITY_PASSWORD);
+        new PGPDecrypter(noKeyFoundRetrievalStrategy).decrypt(encryptedDataInput, decryptedData, TEST_IDENTITY_NAME, TEST_IDENTITY_PASSWORD);
     }
 
     @Test
@@ -225,8 +225,9 @@ public class PGPEncrypterDecrypterTest extends AbstractPGPTest {
         //Decrypting the data
         InputStream encryptedDataInput = new ByteArrayInputStream(encryptedData.toByteArray());
         ByteArrayOutputStream decryptedData = new ByteArrayOutputStream();
-        List<PGPSignatureVerificationResult> verifyResults =
+        PGPDecryptionResult result =
             new PGPDecrypter(onlyFindSecretKeyStrategy).decrypt(encryptedDataInput, decryptedData, TEST_IDENTITY_NAME, TEST_IDENTITY_PASSWORD);
+        List<PGPSignatureVerificationResult> verifyResults = result.getSignatureVerificationResults();
 
         Assert.assertEquals("We should have obtained one verification result", 1, verifyResults.size());
         Assert.assertFalse("Signature should NOT have been verified due to missing public key",verifyResults.get(0).isVerified());

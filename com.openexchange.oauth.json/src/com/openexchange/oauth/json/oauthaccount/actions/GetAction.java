@@ -91,10 +91,8 @@ public final class GetAction extends AbstractOAuthAJAXActionService {
              */
             final OAuthService oAuthService = getOAuthService();
             final OAuthAccount account = oAuthService.getAccount(
-                getUnsignedInteger(accountId),
                 session,
-                session.getUserId(),
-                session.getContextId());
+                getUnsignedInteger(accountId));
             /*
              * Write account as a JSON object
              */

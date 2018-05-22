@@ -67,7 +67,7 @@ import com.openexchange.chronos.Event;
 @RunWith(Parameterized.class)
 public class HourlyTest extends AbstractSingleTimeZoneTest {
 
-    private static final int YEAR = 2016;
+    private static final int YEAR = 2018;
 
     public HourlyTest(String timeZone) {
         super(timeZone);

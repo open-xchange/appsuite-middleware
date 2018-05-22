@@ -58,11 +58,11 @@ import com.openexchange.oauth.scope.OXScope;
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 public enum MSLiveConnectOAuthScope implements OAuthScope {
-    calendar_ro("wl.calendars wl.offline_access", OXScope.calendar_ro),
-    calendar("wl.calendars_update wl.offline_access", OXScope.calendar),
-    contacts_ro("wl.basic wl.contacts_birthday wl.contacts_photos wl.contacts_emails wl.photos wl.postal_addresses wl.offline_access", OXScope.contacts_ro),
-    contacts("wl.basic wl.contacts_create wl.contacts_birthday wl.contacts_photos wl.contacts_emails wl.photos wl.postal_addresses wl.offline_access", OXScope.contacts),
-    drive("wl.skydrive wl.skydrive_update wl.offline_access", OXScope.drive);
+    calendar_ro("wl.basic wl.calendars wl.offline_access", OXScope.calendar_ro),
+    calendar("wl.basic wl.calendars_update wl.offline_access", OXScope.calendar),
+    contacts_ro("wl.basic wl.contacts_birthday wl.contacts_photos wl.contacts_emails wl.photos wl.postal_addresses wl.offline_access wl.contacts_skydrive", OXScope.contacts_ro),
+    contacts("wl.basic wl.contacts_create wl.contacts_birthday wl.contacts_photos wl.contacts_emails wl.photos wl.postal_addresses wl.offline_access wl.contacts_skydrive", OXScope.contacts),
+    drive("wl.basic wl.skydrive wl.skydrive_update wl.offline_access", OXScope.drive);
 
     private final String mapping;
     private final OXScope module;

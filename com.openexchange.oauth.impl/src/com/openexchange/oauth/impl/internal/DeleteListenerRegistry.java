@@ -123,8 +123,9 @@ public final class DeleteListenerRegistry {
 
     /**
      * Triggers the {@link OAuthAccountDeleteListener#onBeforeOAuthAccountDeletion()} event for registered listeners.
+     * @param user TODO
      */
-    public void triggerOnBeforeDeletion(final int id, final Map<String, Object> properties, final int user, final int cid, final Connection con) throws OXException {
+    public void triggerOnBeforeDeletion(final int id, final Map<String, Object> properties, int user, int cid, final Connection con) throws OXException {
         for (final OAuthAccountDeleteListener listener : registry.values()) {
             listener.onBeforeOAuthAccountDeletion(id, properties, user, cid, con);
         }

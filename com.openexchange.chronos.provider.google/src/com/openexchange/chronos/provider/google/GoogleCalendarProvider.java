@@ -155,7 +155,7 @@ public class GoogleCalendarProvider extends BasicCachingCalendarProvider {
             throw CalendarExceptionCodes.INVALID_CONFIGURATION.create(e, userConfig);
         }
         OAuthService oAuthService = requireService(OAuthService.class, services);
-        oAuthService.getAccount(oauthId, session, session.getUserId(), session.getContextId());
+        oAuthService.getAccount(session, oauthId);
         /*
          * prepare & return checked proposed settings based on client-supplied settings
          */
@@ -235,7 +235,7 @@ public class GoogleCalendarProvider extends BasicCachingCalendarProvider {
         }
 
         // Check existing google account
-        oAuthService.getAccount(accountId, session, session.getUserId(), session.getContextId());
+        oAuthService.getAccount(session, accountId);
 
         JSONObject internalConfig = new JSONObject();
         try {
@@ -243,6 +243,7 @@ public class GoogleCalendarProvider extends BasicCachingCalendarProvider {
             if (userConfig.hasAndNotNull(GoogleCalendarConfigField.FOLDER)) {
                 internalConfig.put(GoogleCalendarConfigField.FOLDER, userConfig.getString(GoogleCalendarConfigField.FOLDER));
             }
+            internalConfig.put("name", settings.getName());
 
             // store extended properties
             ExtendedProperties extendedProperties = settings.getExtendedProperties();
@@ -274,12 +275,15 @@ public class GoogleCalendarProvider extends BasicCachingCalendarProvider {
         }
 
         // Check existing google account
-        oAuthService.getAccount(accountId, session, session.getUserId(), session.getContextId());
+        oAuthService.getAccount(session, accountId);
 
         try {
             updated.put(GoogleCalendarConfigField.OAUTH_ID, accountId);
             if (config.hasAndNotNull(GoogleCalendarConfigField.FOLDER)) {
                 updated.put(GoogleCalendarConfigField.FOLDER, config.getString(GoogleCalendarConfigField.FOLDER));
+            }
+            if (config.hasAndNotNull("name")) {
+                updated.put("name", settings.getName());
             }
 
             Object colorValue = optPropertyValue(settings.getExtendedProperties(), COLOR_LITERAL);

@@ -14,7 +14,7 @@ BuildRequires: java-1_8_0-openjdk-devel
 BuildRequires: java-1.8.0-openjdk-devel
 %endif
 Version:       @OXVERSION@
-%define        ox_release 5
+%define        ox_release 6
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -24,17 +24,6 @@ Source:        %{name}_%{version}.orig.tar.bz2
 Summary:       The Open-Xchange backend subscribe extension
 Autoreqprov:   no
 Requires:      open-xchange-oauth >= @OXVERSION@
-Obsoletes:     open-xchange-subscribe-crawler < %{version}
-Provides:      open-xchange-subscribe-json = %{version}
-Obsoletes:     open-xchange-subscribe-json < %{version}
-Provides:      open-xchange-subscribe-linkedin = %{version}
-Obsoletes:     open-xchange-subscribe-linkedin < %{version}
-Provides:      open-xchange-subscribe-microformats = %{version}
-Obsoletes:     open-xchange-subscribe-microformats < %{version}
-Provides:      open-xchange-subscribe-msn = %{version}
-Obsoletes:     open-xchange-subscribe-msn < %{version}
-Provides:      open-xchange-subscribe-yahoo = %{version}
-Obsoletes:     open-xchange-subscribe-yahoo < %{version}
 
 %description
 Adds the feature to subscribe to third party services or
@@ -85,6 +74,8 @@ fi
 %doc docs/
 
 %changelog
+* Fri May 18 2018 Marcus Klein <marcus.klein@open-xchange.com>
+Sixth preview of 7.10.0 release
 * Thu Apr 19 2018 Marcus Klein <marcus.klein@open-xchange.com>
 Fifth preview of 7.10.0 release
 * Tue Apr 03 2018 Marcus Klein <marcus.klein@open-xchange.com>

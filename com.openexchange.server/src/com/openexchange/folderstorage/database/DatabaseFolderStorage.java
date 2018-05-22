@@ -155,6 +155,7 @@ import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.java.CallerRunsCompletionService;
 import com.openexchange.java.Collators;
+import com.openexchange.java.Strings;
 import com.openexchange.java.util.Tools;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.server.impl.OCLPermission;
@@ -1798,10 +1799,9 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage,
             } else {
                 ConfigurationService configurationService = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
                 boolean applyParentPermissions = configurationService.getBoolProperty("com.openexchange.folderstorage.inheritParentPermissions", false);
-                if (applyParentPermissions && isInPublicTree(folderId, context, con, storageParameters)) {
-                    FolderObject destFolder = getFolderObject(folderId, context, con, storageParameters);
-                    FolderObject parent = getFolderObject(destFolder.getParentFolderID(), context, con, storageParameters);
-                    inheritPublicFolderPermissions(destFolder, parent, context, con, storageParameters, folderManager, millis);
+                if (applyParentPermissions && isInPublicTree(folder.getParentID(), context, con, storageParameters)) {
+                    FolderObject parent = getFolderObject(updateMe.getParentFolderID(), context, con, storageParameters);
+                    inheritPublicFolderPermissions(updateMe, parent, context, con, storageParameters, folderManager, millis);
                 }
             }
             folderManager.updateFolder(updateMe, true, StorageParametersUtility.isHandDownPermissions(storageParameters), millis.getTime());
@@ -1915,19 +1915,19 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage,
         }
     }
 
-    private boolean isInPublicTree(int folderId, Context context, Connection con, StorageParameters storageParameters) throws OXException {
-        FolderObject folder = getFolderObject(folderId, context, con, storageParameters);
-        int parentId = folder.getParentFolderID();
-        while(true) {
-            if (parentId == FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID || parentId == FolderObject.SYSTEM_PRIVATE_FOLDER_ID || parentId == FolderObject.SYSTEM_ROOT_FOLDER_ID) {
-                return false;
-            }
+    private boolean isInPublicTree(String folderParentId, Context context, Connection con, StorageParameters storageParameters) throws OXException {
+        if (Strings.isEmpty(folderParentId)) {
+            return false;
+        }
+        int parentId = Integer.parseInt(folderParentId);
+        while(parentId > 0) {
             if (parentId == FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID || parentId == FolderObject.SYSTEM_PUBLIC_FOLDER_ID) {
                 return true;
             }
             FolderObject parent = getFolderObject(parentId, context, con, storageParameters);
             parentId = parent.getParentFolderID();
         }
+        return false;
     }
 
     @Override

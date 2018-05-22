@@ -51,7 +51,6 @@ package com.openexchange.pgp.core;
 
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.List;
 import org.bouncycastle.openpgp.PGPPrivateKey;
 import org.bouncycastle.openpgp.PGPPublicKey;
 import org.bouncycastle.openpgp.operator.PublicKeyDataDecryptorFactory;
@@ -145,10 +144,10 @@ public class PGPSymmetricDecrypter extends PGPDecrypter {
      *
      * @param input The input stream to read the PGP data from
      * @param output The output stream to write the decoded data to
-     * @return A list of Signature verification results, or an empty list, if the encrypted data was not signed
+     * @return The decryption result
      * @throws Exception
      */
-    public List<PGPSignatureVerificationResult> decrypt(InputStream input, OutputStream output) throws Exception {
+    public PGPDecryptionResult decrypt(InputStream input, OutputStream output) throws Exception {
         return super.decrypt(input, output, null, null);
     }
 }

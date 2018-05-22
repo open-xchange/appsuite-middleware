@@ -62,6 +62,7 @@ import com.openexchange.file.storage.FileStorageFolderAccess;
 import com.openexchange.file.storage.FileStorageService;
 import com.openexchange.file.storage.dropbox.DropboxServices;
 import com.openexchange.oauth.KnownApi;
+import com.openexchange.oauth.OAuthUtil;
 import com.openexchange.oauth.access.AbstractOAuthAccess;
 import com.openexchange.oauth.access.OAuthAccess;
 import com.openexchange.oauth.access.OAuthAccessRegistry;
@@ -108,10 +109,11 @@ public final class DropboxAccountAccess implements FileStorageAccountAccess, Cap
     public void connect() throws OXException {
         OAuthAccessRegistryService service = DropboxServices.getService(OAuthAccessRegistryService.class);
         OAuthAccessRegistry registry = service.get(KnownApi.DROPBOX.getFullName());
-        OAuthAccess dropboxOAuthAccess = registry.get(session.getContextId(), session.getUserId());
+        int accountId = OAuthUtil.getAccountId(account.getConfiguration());
+        OAuthAccess dropboxOAuthAccess = registry.get(session.getContextId(), session.getUserId(), accountId);
         if (dropboxOAuthAccess == null) {
             AbstractOAuthAccess newInstance = new DropboxOAuth2Access(account, session);
-            dropboxOAuthAccess = registry.addIfAbsent(session.getContextId(), session.getUserId(), newInstance);
+            dropboxOAuthAccess = registry.addIfAbsent(session.getContextId(), session.getUserId(), accountId, newInstance);
             if (dropboxOAuthAccess == null) {
                 newInstance.initialize();
                 dropboxOAuthAccess = newInstance;

@@ -58,6 +58,7 @@ import com.openexchange.crypto.CryptoService;
 import com.openexchange.database.CreateTableService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.datatypes.genericonf.storage.GenericConfigurationStorageService;
+import com.openexchange.file.storage.FileStorageAccountDeleteListener;
 import com.openexchange.file.storage.FileStorageAccountManagerProvider;
 import com.openexchange.file.storage.FileStorageService;
 import com.openexchange.file.storage.rdb.Services;
@@ -65,6 +66,7 @@ import com.openexchange.file.storage.rdb.groupware.FileStorageConvertUtf8ToUtf8m
 import com.openexchange.file.storage.rdb.groupware.FileStorageRdbCreateTableTask;
 import com.openexchange.file.storage.rdb.groupware.FileStorageRdbDeleteListener;
 import com.openexchange.file.storage.rdb.internal.CachingFileStorageAccountStorage;
+import com.openexchange.file.storage.rdb.internal.DeleteListenerRegistry;
 import com.openexchange.file.storage.rdb.internal.RdbFileStorageAccountManagerProvider;
 import com.openexchange.file.storage.rdb.secret.RdbFileStorageSecretHandling;
 import com.openexchange.file.storage.registry.FileStorageServiceRegistry;
@@ -109,6 +111,8 @@ public class FileStorageRdbActivator extends HousekeepingActivator {
     protected void startBundle() throws Exception {
         try {
             Services.setServices(this);
+            DeleteListenerRegistry.initInstance();
+            track(FileStorageAccountDeleteListener.class, new DeleteListenerServiceTracker(context));
             /*
              * Feed cache with additional cache configuration for file storage account cache
              */
@@ -188,6 +192,7 @@ public class FileStorageRdbActivator extends HousekeepingActivator {
                 secretService.close();
                 this.secretService = null;
             }
+            DeleteListenerRegistry.releaseInstance();
         } catch (final Exception e) {
             org.slf4j.LoggerFactory.getLogger(FileStorageRdbActivator.class).error("", e);
             throw e;

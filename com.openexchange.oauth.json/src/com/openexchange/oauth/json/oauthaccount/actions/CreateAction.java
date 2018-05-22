@@ -112,7 +112,7 @@ public final class CreateAction extends AbstractOAuthTokenAction {
             // By now it doesn't matter which interaction type is passed
             OAuthAccount newAccount;
             try {
-                newAccount = oAuthService.createAccount(serviceId, OAuthInteractionType.CALLBACK, arguments, session.getUserId(), session.getContextId(), scopes);
+                newAccount = oAuthService.createAccount(session, serviceId, scopes, OAuthInteractionType.CALLBACK, arguments);
             } catch (OXException e) {
                 // Create attempt failed
                 HttpServletResponse response = request.optHttpServletResponse();

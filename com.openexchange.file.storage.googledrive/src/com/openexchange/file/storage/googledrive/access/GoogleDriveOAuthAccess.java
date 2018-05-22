@@ -57,8 +57,10 @@ import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.googledrive.GoogleDriveConstants;
+import com.openexchange.file.storage.googledrive.osgi.Services;
 import com.openexchange.google.api.client.GoogleApiClients;
 import com.openexchange.oauth.OAuthAccount;
+import com.openexchange.oauth.OAuthService;
 import com.openexchange.oauth.access.AbstractOAuthAccess;
 import com.openexchange.oauth.access.OAuthAccess;
 import com.openexchange.oauth.access.OAuthClient;
@@ -89,7 +91,6 @@ public class GoogleDriveOAuthAccess extends AbstractOAuthAccess {
             // Grab Google OAuth account
             int oauthAccountId = getAccountId();
             OAuthAccount oauthAccount = GoogleApiClients.getGoogleAccount(oauthAccountId, getSession(), false);
-            verifyAccount(oauthAccount, OXScope.drive);
             setOAuthAccount(oauthAccount);
 
             {
@@ -99,6 +100,7 @@ public class GoogleDriveOAuthAccess extends AbstractOAuthAccess {
                     setOAuthAccount(newAccount);
                 }
             }
+            verifyAccount(oauthAccount, Services.getService(OAuthService.class), OXScope.drive);
 
             // Generate appropriate credentials for it
             GoogleCredential credentials = GoogleApiClients.getCredentials(oauthAccount, getSession());

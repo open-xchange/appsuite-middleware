@@ -105,6 +105,8 @@ import com.openexchange.session.Session;
  */
 public class GoogleCalendarAccess extends BasicCachingCalendarAccess {
 
+    private static final String DEFAULT_CALENDAR_NAME = "Google Calendar";
+
     private static final Logger LOG = LoggerFactory.getLogger(GoogleCalendarAccess.class);
 
     private final GoogleOAuthAccess oauthAccess;
@@ -129,11 +131,7 @@ public class GoogleCalendarAccess extends BasicCachingCalendarAccess {
         } catch (JSONException e) {
             throw CalendarExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
-        try {
-            init(checkConfig);
-        } catch (OXException e) {
-            // ignore exception for now
-        }
+        init(checkConfig);
     }
 
     private void init(boolean checkConfig) throws OXException {
@@ -345,7 +343,7 @@ public class GoogleCalendarAccess extends BasicCachingCalendarAccess {
         settings.setLastModified(account.getLastModified());
         settings.setConfig(account.getUserConfiguration());
         JSONObject internalConfig = account.getInternalConfiguration();
-        settings.setName(internalConfig.optString("name", "Google Calendar"));
+        settings.setName(internalConfig.optString("name", DEFAULT_CALENDAR_NAME));
         ExtendedProperties extendedProperties = new ExtendedProperties();
         extendedProperties.add(SCHEDULE_TRANSP(TimeTransparency.TRANSPARENT, true));
         extendedProperties.add(DESCRIPTION(internalConfig.optString(GoogleCalendarConfigField.DESCRIPTION, null), false));

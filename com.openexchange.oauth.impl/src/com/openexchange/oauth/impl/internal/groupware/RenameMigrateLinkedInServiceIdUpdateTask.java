@@ -49,17 +49,11 @@
 
 package com.openexchange.oauth.impl.internal.groupware;
 
-import static com.openexchange.database.Databases.autocommit;
-import static com.openexchange.database.Databases.closeSQLStuff;
-import static com.openexchange.database.Databases.startTransaction;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.PerformParameters;
-import com.openexchange.groupware.update.UpdateExceptionCodes;
-import com.openexchange.groupware.update.UpdateTaskAdapter;
 import com.openexchange.oauth.KnownApi;
 import com.openexchange.oauth.scope.OXScope;
 
@@ -68,7 +62,7 @@ import com.openexchange.oauth.scope.OXScope;
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class RenameMigrateLinkedInServiceIdUpdateTask extends UpdateTaskAdapter {
+public class RenameMigrateLinkedInServiceIdUpdateTask extends AbstractOAuthUpdateTask {
 
     /**
      * Initialises a new {@link RenameMigrateLinkedInServiceIdUpdateTask}.
@@ -78,40 +72,21 @@ public class RenameMigrateLinkedInServiceIdUpdateTask extends UpdateTaskAdapter 
     }
 
     @Override
-    public void perform(PerformParameters params) throws OXException {
-        Connection writeCon = params.getConnection();
-        boolean rollback = false;
-        PreparedStatement stmt = null;
-        try {
-            startTransaction(writeCon);
-            rollback = true;
-
-            for (int contextId : params.getContextsInSameSchema()) {
-                stmt = writeCon.prepareStatement("UPDATE oauthAccounts SET serviceId=? WHERE cid=? AND serviceId=?");
+    void innerPerform(Connection connection, PerformParameters performParameters) throws OXException, SQLException {
+        for (int contextId : performParameters.getContextsInSameSchema()) {
+            try (PreparedStatement stmt = connection.prepareStatement("UPDATE oauthAccounts SET serviceId=? WHERE cid=? AND serviceId=?")) {
                 stmt.setString(1, KnownApi.LINKEDIN.getFullName());
                 stmt.setInt(2, contextId);
                 stmt.setString(3, "com.openexchange.socialplugin.linkedin");
                 stmt.execute();
-                stmt.close();
+            }
 
-                stmt = writeCon.prepareStatement("UPDATE oauthAccounts SET scope=? WHERE cid=? AND serviceId=?");
+            try (PreparedStatement stmt = connection.prepareStatement("UPDATE oauthAccounts SET scope=? WHERE cid=? AND serviceId=?")) {
                 stmt.setString(1, OXScope.contacts_ro.name());
                 stmt.setInt(2, contextId);
                 stmt.setString(3, KnownApi.LINKEDIN.getFullName());
                 stmt.execute();
-                stmt.close();
             }
-
-            writeCon.commit();
-            rollback = false;
-        } catch (SQLException e) {
-            throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
-        } finally {
-            closeSQLStuff(stmt);
-            if (rollback) {
-                Databases.rollback(writeCon);
-            }
-            autocommit(writeCon);
         }
     }
 

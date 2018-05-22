@@ -53,6 +53,7 @@ import java.util.Collection;
 import java.util.Collections;
 import org.scribe.builder.api.Api;
 import org.scribe.builder.api.BoxApi;
+import org.scribe.model.Verb;
 import com.openexchange.oauth.KnownApi;
 import com.openexchange.oauth.impl.AbstractExtendedScribeAwareOAuthServiceMetaData;
 import com.openexchange.server.ServiceLookup;
@@ -64,6 +65,9 @@ import com.openexchange.server.ServiceLookup;
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 public final class BoxComOAuthServiceMetaData extends AbstractExtendedScribeAwareOAuthServiceMetaData {
+
+    private static final String IDENTITY_URL = "https://api.box.com/2.0/users/me";
+    private static final String IDENTITY_FIELD_NAME = "id";
 
     /**
      * Initializes a new {@link BoxComOAuthServiceMetaData}.
@@ -87,5 +91,35 @@ public final class BoxComOAuthServiceMetaData extends AbstractExtendedScribeAwar
     @Override
     public Class<? extends Api> getScribeService() {
         return BoxApi.class;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.oauth.impl.OAuthIdentityAware#getIdentityMethod()
+     */
+    @Override
+    public Verb getIdentityHTTPMethod() {
+        return Verb.GET;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.oauth.impl.OAuthIdentityAware#getIdentityURL()
+     */
+    @Override
+    public String getIdentityURL(String accessToken) {
+        return IDENTITY_URL;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.oauth.impl.OAuthIdentityAware#getIdentityPattern()
+     */
+    @Override
+    public String getIdentityFieldName() {
+        return IDENTITY_FIELD_NAME;
     }
 }

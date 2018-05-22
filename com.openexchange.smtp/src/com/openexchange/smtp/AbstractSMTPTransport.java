@@ -661,7 +661,7 @@ abstract class AbstractSMTPTransport extends MailTransport implements MimeSuppor
                         if (null != oauthService) {
                             OAuthAccount oAuthAccount;
                             try {
-                                oAuthAccount = oauthService.getAccount(account.getTransportOAuthId(), session, session.getUserId(), session.getContextId());
+                                oAuthAccount = oauthService.getAccount(session, account.getTransportOAuthId());
                             } catch (Exception x) {
                                 LOG.warn("Failed to load transport-associated OAuth account", x);
                                 oAuthAccount = null;
@@ -681,7 +681,7 @@ abstract class AbstractSMTPTransport extends MailTransport implements MimeSuppor
                             OAuthService oauthService = Services.optService(OAuthService.class);
                             if (null != oauthService) {
                                 try {
-                                    OAuthAccount oAuthAccount = oauthService.getAccount(mailAccount.getMailOAuthId(), session, session.getUserId(), session.getContextId());
+                                    OAuthAccount oAuthAccount = oauthService.getAccount(session, mailAccount.getMailOAuthId());
                                     throw MailExceptionCode.MAIL_TRANSPORT_DISABLED_OAUTH.create(smtpConfig.getServer(), smtpConfig.getLogin(), I(session.getUserId()), I(session.getContextId()), oAuthAccount.getDisplayName());
                                 } catch (Exception x) {
                                     LOG.warn("Failed to load mail-associated OAuth account", x);
@@ -824,7 +824,7 @@ abstract class AbstractSMTPTransport extends MailTransport implements MimeSuppor
                         LOG.warn("Detected failed OAuth authentication, but unable to handle as needed service {} is missing", OAuthService.class.getSimpleName());
                     } else {
                         try {
-                            OAuthAccount oAuthAccount = oauthService.getAccount(oauthAccountId, session, session.getUserId(), session.getContextId());
+                            OAuthAccount oAuthAccount = oauthService.getAccount(session, oauthAccountId);
                             API api = oAuthAccount.getAPI();
                             Throwable cause = e.getCause();
                             throw OAuthExceptionCodes.OAUTH_ACCESS_TOKEN_INVALID.create(cause, api.getName(), I(oAuthAccount.getId()), I(session.getUserId()), I(session.getContextId()));

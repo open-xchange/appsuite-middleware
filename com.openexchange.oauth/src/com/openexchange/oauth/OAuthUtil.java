@@ -56,6 +56,7 @@ import java.net.URLEncoder;
 import java.net.UnknownHostException;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.Set;
 import com.openexchange.exception.OXException;
 import com.openexchange.framework.request.RequestContext;
@@ -258,6 +259,34 @@ public final class OAuthUtil {
             return URLEncoder.encode(s, "ISO-8859-1");
         } catch (final UnsupportedEncodingException e) {
             return s;
+        }
+    }
+
+    /**
+     * Returns the OAuth account identifier from associated account's configuration
+     *
+     * @param configuration The configuration
+     * @return The account identifier
+     * @throws IllegalArgumentException If the configuration is <code>null</code>, or if the account identifier is not present, or is present but cannot be parsed as an integer
+     */
+    public static int getAccountId(Map<String, Object> configuration) {
+        if (null == configuration) {
+            throw new IllegalArgumentException("The configuration cannot be 'null'");
+        }
+
+        Object accountId = configuration.get("account");
+        if (null == accountId) {
+            throw new IllegalArgumentException("The account identifier is missing from the configuration");
+        }
+
+        if (accountId instanceof Integer) {
+            return ((Integer) accountId).intValue();
+        }
+
+        try {
+            return Integer.parseInt(accountId.toString());
+        } catch (NumberFormatException e) {
+            throw new IllegalArgumentException("The account identifier '" + accountId.toString() + "' cannot be parsed as an integer.", e);
         }
     }
 }

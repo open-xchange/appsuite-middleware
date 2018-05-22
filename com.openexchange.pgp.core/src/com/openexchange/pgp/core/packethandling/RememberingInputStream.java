@@ -60,7 +60,7 @@ import gnu.trove.list.array.TByteArrayList;
  * @author <a href="mailto:benjamin.gruedelbach@open-xchange.com">Benjamin Gruedelbach</a>
  * @since v7.8.4
  */
-class RememberingInputStream extends InputStream {
+public class RememberingInputStream extends InputStream {
 
     private final InputStream in;
     private TByteList buffer = null;

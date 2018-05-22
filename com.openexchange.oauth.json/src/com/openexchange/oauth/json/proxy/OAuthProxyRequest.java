@@ -164,7 +164,7 @@ public class OAuthProxyRequest {
 		if (req.isSet("id")) {
 			int id = req.getParameter("id", int.class);
 
-			return oauthService.getAccount(id, session, session.getUserId(), session.getContextId());
+			return oauthService.getAccount(session, id);
 		}
 
 		if (req.isSet("api")){

@@ -130,7 +130,7 @@ public final class FolderI18nNamesServiceImpl implements FolderI18nNamesService 
         identifiers = new HashSet<String>();
         identifiers.add(FolderStrings.DEFAULT_CONTACT_COLLECT_FOLDER_NAME);
         identifiers.add(FolderStrings.DEFAULT_CONTACT_FOLDER_NAME);
-        identifiers.add(FolderStrings.SYSTEM_GLOBAL_FOLDER_NAME);
+        /*identifiers.add(FolderStrings.SYSTEM_GLOBAL_FOLDER_NAME);*/ // finally dropped
         identifiers.add(FolderStrings.SYSTEM_LDAP_FOLDER_NAME);
         identifiers.add(FolderStrings.VIRTUAL_LIST_CONTACT_FOLDER_NAME);
         identifiersPerModule.put(Integer.valueOf(Module.CONTACTS.getFolderConstant()), identifiers);

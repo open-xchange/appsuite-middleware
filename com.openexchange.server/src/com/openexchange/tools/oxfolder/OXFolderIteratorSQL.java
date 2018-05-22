@@ -156,7 +156,7 @@ public final class OXFolderIteratorSQL {
 
     private static final int PRIVATE_PERMISSION = FolderObject.PRIVATE_PERMISSION;
 
-    private static final int SYSTEM_GLOBAL_FOLDER_ID = FolderObject.SYSTEM_GLOBAL_FOLDER_ID;
+    /*private static final int SYSTEM_GLOBAL_FOLDER_ID = FolderObject.SYSTEM_GLOBAL_FOLDER_ID;*/ // finally dropped
 
     private static final String SHARED_PREFIX = FolderObject.SHARED_PREFIX;
 
@@ -251,7 +251,38 @@ public final class OXFolderIteratorSQL {
      * @param indexNames The optional indexes to use (<code>"...FORCE INDEX..."</code>)
      * @return The core SQL statement to query user-visible folders
      */
-    private static String getSQLUserVisibleFolders(final String folderTable, final String permissionTable, final String fields, final String permissionIds, final String accessibleModules, final String additionalCondition, final String orderBy, final boolean queryOptUserPrivate, final String... indexNames) {
+    private static String getSQLUserVisibleFolders(String folderTable, String permissionTable, String fields, String permissionIds, String accessibleModules, String additionalCondition, String orderBy, boolean queryOptUserPrivate, String... indexNames) {
+        return getSQLUserVisibleFolders(false, folderTable, permissionTable, fields, permissionIds, accessibleModules, additionalCondition, orderBy, queryOptUserPrivate, indexNames);
+    }
+
+    /**
+     * Generates the core SQL statement to query user-visible folders.
+     * <p>
+     * Returned {@link String} is supposed to be used within a {@link PreparedStatement}.<br>
+     * The following fields have to be set via {@link PreparedStatement#setInt(int, int)} method:
+     * <ol>
+     * <li>Context ID</li>
+     * <li>User ID</li>
+     * <li>Context ID</li>
+     * <li>Context ID</li>
+     * <li>User ID</li>
+     * <li>Context ID</li>
+     * <li>Context ID</li>
+     * <ol>
+     *
+     * @param useUnionAll Whether to use <code>"UNION ALL"</code> if duplicates are allowed
+     * @param folderTable The folder table name
+     * @param permissionTable The permission table name
+     * @param fields The fields to select
+     * @param permissionIds The user's permission identifiers
+     * @param accessibleModules The user's accessible modules
+     * @param additionalCondition The optional additional condition; pass <code>null</code> to ignore
+     * @param orderBy The optional <code>ORDER BY</code> clause; pass <code>null</code> to ignore
+     * @param queryOptUserPrivate <code>true</code> to also query user private folders (optional); otherwise <code>false</code> for pure permission-wise query
+     * @param indexNames The optional indexes to use (<code>"...FORCE INDEX..."</code>)
+     * @return The core SQL statement to query user-visible folders
+     */
+    private static String getSQLUserVisibleFolders(boolean useUnionAll, String folderTable, String permissionTable, String fields, String permissionIds, String accessibleModules, String additionalCondition, String orderBy, boolean queryOptUserPrivate, String... indexNames) {
         final StringBuilder sb = new StringBuilder(256);
         /*
          * Compose SELECT string prepended to each UNION statement
@@ -343,6 +374,9 @@ public final class OXFolderIteratorSQL {
         }
         for (int i = whereClauses.size() - 1; i-- > 0;) {
             sb.append(" UNION ");
+            if (useUnionAll) {
+                sb.append("ALL ");
+            }
             sb.append(select);
             sb.append(it.next());
         }
@@ -353,9 +387,12 @@ public final class OXFolderIteratorSQL {
     }
 
     private static final void appendix(final StringBuilder sb, final String accessibleModules, final String additionalCondition) {
+        /*-
+         *
         if (OXFolderProperties.isIgnoreSharedAddressbook()) {
             sb.append(" AND (ot.fuid != ").append(SYSTEM_GLOBAL_FOLDER_ID).append(')');
         }
+        */
         if (accessibleModules != null) {
             sb.append(" AND (ot.module IN ").append(accessibleModules).append(')');
         }
@@ -1109,8 +1146,7 @@ public final class OXFolderIteratorSQL {
              */
             TIntSet modulesToCheck = new TIntHashSet(modules);
             String condition = (modulesToCheck.contains(FolderObject.INFOSTORE) ? new StringBuilder("AND (ot.type IN (").append(PUBLIC).append(',').append(TRASH).append("))") : new StringBuilder("AND (ot.type = ").append(PUBLIC).append(')')).toString();
-            stmt = rc.prepareStatement(getSQLUserVisibleFolders("ot.fuid, ot.parent, ot.module",
-                permissionIds(userId, groups, ctx), StringCollection.getSqlInString(permissionBits.getAccessibleModules()), condition, getSubfolderOrderBy(STR_OT)));
+            stmt = rc.prepareStatement(getSQLUserVisibleFolders(true, OXFOLDER_TREE, OXFOLDER_PERMISSIONS, "ot.fuid, ot.parent, ot.module", permissionIds(userId, groups, ctx), StringCollection.getSqlInString(permissionBits.getAccessibleModules()), condition, null, false, new String[0]));
             int pos = 1;
             stmt.setInt(pos++, contextId);
             stmt.setInt(pos++, contextId);

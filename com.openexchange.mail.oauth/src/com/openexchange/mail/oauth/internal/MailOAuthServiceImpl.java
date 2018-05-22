@@ -96,7 +96,7 @@ public class MailOAuthServiceImpl implements MailOAuthService {
         }
 
         // Get the OAuth account
-        OAuthAccount oAuthAccount = oAuthService.getAccount(oauthAccountId, session, session.getUserId(), session.getContextId());
+        OAuthAccount oAuthAccount = oAuthService.getAccount(session, oauthAccountId);
         checkOAuthAccount(oAuthAccount, session);
 
         // Try to compose the auto-configuration
@@ -112,7 +112,7 @@ public class MailOAuthServiceImpl implements MailOAuthService {
         }
 
         // Get the OAuth account
-        OAuthAccount oAuthAccount = oAuthService.getAccount(oauthAccountId, session, session.getUserId(), session.getContextId());
+        OAuthAccount oAuthAccount = oAuthService.getAccount(session, oauthAccountId);
         checkOAuthAccount(oAuthAccount, session);
 
         MailOAuthProvider provider = registry.getProviderFor(oAuthAccount.getMetaData().getId());
