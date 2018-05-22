@@ -50,10 +50,17 @@
 package com.openexchange.groupware.update.internal;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.Properties;
+import java.util.Set;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.lean.DefaultProperty;
+import com.openexchange.config.lean.LeanConfigurationService;
+import com.openexchange.config.lean.Property;
+import com.openexchange.java.Strings;
 
 /**
  * This class contains the list of excluded update tasks. The configuration can be done by the configuration file
@@ -63,11 +70,15 @@ import com.openexchange.config.ConfigurationService;
  */
 public class ExcludedList implements UpdateTaskList<String> {
 
+    private static final String PROPERTY_DEFAULT = "";
+    private static final Property PROPERTY = DefaultProperty.valueOf("com.openexchange.groupware.update.excludedUpdateTasks", PROPERTY_DEFAULT);
+
     private static final ExcludedList SINGLETON = new ExcludedList();
 
     private static final String CONFIG_FILE_NAME = "excludedupdatetasks.properties";
 
-    private final List<String> taskList = new ArrayList<String>();
+    private final List<String> taskList = new ArrayList<>();
+    private Set<String> excludedNamespaces = new HashSet<>();
 
     private ExcludedList() {
         super();
@@ -85,6 +96,33 @@ public class ExcludedList implements UpdateTaskList<String> {
             taskList.add(className);
         }
         UpdateTaskCollection.getInstance().dirtyVersion();
+    }
+
+    /**
+     * Loads the property <code>com.openexchange.groupware.update.excludedUpdateTasks</code>
+     * 
+     * @param leanConfig The {@link LeanConfigurationService} to load the property
+     */
+    public void loadExcludedNamespaces(LeanConfigurationService leanConfig) {
+        String namespaces = leanConfig.getProperty(PROPERTY);
+        String[] split = Strings.splitByComma(namespaces);
+        if (split == null) {
+            return;
+        }
+        Set<String> en = new HashSet<>();
+        for (String s : split) {
+            excludedNamespaces.add(s);
+        }
+        excludedNamespaces = Collections.unmodifiableSet(en);
+    }
+
+    /**
+     * Returns an unmodifiable {@link Set} with all excluded update task namespaces
+     * 
+     * @return an unmodifiable {@link Set} with all excluded update task namespaces
+     */
+    public Set<String> getExcludedNamespaces() {
+        return excludedNamespaces;
     }
 
     @Override

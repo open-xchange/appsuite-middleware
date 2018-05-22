@@ -52,6 +52,7 @@ package com.openexchange.groupware.update.osgi;
 import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.caching.CacheService;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.database.CreateTableService;
 import com.openexchange.groupware.update.UpdateTaskProviderService;
 import com.openexchange.groupware.update.internal.CreateUpdateTaskTable;
@@ -77,14 +78,16 @@ public class Activator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigurationService.class };
+        return new Class<?>[] { ConfigurationService.class, LeanConfigurationService.class };
     }
 
     @Override
     public void startBundle() {
         final ConfigurationService configService = getService(ConfigurationService.class);
+        final LeanConfigurationService leanConfigService = getService(LeanConfigurationService.class);
 
         ExcludedList.getInstance().configure(configService);
+        ExcludedList.getInstance().loadExcludedNamespaces(leanConfigService);
         try {
             InternalList.getInstance().start();
         } catch (Error e) {

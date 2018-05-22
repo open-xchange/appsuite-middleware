@@ -123,10 +123,12 @@ class UpdateTaskCollection {
             }
         }
         return new SeparatedTasks() {
+
             @Override
             public List<UpdateTaskV2> getBlocking() {
                 return blocking;
             }
+
             @Override
             public List<UpdateTaskV2> getBackground() {
                 return background;
@@ -157,8 +159,18 @@ class UpdateTaskCollection {
             // Matching must be done based on task class name.
             Iterator<UpdateTaskV2> iter = retval.iterator();
             while (iter.hasNext()) {
-                if (excluded.equals(iter.next().getClass().getName())) {
+                Class<? extends UpdateTaskV2> clazz = iter.next().getClass();
+                if (excluded.equals(clazz.getName())) {
                     iter.remove();
+                } else {
+                    ExcludableUpdateTask annotation = clazz.getAnnotation(ExcludableUpdateTask.class);
+                    if (annotation == null) {
+                        continue;
+                    }
+                    String namespace = annotation.namespace();
+                    if (ExcludedList.getInstance().getExcludedNamespaces().contains(namespace)) {
+                        iter.remove();
+                    }
                 }
             }
         }
