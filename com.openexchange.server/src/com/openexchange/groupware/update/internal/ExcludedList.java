@@ -49,6 +49,7 @@
 
 package com.openexchange.groupware.update.internal;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -56,7 +57,10 @@ import java.util.List;
 import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.Set;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.ConfigurationServices;
 import com.openexchange.config.lean.DefaultProperty;
 import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.config.lean.Property;
@@ -70,6 +74,8 @@ import com.openexchange.java.Strings;
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 public class ExcludedList implements UpdateTaskList<String> {
+
+    private static final Logger LOG = LoggerFactory.getLogger(ExcludedList.class);
 
     private static final String PROPERTY_DEFAULT = "";
     private static final Property PROPERTY = DefaultProperty.valueOf("com.openexchange.groupware.update.excludedUpdateTasks", PROPERTY_DEFAULT);
@@ -90,12 +96,27 @@ public class ExcludedList implements UpdateTaskList<String> {
 
     public void configure(ConfigurationService configService) {
         taskList.clear();
-        Properties props = configService.getFile(CONFIG_FILE_NAME);
+        Properties props = loadProperties(configService);
         for (Entry<Object, Object> entry : props.entrySet()) {
             String className = entry.getKey().toString().trim();
             taskList.add(className);
         }
         UpdateTaskCollection.getInstance().dirtyVersion();
+    }
+
+    /**
+     * Loads the properties
+     * 
+     * @param configService The {@link ConfigurationService}
+     * @return The {@link Properties} found in {@value #CONFIG_FILE_NAME} or an empty {@link Properties} set
+     */
+    private Properties loadProperties(ConfigurationService configService) {
+        try {
+            return ConfigurationServices.loadPropertiesFrom(configService.getFileByName(CONFIG_FILE_NAME));
+        } catch (IOException e) {
+            LOG.warn("No '{}' file found in configuration folder with excluded update tasks.", CONFIG_FILE_NAME);
+            return new Properties();
+        }
     }
 
     /**
