@@ -200,7 +200,7 @@ public final class Session {
 
     /**
      * Sets the currently active bundle.
-     *
+     * 
      * @param bundle The bundle to set or <code>null</code>
      */
     public static void setActiveBundle(org.osgi.framework.Bundle bundle) {
@@ -239,12 +239,11 @@ public final class Session {
 			String home = System.getProperty("java.home");
 			String newdir = home + File.separator + "conf";
 			File conf = new File(newdir);
-			if (conf.exists()) {
-                return newdir + File.separator;
-            } else {
-                return home + File.separator +
+			if (conf.exists())
+			    return newdir + File.separator;
+			else
+			    return home + File.separator +
 				    "lib" + File.separator;
-            }
 		    }
 		});
 	} catch (Exception ex) {
@@ -258,20 +257,18 @@ public final class Session {
 	this.props = props;
 	this.authenticator = authenticator;
 
-	if (Boolean.valueOf(props.getProperty("mail.debug")).booleanValue()) {
-        debug = true;
-    }
+	if (Boolean.valueOf(props.getProperty("mail.debug")).booleanValue())
+	    debug = true;
 
 	initLogger();
 	logger.log(Level.CONFIG, "JavaMail version {0}", "1.6.1");
 
 	// get the Class associated with the Authenticator
 	Class<?> cl;
-	if (authenticator != null) {
-        cl = authenticator.getClass();
-    } else {
-        cl = this.getClass();
-    }
+	if (authenticator != null)
+	    cl = authenticator.getClass();
+	else
+	    cl = this.getClass();
 	// load the resources
 	loadProviders(cl);
 	loadAddressMap(cl);
@@ -288,9 +285,9 @@ public final class Session {
      * @param	props	Properties object that hold relevant properties.<br>
      *                  It is expected that the client supplies values
      *                  for the properties listed in Appendix A of the
-     *                  JavaMail spec (particularly  mail.store.protocol,
-     *                  mail.transport.protocol, mail.host, mail.user,
-     *                  and mail.from) as the defaults are unlikely to
+     *                  JavaMail spec (particularly  mail.store.protocol, 
+     *                  mail.transport.protocol, mail.host, mail.user, 
+     *                  and mail.from) as the defaults are unlikely to 
      *                  work in all cases.
      * @param	authenticator Authenticator object used to call back to
      *			the application when a user name and password is
@@ -309,9 +306,9 @@ public final class Session {
      * @param	props	Properties object that hold relevant properties.<br>
      *                  It is expected that the client supplies values
      *                  for the properties listed in Appendix A of the
-     *                  JavaMail spec (particularly  mail.store.protocol,
-     *                  mail.transport.protocol, mail.host, mail.user,
-     *                  and mail.from) as the defaults are unlikely to
+     *                  JavaMail spec (particularly  mail.store.protocol, 
+     *                  mail.transport.protocol, mail.host, mail.user, 
+     *                  and mail.from) as the defaults are unlikely to 
      *                  work in all cases.
      * @return		a new Session object
      * @since		JavaMail 1.2
@@ -322,7 +319,7 @@ public final class Session {
 
     /**
      * Get the default Session object. If a default has not yet been
-     * setup, a new Session object is created and installed as the
+     * setup, a new Session object is created and installed as the 
      * default. <p>
      *
      * Since the default session is potentially available to all
@@ -358,12 +355,12 @@ public final class Session {
      *			object is created.<br>
      *                  It is expected that the client supplies values
      *                  for the properties listed in Appendix A of the
-     *                  JavaMail spec (particularly  mail.store.protocol,
-     *                  mail.transport.protocol, mail.host, mail.user,
-     *                  and mail.from) as the defaults are unlikely to
+     *                  JavaMail spec (particularly  mail.store.protocol, 
+     *                  mail.transport.protocol, mail.host, mail.user, 
+     *                  and mail.from) as the defaults are unlikely to 
      *                  work in all cases.
      * @param	authenticator Authenticator object.  Used only if a
-     *			new Session object is created.  Otherwise,
+     *			new Session object is created.  Otherwise, 
      *			it must match the Authenticator used to create
      *			the Session.
      * @return		the default Session object
@@ -372,23 +369,21 @@ public final class Session {
 					Authenticator authenticator) {
 	if (defaultSession == null) {
 	    SecurityManager security = System.getSecurityManager();
-	    if (security != null) {
-            security.checkSetFactory();
-        }
+	    if (security != null)
+		security.checkSetFactory();
 	    defaultSession = new Session(props, authenticator);
 	} else {
 	    // have to check whether caller is allowed to see default session
-	    if (defaultSession.authenticator == authenticator) {
-            ;	// either same object or both null, either way OK
-        } else if (defaultSession.authenticator != null &&
+	    if (defaultSession.authenticator == authenticator)
+		;	// either same object or both null, either way OK
+	    else if (defaultSession.authenticator != null &&
 		    authenticator != null &&
 		    defaultSession.authenticator.getClass().getClassLoader() ==
-			authenticator.getClass().getClassLoader()) {
-            ;	// both objects came from the same class loader, OK
-        } else {
-            // anything else is not allowed
-            throw new SecurityException("Access to default session denied");
-        }
+			authenticator.getClass().getClassLoader())
+		;	// both objects came from the same class loader, OK
+	    else
+		// anything else is not allowed
+		throw new SecurityException("Access to default session denied");
 	}
 
 	return defaultSession;
@@ -396,7 +391,7 @@ public final class Session {
 
     /**
      * Get the default Session object. If a default has not yet been
-     * setup, a new Session object is created and installed as the
+     * setup, a new Session object is created and installed as the 
      * default. <p>
      *
      * Note that a default session created with no Authenticator is
@@ -408,9 +403,9 @@ public final class Session {
      *			object is created.<br>
      *                  It is expected that the client supplies values
      *                  for the properties listed in Appendix A of the
-     *                  JavaMail spec (particularly  mail.store.protocol,
-     *                  mail.transport.protocol, mail.host, mail.user,
-     *                  and mail.from) as the defaults are unlikely to
+     *                  JavaMail spec (particularly  mail.store.protocol, 
+     *                  mail.transport.protocol, mail.host, mail.user, 
+     *                  and mail.from) as the defaults are unlikely to 
      *                  work in all cases.
      * @return		the default Session object
      * @since		JavaMail 1.2
@@ -473,15 +468,14 @@ public final class Session {
      * @since		JavaMail 1.3
      */
     public synchronized PrintStream getDebugOut() {
-	if (out == null) {
-        return System.out;
-    } else {
-        return out;
-    }
+	if (out == null)
+	    return System.out;
+	else
+	    return out;
     }
 
     /**
-     * This method returns an array of all the implementations installed
+     * This method returns an array of all the implementations installed 
      * via the javamail.[default.]providers files that can
      * be loaded using the ClassLoader available to this application.
      *
@@ -497,9 +491,9 @@ public final class Session {
      * Returns the default Provider for the protocol
      * specified. Checks mail.&lt;protocol&gt;.class property
      * first and if it exists, returns the Provider
-     * associated with this implementation. If it doesn't exist,
-     * returns the Provider that appeared first in the
-     * configuration files. If an implementation for the protocol
+     * associated with this implementation. If it doesn't exist, 
+     * returns the Provider that appeared first in the 
+     * configuration files. If an implementation for the protocol 
      * isn't found, throws NoSuchProviderException
      *
      * @param  protocol  Configured protocol (i.e. smtp, imap, etc)
@@ -521,11 +515,11 @@ public final class Session {
 	if (_className != null) {
 	    if (logger.isLoggable(Level.FINE)) {
 		logger.fine("mail."+protocol+
-				   ".class property exists and points to " +
+				   ".class property exists and points to " + 
 				   _className);
 	    }
 	    _provider = providersByClassName.get(_className);
-	}
+	} 
 
 	if (_provider != null) {
 	    return _provider;
@@ -548,7 +542,7 @@ public final class Session {
      * Set the passed Provider to be the default implementation
      * for the protocol in Provider.protocol overriding any previous values.
      *
-     * @param provider Currently configured Provider which will be
+     * @param provider Currently configured Provider which will be 
      * set as the default for the protocol
      * @exception	NoSuchProviderException If the provider passed in
      *			is invalid.
@@ -559,7 +553,7 @@ public final class Session {
 	    throw new NoSuchProviderException("Can't set null provider");
 	}
 	providersByProtocol.put(provider.getProtocol(), provider);
-	props.put("mail." + provider.getProtocol() + ".class",
+	props.put("mail." + provider.getProtocol() + ".class", 
 		  provider.getClassName());
     }
 
@@ -567,10 +561,10 @@ public final class Session {
     /**
      * Get a Store object that implements this user's desired Store
      * protocol. The <code>mail.store.protocol</code> property specifies the
-     * desired protocol. If an appropriate Store object is not obtained,
+     * desired protocol. If an appropriate Store object is not obtained, 
      * NoSuchProviderException is thrown
      *
-     * @return 		a Store object
+     * @return 		a Store object 
      * @exception	NoSuchProviderException If a provider for the given
      *			protocol is not found.
      */
@@ -580,11 +574,11 @@ public final class Session {
 
     /**
      * Get a Store object that implements the specified protocol. If an
-     * appropriate Store object cannot be obtained,
+     * appropriate Store object cannot be obtained, 
      * NoSuchProviderException is thrown.
      *
      * @param	        protocol	the Store protocol
-     * @return		a Store object
+     * @return		a Store object 
      * @exception	NoSuchProviderException If a provider for the given
      *			protocol is not found.
      */
@@ -597,7 +591,7 @@ public final class Session {
      * Get a Store object for the given URLName. If the requested Store
      * object cannot be obtained, NoSuchProviderException is thrown.
      *
-     * The "scheme" part of the URL string (Refer RFC 1738) is used
+     * The "scheme" part of the URL string (Refer RFC 1738) is used 
      * to locate the Store protocol. <p>
      *
      * @param	url	URLName that represents the desired Store
@@ -616,7 +610,7 @@ public final class Session {
     /**
      * Get an instance of the store specified by Provider. Instantiates
      * the store and returns it.
-     *
+     * 
      * @param provider Store Provider that will be instantiated
      * @return Instantiated Store
      * @exception	NoSuchProviderException If a provider for the given
@@ -632,14 +626,14 @@ public final class Session {
      * is not null, uses it, otherwise creates a new one. Instantiates
      * the store and returns it. This is a private method used by
      * getStore(Provider) and getStore(URLName)
-     *
+     * 
      * @param provider Store Provider that will be instantiated
      * @param url      URLName used to instantiate the Store
      * @return Instantiated Store
      * @exception	NoSuchProviderException If a provider for the given
      *			Provider/URLName is not found.
      */
-    private Store getStore(Provider provider, URLName url)
+    private Store getStore(Provider provider, URLName url) 
 	throws NoSuchProviderException {
 
 	// make sure we have the correct type of provider
@@ -660,7 +654,7 @@ public final class Session {
      * in a protocol dependent manner to locate and instantiate the
      * appropriate Folder object. <p>
      *
-     * Note that RFC 1738 also specifies the syntax for the
+     * Note that RFC 1738 also specifies the syntax for the 
      * "schemepart" for IP-based protocols (IMAP4, POP3, etc.).
      * Providers of IP-based mail Stores should implement that
      * syntax for referring to Folders. <p>
@@ -671,7 +665,7 @@ public final class Session {
      * @see		javax.mail.URLName
      * @exception	NoSuchProviderException If a provider for the given
      *			URLName is not found.
-     * @exception	MessagingException if the Folder could not be
+     * @exception	MessagingException if the Folder could not be 
      *			located or created.
      */
     public Folder getFolder(URLName url)
@@ -683,24 +677,22 @@ public final class Session {
     }
 
     /**
-     * Get a Transport object that implements this user's desired
-     * Transport protcol. The <code>mail.transport.protocol</code> property
-     * specifies the desired protocol. If an appropriate Transport
+     * Get a Transport object that implements this user's desired 
+     * Transport protcol. The <code>mail.transport.protocol</code> property 
+     * specifies the desired protocol. If an appropriate Transport 
      * object cannot be obtained, MessagingException is thrown.
      *
-     * @return 		a Transport object
+     * @return 		a Transport object 
      * @exception	NoSuchProviderException If the provider is not found.
      */
     public Transport getTransport() throws NoSuchProviderException {
 	String prot = getProperty("mail.transport.protocol");
-	if (prot != null) {
-        return getTransport(prot);
-    }
+	if (prot != null)
+	    return getTransport(prot);
 	// if the property isn't set, use the protocol for "rfc822"
 	prot = (String)addressMap.get("rfc822");
-	if (prot != null) {
-        return getTransport(prot);
-    }
+	if (prot != null)
+	    return getTransport(prot);
 	return getTransport("smtp");	// if all else fails
     }
 
@@ -710,7 +702,7 @@ public final class Session {
      * returned.
      *
      * @param	protocol the Transport protocol
-     * @return 		a Transport object
+     * @return 		a Transport object 
      * @exception	NoSuchProviderException If provider for the given
      *			protocol is not found.
      */
@@ -721,10 +713,10 @@ public final class Session {
 
 
     /**
-     * Get a Transport object for the given URLName. If the requested
+     * Get a Transport object for the given URLName. If the requested 
      * Transport object cannot be obtained, NoSuchProviderException is thrown.
      *
-     * The "scheme" part of the URL string (Refer RFC 1738) is used
+     * The "scheme" part of the URL string (Refer RFC 1738) is used 
      * to locate the Transport protocol. <p>
      *
      * @param	url	URLName that represents the desired Transport
@@ -742,13 +734,13 @@ public final class Session {
     /**
      * Get an instance of the transport specified in the Provider. Instantiates
      * the transport and returns it.
-     *
+     * 
      * @param provider Transport Provider that will be instantiated
      * @return Instantiated Transport
      * @exception	NoSuchProviderException If provider for the given
      *			provider is not found.
      */
-    public Transport getTransport(Provider provider)
+    public Transport getTransport(Provider provider) 
 	                                     throws NoSuchProviderException {
 	return getTransport(provider, null);
     }
@@ -760,22 +752,20 @@ public final class Session {
      * @param	address	an address for which a Transport is needed
      * @return	A Transport object
      * @see javax.mail.Address
-     * @exception	NoSuchProviderException If provider for the
+     * @exception	NoSuchProviderException If provider for the 
      *			Address type is not found
      */
-    public Transport getTransport(Address address)
+    public Transport getTransport(Address address) 
 	                                     throws NoSuchProviderException {
 
 	String transportProtocol;
 	transportProtocol =
 	    getProperty("mail.transport.protocol." + address.getType());
-	if (transportProtocol != null) {
-        return getTransport(transportProtocol);
-    }
+	if (transportProtocol != null)
+	    return getTransport(transportProtocol);
 	transportProtocol = (String)addressMap.get(address.getType());
-	if (transportProtocol != null) {
-        return getTransport(transportProtocol);
-    }
+	if (transportProtocol != null)
+	    return getTransport(transportProtocol);
 	throw new NoSuchProviderException("No provider for Address type: "+
 						address.getType());
     }
@@ -787,7 +777,7 @@ public final class Session {
      * @param	url		urlname to use (can be null)
      * @return A Transport object
      * @exception	NoSuchProviderException	If no provider or the provider
-     *			was the wrong class.
+     *			was the wrong class.	
      */
 
     private Transport getTransport(Provider provider, URLName url)
@@ -823,52 +813,47 @@ public final class Session {
 
 	// create a url if needed
 	if (url == null) {
-	    url = new URLName(provider.getProtocol(), null, -1,
+	    url = new URLName(provider.getProtocol(), null, -1, 
 			      null, null, null);
 	}
 
 	Object service = null;
-
+	
 	// get the ClassLoader associated with the Authenticator
 	ClassLoader cl;
-	if (authenticator != null) {
-        cl = authenticator.getClass().getClassLoader();
-    } else {
-        cl = this.getClass().getClassLoader();
-    }
+	if (authenticator != null)
+	    cl = authenticator.getClass().getClassLoader();
+	else
+	    cl = this.getClass().getClassLoader();
 
 	// now load the class
 	Class<?> serviceClass = null;
 	try {
 	    // First try the "application's" class loader.
 	    ClassLoader ccl = getContextClassLoader();
-	    if (ccl != null) {
-            try {
-                serviceClass =
-            	Class.forName(provider.getClassName(), false, ccl);
-            } catch (ClassNotFoundException ex) {
-                // ignore it
-            }
-        }
-	    if (serviceClass == null || !type.isAssignableFrom(serviceClass)) {
-            serviceClass =
-                Class.forName(provider.getClassName(), false, cl);
-        }
-
-	    if (!type.isAssignableFrom(serviceClass)) {
-            throw new ClassCastException(
-            		type.getName() + " " + serviceClass.getName());
-        }
+	    if (ccl != null)
+		try {
+		    serviceClass =
+			Class.forName(provider.getClassName(), false, ccl);
+		} catch (ClassNotFoundException ex) {
+		    // ignore it
+		}
+	    if (serviceClass == null || !type.isAssignableFrom(serviceClass))
+		serviceClass =
+		    Class.forName(provider.getClassName(), false, cl);
+            
+	    if (!type.isAssignableFrom(serviceClass))
+		throw new ClassCastException(
+				type.getName() + " " + serviceClass.getName());
 	} catch (Exception ex1) {
 	    // That didn't work, now try the "system" class loader.
 	    // (Need both of these because JDK 1.1 class loaders
 	    // may not delegate to their parent class loader.)
 	    try {
 		serviceClass = Class.forName(provider.getClassName());
-		if (!type.isAssignableFrom(serviceClass)) {
-            throw new ClassCastException(
+		if (!type.isAssignableFrom(serviceClass))
+		    throw new ClassCastException(
 				type.getName() + " " + serviceClass.getName());
-        }
 	    } catch (Exception ex) {
 		// Nothing worked, give up.
 		logger.log(Level.FINE, "Exception loading provider", ex);
@@ -905,11 +890,10 @@ public final class Session {
      */
     public void setPasswordAuthentication(URLName url,
 					  PasswordAuthentication pw) {
-	if (pw == null) {
-        authTable.remove(url);
-    } else {
-        authTable.put(url, pw);
-    }
+	if (pw == null)
+	    authTable.remove(url);
+	else
+	    authTable.put(url, pw);
     }
 
     /**
@@ -940,7 +924,7 @@ public final class Session {
      * @param	prompt		any additional String to show as part of
      *                          the prompt; may be null.
      * @param	defaultUserName	the default username. may be null.
-     * @return	the authentication which was collected by the authenticator;
+     * @return	the authentication which was collected by the authenticator; 
      *          may be null.
      */
     public PasswordAuthentication requestPasswordAuthentication(
@@ -960,8 +944,8 @@ public final class Session {
      *
      * @return		Properties object
      */
-    public Properties getProperties() {
-   	return props;
+    public Properties getProperties() { 
+   	return props; 
     }
 
     /**
@@ -971,8 +955,8 @@ public final class Session {
      * @param	name	the property name
      * @return		String that is the property value
      */
-    public String getProperty(String name) {
-   	return props.getProperty(name);
+    public String getProperty(String name) { 
+   	return props.getProperty(name); 
     }
 
     /**
@@ -989,9 +973,8 @@ public final class Session {
 	// load system-wide javamail.providers from the
 	// <java.home>/{conf,lib} directory
 	try {
-	    if (confDir != null) {
-            loadFile(confDir + "javamail.providers", loader);
-        }
+	    if (confDir != null)
+		loadFile(confDir + "javamail.providers", loader);
 	} catch (SecurityException ex) {}
 
 	// load the META-INF/javamail.providers file supplied by an application
@@ -1026,14 +1009,14 @@ public final class Session {
 	if (logger.isLoggable(Level.CONFIG)) {
 	    // dump the output of the tables for debugging
 	    logger.config("Tables of loaded providers");
-	    logger.config("Providers Listed By Class Name: " +
+	    logger.config("Providers Listed By Class Name: " + 
 	       providersByClassName.toString());
-	    logger.config("Providers Listed By Protocol: " +
+	    logger.config("Providers Listed By Protocol: " + 
 	       providersByProtocol.toString());
 	}
     }
 
-    private void loadProvidersFromStream(InputStream is)
+    private void loadProvidersFromStream(InputStream is) 
 				throws IOException {
 	if (is != null) {
 	    LineInputStream lis = new LineInputStream(is);
@@ -1042,22 +1025,19 @@ public final class Session {
 	    // load and process one line at a time using LineInputStream
 	    while ((currLine = lis.readLine()) != null) {
 
-		if (currLine.startsWith("#")) {
-            continue;
-        }
+		if (currLine.startsWith("#"))
+		    continue;
 		if (currLine.trim().length() == 0)
-         {
-            continue;	// skip blank line
-        }
+		    continue;	// skip blank line
 		Provider.Type type = null;
 		String protocol = null, className = null;
 		String vendor = null, version = null;
-
+		    
 		// separate line into key-value tuples
 		StringTokenizer tuples = new StringTokenizer(currLine,";");
 		while (tuples.hasMoreTokens()) {
 		    String currTuple = tuples.nextToken().trim();
-
+			
 		    // set the value of each attribute based on its key
 		    int sep = currTuple.indexOf("=");
 		    if (currTuple.startsWith("protocol=")) {
@@ -1079,9 +1059,9 @@ public final class Session {
 		}
 
 		// check if a valid Provider; else, continue
-		if (type == null || protocol == null || className == null
+		if (type == null || protocol == null || className == null 
 		    || protocol.length() <= 0 || className.length() <= 0) {
-
+			
 		    logger.log(Level.CONFIG, "Bad provider entry: {0}",
 						currLine);
 		    continue;
@@ -1104,9 +1084,8 @@ public final class Session {
     public synchronized void addProvider(Provider provider) {
 	providers.addElement(provider);
 	providersByClassName.put(provider.getClassName(), provider);
-	if (!providersByProtocol.containsKey(provider.getProtocol())) {
-        providersByProtocol.put(provider.getProtocol(), provider);
-    }
+	if (!providersByProtocol.containsKey(provider.getProtocol()))
+	    providersByProtocol.put(provider.getProtocol(), provider);
     }
 
     // load maps in reverse order of preference so that the preferred
@@ -1128,9 +1107,8 @@ public final class Session {
 	// load system-wide javamail.address.map from the
 	// <java.home>/{conf,lib} directory
 	try {
-	    if (confDir != null) {
-            loadFile(confDir + "javamail.address.map", loader);
-        }
+	    if (confDir != null)
+		loadFile(confDir + "javamail.address.map", loader);
 	} catch (SecurityException ex) {}
 
 	if (addressMap.isEmpty()) {
@@ -1152,11 +1130,10 @@ public final class Session {
      */
     public synchronized void setProtocolForAddress(String addresstype,
 				String protocol) {
-	if (protocol == null) {
-        addressMap.remove(addresstype);
-    } else {
-        addressMap.put(addresstype, protocol);
-    }
+	if (protocol == null)
+	    addressMap.remove(addresstype);
+	else
+	    addressMap.put(addresstype, protocol);
     }
 
     /**
@@ -1171,18 +1148,15 @@ public final class Session {
 	} catch (FileNotFoundException fex) {
 	    // ignore it
 	} catch (IOException e) {
-	    if (logger.isLoggable(Level.CONFIG)) {
-            logger.log(Level.CONFIG, "not loading file: " + name, e);
-        }
+	    if (logger.isLoggable(Level.CONFIG))
+		logger.log(Level.CONFIG, "not loading file: " + name, e);
 	} catch (SecurityException sex) {
-	    if (logger.isLoggable(Level.CONFIG)) {
-            logger.log(Level.CONFIG, "not loading file: " + name, sex);
-        }
+	    if (logger.isLoggable(Level.CONFIG))
+		logger.log(Level.CONFIG, "not loading file: " + name, sex);
 	} finally {
 	    try {
-		if (clis != null) {
-            clis.close();
-        }
+		if (clis != null)
+		    clis.close();
 	    } catch (IOException ex) { }	// ignore it
 	}
     }
@@ -1200,10 +1174,9 @@ public final class Session {
 		logger.log(Level.CONFIG, "successfully loaded resource: {0}",
 					    name);
 	    } else {
-		if (expected) {
-            logger.log(Level.WARNING,
+		if (expected)
+		    logger.log(Level.WARNING,
 				    "expected resource not found: {0}", name);
-        }
 	    }
 	} catch (IOException e) {
 	    logger.log(Level.CONFIG, "Exception loading resource", e);
@@ -1211,9 +1184,8 @@ public final class Session {
 	    logger.log(Level.CONFIG, "Exception loading resource", sex);
 	} finally {
 	    try {
-		if (clis != null) {
-            clis.close();
-        }
+		if (clis != null)
+		    clis.close();
 	    } catch (IOException ex) { }	// ignore it
 	}
     }
@@ -1229,14 +1201,12 @@ public final class Session {
 	    ClassLoader cld = null;
 	    // First try the "application's" class loader.
 	    cld = getContextClassLoader();
-	    if (cld == null) {
-            cld = cl.getClassLoader();
-        }
-	    if (cld != null) {
-            urls = getResources(cld, name);
-        } else {
-            urls = getSystemResources(name);
-        }
+	    if (cld == null)
+		cld = cl.getClassLoader();
+	    if (cld != null)
+		urls = getResources(cld, name);
+	    else
+		urls = getSystemResources(name);
 	    if (urls != null) {
 		for (int i = 0; i < urls.length; i++) {
 		    URL url = urls[i];
@@ -1263,9 +1233,8 @@ public final class Session {
 				    sex);
 		    } finally {
 			try {
-			    if (clis != null) {
-                    clis.close();
-                }
+			    if (clis != null)
+				clis.close();
 			} catch (IOException cex) { }
 		    }
 		}
