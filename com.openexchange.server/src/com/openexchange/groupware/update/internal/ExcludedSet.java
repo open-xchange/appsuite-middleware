@@ -74,7 +74,6 @@ public class ExcludedSet implements UpdateTaskSet<String> {
     private static final String CONFIG_FILE_NAME = "excludedupdatetasks.properties";
 
     private final Set<String> taskSet = new HashSet<String>();
-    private Set<String> excludedNamespaces = new HashSet<>();
 
     private ExcludedSet() {
         super();
@@ -107,15 +106,6 @@ public class ExcludedSet implements UpdateTaskSet<String> {
             LOG.warn("No '{}' file found in configuration folder with excluded update tasks.", CONFIG_FILE_NAME);
             return new Properties();
         }
-    }
-
-    /**
-     * Returns an unmodifiable {@link Set} with all excluded update task namespaces
-     * 
-     * @return an unmodifiable {@link Set} with all excluded update task namespaces
-     */
-    public Set<String> getExcludedNamespaces() {
-        return excludedNamespaces;
     }
 
     @Override
