@@ -50,10 +50,8 @@
 package com.openexchange.groupware.update.internal;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.Set;
@@ -73,24 +71,24 @@ import com.openexchange.java.Strings;
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class ExcludedList implements UpdateTaskList<String> {
+public class ExcludedSet implements UpdateTaskSet<String> {
 
-    private static final Logger LOG = LoggerFactory.getLogger(ExcludedList.class);
+    private static final Logger LOG = LoggerFactory.getLogger(ExcludedSet.class);
 
     private static final String PROPERTY_DEFAULT = "";
     private static final Property PROPERTY = DefaultProperty.valueOf("com.openexchange.groupware.update.excludedUpdateTasks", PROPERTY_DEFAULT);
-    private static final ExcludedList SINGLETON = new ExcludedList();
+    private static final ExcludedSet SINGLETON = new ExcludedSet();
 
     private static final String CONFIG_FILE_NAME = "excludedupdatetasks.properties";
 
-    private final List<String> taskList = new ArrayList<String>();
+    private final Set<String> taskList = new HashSet<String>();
     private Set<String> excludedNamespaces = new HashSet<>();
 
-    private ExcludedList() {
+    private ExcludedSet() {
         super();
     }
 
-    public static ExcludedList getInstance() {
+    public static ExcludedSet getInstance() {
         return SINGLETON;
     }
 
@@ -147,7 +145,7 @@ public class ExcludedList implements UpdateTaskList<String> {
     }
 
     @Override
-    public List<String> getTaskList() {
+    public Set<String> getTaskSet() {
         return taskList;
     }
 }

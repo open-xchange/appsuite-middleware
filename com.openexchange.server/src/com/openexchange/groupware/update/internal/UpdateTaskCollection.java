@@ -52,6 +52,7 @@ package com.openexchange.groupware.update.internal;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.SchemaUpdateState;
@@ -160,11 +161,11 @@ class UpdateTaskCollection {
      * @return a {@link List} with all {@link UpdateTaskV2} with out the excluded ones
      */
     List<UpdateTaskV2> getListWithoutExcludes() {
-        List<UpdateTaskV2> retval = getFullList();
-        for (String excluded : ExcludedList.getInstance().getTaskList()) {
-            excludeTask(retval, excluded);
+        Set<UpdateTaskV2> fullSet = getFullSet();
+        for (String excluded : ExcludedSet.getInstance().getTaskSet()) {
+            excludeTask(fullSet, excluded);
         }
-        return retval;
+        return new ArrayList<>(fullSet);
     }
 
     /**
@@ -175,7 +176,7 @@ class UpdateTaskCollection {
      * @param fullList The {@link List} with all the {@link UpdateTaskV2} tasks
      * @param toExclude The name of the task to exclude
      */
-    private void excludeTask(List<UpdateTaskV2> fullList, String toExclude) {
+    private void excludeTask(Set<UpdateTaskV2> fullList, String toExclude) {
         Iterator<UpdateTaskV2> iter = fullList.iterator();
         while (iter.hasNext()) {
             Class<? extends UpdateTaskV2> clazz = iter.next().getClass();
@@ -188,14 +189,14 @@ class UpdateTaskCollection {
                 continue;
             }
             String namespace = annotation.namespace();
-            if (ExcludedList.getInstance().getExcludedNamespaces().contains(namespace)) {
+            if (ExcludedSet.getInstance().getExcludedNamespaces().contains(namespace)) {
                 iter.remove();
             }
         }
     }
 
-    private List<UpdateTaskV2> getFullList() {
-        return DynamicList.getInstance().getTaskList();
+    private Set<UpdateTaskV2> getFullSet() {
+        return DynamicSet.getInstance().getTaskSet();
     }
 
     void dirtyVersion() {

@@ -49,29 +49,29 @@
 
 package com.openexchange.groupware.update.internal;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import com.openexchange.groupware.update.UpdateTaskV2;
 
 /**
- * {@link DynamicList} - Registry for {@link UpdateTask update tasks}.
+ * {@link DynamicSet} - Registry for {@link UpdateTask update tasks}.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class DynamicList implements UpdateTaskList<UpdateTaskV2> {
+public final class DynamicSet implements UpdateTaskSet<UpdateTaskV2> {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(DynamicList.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(DynamicSet.class);
 
-    private static final DynamicList SINGLETON = new DynamicList();
+    private static final DynamicSet SINGLETON = new DynamicSet();
 
     /**
-     * Gets the singleton instance of {@link DynamicList}.
+     * Gets the singleton instance of {@link DynamicSet}.
      *
      * @return The singleton instance
      */
-    public static DynamicList getInstance() {
+    public static DynamicSet getInstance() {
         return SINGLETON;
     }
 
@@ -82,12 +82,19 @@ public final class DynamicList implements UpdateTaskList<UpdateTaskV2> {
     private final ConcurrentMap<Class<? extends UpdateTaskV2>, UpdateTaskV2> taskList = new ConcurrentHashMap<Class<? extends UpdateTaskV2>, UpdateTaskV2>();
 
     /**
-     * Initializes a new {@link DynamicList}.
+     * Initializes a new {@link DynamicSet}.
      */
-    private DynamicList() {
+    private DynamicSet() {
         super();
     }
 
+    /**
+     * Adds the specified update task to this registry.
+     * 
+     * @param updateTask The {@link UpdateTaskV2} task to add
+     * @return <code>true</code> if the task was successfully registered; <code>false</code>
+     *         if the same task was previously registered.
+     */
     public boolean addUpdateTask(final UpdateTaskV2 updateTask) {
         final boolean added = (null == taskList.putIfAbsent(updateTask.getClass(), updateTask));
         if (added) {
@@ -113,8 +120,8 @@ public final class DynamicList implements UpdateTaskList<UpdateTaskV2> {
     }
 
     @Override
-    public List<UpdateTaskV2> getTaskList() {
-        final List<UpdateTaskV2> retval = new ArrayList<UpdateTaskV2>(taskList.size());
+    public Set<UpdateTaskV2> getTaskSet() {
+        final Set<UpdateTaskV2> retval = new HashSet<UpdateTaskV2>(taskList.size());
         retval.addAll(taskList.values());
         return retval;
     }

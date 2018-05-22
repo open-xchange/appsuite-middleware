@@ -49,15 +49,20 @@
 
 package com.openexchange.groupware.update.internal;
 
-import java.util.List;
+import java.util.Set;
+import com.openexchange.groupware.update.UpdateTaskV2;
 
 /**
- * {@link UpdateTaskList}
+ * {@link UpdateTaskSet}
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-interface UpdateTaskList<T> {
+interface UpdateTaskSet<T> {
 
-    List<T> getTaskList();
-
+    /**
+     * Returns a {@link Set} with all {@link UpdateTaskV2} tasks
+     * 
+     * @return a {@link Set} with all {@link UpdateTaskV2} tasks
+     */
+    Set<T> getTaskSet();
 }

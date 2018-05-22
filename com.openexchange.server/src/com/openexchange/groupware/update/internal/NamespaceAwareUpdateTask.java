@@ -59,7 +59,7 @@ import com.openexchange.groupware.update.UpdateTaskV2;
 /**
  * {@link NamespaceAwareUpdateTask} - Makes an {@link UpdateTaskV2} namespace-aware.
  * 
- * @see {@link UpdateTaskCollection} and {@link ExcludedList}
+ * @see {@link UpdateTaskCollection} and {@link ExcludedSet}
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @since v7.10.0
  */
