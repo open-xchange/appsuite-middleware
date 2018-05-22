@@ -65,6 +65,7 @@ import com.openexchange.java.Strings;
  * {@link UpdateTaskCollection} - Collection for update tasks.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 class UpdateTaskCollection {
 
@@ -87,19 +88,6 @@ class UpdateTaskCollection {
      */
     void dispose() {
         versionDirty.set(true);
-    }
-
-    private final List<UpdateTaskV2> getFilteredUpdateTasks(SchemaUpdateState schema) {
-        List<UpdateTaskV2> tasks = getListWithoutExcludes();
-        // Filter
-        Filter filter = new ExecutedFilter();
-        List<UpdateTaskV2> filtered = new ArrayList<UpdateTaskV2>();
-        for (UpdateTaskV2 task : tasks) {
-            if (filter.mustBeExecuted(schema, task)) {
-                filtered.add(task);
-            }
-        }
-        return filtered;
     }
 
     SeparatedTasks getFilteredAndSeparatedTasks(SchemaUpdateState state) {
@@ -161,11 +149,46 @@ class UpdateTaskCollection {
      * @return a {@link List} with all {@link UpdateTaskV2} with out the excluded ones
      */
     List<UpdateTaskV2> getListWithoutExcludes() {
-        Set<UpdateTaskV2> fullSet = getFullSet();
+        Set<UpdateTaskV2> fullSet = DynamicSet.getInstance().getTaskSet();
         for (String excluded : ExcludedSet.getInstance().getTaskSet()) {
             excludeTask(fullSet, excluded);
         }
         return new ArrayList<>(fullSet);
+    }
+
+    void dirtyVersion() {
+        versionDirty.set(true);
+    }
+
+    boolean needsUpdate(SchemaUpdateState state) {
+        List<UpdateTaskV2> tasks = getListWithoutExcludes();
+        for (UpdateTaskV2 task : tasks) {
+            if (!state.isExecuted(task.getClass().getName())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /////////////////////////////////// HELPERS ////////////////////////////////////
+
+    /**
+     * Returns a {@link List} with all tasks that must be executed
+     * 
+     * @param schema The {@link SchemaUpdateState}
+     * @return A {@link List} with all must-executed update tasks
+     */
+    private List<UpdateTaskV2> getFilteredUpdateTasks(SchemaUpdateState schema) {
+        List<UpdateTaskV2> tasks = getListWithoutExcludes();
+        // Filter
+        Filter filter = new ExecutedFilter();
+        List<UpdateTaskV2> filtered = new ArrayList<UpdateTaskV2>();
+        for (UpdateTaskV2 task : tasks) {
+            if (filter.mustBeExecuted(schema, task)) {
+                filtered.add(task);
+            }
+        }
+        return filtered;
     }
 
     /**
@@ -193,23 +216,5 @@ class UpdateTaskCollection {
                 iter.remove();
             }
         }
-    }
-
-    private Set<UpdateTaskV2> getFullSet() {
-        return DynamicSet.getInstance().getTaskSet();
-    }
-
-    void dirtyVersion() {
-        versionDirty.set(true);
-    }
-
-    boolean needsUpdate(SchemaUpdateState state) {
-        List<UpdateTaskV2> tasks = getListWithoutExcludes();
-        for (UpdateTaskV2 task : tasks) {
-            if (!state.isExecuted(task.getClass().getName())) {
-                return true;
-            }
-        }
-        return false;
     }
 }
