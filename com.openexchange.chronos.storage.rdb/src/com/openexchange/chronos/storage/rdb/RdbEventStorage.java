@@ -679,9 +679,9 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
         }
         if (null != entities && 0 < entities.length) {
             if (1 == entities.length) {
-                stringBuilder.append(" AND ((e.folder IS NULL AND a.entity=?) OR (e.folder IS NOT NULL AND e.user=?))");
+                stringBuilder.append(" AND (a.entity=? OR (e.folder IS NOT NULL AND e.user=?))");
             } else {
-                stringBuilder.append(" AND ((e.folder IS NULL AND a.entity IN (").append(EventMapper.getParameters(entities.length)).append(")) OR ")
+                stringBuilder.append(" AND (a.entity IN (").append(EventMapper.getParameters(entities.length)).append(") OR ")
                     .append("(e.folder IS NOT NULL AND e.user IN (").append(EventMapper.getParameters(entities.length)).append(")))");
             }
         }
