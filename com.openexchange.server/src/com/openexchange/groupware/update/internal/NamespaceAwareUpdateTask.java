@@ -74,4 +74,11 @@ public @interface NamespaceAwareUpdateTask {
      * @return the namespace of the update task(s)
      */
     String namespace();
+
+    /**
+     * Returns the description of the namespace-aware update task / task set.
+     * 
+     * @return the description of the namespace-aware update task / task set.
+     */
+    String description();
 }
