@@ -49,46 +49,77 @@
 
 package com.openexchange.groupware.update.internal;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.io.IOException;
+import java.util.HashSet;
 import java.util.Map.Entry;
 import java.util.Properties;
+import java.util.Set;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.ConfigurationServices;
 
 /**
  * This class contains the list of excluded update tasks. The configuration can be done by the configuration file
  * excludedupdatetasks.properties.
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class ExcludedList implements UpdateTaskList<String> {
+public class ExcludedSet implements UpdateTaskSet<String> {
 
-    private static final ExcludedList SINGLETON = new ExcludedList();
+    private static final Logger LOG = LoggerFactory.getLogger(ExcludedSet.class);
 
+    private static final ExcludedSet SINGLETON = new ExcludedSet();
     private static final String CONFIG_FILE_NAME = "excludedupdatetasks.properties";
 
-    private final List<String> taskList = new ArrayList<String>();
+    private final Set<String> taskSet = new HashSet<String>();
 
-    private ExcludedList() {
+    private ExcludedSet() {
         super();
     }
 
-    public static ExcludedList getInstance() {
+    public static ExcludedSet getInstance() {
         return SINGLETON;
     }
 
     public void configure(ConfigurationService configService) {
-        taskList.clear();
-        Properties props = configService.getFile(CONFIG_FILE_NAME);
+        taskSet.clear();
+        Properties props = loadProperties(configService);
         for (Entry<Object, Object> entry : props.entrySet()) {
             String className = entry.getKey().toString().trim();
-            taskList.add(className);
+            taskSet.add(className);
         }
         UpdateTaskCollection.getInstance().dirtyVersion();
     }
 
+    /**
+     * Loads the properties
+     * 
+     * @param configService The {@link ConfigurationService}
+     * @return The {@link Properties} found in {@value #CONFIG_FILE_NAME} or an empty {@link Properties} set
+     */
+    private Properties loadProperties(ConfigurationService configService) {
+        try {
+            return ConfigurationServices.loadPropertiesFrom(configService.getFileByName(CONFIG_FILE_NAME));
+        } catch (IOException e) {
+            LOG.warn("No '{}' file found in configuration folder with excluded update tasks.", CONFIG_FILE_NAME);
+            return new Properties();
+        }
+    }
+
     @Override
-    public List<String> getTaskList() {
-        return taskList;
+    public Set<String> getTaskSet() {
+        return taskSet;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.groupware.update.internal.UpdateTaskSet#containsTask(java.lang.Object)
+     */
+    @Override
+    public boolean containsTask(String task) {
+        return taskSet.contains(task);
     }
 }

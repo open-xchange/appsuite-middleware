@@ -14,7 +14,7 @@ msgstr ""
 "Project-Id-Version: errors.ja_JP\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2018-04-26 19:12+0200\n"
+"PO-Revision-Date: 2018-05-13 14:46+0200\n"
 "Last-Translator: \n"
 "Language-Team: ja@li.org\n"
 "Language: ja_JP\n"
@@ -207,6 +207,10 @@ msgstr "次の検証に失敗しました: %1$s"
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.ical/src/com/openexchange/chronos/ical/ICalExceptionMessages.java:70
 msgid "Not all of the objects could be imported due to a configured limitation."
 msgstr "構成上の制限によりすべてのオブジェクトをインポートすることができませんでした。"
+
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.ical/src/com/openexchange/chronos/ical/ICalExceptionMessages.java:72
+msgid "The given iCalendar source does not contain valid content and cannot be processed."
+msgstr "指定されたiCalendarのソースには有効な内容が含まれないため、処理できません。"
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/HRRStrings.java:61
 msgid "No recurrence"
@@ -953,6 +957,10 @@ msgstr "* %1$s"
 msgid "???? %1$s (%2$d. birthday)"
 msgstr "???? %1$s (%2$d. 誕生日)"
 
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.provider.caching/src/com/openexchange/chronos/provider/caching/basic/exception/BasicCachingCalendarExceptionMessages.java:63
+msgid "The calendar was refreshed less than a minute ago. Please try again later."
+msgstr "予定表は少し前に更新されました。もう一度やり直してください。"
+
 #. * The name of the ICal feed calendar provider.
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.provider.ical/src/com/openexchange/chronos/provider/ical/ICalCalendarStrings.java:64
 msgid "ICal Feed Calendar"
@@ -963,16 +971,16 @@ msgid "The feed URI is missing."
 msgstr "フィードURIが見つかりません。"
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.provider.ical/src/com/openexchange/chronos/provider/ical/exception/ICalProviderExceptionMessages.java:65
-msgid "The feed URI does not match the standard."
-msgstr "フィードURIが標準と一致しません。"
+msgid "The given feed URI is invalid. Please change it and try again."
+msgstr "指定されたフィードURIは無効です。もう一度やり直してください。"
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.provider.ical/src/com/openexchange/chronos/provider/ical/exception/ICalProviderExceptionMessages.java:67
-msgid "Cannot connect to feed with URL: %1$s. Please change the URL and try again."
-msgstr "フィードURL%1$sに接続できません。URLを変えて、もう一度やり直してください。"
+msgid "Cannot connect to feed with URI: %1$s. Please change it and try again."
+msgstr "フィードURI%1$sに接続できません。URIを変えて、もう一度やり直してください。"
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.provider.ical/src/com/openexchange/chronos/provider/ical/exception/ICalProviderExceptionMessages.java:69
-msgid "The provided URL %1$s does not contain content as expected. Please change the URL and try again."
-msgstr "入力したURL%1$sにはあるはずの内容がありません。URLを変えて、もう一度やり直してください。"
+msgid "The provided URI %1$s does not contain content as expected. Please change it and try again."
+msgstr "入力したURI%1$sにはあるはずの内容がありません。URIを変えて、もう一度やり直してください。"
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.provider.ical/src/com/openexchange/chronos/provider/ical/exception/ICalProviderExceptionMessages.java:71
 msgid "The field %1$s cannot be changed."
@@ -987,8 +995,8 @@ msgid "Unfortunately your requested feed cannot be subscribed due to size limita
 msgstr "要求したフィードはサイズ制限のため登録できません。"
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.provider.ical/src/com/openexchange/chronos/provider/ical/exception/ICalProviderExceptionMessages.java:77
-msgid "Unfortunately the given feed URL cannot be processed as expected."
-msgstr "指定されたフィードURLは予想どおりに処理できません。"
+msgid "Unfortunately the given feed URI cannot be processed as expected."
+msgstr "指定されたフィードURIは予想どおりに処理できません。"
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.provider.ical/src/com/openexchange/chronos/provider/ical/exception/ICalProviderExceptionMessages.java:79
 msgid "The remote service is unavailable at the moment. There is nothing we can do about it. Please try again later."
@@ -1017,6 +1025,10 @@ msgstr "この予定表へのアクセスが制限されています。パスワ
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.provider.ical/src/com/openexchange/chronos/provider/ical/exception/ICalProviderExceptionMessages.java:91
 msgid "Authentication failed. Please enter your password and try again."
 msgstr "認証に失敗しました。パスワードを入力して、もう一度やり直してください。"
+
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.provider.ical/src/com/openexchange/chronos/provider/ical/exception/ICalProviderExceptionMessages.java:93
+msgid "Authentication failed due to a recent credentials change. Please remove the account and add it again with correct credentials."
+msgstr "認証情報が最近変更されたため認証に失敗しました。アカウントを削除し、正しい認証情報でもう一度アカウントを追加してください。"
 
 #. *
 #. * The name of the internal calendar provider.
@@ -12517,6 +12529,18 @@ msgstr "UTC (協定世界時)"
 #: /home/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:534
 msgid "Zulu"
 msgstr "ズールー"
+
+#~ msgid "The feed URI does not match the standard."
+#~ msgstr "フィードURIが標準と一致しません。"
+
+#~ msgid "Cannot connect to feed with URL: %1$s. Please change the URL and try again."
+#~ msgstr "フィードURL%1$sに接続できません。URLを変えて、もう一度やり直してください。"
+
+#~ msgid "The provided URL %1$s does not contain content as expected. Please change the URL and try again."
+#~ msgstr "入力したURL%1$sにはあるはずの内容がありません。URLを変えて、もう一度やり直してください。"
+
+#~ msgid "Unfortunately the given feed URL cannot be processed as expected."
+#~ msgstr "指定されたフィードURLは予想どおりに処理できません。"
 
 #~ msgid "The value for \"%2$s\" is invalid and wasn't be applied."
 #~ msgstr "値\"%2$s\"は無効で、使用できませんでした。"

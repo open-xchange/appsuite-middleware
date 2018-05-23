@@ -52,6 +52,7 @@ package com.openexchange.groupware.update.internal;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.SchemaUpdateState;
@@ -64,6 +65,7 @@ import com.openexchange.java.Strings;
  * {@link UpdateTaskCollection} - Collection for update tasks.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 class UpdateTaskCollection {
 
@@ -88,19 +90,6 @@ class UpdateTaskCollection {
         versionDirty.set(true);
     }
 
-    private final List<UpdateTaskV2> getFilteredUpdateTasks(SchemaUpdateState schema) {
-        List<UpdateTaskV2> tasks = getListWithoutExcludes();
-        // Filter
-        Filter filter = new ExecutedFilter();
-        List<UpdateTaskV2> filtered = new ArrayList<UpdateTaskV2>();
-        for (UpdateTaskV2 task : tasks) {
-            if (filter.mustBeExecuted(schema, task)) {
-                filtered.add(task);
-            }
-        }
-        return filtered;
-    }
-
     SeparatedTasks getFilteredAndSeparatedTasks(SchemaUpdateState state) {
         return separateTasks(getFilteredUpdateTasks(state));
     }
@@ -123,10 +112,12 @@ class UpdateTaskCollection {
             }
         }
         return new SeparatedTasks() {
+
             @Override
             public List<UpdateTaskV2> getBlocking() {
                 return blocking;
             }
+
             @Override
             public List<UpdateTaskV2> getBackground() {
                 return background;
@@ -151,22 +142,18 @@ class UpdateTaskCollection {
         return retval;
     }
 
+    /**
+     * Returns a {@link List} with all the {@link UpdateTaskV2} tasks
+     * without the excluded ones.
+     * 
+     * @return a {@link List} with all {@link UpdateTaskV2} with out the excluded ones
+     */
     List<UpdateTaskV2> getListWithoutExcludes() {
-        List<UpdateTaskV2> retval = getFullList();
-        for (String excluded : ExcludedList.getInstance().getTaskList()) {
-            // Matching must be done based on task class name.
-            Iterator<UpdateTaskV2> iter = retval.iterator();
-            while (iter.hasNext()) {
-                if (excluded.equals(iter.next().getClass().getName())) {
-                    iter.remove();
-                }
-            }
+        Set<UpdateTaskV2> fullSet = DynamicSet.getInstance().getTaskSet();
+        for (String excluded : ExcludedSet.getInstance().getTaskSet()) {
+            excludeTask(fullSet, excluded);
         }
-        return retval;
-    }
-
-    private List<UpdateTaskV2> getFullList() {
-        return DynamicList.getInstance().getTaskList();
+        return new ArrayList<>(fullSet);
     }
 
     void dirtyVersion() {
@@ -181,5 +168,53 @@ class UpdateTaskCollection {
             }
         }
         return false;
+    }
+
+    /////////////////////////////////// HELPERS ////////////////////////////////////
+
+    /**
+     * Returns a {@link List} with all tasks that must be executed
+     * 
+     * @param schema The {@link SchemaUpdateState}
+     * @return A {@link List} with all must-executed update tasks
+     */
+    private List<UpdateTaskV2> getFilteredUpdateTasks(SchemaUpdateState schema) {
+        List<UpdateTaskV2> tasks = getListWithoutExcludes();
+        // Filter
+        Filter filter = new ExecutedFilter();
+        List<UpdateTaskV2> filtered = new ArrayList<UpdateTaskV2>();
+        for (UpdateTaskV2 task : tasks) {
+            if (filter.mustBeExecuted(schema, task)) {
+                filtered.add(task);
+            }
+        }
+        return filtered;
+    }
+
+    /**
+     * Excludes (removes) the specified task from the specified {@link UpdateTaskV2} {@link List}.
+     * If the task is namespace-aware via the {@link NamespaceAwareUpdateTask} annotation, then it
+     * gets removed from the list as well.
+     * 
+     * @param fullList The {@link List} with all the {@link UpdateTaskV2} tasks
+     * @param toExclude The name of the task to exclude
+     */
+    private void excludeTask(Set<UpdateTaskV2> fullList, String toExclude) {
+        Iterator<UpdateTaskV2> iter = fullList.iterator();
+        while (iter.hasNext()) {
+            Class<? extends UpdateTaskV2> clazz = iter.next().getClass();
+            if (toExclude.equals(clazz.getName())) {
+                iter.remove();
+                continue;
+            }
+            NamespaceAwareUpdateTask annotation = clazz.getAnnotation(NamespaceAwareUpdateTask.class);
+            if (annotation == null) {
+                continue;
+            }
+            String namespace = annotation.namespace();
+            if (NamespaceAwareExcludedSet.getInstance().containsTask(namespace)) {
+                iter.remove();
+            }
+        }
     }
 }

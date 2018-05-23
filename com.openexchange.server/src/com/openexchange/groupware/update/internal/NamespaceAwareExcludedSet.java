@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2017-2020 OX Software GmbH
+ *     Copyright (C) 2018-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,97 +47,76 @@
  *
  */
 
-package com.openexchange.chronos.schedjoules.impl;
+package com.openexchange.groupware.update.internal;
 
-import java.util.concurrent.TimeUnit;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
+import com.openexchange.config.lean.DefaultProperty;
+import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.config.lean.Property;
+import com.openexchange.java.Strings;
 
 /**
- * {@link SchedJoulesProperty}
+ * {@link NamespaceAwareExcludedSet}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @since v7.10.0
  */
-public enum SchedJoulesProperty implements Property {
-    /**
-     * The API key that gives access to the complete API of SchedJoules.
-     */
-    apiKey,
-    /**
-     * The refresh interval of subscriptions in milliseconds.
-     * Defaults to 86400000 (1 day)
-     */
-    refreshInterval(TimeUnit.DAYS.toMillis(1)),
-    /**
-     * The host to access schedjoules.
-     * Defaults to 'api.schedjoules.com'<br>
-     * <b>Note:</b> this property should explicitly not be published as the endpoint is fix
-     */
-    host("api.schedjoules.com"),
-    /**
-     * The scheme used to contact the SchedJoules API.
-     * Defaults to 'https'<br>
-     * <b>Note:</b> this property should explicitly not be published as the endpoint is fix
-     */
-    scheme("https"),
-    /**
-     * Defines a comma separated blacklist for itemIds of SchedJoules calendars and pages that should be hidden from
-     * the end user.
-     * Default: empty
-     */
-    itemBlacklist;
+public class NamespaceAwareExcludedSet implements UpdateTaskSet<String> {
 
-    private final String fqn;
-    private final Object defaultValue;
-    private static final String PREFIX = "com.openexchange.calendar.schedjoules.";
+    private static final String PROPERTY_DEFAULT = "";
+    private static final Property PROPERTY = DefaultProperty.valueOf("com.openexchange.groupware.update.excludedUpdateTasks", PROPERTY_DEFAULT);
+    private Set<String> excludedNamespaces = new HashSet<>();
 
-    /**
-     * Initialises a new {@link UserFeedbackMailProperty}.
-     *
-     * @param defaultValue The default value of the property
-     * @param optional Whether the property is optional
-     */
-    private SchedJoulesProperty() {
-        this("", PREFIX);
+    private static final NamespaceAwareExcludedSet SINGLETON = new NamespaceAwareExcludedSet();
+
+    public static NamespaceAwareExcludedSet getInstance() {
+        return SINGLETON;
     }
 
     /**
-     * Initialises a new {@link UserFeedbackMailProperty}.
-     *
-     * @param defaultValue The default value of the property
-     * @param optional Whether the property is optional
+     * Initialises a new {@link NamespaceAwareExcludedSet}.
      */
-    private SchedJoulesProperty(Object defaultValue) {
-        this(defaultValue, PREFIX);
+    public NamespaceAwareExcludedSet() {
+        super();
     }
 
     /**
-     * Initialises a new {@link UserFeedbackMailProperty}.
-     *
-     * @param defaultValue The default value of the property
-     * @param optional Whether the property is optional
+     * Loads the property <code>com.openexchange.groupware.update.excludedUpdateTasks</code>
+     * 
+     * @param leanConfig The {@link LeanConfigurationService} to load the property
      */
-    private SchedJoulesProperty(Object defaultValue, String fqn) {
-        this.defaultValue = defaultValue;
-        this.fqn = fqn;
+    public void loadExcludedNamespaces(LeanConfigurationService leanConfig) {
+        String namespaces = leanConfig.getProperty(PROPERTY);
+        String[] split = Strings.splitByComma(namespaces);
+        if (split == null) {
+            return;
+        }
+        Set<String> en = new HashSet<>();
+        for (String s : split) {
+            excludedNamespaces.add(s);
+        }
+        excludedNamespaces = Collections.unmodifiableSet(en);
     }
 
     /*
      * (non-Javadoc)
      * 
-     * @see com.openexchange.config.lean.Property#getFQPropertyName()
+     * @see com.openexchange.groupware.update.internal.UpdateTaskSet#getTaskSet()
      */
     @Override
-    public String getFQPropertyName() {
-        return fqn + name();
+    public Set<String> getTaskSet() {
+        return excludedNamespaces;
     }
 
     /*
      * (non-Javadoc)
      * 
-     * @see com.openexchange.config.lean.Property#getDefaultValue()
+     * @see com.openexchange.groupware.update.internal.UpdateTaskSet#containsTask(java.lang.Object)
      */
     @Override
-    public Object getDefaultValue() {
-        return defaultValue;
+    public boolean containsTask(String task) {
+        return excludedNamespaces.contains(task);
     }
 }

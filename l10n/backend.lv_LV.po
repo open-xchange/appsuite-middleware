@@ -14,7 +14,7 @@ msgstr ""
 "Project-Id-Version: errors.lv_LV.po\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2018-04-25 12:56+0300\n"
+"PO-Revision-Date: 2018-05-22 12:59+0300\n"
 "Last-Translator: Aivars Oliņš <aivars@adsl.lv>\n"
 "Language-Team: Latvian <LL@li.org>\n"
 "Language: lv\n"
@@ -217,6 +217,14 @@ msgid ""
 "Not all of the objects could be imported due to a configured limitation."
 msgstr ""
 "Konfigurācijas ierobežojumu dēļ daži no objektiem nevar tikt importēti."
+
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.ical/src/com/openexchange/chronos/ical/ICalExceptionMessages.java:72
+msgid ""
+"The given iCalendar source does not contain valid content and cannot be "
+"processed."
+msgstr ""
+"Norādītais iCalendar datu avots nesatur derīgu informāciju un nevar tikt "
+"apstrādāts."
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/HRRStrings.java:61
 msgid "No recurrence"
@@ -1038,6 +1046,12 @@ msgstr "* %1$s"
 msgid "???? %1$s (%2$d. birthday)"
 msgstr "???? %1$s (%2$d. dzimšanas diena)"
 
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.provider.caching/src/com/openexchange/chronos/provider/caching/basic/exception/BasicCachingCalendarExceptionMessages.java:63
+msgid ""
+"The calendar was refreshed less than a minute ago. Please try again later."
+msgstr ""
+"Kalendārs ir jaunināts mazāk kā pirms minūtes. Lūdzu mēģiniet vēlreiz vēlāk."
+
 #. * The name of the ICal feed calendar provider.
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.provider.ical/src/com/openexchange/chronos/provider/ical/ICalCalendarStrings.java:64
 msgid "ICal Feed Calendar"
@@ -1048,23 +1062,24 @@ msgid "The feed URI is missing."
 msgstr "Iztrūkst straumes URI."
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.provider.ical/src/com/openexchange/chronos/provider/ical/exception/ICalProviderExceptionMessages.java:65
-msgid "The feed URI does not match the standard."
-msgstr "Straumes URI neatbilst standartam."
+msgid "The given feed URI is invalid. Please change it and try again."
+msgstr ""
+"Norādītais straumes URI nav derīgs. Lūdzu veiciet labojumus un mēģiniet "
+"vēlreiz."
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.provider.ical/src/com/openexchange/chronos/provider/ical/exception/ICalProviderExceptionMessages.java:67
-msgid ""
-"Cannot connect to feed with URL: %1$s. Please change the URL and try again."
+msgid "Cannot connect to feed with URI: %1$s. Please change it and try again."
 msgstr ""
-"Nevar pieslēgties straumei ar URL: %1$s. Lūdzu izlabojiet URL un mēģiniet "
+"Nevar pieslēgties straumei ar URI: %1$s. Lūdzu veiciet labojumus un mēģiniet "
 "vēlreiz."
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.provider.ical/src/com/openexchange/chronos/provider/ical/exception/ICalProviderExceptionMessages.java:69
 msgid ""
-"The provided URL %1$s does not contain content as expected. Please change "
-"the URL and try again."
+"The provided URI %1$s does not contain content as expected. Please change it "
+"and try again."
 msgstr ""
-"Norādītais URL %1$s nesatur sagaidīto informācijas saturu. Lūdzu izmainiet "
-"URL un mēģiniet vēlreiz."
+"Norādītais URI %1$s nesatur sagaidīto informāciju. Lūdzu veiciet labojumus "
+"un mēģiniet vēlreiz."
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.provider.ical/src/com/openexchange/chronos/provider/ical/exception/ICalProviderExceptionMessages.java:71
 msgid "The field %1$s cannot be changed."
@@ -1083,8 +1098,8 @@ msgstr ""
 "ierobežojumu dēļ."
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.provider.ical/src/com/openexchange/chronos/provider/ical/exception/ICalProviderExceptionMessages.java:77
-msgid "Unfortunately the given feed URL cannot be processed as expected."
-msgstr "Diemžēl norādītais straumes URL nevar tikt apstrādāts tā kā paredzēts."
+msgid "Unfortunately the given feed URI cannot be processed as expected."
+msgstr "Diemžēl norādītais straumes URI nevar tikt pareizi apstrādāts."
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.provider.ical/src/com/openexchange/chronos/provider/ical/exception/ICalProviderExceptionMessages.java:79
 msgid ""
@@ -1131,6 +1146,15 @@ msgstr ""
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.provider.ical/src/com/openexchange/chronos/provider/ical/exception/ICalProviderExceptionMessages.java:91
 msgid "Authentication failed. Please enter your password and try again."
 msgstr "Nesekmīga autentificēšana. Lūdzu ievadiet paroli un mēģiniet vēlreiz."
+
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.provider.ical/src/com/openexchange/chronos/provider/ical/exception/ICalProviderExceptionMessages.java:93
+msgid ""
+"Authentication failed due to a recent credentials change. Please remove the "
+"account and add it again with correct credentials."
+msgstr ""
+"Autentifikācijas kļūda saskaņā ar nesenām izmaiņām akreditācijas datos. "
+"Lūdzu noņemiet kontu un pievienojiet to no jauna, izmantojot pareizus "
+"akreditācijas datus."
 
 #. *
 #. * The name of the internal calendar provider.
@@ -13864,6 +13888,27 @@ msgstr "UTC"
 #: /home/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:534
 msgid "Zulu"
 msgstr "Zulu"
+
+#~ msgid "The feed URI does not match the standard."
+#~ msgstr "Straumes URI neatbilst standartam."
+
+#~ msgid ""
+#~ "Cannot connect to feed with URL: %1$s. Please change the URL and try "
+#~ "again."
+#~ msgstr ""
+#~ "Nevar pieslēgties straumei ar URL: %1$s. Lūdzu izlabojiet URL un mēģiniet "
+#~ "vēlreiz."
+
+#~ msgid ""
+#~ "The provided URL %1$s does not contain content as expected. Please change "
+#~ "the URL and try again."
+#~ msgstr ""
+#~ "Norādītais URL %1$s nesatur sagaidīto informācijas saturu. Lūdzu "
+#~ "izmainiet URL un mēģiniet vēlreiz."
+
+#~ msgid "Unfortunately the given feed URL cannot be processed as expected."
+#~ msgstr ""
+#~ "Diemžēl norādītais straumes URL nevar tikt apstrādāts tā kā paredzēts."
 
 #~ msgid "The value for \"%2$s\" is invalid and wasn't be applied."
 #~ msgstr "\"%2$s\" vērtība nav pareiza un netika piemērota."

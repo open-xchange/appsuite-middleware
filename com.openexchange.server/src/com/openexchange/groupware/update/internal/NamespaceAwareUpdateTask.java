@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2016-2020 OX Software GmbH
+ *     Copyright (C) 2018-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,15 +49,29 @@
 
 package com.openexchange.groupware.update.internal;
 
-import java.util.List;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Inherited;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+import com.openexchange.groupware.update.UpdateTaskV2;
 
 /**
- * {@link UpdateTaskList}
- *
- * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ * {@link NamespaceAwareUpdateTask} - Makes an {@link UpdateTaskV2} namespace-aware.
+ * 
+ * @see {@link UpdateTaskCollection} and {@link ExcludedSet}
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @since v7.10.0
  */
-interface UpdateTaskList<T> {
+@Inherited
+@Target(ElementType.TYPE)
+@Retention(RetentionPolicy.RUNTIME)
+public @interface NamespaceAwareUpdateTask {
 
-    List<T> getTaskList();
-
+    /**
+     * Returns the namespace of the update task(s)
+     * 
+     * @return the namespace of the update task(s)
+     */
+    String namespace();
 }

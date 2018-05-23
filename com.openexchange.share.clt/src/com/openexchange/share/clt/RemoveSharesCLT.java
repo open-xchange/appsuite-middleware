@@ -186,14 +186,12 @@ public class RemoveSharesCLT extends AbstractMBeanCLI<Void> {
     private Pair<String, String> parseToken(String token) throws OXException {
         String shareToken = null;
         String targetPath = null;
-        String[] split = token.split("/");
+        String[] split = token.split("/", 2);
         if (split.length == 1) {
             shareToken = token;
         } else if (split.length == 2) {
             shareToken = split[0];
             targetPath = split[1];
-        } else {
-            throw ShareExceptionCodes.INVALID_TOKEN.create(token);
         }
 
         return new Pair<String, String>(shareToken, targetPath);

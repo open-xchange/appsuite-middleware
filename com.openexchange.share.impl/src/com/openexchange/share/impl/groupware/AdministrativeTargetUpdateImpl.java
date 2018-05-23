@@ -50,6 +50,7 @@
 package com.openexchange.share.impl.groupware;
 
 import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -135,8 +136,14 @@ public class AdministrativeTargetUpdateImpl extends AbstractTargetUpdate {
             folderManager.updateFolder(folder, false, System.currentTimeMillis());
 
             if (folder.getModule() == FolderObject.INFOSTORE) {
+                ContextService ctxService = services.getService(ContextService.class);
                 // Add permission to sub folders
-                List<Integer> subfolderIds = folder.getSubfolderIds();
+                List<Integer> subfolderIds;
+                try {
+                    subfolderIds = folder.getSubfolderIds(true, ctxService.getContext(contextID));
+                } catch (SQLException e) {
+                    throw ShareExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+                }
 
                 List<OCLPermission> appliedPermissions = folderTargetProxy.getAppliedPermissions();
                 List<OCLPermission> removedPermissions = folderTargetProxy.getRemovedPermissions();

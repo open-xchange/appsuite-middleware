@@ -6,14 +6,14 @@ msgstr ""
 "Project-Id-Version: backend\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2018-04-29 11:35-0300\n"
-"Last-Translator: Bianca Oliveira <bianca@workshop-chapina.com >\n"
+"PO-Revision-Date: 2018-05-07 09:20-0300\n"
+"Last-Translator: Luiz Fernando Ranghetti <luiz@workshop-chapina.com>\n"
 "Language-Team: Portuguese <ox@workshop-chapina.com>\n"
 "Language: pt_BR\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Generator: Lokalize 2.0\n"
+"X-Generator: Poedit 2.0.7\n"
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
 
 #. -
@@ -194,8 +194,8 @@ msgid ""
 "No calendar data could be found in the supplied file. Please use a valid "
 "iCalendar file and try again."
 msgstr ""
-"Nenhum dado do calendário pôde ser localizado no arquivo fornecido. Por "
-"favor, use um arquivo iCalendar válido e tente novamente."
+"Nenhum dado do calendário pôde ser localizado no arquivo fornecido. Use um "
+"arquivo iCalendar válido e tente novamente."
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.ical/src/com/openexchange/chronos/ical/ICalExceptionMessages.java:66
 msgid "Error reading calendar data at line %1$d: %2$s"
@@ -211,6 +211,14 @@ msgid ""
 msgstr ""
 "Nem todos os objetos puderam ser importados devido a uma limitação "
 "configurada."
+
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.ical/src/com/openexchange/chronos/ical/ICalExceptionMessages.java:72
+msgid ""
+"The given iCalendar source does not contain valid content and cannot be "
+"processed."
+msgstr ""
+"A fonte iCalendar fornecida não contém conteúdo válido e não pode ser "
+"processado."
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/HRRStrings.java:61
 msgid "No recurrence"
@@ -854,24 +862,24 @@ msgid ""
 "The timezone of the appointment was changed. Original timezone: %1$s. New "
 "timezone: %2$s"
 msgstr ""
-"O fuso horário do compromisso foi alterado. Fuso horário original: %1$s. Novo"
-" fuso horário: %2$s"
+"O fuso horário do compromisso foi alterado. Fuso horário original: %1$s. "
+"Novo fuso horário: %2$s"
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:264
 msgid ""
 "The timezone of the appointments start date was changed. Original timezone: "
 "%1$s. New timezone: %2$s"
 msgstr ""
-"O fuso horário da data de início do compromisso foi alterado. Fuso horário"
-" original: %1$s. Novo fuso horário: %2$s"
+"O fuso horário da data de início do compromisso foi alterado. Fuso horário "
+"original: %1$s. Novo fuso horário: %2$s"
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:266
 msgid ""
 "The timezone of the appointments end date was changed. Original timezone: "
 "%1$s. New timezone: %2$s"
 msgstr ""
-"O fuso horário da data de término do compromisso foi alterado. Fuso horário"
-" original: %1$s. Novo fuso horário: %2$s"
+"O fuso horário da data de término do compromisso foi alterado. Fuso horário "
+"original: %1$s. Novo fuso horário: %2$s"
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:268
 msgid "Reschedule the event. Original date: %1$s. New date: %2$s"
@@ -989,7 +997,7 @@ msgstr "Os metadados do anexo '%1$s' não possuem um ContentID."
 #.
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.provider.birthdays/src/com/openexchange/chronos/provider/birthdays/BirthdaysCalendarStrings.java:65
 msgid "Birthday Calendar"
-msgstr "Calendário de Aniversário"
+msgstr "Calendário de aniversário"
 
 #. *
 #. * The display name for the actual birthdays calendar folder.
@@ -1034,32 +1042,37 @@ msgstr "* %1$s"
 msgid "???? %1$s (%2$d. birthday)"
 msgstr "???? %1$s (%2$d. aniversário)"
 
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.provider.caching/src/com/openexchange/chronos/provider/caching/basic/exception/BasicCachingCalendarExceptionMessages.java:63
+msgid ""
+"The calendar was refreshed less than a minute ago. Please try again later."
+msgstr ""
+"O calendário foi atualizado a menos de um minuto atrás. Tente novamente mais "
+"tarde."
+
 #. * The name of the ICal feed calendar provider.
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.provider.ical/src/com/openexchange/chronos/provider/ical/ICalCalendarStrings.java:64
 msgid "ICal Feed Calendar"
-msgstr "Feed do Calendário iCal"
+msgstr "Feed do calendário iCal"
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.provider.ical/src/com/openexchange/chronos/provider/ical/exception/ICalProviderExceptionMessages.java:63
 msgid "The feed URI is missing."
 msgstr "Está faltando a URL do feed."
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.provider.ical/src/com/openexchange/chronos/provider/ical/exception/ICalProviderExceptionMessages.java:65
-msgid "The feed URI does not match the standard."
-msgstr "A URL do feed não corresponde ao padrão."
+msgid "The given feed URI is invalid. Please change it and try again."
+msgstr "A URI do feed fornecido é inválida. Altere e tente novamente."
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.provider.ical/src/com/openexchange/chronos/provider/ical/exception/ICalProviderExceptionMessages.java:67
-msgid ""
-"Cannot connect to feed with URL: %1$s. Please change the URL and try again."
+msgid "Cannot connect to feed with URI: %1$s. Please change it and try again."
 msgstr ""
-"Não foi possível conectar ao feed com a URL: %1$s. Altere a URL e tente "
-"novamente."
+"Não foi possível conectar ao feed com a URI: %1$s. Altere e tente novamente."
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.provider.ical/src/com/openexchange/chronos/provider/ical/exception/ICalProviderExceptionMessages.java:69
 msgid ""
-"The provided URL %1$s does not contain content as expected. Please change "
-"the URL and try again."
+"The provided URI %1$s does not contain content as expected. Please change it "
+"and try again."
 msgstr ""
-"A URL fornecida %1$s não contém o conteúdo esperado. Mude a URL e tente "
+"A URI fornecida %1$s não contém conteúdo como esperado. Altere e tente "
 "novamente."
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.provider.ical/src/com/openexchange/chronos/provider/ical/exception/ICalProviderExceptionMessages.java:71
@@ -1079,10 +1092,9 @@ msgstr ""
 "tamanho."
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.provider.ical/src/com/openexchange/chronos/provider/ical/exception/ICalProviderExceptionMessages.java:77
-msgid "Unfortunately the given feed URL cannot be processed as expected."
+msgid "Unfortunately the given feed URI cannot be processed as expected."
 msgstr ""
-"Infelizmente a URL do feed fornecido não pode ser processado conforme o "
-"esperado."
+"Infelizmente a URI do feed fornecido não pode ser processado como esperado."
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.provider.ical/src/com/openexchange/chronos/provider/ical/exception/ICalProviderExceptionMessages.java:79
 msgid ""
@@ -1090,7 +1102,7 @@ msgid ""
 "about it. Please try again later."
 msgstr ""
 "O serviço remoto está indisponível no momento. E não há nada que possamos "
-"fazer sobre isso. Por favor, tente novamente mais tarde."
+"fazer sobre isso. Tente novamente mais tarde."
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.provider.ical/src/com/openexchange/chronos/provider/ical/exception/ICalProviderExceptionMessages.java:81
 msgid ""
@@ -1113,32 +1125,38 @@ msgid ""
 "Access to this calendar is restricted. Please enter your credentials and try "
 "again."
 msgstr ""
-"O acesso a este calendário é restrito. Por favor, insira suas credenciais e "
-"tentenovamente."
+"O acesso a este calendário é restrito. Insira suas credenciais e tente "
+"novamente."
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.provider.ical/src/com/openexchange/chronos/provider/ical/exception/ICalProviderExceptionMessages.java:87
 msgid "Authentication failed. Please enter your credentials and try again."
-msgstr ""
-"Falha na autenticação. Por favor, insira suas credenciais e tente novamente."
+msgstr "Falha na autenticação. Insira suas credenciais e tente novamente."
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.provider.ical/src/com/openexchange/chronos/provider/ical/exception/ICalProviderExceptionMessages.java:89
 msgid ""
 "Access to this calendar is restricted. Please enter your password and try "
 "again."
 msgstr ""
-"O acesso a este calendário é restrito. Por favor, insira sua senha e "
-"tentenovamente."
+"O acesso a este calendário é restrito. Insira sua senha e tente novamente."
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.provider.ical/src/com/openexchange/chronos/provider/ical/exception/ICalProviderExceptionMessages.java:91
 msgid "Authentication failed. Please enter your password and try again."
-msgstr "Falha na autenticação. Por favor, insira sua senha e tente novamente."
+msgstr "Falha na autenticação. Insira sua senha e tente novamente."
+
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.provider.ical/src/com/openexchange/chronos/provider/ical/exception/ICalProviderExceptionMessages.java:93
+msgid ""
+"Authentication failed due to a recent credentials change. Please remove the "
+"account and add it again with correct credentials."
+msgstr ""
+"Falha na autenticação devido à mudanças de credenciais recentes. Remova a "
+"conta e adicione-a novamente com as credenciais corretas."
 
 #. *
 #. * The name of the internal calendar provider.
 #.
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.provider.internal/src/com/openexchange/chronos/provider/internal/InternalCalendarStrings.java:65
 msgid "Internal Calendar"
-msgstr "Calendário Interno"
+msgstr "Calendário interno"
 
 #. * The summary that is inserted for <i>private</i> events the requesting user has no access to
 #. ------------------------- i18n strings for folder types ------------------------------------- //
@@ -1237,8 +1255,8 @@ msgid ""
 "The requested calendar account is currently disabled. Please enable the "
 "account and try again."
 msgstr ""
-"A conta do calendário solicitado está atualmente desativada. Por favor, "
-"ative a conta e tente novamente."
+"A conta do calendário solicitado está atualmente desativada. Ative a conta e "
+"tente novamente."
 
 #. An I/O error occurred: %1$s
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:74
@@ -1272,16 +1290,16 @@ msgid ""
 "The supplied folder is not supported. Please select a valid folder and try "
 "again."
 msgstr ""
-"A pasta fornecida não é suportada. Por favor, selecione uma pasta válida e "
-"tente novamente."
+"A pasta fornecida não é suportada. Selecione uma pasta válida e tente "
+"novamente."
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:86
 msgid ""
 "The operation could not be completed due to a concurrent modification. "
 "Please reload the data and try again."
 msgstr ""
-"A operação não pôde ser completada devido a uma modificação simultânea. Por "
-"favor, recarregue os dados e tente novamente."
+"A operação não pôde ser completada devido a uma modificação simultânea. "
+"Recarregue os dados e tente novamente."
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:88
 msgid ""
@@ -1299,16 +1317,15 @@ msgstr "O compromisso está em conflito com um ou mais de um compromisso."
 msgid ""
 "The field \"%1$s\" is mandatory. Please supply a valid value and try again."
 msgstr ""
-"O campo \"%1$s\" é obrigatório. Por favor, forneça um valor válido e tente "
-"novamente."
+"O campo \"%1$s\" é obrigatório. Forneça um valor válido e tente novamente."
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:94
 msgid ""
 "The end date lies before the start date. Please correct the appointment "
 "times and try again."
 msgstr ""
-"A data de término é anterior a data de início. Por favor, corrija as datas "
-"do compromisso e tente novamente."
+"A data de término é anterior a data de início. Corrija as datas do "
+"compromisso e tente novamente."
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:96
 msgid ""
@@ -1341,64 +1358,60 @@ msgstr ""
 msgid ""
 "The supplied recurrence rule is invalid. Please correct the rule and try "
 "again."
-msgstr ""
-"A regra de recorrência é inválida. Por favor, corrija a regra e tente "
-"novamente."
+msgstr "A regra de recorrência é inválida. Corrija a regra e tente novamente."
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:106
 msgid ""
 "The supplied reminder is invalid. Please correct the reminder and try again."
-msgstr ""
-"O lembrete fornecido é inválido. Por favor, corrija o lembrete e tente "
-"novamente."
+msgstr "O lembrete fornecido é inválido. Corrija o lembrete e tente novamente."
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:108
 msgid ""
 "The supplied timezone is invalid. Please select a valid timezone and try "
 "again."
 msgstr ""
-"O fuso horário fornecido é inválido. Por favor, selecione um fuso horário "
-"válido e tente novamente."
+"O fuso horário fornecido é inválido. Selecione um fuso horário válido e "
+"tente novamente."
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:110
 msgid ""
 "The supplied geographical location is invalid. Please select valid "
 "coordinates and try again."
 msgstr ""
-"A localização geográfica fornecida é inválida. Por favor, selecione "
-"coordenadas válidas e tente novamente."
+"A localização geográfica fornecida é inválida. Selecione coordenadas válidas "
+"e tente novamente."
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:112
 msgid ""
 "The supplied types of start and end date are incompatible. Please correct "
 "the appointment times and try again."
 msgstr ""
-"Os tipos fornecidos de datas de início e término são incompatíveis. Por "
-"favor, corrija as datas do compromisso e tente novamente."
+"Os tipos fornecidos de datas de início e término são incompatíveis. Corrija "
+"as datas do compromisso e tente novamente."
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:114
 msgid ""
 "The supplied recurrence rule is not supported. Please use adjust the rule "
 "and try again."
 msgstr ""
-"A regra de recorrência fornecida não é suportada. Por favor, ajuste a regra "
-"e tente novamente."
+"A regra de recorrência fornecida não é suportada. Ajuste a regra e tente "
+"novamente."
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:116
 msgid ""
 "The targeted occurrence is not part of the appointment series. Please select "
 "a valid recurrence identifier and try again."
 msgstr ""
-"A ocorrência selecionada não integra a série de compromisso. Por favor, "
-"selecione um identificador de recorrência válido e tente novamente."
+"A ocorrência selecionada não integra a série de compromisso. Selecione um "
+"identificador de recorrência válido e tente novamente."
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:118
 msgid ""
 "The split of the appointment series cannot be performed. Please select a "
 "valid split point and try again."
 msgstr ""
-"A separação da série de compromissos não pode ser realizada. Por favor, "
-"selecione um ponto de separação válido e tente novamente."
+"A separação da série de compromissos não pode ser realizada. Selecione um "
+"ponto de separação válido e tente novamente."
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:120
 msgid "Moving an appointment series into another folder is not supported."
@@ -1423,8 +1436,8 @@ msgid ""
 "The supplied configuration is invalid. Please correct the configuration and "
 "try again."
 msgstr ""
-"A configuração fornecida é inválida. Por favor, corrija a configuração e "
-"tente novamente."
+"A configuração fornecida é inválida. Corrija a configuração e tente "
+"novamente."
 
 #. In order to accomplish the search, %1$d or more characters are required.
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:128
@@ -1452,8 +1465,8 @@ msgid ""
 "Some data entered exceeded the field limit. Please shorten the value for "
 "\"%1$s\" (limit: %2$d, current: %3$d) and try again."
 msgstr ""
-"Alguns dados inseridos excedem o limite do campo. Por favor, reduza o valor "
-"para \"%1$s\" (limite: %2$d, atual: %3$d) e tente novamente."
+"Alguns dados inseridos excedem o limite do campo. Reduza o valor para \"%1$s"
+"\" (limite: %2$d, atual: %3$d) e tente novamente."
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:134
 msgid "The maximum number of calendar subscriptions is exceeded."
@@ -1492,9 +1505,7 @@ msgstr "O anexo solicitado não foi localizado."
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:150
 msgid "Too many appointments are queried. Please choose a shorter timeframe."
-msgstr ""
-"Muitos compromissos serão consultados. Por favor, escolha um prazo mais "
-"curto."
+msgstr "Muitos compromissos serão consultados. Escolha um prazo mais curto."
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:152
 msgid "The appointment contains too many participants."
@@ -1995,11 +2006,11 @@ msgstr "TTY/TDD"
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:124
 msgid "Instant Messenger 1"
-msgstr "Mensageiro Instantâneo 1"
+msgstr "Mensageiro instantâneo 1"
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:125
 msgid "Instant Messenger 2"
-msgstr "Mensageiro Instantâneo 2"
+msgstr "Mensageiro instantâneo 2"
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:126
 msgid "IP phone"
@@ -4533,8 +4544,8 @@ msgid ""
 "The maximum amount of redirect rules is reached. Please delete or deactivate "
 "another redirect rule first."
 msgstr ""
-"A quantidade máxima de regras de direcionamento foi alcançada. Por favor, "
-"primeiro exclua ou desative outra regra de direcionamento."
+"A quantidade máxima de regras de direcionamento foi alcançada. Primeiro "
+"exclua ou desative outra regra de direcionamento."
 
 #. Maximum number of messages already stored for client %1$s
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.message.timeline/src/com/openexchange/message/timeline/MessageTimelineExceptionMessages.java:63
@@ -5756,7 +5767,7 @@ msgstr "Falha ao ler o feed RSS da URL: %2$s"
 #. The RSS feed is exceeding the maximum allowed size of '%1$s'
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.rss/src/com/openexchange/rss/RssExceptionMessages.java:78
 msgid "The RSS feed is exceeding the maximum allowed size of '%1$s'"
-msgstr "O alimentador RSS está excedendo o tamanho máximo permitido de '%1$s'"
+msgstr "O feed RSS está excedendo o tamanho máximo permitido de '%1$s'"
 
 #. Cannot connect to RSS with URL: %1$s. Please change URL and try again.
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.rss/src/com/openexchange/rss/RssExceptionMessages.java:81
@@ -6873,7 +6884,7 @@ msgid ""
 "Date: #DATE# at #TIME#\n"
 "Subject: #SUBJECT#"
 msgstr ""
-"---------- Mensagem Original ----------\n"
+"---------- Mensagem original ----------\n"
 "De: #FROM#\n"
 "Para: #TO##CC_LINE#\n"
 "Data: #DATE# as #TIME#\n"
@@ -6903,14 +6914,14 @@ msgstr "Os links serão excluídos em #DATE#"
 msgid ""
 "This file has been published for E-Mail \"#SUBJECT#\" sent on #DATE# to #TO#"
 msgstr ""
-"Esse arquivo foi publicado por E-mail \"#SUBJECT#\" enviado em #DATE# para "
+"Esse arquivo foi publicado por e-mail \"#SUBJECT#\" enviado em #DATE# para "
 "#TO#"
 
 #. The greeting used for form mails. E.g.
 #. "Dear Sir or Madam Jane Doe"
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:164
 msgid "Dear Sir or Madam"
-msgstr "Prezado Senhor ou Senhora"
+msgstr "Prezado senhor ou senhora"
 
 #. The name for "Unified Mail" root folder
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:187
@@ -9464,7 +9475,7 @@ msgid ""
 "Please reauthorize the account %5$s to enable it again."
 msgstr ""
 "Seu transporte de e-mail para %2$s foi desabilitado devido a problemas de "
-"autorização. Por favor, reautorize a conta %5$s para habilitá-la novamente."
+"autorização. Reautorize a conta %5$s para habilitá-la novamente."
 
 #. The default name for a file
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/json/compose/share/ShareComposeStrings.java:73
@@ -9546,8 +9557,7 @@ msgstr ""
 #.
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:70
 msgid "The provided login data seem to be wrong. Please correct them."
-msgstr ""
-"Os dados de login fornecidos parecem estar incorretos. Por favor, corrija-os."
+msgstr "Os dados de login fornecidos parecem estar incorretos. Corrija-os."
 
 #. *
 #. * The provided login information to access mail server %1$s seem to be wrong. Please try again.
@@ -9558,7 +9568,7 @@ msgid ""
 "correct them."
 msgstr ""
 "Os dados de login fornecidos para acessar o servidor de e-mail %1$s parecem "
-"estar incorretos. Por favor, corrija-os."
+"estar incorretos. Corrija-os."
 
 #. *
 #. * Mail folder "%1$s" could not be found.
@@ -9585,7 +9595,7 @@ msgid ""
 "try again later."
 msgstr ""
 "Perda de conexão com o servidor de e-mail. Provavelmente sua solicitação "
-"levou muito tempo. Por favor, tente novamente mais tarde."
+"levou muito tempo. Tente novamente mais tarde."
 
 #. *
 #. * Folder "%1$s" has been closed on mail server %2$s. Probably your request took too long.
@@ -9596,7 +9606,7 @@ msgid ""
 "Please try again later."
 msgstr ""
 "A conexão com o servidor de e-mail %2$s foi fechada. Provavelmente sua "
-"solicitação levou muito tempo. Por favor, tente novamente mais tarde."
+"solicitação levou muito tempo. Tente novamente mais tarde."
 
 #. *
 #. * Mail(s) could not be found in the given folder.
@@ -9696,9 +9706,7 @@ msgstr ""
 #.
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:155
 msgid "Lost connection to mail server. Please try again later."
-msgstr ""
-"Perda de conexão com o servidor de e-mail. Por favor, tente novamente mais "
-"tarde."
+msgstr "Perda de conexão com o servidor de e-mail. Tente novamente mais tarde."
 
 #. *
 #. * Connection closed to mail server %1$s.
@@ -9706,8 +9714,8 @@ msgstr ""
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:160
 msgid "Connection closed to mail server %1$s. Please try again later."
 msgstr ""
-"A conexão com o servidor de e-mail %1$s foi fechada. Por favor, tente "
-"novamente mais tarde."
+"A conexão com o servidor de e-mail %1$s foi fechada. Tente novamente mais "
+"tarde."
 
 #. *
 #. * The connection to remote server %1$s was refused or timed out while attempting to connect.
@@ -9718,7 +9726,7 @@ msgid ""
 "attempting to connect. Please try again later."
 msgstr ""
 "A conexão com o servidor remoto %1$s foi recusada ou expirou durante a "
-"tentativa de conexão. Por favor, tente novamente mais tarde."
+"tentativa de conexão. Tente novamente mais tarde."
 
 #. *
 #. * The connection to remote server %1$s timed out while awaiting the response.
@@ -9728,8 +9736,8 @@ msgid ""
 "The connection to remote server %1$s timed out while awaiting the response. "
 "Please try again later."
 msgstr ""
-"A conexão com o servidor remoto %1$s expirou ao aguardar a resposta. Por "
-"favor, tente novamente mais tarde."
+"A conexão com o servidor remoto %1$s expirou ao aguardar a resposta. Tente "
+"novamente mais tarde."
 
 #. *
 #. * Mail server %1$s unexpectedly closed connection for user %2$s.
@@ -9738,8 +9746,8 @@ msgstr ""
 msgid ""
 "Mail server %1$s unexpectedly closed connection. Please try again later."
 msgstr ""
-"O servidor de e-mail %1$s encerrou a conexão inesperadamente. Por favor, "
-"tente novamente mais tarde."
+"O servidor de e-mail %1$s encerrou a conexão inesperadamente. Tente "
+"novamente mais tarde."
 
 #. *
 #. * The allowed quota on mail server exceeded.
@@ -9799,8 +9807,8 @@ msgid ""
 "Timeout while trying to send to the following recipient: %1$s. Please try "
 "again later."
 msgstr ""
-"Tempo esgotado ao tentar enviar para o seguinte destinatário: %1$s. Por "
-"favor, tente novamente mais tarde."
+"Tempo esgotado ao tentar enviar para o seguinte destinatário: %1$s. Tente "
+"novamente mais tarde."
 
 #. Mail server denies access
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:209
@@ -9813,15 +9821,13 @@ msgid ""
 "Destination folder does not exist. Please try to create it and retry the "
 "operation."
 msgstr ""
-"A pasta de destino não existe. Por favor, tente criá-la e tente novamente a "
-"operação."
+"A pasta de destino não existe. Tente criá-la e tente novamente a operação."
 
 #. Temporary failure because a subsystem is down. For example, an IMAP server that uses an LDAP server for authentication might use this response code when the LDAP/Radius server is down.
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:215
 msgid "A temporary failure occurred during login. Please try again later."
 msgstr ""
-"Ocorreu uma falha temporária durante o login. Por favor, tente novamente "
-"mais tarde."
+"Ocorreu uma falha temporária durante o login. Tente novamente mais tarde."
 
 #. Either authentication succeeded or the server no longer had the necessary data; either way, access is no longer permitted using that passphrase. The client or user should get a new passphrase.
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:218
@@ -9829,8 +9835,8 @@ msgid ""
 "Access to mail server is no longer permitted using your password. Please "
 "obtain a new one."
 msgstr ""
-"O acesso ao servidor de e-mail não é mais permitido usando sua senha. Por "
-"favor, obtenha uma nova senha."
+"O acesso ao servidor de e-mail não é mais permitido usando sua senha. "
+"Obtenha uma nova senha."
 
 #. Access to mail server is not permitted due to a lack of privacy. E.g. client is supposed to switch to a connection with Transport Layer Security (TLS).
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:221
@@ -10802,8 +10808,8 @@ msgid ""
 "The share you are looking for is currently not available. Please try again "
 "later."
 msgstr ""
-"O compartilhamento que está procurando atualmente não está disponível. Por "
-"favor, tente novamente mais tarde."
+"O compartilhamento que está procurando atualmente não está disponível. Tente "
+"novamente mais tarde."
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/groupware/TargetProxyTypeStrings.java:63
 msgid "image"
@@ -10984,8 +10990,8 @@ msgid ""
 "%1$s (%2$s) has shared %3$d folders with you. Please click the button below "
 "to view them."
 msgstr ""
-"%1$s (%2$s) compartilhou %3$d pastas com você. Por favor, clique no botão"
-" abaixo para visualizá-las."
+"%1$s (%2$s) compartilhou %3$d pastas com você. Clique no botão abaixo para "
+"visualizá-las."
 
 #. * $username ($user_email) has shared calendar $folder with you. Please click the button below to view it.
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:150
@@ -10993,8 +10999,8 @@ msgid ""
 "%1$s (%2$s) has shared the calendar \"%3$s\" with you. Please click the "
 "button below to view it."
 msgstr ""
-"%1$s (%2$s) compartilhou o calendário \"%3$s\" com você. Por favor, clique "
-"no botão abaixo para visualizá-lo."
+"%1$s (%2$s) compartilhou o calendário \"%3$s\" com você. Clique no botão "
+"abaixo para visualizá-lo."
 
 #. * $username ($user_email) has shared $number calendars with you. Please click the button below to view them.
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:153
@@ -11002,8 +11008,8 @@ msgid ""
 "%1$s (%2$s) has shared %3$d calendars with you. Please click the button "
 "below to view them."
 msgstr ""
-"%1$s (%2$s) compartilhou %3$d calendários com você. Por favor, clique no"
-" botão abaixo para visualizá-los."
+"%1$s (%2$s) compartilhou %3$d calendários com você. Clique no botão abaixo "
+"para visualizá-los."
 
 #. * $username ($user_email) has shared file "$filename" with the group "Sales Dept.". Please click the button below to view it.
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:156
@@ -11074,8 +11080,8 @@ msgid ""
 "%1$s (%2$s) has shared %3$d folders with the group \"%4$s\". Please click "
 "the button below to view them."
 msgstr ""
-"%1$s (%2$s) compartilhou %3$d pastas com o grupo \"%4$s\". Por favor, clique"
-" no botão abaixo para visualizá-las."
+"%1$s (%2$s) compartilhou %3$d pastas com o grupo \"%4$s\". Clique no botão "
+"abaixo para visualizá-las."
 
 #. * $username ($user_email) has shared the calendar $folder with the group "Sales Dept.". Please click the button below to view it.
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:180
@@ -11083,8 +11089,8 @@ msgid ""
 "%1$s (%2$s) has shared the calendar \"%3$s\" with the group \"%4$s\". Please "
 "click the button below to view it."
 msgstr ""
-"%1$s (%2$s) compartilhou o calendário \"%3$s\" com o grupo \"%4$s\". Por "
-"favor, clique no botão abaixo para visualizá-lo."
+"%1$s (%2$s) compartilhou o calendário \"%3$s\" com o grupo \"%4$s\". Clique "
+"no botão abaixo para visualizá-lo."
 
 #. * $username ($user_email) has shared $number calendars with the group "Sales Dept.". Please click the button below to view them.
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:183
@@ -11092,8 +11098,8 @@ msgid ""
 "%1$s (%2$s) has shared %3$d calendars with the group \"%4$s\". Please click "
 "the button below to view them."
 msgstr ""
-"%1$s (%2$s) compartilhou %3$d calendários com o grupo \"%4$s\". Por favor,"
-" clique no botão abaixo para visualizá-los."
+"%1$s (%2$s) compartilhou %3$d calendários com o grupo \"%4$s\". Clique no "
+"botão abaixo para visualizá-los."
 
 #. * $username ($user_email) has shared file "$filename" with you and left you a message:
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:186
@@ -11313,7 +11319,7 @@ msgid ""
 "we got informed that you forgot your password. You can set a new password "
 "here:"
 msgstr ""
-"nós fomos informados que você esqueceu sua senha. Você pode definir uma nova "
+"fomos informados que você esqueceu sua senha. Você pode definir uma nova "
 "senha aqui:"
 
 #. * Set password
@@ -11627,27 +11633,27 @@ msgstr "Formato inválido na consulta da pesquisa."
 #. Unified Mail does not support to create folders.
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.unifiedinbox/src/com/openexchange/unifiedinbox/UnifiedInboxExceptionMessage.java:70
 msgid "Unified Mail does not support folder creation."
-msgstr "E-mail Unificado não suporta criação de pasta."
+msgstr "E-mail unificado não suporta criação de pasta."
 
 #. Unified Mail does not support to delete folders.
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.unifiedinbox/src/com/openexchange/unifiedinbox/UnifiedInboxExceptionMessage.java:73
 msgid "Unified Mail does not support folder deletion."
-msgstr "E-mail Unificado não suporta exclusão de pasta."
+msgstr "E-mail unificado não suporta exclusão de pasta."
 
 #. Unified Mail does not support to update folders.
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.unifiedinbox/src/com/openexchange/unifiedinbox/UnifiedInboxExceptionMessage.java:76
 msgid "Unified Mail does not support folder update."
-msgstr "E-mail Unificado não suporta atualização de pastas."
+msgstr "E-mail unificado não suporta atualização de pastas."
 
 #. Unified Mail does not support to move messages.
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.unifiedinbox/src/com/openexchange/unifiedinbox/UnifiedInboxExceptionMessage.java:79
 msgid "Unified Mail does not support to move messages."
-msgstr "E-mail Unificado não suporta movimentação de mensagens."
+msgstr "E-mail unificado não suporta movimentação de mensagens."
 
 #. Unified Mail does not support to copy messages.
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.unifiedinbox/src/com/openexchange/unifiedinbox/UnifiedInboxExceptionMessage.java:82
 msgid "Unified Mail does not support to copy messages."
-msgstr "E-mail Unificado não suporta cópia de mensagem."
+msgstr "E-mail unificado não suporta cópia de mensagem."
 
 #. Append messages failed.
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.unifiedinbox/src/com/openexchange/unifiedinbox/UnifiedInboxExceptionMessage.java:85
@@ -11657,22 +11663,22 @@ msgstr "Falha ao anexar mensagem."
 #. Unified Mail does not support draft messages.
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.unifiedinbox/src/com/openexchange/unifiedinbox/UnifiedInboxExceptionMessage.java:88
 msgid "Unified Mail does not support draft messages."
-msgstr "E-mail Unificado não suporta mensagens de rascunho."
+msgstr "E-mail unificado não suporta mensagens de rascunho."
 
 #. Unified Mail does not support to move folders.
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.unifiedinbox/src/com/openexchange/unifiedinbox/UnifiedInboxExceptionMessage.java:91
 msgid "Unified Mail does not support to move folders."
-msgstr "E-mail Unificado não suporta movimentação de pastas."
+msgstr "E-mail unificado não suporta movimentação de pastas."
 
 #. Unified Mail does not support mail folder creation
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.unifiedinbox/src/com/openexchange/unifiedinbox/UnifiedInboxExceptionMessage.java:94
 msgid "Unified Mail does not support mail folder creation"
-msgstr "E-mail Unificado não suporta criação de pasta"
+msgstr "E-mail unificado não suporta criação de pasta"
 
 #. Unified Mail does not support to clear INBOX folder.
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.unifiedinbox/src/com/openexchange/unifiedinbox/UnifiedInboxExceptionMessage.java:97
 msgid "Unified Mail does not support to clear INBOX folder."
-msgstr "E-mail Unificado não suporta limpeza da Caixa de Entrada."
+msgstr "E-mail unificado não suporta limpeza da caixa de entrada."
 
 #. No connection available to access mailbox
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.unifiedinbox/src/com/openexchange/unifiedinbox/UnifiedInboxExceptionMessage.java:100
@@ -11727,9 +11733,7 @@ msgstr ""
 #. The provided feedback score is invalid. Please choose a number > 0.
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.userfeedback.starrating/src/com/openexchange/userfeedback/starrating/exception/StarRatingExceptionMessages.java:64
 msgid "The provided feedback score is invalid. Please choose a number > 0."
-msgstr ""
-"A pontuação fornecida no comentário é inválida. Por favor escolha um número "
-"> 0."
+msgstr "A pontuação fornecida no comentário é inválida. Escolha um número > 0."
 
 #. The provided feedback for key 'score' has an invalid type.
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.userfeedback.starrating/src/com/openexchange/userfeedback/starrating/exception/StarRatingExceptionMessages.java:67
@@ -14012,6 +14016,28 @@ msgstr "UTC"
 #: /home/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:534
 msgid "Zulu"
 msgstr "Zulu"
+
+#~ msgid "The feed URI does not match the standard."
+#~ msgstr "A URL do feed não corresponde ao padrão."
+
+#~ msgid ""
+#~ "Cannot connect to feed with URL: %1$s. Please change the URL and try "
+#~ "again."
+#~ msgstr ""
+#~ "Não foi possível conectar ao feed com a URL: %1$s. Altere a URL e tente "
+#~ "novamente."
+
+#~ msgid ""
+#~ "The provided URL %1$s does not contain content as expected. Please change "
+#~ "the URL and try again."
+#~ msgstr ""
+#~ "A URL fornecida %1$s não contém o conteúdo esperado. Mude a URL e tente "
+#~ "novamente."
+
+#~ msgid "Unfortunately the given feed URL cannot be processed as expected."
+#~ msgstr ""
+#~ "Infelizmente a URL do feed fornecido não pode ser processado conforme o "
+#~ "esperado."
 
 #~ msgid "The value for \"%2$s\" is invalid and wasn't be applied."
 #~ msgstr "O valor para \"%2$s\" é inválido e foi aplicado."
