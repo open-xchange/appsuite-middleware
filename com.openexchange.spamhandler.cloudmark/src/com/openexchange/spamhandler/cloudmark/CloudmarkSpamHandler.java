@@ -67,10 +67,12 @@ import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.api.MailAccess;
+import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.mime.MimeDefaultSession;
 import com.openexchange.mail.mime.MimeMailException;
 import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.mail.mime.datasource.FileHolderDataSource;
+import com.openexchange.mail.mime.filler.MimeMessageFiller;
 import com.openexchange.mail.transport.MailTransport;
 import com.openexchange.mail.transport.MailTransport.SendRawProperties;
 import com.openexchange.mail.usersetting.UserSettingMail;
@@ -154,6 +156,9 @@ public final class CloudmarkSpamHandler extends SpamHandler {
                     transportMessage.setHeader("Return-Path", senderAddress.getAddress());
                     transportMessage.setHeader("Content-Type", "message/rfc822");
                     transportMessage.setHeader("Content-Disposition", "attachment; filename=\"" + mailId + ".eml\"");
+                    if (MailProperties.getInstance().isAddClientIPAddress()) {
+                        MimeMessageFiller.addClientIPAddress(transportMessage, session);
+                    }
 
                     transportMessage.saveChanges();
 
