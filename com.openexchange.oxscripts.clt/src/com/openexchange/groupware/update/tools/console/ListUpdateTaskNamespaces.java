@@ -84,6 +84,7 @@ public class ListUpdateTaskNamespaces {
         options = new Options();
         options.addOption("h", "help", false, "Prints the help");
 
+        options.addOption("n", "namespaces-only", false, "Prints only the available namespaces without their update tasks");
         options.addOption("H", "host", true, "The optional JMX host (default:localhost)");
         options.addOption("p", "port", true, "The optional JMX port (default:9999)");
         options.addOption("l", "login", true, "The optional JMX login (if JMX has authentication enabled)");
@@ -98,20 +99,11 @@ public class ListUpdateTaskNamespaces {
         " of that particular namespace.";
     //@formatter:on
 
-    /**
-     * Prints the help screen
-     */
-    private static void printHelp() {
-        HelpFormatter helpFormatter = new HelpFormatter();
-        helpFormatter.printHelp("listnamespaceawareupdatetasks", HEADER, options, FOOTER);
-    }
-
-    /**
-     * Initialises a new {@link ListUpdateTaskNamespaces}.
-     */
-    private ListUpdateTaskNamespaces() {
-        super();
-    }
+    private String host;
+    private int port;
+    private String jmxPassword;
+    private String jmxLogin;
+    private boolean printNamespacesOnly;
 
     /**
      * Entry point
@@ -119,6 +111,25 @@ public class ListUpdateTaskNamespaces {
      * @param args The command line arguments to pass
      */
     public static void main(String[] args) {
+        if (false == new ListUpdateTaskNamespaces(args).execute()) {
+            System.exit(1);
+        }
+    }
+
+    /**
+     * Initialises a new {@link ListUpdateTaskNamespaces}.
+     */
+    private ListUpdateTaskNamespaces(String[] args) {
+        super();
+        processArguments(args);
+    }
+
+    /**
+     * Processes the specified command line arguments
+     * 
+     * @param args The command line arguments
+     */
+    private void processArguments(String[] args) {
         CommandLineParser parser = new PosixParser();
         boolean error = true;
         try {
@@ -127,14 +138,14 @@ public class ListUpdateTaskNamespaces {
                 printHelp();
                 System.exit(0);
             }
-            String host = "localhost";
+            host = "localhost";
             if (cmd.hasOption('H')) {
                 String tmp = cmd.getOptionValue('H');
                 if (null != tmp) {
                     host = tmp.trim();
                 }
             }
-            int port = 9999;
+            port = 9999;
             if (cmd.hasOption('p')) {
                 String val = cmd.getOptionValue('p');
                 if (null != val) {
@@ -179,53 +190,57 @@ public class ListUpdateTaskNamespaces {
                 System.setProperty("sun.rmi.transport.tcp.responseTimeout", Integer.toString(responseTimeout * 1000));
             }
 
-            String jmxLogin = null;
+            jmxLogin = null;
             if (cmd.hasOption('l')) {
                 jmxLogin = cmd.getOptionValue('l');
             }
-            String jmxPassword = null;
+            jmxPassword = null;
             if (cmd.hasOption('s')) {
                 jmxPassword = cmd.getOptionValue('s');
             }
 
-            Map<String, Object> environment;
-            if (jmxLogin == null || jmxPassword == null) {
-                environment = null;
-            } else {
-                environment = new HashMap<String, Object>(1);
-                String[] creds = new String[] { jmxLogin, jmxPassword };
-                environment.put(JMXConnector.CREDENTIALS, creds);
-            }
+            printNamespacesOnly = cmd.hasOption('n');
 
-            JMXServiceURL url = new JMXServiceURL("service:jmx:rmi:///jndi/rmi://" + host + ":" + port + "/server");
-            JMXConnector jmxConnector = JMXConnectorFactory.connect(url, environment);
-            try {
-                MBeanServerConnection mbsc = jmxConnector.getMBeanServerConnection();
-                Object ret = mbsc.invoke(Constants.OBJECT_NAME, "getNamespaceAware", new Object[] {}, null);
-                if (ret != null && ret instanceof Map) {
-                    Map<String, Set<String>> map = (Map<String, Set<String>>) ret;
-                    for (Entry<String, Set<String>> entry : map.entrySet()) {
-                        System.out.println("+- " + entry.getKey());
-                        for (String c : entry.getValue()) {
-                            System.out.println("|--- " + c);
-                        }
-                    }
-                } else {
-                    System.out.println("No namespace-aware update tasks found");
-                }
-            } finally {
-                if (null != jmxConnector) {
-                    try {
-                        jmxConnector.close();
-                    } catch (Exception e) {
-                        // Ignore
-                    }
-                }
-            }
             error = false;
         } catch (ParseException e) {
             System.err.println("Unable to parse command line: " + e.getMessage());
             printHelp();
+        } finally {
+            if (error) {
+                System.exit(1);
+            }
+        }
+    }
+
+    /**
+     * Executes the method
+     * 
+     * @return <code>true</code> if the method was executed successfully; <code>false</code> otherwise
+     */
+    @SuppressWarnings("unchecked")
+    private boolean execute() {
+        JMXConnector jmxConnector = null;
+        boolean success = false;
+        try {
+            JMXServiceURL url = new JMXServiceURL("service:jmx:rmi:///jndi/rmi://" + host + ":" + port + "/server");
+            jmxConnector = JMXConnectorFactory.connect(url, createEnvironment());
+            MBeanServerConnection mbsc = jmxConnector.getMBeanServerConnection();
+            Object ret = mbsc.invoke(Constants.OBJECT_NAME, "getNamespaceAware", new Object[] {}, null);
+            if (ret == null) {
+                System.out.println("No namespace-aware update tasks found");
+                return true;
+            }
+            if (!(ret instanceof Map)) {
+                System.out.println("Invalid response. Cannot handle '" + ret.getClass() + "'.");
+                return false;
+            }
+            Map<String, Set<String>> map = (Map<String, Set<String>>) ret;
+            if (printNamespacesOnly) {
+                printNamespaceOnly(map);
+            } else {
+                printEverything(map);
+            }
+            success = true;
         } catch (MalformedURLException e) {
             System.err.println("URL to connect to server is invalid: " + e.getMessage());
         } catch (IOException e) {
@@ -239,9 +254,82 @@ public class ListUpdateTaskNamespaces {
         } catch (InstanceNotFoundException e) {
             System.err.println("Instance is not available: " + e.getMessage());
         } finally {
-            if (error) {
-                System.exit(1);
+            if (null != jmxConnector) {
+                try {
+                    jmxConnector.close();
+                } catch (Exception e) {
+                    // Ignore
+                }
             }
         }
+        return success;
+    }
+
+    /**
+     * Creates the JMX environment
+     * 
+     * @return The JMX environment
+     */
+    private Map<String, Object> createEnvironment() {
+        Map<String, Object> environment;
+        if (jmxLogin == null || jmxPassword == null) {
+            environment = null;
+        } else {
+            environment = new HashMap<String, Object>(1);
+            String[] creds = new String[] { jmxLogin, jmxPassword };
+            environment.put(JMXConnector.CREDENTIALS, creds);
+        }
+        return environment;
+    }
+
+    /**
+     * Prints everything (namespace + underlying update tasks)
+     * 
+     * @param map The {@link Map} containing the namespace aware update tasks
+     */
+    private void printEverything(Map<String, Set<String>> map) {
+        for (Entry<String, Set<String>> entry : map.entrySet()) {
+            printKey(entry.getKey());
+            printValue(entry.getValue());
+        }
+    }
+
+    /**
+     * Prints only the namespace
+     * 
+     * @param map The {@link Map} containing the namespace aware update tasks
+     */
+    private void printNamespaceOnly(Map<String, Set<String>> map) {
+        for (Entry<String, Set<String>> entry : map.entrySet()) {
+            printKey(entry.getKey());
+        }
+    }
+
+    /**
+     * Prints the key
+     * 
+     * @param key the key to print
+     */
+    private void printKey(String key) {
+        System.out.println("+- " + key);
+    }
+
+    /**
+     * Prints the values
+     * 
+     * @param values The values to print
+     */
+    private void printValue(Set<String> values) {
+        for (String c : values) {
+            System.out.println("|--- " + c);
+        }
+    }
+
+    /**
+     * Prints the help screen
+     */
+    private void printHelp() {
+        HelpFormatter helpFormatter = new HelpFormatter();
+        helpFormatter.printHelp("listnamespaceawareupdatetasks", HEADER, options, FOOTER);
     }
 }
