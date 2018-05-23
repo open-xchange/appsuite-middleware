@@ -1,0 +1,18 @@
+feature_name: Updatetasks
+feature_description: |
+  Existing configuration options for update tasks
+properties:
+    - key: com.openexchange.groupware.update.excludedUpdateTasks
+      description: |
+        Specifies a comma-separated list of namespaces of update tasks that are supposed to be excluded from automatic update
+        procedure.
+        
+        A namespace groups multiple individual update tasks.
+      defaultValue:
+      version: 
+      reloadable: false
+      configcascadeAware: false
+      related:
+      file: updatetasks.properties
+      packageName: open-xchange-core
+      tags: ["Updatetasks"]
