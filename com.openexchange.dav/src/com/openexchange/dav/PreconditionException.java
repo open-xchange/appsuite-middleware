@@ -101,7 +101,7 @@ public class PreconditionException extends WebdavProtocolException {
      *        resolve the conflict and resubmit the request
      */
     public PreconditionException(String namespace, String name, WebdavPath url, int status) {
-        this(OXException.general(namespace + ':' + name), namespace, name, url, status);
+        this(OXException.general(name), namespace, name, url, status);
     }
 
     /**

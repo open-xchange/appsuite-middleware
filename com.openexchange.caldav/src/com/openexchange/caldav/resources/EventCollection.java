@@ -370,12 +370,6 @@ public class EventCollection extends FolderCollection<Event> implements Filterin
 
     @Override
     protected SyncStatus<WebdavResource> getSyncStatus(Date since) throws OXException {
-        if (null != since && null != minDateTime.getMinDateTime() && minDateTime.getMinDateTime().after(since)) {
-            /*
-             * last token outside synchronized range; force a full sync
-             */
-            throw new PreconditionException(DAVProtocol.DAV_NS.getURI(), "valid-sync-token", getUrl(), HttpServletResponse.SC_FORBIDDEN);
-        }
         SyncStatus<WebdavResource> syncStatus = new SyncStatus<WebdavResource>();
         /*
          * get new, modified & deleted objects since client token within synchronized interval

@@ -386,6 +386,16 @@ public final class UpdateTaskMBean implements DynamicMBean {
                 LOG.error("", e);
                 throw e;
             }
+        } else if (actionName.equals("getNamespaceAware")) {
+            try {
+                return UpdateTaskToolkit.getNamespaceAwareUpdateTasks();
+            } catch (final RuntimeException e) {
+                LOG.error("", e);
+                throw e;
+            } catch (final Error e) {
+                LOG.error("", e);
+                throw e;
+            }
         }
         final ReflectionException e = new ReflectionException(new NoSuchMethodException(actionName));
         LOG.error("", e);
