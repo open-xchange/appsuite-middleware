@@ -50,8 +50,9 @@
 package com.openexchange.groupware.update.internal;
 
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicReference;
+import com.google.common.collect.ImmutableSet;
 import com.openexchange.config.lean.DefaultProperty;
 import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.config.lean.Property;
@@ -60,72 +61,64 @@ import com.openexchange.java.Strings;
 /**
  * {@link NamespaceAwareExcludedSet} - This class contains the list of excluded update tasks.
  * The configuration can be done by the property <code>com.openexchange.groupware.update.excludedUpdateTasks</code>.
- * 
+ *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @since v7.10.0
  */
 public class NamespaceAwareExcludedSet implements UpdateTaskSet<String> {
 
-    /**
-     * Defines a comma separated list of namespace-aware update tasks to exclude from the update procedure.
-     * Default is empty.
-     */
-    private static final Property PROPERTY = DefaultProperty.valueOf("com.openexchange.groupware.update.excludedUpdateTasks", "");
-    private Set<String> excludedNamespaces = new HashSet<>();
+    /** The property providing the namespaces of the updates tasks that are supposed to be excluded */
+    static final Property PROPERTY = DefaultProperty.valueOf("com.openexchange.groupware.update.excludedUpdateTasks", "");
 
     private static final NamespaceAwareExcludedSet SINGLETON = new NamespaceAwareExcludedSet();
 
     /**
-     * Returns the singleton instance of {@link NamespaceAwareExcludedSet}
-     * 
-     * @return the instance
+     * Gets the singleton instance
+     *
+     * @return The instance
      */
     public static NamespaceAwareExcludedSet getInstance() {
         return SINGLETON;
     }
 
+    // -----------------------------------------------------------------------------------------------------------
+
+    private final AtomicReference<Set<String>> excludedNamespacesRef = new AtomicReference<Set<String>>(Collections.emptySet());
+
     /**
-     * Initialises a new {@link NamespaceAwareExcludedSet}.
+     * Initializes a new {@link NamespaceAwareExcludedSet}.
      */
-    public NamespaceAwareExcludedSet() {
+    private NamespaceAwareExcludedSet() {
         super();
     }
 
     /**
-     * Loads the property <code>com.openexchange.groupware.update.excludedUpdateTasks</code>
-     * 
+     * Loads & parses the <code>"com.openexchange.groupware.update.excludedUpdateTasks"</code> property.
+     *
      * @param leanConfig The {@link LeanConfigurationService} to load the property
      */
     public void loadExcludedNamespaces(LeanConfigurationService leanConfig) {
         String namespaces = leanConfig.getProperty(PROPERTY);
+        if (Strings.isEmpty(namespaces)) {
+            return;
+        }
+
         String[] split = Strings.splitByComma(namespaces);
         if (split == null) {
             return;
         }
-        Set<String> en = new HashSet<>();
-        for (String s : split) {
-            excludedNamespaces.add(s);
+
+        ImmutableSet.Builder<String> en = ImmutableSet.builderWithExpectedSize(split.length);
+        for (String namespace : split) {
+            en.add(namespace);
         }
-        excludedNamespaces = Collections.unmodifiableSet(en);
+        excludedNamespacesRef.set(en.build());
+        UpdateTaskCollection.getInstance().dirtyVersion();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.groupware.update.internal.UpdateTaskSet#getTaskSet()
-     */
     @Override
     public Set<String> getTaskSet() {
-        return excludedNamespaces;
+        return excludedNamespacesRef.get();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.groupware.update.internal.UpdateTaskSet#containsTask(java.lang.Object)
-     */
-    @Override
-    public boolean containsTask(String task) {
-        return excludedNamespaces.contains(task);
-    }
 }
