@@ -7,7 +7,8 @@ properties:
         Specifies a comma-separated list of namespaces of update tasks that are supposed to be excluded from automatic update
         procedure.
         
-        A namespace groups multiple individual update tasks.
+        A namespace groups multiple individual update tasks. See command-line tool "listnamespaceawareupdatetasks" to check for
+        existing namespaces.
       defaultValue:
       version: 
       reloadable: false
