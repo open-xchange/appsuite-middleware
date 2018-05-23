@@ -536,7 +536,7 @@ EOF
     ox_add_property html.style.-moz-box-sizing '"border-box"' ${whlipr}
 
     # SoftwareChange_Request-174
-    ox_remove_property IGNORE_SHARED_ADDRESSBOOK /opt/open-xchange/etc/server.properties
+    ox_remove_property IGNORE_SHARED_ADDRESSBOOK /opt/open-xchange/etc/foldercache.properties
 
     # SoftwareChange_Request-175
     ox_add_property com.openexchange.server.migrationRedirectURL "" /opt/open-xchange/etc/server.properties
