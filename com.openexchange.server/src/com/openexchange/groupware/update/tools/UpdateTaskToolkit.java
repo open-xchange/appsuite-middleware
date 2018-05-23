@@ -56,6 +56,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -64,7 +65,6 @@ import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicReference;
 import org.slf4j.Logger;
-import com.google.common.collect.ImmutableMap;
 import com.openexchange.database.Databases;
 import com.openexchange.database.SchemaInfo;
 import com.openexchange.databaseold.Database;
@@ -280,16 +280,21 @@ public final class UpdateTaskToolkit {
      * 
      * @return an unmodifiable {@link Map} with all {@link NamespaceAwareUpdateTask}s
      */
-    public static Map<String, String> getNamespaceAwareUpdateTasks() {
-        ImmutableMap.Builder<String, String> namespaceAware = ImmutableMap.builder();
+    public static Map<String, Set<String>> getNamespaceAwareUpdateTasks() {
+        Map<String, Set<String>> namespaceAware = new HashMap<>();
 
         for (UpdateTaskV2 updateTask : DynamicSet.getInstance().getTaskSet()) {
             NamespaceAwareUpdateTask annotation = updateTask.getClass().getAnnotation(NamespaceAwareUpdateTask.class);
             if (annotation != null) {
-                namespaceAware.put(annotation.namespace(), annotation.description());
+                Set<String> set = namespaceAware.get(annotation.namespace());
+                if (set == null) {
+                    set = new HashSet<>();
+                }
+                set.add(updateTask.getClass().getName());
+                namespaceAware.put(annotation.namespace(), set);
             }
         }
-        return namespaceAware.build();
+        return Collections.unmodifiableMap(namespaceAware);
     }
 
     /**

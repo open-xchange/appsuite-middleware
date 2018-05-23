@@ -62,6 +62,7 @@ import com.openexchange.exception.OXException;
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
+@NamespaceAwareUpdateTask(namespace="com.openexchange.groupware.update.createTable", description="asd")
 public class CreateTableUpdateTask implements UpdateTaskV2 {
 
     private final CreateTableService create;
