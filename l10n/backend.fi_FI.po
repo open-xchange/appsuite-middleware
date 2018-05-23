@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: backend\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2018-04-21 19:19+0200\n"
+"PO-Revision-Date: 2018-05-09 20:55+0300\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: fi_FI\n"
@@ -16,7 +16,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
-"X-Generator: Poedit 1.6.9\n"
+"X-Generator: Poedit 2.0.5\n"
 
 #. -
 #. * Confirmation actions
@@ -208,7 +208,15 @@ msgstr "Validointi epäonnistui: %1$s"
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.ical/src/com/openexchange/chronos/ical/ICalExceptionMessages.java:70
 msgid ""
 "Not all of the objects could be imported due to a configured limitation."
-msgstr "Kaikkia objekteja ei voitu tuoda konfiguroidun rajoituksen takia,"
+msgstr "Kaikkia objekteja ei voitu tuoda konfiguroidun rajoituksen takia."
+
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.ical/src/com/openexchange/chronos/ical/ICalExceptionMessages.java:72
+msgid ""
+"The given iCalendar source does not contain valid content and cannot be "
+"processed."
+msgstr ""
+"Annettu iCalender-lähde ei sisällä kelpaavaa sisältöä eikä sitä voida "
+"prosessoida."
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/HRRStrings.java:61
 msgid "No recurrence"
@@ -266,44 +274,44 @@ msgstr "Päivä"
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/HRRStrings.java:84
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:891
 msgid "Monday"
-msgstr "maanantai"
+msgstr "Maanantai"
 
 #. Tuesday
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/HRRStrings.java:86
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:894
 msgid "Tuesday"
-msgstr "tiistai"
+msgstr "Tiistai"
 
 #. Wednesday
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/HRRStrings.java:88
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:897
 msgid "Wednesday"
-msgstr "keskiviikko"
+msgstr "Keskiviikko"
 
 #. Thursday
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/HRRStrings.java:90
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:900
 msgid "Thursday"
-msgstr "torstai"
+msgstr "Torstai"
 
 #. Friday
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/HRRStrings.java:92
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:903
 msgid "Friday"
-msgstr "perjantai"
+msgstr "Perjantai"
 
 #. Saturday
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/HRRStrings.java:94
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:906
 msgid "Saturday"
-msgstr "lauantai"
+msgstr "Lauantai"
 
 #. Sunday
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/HRRStrings.java:96
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:909
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:912
 msgid "Sunday"
-msgstr "sunnuntai"
+msgstr "Sunnuntai"
 
 #. -
 #. * Months
@@ -312,73 +320,73 @@ msgstr "sunnuntai"
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/HRRStrings.java:98
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:851
 msgid "January"
-msgstr "tammikuu"
+msgstr "Tammikuu"
 
 #. February
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/HRRStrings.java:100
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:854
 msgid "February"
-msgstr "helmikuu"
+msgstr "Helmikuu"
 
 #. March
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/HRRStrings.java:102
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:857
 msgid "March"
-msgstr "maaliskuu"
+msgstr "Maaliskuu"
 
 #. April
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/HRRStrings.java:104
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:860
 msgid "April"
-msgstr "huhtikuu"
+msgstr "Huhtikuu"
 
 #. May
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/HRRStrings.java:106
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:863
 msgid "May"
-msgstr "toukokuu"
+msgstr "Toukokuu"
 
 #. June
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/HRRStrings.java:108
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:866
 msgid "June"
-msgstr "kesäkuu"
+msgstr "Kesäkuu"
 
 #. July
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/HRRStrings.java:110
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:869
 msgid "July"
-msgstr "heinäkuu"
+msgstr "Heinäkuu"
 
 #. August
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/HRRStrings.java:112
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:872
 msgid "August"
-msgstr "elokuu"
+msgstr "Elokuu"
 
 #. September
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/HRRStrings.java:114
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:875
 msgid "September"
-msgstr "syyskuu"
+msgstr "Syyskuu"
 
 #. October
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/HRRStrings.java:116
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:878
 msgid "October"
-msgstr "lokakuu"
+msgstr "Lokakuu"
 
 #. November
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/HRRStrings.java:118
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:881
 msgid "November"
-msgstr "marraskuu"
+msgstr "Marraskuu"
 
 #. December
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/HRRStrings.java:120
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:884
 msgid "December"
-msgstr "joulukuu"
+msgstr "Joulukuu"
 
 #. -
 #. * Monthly1 constants
@@ -536,11 +544,11 @@ msgstr ""
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:82
 msgid "The appointment's attachments have been changed"
-msgstr "Tapaamisen liitteitä on muutettu."
+msgstr "Tapaamisen liitteitä on muutettu"
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:84
 msgid "One or more other fields have been updated"
-msgstr "Yhtä tai useampaa kenttää on päivitetty."
+msgstr "Yhtä tai useampaa kenttää on päivitetty"
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:86
 msgid "Reserved"
@@ -782,7 +790,7 @@ msgstr "%1$s on poistettu tapaamisesta."
 #.
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:226
 msgid "%1$s has %2$s the appointment."
-msgstr "%1$s on %2$s tapaamisen"
+msgstr "%1$s on %2$s tapaamisen."
 
 #. public static final String ACCEPTED = "accepted";
 #.
@@ -949,7 +957,7 @@ msgstr ""
 #.
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.json/src/com/openexchange/chronos/json/exception/CalendarExceptionMessages.java:65
 msgid "The event %s couldn't be deleted: %s"
-msgstr " %s -tapahtumaa ei voitu poistaa:  %s "
+msgstr "%s -tapahtumaa ei voitu poistaa:  %s"
 
 #. *
 #. * Multiple events couldn't be deleted.
@@ -963,7 +971,7 @@ msgstr "Useaa tapahtumaa ei voitu poistaa."
 #.
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.json/src/com/openexchange/chronos/json/exception/CalendarExceptionMessages.java:73
 msgid "Unable to add alarms: %s"
-msgstr "Hälytyksiä ei voitu lisätä:  %s "
+msgstr "Hälytyksiä ei voitu lisätä:  %s"
 
 #. *
 #. * The content-id '%1$s' refers to a non-existing attachment in the body part.
@@ -1030,6 +1038,12 @@ msgstr "* %1$s"
 msgid "???? %1$s (%2$d. birthday)"
 msgstr "???? %1$s (%2$d. syntymäpäivä)"
 
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.provider.caching/src/com/openexchange/chronos/provider/caching/basic/exception/BasicCachingCalendarExceptionMessages.java:63
+msgid ""
+"The calendar was refreshed less than a minute ago. Please try again later."
+msgstr ""
+"Kalenteri virkistettiin alle minuutti sitten. Yritä myöhemmin uudelleen."
+
 #. * The name of the ICal feed calendar provider.
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.provider.ical/src/com/openexchange/chronos/provider/ical/ICalCalendarStrings.java:64
 msgid "ICal Feed Calendar"
@@ -1040,22 +1054,21 @@ msgid "The feed URI is missing."
 msgstr "Syöte-URI puuttuu."
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.provider.ical/src/com/openexchange/chronos/provider/ical/exception/ICalProviderExceptionMessages.java:65
-msgid "The feed URI does not match the standard."
-msgstr "Syöte-URI ei vastaa standardia."
+msgid "The given feed URI is invalid. Please change it and try again."
+msgstr "URI ei kelpaa. Vaihda se ja yritä uudelleen."
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.provider.ical/src/com/openexchange/chronos/provider/ical/exception/ICalProviderExceptionMessages.java:67
-msgid ""
-"Cannot connect to feed with URL: %1$s. Please change the URL and try again."
+msgid "Cannot connect to feed with URI: %1$s. Please change it and try again."
 msgstr ""
-"Ei voida yhdistää syötteeseen URLilla:  %1$s. Vaihda URL ja yritä uudelleen."
+"Ei voida yhdistää syötteeseen URIlla: %1$s. Vaihda URI ja yritä uudelleen."
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.provider.ical/src/com/openexchange/chronos/provider/ical/exception/ICalProviderExceptionMessages.java:69
 msgid ""
-"The provided URL %1$s does not contain content as expected. Please change "
-"the URL and try again."
+"The provided URI %1$s does not contain content as expected. Please change it "
+"and try again."
 msgstr ""
-"Annettu web-osoite  %1$s  ei sisällä odotettua sisältöä. Vaihda osoite ja "
-"yritä uudelleen."
+"Annettu URI  %1$s  ei sisällä odotettua sisältöä. Vaihda se  ja yritä "
+"uudelleen."
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.provider.ical/src/com/openexchange/chronos/provider/ical/exception/ICalProviderExceptionMessages.java:71
 msgid "The field %1$s cannot be changed."
@@ -1063,7 +1076,7 @@ msgstr "%1$s-kenttää ei voi muuttaa."
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.provider.ical/src/com/openexchange/chronos/provider/ical/exception/ICalProviderExceptionMessages.java:73
 msgid "The field '%1$s' contains an unexpected value '%2$s'"
-msgstr " '%1$s' -kentässä on odottamaton arvo  '%2$s'"
+msgstr "'%1$s' -kentässä on odottamaton arvo  '%2$s'"
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.provider.ical/src/com/openexchange/chronos/provider/ical/exception/ICalProviderExceptionMessages.java:75
 msgid ""
@@ -1073,10 +1086,9 @@ msgstr ""
 "Valitettavasti pyytämääsi syötettä ei voida tilata kokorajoitteiden vuoksi."
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.provider.ical/src/com/openexchange/chronos/provider/ical/exception/ICalProviderExceptionMessages.java:77
-msgid "Unfortunately the given feed URL cannot be processed as expected."
+msgid "Unfortunately the given feed URI cannot be processed as expected."
 msgstr ""
-"Valitettavasti annettua syötteen web-osoitetta ei voitu käsitellä odotetulla "
-"tavalla. "
+"Valitettavasti syötteen URI-osoitetta ei voitu käsitellä odotetulla tavalla."
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.provider.ical/src/com/openexchange/chronos/provider/ical/exception/ICalProviderExceptionMessages.java:79
 msgid ""
@@ -1092,7 +1104,7 @@ msgid ""
 "nothing we can do about it."
 msgstr ""
 "Syötteen toimittajan puolella tapahtui sisäinen palvelinvirhe. Emme voi "
-"asialle mitään. "
+"asialle mitään."
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.provider.ical/src/com/openexchange/chronos/provider/ical/exception/ICalProviderExceptionMessages.java:83
 msgid ""
@@ -1100,7 +1112,7 @@ msgid ""
 "we can do about it."
 msgstr ""
 "Syötteen toimittajan puolella tapahtui etäpalvelinvirhe. Emme voi asialle "
-"mitään. "
+"mitään."
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.provider.ical/src/com/openexchange/chronos/provider/ical/exception/ICalProviderExceptionMessages.java:85
 msgid ""
@@ -1124,6 +1136,14 @@ msgstr ""
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.provider.ical/src/com/openexchange/chronos/provider/ical/exception/ICalProviderExceptionMessages.java:91
 msgid "Authentication failed. Please enter your password and try again."
 msgstr "Varmennus epäonnistui. Kirjoita salasanasi ja yritä uudelleen."
+
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.provider.ical/src/com/openexchange/chronos/provider/ical/exception/ICalProviderExceptionMessages.java:93
+msgid ""
+"Authentication failed due to a recent credentials change. Please remove the "
+"account and add it again with correct credentials."
+msgstr ""
+"Varmennus epäonnistui viimeaikaisen pääsytietojen muutoksen vuoksi. Poista "
+"tili ja lisää se uudelleen oikeilla pääsytiedoilla."
 
 #. *
 #. * The name of the internal calendar provider.
@@ -1242,7 +1262,7 @@ msgstr "Tapahtui input/output virhe: %1$s"
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:76
 msgid ""
 "The requested operation is not supported for calendar provider \"%1$s\"."
-msgstr "Pyydettyä toimenpidettä ei tueta kalenterintarjoajalle \"%1$s\". "
+msgstr "Pyydettyä toimenpidettä ei tueta kalenterintarjoajalle \"%1$s\"."
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:78
 msgid "The operation could not be completed due to insufficient permissions."
@@ -1351,7 +1371,7 @@ msgid ""
 "coordinates and try again."
 msgstr ""
 "Annettu maantieteellinen sijainti ei kelpaa. Valitse oikeat koordinatit ja "
-"yritä uudelleen. "
+"yritä uudelleen."
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:112
 msgid ""
@@ -1374,7 +1394,7 @@ msgid ""
 "a valid recurrence identifier and try again."
 msgstr ""
 "Haluttu tapahtuma ei ole osa tapaamissarjaa. Valitse kelpaava toistumisen "
-"tunniste ja yritä uudelleen. "
+"tunniste ja yritä uudelleen."
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:118
 msgid ""
@@ -1386,7 +1406,7 @@ msgstr ""
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:120
 msgid "Moving an appointment series into another folder is not supported."
-msgstr "Tapaamissarjan siirtämistä toiseen kansioon ei tueta. "
+msgstr "Tapaamissarjan siirtämistä toiseen kansioon ei tueta."
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:122
 msgid ""
@@ -1448,7 +1468,7 @@ msgstr "Arvoa  \"%2$s\" ei tueta eikä sitä käytetty."
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:140
 msgid "The '%1$s' is either not an internal user or does not exist."
-msgstr "Joko '%1$s' ei ole sisäinen käyttäjä tai sitä ei ole olemassa. "
+msgstr "Joko '%1$s' ei ole sisäinen käyttäjä tai sitä ei ole olemassa."
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:142
 msgid "Authentication failed."
@@ -1483,12 +1503,12 @@ msgstr "Tapaaminen sisältää liian monta muistutusta."
 #. Your selection is not supported.
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.client.onboarding/src/com/openexchange/client/onboarding/OnboardingExceptionMessages.java:70
 msgid "Your selection is not supported."
-msgstr "Valintaasi ei tueta"
+msgstr "Valintaasi ei tueta."
 
 #. The chosen configuration is not supported.
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.client.onboarding/src/com/openexchange/client/onboarding/OnboardingExceptionMessages.java:73
 msgid "The chosen configuration is not supported."
-msgstr "Valittua konfiguraatiota ei tueta"
+msgstr "Valittua konfiguraatiota ei tueta."
 
 #. The execution has been denied. Please choose another option.
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.client.onboarding/src/com/openexchange/client/onboarding/OnboardingExceptionMessages.java:76
@@ -1581,7 +1601,7 @@ msgstr "Tekstiviestin lähettäminen onnistui"
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.client.onboarding/src/com/openexchange/client/onboarding/download/DownloadOnboardingStrings.java:73
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.client.onboarding/src/com/openexchange/client/onboarding/download/DownloadOnboardingStrings.java:75
 msgid "To set up your device, click following link: "
-msgstr "Tee laitteeseesi asetukset seuraamalla seuraavaa linkkiä:"
+msgstr "Tee laitteeseesi asetukset seuraamalla seuraavaa linkkiä: "
 
 #. The user salutation; e.g. "Dear John Doe,"
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.client.onboarding/src/com/openexchange/client/onboarding/notification/OnboardingNotificationStrings.java:68
@@ -1594,7 +1614,7 @@ msgid ""
 "to automatically configure your device, please download & install the "
 "attached configuration profile."
 msgstr ""
-"Konfiguroi laitteesi automaattisesti lataamalla ja asentamalla liitteenä "
+"konfiguroi laitteesi automaattisesti lataamalla ja asentamalla liitteenä "
 "oleva konfiguraatioprofiili."
 
 #. The content of the E-Mail providing the profile attachment
@@ -1603,7 +1623,7 @@ msgid ""
 "to automatically configure your device, please download & install the "
 "attached configuration profile \"%1$s\"."
 msgstr ""
-"Konfiguroi laitteesi automaattisesti lataamalla ja asentamalla liitteenä "
+"konfiguroi laitteesi automaattisesti lataamalla ja asentamalla liitteenä "
 "oleva konfiguraatioprofiili \"%1$s\"."
 
 #. The subject of the E-Mail providing the profile attachment
@@ -1964,7 +1984,7 @@ msgstr "Teleksi"
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:123
 msgid "TTY/TDD"
-msgstr "kaukokirjoitin/tekstipuhelin"
+msgstr "Kaukokirjoitin/tekstipuhelin"
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:124
 msgid "Instant Messenger 1"
@@ -2148,7 +2168,7 @@ msgstr ""
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.contact.vcard.impl/src/com/openexchange/contact/vcard/impl/internal/VCardExceptionMessages.java:63
 msgid "Validation failed for property \"%1$s\": %2$s"
-msgstr "Ominaisuuden  \"%1$s\": %2$s validointi epäonnistui."
+msgstr "Ominaisuuden  \"%1$s\": %2$s validointi epäonnistui"
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.contact.vcard.impl/src/com/openexchange/contact/vcard/impl/internal/VCardExceptionMessages.java:65
 msgid "Error reading vCard: %1$s"
@@ -2168,7 +2188,7 @@ msgstr "Ei pääsyä tiedostotaltioon."
 #. - ...
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.contacts.json/src/com/openexchange/contacts/json/osgi/OAuthScopeDescription.java:9
 msgid "Read all your contacts."
-msgstr "Lue kaikki yhteystietosi"
+msgstr "Lue kaikki yhteystietosi."
 
 #. Application 'xyz' requires following permissions:
 #. - Create, modify and delete contacts.
@@ -2211,7 +2231,7 @@ msgstr "Ei yhteyttä tietokantaan %1$d"
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.database/src/com/openexchange/database/DBPoolingExceptionStrings.java:74
 msgid "Schema can not be set on database connection"
-msgstr "Tietokantayhteydelle ei voitu asettaa kaaviota."
+msgstr "Tietokantayhteydelle ei voitu asettaa kaaviota"
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.database/src/com/openexchange/database/DBPoolingExceptionStrings.java:76
 msgid "Null is returned to connection pool."
@@ -2316,7 +2336,7 @@ msgstr ""
 #. %1$s is replaced with more details about the invalid configuration
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.database/src/com/openexchange/database/DBPoolingExceptionStrings.java:133
 msgid "Invalid configuration for global databases: %1$s"
-msgstr "Yleisten tietokantojen kelpaamaton konfiguraatio:   %1$s."
+msgstr "Yleisten tietokantojen kelpaamaton konfiguraatio: %1$s"
 
 #. %1$s is replaced with the context group name
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.database/src/com/openexchange/database/DBPoolingExceptionStrings.java:136
@@ -2339,12 +2359,12 @@ msgstr ""
 #. Invalid DoveAdm URL: %1$s
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.dovecot.doveadm.client/src/com/openexchange/dovecot/doveadm/client/DoveAdmClientExceptionMessages.java:68
 msgid "The provided DoveAdm URL: %1$s is invalid"
-msgstr "Aneetu DoveAdm-osoite %1$s ei kelpaa."
+msgstr "Annettu DoveAdm-osoite %1$s ei kelpaa"
 
 #. The DoveAdm resource does not exist: %1$s
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.dovecot.doveadm.client/src/com/openexchange/dovecot/doveadm/client/DoveAdmClientExceptionMessages.java:71
 msgid "The provided DoveAdm resource does not exist: %1$s"
-msgstr "Annettua DoveAdm-resurssia ei ole olemassa: %1$s "
+msgstr "Annettua DoveAdm-resurssia ei ole olemassa: %1$s"
 
 #. Authentication failed: %1$s
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.dovecot.doveadm.client/src/com/openexchange/dovecot/doveadm/client/DoveAdmClientExceptionMessages.java:77
@@ -2724,7 +2744,7 @@ msgstr ""
 #. ZIP archive exceeds max. allowed size of %1$s
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:89
 msgid "ZIP archive exceeds max. allowed size of %1$s"
-msgstr "ZIP-arkisto ylittää enimmäiskoon  %1$s."
+msgstr "ZIP-arkisto ylittää enimmäiskoon %1$s"
 
 #. The file storage account is currently not accessible.
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:92
@@ -2812,7 +2832,7 @@ msgstr "URL  %1$s ei viittaa tiedostoon %1$s"
 #. The %1$s URL does not denote a directory: %2$s
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:125
 msgid "The %1$s URL does not denote a directory: %2$s"
-msgstr " URL %1$s ei viittaa hakemistoon  %2$s"
+msgstr "URL %1$s ei viittaa hakemistoon %2$s"
 
 #. Missing file name.
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:128
@@ -2823,19 +2843,19 @@ msgstr "Tiedostonimi puuttuu."
 #. Update denied for %1$s resource: %2$s
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:131
 msgid "Update denied for \"%1$s\" resource: %2$s"
-msgstr " \"%1$s\"-resurssin %2$s päivitys on estetty."
+msgstr "\"%1$s\"-resurssin %2$s päivitys on estetty"
 
 #. Delete denied for \"%1$s\" resource: %2$s
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:134
 msgid "Delete denied for \"%1$s\" resource: %2$s"
-msgstr " \"%1$s\"-resurssin %2$s poistaminen on estetty."
+msgstr "\"%1$s\"-resurssin %2$s poistaminen on estetty"
 
 #. Missing configuration for %1$s account "%2$s".
 #. The first placeholder is filled with the name of file storage provider (e.g. "boxcom"), the latter one is filled with numeric identifier of the account.
 #. E.g. 'Missing configuration for boxcom account "3".'
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:139
 msgid "Missing configuration for %1$s account \"%2$s\"."
-msgstr " Tilin %1$s konfiguraatio \"%2$s\" puuttuu."
+msgstr "Tilin %1$s konfiguraatio \"%2$s\" puuttuu."
 
 #. The provided %1$s resource does not exist: %2$s
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:142
@@ -3127,7 +3147,7 @@ msgstr "Ei voitu luoda ämpäriä nimelle  \"%1$s\" käyttäen aluetta  \"%2$s\"
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.filestore.sproxyd/src/com/openexchange/filestore/sproxyd/SproxydExceptionMessages.java:63
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.filestore.swift/src/com/openexchange/filestore/swift/SwiftExceptionMessages.java:64
 msgid "No such document: %1$s"
-msgstr "Ei asiakirjaa %1$s."
+msgstr "Ei asiakirjaa %1$s"
 
 #. No such chunk: %1$s
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.filestore.sproxyd/src/com/openexchange/filestore/sproxyd/SproxydExceptionMessages.java:66
@@ -3590,7 +3610,7 @@ msgstr "Yksittäinen tehtävä"
 #. The uwa widget with the id %1$s could not be found
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.frontend.uwa/src/com/openexchange/frontend/uwa/UWAWidgetExceptionMessages.java:63
 msgid "The uwa widget with the id %1$s could not be found"
-msgstr "Ei löytynyt uwa-agenttia tunnisteella %1$s."
+msgstr "Ei löytynyt uwa-agenttia tunnisteella %1$s"
 
 #. The widget with the id %1$s is protected and only positional information can be updated
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.frontend.uwa/src/com/openexchange/frontend/uwa/UWAWidgetExceptionMessages.java:66
@@ -3598,8 +3618,8 @@ msgid ""
 "The widget with the id %1$s is protected and only positional information can "
 "be updated"
 msgstr ""
-"Widget tunnisteella %1$s on suojattu. Ainoastaan sen sijaintitietoja voi "
-"päivittää."
+"Widget tunnisteella %1$s on suojattu ja ainoastaan sen sijaintitietoja voi "
+"päivittää"
 
 #. The string cannot be parsed to a valid URL.
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.frontend.uwa/src/com/openexchange/frontend/uwa/UWAWidgetExceptionMessages.java:69
@@ -3656,7 +3676,7 @@ msgstr ""
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/authentication/LoginExceptionMessages.java:87
 msgid "Method \"%1$s\" in HTTP header authorization is not supported."
 msgstr ""
-"Metodi \"%1$s\" ei ole tuettu HTTP-otsakkeita käyttävässä tunnistautumisessa"
+"Metodi \"%1$s\" ei ole tuettu HTTP-otsakkeita käyttävässä tunnistautumisessa."
 
 #. Missing client capabilities.
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/authentication/LoginExceptionMessages.java:90
@@ -3772,7 +3792,7 @@ msgstr "Dataa ei voida tallentaa tietokantaan, koska se on liian iso"
 #. The request sent by the client was syntactically incorrect
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/exception/OXExceptionStrings.java:96
 msgid "The request sent by the client was syntactically incorrect"
-msgstr "Asiakasohjelmiston lähettämä pyynto oli syntaktisesti epäkelpo."
+msgstr "Asiakasohjelmiston lähettämä pyynto oli syntaktisesti epäkelpo"
 
 #. *
 #. * File not found: %1$s
@@ -4355,7 +4375,7 @@ msgid ""
 "%2$s in folder %3$s"
 msgstr ""
 "Käyttäjätunnuksen %1$s yhteystieto on liian samankaltainen aiemman kansiossa "
-"%3$s sijaitsevan käyttäjätunnuksen %2$s kanssa. "
+"%3$s sijaitsevan käyttäjätunnuksen %2$s kanssa"
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.importexport/src/com/openexchange/importexport/exceptions/ImportExportExceptionMessages.java:141
 msgid "Could not create a proper name for the export file."
@@ -4467,7 +4487,7 @@ msgstr "Uudelleenohjauksen osoite \"%1$s\" on hylätty."
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.mail.filter/src/com/openexchange/mailfilter/exceptions/MailFilterExceptionMessages.java:64
 msgid "Invalid SIEVE rule specified. Please review your mail filter rules"
-msgstr "Epäkelpo SIEVE-sääntö. Ole hyvä ja tarkista postin suodatussääntösi."
+msgstr "Epäkelpo SIEVE-sääntö. Ole hyvä ja tarkista postin suodatussääntösi"
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.mail.filter/src/com/openexchange/mailfilter/exceptions/MailFilterExceptionMessages.java:66
 msgid ""
@@ -4584,8 +4604,8 @@ msgid ""
 "The SSL certificate with fingerprint '%1$s' was not found for user '%2$s' in "
 "context '%3$s'"
 msgstr ""
-"SSL-varmennetta sormenjäljellä  '%1$s' ei löytynyt käyttäjälle '%2$s' "
-"asiayhteydessä  '%3$s'."
+"SSL-varmennetta sormenjäljellä '%1$s' ei löytynyt käyttäjälle '%2$s' "
+"asiayhteydessä '%3$s'"
 
 #. The certificate for domain '%2$s' is untrusted.
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.net.ssl/src/com/openexchange/net/ssl/exception/SSLExceptionMessages.java:64
@@ -4668,7 +4688,7 @@ msgstr "Varmenteeseen ei luoteta"
 #. Successfully connected ExampleApp with your account
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.oauth.provider.impl/src/com/openexchange/oauth/provider/impl/notification/NotificationStrings.java:64
 msgid "Successfully connected %1$s with your account"
-msgstr " %1$s on onnistuneesti yhdistetty tiliisi."
+msgstr "%1$s on onnistuneesti yhdistetty tiliisi"
 
 #. Salutation with name: "Hello Peter,"
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.oauth.provider.impl/src/com/openexchange/oauth/provider/impl/notification/NotificationStrings.java:67
@@ -4702,8 +4722,7 @@ msgstr "Sovellus  %1$s haluaisi olla yhteydessä tiliisi"
 #. Sign in to OX App Suite to connect example.com with your account
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.oauth.provider.impl/src/com/openexchange/oauth/provider/impl/servlets/OAuthProviderStrings.java:66
 msgid "Sign in to %1$s to connect %2$s with your account"
-msgstr ""
-"Kirjaudu sisään sovellukseen  %1$s yhdistääksesi example.comin tiliisi."
+msgstr "Kirjaudu sisään sovellukseen %1$s yhdistääksesi %2$s tiliisi"
 
 #. The application example.com would like to access your account, and is requesting following permissions:
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.oauth.provider.impl/src/com/openexchange/oauth/provider/impl/servlets/OAuthProviderStrings.java:69
@@ -4894,7 +4913,7 @@ msgstr ""
 #. You need to explicitly authorise %1$s to subscribe to %2$s
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:112
 msgid "You need to explicitly authorise %1$s to subscribe to %2$s"
-msgstr " %1$s täytyy erityisesti valtuuttaa tilaamaan %2$s"
+msgstr "%1$s täytyy erityisesti valtuuttaa tilaamaan %2$s"
 
 #. Thrown in case an OAuth provider is requested to access certain data, but such data is not available at all. For instance Dropbox is requested to access E-Mails.
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:115
@@ -5117,7 +5136,7 @@ msgid ""
 "based sorting"
 msgstr ""
 "POP3-lajittelu epäonnistui (syystä: \"%1$s\"). Käytetään ohjelman "
-"lajittelutoimintoa."
+"lajittelutoimintoa"
 
 #. *
 #. * Unknown search field: %1$s
@@ -5308,7 +5327,7 @@ msgid ""
 "The POP3 storage is missing for user %1$s. Please provide one and try again"
 msgstr ""
 "Käyttäjältä %1$s puuttuu POP3 taltio. Anna sellainen ja yritä uudelleen, ole "
-"hyvä."
+"hyvä"
 
 #. *
 #. * POP3 default folder %1$s must not be moved.
@@ -5409,7 +5428,7 @@ msgid ""
 "again"
 msgstr ""
 "Seuraava kenttä tai seuraavat kentät ovat liian pitkiä: %1$s. Ole hyvä ja "
-"lyhennä arvoja ja yritä uudelleen."
+"lyhennä arvoja ja yritä uudelleen"
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.preview/src/com/openexchange/preview/PreviewExceptionMessages.java:64
 msgid "The data you provided (%1$s) cannot be changed."
@@ -5609,7 +5628,7 @@ msgid ""
 "delete some signatures in order to create new ones."
 msgstr ""
 "Allekirjoitusten kiintiö on ylitetty. Kiintiö: %2$s. Käytetty kiintiö: %1$s. "
-"Poista joitakin allekirjoituksia tehdäksesi tilaa uusille. "
+"Poista joitakin allekirjoituksia tehdäksesi tilaa uusille."
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.quota/src/com/openexchange/quota/QuotaExceptionMessages.java:82
 msgid ""
@@ -5689,17 +5708,17 @@ msgstr "Lukeminen RSS-syötteestä aikakatkaistiin. URL: %1$s"
 #. Failed to read RSS feed from URL: %1$s
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.rss/src/com/openexchange/rss/RssExceptionMessages.java:72
 msgid "Failed to read RSS feed from URL: %1$s"
-msgstr "RSS-syötteen lukeminen osoitteesta  %1$s epäonnistui."
+msgstr "RSS-syötteen lukeminen osoitteesta %1$s epäonnistui"
 
 #. Failed to read RSS feed from URL: %2$s
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.rss/src/com/openexchange/rss/RssExceptionMessages.java:75
 msgid "Failed to read RSS feed from URL: %2$s"
-msgstr "RSS-syötteen lukeminen osoitteesta  %2$s epäonnistui."
+msgstr "RSS-syötteen lukeminen osoitteesta %2$s epäonnistui"
 
 #. The RSS feed is exceeding the maximum allowed size of '%1$s'
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.rss/src/com/openexchange/rss/RssExceptionMessages.java:78
 msgid "The RSS feed is exceeding the maximum allowed size of '%1$s'"
-msgstr "RSS-syöte ylittää sallitun enimmäiskoon '%1$s'."
+msgstr "RSS-syöte ylittää sallitun enimmäiskoon '%1$s'"
 
 #. Cannot connect to RSS with URL: %1$s. Please change URL and try again.
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.rss/src/com/openexchange/rss/RssExceptionMessages.java:81
@@ -5742,7 +5761,7 @@ msgstr "%2$s annettu arvo ei ole oikein."
 #.
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/ajax/helper/ParamContainerExceptionMessage.java:76
 msgid "Please add a value for %1$s"
-msgstr "Lisää arvo parametrille %1$s, ole hyvä."
+msgstr "Lisää arvo parametrille %1$s, ole hyvä"
 
 #. No user-associated job found
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/ajax/requesthandler/jobqueue/JobQueueMessages.java:63
@@ -5927,7 +5946,7 @@ msgstr ""
 #. Failed to delete all folders
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/folderstorage/FolderExceptionMessages.java:98
 msgid "Failed to delete all folders"
-msgstr "Kaikkia kansioita ei voity poistaa."
+msgstr "Kaikkia kansioita ei voitu poistaa"
 
 #. The folder was not updated due to possible data loss. Please review the warnings for details.
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/folderstorage/FolderExceptionMessages.java:101
@@ -6273,7 +6292,7 @@ msgstr "Lipuketta 'yksityinen' ei voi käyttää epäyksityisessä kansiossa."
 #.
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/calendar/OXCalendarExceptionMessage.java:198
 msgid "Invalid characters (%2$s) in field %1$s."
-msgstr "Kelpaamattomia merkkejä (%2$s) kentässä %1$s. "
+msgstr "Kelpaamattomia merkkejä (%2$s) kentässä %1$s."
 
 #. *
 #. * Series end is before start date.
@@ -6360,7 +6379,7 @@ msgstr "Kuvaa ei voida pienentää."
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:71
 msgid "This feature has not been enabled"
-msgstr "Tätä ominaisuutta ei ole kytketty päälle."
+msgstr "Tätä ominaisuutta ei ole kytketty päälle"
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:73
 msgid ""
@@ -6471,7 +6490,7 @@ msgstr "Välttämätöntä arvoa \"sukunimi\" ei annettu."
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:117
 msgid "You are not allowed to modify that contact"
-msgstr "Sinulla ei ole valtuuksia muokata yhteystietoa."
+msgstr "Sinulla ei ole valtuuksia muokata yhteystietoa"
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:119
 msgid ""
@@ -6742,7 +6761,7 @@ msgstr "Vahvistettu posti"
 #. The alternative internationalized name for the confirmed-spam mail folder
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:109
 msgid "confirmed-ham"
-msgstr "Vahvistettu-posti"
+msgstr "vahvistettu-posti"
 
 #. The internationalized subject for a read acknowledgement
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:114
@@ -7798,7 +7817,7 @@ msgstr "alustava"
 #. external
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:708
 msgid "external"
-msgstr "Ulkoinen"
+msgstr "ulkoinen"
 
 #. -
 #. * Line patterns
@@ -7906,22 +7925,22 @@ msgstr "Poistettu"
 #. The appendix to indicate the first ordinal; e.g for EN it would be "1st", for DE it would be "1.".
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:789
 msgid "st"
-msgstr "."
+msgstr ""
 
 #. The appendix to indicate the second ordinal; e.g for EN it would be "2nd", for DE it would be "2.".
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:792
 msgid "nd"
-msgstr "."
+msgstr ""
 
 #. The appendix to indicate the third ordinal; e.g for EN it would be "3rd", for DE it would be "3.".
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:795
 msgid "rd"
-msgstr "."
+msgstr ""
 
 #. The appendix to indicate an ordinal greater than 3rd; e.g for EN it would be "4th", for DE it would be "4.".
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:798
 msgid "th"
-msgstr "."
+msgstr ""
 
 #. -
 #. * Recurrence templates
@@ -8023,7 +8042,7 @@ msgstr "Asiakirjoja ei voitu ladata. Yritä uudelleen."
 #. The folder %1$s you requested is not an Infostore folder.
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/infostore/InfostoreExceptionMessages.java:68
 msgid "The folder %1$s you requested is not an Infostore folder."
-msgstr "Pyytämäsi kansio %1$s ei ole Infostore-kansio"
+msgstr "Pyytämäsi kansio %1$s ei ole Infostore-kansio."
 
 #. You do not have the appropriate permissions to read the document.
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/infostore/InfostoreExceptionMessages.java:71
@@ -8056,7 +8075,7 @@ msgstr "Sinulla ei ole tarvittavia valtuuksia tämän version poistamiseen."
 #. The document is already locked. Please try again later.
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/infostore/InfostoreExceptionMessages.java:86
 msgid "The document is currently locked. Please try again later."
-msgstr "Asiakirja on juuri nyt lukittu. Yritä myöhemmin uudelleen. "
+msgstr "Asiakirja on juuri nyt lukittu. Yritä myöhemmin uudelleen."
 
 #. You do not have the appropriate permissions to unlock the document.
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/infostore/InfostoreExceptionMessages.java:89
@@ -8372,7 +8391,7 @@ msgid ""
 "The current password is missing. Please enter your current password and try "
 "again."
 msgstr ""
-"Nykyinen salasana puuttuu. Anna nykyinen salasanasi ja yritä uudelleen. "
+"Nykyinen salasana puuttuu. Anna nykyinen salasanasi ja yritä uudelleen."
 
 #. *
 #. * The new password is missing. Please enter your new password and try again.
@@ -8641,8 +8660,7 @@ msgstr ""
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:112
 msgid "Tasks with private flag cannot be moved to a public folder."
 msgstr ""
-"Yksityisellä lipulla merkittyjä tehtäviä ei voida siirtää julkiseen "
-"kansioon. "
+"Yksityisellä lipulla merkittyjä tehtäviä ei voida siirtää julkiseen kansioon."
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:114
 msgid "Only the task creator is allowed to set the private flag."
@@ -8748,7 +8766,7 @@ msgstr "Taulusta \"%2$s\" ei löytynyt saraketta \"%1$s\"."
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/update/UpdateExceptionMessages.java:84
 msgid "Found multiple schemas for name: \"%1$s\"."
-msgstr "Löytyi useita skeemoja nimellä \"%1$s\". "
+msgstr "Löytyi useita skeemoja nimellä \"%1$s\"."
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/update/internal/SchemaExceptionMessages.java:62
 msgid "Cannot get database connection."
@@ -9057,7 +9075,7 @@ msgid ""
 msgstr ""
 "Oletuskansioita ei voida luoda,  koska postijärjestelmä estää uusien "
 "kansioiden luomisen. Postimoduuli ei siten ole käytettävissä tällä hetkellä. "
-"Poista ensin muut kansiot, jotta voit käyttää postimoduulia uudelleen."
+"Poista ensin muut kansiot, jotta voit käyttää postimoduulia uudelleen"
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:120
 msgid "The types of specified data source are not supported."
@@ -9226,7 +9244,7 @@ msgstr ""
 #. The client request is not permitted.
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:194
 msgid "The client request is not permitted."
-msgstr "Asiakaspyyntöä ei sallittu. "
+msgstr "Asiakaspyyntöä ei sallittu."
 
 #. Sending the message denied.
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:197
@@ -9236,12 +9254,12 @@ msgstr "Viestin lähettäminen estetty."
 #. Denied to rename a standard/default folder like Trash
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:200
 msgid "Default folder must not be renamed"
-msgstr "Oletuskansiota ei voi nimetä uudelleen."
+msgstr "Oletuskansiota ei voi nimetä uudelleen"
 
 #. Denied to delete a standard/default folder like Trash
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:203
 msgid "Default folder must not be deleted"
-msgstr "Oletuskansiota ei voi tuhota."
+msgstr "Oletuskansiota ei voi poistaa"
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:205
 msgid "Archive folder does not allow subfolders."
@@ -9288,7 +9306,7 @@ msgstr ""
 #. User wants to compose a share message but does not hold sufficient permissions/capabilities to do so
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:225
 msgid "You are not allowed to compose a message containing share links"
-msgstr "Et saa kirjoittaa jakolinkkejä sisältävää viestiä."
+msgstr "Et saa kirjoittaa jakolinkkejä sisältävää viestiä"
 
 #. User wants to compose a share message but does not specify an expiration date which is required
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:228
@@ -9297,12 +9315,12 @@ msgid ""
 "share links"
 msgstr ""
 "Määritä vanhenemispäivämäärä, jotta voit kirjoittaa jakolinkkejä sisältävän "
-"viestin."
+"viestin"
 
 #. The authentication type selected for a certain mail/transport account is not supported; e.g. user wants to authenticate via OAuth, but IMAP server does not support AUTH=XOAUTH2 capability
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:231
 msgid "The selected authentication type is not supported by server %2$s"
-msgstr "Palvelin %2$s ei tue valittua varmennustapaa."
+msgstr "Palvelin %2$s ei tue valittua varmennustapaa"
 
 #. Something is wrong with a subscribed E-Mail account; e.g. invalid credentials. Example: "Please check your mail account: The entered credentials are wrong"
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:234
@@ -9342,7 +9360,7 @@ msgid ""
 msgstr ""
 "Sähköpostitilisi %2$s on kytketty pois päältä kelpaamattomien pääsytietojen "
 "vuoksi. Muokkaa tiliä ja anna oikeat pääsytiedot, jotta se voidaan taas "
-"kytkeä päälle."
+"kytkeä päälle"
 
 #. Thrown when an oauth-associated mail access has been disabled. That is it exceeded the limit for failed authentication count.
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:255
@@ -9361,7 +9379,7 @@ msgid ""
 msgstr ""
 "Sähköpostisi siirto tilillä %2$s on kytketty pois päältä kelpaamattomien "
 "pääsytietojen vuoksi. Muokkaa tiliä ja anna oikeat pääsytiedot, jotta se "
-"voidaan taas kytkeä päälle."
+"voidaan taas kytkeä päälle"
 
 #. Thrown when an oauth-associated mail transport has been disabled. That is it exceeded the limit for failed authentication count.
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:261
@@ -9432,7 +9450,7 @@ msgid ""
 "authentication to be active."
 msgstr ""
 "Lähetä RFC822 -tiedot käyttäen ensisijaisen tilin siirtoa. Päävarmennuksen "
-"täytyy olla aktiivinen. "
+"täytyy olla aktiivinen."
 
 #. *
 #. * There was an issue while authenticating. This may be due to a recent password change. To continue please log out and log back in with
@@ -9465,7 +9483,7 @@ msgid ""
 "correct them."
 msgstr ""
 "Annetut sisäänkirjautumistiedot postipalvelimelle %1$s näyttävät olevan "
-"virheelliset. Korjaa tiedot. "
+"virheelliset. Korjaa tiedot."
 
 #. *
 #. * Mail folder "%1$s" could not be found.
@@ -9580,7 +9598,7 @@ msgstr "Viestiä ei voitu lähettää seuraaville vastaanottajille: %1$s(%2$s)"
 msgid ""
 "Message could not be sent. Error message from mail transport server: %1$s"
 msgstr ""
-"Viestiä ei voitu lähettää. Virheviesti seuraavalta postipalvelimelta: %1$s."
+"Viestiä ei voitu lähettää. Virheviesti seuraavalta postipalvelimelta: %1$s"
 
 #. *
 #. * Message could not be sent. Error message from mail transport server: %1$s (%2$s)
@@ -9956,7 +9974,7 @@ msgstr ""
 #. The selected resource \"%1$s\" has been changed in the meantime.
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/resource/ResourceExceptionMessage.java:93
 msgid "The selected resource \"%1$s\" has been changed in the meantime."
-msgstr "Valittua resurssia \"%1$s\" on sillä välin muutettu"
+msgstr "Valittua resurssia \"%1$s\" on sillä välin muutettu."
 
 #. Missing mandatory field(s) in given resource.
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/resource/ResourceExceptionMessage.java:96
@@ -9969,7 +9987,7 @@ msgstr "Sinulla ei ole tarvittavia valtuuksia moduuliin \"%2$s\"."
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:71
 msgid "Shared folders are not available for your account."
-msgstr "Jaetut kansiot eivät ole käytössä tilillesi."
+msgstr "Jaetut kansiot eivät ole tilisi käytössä."
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:72
 msgid "You do not have appropriate permissions for the public folder."
@@ -9999,7 +10017,7 @@ msgstr "Kansio on oletuskansio eikä sitä voi nimetä uudelleen."
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:78
 msgid "The folder already contains a folder with such a name."
-msgstr "Kansio sisältää jo samannimisen kansion.l"
+msgstr "Kansio sisältää jo samannimisen kansion."
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:79
 msgid "Folders of type \"%2$s\" can't be created below this folder."
@@ -10122,8 +10140,7 @@ msgstr "Sinulla ei ole asiaankuuluvia lupia kansion jakamiseen."
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:104
 msgid "It is not possible to apply the changes due to limited permissions"
-msgstr ""
-"Ei ole mahdollista toteuttaa muutoksia rajoitettujen oikeuksien vuoksi."
+msgstr "Ei ole mahdollista toteuttaa muutoksia rajoitettujen oikeuksien vuoksi"
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:105
 msgid ""
@@ -10212,14 +10229,14 @@ msgstr "Anna kansion nimi."
 #. You are not allowed to share the folder to "%2$s"; e.g. 'You are not allowed to share the folder to "Guests"'
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:130
 msgid "You are not allowed to share the folder to \"%2$s\""
-msgstr "Kansion jakaminen käyttäjälle \"%2$s\" ei ole sallittu."
+msgstr "Kansion jakaminen ei ole sallittu käyttäjälle \"%2$s\""
 
 #. You are not allowed to change the permissions of the trash folder or any of its subfolders
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:133
 msgid ""
 "You are not allowed to change the permissions of the trash folder or any of "
 "its subfolders"
-msgstr "Et voi muuttaa roskakorin tai sen alakansioiden oikeuksia."
+msgstr "Et voi muuttaa roskakorin tai sen alakansioiden oikeuksia"
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/servlet/AjaxExceptionMessages.java:62
 msgid "The requested operation is not permitted via a non-secure connection."
@@ -10269,7 +10286,7 @@ msgstr ""
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/servlet/AjaxExceptionMessages.java:70
 msgid "Invalid JSON data received from client"
-msgstr "Asiakkaalta on vastaanotettu kelpaamatonta JSON-dataa."
+msgstr "Asiakkaalta on vastaanotettu kelpaamatonta JSON-dataa"
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/servlet/AjaxExceptionMessages.java:71
 msgid "Client sent not allowed request parameter \"%1$s\" within the URI."
@@ -10364,7 +10381,8 @@ msgstr "kansio"
 #. John Doe has shared the folder "Photos" with you. Please log in to view it.
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:69
 msgid "%1$s has shared the %2$s \"%3$s\" with you. Please log in to view it. "
-msgstr "%1$s on jakanut kanssasi %2$s \"%3$s\". Kirjaudu sisään katsellaksesi."
+msgstr ""
+"%1$s on jakanut kanssasi %2$s \"%3$s\". Kirjaudu sisään katsellaksesi. "
 
 #. We sent a message to john.doe@example.com with further instructions on how to set a new password.
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:72
@@ -10449,7 +10467,7 @@ msgid ""
 "owner if you want access again."
 msgstr ""
 "Etsimäsi jaettu aineisto ei ole saatavilla. Ota yhteyttä omistajaan jos "
-"haluat saada sen uudelleen käyttöösi. "
+"haluat saada sen uudelleen käyttöösi."
 
 #. Access to the share you're looking for has been removed. Please contact <John Doe> if you want access again.
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:102
@@ -10678,7 +10696,7 @@ msgstr "kuva"
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/groupware/TargetProxyTypeStrings.java:69
 msgid "calendar"
-msgstr "Kalenteri"
+msgstr "kalenteri"
 
 #. subject
 #. * $username has shared file "$filename" with you.
@@ -10788,8 +10806,8 @@ msgid ""
 "%1$s (%2$s) has shared the file \"%3$s\" with you. Please click the button "
 "below to view it."
 msgstr ""
-"%1$s (%2$s)  on jakanut sinulle tiedoston \"%3$s\". Napauta allaolevaa "
-"nappia katsellaksesi tiedostoa. "
+"%1$s (%2$s) on jakanut sinulle tiedoston \"%3$s\". Napauta allaolevaa nappia "
+"katsellaksesi tiedostoa."
 
 #. * $username ($user_email) has shared $number_of_files files with you. Please click the button below to view them.
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:129
@@ -10797,8 +10815,8 @@ msgid ""
 "%1$s (%2$s) has shared %3$s files with you. Please click the button below to "
 "view them."
 msgstr ""
-"%1$s (%2$s)  on jakanut sinulle %3$s tiedostoa. Napauta allaolevaa nappia "
-"katsellaksesi niitä. "
+"%1$s (%2$s) on jakanut sinulle %3$s tiedostoa. Napauta allaolevaa painiketta "
+"katsellaksesi niitä."
 
 #. * $username ($user_email) has shared image "$filename" with you. Please click the button below to view it.
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:132
@@ -10806,8 +10824,8 @@ msgid ""
 "%1$s (%2$s) has shared the image \"%3$s\" with you. Please click the button "
 "below to view it."
 msgstr ""
-"%1$s (%2$s) on jakanut sinulle kuvan  \"%3$s\". Napauta allaolevaa "
-"katsellaksesi sitä. "
+"%1$s (%2$s) on jakanut sinulle kuvan \"%3$s\". Napauta allaolevaa painiketta "
+"katsellaksesi sitä."
 
 #. * $username ($user_email) has shared $number_of_images images with you. Please click the button below to view them.
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:135
@@ -10815,8 +10833,8 @@ msgid ""
 "%1$s (%2$s) has shared %3$s images with you. Please click the button below "
 "to view them."
 msgstr ""
-"%1$s (%2$s)  on jakanut sinulle %3$s kuvaa. Napauta allaolevaa nappia "
-"katsellaksesi niitä. "
+"%1$s (%2$s) on jakanut sinulle %3$s kuvaa. Napauta allaolevaa painiketta "
+"katsellaksesi niitä."
 
 #. * $username ($user_email) has shared item "$filename" with you. Please click the button below to view it.
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:138
@@ -10824,8 +10842,8 @@ msgid ""
 "%1$s (%2$s) has shared the item \"%3$s\" with you. Please click the button "
 "below to view it."
 msgstr ""
-"%1$s (%2$s)  on jakanut sinulle kohteen  \"%3$s\". Napauta allaolevaa nappia "
-"katsellaksesi sitä. "
+"%1$s (%2$s)  on jakanut sinulle kohteen \"%3$s\". Napauta allaolevaa "
+"painiketta katsellaksesi sitä."
 
 #. * $username ($user_email) has shared $number items with you. Please click the button below to view them.
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:141
@@ -10833,8 +10851,8 @@ msgid ""
 "%1$s (%2$s) has shared %3$s items with you. Please click the button below to "
 "view them."
 msgstr ""
-" %1$s (%2$s)  on jakanut sinulle %3$s kohdetta. Napauta allaolevaa nappia "
-"katsellaksesi niitä. "
+"%1$s (%2$s) on jakanut sinulle %3$s kohdetta. Napauta allaolevaa painiketta "
+"katsellaksesi niitä."
 
 #. * $username ($user_email) has shared folder $folder with you. Please click the button below to view it.
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:144
@@ -10842,8 +10860,8 @@ msgid ""
 "%1$s (%2$s) has shared the folder \"%3$s\" with you. Please click the button "
 "below to view it."
 msgstr ""
-"%1$s (%2$s)  on jakanut sinulle kansion \"%3$s\". Napauta allaolevaa nappia "
-"katsellaksesi niitä. "
+"%1$s (%2$s) on jakanut sinulle kansion \"%3$s\". Napauta allaolevaa "
+"painiketta katsellaksesi sitä."
 
 #. * $username ($user_email) has shared folder $number folders with you. Please click the button below to view them.
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:147
@@ -11213,7 +11231,7 @@ msgstr "%1$s - Unohditko salasanasi?"
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:291
 msgid "Hello,"
-msgstr "Hei!"
+msgstr "Hei,"
 
 #. * we got informed that you forgot your password. You can set a new password here:
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:294
@@ -11221,13 +11239,13 @@ msgid ""
 "we got informed that you forgot your password. You can set a new password "
 "here:"
 msgstr ""
-"Saimme tietää Sinun unohtaneen salasanasi. Voit asettaa uuden salasanan "
+"saimme tietää Sinun unohtaneen salasanasi. Voit asettaa uuden salasanan "
 "täällä:"
 
 #. * Set password
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:297
 msgid "Set password"
-msgstr "Aseta salasana."
+msgstr "Aseta salasana"
 
 #. * If you didn't request this, please ignore this email. Your password won't change until you access the button above and set a new one.
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:300
@@ -11291,7 +11309,7 @@ msgid ""
 "%1$s hours"
 msgstr ""
 "Olet ylittänyt suurimman sallitun sms-viestien määrän. Yritä uudelleen %1$s "
-"tunnin kuluttua."
+"tunnin kuluttua"
 
 #. SMS limits apply. You can only send one more message in the next %1$s hours
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.sms.tools/src/com/openexchange/sms/tools/SMSBucketExceptionMessages.java:74
@@ -11304,7 +11322,7 @@ msgstr ""
 #. Could not parse phone number %1$s
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.sms/src/com/openexchange/sms/SMSExceptionMessages.java:64
 msgid "Could not parse phone number %1$s"
-msgstr "Puhelinnumeroa  %1$s ei voitu jäsentää."
+msgstr "Puhelinnumeroa %1$s ei voitu jäsentää"
 
 #. Unknown country tag: %1$s
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.sms/src/com/openexchange/sms/SMSExceptionMessages.java:67
@@ -11339,7 +11357,7 @@ msgstr ""
 #. Thrown if a user tries to create a snippet/signature referencing to invalid or even harmful image data
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.snippet/src/com/openexchange/snippet/SnippetStrings.java:71
 msgid "Invalid or harmful image data detected"
-msgstr "Kelpaamatonta tai haitallista kuvadataa havaittu."
+msgstr "Kelpaamatonta tai haitallista kuvadataa havaittu"
 
 #. Thrown if a user tries to create a snippet/signature referencing to an image which is too big
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.snippet/src/com/openexchange/snippet/SnippetStrings.java:74
@@ -11421,7 +11439,7 @@ msgstr "Pyydettyä tilausta ei löydy."
 #. The message displayed if the server is not able to access the 3rd party service with the given credentials.
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.subscribe/src/com/openexchange/subscribe/SubscriptionErrorStrings.java:65
 msgid "The login/password combination you entered is wrong."
-msgstr "Syöttämäsi tunnus tai salasana on väärin"
+msgstr "Syöttämäsi tunnus tai salasana on väärin."
 
 #. The message displayed if a required service (e. g. for adding a subscription) is currently not available.
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.subscribe/src/com/openexchange/subscribe/SubscriptionErrorStrings.java:68
@@ -11767,7 +11785,7 @@ msgid ""
 "order to perform the requested action"
 msgstr ""
 "Käyttämälläsi XING-sovelluksella ei ole oikeutta suorittaa pyydettyä "
-"toimintoa."
+"toimintoa"
 
 #. No XING OAuth access available for user %1$s in context %2$s.
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.xing.access/src/com/openexchange/xing/access/XingExceptionMessages.java:122
@@ -13905,6 +13923,28 @@ msgstr "UTC"
 #: /home/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:534
 msgid "Zulu"
 msgstr "Zulu"
+
+#~ msgid "The feed URI does not match the standard."
+#~ msgstr "Syöte-URI ei vastaa standardia."
+
+#~ msgid ""
+#~ "Cannot connect to feed with URL: %1$s. Please change the URL and try "
+#~ "again."
+#~ msgstr ""
+#~ "Ei voida yhdistää syötteeseen URLilla:  %1$s. Vaihda URL ja yritä "
+#~ "uudelleen."
+
+#~ msgid ""
+#~ "The provided URL %1$s does not contain content as expected. Please change "
+#~ "the URL and try again."
+#~ msgstr ""
+#~ "Annettu web-osoite  %1$s  ei sisällä odotettua sisältöä. Vaihda osoite ja "
+#~ "yritä uudelleen."
+
+#~ msgid "Unfortunately the given feed URL cannot be processed as expected."
+#~ msgstr ""
+#~ "Valitettavasti annettua syötteen web-osoitetta ei voitu käsitellä "
+#~ "odotetulla tavalla. "
 
 #~ msgid "The value for \"%2$s\" is invalid and wasn't be applied."
 #~ msgstr "\"%2$s\"-arvo ei kelpaa eikä sitä käytetä."

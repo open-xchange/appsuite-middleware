@@ -60,6 +60,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
+import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicReference;
 import org.slf4j.Logger;
@@ -72,7 +73,7 @@ import com.openexchange.groupware.update.SchemaUpdateState;
 import com.openexchange.groupware.update.TaskInfo;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskV2;
-import com.openexchange.groupware.update.internal.DynamicList;
+import com.openexchange.groupware.update.internal.DynamicSet;
 import com.openexchange.groupware.update.internal.UpdateExecutor;
 import com.openexchange.groupware.update.internal.UpdateProcess;
 import com.openexchange.threadpool.ThreadPools;
@@ -338,13 +339,14 @@ public final class UpdateTaskToolkit {
 
     /**
      * Load update task by class name.
+     * 
      * @param className name of the update task class.
      * @return the update task class.
      * @throws OXException if the update task class can not be determined.
      */
     private static UpdateTaskV2 getUpdateTask(final String className) throws OXException {
-        final List<UpdateTaskV2> taskList = DynamicList.getInstance().getTaskList();
-        for (final UpdateTaskV2 task : taskList) {
+        Set<UpdateTaskV2> taskList = DynamicSet.getInstance().getTaskSet();
+        for (UpdateTaskV2 task : taskList) {
             if (task.getClass().getName().equals(className)) {
                 return task;
             }

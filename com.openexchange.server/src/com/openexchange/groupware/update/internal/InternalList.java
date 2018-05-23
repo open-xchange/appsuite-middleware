@@ -144,7 +144,7 @@ public final class InternalList {
      * Starts the internal list.
      */
     public void start() {
-        final DynamicList registry = DynamicList.getInstance();
+        final DynamicSet registry = DynamicSet.getInstance();
         TASKS = genTaskList();
         for (final UpdateTaskV2 task : TASKS) {
             if (!registry.addUpdateTask(task)) {
@@ -157,7 +157,7 @@ public final class InternalList {
      * Stops the internal list.
      */
     public void stop() {
-        final DynamicList registry = DynamicList.getInstance();
+        final DynamicSet registry = DynamicSet.getInstance();
         for (final UpdateTaskV2 task : TASKS) {
             registry.removeUpdateTask(task);
         }

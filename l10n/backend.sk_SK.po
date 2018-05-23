@@ -6,7 +6,7 @@ msgstr ""
 "Project-Id-Version: Open-Xchange 6\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2018-04-19 14:55+0200\n"
+"PO-Revision-Date: 2018-05-08 00:23+0200\n"
 "Last-Translator: \n"
 "Language-Team: x\n"
 "Language: sk\n"
@@ -211,6 +211,13 @@ msgid ""
 msgstr ""
 "Nie všetky objekty bolo možné importovať z dôvodu nakonfigurovaného "
 "obmedzenia."
+
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.ical/src/com/openexchange/chronos/ical/ICalExceptionMessages.java:72
+msgid ""
+"The given iCalendar source does not contain valid content and cannot be "
+"processed."
+msgstr ""
+"Daný zdroj iCalendar neobsahuje platný obsah a nie je možné ho spracovať."
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/HRRStrings.java:61
 msgid "No recurrence"
@@ -859,8 +866,8 @@ msgid ""
 "The timezone of the appointments start date was changed. Original timezone: "
 "%1$s. New timezone: %2$s"
 msgstr ""
-"Časové pásmo dátumu začiatku schôdzky bolo zmenené. Pôvodné časové pásmo: %1$"
-"s. Nové časové pásmo: %2$s"
+"Časové pásmo dátumu začiatku schôdzky bolo zmenené. Pôvodné časové pásmo: "
+"%1$s. Nové časové pásmo: %2$s"
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:266
 msgid ""
@@ -1029,6 +1036,13 @@ msgstr "* %1$s"
 msgid "???? %1$s (%2$d. birthday)"
 msgstr "???? %1$s (%2$d. narodeniny)"
 
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.provider.caching/src/com/openexchange/chronos/provider/caching/basic/exception/BasicCachingCalendarExceptionMessages.java:63
+msgid ""
+"The calendar was refreshed less than a minute ago. Please try again later."
+msgstr ""
+"Kalendár bol obnovený pred menej ako minútou. Prosím, skúste to neskôr "
+"znova."
+
 #. * The name of the ICal feed calendar provider.
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.provider.ical/src/com/openexchange/chronos/provider/ical/ICalCalendarStrings.java:64
 msgid "ICal Feed Calendar"
@@ -1039,23 +1053,22 @@ msgid "The feed URI is missing."
 msgstr "URI kanálu chýba."
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.provider.ical/src/com/openexchange/chronos/provider/ical/exception/ICalProviderExceptionMessages.java:65
-msgid "The feed URI does not match the standard."
-msgstr "URI kanálu nezodpovedá štandardu."
+msgid "The given feed URI is invalid. Please change it and try again."
+msgstr "Zadané URI kanála je neplatné. Prosím, zmeňte ho a skúste to znova."
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.provider.ical/src/com/openexchange/chronos/provider/ical/exception/ICalProviderExceptionMessages.java:67
-msgid ""
-"Cannot connect to feed with URL: %1$s. Please change the URL and try again."
+msgid "Cannot connect to feed with URI: %1$s. Please change it and try again."
 msgstr ""
-"Nedá sa pripojiť ku kanálu na adrese: %1$s. Prosím, zmeňte adresu URL a "
-"skúste to znova."
+"Nedá sa pripojiť ku kanálu na adrese: %1$s. Prosím, zmeňte ju a skúste to "
+"znova."
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.provider.ical/src/com/openexchange/chronos/provider/ical/exception/ICalProviderExceptionMessages.java:69
 msgid ""
-"The provided URL %1$s does not contain content as expected. Please change "
-"the URL and try again."
+"The provided URI %1$s does not contain content as expected. Please change it "
+"and try again."
 msgstr ""
-"Uvedené URL %1$s neobsahuje očakávaný obsah. Prosím, zmeňte adresu URL a "
-"skúste to znova."
+"Uvedené URI %1$s neobsahuje očakávaný obsah. Prosím, zmeňte ju a skúste to "
+"znova."
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.provider.ical/src/com/openexchange/chronos/provider/ical/exception/ICalProviderExceptionMessages.java:71
 msgid "The field %1$s cannot be changed."
@@ -1074,8 +1087,8 @@ msgstr ""
 "dôvodu obmedzenia veľkosti."
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.provider.ical/src/com/openexchange/chronos/provider/ical/exception/ICalProviderExceptionMessages.java:77
-msgid "Unfortunately the given feed URL cannot be processed as expected."
-msgstr "Bohužiaľ nie je možné zadaný kanál spracovať ako bolo očakávané."
+msgid "Unfortunately the given feed URI cannot be processed as expected."
+msgstr "Bohužiaľ, nie je možné zadané URI kanála spracovať podľa očakávania."
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.provider.ical/src/com/openexchange/chronos/provider/ical/exception/ICalProviderExceptionMessages.java:79
 msgid ""
@@ -1126,6 +1139,14 @@ msgstr ""
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.provider.ical/src/com/openexchange/chronos/provider/ical/exception/ICalProviderExceptionMessages.java:91
 msgid "Authentication failed. Please enter your password and try again."
 msgstr "Overenie zlyhalo. Prosím, zadajte svoje heslo a skúste to znova."
+
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.provider.ical/src/com/openexchange/chronos/provider/ical/exception/ICalProviderExceptionMessages.java:93
+msgid ""
+"Authentication failed due to a recent credentials change. Please remove the "
+"account and add it again with correct credentials."
+msgstr ""
+"Overenie totožnosti zlyhalo z dôvodu nedávnej zmeny prihlasovacích údajov. "
+"Odstráňte účet a znovu ho pridajte so správnymi prihlasovacími údajmi."
 
 #. *
 #. * The name of the internal calendar provider.
@@ -13940,6 +13961,26 @@ msgstr "UTC"
 #: /home/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:534
 msgid "Zulu"
 msgstr "Zulu"
+
+#~ msgid "The feed URI does not match the standard."
+#~ msgstr "URI kanálu nezodpovedá štandardu."
+
+#~ msgid ""
+#~ "Cannot connect to feed with URL: %1$s. Please change the URL and try "
+#~ "again."
+#~ msgstr ""
+#~ "Nedá sa pripojiť ku kanálu na adrese: %1$s. Prosím, zmeňte adresu URL a "
+#~ "skúste to znova."
+
+#~ msgid ""
+#~ "The provided URL %1$s does not contain content as expected. Please change "
+#~ "the URL and try again."
+#~ msgstr ""
+#~ "Uvedené URL %1$s neobsahuje očakávaný obsah. Prosím, zmeňte adresu URL a "
+#~ "skúste to znova."
+
+#~ msgid "Unfortunately the given feed URL cannot be processed as expected."
+#~ msgstr "Bohužiaľ nie je možné zadaný kanál spracovať ako bolo očakávané."
 
 #~ msgid "The value for \"%2$s\" is invalid and wasn't be applied."
 #~ msgstr "Hodnota pre „%2$s“ je neplatná a nebola použitá."

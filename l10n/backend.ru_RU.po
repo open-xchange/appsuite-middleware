@@ -6,7 +6,7 @@ msgstr ""
 "Project-Id-Version: backend\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2018-04-18 13:36+0200\n"
+"PO-Revision-Date: 2018-05-04 15:07+0200\n"
 "Last-Translator: \n"
 "Language-Team: Russian <>\n"
 "Language: ru_RU\n"
@@ -207,6 +207,12 @@ msgstr "Ошибка валидации: %1$s"
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.ical/src/com/openexchange/chronos/ical/ICalExceptionMessages.java:70
 msgid "Not all of the objects could be imported due to a configured limitation."
 msgstr "Вследствие настроенных ограничений некоторые объекты не были импортированы."
+
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.ical/src/com/openexchange/chronos/ical/ICalExceptionMessages.java:72
+msgid ""
+"The given iCalendar source does not contain valid content and cannot be "
+"processed."
+msgstr "Указанный источник iCalendar не содержит действительных данных и не может быть обработан."
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/HRRStrings.java:61
 msgid "No recurrence"
@@ -1009,6 +1015,10 @@ msgstr "* %1$s"
 msgid "???? %1$s (%2$d. birthday)"
 msgstr "???? %1$s (день рождения, %2$d)"
 
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.provider.caching/src/com/openexchange/chronos/provider/caching/basic/exception/BasicCachingCalendarExceptionMessages.java:63
+msgid "The calendar was refreshed less than a minute ago. Please try again later."
+msgstr "Календарь обновлялся менее минуты назад. Повторите попытку позже."
+
 #. * The name of the ICal feed calendar provider.
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.provider.ical/src/com/openexchange/chronos/provider/ical/ICalCalendarStrings.java:64
 msgid "ICal Feed Calendar"
@@ -1019,18 +1029,18 @@ msgid "The feed URI is missing."
 msgstr "Отстутствует URI ленты."
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.provider.ical/src/com/openexchange/chronos/provider/ical/exception/ICalProviderExceptionMessages.java:65
-msgid "The feed URI does not match the standard."
-msgstr "URI ленты не соответствует требованиям стандарта."
+msgid "The given feed URI is invalid. Please change it and try again."
+msgstr "Недействительный URI ленты. Исправьте и повторите попытку."
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.provider.ical/src/com/openexchange/chronos/provider/ical/exception/ICalProviderExceptionMessages.java:67
-msgid "Cannot connect to feed with URL: %1$s. Please change the URL and try again."
-msgstr "Не удалось подключиться к ленте: %1$s. Измените URL и повторите попытку."
+msgid "Cannot connect to feed with URI: %1$s. Please change it and try again."
+msgstr "Не удалось подключиться к ленте: %1$s. Измените URI и повторите попытку."
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.provider.ical/src/com/openexchange/chronos/provider/ical/exception/ICalProviderExceptionMessages.java:69
 msgid ""
-"The provided URL %1$s does not contain content as expected. Please change "
-"the URL and try again."
-msgstr "%1$s не содержит контента. Измените URL и повторите попытку."
+"The provided URI %1$s does not contain content as expected. Please change it "
+"and try again."
+msgstr "%1$s не предоставляет контент. Измените ссылку и повторите попытку."
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.provider.ical/src/com/openexchange/chronos/provider/ical/exception/ICalProviderExceptionMessages.java:71
 msgid "The field %1$s cannot be changed."
@@ -1047,8 +1057,8 @@ msgid ""
 msgstr "К сожалению, вследствие ограничений размера подписаться на ленту невозможно."
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.provider.ical/src/com/openexchange/chronos/provider/ical/exception/ICalProviderExceptionMessages.java:77
-msgid "Unfortunately the given feed URL cannot be processed as expected."
-msgstr "К сожалению, URL-адрес ленты не может быть обработан."
+msgid "Unfortunately the given feed URI cannot be processed as expected."
+msgstr "К сожалению, URI ленты не может быть обработан."
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.provider.ical/src/com/openexchange/chronos/provider/ical/exception/ICalProviderExceptionMessages.java:79
 msgid ""
@@ -1091,6 +1101,12 @@ msgstr "Доступ к календарю ограничен. Введите с
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.provider.ical/src/com/openexchange/chronos/provider/ical/exception/ICalProviderExceptionMessages.java:91
 msgid "Authentication failed. Please enter your password and try again."
 msgstr "Ошибка аутентификации. Введите свой пароль и повторите попытку."
+
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.provider.ical/src/com/openexchange/chronos/provider/ical/exception/ICalProviderExceptionMessages.java:93
+msgid ""
+"Authentication failed due to a recent credentials change. Please remove the "
+"account and add it again with correct credentials."
+msgstr "Ошибка аутентификации: учетные данные изменились. Удалите этот аккаунт и добавьте его снова."
 
 #. *
 #. * The name of the internal calendar provider.
@@ -1162,6 +1178,7 @@ msgid ""
 "The supplied folder is not supported. Please select a valid folder and try "
 "again."
 msgstr "Указанная папка не поддерживается. Выберите другую папку и повторите попытку."
+
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:86
 msgid ""
@@ -3189,7 +3206,6 @@ msgid "Shared"
 msgstr "Общий доступ"
 
 #. ------------------------- i18n strings for facet values -------------------------------------- //
-
 #. Search mails from last week
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/common/CommonStrings.java:92
 msgid "last week"
@@ -3381,7 +3397,6 @@ msgstr "без вложения"
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/tasks/TasksStrings.java:66
 msgid "in title"
 msgstr "в заголовке"
-
 
 #. Search in folders.
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/tasks/TasksStrings.java:69
@@ -4186,6 +4201,7 @@ msgid "Could not parse json body parameters for folders and objects."
 msgstr "Не удалось обработать параметры для папок и объектов из JSON body."
 
 #. *
+
 #. * The default file name for an ical appointment export, when using batch data
 #.
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.importexport/src/com/openexchange/importexport/helpers/ExportDefaultFileNames.java:71
@@ -5369,7 +5385,6 @@ msgstr ""
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.quota/src/com/openexchange/quota/QuotaExceptionMessages.java:82
 msgid ""
 "The storage limit for signatures is %1$s. Delete old signatures to be able "
-""
 "to store a new one."
 msgstr ""
 "Максимальное количество подписей составляет %1$s. Прежде чем сохранить новую "
@@ -5427,6 +5442,7 @@ msgstr "Недопустимый адрес RSS или неверный форм
 
 #. HTTP error %1$s while loading RSS feed from URL: %2$s.
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.rss/src/com/openexchange/rss/RssExceptionMessages.java:66
+
 msgid "HTTP error %1$s while loading RSS feed from URL: %2$s."
 msgstr "Ошибка HTTP %1$s при загрузке RSS-ленты %2$s."
 
@@ -8223,6 +8239,7 @@ msgstr "Счетчик"
 msgid "Error while inserting task."
 msgstr "Произошла ошибка при вставке задачи."
 
+
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:67
 msgid "Folder cannot be found."
 msgstr "Папка не найдена."
@@ -10501,8 +10518,8 @@ msgid ""
 "%1$s (%2$s) has shared %3$d calendars with you. Please click the button "
 "below to view them."
 msgstr ""
-"%1$s (%2$s) предоставляет вам доступ к %3$s календарям. Нажмите кнопку ниже для "
-"их просмотра."
+"%1$s (%2$s) предоставляет вам доступ к %3$s календарям. Нажмите кнопку ниже "
+"для их просмотра."
 
 #. * $username ($user_email) has shared file "$filename" with the group "Sales Dept.". Please click the button below to view it.
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:156
@@ -10572,7 +10589,9 @@ msgstr ""
 msgid ""
 "%1$s (%2$s) has shared %3$d folders with the group \"%4$s\". Please click "
 "the button below to view them."
-msgstr "%1$s (%2$s) открыл доступ к %3$s папкам группе «%4$s». Нажмите кнопку ниже для просмотра."
+msgstr ""
+"%1$s (%2$s) открыл доступ к %3$s папкам группе «%4$s». Нажмите кнопку ниже "
+"для просмотра."
 
 #. * $username ($user_email) has shared the calendar $folder with the group "Sales Dept.". Please click the button below to view it.
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:180
@@ -10588,7 +10607,9 @@ msgstr ""
 msgid ""
 "%1$s (%2$s) has shared %3$d calendars with the group \"%4$s\". Please click "
 "the button below to view them."
-msgstr "%1$s (%2$s) открыл доступ к %3$s календарям группе «%4$s». Нажмите кнопку ниже для просмотра."
+msgstr ""
+"%1$s (%2$s) открыл доступ к %3$s календарям группе «%4$s». Нажмите кнопку "
+"ниже для просмотра."
 
 #. * $username ($user_email) has shared the calendar $folder with the group "Sales Dept.". Please click the button below to view it.
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:180
@@ -13462,6 +13483,23 @@ msgstr "UTC"
 msgid "Zulu"
 msgstr "Зулу"
 
+#~ msgid "The feed URI does not match the standard."
+#~ msgstr "URI ленты не соответствует требованиям стандарта."
+
+#~ msgid ""
+#~ "Cannot connect to feed with URL: %1$s. Please change the URL and try "
+#~ "again."
+#~ msgstr ""
+#~ "Не удалось подключиться к ленте: %1$s. Измените URL и повторите попытку."
+
+#~ msgid ""
+#~ "The provided URL %1$s does not contain content as expected. Please change "
+#~ "the URL and try again."
+#~ msgstr "%1$s не содержит контента. Измените URL и повторите попытку."
+
+#~ msgid "Unfortunately the given feed URL cannot be processed as expected."
+#~ msgstr "К сожалению, URL-адрес ленты не может быть обработан."
+
 #~ msgid "The value for \"%2$s\" is invalid and wasn't be applied."
 #~ msgstr "«%2$s» содержит недопустимое значение."
 
@@ -13750,7 +13788,6 @@ msgstr "Зулу"
 
 #~ msgid "The associated %2$s account does no more exist"
 #~ msgstr "Соответствующая учетная запись %2$s не существует"
-
 
 #~ msgid "Can not import the format %2$s into folder %1$s."
 #~ msgstr "Формат %2$s не может быть импортирован в %1$s."

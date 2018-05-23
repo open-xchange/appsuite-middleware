@@ -53,7 +53,7 @@ import com.openexchange.exception.OXException;
 
 /**
  * Second generation of update tasks.
- *
+ * 
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
 public interface UpdateTaskV2 {
@@ -88,7 +88,7 @@ public interface UpdateTaskV2 {
 
     /**
      * Defines the attributes of a database update task. Please read the corresponding java documentation for the interfaces and enums to
-     * get an understandig for the attributes.
+     * get an understanding for the attributes.
      *
      * @return the attributes.
      */

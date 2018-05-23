@@ -5,7 +5,7 @@ msgstr ""
 "Project-Id-Version: errors.zh_TW\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2018-04-19 23:07+0800\n"
+"PO-Revision-Date: 2018-05-08 23:32+0800\n"
 "Last-Translator: \n"
 "Language-Team: Traditional Chinese <LL@li.org>\n"
 "Language: zh_TW\n"
@@ -13,7 +13,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
-"X-Generator: Poedit 2.0.6\n"
+"X-Generator: Poedit 2.0.7\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
 #. -
@@ -204,6 +204,12 @@ msgstr "驗證失敗: %1$s"
 msgid ""
 "Not all of the objects could be imported due to a configured limitation."
 msgstr "因為設定限制，無法匯入所有物件。"
+
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.ical/src/com/openexchange/chronos/ical/ICalExceptionMessages.java:72
+msgid ""
+"The given iCalendar source does not contain valid content and cannot be "
+"processed."
+msgstr "指定的 iCalendar 來源並未包含有效內容，無法處理。"
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/HRRStrings.java:61
 msgid "No recurrence"
@@ -993,6 +999,11 @@ msgstr "* %1$s"
 msgid "???? %1$s (%2$d. birthday)"
 msgstr "???? %1$s（%2$d 歲生日）"
 
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.provider.caching/src/com/openexchange/chronos/provider/caching/basic/exception/BasicCachingCalendarExceptionMessages.java:63
+msgid ""
+"The calendar was refreshed less than a minute ago. Please try again later."
+msgstr "剛在不到一分鐘前重新整理行事曆，請稍後再試。"
+
 #. * The name of the ICal feed calendar provider.
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.provider.ical/src/com/openexchange/chronos/provider/ical/ICalCalendarStrings.java:64
 msgid "ICal Feed Calendar"
@@ -1003,19 +1014,18 @@ msgid "The feed URI is missing."
 msgstr "缺少資訊來源網址。"
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.provider.ical/src/com/openexchange/chronos/provider/ical/exception/ICalProviderExceptionMessages.java:65
-msgid "The feed URI does not match the standard."
-msgstr "資訊來源網址與標準不符。"
+msgid "The given feed URI is invalid. Please change it and try again."
+msgstr "提供的資訊來源網址無效，請修改後再試一次。"
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.provider.ical/src/com/openexchange/chronos/provider/ical/exception/ICalProviderExceptionMessages.java:67
-msgid ""
-"Cannot connect to feed with URL: %1$s. Please change the URL and try again."
-msgstr "無法連線至下列網址的資訊來源: %1$s。請更改網址後再試一次。"
+msgid "Cannot connect to feed with URI: %1$s. Please change it and try again."
+msgstr "無法連線至網址為 %1$s 的資訊來源。請修改後再試一次。"
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.provider.ical/src/com/openexchange/chronos/provider/ical/exception/ICalProviderExceptionMessages.java:69
 msgid ""
-"The provided URL %1$s does not contain content as expected. Please change "
-"the URL and try again."
-msgstr "提供的網址 %1$s 不含預期的內容，請修改網址後再試一次。"
+"The provided URI %1$s does not contain content as expected. Please change it "
+"and try again."
+msgstr "提供的網址 %1$s 不含預期的內容，請修改後再試一次。"
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.provider.ical/src/com/openexchange/chronos/provider/ical/exception/ICalProviderExceptionMessages.java:71
 msgid "The field %1$s cannot be changed."
@@ -1032,8 +1042,8 @@ msgid ""
 msgstr "很抱歉，由於大小限制，無法訂閱您要求的資訊來源。"
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.provider.ical/src/com/openexchange/chronos/provider/ical/exception/ICalProviderExceptionMessages.java:77
-msgid "Unfortunately the given feed URL cannot be processed as expected."
-msgstr "很抱歉，無法如預期處理您提供的資訊來源網址。"
+msgid "Unfortunately the given feed URI cannot be processed as expected."
+msgstr "很抱歉，無法如預期地處理您提供的資訊來源網址。"
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.provider.ical/src/com/openexchange/chronos/provider/ical/exception/ICalProviderExceptionMessages.java:79
 msgid ""
@@ -1072,6 +1082,12 @@ msgstr "此行事曆的存取受限。請輸入您的密碼後再試一次。"
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.provider.ical/src/com/openexchange/chronos/provider/ical/exception/ICalProviderExceptionMessages.java:91
 msgid "Authentication failed. Please enter your password and try again."
 msgstr "驗證失敗。請輸入您的密碼後再試一次。"
+
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.provider.ical/src/com/openexchange/chronos/provider/ical/exception/ICalProviderExceptionMessages.java:93
+msgid ""
+"Authentication failed due to a recent credentials change. Please remove the "
+"account and add it again with correct credentials."
+msgstr "近期修改了登入資訊，造成驗證失敗。請移除帳號後以正確資訊重新新增帳號。"
 
 #. *
 #. * The name of the internal calendar provider.
@@ -13262,6 +13278,22 @@ msgstr "UTC"
 #: /home/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:534
 msgid "Zulu"
 msgstr "祖魯"
+
+#~ msgid "The feed URI does not match the standard."
+#~ msgstr "資訊來源網址與標準不符。"
+
+#~ msgid ""
+#~ "Cannot connect to feed with URL: %1$s. Please change the URL and try "
+#~ "again."
+#~ msgstr "無法連線至下列網址的資訊來源: %1$s。請更改網址後再試一次。"
+
+#~ msgid ""
+#~ "The provided URL %1$s does not contain content as expected. Please change "
+#~ "the URL and try again."
+#~ msgstr "提供的網址 %1$s 不含預期的內容，請修改網址後再試一次。"
+
+#~ msgid "Unfortunately the given feed URL cannot be processed as expected."
+#~ msgstr "很抱歉，無法如預期處理您提供的資訊來源網址。"
 
 #~ msgid "The value for \"%2$s\" is invalid and wasn't be applied."
 #~ msgstr "「%2$s」值無效，並未套用。"

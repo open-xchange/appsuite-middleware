@@ -4,7 +4,7 @@ msgstr ""
 "Project-Id-Version: backend\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2018-04-23 08:01+0200\n"
+"PO-Revision-Date: 2018-05-09 11:10+0200\n"
 "Last-Translator: Daiana Heinrich <daiana@workshop-chapina.com>\n"
 "Language-Team: Romanian <ro@workshop-chapina.com>\n"
 "Language: ro_RO\n"
@@ -207,6 +207,12 @@ msgid ""
 "Not all of the objects could be imported due to a configured limitation."
 msgstr ""
 "Nu au putut fi importate toate obiectele din cauza unei limitări configurate."
+
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.ical/src/com/openexchange/chronos/ical/ICalExceptionMessages.java:72
+msgid ""
+"The given iCalendar source does not contain valid content and cannot be "
+"processed."
+msgstr "Sursa iCalendar dată nu are conținut valid și nu poate fi procesată."
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/HRRStrings.java:61
 msgid "No recurrence"
@@ -1036,6 +1042,13 @@ msgstr "* %1$s"
 msgid "???? %1$s (%2$d. birthday)"
 msgstr "???? %1$s (aniversarea a %2$d a)"
 
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.provider.caching/src/com/openexchange/chronos/provider/caching/basic/exception/BasicCachingCalendarExceptionMessages.java:63
+msgid ""
+"The calendar was refreshed less than a minute ago. Please try again later."
+msgstr ""
+"Calendarul a fost reîmprospătat cu mai puțin de un minut în urmă. Încercați "
+"din nou mai târziu."
+
 #. * The name of the ICal feed calendar provider.
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.provider.ical/src/com/openexchange/chronos/provider/ical/ICalCalendarStrings.java:64
 msgid "ICal Feed Calendar"
@@ -1046,23 +1059,22 @@ msgid "The feed URI is missing."
 msgstr "Lipsește URI-ul fluxului."
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.provider.ical/src/com/openexchange/chronos/provider/ical/exception/ICalProviderExceptionMessages.java:65
-msgid "The feed URI does not match the standard."
-msgstr "URI-ul fluxului nu corespunde standardului."
+msgid "The given feed URI is invalid. Please change it and try again."
+msgstr "URI-ul de flux dat este incorect. Modificați-l și încercați din nou."
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.provider.ical/src/com/openexchange/chronos/provider/ical/exception/ICalProviderExceptionMessages.java:67
-msgid ""
-"Cannot connect to feed with URL: %1$s. Please change the URL and try again."
+msgid "Cannot connect to feed with URI: %1$s. Please change it and try again."
 msgstr ""
-"Nu s-a putut efectua conexiunea cu fluxul prin URL-ul: %1$s. Modificați URL-"
-"ul și încercați din nou."
+"Nu s-a putut efectua conexiunea cu fluxul prin URI-ul: %1$s. Modificați-l și "
+"încercați din nou."
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.provider.ical/src/com/openexchange/chronos/provider/ical/exception/ICalProviderExceptionMessages.java:69
 msgid ""
-"The provided URL %1$s does not contain content as expected. Please change "
-"the URL and try again."
+"The provided URI %1$s does not contain content as expected. Please change it "
+"and try again."
 msgstr ""
-"URL-ul furnizat %1$s nu are conținutul așteptat. Modificați URL-ul și "
-"încercați din nou."
+"URI-ul furnizat %1$s nu are conținutul așteptat. Modificați-l și încercați "
+"din nou."
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.provider.ical/src/com/openexchange/chronos/provider/ical/exception/ICalProviderExceptionMessages.java:71
 msgid "The field %1$s cannot be changed."
@@ -1081,8 +1093,8 @@ msgstr ""
 "dimensiune."
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.provider.ical/src/com/openexchange/chronos/provider/ical/exception/ICalProviderExceptionMessages.java:77
-msgid "Unfortunately the given feed URL cannot be processed as expected."
-msgstr "Din păcate URL-ul de flux dat nu poate fi procesat în mod corect."
+msgid "Unfortunately the given feed URI cannot be processed as expected."
+msgstr "Din păcate URI-ul de flux dat nu poate fi procesat în modul prevăzut."
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.provider.ical/src/com/openexchange/chronos/provider/ical/exception/ICalProviderExceptionMessages.java:79
 msgid ""
@@ -1133,6 +1145,14 @@ msgstr ""
 msgid "Authentication failed. Please enter your password and try again."
 msgstr ""
 "Autentificarea a eșuat. Introduceți-vă parola de acces și încercați din nou."
+
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.provider.ical/src/com/openexchange/chronos/provider/ical/exception/ICalProviderExceptionMessages.java:93
+msgid ""
+"Authentication failed due to a recent credentials change. Please remove the "
+"account and add it again with correct credentials."
+msgstr ""
+"Autentificarea a eșuat din cauza unei modificări recente a datelor de acces. "
+"Elimitați contul și adăugați-l din nou cu datele de acces corecte."
 
 #. *
 #. * The name of the internal calendar provider.
@@ -13993,6 +14013,26 @@ msgstr "UTC"
 #: /home/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:534
 msgid "Zulu"
 msgstr "Zulu"
+
+#~ msgid "The feed URI does not match the standard."
+#~ msgstr "URI-ul fluxului nu corespunde standardului."
+
+#~ msgid ""
+#~ "Cannot connect to feed with URL: %1$s. Please change the URL and try "
+#~ "again."
+#~ msgstr ""
+#~ "Nu s-a putut efectua conexiunea cu fluxul prin URL-ul: %1$s. Modificați "
+#~ "URL-ul și încercați din nou."
+
+#~ msgid ""
+#~ "The provided URL %1$s does not contain content as expected. Please change "
+#~ "the URL and try again."
+#~ msgstr ""
+#~ "URL-ul furnizat %1$s nu are conținutul așteptat. Modificați URL-ul și "
+#~ "încercați din nou."
+
+#~ msgid "Unfortunately the given feed URL cannot be processed as expected."
+#~ msgstr "Din păcate URL-ul de flux dat nu poate fi procesat în mod corect."
 
 #~ msgid "The value for \"%2$s\" is invalid and wasn't be applied."
 #~ msgstr "Valoarea pentru \"%2$s\" este incorectă și nu va fi aplicată."

@@ -5,7 +5,7 @@ msgstr ""
 "Project-Id-Version: backend\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2018-04-21 16:27+0100\n"
+"PO-Revision-Date: 2018-05-20 09:33-0800\n"
 "Last-Translator: Robert Kratky <robert@workshop-chapina.com>\n"
 "Language-Team: Czech <>\n"
 "Language: cs_CZ\n"
@@ -210,6 +210,13 @@ msgstr "Ověření platnosti selhalo: %1$s"
 msgid ""
 "Not all of the objects could be imported due to a configured limitation."
 msgstr "Kvůli omezení v nastavení se všechny objekty nepodařilo importovat."
+
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.ical/src/com/openexchange/chronos/ical/ICalExceptionMessages.java:72
+msgid ""
+"The given iCalendar source does not contain valid content and cannot be "
+"processed."
+msgstr ""
+"Daný zdroj pro iCalendar neobsahuje platný obsah a nelze jej zpracovat."
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/HRRStrings.java:61
 msgid "No recurrence"
@@ -855,16 +862,16 @@ msgid ""
 "The timezone of the appointments start date was changed. Original timezone: "
 "%1$s. New timezone: %2$s"
 msgstr ""
-"Časové pásmo počátečního data schůzek bylo změněno. Původní pásmo: %1$s. Nové"
-" pásmo: %2$s."
+"Časové pásmo počátečního data schůzek bylo změněno. Původní pásmo: %1$s. "
+"Nové pásmo: %2$s."
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:266
 msgid ""
 "The timezone of the appointments end date was changed. Original timezone: "
 "%1$s. New timezone: %2$s"
 msgstr ""
-"Časové pásmo konečného data schůzek bylo změněno. Původní pásmo: %1$s. Nové"
-" pásmo: %2$s."
+"Časové pásmo konečného data schůzek bylo změněno. Původní pásmo: %1$s. Nové "
+"pásmo: %2$s."
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:268
 msgid "Reschedule the event. Original date: %1$s. New date: %2$s"
@@ -1026,6 +1033,12 @@ msgstr "* %1$s"
 msgid "???? %1$s (%2$d. birthday)"
 msgstr "???? %1$s (%2$d. narozeniny)"
 
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.provider.caching/src/com/openexchange/chronos/provider/caching/basic/exception/BasicCachingCalendarExceptionMessages.java:63
+msgid ""
+"The calendar was refreshed less than a minute ago. Please try again later."
+msgstr ""
+"Kalendář byl obnoven méně než před minutou. Zkuste to, prosím, později."
+
 #. * The name of the ICal feed calendar provider.
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.provider.ical/src/com/openexchange/chronos/provider/ical/ICalCalendarStrings.java:64
 msgid "ICal Feed Calendar"
@@ -1036,23 +1049,22 @@ msgid "The feed URI is missing."
 msgstr "Chybí adresa kalendáře."
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.provider.ical/src/com/openexchange/chronos/provider/ical/exception/ICalProviderExceptionMessages.java:65
-msgid "The feed URI does not match the standard."
-msgstr "Adresa kalendáře neodpovídá standardu."
+msgid "The given feed URI is invalid. Please change it and try again."
+msgstr "Daná adresa zdroje není platná. Změňte ji, prosím, a zkuste to znovu."
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.provider.ical/src/com/openexchange/chronos/provider/ical/exception/ICalProviderExceptionMessages.java:67
-msgid ""
-"Cannot connect to feed with URL: %1$s. Please change the URL and try again."
+msgid "Cannot connect to feed with URI: %1$s. Please change it and try again."
 msgstr ""
-"Na adrese %1$s se nelze připojit ke kalendáři. Změňte, prosím, adresu a "
-"zkuste to znovu."
+"Na adrese %1$s se nelze připojit ke zdroji. Změňte, prosím, adresu a zkuste"
+" to znovu."
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.provider.ical/src/com/openexchange/chronos/provider/ical/exception/ICalProviderExceptionMessages.java:69
 msgid ""
-"The provided URL %1$s does not contain content as expected. Please change "
-"the URL and try again."
+"The provided URI %1$s does not contain content as expected. Please change it "
+"and try again."
 msgstr ""
-"Poskytnutá adresa (%1$s) neobsahuje očekávaná data. Změňte, prosím, adresu a "
-"zkuste to znovu."
+"Poskytnutá adresa (%1$s) neobsahuje očekávaný obsah. Změňte, prosím, adresu a"
+" zkuste to znovu."
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.provider.ical/src/com/openexchange/chronos/provider/ical/exception/ICalProviderExceptionMessages.java:71
 msgid "The field %1$s cannot be changed."
@@ -1069,8 +1081,8 @@ msgid ""
 msgstr "Požadovaný zdroj není možné odebírat kvůli omezení velikosti."
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.provider.ical/src/com/openexchange/chronos/provider/ical/exception/ICalProviderExceptionMessages.java:77
-msgid "Unfortunately the given feed URL cannot be processed as expected."
-msgstr "Zadanou adresu zdroje nelze zpracovat podle očekávání."
+msgid "Unfortunately the given feed URI cannot be processed as expected."
+msgstr "Zadanou adresu zdroje bohužel nelze zpracovat podle očekávání."
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.provider.ical/src/com/openexchange/chronos/provider/ical/exception/ICalProviderExceptionMessages.java:79
 msgid ""
@@ -1121,6 +1133,14 @@ msgstr ""
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.provider.ical/src/com/openexchange/chronos/provider/ical/exception/ICalProviderExceptionMessages.java:91
 msgid "Authentication failed. Please enter your password and try again."
 msgstr "Autentizace selhala. Zadejte, prosím, své heslo a zkuste to znovu."
+
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.provider.ical/src/com/openexchange/chronos/provider/ical/exception/ICalProviderExceptionMessages.java:93
+msgid ""
+"Authentication failed due to a recent credentials change. Please remove the "
+"account and add it again with correct credentials."
+msgstr ""
+"Autentizace selhala kvůli nedávné změně přihlašovacích údajů. Odstraňte,"
+" prosím, účet a přidejte jej znovu se správnými údaji."
 
 #. *
 #. * The name of the internal calendar provider.
@@ -10813,8 +10833,8 @@ msgid ""
 "%1$s (%2$s) has shared %3$d folders with you. Please click the button below "
 "to view them."
 msgstr ""
-"%1$s (%2$s) s vámi sdílel(a) %3$s složek. Klikněte, prosím, na tlačítko níže,"
-" chcete-li je prohlédnout."
+"%1$s (%2$s) s vámi sdílel(a) %3$s složek. Klikněte, prosím, na tlačítko "
+"níže, chcete-li je prohlédnout."
 
 #. * $username ($user_email) has shared calendar $folder with you. Please click the button below to view it.
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:150
@@ -10831,8 +10851,8 @@ msgid ""
 "%1$s (%2$s) has shared %3$d calendars with you. Please click the button "
 "below to view them."
 msgstr ""
-"%1$s (%2$s) s vámi sdílel(a) %3$s kalendářů. Klikněte, prosím, na tlačítko"
-" níže, chcete-li si kalendáře prohlédnout."
+"%1$s (%2$s) s vámi sdílel(a) %3$s kalendářů. Klikněte, prosím, na tlačítko "
+"níže, chcete-li si kalendáře prohlédnout."
 
 #. * $username ($user_email) has shared file "$filename" with the group "Sales Dept.". Please click the button below to view it.
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:156
@@ -10903,8 +10923,8 @@ msgid ""
 "%1$s (%2$s) has shared %3$d folders with the group \"%4$s\". Please click "
 "the button below to view them."
 msgstr ""
-"%1$s (%2$s) sdílel(a) %3$s složek se skupinou „%4$s“. Klikněte, prosím, na"
-" tlačítko níže, chcete-li složky prohlédnout."
+"%1$s (%2$s) sdílel(a) %3$s složek se skupinou „%4$s“. Klikněte, prosím, na "
+"tlačítko níže, chcete-li složky prohlédnout."
 
 #. * $username ($user_email) has shared the calendar $folder with the group "Sales Dept.". Please click the button below to view it.
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:180
@@ -10921,8 +10941,8 @@ msgid ""
 "%1$s (%2$s) has shared %3$d calendars with the group \"%4$s\". Please click "
 "the button below to view them."
 msgstr ""
-"%1$s (%2$s) sdílel(a) %3$s kalendářů se skupinou „%4$s“. Klikněte, prosím, na"
-" tlačítko níže, chcete-li kalendáře prohlédnout."
+"%1$s (%2$s) sdílel(a) %3$s kalendářů se skupinou „%4$s“. Klikněte, prosím, "
+"na tlačítko níže, chcete-li kalendáře prohlédnout."
 
 #. * $username ($user_email) has shared file "$filename" with you and left you a message:
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:186
@@ -13814,6 +13834,26 @@ msgstr "UTC"
 #: /home/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:534
 msgid "Zulu"
 msgstr "Zulu"
+
+#~ msgid "The feed URI does not match the standard."
+#~ msgstr "Adresa kalendáře neodpovídá standardu."
+
+#~ msgid ""
+#~ "Cannot connect to feed with URL: %1$s. Please change the URL and try "
+#~ "again."
+#~ msgstr ""
+#~ "Na adrese %1$s se nelze připojit ke kalendáři. Změňte, prosím, adresu a "
+#~ "zkuste to znovu."
+
+#~ msgid ""
+#~ "The provided URL %1$s does not contain content as expected. Please change "
+#~ "the URL and try again."
+#~ msgstr ""
+#~ "Poskytnutá adresa (%1$s) neobsahuje očekávaná data. Změňte, prosím, "
+#~ "adresu a zkuste to znovu."
+
+#~ msgid "Unfortunately the given feed URL cannot be processed as expected."
+#~ msgstr "Zadanou adresu zdroje nelze zpracovat podle očekávání."
 
 #~ msgid "The value for \"%2$s\" is invalid and wasn't be applied."
 #~ msgstr "Hodnota „%2$s“ není platná a nebyla použita."

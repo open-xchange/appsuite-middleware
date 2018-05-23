@@ -4,7 +4,7 @@ msgstr ""
 "Project-Id-Version: backend\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2018-04-23 08:40+0100\n"
+"PO-Revision-Date: 2018-05-07 09:06+0100\n"
 "Last-Translator: Jacob Sparre Andersen <jacob@workshop-chapina.com>\n"
 "Language-Team: Danish <da@workshop-chapina.com>\n"
 "Language: da_DK\n"
@@ -208,6 +208,13 @@ msgid ""
 msgstr ""
 "Ikke alle objekterne kunne importeres.  Dette skyldes en indstillet "
 "begrænsning."
+
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.ical/src/com/openexchange/chronos/ical/ICalExceptionMessages.java:72
+msgid ""
+"The given iCalendar source does not contain valid content and cannot be "
+"processed."
+msgstr ""
+"Den angivne iCalendar-kildes indehold er ikke gyldigt og kan ikke behandles."
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/HRRStrings.java:61
 msgid "No recurrence"
@@ -1020,6 +1027,13 @@ msgstr "* %1$s"
 msgid "???? %1$s (%2$d. birthday)"
 msgstr "???? %1$s (%2$d. fødselsdag)"
 
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.provider.caching/src/com/openexchange/chronos/provider/caching/basic/exception/BasicCachingCalendarExceptionMessages.java:63
+msgid ""
+"The calendar was refreshed less than a minute ago. Please try again later."
+msgstr ""
+"Kalenderen blev opdateret for mindre end et minut siden.  Prøv venligst igen"
+" senere."
+
 #. * The name of the ICal feed calendar provider.
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.provider.ical/src/com/openexchange/chronos/provider/ical/ICalCalendarStrings.java:64
 msgid "ICal Feed Calendar"
@@ -1030,22 +1044,21 @@ msgid "The feed URI is missing."
 msgstr "Kilde-URI'en mangler."
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.provider.ical/src/com/openexchange/chronos/provider/ical/exception/ICalProviderExceptionMessages.java:65
-msgid "The feed URI does not match the standard."
-msgstr "Kilde-URI'en svarer ikke til standarden."
+msgid "The given feed URI is invalid. Please change it and try again."
+msgstr "Den angivne kilde-URI er ugyldig.  Ret den venligst og prøv igen."
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.provider.ical/src/com/openexchange/chronos/provider/ical/exception/ICalProviderExceptionMessages.java:67
-msgid ""
-"Cannot connect to feed with URL: %1$s. Please change the URL and try again."
+msgid "Cannot connect to feed with URI: %1$s. Please change it and try again."
 msgstr ""
-"Kan ikke forbinde til kilde med URL:%1$s.  Ret venligst URL'en og prøv igen."
+"Kan ikke forbinde til kilde med URI:$%1s.  Ret den venligst og prøv igen."
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.provider.ical/src/com/openexchange/chronos/provider/ical/exception/ICalProviderExceptionMessages.java:69
 msgid ""
-"The provided URL %1$s does not contain content as expected. Please change "
-"the URL and try again."
+"The provided URI %1$s does not contain content as expected. Please change it "
+"and try again."
 msgstr ""
-"Den angivne URL, %1$s, indeholder ikke det forventede indhold.  Ret venligst "
-"URL'en og prøv igen."
+"Den angivne URI, %1$s, indeholder ikke det forventede indhold.  Ret den"
+" venligst og prøv igen."
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.provider.ical/src/com/openexchange/chronos/provider/ical/exception/ICalProviderExceptionMessages.java:71
 msgid "The field %1$s cannot be changed."
@@ -1064,8 +1077,8 @@ msgstr ""
 "den valgte kilde."
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.provider.ical/src/com/openexchange/chronos/provider/ical/exception/ICalProviderExceptionMessages.java:77
-msgid "Unfortunately the given feed URL cannot be processed as expected."
-msgstr "Den angivne kilde-URL kan beklageligvis ikke behandles som forventet."
+msgid "Unfortunately the given feed URI cannot be processed as expected."
+msgstr "Den angivne kilde-URI kan beklageligvis ikke behandles som forventet."
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.provider.ical/src/com/openexchange/chronos/provider/ical/exception/ICalProviderExceptionMessages.java:79
 msgid ""
@@ -1117,6 +1130,14 @@ msgstr ""
 msgid "Authentication failed. Please enter your password and try again."
 msgstr ""
 "Godkendelse mislykkedes.  Indtast venligst din adgangskode og prøv igen."
+
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.provider.ical/src/com/openexchange/chronos/provider/ical/exception/ICalProviderExceptionMessages.java:93
+msgid ""
+"Authentication failed due to a recent credentials change. Please remove the "
+"account and add it again with correct credentials."
+msgstr ""
+"Godkendelse mislykkedes på grund af en nylig ændring af loginoplysninger. "
+" Slet venligst kontoen og tilføj den igen med korrekte loginoplysninger."
 
 #. *
 #. * The name of the internal calendar provider.
@@ -10838,8 +10859,8 @@ msgid ""
 "%1$s (%2$s) has shared %3$d folders with you. Please click the button below "
 "to view them."
 msgstr ""
-"%1$s (%2$s) har delt %3$d mapper med dig.  Klik venligst på knappen nedenfor,"
-" for at se dem."
+"%1$s (%2$s) har delt %3$d mapper med dig.  Klik venligst på knappen "
+"nedenfor, for at se dem."
 
 #. * $username ($user_email) has shared calendar $folder with you. Please click the button below to view it.
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:150
@@ -10856,8 +10877,8 @@ msgid ""
 "%1$s (%2$s) has shared %3$d calendars with you. Please click the button "
 "below to view them."
 msgstr ""
-"%1$s (%2$s) har delt %3$d kalendere med dig.  Klik venligst på knappen"
-" nedenfor, for at se dem."
+"%1$s (%2$s) har delt %3$d kalendere med dig.  Klik venligst på knappen "
+"nedenfor, for at se dem."
 
 #. * $username ($user_email) has shared file "$filename" with the group "Sales Dept.". Please click the button below to view it.
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:156
@@ -10928,8 +10949,8 @@ msgid ""
 "%1$s (%2$s) has shared %3$d folders with the group \"%4$s\". Please click "
 "the button below to view them."
 msgstr ""
-"%1$s (%2$s) har delt %3$d mapper med gruppen »%4$s«.  Klik venligst på"
-" knappen nedenfor, for at se dem."
+"%1$s (%2$s) har delt %3$d mapper med gruppen »%4$s«.  Klik venligst på "
+"knappen nedenfor, for at se dem."
 
 #. * $username ($user_email) has shared the calendar $folder with the group "Sales Dept.". Please click the button below to view it.
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:180
@@ -10946,8 +10967,8 @@ msgid ""
 "%1$s (%2$s) has shared %3$d calendars with the group \"%4$s\". Please click "
 "the button below to view them."
 msgstr ""
-"%1$s (%2$s) har delt %3$d kalendere med gruppen »%4$s«.  Klik venligst på"
-" knappen nedenfor, for at se dem."
+"%1$s (%2$s) har delt %3$d kalendere med gruppen »%4$s«.  Klik venligst på "
+"knappen nedenfor, for at se dem."
 
 #. * $username ($user_email) has shared file "$filename" with you and left you a message:
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:186
@@ -13832,6 +13853,27 @@ msgstr "UTC"
 #: /home/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:534
 msgid "Zulu"
 msgstr "Zulu"
+
+#~ msgid "The feed URI does not match the standard."
+#~ msgstr "Kilde-URI'en svarer ikke til standarden."
+
+#~ msgid ""
+#~ "Cannot connect to feed with URL: %1$s. Please change the URL and try "
+#~ "again."
+#~ msgstr ""
+#~ "Kan ikke forbinde til kilde med URL:%1$s.  Ret venligst URL'en og prøv "
+#~ "igen."
+
+#~ msgid ""
+#~ "The provided URL %1$s does not contain content as expected. Please change "
+#~ "the URL and try again."
+#~ msgstr ""
+#~ "Den angivne URL, %1$s, indeholder ikke det forventede indhold.  Ret "
+#~ "venligst URL'en og prøv igen."
+
+#~ msgid "Unfortunately the given feed URL cannot be processed as expected."
+#~ msgstr ""
+#~ "Den angivne kilde-URL kan beklageligvis ikke behandles som forventet."
 
 #~ msgid "The value for \"%2$s\" is invalid and wasn't be applied."
 #~ msgstr "Værdien for »%2$s« er ugyldig og vil ikke blive anvendt."

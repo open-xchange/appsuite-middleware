@@ -6,7 +6,7 @@ msgstr ""
 "Project-Id-Version: backend\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2018-04-18 13:35+0200\n"
+"PO-Revision-Date: 2018-05-04 15:05+0200\n"
 "Last-Translator: Kalman Kemenczy <kalman@workshop-chapina.com>\n"
 "Language-Team: Hungarian <hu@workshop-chapina.com>\n"
 "Language: hu_HU\n"
@@ -203,6 +203,12 @@ msgstr "Az ellenőrzés sikertelen: %1$s"
 msgid ""
 "Not all of the objects could be imported due to a configured limitation."
 msgstr "Nem sikerült az összes objektumot beimportálni a beállított korlátozások miatt."
+
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.ical/src/com/openexchange/chronos/ical/ICalExceptionMessages.java:72
+msgid ""
+"The given iCalendar source does not contain valid content and cannot be "
+"processed."
+msgstr "A megadott iCalendar forrás nem rendelkezik érvényes tartalommal, és nem dolgozható fel."
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/HRRStrings.java:61
 msgid "No recurrence"
@@ -981,6 +987,11 @@ msgstr "* %1$s"
 msgid "???? %1$s (%2$d. birthday)"
 msgstr "???? %1$s (%2$d. születésnap)"
 
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.provider.caching/src/com/openexchange/chronos/provider/caching/basic/exception/BasicCachingCalendarExceptionMessages.java:63
+msgid ""
+"The calendar was refreshed less than a minute ago. Please try again later."
+msgstr "A naptárat kevesebb mint egy perccel ezelőtt frissítették. Próbáld újra később."
+
 #. * The name of the ICal feed calendar provider.
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.provider.ical/src/com/openexchange/chronos/provider/ical/ICalCalendarStrings.java:64
 msgid "ICal Feed Calendar"
@@ -991,19 +1002,18 @@ msgid "The feed URI is missing."
 msgstr "A hírforrás URI hiányzik."
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.provider.ical/src/com/openexchange/chronos/provider/ical/exception/ICalProviderExceptionMessages.java:65
-msgid "The feed URI does not match the standard."
-msgstr "A hírforrás URI nem szabványos."
+msgid "The given feed URI is invalid. Please change it and try again."
+msgstr "Az adott URI forrás érvénytelen. Változtassa meg és próbálja újra."
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.provider.ical/src/com/openexchange/chronos/provider/ical/exception/ICalProviderExceptionMessages.java:67
-msgid ""
-"Cannot connect to feed with URL: %1$s. Please change the URL and try again."
-msgstr "Nem sikerül kapcsolódni a hírforráshoz ezzel a %1$s hivatkozáson keresztül. Változtassa meg a hivatkozást és próbálja újra."
+msgid "Cannot connect to feed with URI: %1$s. Please change it and try again."
+msgstr "Nem sikerül kapcsolódni a hírforráshoz a(z) %1$s URI-n keresztül. Változtassa meg és próbálja újra."
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.provider.ical/src/com/openexchange/chronos/provider/ical/exception/ICalProviderExceptionMessages.java:69
 msgid ""
-"The provided URL %1$s does not contain content as expected. Please change "
-"the URL and try again."
-msgstr "A megadott %1$s URL tartalma nem megfelelő. Változtassa meg az URL-t és próbálja újra."
+"The provided URI %1$s does not contain content as expected. Please change it "
+"and try again."
+msgstr "A megadott %1$s URI tartalma nem megfelelő. Változtassa meg és próbálja újra."
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.provider.ical/src/com/openexchange/chronos/provider/ical/exception/ICalProviderExceptionMessages.java:71
 msgid "The field %1$s cannot be changed."
@@ -1020,8 +1030,8 @@ msgid ""
 msgstr "Sajnos a keresett hírcsatornára nem lehet feliratkozni a méretkorlátozások miatt."
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.provider.ical/src/com/openexchange/chronos/provider/ical/exception/ICalProviderExceptionMessages.java:77
-msgid "Unfortunately the given feed URL cannot be processed as expected."
-msgstr "Sajnos az adott feed URL-t nem lehet feldolgozni a várt módon."
+msgid "Unfortunately the given feed URI cannot be processed as expected."
+msgstr "Sajnos az adott URI forrást nem lehet feldolgozni a várt módon."
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.provider.ical/src/com/openexchange/chronos/provider/ical/exception/ICalProviderExceptionMessages.java:79
 msgid ""
@@ -1060,6 +1070,12 @@ msgstr "A naptárhoz való hozzáférés korlátozott. Adja meg a jelszavát, é
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.provider.ical/src/com/openexchange/chronos/provider/ical/exception/ICalProviderExceptionMessages.java:91
 msgid "Authentication failed. Please enter your password and try again."
 msgstr "Sikertelen volt a hitelesítés. Adja meg a jelszavát, és próbálja meg újra."
+
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.provider.ical/src/com/openexchange/chronos/provider/ical/exception/ICalProviderExceptionMessages.java:93
+msgid ""
+"Authentication failed due to a recent credentials change. Please remove the "
+"account and add it again with correct credentials."
+msgstr "A hitelesítés nem sikerült a hitelesítő adatok legutóbbi módosítása miatt. Kérjük, távolítsa el a fiókot, és adja hozzá újra a megfelelő hitelesítő adatokkal."
 
 #. *
 #. * The name of the internal calendar provider.
@@ -12676,6 +12692,26 @@ msgstr "UTC"
 #: /home/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:534
 msgid "Zulu"
 msgstr "Zulu"
+
+#~ msgid "The feed URI does not match the standard."
+#~ msgstr "A hírforrás URI nem szabványos."
+
+#~ msgid ""
+#~ "Cannot connect to feed with URL: %1$s. Please change the URL and try "
+#~ "again."
+#~ msgstr ""
+#~ "Nem sikerül kapcsolódni a hírforráshoz ezzel a %1$s hivatkozáson "
+#~ "keresztül. Változtassa meg a hivatkozást és próbálja újra."
+
+#~ msgid ""
+#~ "The provided URL %1$s does not contain content as expected. Please change "
+#~ "the URL and try again."
+#~ msgstr ""
+#~ "A megadott %1$s URL tartalma nem megfelelő. Változtassa meg az URL-t és "
+#~ "próbálja újra."
+
+#~ msgid "Unfortunately the given feed URL cannot be processed as expected."
+#~ msgstr "Sajnos az adott feed URL-t nem lehet feldolgozni a várt módon."
 
 #~ msgid "The value for \"%2$s\" is invalid and wasn't be applied."
 #~ msgstr "A (z) \"%2$s\" érték érvénytelen, és nem alkalmazható."

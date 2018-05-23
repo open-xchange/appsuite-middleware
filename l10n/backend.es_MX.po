@@ -5,7 +5,7 @@ msgstr ""
 "Project-Id-Version: backend\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2018-04-30 00:34+0100\n"
+"PO-Revision-Date: 2018-05-06 23:00+0100\n"
 "Last-Translator: Andrés Herrera <andres@workshop-chapina.com>\n"
 "Language-Team: Spanish <ox7doc@workshop-chapina.com>\n"
 "Language: es_MX\n"
@@ -212,6 +212,14 @@ msgid ""
 msgstr ""
 "No se pudieron importar todos los objetos debido a una limitación por "
 "configuración."
+
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.ical/src/com/openexchange/chronos/ical/ICalExceptionMessages.java:72
+msgid ""
+"The given iCalendar source does not contain valid content and cannot be "
+"processed."
+msgstr ""
+"La fuente de iCalendar indicada no contiene datos válidos y no se puede"
+" procesar."
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/HRRStrings.java:61
 msgid "No recurrence"
@@ -511,9 +519,9 @@ msgid ""
 "not be found. It was probably deleted at some point. Best ignore this "
 "message."
 msgstr ""
-"Un asistente quiere ser puesto al día sobre una cita que parece no se ha"
-" podido encontrar. Probablemente fue borrada en algún momento. Lo mejor será"
-" ignorar este mensaje."
+"Un asistente quiere ser puesto al día sobre una cita que parece no se ha "
+"podido encontrar. Probablemente fue borrada en algún momento. Lo mejor será "
+"ignorar este mensaje."
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:78
 msgid ""
@@ -855,24 +863,24 @@ msgid ""
 "The timezone of the appointment was changed. Original timezone: %1$s. New "
 "timezone: %2$s"
 msgstr ""
-"La zona horaria de la cita ha cambiado. Zona horaria original: %1$s. Zona"
-" horaria nueva: %2$s"
+"La zona horaria de la cita ha cambiado. Zona horaria original: %1$s. Zona "
+"horaria nueva: %2$s"
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:264
 msgid ""
 "The timezone of the appointments start date was changed. Original timezone: "
 "%1$s. New timezone: %2$s"
 msgstr ""
-"La zona horaria de la hecha de inicio de la cita ha cambiado. Zona horaria"
-" original: %1$s. Zona horaria nueva: %2$s"
+"La zona horaria de la hecha de inicio de la cita ha cambiado. Zona horaria "
+"original: %1$s. Zona horaria nueva: %2$s"
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:266
 msgid ""
 "The timezone of the appointments end date was changed. Original timezone: "
 "%1$s. New timezone: %2$s"
 msgstr ""
-"La zona horaria de la hecha de finalización de la cita ha cambiado. Zona"
-" horaria original: %1$s. Zona horaria nueva: %2$s"
+"La zona horaria de la hecha de finalización de la cita ha cambiado. Zona "
+"horaria original: %1$s. Zona horaria nueva: %2$s"
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:268
 msgid "Reschedule the event. Original date: %1$s. New date: %2$s"
@@ -1035,6 +1043,13 @@ msgstr "* %1$s"
 msgid "???? %1$s (%2$d. birthday)"
 msgstr "???? %1$s (%2$d. cumpleaños)"
 
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.provider.caching/src/com/openexchange/chronos/provider/caching/basic/exception/BasicCachingCalendarExceptionMessages.java:63
+msgid ""
+"The calendar was refreshed less than a minute ago. Please try again later."
+msgstr ""
+"El calendario se actualizó hace menos de un minuto. Por favor, inténtelo de"
+" nuevo más tarde."
+
 #. * The name of the ICal feed calendar provider.
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.provider.ical/src/com/openexchange/chronos/provider/ical/ICalCalendarStrings.java:64
 msgid "ICal Feed Calendar"
@@ -1045,23 +1060,24 @@ msgid "The feed URI is missing."
 msgstr "Falta el URI del feed."
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.provider.ical/src/com/openexchange/chronos/provider/ical/exception/ICalProviderExceptionMessages.java:65
-msgid "The feed URI does not match the standard."
-msgstr "El URI del feed no cumple el estándar."
+msgid "The given feed URI is invalid. Please change it and try again."
+msgstr ""
+"El URI del feed indicado no es válido. Por favor, cámbielo e inténtelo de"
+" nuevo."
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.provider.ical/src/com/openexchange/chronos/provider/ical/exception/ICalProviderExceptionMessages.java:67
-msgid ""
-"Cannot connect to feed with URL: %1$s. Please change the URL and try again."
+msgid "Cannot connect to feed with URI: %1$s. Please change it and try again."
 msgstr ""
-"No se puede conectar al feed con la URL: %1$s. Por favor, cambie la URL e "
-"inténtelo de nuevo."
+"No se puede conectar al feed con URI: %1$s. Por favor, cámbielo e inténtelo"
+" de nuevo."
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.provider.ical/src/com/openexchange/chronos/provider/ical/exception/ICalProviderExceptionMessages.java:69
 msgid ""
-"The provided URL %1$s does not contain content as expected. Please change "
-"the URL and try again."
+"The provided URI %1$s does not contain content as expected. Please change it "
+"and try again."
 msgstr ""
-"La URL proporcionada, %1$s, no tiene el contenido esperado. Por favor, "
-"cambie la URL e inténtelo de nuevo."
+"El URI proporcionado, %1$s, no tiene el contenido esperado. Por favor,"
+" cámbielo e inténtelo de nuevo."
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.provider.ical/src/com/openexchange/chronos/provider/ical/exception/ICalProviderExceptionMessages.java:71
 msgid "The field %1$s cannot be changed."
@@ -1080,10 +1096,9 @@ msgstr ""
 "limitaciones de tamaño."
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.provider.ical/src/com/openexchange/chronos/provider/ical/exception/ICalProviderExceptionMessages.java:77
-msgid "Unfortunately the given feed URL cannot be processed as expected."
+msgid "Unfortunately the given feed URI cannot be processed as expected."
 msgstr ""
-"Desafortunadamente, la URL del feed indicada no se puede procesar como se "
-"esperaba."
+"Por desgracia, el URI del feed indicado no se puede procesar como se esperaba."
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.provider.ical/src/com/openexchange/chronos/provider/ical/exception/ICalProviderExceptionMessages.java:79
 msgid ""
@@ -1136,6 +1151,14 @@ msgid "Authentication failed. Please enter your password and try again."
 msgstr ""
 "Autenticación fallida. Por favor, introduzca su contraseña e inténtelo de "
 "nuevo."
+
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.provider.ical/src/com/openexchange/chronos/provider/ical/exception/ICalProviderExceptionMessages.java:93
+msgid ""
+"Authentication failed due to a recent credentials change. Please remove the "
+"account and add it again with correct credentials."
+msgstr ""
+"Ha fallado la autenticación debido a un cambio reciente de credenciales. Por"
+" favor, elimine la cuenta y añádala de nuevo con las credenciales correctas."
 
 #. *
 #. * The name of the internal calendar provider.
@@ -11111,8 +11134,8 @@ msgid ""
 "%1$s (%2$s) has shared %3$d folders with you. Please click the button below "
 "to view them."
 msgstr ""
-"%1$s (%2$s) ha compartido %3$d carpetas con usted. Por favor, presione el"
-" botón inferior para verlas."
+"%1$s (%2$s) ha compartido %3$d carpetas con usted. Por favor, presione el "
+"botón inferior para verlas."
 
 #. * $username ($user_email) has shared calendar $folder with you. Please click the button below to view it.
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:150
@@ -11129,8 +11152,8 @@ msgid ""
 "%1$s (%2$s) has shared %3$d calendars with you. Please click the button "
 "below to view them."
 msgstr ""
-"%1$s (%2$s) ha compartido %3$d calendarios con usted. Por favor, presione el"
-" botón inferior para verlos."
+"%1$s (%2$s) ha compartido %3$d calendarios con usted. Por favor, presione el "
+"botón inferior para verlos."
 
 #. * $username ($user_email) has shared file "$filename" with the group "Sales Dept.". Please click the button below to view it.
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:156
@@ -11201,8 +11224,8 @@ msgid ""
 "%1$s (%2$s) has shared %3$d folders with the group \"%4$s\". Please click "
 "the button below to view them."
 msgstr ""
-"%1$s (%2$s) ha compartido %3$d carpetas con el grupo \"%4$s\". Por favor,"
-" presione el botón inferior para verlas."
+"%1$s (%2$s) ha compartido %3$d carpetas con el grupo \"%4$s\". Por favor, "
+"presione el botón inferior para verlas."
 
 #. * $username ($user_email) has shared the calendar $folder with the group "Sales Dept.". Please click the button below to view it.
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:180
@@ -11219,8 +11242,8 @@ msgid ""
 "%1$s (%2$s) has shared %3$d calendars with the group \"%4$s\". Please click "
 "the button below to view them."
 msgstr ""
-"%1$s (%2$s) ha compartido %3$d calendarios con el grupo \"%4$s\". Por favor,"
-" presione el botón inferior para verlos."
+"%1$s (%2$s) ha compartido %3$d calendarios con el grupo \"%4$s\". Por favor, "
+"presione el botón inferior para verlos."
 
 #. * $username ($user_email) has shared file "$filename" with you and left you a message:
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:186
@@ -14158,6 +14181,28 @@ msgstr "UTC"
 #: /home/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:534
 msgid "Zulu"
 msgstr "Zulú"
+
+#~ msgid "The feed URI does not match the standard."
+#~ msgstr "El URI del feed no cumple el estándar."
+
+#~ msgid ""
+#~ "Cannot connect to feed with URL: %1$s. Please change the URL and try "
+#~ "again."
+#~ msgstr ""
+#~ "No se puede conectar al feed con la URL: %1$s. Por favor, cambie la URL e "
+#~ "inténtelo de nuevo."
+
+#~ msgid ""
+#~ "The provided URL %1$s does not contain content as expected. Please change "
+#~ "the URL and try again."
+#~ msgstr ""
+#~ "La URL proporcionada, %1$s, no tiene el contenido esperado. Por favor, "
+#~ "cambie la URL e inténtelo de nuevo."
+
+#~ msgid "Unfortunately the given feed URL cannot be processed as expected."
+#~ msgstr ""
+#~ "Desafortunadamente, la URL del feed indicada no se puede procesar como se "
+#~ "esperaba."
 
 #~ msgid "The value for \"%2$s\" is invalid and wasn't be applied."
 #~ msgstr "El valor de \"%2$s\" no es válido y no se ha aplicado."

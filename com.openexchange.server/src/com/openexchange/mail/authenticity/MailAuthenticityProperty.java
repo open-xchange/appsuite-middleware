@@ -83,18 +83,7 @@ public enum MailAuthenticityProperty implements Property {
      * 
      * <p>Defaults to <code>false</code></p>
      */
-    LOG_RAW_HEADERS("logRawHeaders", Boolean.FALSE),
-    /**
-     * <p>
-     * Defines whether the policy of the DMARC mechanism will be considered when determining
-     * the overall result. If this property is enabled, then in case the DMARC mechanism defines
-     * a policy and that policy is 'NONE', then the DMARC mechanism result will not be taken
-     * into consideration and will not influence the overall result.
-     * </p>
-     * 
-     * <p>Defaults to <code>false</code></p>
-     */
-    CONSIDER_DMARC_POLICY("considerDMARCPolicy", Boolean.FALSE);
+    LOG_RAW_HEADERS("logRawHeaders", Boolean.FALSE);
 
     private final Object defaultValue;
     private final String fqn;

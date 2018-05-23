@@ -49,73 +49,22 @@
 
 package com.openexchange.groupware.update.internal;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
+import java.util.Set;
 import com.openexchange.groupware.update.UpdateTaskV2;
 
 /**
- * {@link DynamicList} - Registry for {@link UpdateTask update tasks}.
+ * {@link UpdateTaskSet}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @param <T> The type of task
+ * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public final class DynamicList implements UpdateTaskList<UpdateTaskV2> {
-
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(DynamicList.class);
-
-    private static final DynamicList SINGLETON = new DynamicList();
+interface UpdateTaskSet<T> {
 
     /**
-     * Gets the singleton instance of {@link DynamicList}.
+     * Returns a {@link Set} with all {@link UpdateTaskV2} tasks
      *
-     * @return The singleton instance
+     * @return a {@link Set} with all {@link UpdateTaskV2} tasks
      */
-    public static DynamicList getInstance() {
-        return SINGLETON;
-    }
+    Set<T> getTaskSet();
 
-    /*-
-     * -------------------------------- Member section --------------------------------
-     */
-
-    private final ConcurrentMap<Class<? extends UpdateTaskV2>, UpdateTaskV2> taskList = new ConcurrentHashMap<Class<? extends UpdateTaskV2>, UpdateTaskV2>();
-
-    /**
-     * Initializes a new {@link DynamicList}.
-     */
-    private DynamicList() {
-        super();
-    }
-
-    public boolean addUpdateTask(final UpdateTaskV2 updateTask) {
-        final boolean added = (null == taskList.putIfAbsent(updateTask.getClass(), updateTask));
-        if (added) {
-            UpdateTaskCollection.getInstance().dirtyVersion();
-        } else {
-            LOG.error("Update task \"{}\" is already registered.", updateTask.getClass().getName());
-        }
-        return added;
-    }
-
-    /**
-     * Removes specified update task from this registry.
-     *
-     * @param updateTask The update task
-     */
-    public void removeUpdateTask(final UpdateTaskV2 updateTask) {
-        final UpdateTaskV2 removed = taskList.remove(updateTask.getClass());
-        if (null == removed) {
-            LOG.error("Update task \"{}\" is unknown and could not be deregistered.", updateTask.getClass().getName());
-        } else {
-            UpdateTaskCollection.getInstance().dirtyVersion();
-        }
-    }
-
-    @Override
-    public List<UpdateTaskV2> getTaskList() {
-        final List<UpdateTaskV2> retval = new ArrayList<UpdateTaskV2>(taskList.size());
-        retval.addAll(taskList.values());
-        return retval;
-    }
 }

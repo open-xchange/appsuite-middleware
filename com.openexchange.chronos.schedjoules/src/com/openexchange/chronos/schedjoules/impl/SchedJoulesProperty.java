@@ -64,9 +64,9 @@ public enum SchedJoulesProperty implements Property {
     apiKey,
     /**
      * The refresh interval of subscriptions in milliseconds.
-     * Defaults to 604800000 (1 week)
+     * Defaults to 86400000 (1 day)
      */
-    refreshInterval(TimeUnit.DAYS.toMillis(7)),
+    refreshInterval(TimeUnit.DAYS.toMillis(1)),
     /**
      * The host to access schedjoules.
      * Defaults to 'api.schedjoules.com'<br>
