@@ -57,6 +57,7 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 import com.google.common.collect.ImmutableList;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.update.NamespaceAwareUpdateTask;
 import com.openexchange.groupware.update.SchemaUpdateState;
 import com.openexchange.groupware.update.SeparatedTasks;
 import com.openexchange.groupware.update.UpdateConcurrency;
