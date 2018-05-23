@@ -50,6 +50,7 @@
 package com.openexchange.file.storage.json;
 
 import java.util.Date;
+import java.util.List;
 import org.json.JSONArray;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
@@ -136,6 +137,9 @@ public class FileConverter implements ResultConverter {
             } finally {
                 SearchIterators.close(searchIterator);
             }
+        } else if (List.class.isInstance(resultObject)) {
+            @SuppressWarnings("unchecked") List<File> list = (List<File>) resultObject;
+            resultObject = writer.write(infostoreRequest, list);
         } else {
             throw new UnsupportedOperationException("unknown result object");
         }
