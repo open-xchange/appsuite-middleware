@@ -393,7 +393,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                 throw MailExceptionCode.UNEXPECTED_ERROR.create("IMAP account has no user namespace");
             }
             char separator = getSeparator();
-            if (namespace.charAt(namespace.length() - 1) ==  separator) {
+            if (namespace.charAt(namespace.length() - 1) == separator) {
                 namespace = namespace.substring(0, namespace.length() - 1);
             }
 
@@ -401,18 +401,27 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
             Entity2ACLArgs entity2AclArgs = IMAPFolderConverter.getEntity2AclArgs(targetUserId, session, imapFolder, imapConfig);
             String aclName = Entity2ACL.getInstance(imapStore, imapConfig).getACLName(session.getUserId(), ctx, entity2AclArgs);
 
+            // Check whether shared INBOX should be visible as "shared/user" or "shared/user/INBOX"
+            boolean includeSharedInboxExplicitly = IMAPProperties.getInstance().includeSharedInboxExplicitly(session.getUserId(), session.getContextId());
+
             // Compose the full name from target user point of view
             StringBuilder fullNameBuilder = new StringBuilder(namespace).append(separator).append(aclName);
             if (STR_INBOX.equals(fullName)) {
+                if (includeSharedInboxExplicitly) {
+                    fullNameBuilder.append(separator).append(STR_INBOX);
+                }
                 return fullNameBuilder.toString();
             }
 
-            String inboxPrefix = new StringBuilder(STR_INBOX).append(separator).toString();
-            if (fullName.startsWith(inboxPrefix)) {
-                fullName = fullName.substring(inboxPrefix.length());
+            String appendix = fullName;
+            if (false == includeSharedInboxExplicitly) {
+                String inboxPrefix = new StringBuilder(STR_INBOX).append(separator).toString();
+                if (appendix.startsWith(inboxPrefix)) {
+                    appendix = appendix.substring(inboxPrefix.length());
+                }
             }
 
-            return fullNameBuilder.append(separator).append(fullName).toString();
+            return fullNameBuilder.append(separator).append(appendix).toString();
         } catch (final MessagingException e) {
             throw handleMessagingException(fullName, e);
         } catch (final IMAPException e) {
