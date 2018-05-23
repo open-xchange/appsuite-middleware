@@ -76,6 +76,7 @@ public class Bug41287Test extends ShareTest {
     private ShareTarget target;
     private long lastModified;
 
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
@@ -88,6 +89,7 @@ public class Bug41287Test extends ShareTest {
         lastModified = getClient().execute(req).getResponse().getTimestamp().getTime();
     }
 
+    @Override
     @After
     public void tearDown() throws Exception {
         try {
@@ -105,6 +107,7 @@ public class Bug41287Test extends ShareTest {
         GetLinkResponse resp = getClient().execute(req);
         assertFalse(resp.hasError());
         String url = resp.getShareLink().getShareURL();
+        lastModified = resp.getTimestamp().getTime();
         GuestClient guestClient = resolveShare(url);
         OCLGuestPermission perm = createAnonymousGuestPermission();
         perm.setEntity(guestClient.getValues().getUserId());
