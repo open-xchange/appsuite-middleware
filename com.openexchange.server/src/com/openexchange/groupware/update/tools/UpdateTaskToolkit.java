@@ -64,6 +64,7 @@ import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicReference;
 import org.slf4j.Logger;
+import com.google.common.collect.ImmutableMap;
 import com.openexchange.database.Databases;
 import com.openexchange.database.SchemaInfo;
 import com.openexchange.databaseold.Database;
@@ -74,6 +75,7 @@ import com.openexchange.groupware.update.TaskInfo;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskV2;
 import com.openexchange.groupware.update.internal.DynamicSet;
+import com.openexchange.groupware.update.internal.NamespaceAwareUpdateTask;
 import com.openexchange.groupware.update.internal.UpdateExecutor;
 import com.openexchange.groupware.update.internal.UpdateProcess;
 import com.openexchange.threadpool.ThreadPools;
@@ -271,6 +273,23 @@ public final class UpdateTaskToolkit {
         UpdateTaskToolkitJob<Void> job = new UpdateTaskToolkitJob<>(task, statusText);
         ThreadPools.getThreadPool().submit(ThreadPools.task(job, "RunAllUpdate"));
         return job;
+    }
+
+    /**
+     * Returns an unmodifiable {@link Map} with all {@link NamespaceAwareUpdateTask}s
+     * 
+     * @return an unmodifiable {@link Map} with all {@link NamespaceAwareUpdateTask}s
+     */
+    public static Map<String, String> getNamespaceAwareUpdateTasks() {
+        ImmutableMap.Builder<String, String> namespaceAware = ImmutableMap.builder();
+
+        for (UpdateTaskV2 updateTask : DynamicSet.getInstance().getTaskSet()) {
+            NamespaceAwareUpdateTask annotation = updateTask.getClass().getAnnotation(NamespaceAwareUpdateTask.class);
+            if (annotation != null) {
+                namespaceAware.put(annotation.namespace(), annotation.description());
+            }
+        }
+        return namespaceAware.build();
     }
 
     /**
