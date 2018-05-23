@@ -63,7 +63,6 @@ import com.openexchange.groupware.update.SeparatedTasks;
 import com.openexchange.groupware.update.UpdateConcurrency;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskV2;
-import com.openexchange.groupware.update.internal.ExcludedList.NamespaceAwareUpdateTask;
 import com.openexchange.java.Strings;
 
 /**
