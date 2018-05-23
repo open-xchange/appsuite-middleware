@@ -58,19 +58,28 @@ import com.openexchange.config.lean.Property;
 import com.openexchange.java.Strings;
 
 /**
- * {@link NamespaceAwareExcludedSet}
- *
+ * {@link NamespaceAwareExcludedSet} - This class contains the list of excluded update tasks.
+ * The configuration can be done by the property <code>com.openexchange.groupware.update.excludedUpdateTasks</code>.
+ * 
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @since v7.10.0
  */
 public class NamespaceAwareExcludedSet implements UpdateTaskSet<String> {
 
-    private static final String PROPERTY_DEFAULT = "";
-    private static final Property PROPERTY = DefaultProperty.valueOf("com.openexchange.groupware.update.excludedUpdateTasks", PROPERTY_DEFAULT);
+    /**
+     * Defines a comma separated list of namespace-aware update tasks to exclude from the update procedure.
+     * Default is empty.
+     */
+    private static final Property PROPERTY = DefaultProperty.valueOf("com.openexchange.groupware.update.excludedUpdateTasks", "");
     private Set<String> excludedNamespaces = new HashSet<>();
 
     private static final NamespaceAwareExcludedSet SINGLETON = new NamespaceAwareExcludedSet();
 
+    /**
+     * Returns the singleton instance of {@link NamespaceAwareExcludedSet}
+     * 
+     * @return the instance
+     */
     public static NamespaceAwareExcludedSet getInstance() {
         return SINGLETON;
     }

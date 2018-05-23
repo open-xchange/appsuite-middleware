@@ -75,14 +75,27 @@ public class ExcludedSet implements UpdateTaskSet<String> {
 
     private final Set<String> taskSet = new HashSet<String>();
 
+    /**
+     * Initialises a new {@link ExcludedSet}.
+     */
     private ExcludedSet() {
         super();
     }
 
+    /**
+     * Returns the singleton instance of the {@link ExcludedSet}
+     * 
+     * @return the instance
+     */
     public static ExcludedSet getInstance() {
         return SINGLETON;
     }
 
+    /**
+     * Loads all excluded tasks from the {@value #CONFIG_FILE_NAME} file.
+     * 
+     * @param configService The {@link ConfigurationService}
+     */
     public void configure(ConfigurationService configService) {
         taskSet.clear();
         Properties props = loadProperties(configService);
