@@ -798,3 +798,16 @@ properties:
       file: imap.properties
       packageName: open-xchange-imap
       tags: ["Mail","IMAP"]
+    - key: com.openexchange.imap.includeSharedInboxExplicitly
+      description: |
+        Controls whether shared INBOX should be visible as "shared/user" or "shared/user/INBOX".
+        
+        Applies only to the primary mail account!
+      defaultValue: false
+      version: 7.10.0
+      reloadable: true
+      configcascadeAware: true
+      related: 
+      file: imap.properties
+      packageName: open-xchange-imap
+      tags: ["Mail","IMAP"]
