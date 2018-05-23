@@ -152,7 +152,7 @@ class UpdateTaskCollection {
      * tasks prior any {@link UpdateConcurrency#BACKGROUND} tasks (controlled by the <code>blocking</code> argument
      * 
      * @param schema The {@link SchemaUpdateState}
-     * @param blocking Whether the {@link UpdateConcurrency#BLOCKING} tasks will be first on the returbed {@link List}
+     * @param blocking Whether the {@link UpdateConcurrency#BLOCKING} tasks will be first on the returned {@link List}
      * @return A {@link List} with the filtered and sorted {@link UpdateTaskV2} tasks
      * @throws OXException if there is no preference in executing the blocking tasks first, but there are blocking tasks to be executed
      */
