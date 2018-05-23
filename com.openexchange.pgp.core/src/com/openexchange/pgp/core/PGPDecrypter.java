@@ -267,6 +267,10 @@ public class PGPDecrypter {
                     pgpObject = plainFact.nextObject();
                 }
             }
+
+            if(encryptedData.isIntegrityProtected() && !encryptedData.verify()) {
+            	throw PGPCoreExceptionCodes.PGP_EXCEPTION.create("Integrity check of the message failed.");
+            }
         }
         output.flush();
         return ret;
