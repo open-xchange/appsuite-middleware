@@ -4,6 +4,7 @@ package com.openexchange.ajax.importexport;
 import static org.junit.Assert.assertEquals;
 import java.util.Calendar;
 import java.util.TimeZone;
+import java.util.concurrent.TimeUnit;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.DisableOnDebug;
@@ -19,7 +20,7 @@ import com.openexchange.groupware.importexport.ImportResult;
 public class Bug20498Test_ReminderJumpsAnHour extends ManagedAppointmentTest {
 
     @Rule
-    public TestRule timeout = new DisableOnDebug(new Timeout(2000000000));
+    public TestRule timeout = new DisableOnDebug(new Timeout(2000000000, TimeUnit.MILLISECONDS));
 
     // @formatter:off
     public String ical =
