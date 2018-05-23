@@ -110,7 +110,7 @@ public final class DynamicSet implements UpdateTaskSet<UpdateTaskV2> {
      * Returns the name of the update task. If the {@link UpdateTaskV2} is implemented
      * as a local or anonymous class, then its name is being compiled by the {@link Package}
      * information and the class's name. If the {@link Package} is not available, then
-     * the name falls back to a 'orphanedUpdateTask.t[timestamp].ClassName' format.
+     * the name falls back to an 'orphanedUpdateTask.t[timestamp].ClassName' format.
      * 
      * @param updateTask The update task's name that shall be returned
      * @return the update task's name

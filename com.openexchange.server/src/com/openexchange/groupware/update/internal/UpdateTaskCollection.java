@@ -57,6 +57,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.SchemaUpdateState;
 import com.openexchange.groupware.update.SeparatedTasks;
+import com.openexchange.groupware.update.UpdateConcurrency;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskV2;
 import com.openexchange.java.Strings;
@@ -75,10 +76,18 @@ class UpdateTaskCollection {
 
     private final AtomicBoolean versionDirty = new AtomicBoolean(true);
 
+    /**
+     * Initialises a new {@link UpdateTaskCollection}.
+     */
     private UpdateTaskCollection() {
         super();
     }
 
+    /**
+     * Returns the instance of the {@link UpdateTaskCollection}
+     * 
+     * @return the instance of the {@link UpdateTaskCollection}
+     */
     static UpdateTaskCollection getInstance() {
         return SINGLETON;
     }
@@ -90,10 +99,23 @@ class UpdateTaskCollection {
         versionDirty.set(true);
     }
 
+    /**
+     * Filters the update tasks that must be executed
+     * 
+     * @param state The {@link SchemaUpdateState}
+     * @return The filtered {@link SeparatedTasks}
+     */
     SeparatedTasks getFilteredAndSeparatedTasks(SchemaUpdateState state) {
         return separateTasks(getFilteredUpdateTasks(state));
     }
 
+    /**
+     * Separates the {@link UpdateTaskV2} tasks in {@link UpdateConcurrency#BLOCKING}
+     * and {@link UpdateConcurrency#BACKGROUND}
+     * 
+     * @param tasks The {@link List} of {@link UpdateTaskV2} tasks
+     * @return The {@link SeparatedTasks}
+     */
     SeparatedTasks separateTasks(List<UpdateTaskV2> tasks) {
         final List<UpdateTaskV2> blocking = new ArrayList<UpdateTaskV2>();
         final List<UpdateTaskV2> background = new ArrayList<UpdateTaskV2>();
@@ -125,6 +147,15 @@ class UpdateTaskCollection {
         };
     }
 
+    /**
+     * Returns a {@link List} with all {@link UpdateTaskV2} tasks filtered and sorted with the {@link UpdateConcurrency#BLOCKING}
+     * tasks prior any {@link UpdateConcurrency#BACKGROUND} tasks (controlled by the <code>blocking</code> argument
+     * 
+     * @param schema The {@link SchemaUpdateState}
+     * @param blocking Whether the {@link UpdateConcurrency#BLOCKING} tasks will be first on the returbed {@link List}
+     * @return A {@link List} with the filtered and sorted {@link UpdateTaskV2} tasks
+     * @throws OXException if there is no preference in executing the blocking tasks first, but there are blocking tasks to be executed
+     */
     final List<UpdateTaskV2> getFilteredAndSortedUpdateTasks(SchemaUpdateState schema, boolean blocking) throws OXException {
         SeparatedTasks tasks = getFilteredAndSeparatedTasks(schema);
         List<UpdateTaskV2> retval = new ArrayList<UpdateTaskV2>();
@@ -156,10 +187,19 @@ class UpdateTaskCollection {
         return new ArrayList<>(fullSet);
     }
 
+    /**
+     * Marks it as dirty
+     */
     void dirtyVersion() {
         versionDirty.set(true);
     }
 
+    /**
+     * Checks whether there are any pending update tasks
+     * 
+     * @param state The {@link SchemaUpdateState}
+     * @return <code>true</code> if at least one task is pending for execution; <code>false</code> otherwise
+     */
     boolean needsUpdate(SchemaUpdateState state) {
         List<UpdateTaskV2> tasks = getListWithoutExcludes();
         for (UpdateTaskV2 task : tasks) {
