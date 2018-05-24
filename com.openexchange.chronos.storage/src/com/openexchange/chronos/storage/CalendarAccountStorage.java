@@ -50,6 +50,7 @@
 package com.openexchange.chronos.storage;
 
 import java.util.List;
+import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.provider.CalendarAccount;
 import com.openexchange.database.provider.DBTransactionPolicy;
 import com.openexchange.exception.OXException;
@@ -80,7 +81,8 @@ public interface CalendarAccountStorage {
     void insertAccount(CalendarAccount account) throws OXException;
 
     /**
-     * Inserts a new calendar account.
+     * Inserts a new calendar account, obeying the maximum number of allowed accounts for this provider and user. If the account was not
+     * inserted, this is indicated via {@link CalendarExceptionCodes#ACCOUNT_NOT_WRITTEN}.
      *
      * @param account The account data to insert
      * @param maxAccounts The maximum number of accounts allowed for this provider and user

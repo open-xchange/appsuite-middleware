@@ -50,7 +50,6 @@
 package com.openexchange.chronos.storage.rdb;
 
 import static com.openexchange.java.Autoboxing.I;
-import com.google.json.JsonSanitizer;
 import java.io.IOException;
 import java.io.InputStream;
 import java.sql.Connection;
@@ -63,6 +62,7 @@ import java.util.List;
 import org.json.JSONException;
 import org.json.JSONInputStream;
 import org.json.JSONObject;
+import com.google.json.JsonSanitizer;
 import com.openexchange.caching.CacheService;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.provider.CalendarAccount;
@@ -174,6 +174,9 @@ public class RdbCalendarAccountStorage extends RdbStorage implements CalendarAcc
             connection = dbProvider.getWriteConnection(context);
             txPolicy.setAutoCommit(connection, false);
             updated = insertAccount(connection, context.getContextId(), account, maxAccounts);
+            if (0 == updated) {
+                throw CalendarExceptionCodes.ACCOUNT_NOT_WRITTEN.create();
+            }
             txPolicy.commit(connection);
         } catch (SQLException e) {
             throw asOXException(e);

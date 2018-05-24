@@ -330,6 +330,11 @@ public enum CalendarExceptionCodes implements DisplayableOXExceptionCode {
      */
     DB_NOT_MODIFIED("Data not modified in storage", OXExceptionStrings.SQL_ERROR_MSG, Category.CATEGORY_WARNING, 3040),
     /**
+     * <li>Error while reading/writing data from/to the database.</li>
+     * <li>Calendar account data not written in storage</li>
+     */
+    ACCOUNT_NOT_WRITTEN("Calendar account data not written in storage", OXExceptionStrings.SQL_ERROR_MSG, Category.CATEGORY_WARNING, 3041),
+    /**
      * An I/O error occurred: %1$s
      */
     IO_ERROR("An I/O error occurred: %1$s", IO_ERROR_MSG, Category.CATEGORY_ERROR, 5003),
