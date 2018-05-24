@@ -69,7 +69,7 @@ import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.common.SelfProtectionFactory.SelfProtection;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.impl.performer.ConflictCheckPerformer;
-import com.openexchange.chronos.impl.performer.ResolveUidPerformer;
+import com.openexchange.chronos.impl.performer.ResolvePerformer;
 import com.openexchange.chronos.service.CalendarService;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.EventConflict;
@@ -296,15 +296,16 @@ public class Check extends com.openexchange.chronos.common.Check {
     /**
      * Checks that the supplied event's unique identifier (UID) is not already used for another event within the same context.
      *
+     * @param session The calendar session
      * @param storage A reference to the calendar storage
      * @param event The event to check
      * @return The passed event's unique identifier, after it was checked for uniqueness
      * @throws OXException {@link CalendarExceptionCodes#UID_CONFLICT}
      */
-    public static String uidIsUnique(CalendarStorage storage, Event event) throws OXException {
+    public static String uidIsUnique(CalendarSession session, CalendarStorage storage, Event event) throws OXException {
         String uid = event.getUid();
         if (Strings.isNotEmpty(uid)) {
-            String existingId = new ResolveUidPerformer(storage).perform(uid);
+            String existingId = new ResolvePerformer(session, storage).resolveByUid(uid);
             if (null != existingId) {
                 throw CalendarExceptionCodes.UID_CONFLICT.create(uid, existingId);
             }
@@ -315,13 +316,14 @@ public class Check extends com.openexchange.chronos.common.Check {
     /**
      * Checks that a specific unique identifier (UID) is not already used for another event within the same context.
      *
+     * @param session The calendar session
      * @param storage A reference to the calendar storage
      * @param uid The unique identifier to check
      * @return The passed unique identifier, after it was checked for uniqueness
      * @throws OXException {@link CalendarExceptionCodes#UID_CONFLICT}
      */
-    public static String uidIsUnique(CalendarStorage storage, String uid) throws OXException {
-        String existingId = new ResolveUidPerformer(storage).perform(uid);
+    public static String uidIsUnique(CalendarSession session, CalendarStorage storage, String uid) throws OXException {
+        String existingId = new ResolvePerformer(session, storage).resolveByUid(uid);
         if (null != existingId) {
             throw CalendarExceptionCodes.UID_CONFLICT.create(uid, existingId);
         }

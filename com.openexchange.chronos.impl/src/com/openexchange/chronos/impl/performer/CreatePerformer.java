@@ -187,7 +187,7 @@ public class CreatePerformer extends AbstractUpdatePerformer {
         if (false == eventData.containsUid() || Strings.isEmpty(eventData.getUid())) {
             event.setUid(UUID.randomUUID().toString());
         } else {
-            event.setUid(Check.uidIsUnique(storage, eventData));
+            event.setUid(Check.uidIsUnique(session, storage, eventData));
         }
         /*
          * creation/modification/calendaruser metadata

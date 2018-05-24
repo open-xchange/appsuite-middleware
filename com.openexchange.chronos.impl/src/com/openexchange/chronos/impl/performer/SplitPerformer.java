@@ -161,7 +161,7 @@ public class SplitPerformer extends AbstractUpdatePerformer {
         Event detachedSeriesMaster = EventMapper.getInstance().copy(originalEvent, null, true, (EventField[]) null);
         detachedSeriesMaster.setId(storage.getEventStorage().nextId());
         detachedSeriesMaster.setSeriesId(detachedSeriesMaster.getId());
-        detachedSeriesMaster.setUid(Strings.isNotEmpty(uid) ? Check.uidIsUnique(storage, uid) : UUID.randomUUID().toString());
+        detachedSeriesMaster.setUid(Strings.isNotEmpty(uid) ? Check.uidIsUnique(session, storage, uid) : UUID.randomUUID().toString());
         detachedSeriesMaster.setRelatedTo(relatedTo);
         Consistency.setCreated(session, timestamp, detachedSeriesMaster, session.getUserId());
         Consistency.setModified(session, timestamp, detachedSeriesMaster, session.getUserId());

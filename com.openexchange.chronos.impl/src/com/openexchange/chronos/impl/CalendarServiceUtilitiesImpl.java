@@ -53,19 +53,15 @@ import static com.openexchange.chronos.common.CalendarUtils.isSeriesMaster;
 import static com.openexchange.java.Autoboxing.B;
 import static com.openexchange.java.Autoboxing.L;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.common.DefaultEventsResult;
-import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.impl.performer.ChangeExceptionsPerformer;
 import com.openexchange.chronos.impl.performer.CountEventsPerformer;
 import com.openexchange.chronos.impl.performer.ForeignEventsPerformer;
 import com.openexchange.chronos.impl.performer.GetPerformer;
-import com.openexchange.chronos.impl.performer.ResolveFilenamePerformer;
-import com.openexchange.chronos.impl.performer.ResolveIdPerformer;
-import com.openexchange.chronos.impl.performer.ResolveUidPerformer;
+import com.openexchange.chronos.impl.performer.ResolvePerformer;
 import com.openexchange.chronos.service.CalendarServiceUtilities;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.EventsResult;
@@ -125,23 +121,23 @@ public class CalendarServiceUtilitiesImpl implements CalendarServiceUtilities {
     }
 
     @Override
-    public String resolveByUID(CalendarSession session, final String uid) throws OXException {
+    public String resolveByUID(CalendarSession session, String uid) throws OXException {
         return new InternalCalendarStorageOperation<String>(session) {
 
             @Override
             protected String execute(CalendarSession session, CalendarStorage storage) throws OXException {
-                return new ResolveUidPerformer(storage).perform(uid);
+                return new ResolvePerformer(session, storage).resolveByUid(uid);
             }
         }.executeQuery();
     }
 
     @Override
-    public String resolveByFilename(CalendarSession session, final String filename) throws OXException {
+    public String resolveByFilename(CalendarSession session, String filename) throws OXException {
         return new InternalCalendarStorageOperation<String>(session) {
 
             @Override
             protected String execute(CalendarSession session, CalendarStorage storage) throws OXException {
-                return new ResolveFilenamePerformer(storage).perform(filename);
+                return new ResolvePerformer(session, storage).resolveByFilename(filename);
             }
         }.executeQuery();
     }
@@ -163,7 +159,7 @@ public class CalendarServiceUtilitiesImpl implements CalendarServiceUtilities {
 
             @Override
             protected Event execute(CalendarSession session, CalendarStorage storage) throws OXException {
-                return new ResolveIdPerformer(session, storage).perform(id);
+                return new ResolvePerformer(session, storage).resolveById(id);
             }
         }.executeQuery();
     }
@@ -174,17 +170,11 @@ public class CalendarServiceUtilitiesImpl implements CalendarServiceUtilities {
 
             @Override
             protected List<Event> execute(CalendarSession session, CalendarStorage storage) throws OXException {
-                /*
-                 * resolve by UID or filename
-                 */
-                String id = new ResolveUidPerformer(storage).perform(resourceName);
-                if (null == id) {
-                    id = new ResolveFilenamePerformer(storage).perform(resourceName);
-                    if (null == id) {
-                        return null;
-                    }
+                EventsResult eventsResult = new ResolvePerformer(session, storage).resolve(folderId, resourceName);
+                if (null != eventsResult && null != eventsResult.getEvents() && 0 < eventsResult.getEvents().size()) {
+                    return eventsResult.getEvents();
                 }
-                return resolveEvent(session, storage, folderId, id).getEvents();
+                return null;
             }
         }.executeQuery();
     }
@@ -195,24 +185,7 @@ public class CalendarServiceUtilitiesImpl implements CalendarServiceUtilities {
 
             @Override
             protected Map<String, EventsResult> execute(CalendarSession session, CalendarStorage storage) throws OXException {
-                Map<String, EventsResult> resultsPerResourceName = new HashMap<String, EventsResult>(resourceNames.size());
-                /*
-                 * batch-resolve by UID, falling back to filename as needed, and wrap into appropriate events results
-                 */
-                Map<String, String> eventIdsByResourceName = new ResolveUidPerformer(storage).perform(resourceNames);
-                for (String resourceName : resourceNames) {
-                    String id = eventIdsByResourceName.get(resourceName);
-                    if (null == id) {
-                        id = new ResolveFilenamePerformer(storage).perform(resourceName);
-                        if (null == id) {
-                            DefaultEventsResult result = new DefaultEventsResult(CalendarExceptionCodes.EVENT_NOT_FOUND_IN_FOLDER.create(folderId, resourceName));
-                            resultsPerResourceName.put(resourceName, result);
-                            continue;
-                        }
-                    }
-                    resultsPerResourceName.put(resourceName, resolveEvent(session, storage, folderId, id));
-                }
-                return resultsPerResourceName;
+                return new ResolvePerformer(session, storage).resolve(folderId, resourceNames);
             }
         }.executeQuery();
     }
