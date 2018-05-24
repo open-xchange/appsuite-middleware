@@ -59,7 +59,6 @@ import java.util.Iterator;
 import java.util.List;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
-import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.impl.CalendarFolder;
 import com.openexchange.chronos.impl.Utils;
 import com.openexchange.chronos.service.CalendarSession;
@@ -97,19 +96,10 @@ public class ChangeExceptionsPerformer extends AbstractQueryPerformer {
      */
     public List<Event> perform(String folderId, String seriesId) throws OXException {
         /*
-         * load series master first
+         * construct search term to lookup all change exceptions
          */
         CalendarFolder folder = getFolder(session, folderId);
         EventField[] fields = getFields(session, EventField.ORGANIZER, EventField.ATTENDEES);
-        Event event = storage.getEventStorage().loadEvent(seriesId, fields);
-        if (null == event) {
-            throw CalendarExceptionCodes.EVENT_NOT_FOUND.create(seriesId);
-        }
-        // Dead store to "event"
-        // event = storage.getUtilities().loadAdditionalEventData(getCalendarUserId(folder), event, fields);
-        /*
-         * construct search term to lookup all change exceptions
-         */
         CompositeSearchTerm searchTerm = new CompositeSearchTerm(CompositeOperation.AND)
             .addSearchTerm(getFolderIdTerm(session, folder))
             .addSearchTerm(getSearchTerm(EventField.SERIES_ID, SingleOperation.EQUALS, seriesId))
