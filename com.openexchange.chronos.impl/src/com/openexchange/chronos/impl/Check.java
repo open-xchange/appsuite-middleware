@@ -63,6 +63,7 @@ import com.openexchange.chronos.CalendarUserType;
 import com.openexchange.chronos.Classification;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
+import com.openexchange.chronos.Organizer;
 import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.RecurrenceRange;
 import com.openexchange.chronos.common.CalendarUtils;
@@ -345,6 +346,19 @@ public class Check extends com.openexchange.chronos.common.Check {
             throw CalendarExceptionCodes.ATTENDEE_NOT_FOUND.create(attendee, event.getId());
         }
         return matchingAttendee;
+    }
+
+    /**
+     * Checks that the event's organizer is also contained in the list of attendees, in case it is an <i>internal</i> user.
+     *
+     * @param event The event to check
+     * @throws OXException {@link CalendarExceptionCodes#MISSING_ORGANIZER}
+     */
+    public static void internalOrganizerIsAttendee(Event event) throws OXException {
+        Organizer organizer = event.getOrganizer();
+        if (null != organizer && CalendarUtils.isInternal(organizer, CalendarUserType.INDIVIDUAL) && false == contains(event.getAttendees(), organizer)) {
+            throw CalendarExceptionCodes.MISSING_ORGANIZER.create();
+        }
     }
 
     /**
