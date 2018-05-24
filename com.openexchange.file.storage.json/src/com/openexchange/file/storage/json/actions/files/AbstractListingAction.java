@@ -186,7 +186,7 @@ public abstract class AbstractListingAction extends AbstractFileAction {
      */
     protected AJAXRequestResult results(SearchIterator<File> searchIterator, InfostoreRequest request) throws OXException {
         SearchIterator<File> results = searchIterator;
-        Date timestamp = null;
+        Long timestamp = null;
         if (AJAXRequestDataTools.parseBoolParameter(PARAMETER_PREGENERATE_PREVIEWS, request.getRequestData())) {
             PreviewService previewService = Services.getPreviewService();
             ThreadPoolService threadPool = Services.getThreadPoolService();
@@ -196,8 +196,8 @@ public abstract class AbstractListingAction extends AbstractFileAction {
                     while (results.hasNext()) {
                         // Call preview service for next file
                         File fileMetadata = results.next();
-                        if(timestamp == null || timestamp.before(fileMetadata.getLastModified())) {
-                            timestamp = fileMetadata.getLastModified();
+                        if(timestamp == null || timestamp<fileMetadata.getSequenceNumber()) {
+                            timestamp = fileMetadata.getSequenceNumber();
                         }
                         files.add(fileMetadata);
                     }
@@ -216,15 +216,15 @@ public abstract class AbstractListingAction extends AbstractFileAction {
             while (results.hasNext()) {
                 // Call preview service for next file
                 File fileMetadata = results.next();
-                if(timestamp == null || timestamp.before(fileMetadata.getLastModified())) {
-                    timestamp = fileMetadata.getLastModified();
+                if(timestamp == null || timestamp < fileMetadata.getSequenceNumber()) {
+                    timestamp = fileMetadata.getSequenceNumber();
                 }
                 files.add(fileMetadata);
             }
-            return new AJAXRequestResult(files, timestamp, "infostore");
+            return new AJAXRequestResult(files, new Date(timestamp), "infostore");
         }
 
-        return new AJAXRequestResult(results, timestamp, "infostore");
+        return new AJAXRequestResult(results, timestamp == null ? null : new Date(timestamp), "infostore");
     }
 
     /**

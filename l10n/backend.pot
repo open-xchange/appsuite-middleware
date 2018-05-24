@@ -1223,131 +1223,135 @@ msgid ""
 msgstr ""
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:82
-msgid "The operation could not be completed due to missing capabilities."
+msgid "Organizer must also be an attendee."
 msgstr ""
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:84
+msgid "The operation could not be completed due to missing capabilities."
+msgstr ""
+
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:86
 msgid ""
 "The supplied folder is not supported. Please select a valid folder and try "
 "again."
 msgstr ""
 
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:86
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:88
 msgid ""
 "The operation could not be completed due to a concurrent modification. "
 "Please reload the data and try again."
 msgstr ""
 
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:88
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:90
 msgid ""
 "The appointment could not be created due to another conflicting appointment "
 "with the same unique identifier."
 msgstr ""
 
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:90
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:92
 msgid "The appointment conflicts with one or more other appointments."
 msgstr ""
 
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:92
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:94
 msgid ""
 "The field \"%1$s\" is mandatory. Please supply a valid value and try again."
 msgstr ""
 
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:94
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:96
 msgid ""
 "The end date lies before the start date. Please correct the appointment "
 "times and try again."
 msgstr ""
 
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:96
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:98
 msgid ""
 "Appointments in non-personal folders must not be classified as \"private\" "
 "or \"secret\"."
 msgstr ""
 
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:98
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:100
 msgid "Appointments with resources must not be classified as \"secret\"."
 msgstr ""
 
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:100
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:102
 msgid ""
 "Appointments classified as \"private\" or \"secret\" cannot be moved to this "
 "type of folder."
 msgstr ""
 
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:102
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:104
 msgid "Occurrences of appointment series must not be classified differently."
 msgstr ""
 
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:104
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:106
 msgid ""
 "The supplied recurrence rule is invalid. Please correct the rule and try "
 "again."
 msgstr ""
 
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:106
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:108
 msgid ""
 "The supplied reminder is invalid. Please correct the reminder and try again."
 msgstr ""
 
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:108
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:110
 msgid ""
 "The supplied timezone is invalid. Please select a valid timezone and try "
 "again."
 msgstr ""
 
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:110
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:112
 msgid ""
 "The supplied geographical location is invalid. Please select valid "
 "coordinates and try again."
 msgstr ""
 
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:112
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:114
 msgid ""
 "The supplied types of start and end date are incompatible. Please correct "
 "the appointment times and try again."
 msgstr ""
 
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:114
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:116
 msgid ""
 "The supplied recurrence rule is not supported. Please use adjust the rule "
 "and try again."
 msgstr ""
 
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:116
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:118
 msgid ""
 "The targeted occurrence is not part of the appointment series. Please select "
 "a valid recurrence identifier and try again."
 msgstr ""
 
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:118
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:120
 msgid ""
 "The split of the appointment series cannot be performed. Please select a "
 "valid split point and try again."
 msgstr ""
 
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:120
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:122
 msgid "Moving an appointment series into another folder is not supported."
 msgstr ""
 
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:122
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:124
 msgid ""
 "Moving an occurrence of an appointment series into another folder is not "
 "supported."
 msgstr ""
 
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:124
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:126
 msgid "The calendar user \"%1$s\" is invalid."
 msgstr ""
 
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:126
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:128
 msgid ""
 "The supplied configuration is invalid. Please correct the configuration and "
 "try again."
 msgstr ""
 
 #. In order to accomplish the search, %1$d or more characters are required.
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:128
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:130
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:80
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/FindExceptionMessages.java:84
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:135
@@ -1357,7 +1361,7 @@ msgid ""
 "In order to accomplish the search, %1$d or more characters are required."
 msgstr ""
 
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:130
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:132
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:137
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:130
 msgid ""
@@ -1365,55 +1369,55 @@ msgid ""
 "problematic character and try again."
 msgstr ""
 
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:132
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:134
 msgid ""
 "Some data entered exceeded the field limit. Please shorten the value for "
 "\"%1$s\" (limit: %2$d, current: %3$d) and try again."
 msgstr ""
 
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:134
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:136
 msgid "The maximum number of calendar subscriptions is exceeded."
 msgstr ""
 
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:136
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:138
 msgid "The value for \"%2$s\" is invalid and wasn't applied."
 msgstr ""
 
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:138
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:140
 msgid "The value for \"%2$s\" is not supported and wasn't applied."
 msgstr ""
 
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:140
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:142
 msgid "The '%1$s' is either not an internal user or does not exist."
 msgstr ""
 
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:142
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:144
 msgid "Authentication failed."
 msgstr ""
 
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:144
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:146
 msgid ""
 "Unable to create account. There have been issues with the provided "
 "authentication."
 msgstr ""
 
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:146
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:148
 msgid "The quota for account '%1$s' in context '%2$s' exceeded the limit."
 msgstr ""
 
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:148
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:150
 msgid "The requested attachment was not found."
 msgstr ""
 
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:150
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:152
 msgid "Too many appointments are queried. Please choose a shorter timeframe."
 msgstr ""
 
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:152
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:154
 msgid "The appointment contains too many participants."
 msgstr ""
 
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:154
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:156
 msgid "The appointment contains too many reminders."
 msgstr ""
 
@@ -10225,6 +10229,11 @@ msgstr ""
 #. The string cannot be parsed to a valid URL.
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.subscribe.microformats/src/com/openexchange/subscribe/microformats/OXMFErrorStrings.java:72
 msgid "You provided an invalid URL."
+msgstr ""
+
+#. No URL was provided.
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.subscribe.microformats/src/com/openexchange/subscribe/microformats/OXMFErrorStrings.java:75
+msgid "You provided no URL."
 msgstr ""
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.subscribe.xing/src/com/openexchange/subscribe/xing/FormStrings.java:62

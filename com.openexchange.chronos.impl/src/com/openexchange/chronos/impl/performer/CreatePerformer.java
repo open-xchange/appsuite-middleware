@@ -68,6 +68,7 @@ import com.openexchange.chronos.Classification;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.TimeTransparency;
+import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.common.mapping.EventMapper;
 import com.openexchange.chronos.impl.AttendeeHelper;
 import com.openexchange.chronos.impl.CalendarFolder;
@@ -132,6 +133,10 @@ public class CreatePerformer extends AbstractUpdatePerformer {
          */
         Check.quotaNotExceeded(storage, session);
         Check.noConflicts(storage, session, newEvent, newEvent.getAttendees());
+        /*
+         * check organizer
+         */
+        CalendarUtils.checkOrganizer(newEvent);
         /*
          * insert event, attendees & attachments
          */

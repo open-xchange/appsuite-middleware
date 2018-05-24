@@ -108,7 +108,9 @@ public class Bug18558Test extends AbstractAJAXSession {
         FolderObject folderA = new FolderObject();
         folderA.setObjectID(clientA.getValues().getPrivateAppointmentFolder());
         folderA.setLastModified(new Date(Long.MAX_VALUE));
-        folderA.setPermissionsAsArray(new OCLPermission[] { ocl(clientA.getValues().getUserId(), false, true, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION), ocl(clientD.getValues().getUserId(), false, false, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION) });
+        folderA.setPermissionsAsArray(new OCLPermission[] {
+            ocl(clientA.getValues().getUserId(), false, true, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION),
+            ocl(clientD.getValues().getUserId(), false, false, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION) });
 
         CommonInsertResponse response = clientA.execute(new com.openexchange.ajax.folder.actions.UpdateRequest(EnumAPI.OX_OLD, folderA));
         response.fillObject(folderA);
@@ -116,7 +118,9 @@ public class Bug18558Test extends AbstractAJAXSession {
         FolderObject folderB = new FolderObject();
         folderB.setObjectID(clientB.getValues().getPrivateAppointmentFolder());
         folderB.setLastModified(new Date(Long.MAX_VALUE));
-        folderB.setPermissionsAsArray(new OCLPermission[] { ocl(clientB.getValues().getUserId(), false, true, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION), ocl(clientD.getValues().getUserId(), false, false, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION) });
+        folderB.setPermissionsAsArray(new OCLPermission[] {
+            ocl(clientB.getValues().getUserId(), false, true, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION),
+            ocl(clientD.getValues().getUserId(), false, false, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION) });
 
         response = clientB.execute(new com.openexchange.ajax.folder.actions.UpdateRequest(EnumAPI.OX_OLD, folderB));
         response.fillObject(folderB);

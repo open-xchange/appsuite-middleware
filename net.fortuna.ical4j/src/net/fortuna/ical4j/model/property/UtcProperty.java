@@ -49,7 +49,7 @@ import net.fortuna.ical4j.model.ValidationException;
 public abstract class UtcProperty extends DateProperty {
 
     /**
-     * 
+     *
      */
     private static final long serialVersionUID = 4850079486497487938L;
 
@@ -75,6 +75,9 @@ public abstract class UtcProperty extends DateProperty {
      */
     public final DateTime getDateTime() {
         Date date = getDate();
+        if (null == date) {
+            return null;
+        }
         return date instanceof DateTime ? (DateTime) date : new DateTime(date.getTime());
     }
 
@@ -96,13 +99,15 @@ public abstract class UtcProperty extends DateProperty {
     /**
      * {@inheritDoc}
      */
+    @Override
     public void setTimeZone(TimeZone timezone) {
         throw new UnsupportedOperationException("Cannot set timezone for UTC properties");
     }
-    
+
     /**
      * {@inheritDoc}
      */
+    @Override
     public void validate() throws ValidationException {
         super.validate();
 
@@ -114,7 +119,7 @@ public abstract class UtcProperty extends DateProperty {
         final DateTime dateTime = (DateTime) getDate();
 
         if (dateTime != null && !dateTime.isUtc()) {
-            throw new ValidationException(getName() + 
+            throw new ValidationException(getName() +
                     ": DATE-TIME value must be specified in UTC time");
         }
     }

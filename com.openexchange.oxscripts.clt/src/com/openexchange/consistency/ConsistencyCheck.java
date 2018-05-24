@@ -344,10 +344,10 @@ public class ConsistencyCheck extends AbstractMBeanCLI<Void> {
         sb.append("Only considered for actions \"").append(Action.list_missing.name()).append("\", \"").append(Action.list_unassigned.name()).append("\" or \"").append(Action.repair).append("\"");
         sb.append("\n");
         sb.append("Possible combinations:");
-        sb.append("\n- \"-o ").append(source.context.name()).append(" -i ").append("<context-id>").append("\"\nConsiders all files of a certain context");
-        sb.append("\n- \"-o ").append(source.filestore.name()).append(" -i ").append("<filestore-id>").append("\"\nConsiders all files of a certain file store");
-        sb.append("\n- \"-o ").append(source.database.name()).append(" -i ").append("<database-id>").append("\"\nConsiders all files of all contexts that belong to a certain database's schema");
-        sb.append("\n- \"-o ").append(source.all.name()).append("\"\nConsiders all files; no matter to what context and/or file store a file belongs (the \"--source-id\" option is ignored)");
+        sb.append("\n- \"-o ").append(Source.context.name()).append(" -i ").append("<context-id>").append("\"\nConsiders all files of a certain context");
+        sb.append("\n- \"-o ").append(Source.filestore.name()).append(" -i ").append("<filestore-id>").append("\"\nConsiders all files of a certain file store");
+        sb.append("\n- \"-o ").append(Source.database.name()).append(" -i ").append("<database-id>").append("\"\nConsiders all files of all contexts that belong to a certain database's schema");
+        sb.append("\n- \"-o ").append(Source.all.name()).append("\"\nConsiders all files; no matter to what context and/or file store a file belongs (the \"--source-id\" option is ignored)");
 
         sb.append("\n");
         sb.append(".\n");

@@ -53,6 +53,7 @@ import java.io.IOException;
 import java.io.Reader;
 import org.apache.commons.httpclient.HttpException;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Strings;
 import com.openexchange.subscribe.Subscription;
 import com.openexchange.subscribe.microformats.OXMFSubscriptionErrorMessage;
 
@@ -70,7 +71,9 @@ public class HTTPOXMFDataSource implements OXMFDataSource {
     @Override
     public Reader getData(Subscription subscription) throws OXException {
         String site = (String) subscription.getConfiguration().get(URL);
-
+        if (Strings.isEmpty(site)) {
+            throw OXMFSubscriptionErrorMessage.NO_URL.create();
+        }
         try {
             return HTTPToolkit.grab(site);
         } catch (HttpException e) {
