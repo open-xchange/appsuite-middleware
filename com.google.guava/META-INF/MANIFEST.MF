@@ -9,7 +9,8 @@ Eclipse-BuddyPolicy: registered
 Bundle-ClassPath: lib/guava-25.0-jre.jar,
  lib/animal-sniffer-annotations-1.16.jar,
  lib/error_prone_annotations-2.1.0.jar,
- lib/j2objc-annotations-1.1.jar
+ lib/j2objc-annotations-1.1.jar,
+ lib/checker-compat-qual-2.0.0.jar
 Export-Package: com.google.common.annotations;version="25.0.0",
  com.google.common.base;version="25.0.0",
  com.google.common.cache;version="25.0.0";uses:="com.google.common.base,com.google.common.collect,com.google.common.util.concurrent",
