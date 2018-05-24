@@ -247,7 +247,8 @@ public abstract class FolderCollection<T> extends DAVCollection {
             try {
                 since = new Date(Long.parseLong(token));
             } catch (NumberFormatException e) {
-                throw new PreconditionException(DAVProtocol.DAV_NS.getURI(), "valid-sync-token", getUrl(), HttpServletResponse.SC_FORBIDDEN);
+                OXException cause = OXException.general("Invalid sync token \"" + token + "\"");
+                throw new PreconditionException(cause, DAVProtocol.DAV_NS.getURI(), "valid-sync-token", getUrl(), HttpServletResponse.SC_FORBIDDEN);
             }
         }
         try {

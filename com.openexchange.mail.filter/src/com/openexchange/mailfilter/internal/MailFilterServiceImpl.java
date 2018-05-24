@@ -1054,26 +1054,32 @@ public final class MailFilterServiceImpl implements MailFilterService, Reloadabl
     }
 
     /**
-     *
-     * @param sieveHandler
+     * Connects the specified SIEVE handler.
+     * <p>
+     * Furthermore this method contains a thread synchronization if Kerberos is used. If the Kerberos subject is not <code>null</code>, that Kerberos subject object is used to only allow a single IMAP/SIEVE login per Kerberos
+     * subject. The service ticket for the IMAP/SIEVE server is stored in the Kerberos subject once the IMAP/SIEVE login was successful. If multiple threads can execute this in concurrently, multiple service tickets are
+     * requested, which is discouraged for performance reasons.
+     * 
+     * @param sieveHandler The SIEVE handler to connect
+     * @param kerberosSubject The optional Kerberos subject or <code>null</code>
      * @throws OXException
-     * @throws UnsupportedEncodingException
-     * @throws IOException
      * @throws OXSieveHandlerException
-     * @throws OXSieveHandlerInvalidCredentialsException
      * @throws PrivilegedActionException
+     * @see {@link Credentials#getSubject()}
      */
-    protected void handlerConnect(final SieveHandler sieveHandler, Subject subject) throws OXException, OXSieveHandlerException {
+    protected void handlerConnect(final SieveHandler sieveHandler, Subject kerberosSubject) throws OXException, OXSieveHandlerException {
         try {
-            if (subject != null) {
-                Subject.doAs(subject, new PrivilegedExceptionAction<Object>() {
-
-                    @Override
-                    public Object run() throws Exception {
-                        sieveHandler.initializeConnection();
-                        return null;
-                    }
-                });
+            if (kerberosSubject != null) {
+                synchronized (kerberosSubject) {
+                    Subject.doAs(kerberosSubject, new PrivilegedExceptionAction<Object>() {
+    
+                        @Override
+                        public Object run() throws Exception {
+                            sieveHandler.initializeConnection();
+                            return null;
+                        }
+                    });
+                }
             } else {
                 sieveHandler.initializeConnection();
             }

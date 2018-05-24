@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2017-2020 OX Software GmbH
+ *     Copyright (C) 2018-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,72 +47,78 @@
  *
  */
 
-package com.openexchange.mail.authenticity;
+package com.openexchange.groupware.update.internal;
 
+import java.util.Collections;
+import java.util.Set;
+import java.util.concurrent.atomic.AtomicReference;
+import com.google.common.collect.ImmutableSet;
+import com.openexchange.config.lean.DefaultProperty;
+import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.config.lean.Property;
+import com.openexchange.java.Strings;
 
 /**
- * {@link MailAuthenticityProperty} - Properties for mail authenticity validation.
+ * {@link NamespaceAwareExcludedSet} - This class contains the list of excluded update tasks.
+ * The configuration can be done by the property <code>com.openexchange.groupware.update.excludedUpdateTasks</code>.
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @since v7.10.0
  */
-public enum MailAuthenticityProperty implements Property {
+public class NamespaceAwareExcludedSet implements UpdateTaskSet<String> {
+
+    /** The property providing the namespaces of the updates tasks that are supposed to be excluded */
+    static final Property PROPERTY = DefaultProperty.valueOf("com.openexchange.groupware.update.excludedUpdateTasks", "");
+
+    private static final NamespaceAwareExcludedSet SINGLETON = new NamespaceAwareExcludedSet();
+
     /**
-     * Defines whether the mail authenticity core feature is enabled
-     * <p>
-     * Defaults to <code>false</code>
-     */
-    ENABLED("enabled", Boolean.FALSE),
-    /**
-     * Defines the date after which the e-mails will be analyzed
-     * <p>
-     * Defaults to 0
-     */
-    THRESHOLD("threshold", Long.valueOf(0)),
-    /**
-     * Defines the MANDATORY <code>authserv-id</code>. It can contain a single arbitrary string
-     * or a comma separated list of arbitrary strings
-     * <p>
-     * Default is empty.
+     * Gets the singleton instance
      *
-     * @see <a href="https://tools.ietf.org/html/rfc7601#section-2.2">RFC-7601, Section 2.2</a>
+     * @return The instance
      */
-    AUTHSERV_ID("authServId", ""),
-    /**
-     * <p>Defines whether the raw headers of a message will be logged in DEBUG level.</p>
-     * 
-     * <p>Defaults to <code>false</code></p>
-     */
-    LOG_RAW_HEADERS("logRawHeaders", Boolean.FALSE);
+    public static NamespaceAwareExcludedSet getInstance() {
+        return SINGLETON;
+    }
 
-    private final Object defaultValue;
-    private final String fqn;
+    // -----------------------------------------------------------------------------------------------------------
+
+    private final AtomicReference<Set<String>> excludedNamespacesRef = new AtomicReference<Set<String>>(Collections.emptySet());
 
     /**
-     * Initializes a new {@link MailAuthenticityProperty}.
+     * Initializes a new {@link NamespaceAwareExcludedSet}.
      */
-    private MailAuthenticityProperty(String suffix, Object defaultValue) {
-        this.defaultValue = defaultValue;
-        fqn = "com.openexchange.mail.authenticity." + suffix;
+    private NamespaceAwareExcludedSet() {
+        super();
     }
 
     /**
-     * Gets the fully qualified name for the property
+     * Loads & parses the <code>"com.openexchange.groupware.update.excludedUpdateTasks"</code> property.
      *
-     * @return the fully qualified name for the property
+     * @param leanConfig The {@link LeanConfigurationService} to load the property
      */
+    public void loadExcludedNamespaces(LeanConfigurationService leanConfig) {
+        String namespaces = leanConfig.getProperty(PROPERTY);
+        if (Strings.isEmpty(namespaces)) {
+            return;
+        }
+
+        String[] split = Strings.splitByComma(namespaces);
+        if (split == null) {
+            return;
+        }
+
+        ImmutableSet.Builder<String> en = ImmutableSet.builderWithExpectedSize(split.length);
+        for (String namespace : split) {
+            en.add(namespace);
+        }
+        excludedNamespacesRef.set(en.build());
+        UpdateTaskCollection.getInstance().dirtyVersion();
+    }
+
     @Override
-    public String getFQPropertyName() {
-        return fqn;
+    public Set<String> getTaskSet() {
+        return excludedNamespacesRef.get();
     }
 
-    /**
-     * Gets the default value of this property
-     *
-     * @return the default value of this property
-     */
-    @Override
-    public Object getDefaultValue() {
-        return defaultValue;
-    }
 }

@@ -312,7 +312,7 @@ public class AllPerformer extends AbstractQueryPerformer {
         CalendarFolder folder = getFolder(session, folderId);
         requireCalendarPermission(folder, READ_FOLDER, READ_OWN_OBJECTS, NO_PERMISSIONS, NO_PERMISSIONS);
         SearchTerm<?> searchTerm = getFolderIdTerm(session, folder);
-        EventField[] fields = getFields(session);
+        EventField[] fields = getFields(session, EventField.ORGANIZER, EventField.ATTENDEES);
         /*
          * get events with default fields & load additional event data as needed
          */

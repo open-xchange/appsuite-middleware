@@ -554,6 +554,11 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
              * Fetch effective permission from storage
              */
             final EffectivePermission perm = getOXFolderAccess().getFolderPermission(fo.getObjectID(), user.getId(), userPerms);
+
+            if (!fo.containsType() && perm.getFolderType() == FolderObject.PUBLIC && perm.getFolderModule() != FolderObject.INFOSTORE && !userPerms.hasFullPublicFolderAccess()) {
+                throw OXFolderExceptionCode.NO_PUBLIC_FOLDER_WRITE_ACCESS.create(session.getUserId(), Integer.valueOf(fo.getObjectID()), Integer.valueOf(ctx.getContextId()));
+            }
+
             if (!perm.isFolderVisible() || !perm.getUnderlyingPermission().isFolderVisible()) {
                 throw OXFolderExceptionCode.NOT_VISIBLE.create(Integer.valueOf(fo.getObjectID()), session.getUserId(), Integer.valueOf(ctx.getContextId()));
             }

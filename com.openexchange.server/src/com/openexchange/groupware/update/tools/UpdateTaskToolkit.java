@@ -56,10 +56,12 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
+import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicReference;
 import org.slf4j.Logger;
@@ -67,12 +69,13 @@ import com.openexchange.database.Databases;
 import com.openexchange.database.SchemaInfo;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.update.NamespaceAwareUpdateTask;
 import com.openexchange.groupware.update.SchemaStore;
 import com.openexchange.groupware.update.SchemaUpdateState;
 import com.openexchange.groupware.update.TaskInfo;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskV2;
-import com.openexchange.groupware.update.internal.DynamicList;
+import com.openexchange.groupware.update.internal.DynamicSet;
 import com.openexchange.groupware.update.internal.UpdateExecutor;
 import com.openexchange.groupware.update.internal.UpdateProcess;
 import com.openexchange.threadpool.ThreadPools;
@@ -273,6 +276,28 @@ public final class UpdateTaskToolkit {
     }
 
     /**
+     * Returns an unmodifiable {@link Map} with all {@link NamespaceAwareUpdateTask}s
+     * 
+     * @return an unmodifiable {@link Map} with all {@link NamespaceAwareUpdateTask}s
+     */
+    public static Map<String, Set<String>> getNamespaceAwareUpdateTasks() {
+        Map<String, Set<String>> namespaceAware = new HashMap<>();
+
+        for (UpdateTaskV2 updateTask : DynamicSet.getInstance().getTaskSet()) {
+            NamespaceAwareUpdateTask annotation = updateTask.getClass().getAnnotation(NamespaceAwareUpdateTask.class);
+            if (annotation != null) {
+                Set<String> set = namespaceAware.get(annotation.namespace());
+                if (set == null) {
+                    set = new HashSet<>();
+                }
+                set.add(updateTask.getClass().getName());
+                namespaceAware.put(annotation.namespace(), set);
+            }
+        }
+        return Collections.unmodifiableMap(namespaceAware);
+    }
+
+    /**
      * Gets all available schemas.
      *
      * @return A list containing schemas.
@@ -338,13 +363,14 @@ public final class UpdateTaskToolkit {
 
     /**
      * Load update task by class name.
+     * 
      * @param className name of the update task class.
      * @return the update task class.
      * @throws OXException if the update task class can not be determined.
      */
     private static UpdateTaskV2 getUpdateTask(final String className) throws OXException {
-        final List<UpdateTaskV2> taskList = DynamicList.getInstance().getTaskList();
-        for (final UpdateTaskV2 task : taskList) {
+        Set<UpdateTaskV2> taskList = DynamicSet.getInstance().getTaskSet();
+        for (UpdateTaskV2 task : taskList) {
             if (task.getClass().getName().equals(className)) {
                 return task;
             }

@@ -148,6 +148,8 @@ import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.tools.regex.MatcherReplacer;
 import com.openexchange.version.Version;
+import com.sun.mail.util.BASE64DecoderStream;
+import com.sun.mail.util.QPDecoderStream;
 
 /**
  * {@link MimeMessageFiller} - Provides basic methods to fills an instance of {@link MimeMessage} with headers/contents given through an
@@ -1459,7 +1461,22 @@ public class MimeMessageFiller {
     protected void addNestedMessage(final MailPart mailPart, final Boolean inline, final Multipart primaryMultipart, final StringBuilder sb) throws OXException, MessagingException {
         ThresholdFileHolder sink = new ThresholdFileHolder(65536, 65536);
         try {
-            sink.write(mailPart.getInputStream());
+            String encoding = mailPart.getFirstHeader(MessageHeaders.HDR_CONTENT_TRANSFER_ENC);
+            if ("quoted-printable".equalsIgnoreCase(encoding)) {
+                sink.write(new QPDecoderStream(mailPart.getInputStream()));
+            } else if ("base64".equalsIgnoreCase(encoding)) {
+                try {
+                    sink.write(new BASE64DecoderStream(mailPart.getInputStream(), false));
+                } catch (OXException e) {
+                    Throwable cause = e.getCause();
+                    if (!(cause instanceof com.sun.mail.util.DecodingException)) {
+                        throw e;
+                    }
+                    sink.write(mailPart.getInputStream());
+                }
+            } else {
+                sink.write(mailPart.getInputStream());
+            }            
 
             final String fn;
             if (null == mailPart.getFileName()) {

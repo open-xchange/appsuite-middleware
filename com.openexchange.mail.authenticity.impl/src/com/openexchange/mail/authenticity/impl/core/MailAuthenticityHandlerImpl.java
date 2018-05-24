@@ -130,7 +130,7 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
         this.ranking = ranking;
         authServIdsCache = CacheBuilder.newBuilder().maximumSize(65536).expireAfterWrite(30, TimeUnit.MINUTES).build();
         requiredMailFields = ImmutableList.of(MailField.FROM);
-        validator = new StandardAuthenticationResultsValidator(services);
+        validator = new StandardAuthenticationResultsValidator();
         this.checker = checker;
     }
 
