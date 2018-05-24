@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: backend\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2018-05-09 20:55+0300\n"
+"PO-Revision-Date: 2018-05-23 15:19+0300\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: fi_FI\n"
@@ -7925,22 +7925,22 @@ msgstr "Poistettu"
 #. The appendix to indicate the first ordinal; e.g for EN it would be "1st", for DE it would be "1.".
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:789
 msgid "st"
-msgstr ""
+msgstr "."
 
 #. The appendix to indicate the second ordinal; e.g for EN it would be "2nd", for DE it would be "2.".
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:792
 msgid "nd"
-msgstr ""
+msgstr "."
 
 #. The appendix to indicate the third ordinal; e.g for EN it would be "3rd", for DE it would be "3.".
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:795
 msgid "rd"
-msgstr ""
+msgstr "."
 
 #. The appendix to indicate an ordinal greater than 3rd; e.g for EN it would be "4th", for DE it would be "4.".
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:798
 msgid "th"
-msgstr ""
+msgstr "."
 
 #. -
 #. * Recurrence templates
