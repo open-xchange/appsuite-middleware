@@ -393,8 +393,8 @@ public class CalendarAccountServiceImpl implements CalendarAccountService, Admin
                     throw CalendarExceptionCodes.CONCURRENT_MODIFICATION.create(String.valueOf(accountId), clientTimestamp, account.getLastModified().getTime());
                 }
                 CalendarAccount accountUpdate = new DefaultCalendarAccount(account.getProviderId(), account.getAccountId(), account.getUserId(), internalConfig, userConfig, new Date());
-                CalendarAccount updatedAccount = storage.getAccountStorage().updateAccount(accountUpdate, clientTimestamp);
-                return updatedAccount;
+                storage.getAccountStorage().updateAccount(accountUpdate, clientTimestamp);
+                return storage.getAccountStorage().loadAccount(userId, accountId);
             }
         }.executeUpdate();
         invalidateStorage(contextId, userId, accountId);
@@ -468,8 +468,8 @@ public class CalendarAccountServiceImpl implements CalendarAccountService, Admin
         } else {
             accountId = storage.nextId();
         }
-        CalendarAccount newAccount = storage.insertAccount(new DefaultCalendarAccount(providerId, accountId, userId, internalConfig, userConfig, new Date()), maxAccounts);
-        return newAccount;
+        storage.insertAccount(new DefaultCalendarAccount(providerId, accountId, userId, internalConfig, userConfig, new Date()), maxAccounts);
+        return storage.loadAccount(userId, accountId);
     }
 
     private CalendarProvider getProvider(String providerId) throws OXException {
