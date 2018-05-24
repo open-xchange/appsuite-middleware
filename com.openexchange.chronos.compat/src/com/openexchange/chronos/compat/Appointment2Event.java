@@ -316,6 +316,9 @@ public class Appointment2Event {
      * @throws {@link CalendarExceptionCodes#INVALID_RECURRENCE_ID}
      */
     public static RecurrenceId getRecurrenceID(RecurrenceService recurrenceService, RecurrenceData recurrenceData, int recurrencePosition) throws OXException {
+        if(recurrenceData == null) {
+            throw CalendarExceptionCodes.UNEXPECTED_ERROR.create("Missing recurrence data");
+        }
         RecurrenceIterator<RecurrenceId> iterator = recurrenceService.iterateRecurrenceIds(recurrenceData, Autoboxing.I(recurrencePosition), null);
         while (iterator.hasNext()) {
             DateTime next = iterator.next().getValue();

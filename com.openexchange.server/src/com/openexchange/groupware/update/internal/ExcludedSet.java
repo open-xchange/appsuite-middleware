@@ -50,12 +50,14 @@
 package com.openexchange.groupware.update.internal;
 
 import java.io.IOException;
-import java.util.HashSet;
-import java.util.Map.Entry;
+import java.util.Collections;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.Properties;
 import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.google.common.collect.ImmutableSet;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.ConfigurationServices;
 
@@ -73,29 +75,53 @@ public class ExcludedSet implements UpdateTaskSet<String> {
     private static final ExcludedSet SINGLETON = new ExcludedSet();
     private static final String CONFIG_FILE_NAME = "excludedupdatetasks.properties";
 
-    private final Set<String> taskSet = new HashSet<String>();
-
-    private ExcludedSet() {
-        super();
-    }
-
+    /**
+     * Gets the singleton instance
+     *
+     * @return The instance
+     */
     public static ExcludedSet getInstance() {
         return SINGLETON;
     }
 
+    // -----------------------------------------------------------------------------------------------------
+
+    private final AtomicReference<Set<String>> taskSetRef = new AtomicReference<Set<String>>(Collections.emptySet());
+
+    /**
+     * Initialises a new {@link ExcludedSet}.
+     */
+    private ExcludedSet() {
+        super();
+    }
+
+    /**
+     * Loads <code>"excludedupdatetasks.properties"</code> file.
+     *
+     * @param configService The service to use
+     */
     public void configure(ConfigurationService configService) {
-        taskSet.clear();
         Properties props = loadProperties(configService);
-        for (Entry<Object, Object> entry : props.entrySet()) {
-            String className = entry.getKey().toString().trim();
-            taskSet.add(className);
+        int size = props.size();
+        if (size <= 0) {
+            return;
         }
+
+        ImmutableSet.Builder<String> taskSet = ImmutableSet.builderWithExpectedSize(size);
+        String propertyName = NamespaceAwareExcludedSet.PROPERTY.getFQPropertyName();
+        for (Map.Entry<Object, Object> entry : props.entrySet()) {
+            String className = entry.getKey().toString().trim();
+            if (false == propertyName.equals(className)) {
+                taskSet.add(className);
+            }
+        }
+        taskSetRef.set(taskSet.build());
         UpdateTaskCollection.getInstance().dirtyVersion();
     }
 
     /**
      * Loads the properties
-     * 
+     *
      * @param configService The {@link ConfigurationService}
      * @return The {@link Properties} found in {@value #CONFIG_FILE_NAME} or an empty {@link Properties} set
      */
@@ -103,23 +129,14 @@ public class ExcludedSet implements UpdateTaskSet<String> {
         try {
             return ConfigurationServices.loadPropertiesFrom(configService.getFileByName(CONFIG_FILE_NAME));
         } catch (IOException e) {
-            LOG.warn("No '{}' file found in configuration folder with excluded update tasks.", CONFIG_FILE_NAME);
+            LOG.warn("No '{}' file found in configuration folder with excluded update tasks.", CONFIG_FILE_NAME, e);
             return new Properties();
         }
     }
 
     @Override
     public Set<String> getTaskSet() {
-        return taskSet;
+        return taskSetRef.get();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.groupware.update.internal.UpdateTaskSet#containsTask(java.lang.Object)
-     */
-    @Override
-    public boolean containsTask(String task) {
-        return taskSet.contains(task);
-    }
 }

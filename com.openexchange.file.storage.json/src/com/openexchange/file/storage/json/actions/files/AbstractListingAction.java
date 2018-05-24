@@ -186,7 +186,7 @@ public abstract class AbstractListingAction extends AbstractFileAction {
      */
     protected AJAXRequestResult results(SearchIterator<File> searchIterator, InfostoreRequest request) throws OXException {
         SearchIterator<File> results = searchIterator;
-
+        Long timestamp = null;
         if (AJAXRequestDataTools.parseBoolParameter(PARAMETER_PREGENERATE_PREVIEWS, request.getRequestData())) {
             PreviewService previewService = Services.getPreviewService();
             ThreadPoolService threadPool = Services.getThreadPoolService();
@@ -196,6 +196,9 @@ public abstract class AbstractListingAction extends AbstractFileAction {
                     while (results.hasNext()) {
                         // Call preview service for next file
                         File fileMetadata = results.next();
+                        if(timestamp == null || timestamp<fileMetadata.getSequenceNumber()) {
+                            timestamp = fileMetadata.getSequenceNumber();
+                        }
                         files.add(fileMetadata);
                     }
 
@@ -207,7 +210,21 @@ public abstract class AbstractListingAction extends AbstractFileAction {
             }
         }
 
-        return new AJAXRequestResult(results, null, "infostore");
+        // Calculate eventually missing timestamp
+        if(timestamp == null && results.hasNext()) {
+            List<File> files = new LinkedList<File>();
+            while (results.hasNext()) {
+                // Call preview service for next file
+                File fileMetadata = results.next();
+                if(timestamp == null || timestamp < fileMetadata.getSequenceNumber()) {
+                    timestamp = fileMetadata.getSequenceNumber();
+                }
+                files.add(fileMetadata);
+            }
+            return new AJAXRequestResult(files, new Date(timestamp), "infostore");
+        }
+
+        return new AJAXRequestResult(results, new Date(timestamp), "infostore");
     }
 
     /**

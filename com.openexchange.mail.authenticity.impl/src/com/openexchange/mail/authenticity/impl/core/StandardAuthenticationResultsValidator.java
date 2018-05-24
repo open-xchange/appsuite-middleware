@@ -59,7 +59,6 @@ import java.util.Map;
 import java.util.function.BiFunction;
 import javax.mail.internet.InternetAddress;
 import com.google.common.collect.ImmutableMap;
-import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.InterruptibleCharSequence;
 import com.openexchange.java.InterruptibleCharSequence.InterruptedRuntimeException;
@@ -79,7 +78,6 @@ import com.openexchange.mail.authenticity.mechanism.dkim.DKIMResult;
 import com.openexchange.mail.authenticity.mechanism.dmarc.DMARCResult;
 import com.openexchange.mail.authenticity.mechanism.spf.SPFResult;
 import com.openexchange.mail.dataobjects.MailAuthenticityResult;
-import com.openexchange.server.ServiceLookup;
 
 /**
  * {@link StandardAuthenticationResultsValidator} - The standard parser and validator for <code>Authentication-Results</code> headers and <code>From</code> header of an E-Mail.
@@ -94,14 +92,12 @@ public class StandardAuthenticationResultsValidator implements AuthenticationRes
 
     private final Comparator<String> mailAuthComparator;
     private final Map<DefaultMailAuthenticityMechanism, BiFunction<Map<String, String>, MailAuthenticityResult, MailAuthenticityMechanismResult>> mechanismParsersRegistry;
-    private final ServiceLookup services;
 
     /**
      * Initializes a new {@link StandardAuthenticationResultsValidator}.
      */
-    protected StandardAuthenticationResultsValidator(ServiceLookup services) {
+    protected StandardAuthenticationResultsValidator() {
         super();
-        this.services = services;
         mailAuthComparator = new MailAuthenticityMechanismComparator();
         mechanismParsersRegistry = initialiseMechanismRegistry();
     }
@@ -357,27 +353,16 @@ public class StandardAuthenticationResultsValidator implements AuthenticationRes
         }
 
         if (bestOfDMARC != null) {
-            LeanConfigurationService leanConfig = services.getService(LeanConfigurationService.class);
-            boolean considerDMARCPolicy = leanConfig.getBooleanProperty(MailAuthenticityProperty.CONSIDER_DMARC_POLICY);
-            String policy = "";
-            if (considerDMARCPolicy) {
-                Map<String, String> properties = bestOfDMARC.getProperties();
-                policy = properties.get("policy");
-            }
-
-            // If the policy is set to 'none' then ignore DMARC and continue with other mechs
-            if (Strings.isEmpty(policy) || (Strings.isNotEmpty(policy) && !policy.equalsIgnoreCase("none"))) {
-                // If DMARC passes we set the overall status to PASS
-                if (DMARCResult.PASS.equals(bestOfDMARC.getResult()) && bestOfDMARC.isDomainMatch()) {
-                    overallResult.setStatus(MailAuthenticityStatus.PASS);
-                    overallResult.addAttribute(MailAuthenticityResultKey.FROM_DOMAIN, bestOfDMARC.getDomain());
-                    return;
-                } else if (DMARCResult.FAIL.equals(bestOfDMARC.getResult())) {
-                    overallResult.setStatus(MailAuthenticityStatus.FAIL);
-                    return;
-                } else if (DMARCResult.NONE.equals(bestOfDMARC.getResult())) {
-                    overallResult.setStatus(MailAuthenticityStatus.NONE);
-                }
+            // If DMARC passes we set the overall status to PASS
+            if (DMARCResult.PASS.equals(bestOfDMARC.getResult()) && bestOfDMARC.isDomainMatch()) {
+                overallResult.setStatus(MailAuthenticityStatus.PASS);
+                overallResult.addAttribute(MailAuthenticityResultKey.FROM_DOMAIN, bestOfDMARC.getDomain());
+                return;
+            } else if (DMARCResult.FAIL.equals(bestOfDMARC.getResult())) {
+                overallResult.setStatus(MailAuthenticityStatus.FAIL);
+                return;
+            } else if (DMARCResult.NONE.equals(bestOfDMARC.getResult())) {
+                overallResult.setStatus(MailAuthenticityStatus.NONE);
             }
         }
 

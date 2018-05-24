@@ -62,16 +62,9 @@ interface UpdateTaskSet<T> {
 
     /**
      * Returns a {@link Set} with all {@link UpdateTaskV2} tasks
-     * 
+     *
      * @return a {@link Set} with all {@link UpdateTaskV2} tasks
      */
     Set<T> getTaskSet();
 
-    /**
-     * Determines whether the specified task {@link T} is contained in this {@link UpdateTaskSet}
-     * 
-     * @param task The task
-     * @return <code>true</code> if the task is contained; <code>false</code> otherwise
-     */
-    boolean containsTask(T task);
 }

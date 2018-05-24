@@ -49,7 +49,6 @@
 
 package com.openexchange.mail.authenticity.test;
 
-import static org.mockito.Mockito.when;
 import java.util.Arrays;
 import java.util.List;
 import javax.mail.internet.AddressException;
@@ -57,7 +56,6 @@ import javax.mail.internet.InternetAddress;
 import org.junit.Test;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.authenticity.AllowedAuthServId;
-import com.openexchange.mail.authenticity.MailAuthenticityProperty;
 import com.openexchange.mail.authenticity.MailAuthenticityStatus;
 import com.openexchange.mail.authenticity.impl.core.AuthenticationResultsValidator;
 import com.openexchange.mail.dataobjects.MailAuthenticityResult;
@@ -147,42 +145,6 @@ public class StandardAuthenticationResultsValidatorTest extends AbstractTestMail
         List<AllowedAuthServId> allowedAuthServIds = AllowedAuthServId.allowedAuthServIdsFor("open-xchange.com");
         InternetAddress from = new QuotedInternetAddress("John Doe <John.Doe@fooBAR.com>");
 
-        MailAuthenticityResult result = validator.parseHeaders(authHeaders, from, allowedAuthServIds);
-        assertStatus(MailAuthenticityStatus.NEUTRAL, result.getStatus());
-    }
-
-    @Test
-    public void testConsiderDMARCPolicy1() throws Exception {
-        when(leanConfig.getBooleanProperty(MailAuthenticityProperty.CONSIDER_DMARC_POLICY)).thenReturn(true);
-
-        //@formatter:off
-        List<String> authHeaders = Arrays.asList(
-            "open-xchange.com; dmarc=fail (p=none dis=none) header.from=foobar.com",
-            "open-xchange.com; spf=none smtp.helo=mx2.foobar.com"
-        );
-        //@formatter:on
-        List<AllowedAuthServId> allowedAuthServIds = AllowedAuthServId.allowedAuthServIdsFor("open-xchange.com");
-        InternetAddress from = new QuotedInternetAddress("MAILER-DAEMON@foobar.com (Mail Delivery System)");
-
-        AuthenticationResultsValidator validator = handler.getValidator();
-        MailAuthenticityResult result = validator.parseHeaders(authHeaders, from, allowedAuthServIds);
-        assertStatus(MailAuthenticityStatus.NEUTRAL, result.getStatus());
-    }
-    
-    @Test
-    public void testConsiderDMARCPolicy2() throws Exception {
-        when(leanConfig.getBooleanProperty(MailAuthenticityProperty.CONSIDER_DMARC_POLICY)).thenReturn(true);
-
-        //@formatter:off
-        List<String> authHeaders = Arrays.asList(
-            "open-xchange.com; dmarc=fail (p=none dis=none) header.from=open-xchange.com",
-            "open-xchange.com; spf=none smtp.mailfrom=mailop-bounces@foobar.com"
-        );
-        //@formatter:on
-        List<AllowedAuthServId> allowedAuthServIds = AllowedAuthServId.allowedAuthServIdsFor("open-xchange.com");
-        InternetAddress from = new QuotedInternetAddress("Jane Doe <jane.doe@open-xchange.com>");
-
-        AuthenticationResultsValidator validator = handler.getValidator();
         MailAuthenticityResult result = validator.parseHeaders(authHeaders, from, allowedAuthServIds);
         assertStatus(MailAuthenticityStatus.NEUTRAL, result.getStatus());
     }

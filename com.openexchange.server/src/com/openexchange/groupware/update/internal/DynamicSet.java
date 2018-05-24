@@ -91,19 +91,19 @@ public final class DynamicSet implements UpdateTaskSet<UpdateTaskV2> {
 
     /**
      * Adds the specified update task to this registry.
-     * 
+     *
      * @param updateTask The {@link UpdateTaskV2} task to add
      * @return <code>true</code> if the task was successfully registered; <code>false</code>
      *         if the same task was previously registered.
      */
     public boolean addUpdateTask(final UpdateTaskV2 updateTask) {
-        final boolean added = (null == taskRegistry.putIfAbsent(getUpdateTaskName(updateTask), updateTask));
-        if (added) {
+        if (null == taskRegistry.putIfAbsent(getUpdateTaskName(updateTask), updateTask)) {
             UpdateTaskCollection.getInstance().dirtyVersion();
-        } else {
-            LOG.error("Update task \"{}\" is already registered.", updateTask.getClass().getName());
+            return true;
         }
-        return added;
+
+        LOG.error("Update task \"{}\" is already registered.", updateTask.getClass().getName());
+        return false;
     }
 
     /**
@@ -111,7 +111,7 @@ public final class DynamicSet implements UpdateTaskSet<UpdateTaskV2> {
      * as a local or anonymous class, then its name is being compiled by the {@link Package}
      * information and the class's name. If the {@link Package} is not available, then
      * the name falls back to a 'orphanedUpdateTask.t[timestamp].ClassName' format.
-     * 
+     *
      * @param updateTask The update task's name that shall be returned
      * @return the update task's name
      */
@@ -133,8 +133,7 @@ public final class DynamicSet implements UpdateTaskSet<UpdateTaskV2> {
      * @param updateTask The update task
      */
     public void removeUpdateTask(final UpdateTaskV2 updateTask) {
-        final UpdateTaskV2 removed = taskRegistry.remove(getUpdateTaskName(updateTask));
-        if (null == removed) {
+        if (null == taskRegistry.remove(getUpdateTaskName(updateTask))) {
             LOG.error("Update task \"{}\" is unknown and could not be deregistered.", updateTask.getClass().getName());
         } else {
             UpdateTaskCollection.getInstance().dirtyVersion();
@@ -143,18 +142,7 @@ public final class DynamicSet implements UpdateTaskSet<UpdateTaskV2> {
 
     @Override
     public Set<UpdateTaskV2> getTaskSet() {
-        final Set<UpdateTaskV2> retval = new HashSet<UpdateTaskV2>(taskRegistry.size());
-        retval.addAll(taskRegistry.values());
-        return retval;
+        return new HashSet<UpdateTaskV2>(taskRegistry.values());
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.groupware.update.internal.UpdateTaskSet#containsTask(java.lang.Object)
-     */
-    @Override
-    public boolean containsTask(UpdateTaskV2 task) {
-        return taskRegistry.containsKey(getUpdateTaskName(task));
-    }
 }

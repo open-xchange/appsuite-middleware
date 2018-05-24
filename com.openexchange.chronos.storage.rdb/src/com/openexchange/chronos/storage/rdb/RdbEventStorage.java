@@ -65,7 +65,6 @@ import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 import org.dmfs.rfc5545.DateTime;
@@ -586,7 +585,8 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
             stringBuilder.append(" AND e.rangeFrom<?");
         }
         stringBuilder.append(" AND ").append(adapter.getClause()).append(getSortOptions(MAPPER, searchOptions, "e.")).append(';');
-        Set<Event> events = new LinkedHashSet<>();
+        Set<String> ids = new HashSet<String>();
+        List<Event> events = new ArrayList<Event>();
         try (PreparedStatement stmt = connection.prepareStatement(stringBuilder.toString())) {
             int parameterIndex = 1;
             stmt.setInt(parameterIndex++, context.getContextId());
@@ -600,11 +600,14 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
             adapter.setParameters(stmt, parameterIndex++);
             try (ResultSet resultSet = logExecuteQuery(stmt)) {
                 while (resultSet.next()) {
-                    events.add(readEvent(resultSet, mappedFields, "e."));
+                    Event event = readEvent(resultSet, mappedFields, "e.");
+                    if (null == event.getId() || ids.add(event.getId())) {
+                        events.add(event);
+                    }
                 }
             }
         }
-        return new ArrayList<>(events);
+        return events;
     }
 
     private long countEvents(Connection connection, boolean deleted, SearchTerm<?> searchTerm) throws SQLException, OXException {
@@ -686,7 +689,8 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
             }
         }
         stringBuilder.append(getSortOptions(MAPPER, searchOptions, "e.")).append(';');
-        Set<Event> events = new LinkedHashSet<>();
+        Set<String> ids = new HashSet<String>();
+        List<Event> events = new ArrayList<Event>();
         try (PreparedStatement stmt = connection.prepareStatement(stringBuilder.toString())) {
             int parameterIndex = 1;
             stmt.setInt(parameterIndex++, context.getContextId());
@@ -707,11 +711,14 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
             }
             try (ResultSet resultSet = logExecuteQuery(stmt)) {
                 while (resultSet.next()) {
-                    events.add(readEvent(resultSet, mappedFields, "e."));
+                    Event event = readEvent(resultSet, mappedFields, "e.");
+                    if (null == event.getId() || ids.add(event.getId())) {
+                        events.add(event);
+                    }
                 }
             }
         }
-        return new ArrayList<>(events);
+        return events;
     }
 
     private Event readEvent(ResultSet resultSet, EventField[] fields, String columnLabelPrefix) throws SQLException, OXException {

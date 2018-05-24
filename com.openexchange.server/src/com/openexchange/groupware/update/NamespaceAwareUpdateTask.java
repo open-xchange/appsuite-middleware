@@ -47,14 +47,14 @@
  *
  */
 
-package com.openexchange.groupware.update.internal;
+package com.openexchange.groupware.update;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Inherited;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
-import com.openexchange.groupware.update.UpdateTaskV2;
+import com.openexchange.groupware.update.internal.ExcludedSet;
 
 /**
  * {@link NamespaceAwareUpdateTask} - Makes an {@link UpdateTaskV2} namespace-aware.
@@ -74,4 +74,11 @@ public @interface NamespaceAwareUpdateTask {
      * @return the namespace of the update task(s)
      */
     String namespace();
+
+    /**
+     * Returns the description of the namespace-aware update task / task set.
+     * 
+     * @return the description of the namespace-aware update task / task set.
+     */
+    String description();
 }

@@ -311,6 +311,8 @@ public class EventManager extends AbstractManager {
         endTime.add(Calendar.HOUR, 1);
         event.setEndDate(DateTimeUtil.getDateTime(endTime));
         ChronosCalendarResultResponse updateEvent = userApi.getChronosApi().updateEvent(userApi.getSession(), getFolder(event), eventId, event, timestamp, recurrence, null, false, false, false, null, null, EXPAND_SERIES);
+        assertNull(updateEvent.getErrorDesc(), updateEvent.getError());
+        assertNotNull("Missing timestamp", updateEvent.getTimestamp());
         lastTimeStamp = updateEvent.getTimestamp();
         return checkResponse(updateEvent.getError(), updateEvent.getErrorDesc(), updateEvent.getCategories(), updateEvent.getData());
     }
