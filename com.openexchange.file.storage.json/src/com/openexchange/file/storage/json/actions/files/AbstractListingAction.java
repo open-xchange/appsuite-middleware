@@ -224,7 +224,7 @@ public abstract class AbstractListingAction extends AbstractFileAction {
             return new AJAXRequestResult(files, new Date(timestamp), "infostore");
         }
 
-        return new AJAXRequestResult(results, new Date(timestamp), "infostore");
+        return new AJAXRequestResult(results, timestamp == null ? null : new Date(timestamp), "infostore");
     }
 
     /**
