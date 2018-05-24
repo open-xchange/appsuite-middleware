@@ -97,6 +97,7 @@ import com.openexchange.chronos.EventFlag;
 import com.openexchange.chronos.EventStatus;
 import com.openexchange.chronos.ExtendedProperties;
 import com.openexchange.chronos.ExtendedProperty;
+import com.openexchange.chronos.Organizer;
 import com.openexchange.chronos.ParticipationStatus;
 import com.openexchange.chronos.Period;
 import com.openexchange.chronos.RecurrenceId;
@@ -1984,6 +1985,33 @@ public class CalendarUtils {
             flags.add(EventFlag.OVERRIDDEN);
         }
         return flags;
+    }
+
+    /**
+     * Checks if the organizer is also part of the attendee list.
+     *
+     * @param changedEvent
+     * @throws OXException
+     */
+    public static void checkOrganizer(Event changedEvent) throws OXException {
+        Organizer organizer = changedEvent.getOrganizer();
+        if (organizer == null) {
+            return;
+        }
+
+        boolean foundOrganizer = changedEvent.getAttendees().stream().filter(a -> {
+            if (CalendarUtils.isInternal(a)) {
+                return a.getEntity() == organizer.getEntity();
+            } else if (CalendarUtils.isExternalUser(a)) {
+                return a.getUri().equals(organizer.getUri());
+            } else {
+                return false;
+            }
+        }).findFirst().isPresent();
+
+        if (!foundOrganizer) {
+            throw CalendarExceptionCodes.MISSING_ORGANIZER.create();
+        }
     }
 
 }

@@ -161,6 +161,7 @@ public class EventUpdateProcessor implements EventUpdate {
          * apply, check, adjust event update as needed
          */
         Event changedEvent = apply(originalEvent, updatedEvent, consideredFields, ignoredFields);
+        CalendarUtils.checkOrganizer(changedEvent);
         checkIntegrity(originalEvent, changedEvent);
         ensureConsistency(originalEvent, changedEvent, timestamp);
         List<Event> changedChangeExceptions = adjustExceptions(originalEvent, changedEvent, originalChangeExceptions);
