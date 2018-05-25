@@ -370,7 +370,7 @@ public class Executor {
              * execute and read out results
              */
             resultSet = logExecuteQuery(stmt);
-            return new ContactReader(contextID, connection, resultSet).readContacts(fields, false);
+            return new ContactReader(contextID, connection, resultSet).readContacts(fields, Arrays.asList(fields).contains(ContactField.USE_COUNT));
         } finally {
             Databases.closeSQLStuff(resultSet, stmt);
         }

@@ -28,6 +28,8 @@ Import-Package: com.openexchange.capabilities,
  com.openexchange.server,
  com.openexchange.session,
  com.openexchange.tools.session,
+ net.jodah.failsafe,
+ net.jodah.failsafe.function,
  org.json,
  org.osgi.framework,
  org.slf4j

@@ -61,6 +61,7 @@ import com.openexchange.ajax.share.GuestClient;
 import com.openexchange.ajax.share.ShareTest;
 import com.openexchange.ajax.share.actions.ExtendedPermissionEntity;
 import com.openexchange.ajax.share.actions.ResolveShareResponse;
+import com.openexchange.ajax.writer.ResponseWriter;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.share.recipient.AnonymousRecipient;
@@ -69,8 +70,7 @@ import com.openexchange.share.recipient.RecipientType;
 /**
  * {@link ExpiredSharesTest}
  *
- * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias
- *         Friedrich</a>
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public class ExpiredSharesTest extends ShareTest {
 
@@ -150,7 +150,7 @@ public class ExpiredSharesTest extends ShareTest {
         if (shareResolveResponse.getResponse() != null) {
             System.out.println("Share resolve response error messages: " + shareResolveResponse.getErrorMessage());
             System.out.println("Share resolve response exception: " + shareResolveResponse.getException().getMessage());
-            System.out.println("Share resolve response content: " + shareResolveResponse.getResponse().getJSON());
+            System.out.println("Share resolve response content: " + ResponseWriter.getJSON(shareResolveResponse.getResponse()));
         }
         if (null != shareResolveResponse.getConflicts()) {
             System.out.println("Share resolve response conflicts: " + shareResolveResponse.getConflicts().size());

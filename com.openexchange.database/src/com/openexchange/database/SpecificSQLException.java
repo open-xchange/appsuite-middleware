@@ -47,61 +47,45 @@
  *
  */
 
-package com.openexchange.chronos.impl.performer;
+package com.openexchange.database;
 
-import static com.openexchange.chronos.common.SearchUtils.getSearchTerm;
-import java.util.List;
-import com.openexchange.chronos.Event;
-import com.openexchange.chronos.EventField;
-import com.openexchange.chronos.storage.CalendarStorage;
-import com.openexchange.exception.OXException;
-import com.openexchange.search.CompositeSearchTerm;
-import com.openexchange.search.CompositeSearchTerm.CompositeOperation;
-import com.openexchange.search.SingleSearchTerm.SingleOperation;
-import com.openexchange.search.internal.operands.ColumnFieldOperand;
+import java.sql.SQLException;
 
 /**
- * {@link ResolveFilenamePerformer}
+ * {@link SpecificSQLException} - Utility class to map given SQL error to a specific one.
  *
- * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.10.0
  */
-public class ResolveFilenamePerformer {
-
-    private final CalendarStorage storage;
+public class SpecificSQLException {
 
     /**
-     * Initializes a new {@link ResolveFilenamePerformer}.
-     *
-     * @param storage The underlying calendar storage
+     * Initializes a new {@link SpecificSQLException}.
      */
-    public ResolveFilenamePerformer(CalendarStorage storage) {
+    private SpecificSQLException() {
         super();
-        this.storage = storage;
     }
 
     /**
-     * Performs the operation.
+     * Tries to map given SQL error to a specific one.
      *
-     * @param filename The filename to resolve
-     * @return The identifier of the resolved event, or <code>0</code> if not found
+     * @param e The SQL error to map
+     * @return The specific SQL error or <code>null</code>
      */
-    public String perform(String filename) throws OXException {
-        /*
-         * construct search term
-         */
-        CompositeSearchTerm searchTerm = new CompositeSearchTerm(CompositeOperation.AND)
-            .addSearchTerm(getSearchTerm(EventField.FILENAME, SingleOperation.EQUALS, filename))
-            .addSearchTerm(new CompositeSearchTerm(CompositeOperation.OR)
-                .addSearchTerm(getSearchTerm(EventField.SERIES_ID, SingleOperation.ISNULL))
-                .addSearchTerm(getSearchTerm(EventField.ID, SingleOperation.EQUALS, new ColumnFieldOperand<EventField>(EventField.SERIES_ID)))
-            )
-        ;
-        /*
-         * search for an event matching the filename
-         */
-        List<Event> events = storage.getEventStorage().searchEvents(searchTerm, null, new EventField[] { EventField.ID });
-        return 0 < events.size() ? events.get(0).getId() : null;
+    public static SQLException getSpecificSQLExceptionFor(SQLException e) {
+        if (null == e) {
+            return null;
+        }
+
+        SQLException specific = IncorrectStringSQLException.instanceFor(e);
+        if (null != specific) {
+            return specific;
+        }
+        specific = IllegalMixOfCollationsSQLException.instanceFor(e);
+        if (null != specific) {
+            return specific;
+        }
+        return null;
     }
 
 }

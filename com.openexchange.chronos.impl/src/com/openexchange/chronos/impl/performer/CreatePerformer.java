@@ -121,11 +121,12 @@ public class CreatePerformer extends AbstractUpdatePerformer {
             newEvent.setFolderId(folder.getId());
         } else {
             /*
-             * group-scheduled event, assign organizer, sequence number and dynamic parent-folder identifier (for non-public folders)
+             * group-scheduled event, assign & check organizer, sequence number and dynamic parent-folder identifier (for non-public folders)
              */
             newEvent.setOrganizer(prepareOrganizer(session, folder, event.getOrganizer()));
             newEvent.setSequence(event.containsSequence() ? event.getSequence() : 0);
             newEvent.setFolderId(PublicType.getInstance().equals(folder.getType()) ? folder.getId() : null);
+            Check.internalOrganizerIsAttendee(newEvent);
         }
         /*
          * check for conflicts & quota restrictions
@@ -182,7 +183,7 @@ public class CreatePerformer extends AbstractUpdatePerformer {
         if (false == eventData.containsUid() || Strings.isEmpty(eventData.getUid())) {
             event.setUid(UUID.randomUUID().toString());
         } else {
-            event.setUid(Check.uidIsUnique(storage, eventData));
+            event.setUid(Check.uidIsUnique(session, storage, eventData));
         }
         /*
          * creation/modification/calendaruser metadata

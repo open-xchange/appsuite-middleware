@@ -59,6 +59,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import org.json.JSONObject;
 import org.slf4j.LoggerFactory;
@@ -80,6 +81,7 @@ import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.storage.CalendarAccountStorage;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.chronos.storage.CalendarStorageFactory;
+import com.openexchange.chronos.storage.operation.CalendarStorageOperation;
 import com.openexchange.chronos.storage.operation.OSGiCalendarStorageOperation;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
@@ -92,6 +94,9 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
+import net.jodah.failsafe.Failsafe;
+import net.jodah.failsafe.FailsafeException;
+import net.jodah.failsafe.RetryPolicy;
 
 /**
  * {@link CalendarAccountServiceImpl}
@@ -303,20 +308,17 @@ public class CalendarAccountServiceImpl implements CalendarAccountService, Admin
     @Override
     public List<CalendarAccount> getAccounts(Session session, CalendarParameters parameters) throws OXException {
         /*
-         * get accounts from storage
+         * get accounts from storage & check list for pending provisioning tasks
          */
         List<CalendarAccount> accounts = getAccounts(session.getContextId(), session.getUserId());
-        /*
-         * check for pending provisioning tasks
-         */
         if (false == getProvidersRequiringProvisioning(session, accounts).isEmpty() && false == isGuest(session)) {
-            accounts = new OSGiCalendarStorageOperation<List<CalendarAccount>>(services, session.getContextId(), -1, parameters) {
+            /*
+             * assume there are pending auto-provisioning tasks, so re-check account list for pending auto-provisioning within transaction & auto-provision as needed
+             */
+            CalendarStorageOperation<List<CalendarAccount>> storageOperation = new OSGiCalendarStorageOperation<List<CalendarAccount>>(services, session.getContextId(), -1, parameters) {
 
                 @Override
                 protected List<CalendarAccount> call(CalendarStorage storage) throws OXException {
-                    /*
-                     * re-check account list for pending auto-provisioning within transaction & auto-provision as needed
-                     */
                     List<CalendarAccount> accounts = storage.getAccountStorage().loadAccounts(session.getUserId());
                     for (AutoProvisioningCalendarProvider calendarProvider : getProvidersRequiringProvisioning(session, accounts)) {
                         int maxAccounts = getMaxAccounts(calendarProvider, session.getContextId(), session.getUserId());
@@ -328,9 +330,24 @@ public class CalendarAccountServiceImpl implements CalendarAccountService, Admin
                     }
                     return accounts;
                 }
-            }.executeUpdate();
+            };
             /*
-             * (re-)invalidate caches outside of transaction
+             * ... trying again in case of a concurrently running auto-provisioning operation
+             */
+            try {
+                accounts = Failsafe.with(new RetryPolicy()
+                    .withMaxRetries(5).withBackoff(100, 1000, TimeUnit.MILLISECONDS)
+                    .retryOn(f -> OXException.class.isInstance(f) && CalendarExceptionCodes.ACCOUNT_NOT_WRITTEN.equals((OXException) f)))
+                    .onRetry(f -> LoggerFactory.getLogger(CalendarAccountServiceImpl.class).debug("New calendar account not stored, re-checking pending auto-provisioning tasks", f))
+                .get(() -> storageOperation.executeUpdate());
+            } catch (FailsafeException e) {
+                if (OXException.class.isInstance(e.getCause())) {
+                    throw (OXException) e.getCause();
+                }
+                throw e;
+            }
+            /*
+             * ensure to (re-)invalidate caches outside of transaction afterwards
              */
             invalidateStorage(session.getContextId(), session.getUserId());
         }
@@ -393,8 +410,8 @@ public class CalendarAccountServiceImpl implements CalendarAccountService, Admin
                     throw CalendarExceptionCodes.CONCURRENT_MODIFICATION.create(String.valueOf(accountId), clientTimestamp, account.getLastModified().getTime());
                 }
                 CalendarAccount accountUpdate = new DefaultCalendarAccount(account.getProviderId(), account.getAccountId(), account.getUserId(), internalConfig, userConfig, new Date());
-                CalendarAccount updatedAccount = storage.getAccountStorage().updateAccount(accountUpdate, clientTimestamp);
-                return updatedAccount;
+                storage.getAccountStorage().updateAccount(accountUpdate, clientTimestamp);
+                return storage.getAccountStorage().loadAccount(userId, accountId);
             }
         }.executeUpdate();
         invalidateStorage(contextId, userId, accountId);
@@ -468,8 +485,8 @@ public class CalendarAccountServiceImpl implements CalendarAccountService, Admin
         } else {
             accountId = storage.nextId();
         }
-        CalendarAccount newAccount = storage.insertAccount(new DefaultCalendarAccount(providerId, accountId, userId, internalConfig, userConfig, new Date()), maxAccounts);
-        return newAccount;
+        storage.insertAccount(new DefaultCalendarAccount(providerId, accountId, userId, internalConfig, userConfig, new Date()), maxAccounts);
+        return storage.loadAccount(userId, accountId);
     }
 
     private CalendarProvider getProvider(String providerId) throws OXException {
