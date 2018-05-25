@@ -134,7 +134,7 @@ public class ResolvePerformer extends AbstractQueryPerformer {
             }
         }
         event.setFolderId(folderId);
-        event.setFlags(getFlags(event, calendarUserId));
+        event.setFlags(getFlags(event, calendarUserId, session.getUserId()));
         /*
          * return event, anonymized as needed
          */

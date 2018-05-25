@@ -108,7 +108,7 @@ public class GetPerformer extends AbstractQueryPerformer {
         event = storage.getUtilities().loadAdditionalEventData(getCalendarUserId(folder), event, fields);
         event = Check.eventIsVisible(folder, event);
         event.setFolderId(Check.eventIsInFolder(event, folder));
-        event.setFlags(getFlags(event, getCalendarUserId(folder)));
+        event.setFlags(getFlags(event, getCalendarUserId(folder), session.getUserId()));
         if (isSeriesMaster(event)) {
             event = applyExceptionDates(storage, event, getCalendarUserId(folder));
         }
