@@ -65,7 +65,7 @@ public class OAuthAccountsTableUtf8Mb4UpdateTask extends SimpleConvertUtf8ToUtf8
      * Initialises a new {@link OAuthAccountsTableUtf8Mb4UpdateTask}.
      */
     public OAuthAccountsTableUtf8Mb4UpdateTask() {
-        super(DropForeignKeyFromOAuthAccountTask.class, "oauthAccounts");
+        super(OAuthAddIdentityColumnTask.class, "oauthAccounts");
     }
 
     /*
