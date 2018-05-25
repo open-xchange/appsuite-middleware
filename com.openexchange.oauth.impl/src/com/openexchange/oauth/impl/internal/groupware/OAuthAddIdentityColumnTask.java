@@ -94,6 +94,6 @@ public class OAuthAddIdentityColumnTask extends AbstractOAuthUpdateTask {
      */
     @Override
     public String[] getDependencies() {
-        return new String[] { OAuthCreateTableTask2.class.getName() };
+        return new String[] { DropForeignKeyFromOAuthAccountTask.class.getName() };
     }
 }
