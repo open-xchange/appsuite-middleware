@@ -147,7 +147,10 @@ public class PrepareResponseHeaderAction implements IFileResponseRendererAction 
             /*
              * Set headers...
              */
-            if (data.getDelivery() == null || !data.getDelivery().equalsIgnoreCase(IDataWrapper.VIEW)) {
+            if (checkedDownload.isAttachment()) {
+                // Force attachment download
+                data.getResponse().setHeader("Content-Disposition", checkedDownload.getContentDisposition());
+            } else if (data.getDelivery() == null || !data.getDelivery().equalsIgnoreCase(IDataWrapper.VIEW)) {
                 if (isEmpty(data.getContentDisposition())) {
                     data.getResponse().setHeader("Content-Disposition", checkedDownload.getContentDisposition());
                 } else {
@@ -163,9 +166,6 @@ public class PrepareResponseHeaderAction implements IFileResponseRendererAction 
                         }
                     }
                 }
-            } else if (checkedDownload.isAttachment()) {
-                // Force attachment download
-                data.getResponse().setHeader("Content-Disposition", checkedDownload.getContentDisposition());
             } else if (data.getDelivery().equalsIgnoreCase(IDataWrapper.VIEW) && null != data.getFileName()) {
                 final StringBuilder sb = new StringBuilder(32);
                 sb.append("inline");

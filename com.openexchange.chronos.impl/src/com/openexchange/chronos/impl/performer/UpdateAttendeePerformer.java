@@ -236,30 +236,30 @@ public class UpdateAttendeePerformer extends AbstractUpdatePerformer {
                 Attendee originalExceptionAttendee = Check.attendeeExists(originalExceptionEvent, attendee);
                 updateAttendee(originalExceptionEvent, originalExceptionAttendee, attendee);
             } else {
-
-                Map<Integer, List<Alarm>> alarms = storage.getAlarmStorage().loadAlarms(originalSeriesMaster);
                 /*
                  * update for new change exception; prepare & insert a plain exception first, based on the original data from the master
                  */
+                Map<Integer, List<Alarm>> seriesMasterAlarms = storage.getAlarmStorage().loadAlarms(originalSeriesMaster);
                 Event newExceptionEvent = prepareException(originalSeriesMaster, recurrenceId);
                 Check.quotaNotExceeded(storage, session);
                 storage.getEventStorage().insertEvent(newExceptionEvent);
                 storage.getAttendeeStorage().insertAttendees(newExceptionEvent.getId(), originalSeriesMaster.getAttendees());
                 storage.getAttachmentStorage().insertAttachments(session.getSession(), folder.getId(), newExceptionEvent.getId(), originalSeriesMaster.getAttachments());
-                for (Entry<Integer, List<Alarm>> entry : storage.getAlarmStorage().loadAlarms(originalSeriesMaster).entrySet()) {
+                for (Entry<Integer, List<Alarm>> entry : seriesMasterAlarms.entrySet()) {
                     insertAlarms(newExceptionEvent, i(entry.getKey()), filterRelativeTriggers(entry.getValue()), true);
                 }
                 newExceptionEvent = loadEventData(newExceptionEvent.getId());
                 resultTracker.trackCreation(newExceptionEvent, originalSeriesMaster);
                 /*
-                 * perform the attendee update & add new change exception date to series master event
+                 * perform the attendee update & track results
                  */
                 resultTracker.rememberOriginalEvent(newExceptionEvent);
                 Attendee attendeeUpdate = prepareAttendeeUpdate(newExceptionEvent, originalAttendee, attendee);
                 if (null != attendeeUpdate) {
                     storage.getAttendeeStorage().updateAttendee(newExceptionEvent.getId(), attendeeUpdate);
                 }
-                resultTracker.trackUpdate(newExceptionEvent, loadEventData(newExceptionEvent.getId()));
+                Event updatedExceptionEvent = loadEventData(newExceptionEvent.getId());
+                resultTracker.trackUpdate(newExceptionEvent, updatedExceptionEvent);
                 /*
                  * add change exception date to series master & track results
                  */
@@ -267,9 +267,13 @@ public class UpdateAttendeePerformer extends AbstractUpdatePerformer {
                 addChangeExceptionDate(originalSeriesMaster, recurrenceId);
                 Event updatedMasterEvent = loadEventData(originalSeriesMaster.getId());
                 resultTracker.trackUpdate(originalSeriesMaster, updatedMasterEvent);
-
-                storage.getAlarmTriggerStorage().deleteTriggers(originalSeriesMaster.getId());
-                storage.getAlarmTriggerStorage().insertTriggers(updatedMasterEvent, alarms);
+                /*
+                 * reset alarm triggers for series master event and new change exception
+                 */
+                storage.getAlarmTriggerStorage().deleteTriggers(updatedMasterEvent.getId());
+                storage.getAlarmTriggerStorage().insertTriggers(updatedMasterEvent, seriesMasterAlarms);
+                storage.getAlarmTriggerStorage().deleteTriggers(updatedExceptionEvent.getId());
+                storage.getAlarmTriggerStorage().insertTriggers(updatedExceptionEvent, storage.getAlarmStorage().loadAlarms(updatedExceptionEvent));
             }
         } else if (isSeriesException(originalEvent)) {
             /*

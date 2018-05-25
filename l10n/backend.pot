@@ -2250,6 +2250,18 @@ msgstr ""
 msgid "No global database for context group \"%1$s\" found."
 msgstr ""
 
+#. Problem with reading from or writing to database
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.database/src/com/openexchange/database/DatabaseExceptionStrings.java:63
+msgid "Problem with reading from or writing to database"
+msgstr ""
+
+#. User specified an input text that contains certain characters, which are not supported by database. E.g. cannot be stored or cannot be queried by.
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.database/src/com/openexchange/database/DatabaseExceptionStrings.java:66
+msgid ""
+"The specified input contains unsupported characters. Please remove the "
+"unsupported characters and try again."
+msgstr ""
+
 #. A DoveAdm error occurred: %1$s
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.dovecot.doveadm.client/src/com/openexchange/dovecot/doveadm/client/DoveAdmClientExceptionMessages.java:62
 msgid "A DoveAdm error occurred: %1$s"

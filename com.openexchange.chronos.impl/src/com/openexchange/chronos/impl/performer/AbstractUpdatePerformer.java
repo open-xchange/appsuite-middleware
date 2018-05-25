@@ -371,56 +371,39 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
      * @param recurrenceId The recurrence identifier of the occurrence to remove the attendee for
      * @param originalAttendee The original attendee to delete from the recurrence
      */
-    protected void deleteFromRecurrence(Event originalMasterEvent, RecurrenceId recurrenceId, Attendee originalAttendee) throws OXException {
+    protected void deleteFromRecurrence(Event originalSeriesMaster, RecurrenceId recurrenceId, Attendee originalAttendee) throws OXException {
         /*
-         * check if quota is exceeded before inserting new events
+         * prepare & insert a plain exception first, based on the original data from the master, leaving out the removed attendee
          */
+        Map<Integer, List<Alarm>> seriesMasterAlarms = storage.getAlarmStorage().loadAlarms(originalSeriesMaster);
+        Event newExceptionEvent = prepareException(originalSeriesMaster, recurrenceId);
         Check.quotaNotExceeded(storage, session);
-        /*
-         * prepare & insert a new plain exception
-         */
-        Event exceptionEvent = prepareException(originalMasterEvent, recurrenceId);
-        storage.getEventStorage().insertEvent(exceptionEvent);
-        /*
-         * take over all other original attendees
-         */
-        List<Attendee> excpetionAttendees = new ArrayList<Attendee>(originalMasterEvent.getAttendees());
-        excpetionAttendees.remove(originalAttendee);
-        storage.getAttendeeStorage().insertAttendees(exceptionEvent.getId(), excpetionAttendees);
-        /*
-         * take over all other original alarms
-         */
-        for (Entry<Integer, List<Alarm>> entry : storage.getAlarmStorage().loadAlarms(originalMasterEvent).entrySet()) {
-            int userId = i(entry.getKey());
-            if (userId != originalAttendee.getEntity()) {
-                insertAlarms(exceptionEvent, userId, filterRelativeTriggers(entry.getValue()), true);
+        storage.getEventStorage().insertEvent(newExceptionEvent);
+        List<Attendee> attendees = new ArrayList<Attendee>(originalSeriesMaster.getAttendees());
+        attendees.remove(originalAttendee);
+        storage.getAttendeeStorage().insertAttendees(newExceptionEvent.getId(), attendees);
+        storage.getAttachmentStorage().insertAttachments(session.getSession(), folder.getId(), newExceptionEvent.getId(), originalSeriesMaster.getAttachments());
+        for (Entry<Integer, List<Alarm>> entry : seriesMasterAlarms.entrySet()) {
+            if (originalAttendee.getEntity() != i(entry.getKey())) {
+                insertAlarms(newExceptionEvent, i(entry.getKey()), filterRelativeTriggers(entry.getValue()), true);
             }
         }
         /*
-         * take over all original attachments
+         * add change exception date to series master & track results
          */
-        storage.getAttachmentStorage().insertAttachments(session.getSession(), folder.getId(), exceptionEvent.getId(), originalMasterEvent.getAttachments());
+        Event updatedExceptionEvent = loadEventData(newExceptionEvent.getId());
+        resultTracker.trackCreation(updatedExceptionEvent, originalSeriesMaster);
+        resultTracker.rememberOriginalEvent(originalSeriesMaster);
+        addChangeExceptionDate(originalSeriesMaster, recurrenceId);
+        Event updatedMasterEvent = loadEventData(originalSeriesMaster.getId());
+        resultTracker.trackUpdate(originalSeriesMaster, updatedMasterEvent);
         /*
-         * add new change exception date in master
+         * reset alarm triggers for series master event and new change exception
          */
-        resultTracker.rememberOriginalEvent(originalMasterEvent);
-        addChangeExceptionDate(originalMasterEvent, recurrenceId);
-        /*
-         * track results
-         */
-        Event createdException = loadEventData(exceptionEvent.getId());
-        Event updatedMasterEvent = loadEventData(originalMasterEvent.getId());
-        removeAlarmTrigger(createdException, updatedMasterEvent);
-        resultTracker.trackCreation(createdException, originalMasterEvent);
-        resultTracker.trackUpdate(originalMasterEvent, updatedMasterEvent);
-    }
-
-    private void removeAlarmTrigger(Event createdException, Event updatedMasterEvent) throws OXException {
-        Map<Integer, List<Alarm>> exxceptionAlarms = storage.getAlarmStorage().loadAlarms(createdException);
-        storage.getAlarmTriggerStorage().insertTriggers(createdException, exxceptionAlarms);
-        Map<Integer, List<Alarm>> masterAlarms = storage.getAlarmStorage().loadAlarms(updatedMasterEvent);
         storage.getAlarmTriggerStorage().deleteTriggers(updatedMasterEvent.getId());
-        storage.getAlarmTriggerStorage().insertTriggers(updatedMasterEvent, masterAlarms);
+        storage.getAlarmTriggerStorage().insertTriggers(updatedMasterEvent, seriesMasterAlarms);
+        storage.getAlarmTriggerStorage().deleteTriggers(updatedExceptionEvent.getId());
+        storage.getAlarmTriggerStorage().insertTriggers(updatedExceptionEvent, storage.getAlarmStorage().loadAlarms(updatedExceptionEvent));
     }
 
     /**

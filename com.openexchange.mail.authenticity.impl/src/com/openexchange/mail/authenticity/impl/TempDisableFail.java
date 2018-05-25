@@ -47,61 +47,57 @@
  *
  */
 
-package com.openexchange.chronos.impl.performer;
+package com.openexchange.mail.authenticity.impl;
 
-import static com.openexchange.chronos.common.SearchUtils.getSearchTerm;
-import java.util.List;
-import com.openexchange.chronos.Event;
-import com.openexchange.chronos.EventField;
-import com.openexchange.chronos.storage.CalendarStorage;
+import java.util.Map;
 import com.openexchange.exception.OXException;
-import com.openexchange.search.CompositeSearchTerm;
-import com.openexchange.search.CompositeSearchTerm.CompositeOperation;
-import com.openexchange.search.SingleSearchTerm.SingleOperation;
-import com.openexchange.search.internal.operands.ColumnFieldOperand;
+import com.openexchange.jslob.JSlobEntry;
+import com.openexchange.jslob.JSlobKeys;
+import com.openexchange.session.Session;
 
 /**
- * {@link ResolveFilenamePerformer}
+ * {@link TempDisableFail}
  *
- * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.10.0
  */
-public class ResolveFilenamePerformer {
+// FIXME: Delete after changing fail evaluation
+public class TempDisableFail implements JSlobEntry {
 
-    private final CalendarStorage storage;
+    private static final String NAME = "authenticity/level";
 
-    /**
-     * Initializes a new {@link ResolveFilenamePerformer}.
-     *
-     * @param storage The underlying calendar storage
-     */
-    public ResolveFilenamePerformer(CalendarStorage storage) {
+    public TempDisableFail() {
         super();
-        this.storage = storage;
     }
 
-    /**
-     * Performs the operation.
-     *
-     * @param filename The filename to resolve
-     * @return The identifier of the resolved event, or <code>0</code> if not found
-     */
-    public String perform(String filename) throws OXException {
-        /*
-         * construct search term
-         */
-        CompositeSearchTerm searchTerm = new CompositeSearchTerm(CompositeOperation.AND)
-            .addSearchTerm(getSearchTerm(EventField.FILENAME, SingleOperation.EQUALS, filename))
-            .addSearchTerm(new CompositeSearchTerm(CompositeOperation.OR)
-                .addSearchTerm(getSearchTerm(EventField.SERIES_ID, SingleOperation.ISNULL))
-                .addSearchTerm(getSearchTerm(EventField.ID, SingleOperation.EQUALS, new ColumnFieldOperand<EventField>(EventField.SERIES_ID)))
-            )
-        ;
-        /*
-         * search for an event matching the filename
-         */
-        List<Event> events = storage.getEventStorage().searchEvents(searchTerm, null, new EventField[] { EventField.ID });
-        return 0 < events.size() ? events.get(0).getId() : null;
+    @Override
+    public String getKey() {
+        return JSlobKeys.MAIL;
+    }
+
+    @Override
+    public String getPath() {
+        return NAME;
+    }
+
+    @Override
+    public Object getValue(Session session) throws OXException {
+        return "neutral_pass_trusted";
+    }
+
+    @Override
+    public boolean isWritable(Session session) throws OXException {
+        return false;
+    }
+
+    @Override
+    public Map<String, Object> metadata(Session session) throws OXException {
+        return null;
+    }
+
+    @Override
+    public void setValue(Object value, Session session) throws OXException {
+        // not writable
     }
 
 }

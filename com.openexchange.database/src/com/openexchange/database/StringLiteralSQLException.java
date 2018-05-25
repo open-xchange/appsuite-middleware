@@ -47,58 +47,30 @@
  *
  */
 
-package com.openexchange.file.storage.json.actions.files;
+package com.openexchange.database;
 
-import java.util.ArrayList;
-import java.util.List;
-import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.exception.OXException;
-import com.openexchange.file.storage.File;
-import com.openexchange.file.storage.File.Field;
-import com.openexchange.file.storage.FileStorageFileAccess.SortDirection;
-import com.openexchange.file.storage.composition.IDBasedFileAccess;
-import com.openexchange.tools.iterator.SearchIterator;
+import java.sql.SQLException;
+
 
 /**
- * {@link SharesAction}
+ * {@link StringLiteralSQLException} - The generic {@link SQLException} class indicating a problem with a passed character string literal.
+ * <p>
+ * For instance {@link IncorrectStringSQLException} or {@link IllegalMixOfCollationsSQLException}.
  *
- * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.10.0
  */
-public class SharesAction extends AbstractListingAction {
+public class StringLiteralSQLException extends SQLException {
 
-    @Override
-    public AJAXRequestResult handle(InfostoreRequest request) throws OXException {
-        IDBasedFileAccess fileAccess = request.getFileAccess();
-        Field sortingField = request.getSortingField();
-        SortDirection sortDirection = request.getSortingOrder();
+    private static final long serialVersionUID = -9142992709020086710L;
 
-        List<Field> columns = request.getFieldsToLoad();
-        boolean copy = false;
-        if(!columns.contains(File.Field.FOLDER_ID)) {
-            columns = new ArrayList<File.Field>(columns);
-            columns.add(File.Field.FOLDER_ID);
-            copy = true;
-        }
-        if(!columns.contains(File.Field.ID)) {
-            if(!copy) {
-                columns = new ArrayList<File.Field>(columns);
-                copy = true;
-            }
-            columns.add(File.Field.ID);
-        }
-        if (!columns.contains(File.Field.SEQUENCE_NUMBER)) {
-            if (!copy) {
-                columns = new ArrayList<File.Field>(columns);
-                copy = true;
-            }
-            columns.add(File.Field.SEQUENCE_NUMBER);
-        }
-
-        SearchIterator<File> searchIterator = fileAccess.getUserSharedDocuments(columns, sortingField, sortDirection);
-        if (Field.CREATED_BY.equals(sortingField)) {
-            searchIterator = CreatedByComparator.resort(request.getSession(), searchIterator, sortDirection);
-        }
-        return results(searchIterator, request);
+    /**
+     * Initializes a new {@link StringLiteralSQLException}.
+     *
+     * @param cause The causing SQL exception
+     */
+    public StringLiteralSQLException(SQLException cause) {
+        super(cause.getMessage(), cause.getSQLState(), cause.getErrorCode(), cause);
     }
 
 }

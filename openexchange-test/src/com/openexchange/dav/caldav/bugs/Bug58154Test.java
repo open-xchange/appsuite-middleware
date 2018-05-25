@@ -286,7 +286,11 @@ public class Bug58154Test extends CalDAVTest {
         assertEquals("Unexpected number of VALARMs found", 2, vAlarms.size());
         for (Component vAlarm : vAlarms) {
             if (null != vAlarm.getProperty("RELATED-TO")) {
-                assertEquals("ALARM wrong", "-PT8M43S", vAlarm.getPropertyValue("TRIGGER"));
+                if ("DATE-TIME".equals(vAlarm.getProperty("TRIGGER").getAttribute("VALUE"))) {
+                    assertEquals("ALARM wrong", formatAsUTC(nextTrigger), vAlarm.getPropertyValue("TRIGGER"));
+                } else {
+                    assertEquals("ALARM wrong", "-PT8M43S", vAlarm.getPropertyValue("TRIGGER"));
+                }
             } else {
                 assertEquals("ALARM wrong", "-PT15M", vAlarm.getPropertyValue("TRIGGER"));
                 assertEquals("ACKNOWLEDGED wrong", formatAsUTC(acknowledgedDate), vAlarm.getPropertyValue("ACKNOWLEDGED"));
