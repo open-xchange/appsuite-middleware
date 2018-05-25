@@ -63,8 +63,11 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.UUID;
+import com.openexchange.database.DatabaseExceptionCodes;
 import com.openexchange.database.Databases;
+import com.openexchange.database.EmptyResultSet;
 import com.openexchange.database.IncorrectStringSQLException;
+import com.openexchange.database.StringLiteralSQLException;
 import com.openexchange.database.provider.DBProvider;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.NameBuilder;
@@ -198,6 +201,8 @@ public class FilenameReserverImpl implements FilenameReserver {
             }
         } catch (IncorrectStringSQLException e) {
             throw AbstractInfostoreAction.handleIncorrectStringError(e, null);
+        } catch (StringLiteralSQLException e) {
+            throw DatabaseExceptionCodes.STRING_LITERAL_ERROR.create(e, e.getMessage());
         } catch (SQLException e) {
             throw InfostoreExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } finally {
@@ -369,7 +374,12 @@ public class FilenameReserverImpl implements FilenameReserver {
             for (String possibleWildcard : possibleWildcards) {
                 stmt.setString(++parameterIndex, possibleWildcard);
             }
-            result = stmt.executeQuery();
+            try {
+                result = stmt.executeQuery();
+            } catch (StringLiteralSQLException e) {
+                // No result possible
+                result = EmptyResultSet.getInstance();
+            }
             while (result.next()) {
                 DocumentMetadata document = new DocumentMetadataImpl();
                 String name = result.getString(1);
