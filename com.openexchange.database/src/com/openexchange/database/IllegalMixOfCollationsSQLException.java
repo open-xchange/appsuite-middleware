@@ -61,7 +61,7 @@ import com.openexchange.java.Strings;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class IllegalMixOfCollationsSQLException extends SQLException {
+public class IllegalMixOfCollationsSQLException extends StringLiteralSQLException {
 
     private static final long serialVersionUID = 3613082500383087281L;
 
@@ -114,7 +114,7 @@ public class IllegalMixOfCollationsSQLException extends SQLException {
      * @param cause The associated SQL exception
      */
     private IllegalMixOfCollationsSQLException(CollationInfo firstCollation, CollationInfo secondCollation, String operation, SQLException cause) {
-        super(cause.getMessage(), cause.getSQLState(), cause.getErrorCode(), cause);
+        super(cause);
         this.firstCollation = firstCollation;
         this.secondCollation = secondCollation;
         this.operation = operation;
