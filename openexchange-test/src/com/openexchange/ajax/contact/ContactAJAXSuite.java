@@ -65,7 +65,7 @@ import com.openexchange.test.concurrent.ParallelSuite;
     SearchTest.class,
     UpdateTest.class,
     UpdatesTest.class,
-    ContactImageScaleTest.class,
+    ContactImageApiClientScaleTest.class,
     MultipleTest.class,
     NewListTest.class,
     SearchInAllContactFoldersTest.class,
@@ -75,7 +75,7 @@ import com.openexchange.test.concurrent.ParallelSuite;
     AllAliasTest.class,
     ListAliasTest.class,
     DeleteMultipleContactsTest.class,
-    
+
     YomiTest.class,
     YomiContactSearchTests.class,
     ContactSearchTests.class,
@@ -88,7 +88,7 @@ import com.openexchange.test.concurrent.ParallelSuite;
     SortingInJapanTest.class,
     AutocompleteTest.class,
     UseCountTest.class,
-    
+
     ContactBugTestSuite.class,
 
 })

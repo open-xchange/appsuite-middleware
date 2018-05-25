@@ -53,36 +53,35 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import java.io.FileInputStream;
 import org.junit.Test;
-import com.openexchange.ajax.contact.action.GetRequest;
-import com.openexchange.ajax.contact.action.GetResponse;
+import com.google.api.client.repackaged.org.apache.commons.codec.binary.Base64;
 import com.openexchange.configuration.AJAXConfig;
-import com.openexchange.groupware.container.Contact;
+import com.openexchange.testing.httpclient.models.ContactData;
 
 /**
- * {@link ContactImageScaleTest}
+ *
+ * {@link ContactImageApiClientScaleTest}
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
- * @since v7.8.0
+ * @since v7.10.0
  */
-public class ContactImageScaleTest extends AbstractContactTest {
+public class ContactImageApiClientScaleTest extends AbstractApiClientContactTest {
 
     @Test
     public void testCreateContact() throws Exception {
         FileInputStream input = null;
         try {
-            final Contact contactObj = createContactObject("testContactWithImage");
+            final ContactData contactObj = createContactObject("testContactWithImage");
             String testDataDir = AJAXConfig.getProperty(AJAXConfig.Property.TEST_DIR);
             java.io.File file = new java.io.File(testDataDir, "oxlogo.png");
             input = new FileInputStream(file);
             final byte bigImage[] = new byte[input.available()];
             input.read(bigImage);
+            contactObj.setImage1(Base64.encodeBase64String(bigImage));
+            contactObj.setImage1ContentType("image/png");
+            final String objectId = createContact(contactObj);
 
-            contactObj.setImage1(bigImage);
-            contactObj.setImageContentType("image/png");
-            final int objectId = insertContact(contactObj);
-            final GetRequest request = new GetRequest(contactFolderId, objectId, tz);
-            final GetResponse response = getClient().execute(request);
-            final String imageUrl = response.getImageUrl();
+            ContactData loadContact = loadContact(objectId, contactFolderId);
+            final String imageUrl = loadContact.getImage1Url();
             if (imageUrl == null) {
                 fail("Contact contains no image URL.");
             }
@@ -100,21 +99,21 @@ public class ContactImageScaleTest extends AbstractContactTest {
     public void testUpdateContact() throws Exception {
         FileInputStream input = null;
         try {
-            final Contact contactObj = createContactObject("testUpdateContactWithImageUpdate");
-            final int objectId = insertContact(contactObj);
+            final ContactData contactObj = createContactObject("testUpdateContactWithImageUpdate");
+            final String objectId = createContact(contactObj);
             String testDataDir = AJAXConfig.getProperty(AJAXConfig.Property.TEST_DIR);
             java.io.File file = new java.io.File(testDataDir, "oxlogo.png");
             input = new FileInputStream(file);
             final byte bigImage[] = new byte[input.available()];
             input.read(bigImage);
-            contactObj.setImage1(bigImage);
-            contactObj.setImageContentType("image/png");
-            contactObj.removeParentFolderID();
+            contactObj.setImage1(Base64.encodeBase64String(bigImage));
+            contactObj.setImage1ContentType("image/png");
+            contactObj.setId(objectId);
+            contactObj.setFolderId(null);
             updateContact(contactObj, contactFolderId);
 
-            final GetRequest request = new GetRequest(contactFolderId, objectId, tz);
-            final GetResponse response = getClient().execute(request);
-            final String imageUrl = response.getImageUrl();
+            ContactData loadContact = loadContact(objectId, contactFolderId);
+            final String imageUrl = loadContact.getImage1Url();
             if (imageUrl == null) {
                 fail("Contact contains no image URL.");
             }
