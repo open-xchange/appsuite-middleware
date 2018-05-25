@@ -56,7 +56,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import com.openexchange.exception.OXException;
-import com.openexchange.folderstorage.internal.FolderStorageDeleteListener;
 import com.openexchange.folderstorage.outlook.OutlookFolderDeleteListener;
 import com.openexchange.group.internal.GroupDeleteListener;
 import com.openexchange.groupware.attach.impl.AttachmentContextDelete;
@@ -198,7 +197,6 @@ public final class DeleteRegistry {
             /*
              * Insert folder delete listener
              */
-            new FolderStorageDeleteListener(),
             new OXFolderDeleteListener(),
             /*
              * Remove FileStorage if context is deleted.

@@ -79,6 +79,7 @@ import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.delete.DeleteEvent;
+import com.openexchange.groupware.delete.DeleteFinishedListenerRegistry;
 import com.openexchange.groupware.delete.DeleteRegistry;
 import com.openexchange.groupware.impl.IDGenerator;
 import com.openexchange.tools.oxfolder.OXFolderAdminHelper;
@@ -422,12 +423,13 @@ public class OXGroupMySQLStorage extends OXGroupSQLStorage implements OXMySQLDef
         try {
             final OXToolStorageInterface tool = OXToolStorageInterface.getInstance();
             tool.existsGroup(ctx, groups);
+            com.openexchange.groupware.contexts.Context gwContext = ContextStorage.getInstance().getContext(ctxId);
             con.setAutoCommit(false);
             for (Group group : groups) {
                 int groupId = i(group.getId());
                 // let the groupware api know that the group will be deleted
                 OXFolderAdminHelper.propagateGroupModification(groupId, con, con, ctxId);
-                DeleteRegistry.getInstance().fireDeleteEvent(DeleteEvent.createDeleteEventForGroupDeletion(this, groupId, ContextStorage.getInstance().getContext(ctxId)), con, con);
+                DeleteRegistry.getInstance().fireDeleteEvent(DeleteEvent.createDeleteEventForGroupDeletion(this, groupId, gwContext), con, con);
 
                 final List<Integer> members = new LinkedList<Integer>();
                 {
@@ -492,6 +494,12 @@ public class OXGroupMySQLStorage extends OXGroupSQLStorage implements OXMySQLDef
             con.commit();
 
             for (Group group : groups) {
+                try {
+                    DeleteEvent delev = DeleteEvent.createDeleteEventForGroupDeletion(this, i(group.getId()), gwContext);
+                    DeleteFinishedListenerRegistry.getInstance().fireDeleteEvent(delev);
+                } catch (Exception e) {
+                    log.warn("Failed to trigger delete finished listeners", e);
+                }
                 log.info("Group {} deleted!", group.getId());
             }
         } catch (SQLException e) {
