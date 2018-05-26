@@ -51,6 +51,7 @@ package com.openexchange.chronos.ical.ical4j.mapping.alarm;
 
 import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.ical.ical4j.mapping.ICalTextMapping;
+import com.openexchange.java.Strings;
 import net.fortuna.ical4j.model.Property;
 import net.fortuna.ical4j.model.component.VAlarm;
 import net.fortuna.ical4j.model.property.Description;
@@ -72,7 +73,8 @@ public class DescriptionMapping extends ICalTextMapping<VAlarm, Alarm> {
 
     @Override
     protected String getValue(Alarm object) {
-        return object.getDescription();
+        String value = object.getDescription();
+        return null != value && Strings.isEmpty(value) ? "Alarm" : value;
     }
 
     @Override

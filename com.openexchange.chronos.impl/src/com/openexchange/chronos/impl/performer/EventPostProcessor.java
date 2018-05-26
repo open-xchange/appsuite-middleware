@@ -222,7 +222,7 @@ public class EventPostProcessor {
         }
         event.setFolderId(folderId);
         if (null == requestedFields || Arrays.contains(requestedFields, EventField.FLAGS)) {
-            event.setFlags(getFlags(event, calendarUserId));
+            event.setFlags(getFlags(event, calendarUserId, session.getUserId()));
         }
         maximumTimestamp = Math.max(maximumTimestamp, event.getTimestamp());
         event = anonymizeIfNeeded(session, event);

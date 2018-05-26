@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,57 +47,30 @@
  *
  */
 
-package com.openexchange.chronos.storage.rdb.groupware;
+package com.openexchange.database;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import com.openexchange.database.Databases;
-import com.openexchange.exception.OXException;
-import com.openexchange.groupware.update.PerformParameters;
-import com.openexchange.groupware.update.UpdateExceptionCodes;
-import com.openexchange.groupware.update.UpdateTaskAdapter;
-import com.openexchange.tools.update.Tools;
+
 
 /**
+ * {@link StringLiteralSQLException} - The generic {@link SQLException} class indicating a problem with a passed character string literal.
+ * <p>
+ * For instance {@link IncorrectStringSQLException} or {@link IllegalMixOfCollationsSQLException}.
  *
- * {@link AlarmTriggerConsistencyTask} fixes corrupted alarm trigger data caused by an insufficient floating check.
- *
- * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.10.0
  */
-public class AlarmTriggerConsistencyTask extends UpdateTaskAdapter {
+public class StringLiteralSQLException extends SQLException {
 
+    private static final long serialVersionUID = -9142992709020086710L;
 
-    private static final Logger LOG = LoggerFactory.getLogger(AlarmTriggerConsistencyTask.class);
-    private static final String REPAIR_INVALID_TIMZONE = "UPDATE calendar_alarm_trigger SET floatingTimezone = NULL WHERE floatingTimezone IS NOT NULL AND relatedTime IS NULL";
-
-
-    @Override
-    public String[] getDependencies() {
-        return new String[] { "com.openexchange.chronos.storage.rdb.migration.ChronosStorageMigrationTask"};
-    }
-
-    @Override
-    public void perform(PerformParameters params) throws OXException {
-        PreparedStatement stmt = null;
-        try {
-            Connection con = params.getConnection();
-            if (!Tools.tableExists(con, "calendar_alarm_trigger")) {
-                return;
-            }
-
-            stmt = con.prepareStatement(REPAIR_INVALID_TIMZONE);
-            int executeUpdate = stmt.executeUpdate();
-            LOG.info("Fixed {} alarm triggers.", executeUpdate);
-
-        } catch (SQLException e) {
-            throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
-        } finally {
-            Databases.closeSQLStuff(stmt);
-        }
+    /**
+     * Initializes a new {@link StringLiteralSQLException}.
+     *
+     * @param cause The causing SQL exception
+     */
+    public StringLiteralSQLException(SQLException cause) {
+        super(cause.getMessage(), cause.getSQLState(), cause.getErrorCode(), cause);
     }
 
 }

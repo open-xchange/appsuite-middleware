@@ -1933,6 +1933,18 @@ public class CalendarUtils {
      * @return The event flags
      */
     public static EnumSet<EventFlag> getFlags(Event event, int calendarUser) {
+        return getFlags(event, calendarUser, calendarUser);
+    }
+
+    /**
+     * Generates the flags for a specific event (see {@link EventFlag}).
+     *
+     * @param event The event to get the flags for
+     * @param calendarUser The identifier of the calendar user to get flags for
+     * @param user The identifier of the current user, in case he is different from the calendar user
+     * @return The event flags
+     */
+    public static EnumSet<EventFlag> getFlags(Event event, int calendarUser, int user) {
         EnumSet<EventFlag> flags = EnumSet.noneOf(EventFlag.class);
         if (null != event.getAttachments() && 0 < event.getAttachments().size()) {
             flags.add(EventFlag.ATTACHMENTS);
@@ -1948,6 +1960,9 @@ public class CalendarUtils {
             flags.add(EventFlag.ATTENDEE);
         } else if (isAttendeeSchedulingResource(event, calendarUser)) {
             flags.add(EventFlag.ATTENDEE);
+        }
+        if (calendarUser != user) {
+            flags.add(EventFlag.ON_BEHALF);
         }
         if (Classification.CONFIDENTIAL.equals(event.getClassification())) {
             flags.add(EventFlag.CONFIDENTIAL);

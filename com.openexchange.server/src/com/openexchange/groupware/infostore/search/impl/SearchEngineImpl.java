@@ -69,6 +69,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.database.Databases;
+import com.openexchange.database.StringLiteralSQLException;
 import com.openexchange.database.provider.DBProvider;
 import com.openexchange.database.tx.DBService;
 import com.openexchange.exception.OXException;
@@ -156,6 +157,9 @@ public class SearchEngineImpl extends DBService {
             // Iterator has been successfully generated, thus closing DB resources is performed by iterator instance.
             successful = true;
             return iter;
+        } catch (StringLiteralSQLException e) {
+            // Cannot return any match
+            return SearchIterators.emptyIterator();
         } catch (SQLException e) {
             if (e.getCause() instanceof java.net.SocketTimeoutException) {
                 // Communications link failure
@@ -273,6 +277,9 @@ public class SearchEngineImpl extends DBService {
                 // Iterator has been successfully generated, thus closing DB resources is performed by iterator instance.
                 successful = true;
                 return iter;
+            } catch (StringLiteralSQLException e) {
+                // Cannot return any match
+                return SearchIterators.emptyIterator();
             } catch (final SQLException e) {
                 LOG.error("", e);
                 throw InfostoreExceptionCodes.SQL_PROBLEM.create(e, SQL_QUERY.toString());
@@ -517,6 +524,9 @@ public class SearchEngineImpl extends DBService {
                 // Iterator has been successfully generated, thus closing DB resources is performed by iterator instance.
                 closeResources = false;
                 return iter;
+            } catch (StringLiteralSQLException e) {
+                // Cannot return any match
+                return SearchIterators.emptyIterator();
             } catch (final SQLException e) {
                 LOG.error("", e);
                 throw InfostoreExceptionCodes.SQL_PROBLEM.create(e, sqlQuery.toString());

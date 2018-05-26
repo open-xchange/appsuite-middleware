@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2018-2020 OX Software GmbH
+ *     Copyright (C) 2016-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,53 +47,25 @@
  *
  */
 
-package com.openexchange.oauth.impl.internal.groupware;
+package com.openexchange.database;
 
-import java.sql.Connection;
-import java.sql.SQLException;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.update.PerformParameters;
-import com.openexchange.tools.update.Column;
-import com.openexchange.tools.update.Tools;
+import com.openexchange.i18n.LocalizableStrings;
 
 /**
- * {@link OAuthAddIdentityColumnTask}
+ * Exception messages to translate for {@link OXException}.
  *
- * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
- * @since 7.10.0
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class OAuthAddIdentityColumnTask extends AbstractOAuthUpdateTask {
+public class DatabaseExceptionStrings implements LocalizableStrings {
 
-    private static final String IDENTITY_COLUMN_NAME = "identity";
+    // Problem with reading from or writing to database
+    public static final String SQL_ERROR_MSG = "Problem with reading from or writing to database";
 
-    /**
-     * Initialises a new {@link OAuthAddIdentityColumnTask}.
-     */
-    public OAuthAddIdentityColumnTask() {
+    // User specified an input text that contains certain characters, which are not supported by database. E.g. cannot be stored or cannot be queried by.
+    public static final String STRING_LITERAL_ERROR_MSG = "The specified input contains unsupported characters. Please remove the unsupported characters and try again.";
+
+    private DatabaseExceptionStrings() {
         super();
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.oauth.impl.internal.groupware.AbstractOAuthUpdateTask#innerPerform(java.sql.Connection, com.openexchange.groupware.update.PerformParameters)
-     */
-    @Override
-    void innerPerform(Connection connection, PerformParameters performParameters) throws OXException, SQLException {
-        if (Tools.columnExists(connection, CreateOAuthAccountTable.TABLE_NAME, IDENTITY_COLUMN_NAME)) {
-            return;
-        }
-        Tools.addColumns(connection, CreateOAuthAccountTable.TABLE_NAME, new Column(IDENTITY_COLUMN_NAME, "varchar(767)"));
-        Tools.createIndex(connection, CreateOAuthAccountTable.TABLE_NAME, new String[] { IDENTITY_COLUMN_NAME });
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.groupware.update.UpdateTaskV2#getDependencies()
-     */
-    @Override
-    public String[] getDependencies() {
-        return new String[] { DropForeignKeyFromOAuthAccountTask.class.getName() };
     }
 }

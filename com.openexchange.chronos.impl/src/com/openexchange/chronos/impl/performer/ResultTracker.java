@@ -499,7 +499,7 @@ public class ResultTracker {
         }
         final List<Alarm> alarms = storage.getAlarmStorage().loadAlarms(event, forUser);
         final String folderView = getFolderView(event, forUser);
-        EnumSet<EventFlag> flags = CalendarUtils.getFlags(event, forUser);
+        EnumSet<EventFlag> flags = CalendarUtils.getFlags(event, forUser, session.getUserId());
         if (null != alarms && 0 < alarms.size()) {
             flags.add(EventFlag.ALARMS);
         }

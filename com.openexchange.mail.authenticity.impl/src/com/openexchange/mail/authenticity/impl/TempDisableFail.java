@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2018-2020 OX Software GmbH
+ *     Copyright (C) 2016-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,53 +47,57 @@
  *
  */
 
-package com.openexchange.oauth.impl.internal.groupware;
+package com.openexchange.mail.authenticity.impl;
 
-import java.sql.Connection;
-import java.sql.SQLException;
+import java.util.Map;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.update.PerformParameters;
-import com.openexchange.tools.update.Column;
-import com.openexchange.tools.update.Tools;
+import com.openexchange.jslob.JSlobEntry;
+import com.openexchange.jslob.JSlobKeys;
+import com.openexchange.session.Session;
 
 /**
- * {@link OAuthAddIdentityColumnTask}
+ * {@link TempDisableFail}
  *
- * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
- * @since 7.10.0
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ * @since v7.10.0
  */
-public class OAuthAddIdentityColumnTask extends AbstractOAuthUpdateTask {
+// FIXME: Delete after changing fail evaluation
+public class TempDisableFail implements JSlobEntry {
 
-    private static final String IDENTITY_COLUMN_NAME = "identity";
+    private static final String NAME = "authenticity/level";
 
-    /**
-     * Initialises a new {@link OAuthAddIdentityColumnTask}.
-     */
-    public OAuthAddIdentityColumnTask() {
+    public TempDisableFail() {
         super();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.oauth.impl.internal.groupware.AbstractOAuthUpdateTask#innerPerform(java.sql.Connection, com.openexchange.groupware.update.PerformParameters)
-     */
     @Override
-    void innerPerform(Connection connection, PerformParameters performParameters) throws OXException, SQLException {
-        if (Tools.columnExists(connection, CreateOAuthAccountTable.TABLE_NAME, IDENTITY_COLUMN_NAME)) {
-            return;
-        }
-        Tools.addColumns(connection, CreateOAuthAccountTable.TABLE_NAME, new Column(IDENTITY_COLUMN_NAME, "varchar(767)"));
-        Tools.createIndex(connection, CreateOAuthAccountTable.TABLE_NAME, new String[] { IDENTITY_COLUMN_NAME });
+    public String getKey() {
+        return JSlobKeys.MAIL;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.groupware.update.UpdateTaskV2#getDependencies()
-     */
     @Override
-    public String[] getDependencies() {
-        return new String[] { DropForeignKeyFromOAuthAccountTask.class.getName() };
+    public String getPath() {
+        return NAME;
     }
+
+    @Override
+    public Object getValue(Session session) throws OXException {
+        return "pass_trusted";
+    }
+
+    @Override
+    public boolean isWritable(Session session) throws OXException {
+        return false;
+    }
+
+    @Override
+    public Map<String, Object> metadata(Session session) throws OXException {
+        return null;
+    }
+
+    @Override
+    public void setValue(Object value, Session session) throws OXException {
+        // not writable
+    }
+
 }
