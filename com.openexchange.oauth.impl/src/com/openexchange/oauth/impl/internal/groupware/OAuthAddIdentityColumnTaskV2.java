@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2016-2020 OX Software GmbH
+ *     Copyright (C) 2018-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,55 +49,52 @@
 
 package com.openexchange.oauth.impl.internal.groupware;
 
-import com.openexchange.database.AbstractCreateTableImpl;
+import java.sql.Connection;
+import java.sql.SQLException;
+import com.openexchange.exception.OXException;
+import com.openexchange.groupware.update.PerformParameters;
+import com.openexchange.tools.update.Tools;
 
 /**
- * {@link CreateOAuthAccountTable}
+ * {@link OAuthAddIdentityColumnTaskV2} - Re-adds the 'identity' index with the 'cid' as
+ * first part of the key
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @since 7.10.0
  */
-public final class CreateOAuthAccountTable extends AbstractCreateTableImpl {
-    
-    static final String TABLE_NAME = "oauthAccounts";
+public class OAuthAddIdentityColumnTaskV2 extends AbstractOAuthUpdateTask {
 
-    public static final String CREATE_TABLE_STATEMENT =
-        "CREATE TABLE oauthAccounts (" +
-        "cid INT4 UNSIGNED NOT NULL," +
-        "user INT4 UNSIGNED NOT NULL," +
-        "id INT4 UNSIGNED NOT NULL," +
-        "displayName VARCHAR(128) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL," +
-        "accessToken TEXT CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL," +
-        "accessSecret TEXT CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL," +
-        "serviceId VARCHAR(128) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL," +
-        "scope VARCHAR(767) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL," +
-        "identity VARCHAR(767) CHARACTER SET utf8 COLLATE utf8_unicode_ci NULL," +
-        "PRIMARY KEY (cid, id)," +
-        "KEY `identity` (cid,identity(191))" +
-        ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci";
+    private static final String CID_COLUMN_NAME = "`cid`";
+    private static final String IDENTITY_COLUMN_NAME = "`identity`(191)";
 
-    public CreateOAuthAccountTable() {
+    /**
+     * Initialises a new {@link OAuthAddIdentityColumnTaskV2}.
+     */
+    public OAuthAddIdentityColumnTaskV2() {
         super();
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.oauth.impl.internal.groupware.AbstractOAuthUpdateTask#innerPerform(java.sql.Connection, com.openexchange.groupware.update.PerformParameters)
+     */
     @Override
-    public String[] getCreateStatements() {
-        return createStatements;
+    void innerPerform(Connection connection, PerformParameters performParameters) throws OXException, SQLException {
+        String indexName = Tools.existsIndex(connection, CreateOAuthAccountTable.TABLE_NAME, new String[] { "identity" });
+        if (indexName != null) {
+            Tools.dropIndex(connection, CreateOAuthAccountTable.TABLE_NAME, indexName);
+        }
+        Tools.createIndex(connection, CreateOAuthAccountTable.TABLE_NAME, indexName, new String[] { CID_COLUMN_NAME, IDENTITY_COLUMN_NAME }, false);
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.groupware.update.UpdateTaskV2#getDependencies()
+     */
     @Override
-    public String[] requiredTables() {
-        return requiredTables;
+    public String[] getDependencies() {
+        return new String[] { OAuthAddIdentityColumnTask.class.getName() };
     }
-
-    @Override
-    public String[] tablesToCreate() {
-        return createdTables;
-    }
-
-    private static final String[] requiredTables = { "user" };
-
-    private static final String[] createdTables = { TABLE_NAME };
-
-    private static final String[] createStatements = { CREATE_TABLE_STATEMENT };
-
 }
