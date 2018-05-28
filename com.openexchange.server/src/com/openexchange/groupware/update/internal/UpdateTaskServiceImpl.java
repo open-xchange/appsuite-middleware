@@ -284,13 +284,7 @@ public class UpdateTaskServiceImpl implements UpdateTaskService {
             if (null == timerTask) {
                 TimerService timerService = ServerServiceRegistry.getInstance().getService(TimerService.class);
                 if (null != timerService) {
-                    Runnable task = new Runnable() {
-
-                        @Override
-                        public void run() {
-                            cleanUp();
-                        }
-                    };
+                    Runnable task = () -> cleanUp();
                     timerTask = timerService.scheduleWithFixedDelay(task, 5L, 5L, TimeUnit.MINUTES);
                 }
             }
