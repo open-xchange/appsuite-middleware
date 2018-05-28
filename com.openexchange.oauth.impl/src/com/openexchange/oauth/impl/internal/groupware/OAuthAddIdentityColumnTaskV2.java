@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2016-2020 OX Software GmbH
+ *     Copyright (C) 2018-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -51,20 +51,50 @@ package com.openexchange.oauth.impl.internal.groupware;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.PerformParameters;
-import com.openexchange.groupware.update.SimpleConvertUtf8ToUtf8mb4UpdateTask;
+import com.openexchange.tools.update.Tools;
 
 /**
- * {@link OAuthAccountsTableUtf8Mb4UpdateTask}
+ * {@link OAuthAddIdentityColumnTaskV2} - Re-adds the 'identity' index with the 'cid' as
+ * first part of the key
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @since 7.10.0
  */
-public class OAuthAccountsTableUtf8Mb4UpdateTask extends SimpleConvertUtf8ToUtf8mb4UpdateTask {
+public class OAuthAddIdentityColumnTaskV2 extends AbstractOAuthUpdateTask {
+
+    private static final String CID_COLUMN_NAME = "`cid`";
+    private static final String IDENTITY_COLUMN_NAME = "`identity`(191)";
 
     /**
-     * Initialises a new {@link OAuthAccountsTableUtf8Mb4UpdateTask}.
+     * Initialises a new {@link OAuthAddIdentityColumnTaskV2}.
      */
-    public OAuthAccountsTableUtf8Mb4UpdateTask() {
-        super(OAuthAddIdentityColumnTaskV2.class, "oauthAccounts");
+    public OAuthAddIdentityColumnTaskV2() {
+        super();
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.oauth.impl.internal.groupware.AbstractOAuthUpdateTask#innerPerform(java.sql.Connection, com.openexchange.groupware.update.PerformParameters)
+     */
+    @Override
+    void innerPerform(Connection connection, PerformParameters performParameters) throws OXException, SQLException {
+        String indexName = Tools.existsIndex(connection, CreateOAuthAccountTable.TABLE_NAME, new String[] { "identity" });
+        if (indexName != null) {
+            Tools.dropIndex(connection, CreateOAuthAccountTable.TABLE_NAME, indexName);
+        }
+        Tools.createIndex(connection, CreateOAuthAccountTable.TABLE_NAME, indexName, new String[] { CID_COLUMN_NAME, IDENTITY_COLUMN_NAME }, false);
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.groupware.update.UpdateTaskV2#getDependencies()
+     */
+    @Override
+    public String[] getDependencies() {
+        return new String[] { OAuthAddIdentityColumnTask.class.getName() };
     }
 }
