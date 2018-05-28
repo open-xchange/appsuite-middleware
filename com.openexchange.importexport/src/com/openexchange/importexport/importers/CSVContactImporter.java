@@ -584,7 +584,7 @@ public class CSVContactImporter extends AbstractImporter {
 
         List<List<String>> retval = null;
 
-        Map<String, String> csvByEncodings = new HashMap<String, String>();
+        Map<String, String> csvByEncodings = new HashMap<>();
         for (ContactFieldMapper mapper : getMappers()) {
             String encoding = mapper.getEncoding();
             String csvStr = csvByEncodings.get(encoding);
@@ -700,11 +700,7 @@ public class CSVContactImporter extends AbstractImporter {
         for (ContactFieldMapper mapper : mappers) {
             Charset key = Charsets.forName(mapper.getEncoding());
             if (null != key) {
-                List<ContactFieldMapper> value = mappersByCharset.get(key);
-                if (null == value) {
-                    value = new ArrayList<ContactFieldMapper>();
-                    mappersByCharset.put(key, value);
-                }
+                List<ContactFieldMapper> value = mappersByCharset.computeIfAbsent(key,  k -> new ArrayList<>());
                 value.add(mapper);
             }
         }
