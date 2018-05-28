@@ -82,7 +82,7 @@ public class TempDisableFail implements JSlobEntry {
 
     @Override
     public Object getValue(Session session) throws OXException {
-        return "neutral_pass_trusted";
+        return "pass_trusted";
     }
 
     @Override

@@ -423,6 +423,24 @@ public class EventPatches {
             }
         }
 
+        /**
+         * Get the original {@link Alarm} that is equal to the snoozed alarm
+         *
+         * @param originalOccurrence The original occurrence of the exception
+         * @param snoozedAlarm The alarm that has been snoozed
+         * @return The {@link Alarm} that matches the snoozedAlarm or <code>null</code>
+         */
+        private Alarm getSnoozedAlarm(Event originalOccurrence, Alarm snoozedAlarm) {
+            if (null != originalOccurrence.getAlarms()) {
+                for (Alarm a : originalOccurrence.getAlarms()) {
+                    if (snoozedAlarm.getTrigger().matches(a.getTrigger())) {
+                        return a;
+                    }
+                }
+            }
+            return null;
+        }
+
         private Event exportAndImport(EventResource resource, Event event) throws OXException {
             /*
              * prepare exported event
@@ -447,24 +465,6 @@ public class EventPatches {
             } finally {
                 Streams.close(fileHolder);
             }
-        }
-
-        /**
-         * Get the original {@link Alarm} that is equal to the snoozed alarm
-         * 
-         * @param originalOccurrence The original occurrence of the exception
-         * @param snoozedAlarm The alarm that has been snoozed
-         * @return The {@link Alarm} that matches the snoozedAlarm or <code>null</code>
-         */
-        private Alarm getSnoozedAlarm(Event originalOccurrence, Alarm snoozedAlarm) {
-            if (null != originalOccurrence.getAlarms()) {
-                for (Alarm a : originalOccurrence.getAlarms()) {
-                    if (snoozedAlarm.getTrigger().matches(a.getTrigger())) {
-                        return a;
-                    }
-                }
-            }
-            return null;
         }
 
         /**
@@ -828,22 +828,6 @@ public class EventPatches {
                     }
                     Alarm snoozedAlarm = AlarmUtils.getSnoozedAlarm(alarm, exportedAlarms);
                     if (null != snoozedAlarm) {
-                        /*
-                         * use relative triggers for snoozed alarms in event series for apple clients
-                         */
-                        if (isSeriesMaster(exportedEvent) && null != alarm.getTrigger() && null != alarm.getTrigger().getDateTime() && (DAVUserAgent.IOS.equals(resource.getUserAgent()))) {
-                            try {
-                                Trigger trigger = alarm.getTrigger();
-                                trigger.setDuration(AlarmUtils.getTriggerDuration(alarm.getTrigger(), exportedEvent, factory.requireService(RecurrenceService.class)));
-                                trigger.setDateTime(null);
-                            } catch (OXException e) {
-                                LOG.warn("Error converting snoozed alarm trigger", e);
-                            }
-                        }
-                        /*
-                         * Thunderbird/Lightning likes to have a custom "X-MOZ-SNOOZE-TIME-<timestamp_of_recurrence>" property for recurring
-                         * events, and a custom "X-MOZ-SNOOZE-TIME" property for non-recurring ones
-                         */
                         if (DAVUserAgent.THUNDERBIRD_LIGHTNING.equals(resource.getUserAgent())) {
                             Date snoozeTime = null;
                             try {

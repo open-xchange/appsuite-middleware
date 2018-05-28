@@ -113,7 +113,7 @@ public class MailAuthenticityMetricFileLogger implements MailAuthenticityMetricL
             logRawHeaders(jLog, rawHeaders);
             logMechanisms(jLog, overallResult);
             jLog.put(MailAuthenticityMetricLogField.mail_id.name(), DigestUtils.sha256Hex(mailId).substring(0, 12));
-            jLog.put(MailAuthenticityMetricLogField.domain_mismatch.name(), overallResult.getAttribute(MailAuthenticityResultKey.DOMAN_MISMATCH, Boolean.class));
+            jLog.put(MailAuthenticityMetricLogField.domain_mismatch.name(), overallResult.getAttribute(MailAuthenticityResultKey.DOMAIN_MISMATCH, Boolean.class));
             jLog.put(MailAuthenticityMetricLogField.overall_result.name(), overallResult.getStatus().getTechnicalName());
             jLog.put(MailAuthenticityMetricLogField.from_header.name(), overallResult.getAttribute(MailAuthenticityResultKey.FROM_HEADER_DOMAIN));
             return jLog;

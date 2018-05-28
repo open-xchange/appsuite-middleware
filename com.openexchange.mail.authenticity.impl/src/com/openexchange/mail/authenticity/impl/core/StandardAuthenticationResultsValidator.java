@@ -50,6 +50,7 @@
 package com.openexchange.mail.authenticity.impl.core;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -163,13 +164,11 @@ public class StandardAuthenticationResultsValidator implements AuthenticationRes
 
         // Set overall status to 'none'. This implies that:
         //  a) no auth-servId match was found, hence no mechanisms was parsed, or
-        //  b) we only came across unknown mechanisms, which we don't take 
-        //     into consideration when we determine the overall result. 
+        //  b) we only came across unknown mechanisms, which we don't take
+        //     into consideration when we determine the overall result.
         if (results.isEmpty()) {
             overallResult.setStatus(MailAuthenticityStatus.NONE);
         }
-
-        determineDomainMismatch(overallResult);
 
         return overallResult;
     }
@@ -352,25 +351,59 @@ public class StandardAuthenticationResultsValidator implements AuthenticationRes
             results.add(bestOfSPF);
         }
 
+        boolean checkOthers = true;
         if (bestOfDMARC != null) {
             // If DMARC passes we set the overall status to PASS
             if (DMARCResult.PASS.equals(bestOfDMARC.getResult()) && bestOfDMARC.isDomainMatch()) {
                 overallResult.setStatus(MailAuthenticityStatus.PASS);
-                overallResult.addAttribute(MailAuthenticityResultKey.FROM_DOMAIN, bestOfDMARC.getDomain());
-                return;
+                checkOthers = false;
             } else if (DMARCResult.FAIL.equals(bestOfDMARC.getResult())) {
                 overallResult.setStatus(MailAuthenticityStatus.FAIL);
-                return;
+                checkOthers = false;
             } else if (DMARCResult.NONE.equals(bestOfDMARC.getResult())) {
                 overallResult.setStatus(MailAuthenticityStatus.NONE);
             }
         }
 
-        // The DMARC status was NEUTRAL or none existing, check for DKIM
-        boolean dkimFailed = dkimFailed(overallResult, bestOfDKIM);
+        if (checkOthers) {
+            // The DMARC status was NEUTRAL or none existing, check for DKIM
+            boolean dkimFailed = dkimFailed(overallResult, bestOfDKIM);
 
-        // Continue with SPF
-        checkSPF(overallResult, bestOfSPF, dkimFailed);
+            // Continue with SPF
+            checkSPF(overallResult, bestOfSPF, dkimFailed);
+        }
+
+        determineReliableAuthenticatedSender(overallResult, bestOfDMARC, bestOfDKIM, bestOfSPF);
+    }
+
+    /**
+     * Determines the most reliably authenticated sender domain and whether there is a mismatch between
+     * it and the domain from the 'From' header.
+     * Sets the {@link MailAuthenticityResultKey#DOMAIN_MISMATCH} to the attributes of the overall result.
+     *
+     * @param overallResult The overall result
+     * @param bestOfDMARC The best DMARC result
+     * @param bestOfDKIM The best DKIM result
+     * @param bestOfSPF The best SPF result
+     */
+    private void determineReliableAuthenticatedSender(final MailAuthenticityResult overallResult, MailAuthenticityMechanismResult bestOfDMARC, MailAuthenticityMechanismResult bestOfDKIM, MailAuthenticityMechanismResult bestOfSPF) {
+        String fromDomain = overallResult.getAttribute(MailAuthenticityResultKey.FROM_HEADER_DOMAIN, String.class);
+        for (MailAuthenticityMechanismResult result : Arrays.asList(bestOfDMARC, bestOfDKIM, bestOfSPF)) { // check in authenticity-descending order
+            if (result == null) {
+                continue;
+            }
+            if (result.getResult().convert() != MailAuthenticityStatus.PASS) {
+                continue;
+            }
+            String domain = result.getDomain();
+            if (domain == null) {
+                continue;
+            }
+            overallResult.addAttribute(MailAuthenticityResultKey.FROM_DOMAIN, domain);
+            overallResult.addAttribute(MailAuthenticityResultKey.DOMAIN_MECH, result.getMechanism().getTechnicalName());
+            overallResult.addAttribute(MailAuthenticityResultKey.DOMAIN_MISMATCH, !domain.equalsIgnoreCase(fromDomain));
+            break;
+        }
     }
 
     /**
@@ -555,21 +588,6 @@ public class StandardAuthenticationResultsValidator implements AuthenticationRes
         }
 
         return bestResult;
-    }
-
-    /**
-     * Determines whether there is a domain mismatch between the dominant mechanism's domain and the domain from the 'From' header.
-     * Sets the {@link MailAuthenticityResultKey#DOMAN_MISMATCH} to the attributes of the overall result.
-     * 
-     * @param overallResult The overall result
-     */
-    private void determineDomainMismatch(MailAuthenticityResult overallResult) {
-        boolean domainMismatch = true;
-        String mechDomain = (String) overallResult.getAttribute(MailAuthenticityResultKey.FROM_DOMAIN);
-        if (Strings.isNotEmpty(mechDomain)) {
-            domainMismatch = !mechDomain.equals((String) overallResult.getAttribute(MailAuthenticityResultKey.FROM_HEADER_DOMAIN));
-        }
-        overallResult.addAttribute(MailAuthenticityResultKey.DOMAN_MISMATCH, domainMismatch);
     }
 
     ///////////////////////////////// HELPER CLASSES /////////////////////////////////
