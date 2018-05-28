@@ -83,7 +83,7 @@ import com.openexchange.tools.update.Tools;
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @since v7.10.0
  */
-@NamespaceAwareUpdateTask(namespace = "com.openexchange.groupware.update.utf8mb4", description = "All utf8 to utf8mb4 convert tasks")
+@NamespaceAwareUpdateTask(namespace = "groupware.utf8mb4", description = "All utf8 to utf8mb4 convert tasks")
 public abstract class AbstractConvertUtf8ToUtf8mb4Task extends UpdateTaskAdapter {
 
     private static final org.slf4j.Logger LOGGER = org.slf4j.LoggerFactory.getLogger(AbstractConvertUtf8ToUtf8mb4Task.class);
