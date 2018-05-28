@@ -53,19 +53,19 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.PerformParameters;
+import com.openexchange.tools.update.Column;
 import com.openexchange.tools.update.Tools;
 
 /**
- * {@link OAuthAddIdentityColumnTaskV2} - Re-adds the 'identity' index with the 'cid' as
- * first part of the key
+ * {@link OAuthAddIdentityColumnTaskV2}
+ * Adds the 'identity' column and an index for the identity (cid,identity(191))
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @since 7.10.0
  */
 public class OAuthAddIdentityColumnTaskV2 extends AbstractOAuthUpdateTask {
 
-    private static final String CID_COLUMN_NAME = "`cid`";
-    private static final String IDENTITY_COLUMN_NAME = "`identity`(191)";
+    private static final String IDENTITY_NAME = "`identity`";
 
     /**
      * Initialises a new {@link OAuthAddIdentityColumnTaskV2}.
@@ -81,11 +81,11 @@ public class OAuthAddIdentityColumnTaskV2 extends AbstractOAuthUpdateTask {
      */
     @Override
     void innerPerform(Connection connection, PerformParameters performParameters) throws OXException, SQLException {
-        String indexName = Tools.existsIndex(connection, CreateOAuthAccountTable.TABLE_NAME, new String[] { "identity" });
-        if (indexName != null) {
-            Tools.dropIndex(connection, CreateOAuthAccountTable.TABLE_NAME, indexName);
+        if (Tools.columnExists(connection, CreateOAuthAccountTable.TABLE_NAME, IDENTITY_NAME)) {
+            return;
         }
-        Tools.createIndex(connection, CreateOAuthAccountTable.TABLE_NAME, indexName, new String[] { CID_COLUMN_NAME, IDENTITY_COLUMN_NAME }, false);
+        Tools.addColumns(connection, CreateOAuthAccountTable.TABLE_NAME, new Column(IDENTITY_NAME, "varchar(767)"));
+        Tools.createIndex(connection, CreateOAuthAccountTable.TABLE_NAME, IDENTITY_NAME, new String[] { "`cid`", "`identity`(191)" }, false);
     }
 
     /*
@@ -95,6 +95,6 @@ public class OAuthAddIdentityColumnTaskV2 extends AbstractOAuthUpdateTask {
      */
     @Override
     public String[] getDependencies() {
-        return new String[] { OAuthAddIdentityColumnTask.class.getName() };
+        return new String[] { DropForeignKeyFromOAuthAccountTask.class.getName() };
     }
 }
