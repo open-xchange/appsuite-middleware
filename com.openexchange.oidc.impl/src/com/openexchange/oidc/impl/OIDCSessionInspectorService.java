@@ -35,10 +35,8 @@ public class OIDCSessionInspectorService implements SessionInspectorService{
         if (null == backend) {
             return Reply.NEUTRAL;
         }
-        if (backend.isTokenExpired(session)) {
-            if(!backend.updateOauthTokens(session)) {
-                backend.logoutCurrentUser(session, request, response);
-            }
+        if (backend.isTokenExpired(session) && !backend.updateOauthTokens(session)) {
+            backend.logoutCurrentUser(session, request, response);
         }
         return Reply.NEUTRAL;
     }
