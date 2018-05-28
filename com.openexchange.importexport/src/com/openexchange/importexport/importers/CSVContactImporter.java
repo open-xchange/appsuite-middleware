@@ -219,7 +219,7 @@ public class CSVContactImporter extends AbstractImporter {
         final List<ImportIntention> intentions;
         {
             final int size = csv.size();
-            intentions = new ArrayList<ImportIntention>(size);
+            intentions = new ArrayList<>(size);
             final ContactSwitcher conSet = getContactSwitcher(sessObj.getUser().getLocale());
             for (int lineNumber = 1; lineNumber < size; lineNumber++) {
                 // ...and writing them
@@ -231,7 +231,7 @@ public class CSVContactImporter extends AbstractImporter {
 
         int count = 0;
         // Build a list of contacts to insert
-        final List<Contact> contacts = new ArrayList<Contact>(intentions.size());
+        final List<Contact> contacts = new ArrayList<>(intentions.size());
         for (final ImportIntention intention : intentions) {
             if (intention.contact != null) {
                 if (limit <= 0 || count <= limit) {
@@ -246,7 +246,7 @@ public class CSVContactImporter extends AbstractImporter {
         // Insert or update contacts
         final FolderUpdaterRegistry updaterRegistry = ImportExportServices.getUpdaterRegistry();
         final TargetFolderDefinition target = new TargetFolderDefinition(folder, sessObj.getUserId(), sessObj.getContext());
-        final List<OXException> errors = new LinkedList<OXException>();
+        final List<OXException> errors = new LinkedList<>();
         {
             final FolderUpdaterService<Contact> folderUpdater = updaterRegistry.getFolderUpdater(target);
             if (folderUpdater == null) {
@@ -261,7 +261,7 @@ public class CSVContactImporter extends AbstractImporter {
         }
 
         // Build result list
-        final List<ImportResult> results = new ArrayList<ImportResult>(intentions.size());
+        final List<ImportResult> results = new ArrayList<>(intentions.size());
 
         boolean exceeds = false;
         for (final ImportIntention intention : intentions) {
@@ -343,8 +343,8 @@ public class CSVContactImporter extends AbstractImporter {
 
     public Contact convertCsvToContact(List<String> fields, List<String> entry, ContactSwitcher conSet, int lineNumber, ImportResult result, boolean[] atLeastOneFieldInserted) throws OXException {
         final Contact contactObj = new Contact();
-        final Collection<OXException> warnings = new LinkedList<OXException>();
-        final List<String> wrongFields = new LinkedList<String>();
+        final Collection<OXException> warnings = new LinkedList<>();
+        final List<String> wrongFields = new LinkedList<>();
 
         boolean atLeastOneFieldWithWrongName = false;
         boolean markAsDistributionlist = false;
@@ -484,7 +484,7 @@ public class CSVContactImporter extends AbstractImporter {
             String firstLine = readLines(fileHolder.getStream(), charset, false, 1);
             CSVParser csvParser = getCSVParser(determineDelimiter(firstLine));
             List<List<String>> parsedFirstLine = csvParser.parse(firstLine);
-            if (null == parsedFirstLine || 0 == parsedFirstLine.size() || null == parsedFirstLine.get(0)) {
+            if (null == parsedFirstLine || parsedFirstLine.isEmpty() || null == parsedFirstLine.get(0)) {
                 throw ImportExportExceptionCodes.NO_CONTENT.create();
             }
             /*
@@ -543,7 +543,7 @@ public class CSVContactImporter extends AbstractImporter {
                 } catch (OXException e) {
                     parseException = e;
                 }
-                if (null == parsedFirstLine || 0 == parsedFirstLine.size() || null == parsedFirstLine.get(0)) {
+                if (null == parsedFirstLine || parsedFirstLine.isEmpty() || null == parsedFirstLine.get(0)) {
                     continue;
                 }
                 for (ContactFieldMapper mapper : entry.getValue()) {
@@ -646,7 +646,7 @@ public class CSVContactImporter extends AbstractImporter {
 
     public void addFieldMapper(ContactFieldMapper mapper) {
         if (mappers == null) {
-            mappers = new LinkedList<ContactFieldMapper>();
+            mappers = new LinkedList<>();
         }
         mappers.add(mapper);
     }
@@ -693,7 +693,7 @@ public class CSVContactImporter extends AbstractImporter {
      * @return A map holding the contact field mappers per charset they should operate on.
      */
     private static Map<Charset, List<ContactFieldMapper>> getMappersByCharset(List<ContactFieldMapper> mappers, Charset detectedCharset) {
-        Map<Charset, List<ContactFieldMapper>> mappersByCharset = new HashMap<Charset, List<ContactFieldMapper>>();
+        Map<Charset, List<ContactFieldMapper>> mappersByCharset = new HashMap<>();
         if (null != detectedCharset) {
             mappersByCharset.put(detectedCharset, new ArrayList<ContactFieldMapper>(mappers));
         }
@@ -799,12 +799,10 @@ public class CSVContactImporter extends AbstractImporter {
             String[] value = optionalParams.get("charset");
             if (null != value && 1 == value.length) {
                 String charsetName = value[0];
-                if (false == Strings.isEmpty(charsetName) && false == "auto".equalsIgnoreCase(charsetName)) {
+                if (!Strings.isEmpty(charsetName) && !"auto".equalsIgnoreCase(charsetName)) {
                     try {
                         return Charsets.forName(value[0]);
-                    } catch (IllegalCharsetNameException e) {
-                        throw ImportExportExceptionCodes.UNSUPPORTED_CHARACTER_ENCODING.create(charsetName);
-                    } catch (UnsupportedCharsetException e) {
+                    } catch (IllegalCharsetNameException | UnsupportedCharsetException e) {
                         throw ImportExportExceptionCodes.UNSUPPORTED_CHARACTER_ENCODING.create(charsetName);
                     }
                 }
