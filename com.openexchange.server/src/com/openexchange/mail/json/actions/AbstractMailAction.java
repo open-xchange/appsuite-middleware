@@ -74,9 +74,13 @@ import com.openexchange.ajax.requesthandler.AJAXState;
 import com.openexchange.ajax.requesthandler.crypto.CryptographicServiceAuthenticationFactory;
 import com.openexchange.ajax.requesthandler.oauth.OAuthConstants;
 import com.openexchange.annotation.NonNull;
+import com.openexchange.contact.ContactService;
 import com.openexchange.contactcollector.ContactCollectorService;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.container.Contact;
+import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.search.ContactSearchObject;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.MailListField;
@@ -95,8 +99,12 @@ import com.openexchange.mail.utils.MsisdnUtility;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.mailaccount.TransportAccount;
+import com.openexchange.objectusecount.IncrementArguments;
+import com.openexchange.objectusecount.ObjectUseCountService;
+import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
@@ -345,6 +353,40 @@ public abstract class AbstractMailAction implements AJAXActionService, MailActio
 
             if (null != addrs && !addrs.isEmpty()) {
                 ccs.memorizeAddresses(new ArrayList<InternetAddress>(addrs), incrementUseCount, session);
+            }
+        }
+    }
+
+    /**
+     * Triggers the object use count increment for specified addresses in global address book.
+     *
+     * @param session The session
+     * @param addresses The mail addresses
+     * @throws OXException
+     */
+    public static void triggerUseCountIncrementForGAB(ServerSession session, InternetAddress[] addresses) throws OXException {
+        ObjectUseCountService service = ServerServiceRegistry.getInstance().getService(ObjectUseCountService.class);
+        ContactService cService = ServerServiceRegistry.getInstance().getService(ContactService.class);
+        if (null != service) {
+            for (InternetAddress address : addresses) {
+                String mailAddress = address.getAddress();
+                if (null != cService) {
+                    ContactSearchObject cso = new ContactSearchObject();
+                    cso.setEmail1(mailAddress);
+                    cso.setEmail2(mailAddress);
+                    cso.setEmail3(mailAddress);
+                    cso.setOrSearch(true);
+                    SearchIterator<Contact> it = cService.searchContacts(session, cso);
+                    if (it.hasNext()) {
+                        Contact c = it.next();
+                        if (FolderObject.SYSTEM_LDAP_FOLDER_ID == c.getParentFolderID()) {
+                            IncrementArguments.Builder builder = new IncrementArguments.Builder(mailAddress);
+                            service.incrementObjectUseCount(session, builder.build());
+                        }
+                    } 
+                } else {
+                    throw ServiceExceptionCode.absentService(ContactService.class);
+                }
             }
         }
     }
