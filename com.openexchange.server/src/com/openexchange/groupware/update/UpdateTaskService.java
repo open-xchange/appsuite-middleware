@@ -51,9 +51,9 @@ package com.openexchange.groupware.update;
 
 import java.rmi.Remote;
 import java.rmi.RemoteException;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import javax.management.openmbean.TabularDataSupport;
 
 /**
  * {@link UpdateTaskService} - The RMI service for update tasks
@@ -119,8 +119,7 @@ public interface UpdateTaskService extends Remote {
      * @param schemaName The schema name
      * @return a list with all executed tasks
      */
-    //TODO: Define a proper data object instead of TabularDataSupport
-    TabularDataSupport getExecutedTasksList(String schemaName) throws RemoteException;
+    List<ExecutedTask> getExecutedTasksList(String schemaName) throws RemoteException;
 
     /**
      * Returns the status of a scheduled update task job
