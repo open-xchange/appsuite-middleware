@@ -236,52 +236,45 @@ public class EventResource extends DAVObjectResource<Event> {
         InputStream inputStream = null;
         try {
             /*
-             * init export
+             * load event data for export
              */
-            ICalService iCalService = getFactory().requireService(ICalService.class);
-            ICalParameters iCalParameters = EventPatches.applyIgnoredProperties(this, iCalService.initParameters());
-            CalendarExport calendarExport = iCalService.exportICal(iCalParameters);
-            new CalendarAccessOperation<Void>(factory) {
+            List<Event> exportedEvents = new CalendarAccessOperation<List<Event>>(factory) {
 
                 @Override
-                protected Void perform(IDBasedCalendarAccess access) throws OXException {
+                protected List<Event> perform(IDBasedCalendarAccess access) throws OXException {
                     access.set(CalendarParameters.PARAMETER_FIELDS, null);
-                    List<Event> changeExceptions = null;
+                    List<Event> exportedEvents = new ArrayList<Event>();
                     if (PhantomMaster.class.isInstance(object)) {
                         /*
                          * no access to parent recurring master, use detached occurrences as exceptions
                          */
-                        changeExceptions = access.getChangeExceptions(object.getFolderId(), object.getSeriesId());
+                        exportedEvents.addAll(access.getChangeExceptions(object.getFolderId(), object.getSeriesId()));
                     } else {
                         /*
-                         * load all event data & add (master) event to export
+                         * add (master) event and any overridden instances
                          */
                         Event event = access.getEvent(new EventID(object.getFolderId(), object.getId(), object.getRecurrenceId()));
-                        event = EventPatches.Outgoing(parent.getFactory()).applyAll(EventResource.this, event);
-                        calendarExport.add(event);
+                        exportedEvents.add(event);
                         if (CalendarUtils.isSeriesMaster(object)) {
-                            changeExceptions = access.getChangeExceptions(object.getFolderId(), object.getSeriesId());
+                            exportedEvents.addAll(access.getChangeExceptions(object.getFolderId(), object.getSeriesId()));
                         }
                     }
-                    /*
-                     * add change exceptions to export
-                     */
-                    if (null != changeExceptions && 0 < changeExceptions.size()) {
-                        for (Event changeException : changeExceptions) {
-                            changeException = EventPatches.Outgoing(parent.getFactory()).applyAll(EventResource.this, changeException);
-                            calendarExport.add(changeException);
-                        }
-                    }
-                    /*
-                     * add any extended properties
-                     */
-                    EventPatches.Outgoing.applyExport(EventResource.this, calendarExport);
-                    return null;
+                    return exportedEvents;
                 }
             }.execute(factory.getSession());
             /*
-             * do export
+             * init export & add events
              */
+            ICalService iCalService = getFactory().requireService(ICalService.class);
+            ICalParameters iCalParameters = EventPatches.applyIgnoredProperties(this, iCalService.initParameters());
+            CalendarExport calendarExport = iCalService.exportICal(iCalParameters);
+            for (Event exportedEvent : exportedEvents) {
+                calendarExport.add(EventPatches.Outgoing(parent.getFactory()).applyAll(this, exportedEvent));
+            }
+            /*
+             * add any extended properties & serialize ical
+             */
+            EventPatches.Outgoing.applyExport(this, calendarExport);
             inputStream = calendarExport.getClosingStream();
             return Streams.stream2bytes(inputStream);
         } catch (IOException e) {

@@ -76,6 +76,7 @@ import static com.openexchange.chronos.exception.CalendarExceptionMessages.IO_ER
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.MANDATORY_FIELD_MSG;
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.MAX_ACCOUNTS_EXCEEDED_MSG;
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.MISSING_CAPABILITY_MSG;
+import static com.openexchange.chronos.exception.CalendarExceptionMessages.MISSING_ORGANIZER_MSG;
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.MOVE_OCCURRENCE_NOT_SUPPORTED_MSG;
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.MOVE_SERIES_NOT_SUPPORTED_MSG;
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.NOT_ORGANIZER_MSG;
@@ -189,6 +190,11 @@ public enum CalendarExceptionCodes implements DisplayableOXExceptionCode {
      * <li>Modification restricted to organizer [folder %1$s, id %2$s, organizerUri %3$s, organizerCn %4$s]</li>
      */
     NOT_ORGANIZER("Modification restricted to organizer [folder %1$s, id %2$s, organizerUri %3$s, organizerCn %4$s]", NOT_ORGANIZER_MSG, Category.CATEGORY_PERMISSION_DENIED, 4038),
+    /**
+     * <li>Organizer must also be an attendee.</li>
+     * <li>Missing organizer.</li>
+     */
+    MISSING_ORGANIZER("Missing organizer.", MISSING_ORGANIZER_MSG, Category.CATEGORY_USER_INPUT, 4039),
     /**
      * <li>The supplied folder is not supported. Please select a valid folder and try again.</li>
      * <li>Unsupported folder [folder %1$s, content type %2$s]</li>
@@ -329,6 +335,11 @@ public enum CalendarExceptionCodes implements DisplayableOXExceptionCode {
      * <li>Data not modified in storage</li>
      */
     DB_NOT_MODIFIED("Data not modified in storage", OXExceptionStrings.SQL_ERROR_MSG, Category.CATEGORY_WARNING, 3040),
+    /**
+     * <li>Error while reading/writing data from/to the database.</li>
+     * <li>Calendar account data not written in storage</li>
+     */
+    ACCOUNT_NOT_WRITTEN("Calendar account data not written in storage", OXExceptionStrings.SQL_ERROR_MSG, Category.CATEGORY_WARNING, 3041),
     /**
      * An I/O error occurred: %1$s
      */

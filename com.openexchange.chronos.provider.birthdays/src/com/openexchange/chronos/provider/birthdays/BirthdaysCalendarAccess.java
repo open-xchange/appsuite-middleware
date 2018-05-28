@@ -149,7 +149,7 @@ public class BirthdaysCalendarAccess implements BasicCalendarAccess, SubscribeAw
         this.services = services;
         this.session = session;
         this.parameters = parameters;
-        this.eventConverter = new EventConverter(services, session.getUser().getLocale(), session.getUserId());
+        this.eventConverter = new EventConverter(services, session.getUser().getLocale(), account.getUserId());
     }
 
     /**

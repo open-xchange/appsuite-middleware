@@ -62,13 +62,10 @@ import org.json.JSONObject;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.group.actions.AbstractGroupResponse;
 import com.openexchange.ajax.group.actions.AllRequest;
 import com.openexchange.ajax.group.actions.AllResponse;
-import com.openexchange.ajax.group.actions.ChangeRequest;
-import com.openexchange.ajax.group.actions.ChangeResponse;
 import com.openexchange.ajax.group.actions.CreateRequest;
 import com.openexchange.ajax.group.actions.CreateResponse;
 import com.openexchange.ajax.group.actions.DeleteRequest;
@@ -99,17 +96,21 @@ public final class FunctionTest extends AbstractAJAXSession {
         super();
     }
 
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
         groupsToDelete = new HashSet<Integer>();
     }
 
+    @Override
     @After
     public void tearDown() throws Exception {
         try {
-            for (int id : groupsToDelete) {
-                getClient().execute(new DeleteRequest(id, new Date(Long.MAX_VALUE), false));
+            if (groupsToDelete != null) {
+                for (int id : groupsToDelete) {
+                    getClient().execute(new DeleteRequest(id, new Date(Long.MAX_VALUE), false));
+                }
             }
         } finally {
             super.tearDown();
@@ -258,31 +259,4 @@ public final class FunctionTest extends AbstractAJAXSession {
         assertTrue(entry.has("last_modified_utc"));
     }
 
-    @Test
-    public void testCreateChangeDelete() throws Throwable {
-        // Disabled due to missing permissions for the user.
-        if (true) {
-            return;
-        }
-        final AJAXClient client1 = getClient();
-        final Group group = new Group();
-        group.setSimpleName("createTest");
-        group.setDisplayName("createTest");
-        group.setMember(new int[] { client1.getValues().getUserId() });
-        final CreateRequest request = new CreateRequest(group);
-        try {
-            final CreateResponse response = client1.execute(request);
-            group.setIdentifier(response.getId());
-            group.setLastModified(response.getTimestamp());
-            LOG.trace("Created group with identifier: " + group.getIdentifier());
-            final ChangeRequest change = new ChangeRequest(group);
-            final ChangeResponse changed = client1.execute(change);
-            group.setLastModified(changed.getTimestamp());
-            LOG.trace("Changed group with identifier: " + group.getIdentifier());
-        } finally {
-            if (-1 != group.getIdentifier()) {
-                client1.execute(new DeleteRequest(group.getIdentifier(), group.getLastModified()));
-            }
-        }
-    }
 }

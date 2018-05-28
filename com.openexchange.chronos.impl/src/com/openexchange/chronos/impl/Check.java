@@ -63,13 +63,14 @@ import com.openexchange.chronos.CalendarUserType;
 import com.openexchange.chronos.Classification;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
+import com.openexchange.chronos.Organizer;
 import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.RecurrenceRange;
 import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.common.SelfProtectionFactory.SelfProtection;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.impl.performer.ConflictCheckPerformer;
-import com.openexchange.chronos.impl.performer.ResolveUidPerformer;
+import com.openexchange.chronos.impl.performer.ResolvePerformer;
 import com.openexchange.chronos.service.CalendarService;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.EventConflict;
@@ -296,15 +297,16 @@ public class Check extends com.openexchange.chronos.common.Check {
     /**
      * Checks that the supplied event's unique identifier (UID) is not already used for another event within the same context.
      *
+     * @param session The calendar session
      * @param storage A reference to the calendar storage
      * @param event The event to check
      * @return The passed event's unique identifier, after it was checked for uniqueness
      * @throws OXException {@link CalendarExceptionCodes#UID_CONFLICT}
      */
-    public static String uidIsUnique(CalendarStorage storage, Event event) throws OXException {
+    public static String uidIsUnique(CalendarSession session, CalendarStorage storage, Event event) throws OXException {
         String uid = event.getUid();
         if (Strings.isNotEmpty(uid)) {
-            String existingId = new ResolveUidPerformer(storage).perform(uid);
+            String existingId = new ResolvePerformer(session, storage).resolveByUid(uid);
             if (null != existingId) {
                 throw CalendarExceptionCodes.UID_CONFLICT.create(uid, existingId);
             }
@@ -315,13 +317,14 @@ public class Check extends com.openexchange.chronos.common.Check {
     /**
      * Checks that a specific unique identifier (UID) is not already used for another event within the same context.
      *
+     * @param session The calendar session
      * @param storage A reference to the calendar storage
      * @param uid The unique identifier to check
      * @return The passed unique identifier, after it was checked for uniqueness
      * @throws OXException {@link CalendarExceptionCodes#UID_CONFLICT}
      */
-    public static String uidIsUnique(CalendarStorage storage, String uid) throws OXException {
-        String existingId = new ResolveUidPerformer(storage).perform(uid);
+    public static String uidIsUnique(CalendarSession session, CalendarStorage storage, String uid) throws OXException {
+        String existingId = new ResolvePerformer(session, storage).resolveByUid(uid);
         if (null != existingId) {
             throw CalendarExceptionCodes.UID_CONFLICT.create(uid, existingId);
         }
@@ -343,6 +346,19 @@ public class Check extends com.openexchange.chronos.common.Check {
             throw CalendarExceptionCodes.ATTENDEE_NOT_FOUND.create(attendee, event.getId());
         }
         return matchingAttendee;
+    }
+
+    /**
+     * Checks that the event's organizer is also contained in the list of attendees, in case it is an <i>internal</i> user.
+     *
+     * @param event The event to check
+     * @throws OXException {@link CalendarExceptionCodes#MISSING_ORGANIZER}
+     */
+    public static void internalOrganizerIsAttendee(Event event) throws OXException {
+        Organizer organizer = event.getOrganizer();
+        if (null != organizer && CalendarUtils.isInternal(organizer, CalendarUserType.INDIVIDUAL) && false == contains(event.getAttendees(), organizer)) {
+            throw CalendarExceptionCodes.MISSING_ORGANIZER.create();
+        }
     }
 
     /**

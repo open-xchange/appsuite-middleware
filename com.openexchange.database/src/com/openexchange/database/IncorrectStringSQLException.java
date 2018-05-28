@@ -61,7 +61,7 @@ import com.openexchange.java.Streams;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class IncorrectStringSQLException extends SQLException {
+public class IncorrectStringSQLException extends StringLiteralSQLException {
 
     private static final long serialVersionUID = 2713082500383087281L;
 
@@ -131,7 +131,7 @@ public class IncorrectStringSQLException extends SQLException {
      * @param cause The associated SQL exception
      */
     public IncorrectStringSQLException(String incorrectString, String column, int row, SQLException cause) {
-        super(cause.getMessage(), cause.getSQLState(), cause.getErrorCode(), cause);
+        super(cause);
         this.incorrectString = incorrectString;
         this.column = column;
         this.row = row;

@@ -50,6 +50,7 @@
 package com.openexchange.chronos.storage;
 
 import java.util.List;
+import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.provider.CalendarAccount;
 import com.openexchange.database.provider.DBTransactionPolicy;
 import com.openexchange.exception.OXException;
@@ -76,34 +77,32 @@ public interface CalendarAccountStorage {
      * Inserts a new calendar account.
      *
      * @param account The account data to insert
-     * @return The newly created account
      */
-    CalendarAccount insertAccount(CalendarAccount account) throws OXException;
+    void insertAccount(CalendarAccount account) throws OXException;
 
     /**
-     * Inserts a new calendar account.
+     * Inserts a new calendar account, obeying the maximum number of allowed accounts for this provider and user. If the account was not
+     * inserted, this is indicated via {@link CalendarExceptionCodes#ACCOUNT_NOT_WRITTEN}.
      *
      * @param account The account data to insert
      * @param maxAccounts The maximum number of accounts allowed for this provider and user
-     * @return The newly created account
      */
-    CalendarAccount insertAccount(CalendarAccount account, int maxAccounts) throws OXException;
+    void insertAccount(CalendarAccount account, int maxAccounts) throws OXException;
 
     /**
      * Updates an existing calendar account.
      *
      * @param account The account data to update
-     * @param clientTimestamp The last time stamp known by the client to prevent from concurrent updates
-     * @return The updated account
+     * @param clientTimestamp The last timestamp known by the client to catch concurrent updates
      */
-    CalendarAccount updateAccount(CalendarAccount account, long clientTimestamp) throws OXException;
+    void updateAccount(CalendarAccount account, long clientTimestamp) throws OXException;
 
     /**
      * Deletes an existing calendar account.
      *
      * @param userId The identifier of the user to delete the account for
      * @param accountId The identifier of the account to delete
-     * @param clientTimestamp The last time stamp known by the client to prevent from concurrent updates
+     * @param clientTimestamp The last timestamp known by the client to catch concurrent updates
      */
     void deleteAccount(int userId, int accountId, long clientTimestamp) throws OXException;
 

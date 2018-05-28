@@ -211,13 +211,13 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
             /*
              * update for new change exception; prepare & insert a plain exception first, based on the original data from the master
              */
-            Map<Integer, List<Alarm>> alarms = storage.getAlarmStorage().loadAlarms(originalSeriesMaster);
+            Map<Integer, List<Alarm>> seriesMasterAlarms = storage.getAlarmStorage().loadAlarms(originalSeriesMaster);
             Event newExceptionEvent = prepareException(originalSeriesMaster, recurrenceId);
             Check.quotaNotExceeded(storage, session);
             storage.getEventStorage().insertEvent(newExceptionEvent);
             storage.getAttendeeStorage().insertAttendees(newExceptionEvent.getId(), originalSeriesMaster.getAttendees());
             storage.getAttachmentStorage().insertAttachments(session.getSession(), folder.getId(), newExceptionEvent.getId(), originalSeriesMaster.getAttachments());
-            for (Entry<Integer, List<Alarm>> entry : storage.getAlarmStorage().loadAlarms(originalSeriesMaster).entrySet()) {
+            for (Entry<Integer, List<Alarm>> entry : seriesMasterAlarms.entrySet()) {
                 insertAlarms(newExceptionEvent, i(entry.getKey()), filterRelativeTriggers(entry.getValue()), true);
             }
             newExceptionEvent = loadEventData(newExceptionEvent.getId());
@@ -228,6 +228,7 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
              * - sequence number is also ignored (since possibly incremented implicitly before)
              */
             updateEvent(newExceptionEvent, updatedEventData, EventField.ID, EventField.RECURRENCE_RULE, EventField.SEQUENCE);
+            Event updatedExceptionEvent = loadEventData(newExceptionEvent.getId());
             /*
              * add change exception date to series master & track results
              */
@@ -235,9 +236,13 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
             addChangeExceptionDate(originalSeriesMaster, recurrenceId);
             Event updatedMasterEvent = loadEventData(originalSeriesMaster.getId());
             resultTracker.trackUpdate(originalSeriesMaster, updatedMasterEvent);
-
-            storage.getAlarmTriggerStorage().deleteTriggers(originalSeriesMaster.getId());
-            storage.getAlarmTriggerStorage().insertTriggers(updatedMasterEvent, alarms);
+            /*
+             * reset alarm triggers for series master event and new change exception
+             */
+            storage.getAlarmTriggerStorage().deleteTriggers(updatedMasterEvent.getId());
+            storage.getAlarmTriggerStorage().insertTriggers(updatedMasterEvent, seriesMasterAlarms);
+            storage.getAlarmTriggerStorage().deleteTriggers(updatedExceptionEvent.getId());
+            storage.getAlarmTriggerStorage().insertTriggers(updatedExceptionEvent, storage.getAlarmStorage().loadAlarms(updatedExceptionEvent));
         }
     }
 

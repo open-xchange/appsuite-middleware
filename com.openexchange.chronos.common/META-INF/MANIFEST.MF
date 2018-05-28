@@ -7,8 +7,7 @@ Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ClassPath: .,
  lib/vinnie-2.0.0.jar,
- lib/lib-recur-0.10.jar,
- lib/failsafe-1.0.5.jar
+ lib/lib-recur-0.10.jar
 Import-Package: com.openexchange.chronos,
  com.openexchange.chronos.exception,
  com.openexchange.chronos.service,
@@ -36,8 +35,5 @@ Export-Package: com.github.mangstadt.vinnie,
  com.github.mangstadt.vinnie.io,
  com.openexchange.chronos.common,
  com.openexchange.chronos.common.mapping,
- net.jodah.failsafe,
- net.jodah.failsafe.event,
- net.jodah.failsafe.function,
  org.dmfs.rfc5545.recur,
  org.dmfs.rfc5545.recurrenceset

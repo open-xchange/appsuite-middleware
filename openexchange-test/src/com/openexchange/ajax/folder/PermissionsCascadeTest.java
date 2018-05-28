@@ -81,7 +81,7 @@ import com.openexchange.server.impl.OCLPermission;
  */
 public class PermissionsCascadeTest extends AbstractAJAXSession {
 
-    private List<FolderObject> testFolders = new ArrayList<FolderObject>();
+    private final List<FolderObject> testFolders = new ArrayList<FolderObject>();
 
     private FolderObject rootFolder;
 
@@ -89,13 +89,14 @@ public class PermissionsCascadeTest extends AbstractAJAXSession {
 
     /**
      * Initializes a new {@link PermissionsCascadeTest}.
-     * 
+     *
      * @param name
      */
     public PermissionsCascadeTest() {
         super();
     }
 
+    @Override
     @After
     public void tearDown() throws Exception {
         try {
@@ -111,9 +112,9 @@ public class PermissionsCascadeTest extends AbstractAJAXSession {
 
     /**
      * Test simple permissions cascade.
-     * 
+     *
      * Creates a simple folder tree, assigns permissions and asserts
-     * 
+     *
      * @throws Exception
      */
     @Test
@@ -125,7 +126,7 @@ public class PermissionsCascadeTest extends AbstractAJAXSession {
 
     /**
      * Test cascading in sibling folders
-     * 
+     *
      * @throws Exception
      */
     @Test
@@ -136,21 +137,20 @@ public class PermissionsCascadeTest extends AbstractAJAXSession {
 
     /**
      * Assert cascaded permissions in tree, starting by root node
-     * 
+     *
      * @throws Exception
      */
     private void assertCascadePermissions() throws Exception {
         // Fetch that folder
         GetResponse response = getClient().execute(new GetRequest(EnumAPI.OUTLOOK, rootFolder.getObjectID()));
-        JSONObject data = (JSONObject) response.getData();
-        long timestamp = data.getLong("last_modified");
+        Date timestamp = response.getTimestamp();
 
         // User to share the folder with
         AJAXClient client2 = new AJAXClient(testContext.acquireUser());
 
-        // Apply permissions 
+        // Apply permissions
         rootFolder.addPermission(Create.ocl(client2.getValues().getUserId(), false, false, OCLPermission.READ_FOLDER, OCLPermission.READ_OWN_OBJECTS, OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS));
-        rootFolder.setLastModified(new Date(timestamp));
+        rootFolder.setLastModified(timestamp);
         getClient().execute(new UpdateRequest(EnumAPI.OUTLOOK, rootFolder).setCascadePermissions(true));
 
         // Fetch all folders of the tree and make sure that the permissions are cascaded
@@ -168,15 +168,15 @@ public class PermissionsCascadeTest extends AbstractAJAXSession {
 
     /**
      * Test roll-back functionality.
-     * 
+     *
      * Create a random tree and find a folder in the tree (say (A)) that has at least one sub-folder.
      * Select that sub-folder (A) and create a new folder (B) under that sub-folder (A) with a second client
      * Remove the permissions from the new folder (B) for client 1 and make client 2 the administrator
      * for that folder.
-     * 
+     *
      * Apply new permissions to folder (A) and assert that the permissions are not cascaded.
      * Then apply the new permissions again and ignore the warnings. Assert that the permissions are cascaded.
-     * 
+     *
      * @throws Exception
      */
     @Test
@@ -265,7 +265,7 @@ public class PermissionsCascadeTest extends AbstractAJAXSession {
 
     /**
      * Assert permissions
-     * 
+     *
      * @param folderObject The folder objects
      * @param includedUsers The users that should be included in the permission bits
      * @param excludedUsers The users that should be excluded from the permission bits
@@ -285,7 +285,7 @@ public class PermissionsCascadeTest extends AbstractAJAXSession {
 
     /**
      * Assert users in permissions
-     * 
+     *
      * @param userIds The user identifiers
      * @param permissions The permission bits
      * @param folderId The folder identifier
@@ -303,7 +303,7 @@ public class PermissionsCascadeTest extends AbstractAJAXSession {
 
     /**
      * Fetch all sub-folders of the specified folder
-     * 
+     *
      * @param folderId The folder identifier
      * @param tree The tree
      * @throws Exception
@@ -322,7 +322,7 @@ public class PermissionsCascadeTest extends AbstractAJAXSession {
 
     /**
      * Create a folder and add it to the delete list for later cleanup (Helper method)
-     * 
+     *
      * @param folderName The folder name
      * @param parent The parent
      * @return The folder identifier
@@ -334,7 +334,7 @@ public class PermissionsCascadeTest extends AbstractAJAXSession {
 
     /**
      * Create a folder and add it to the delete list for later cleanup
-     * 
+     *
      * @param folderName The folder name
      * @param parent The parent
      * @param client The client
@@ -353,7 +353,7 @@ public class PermissionsCascadeTest extends AbstractAJAXSession {
 
     /**
      * Creates a simple folder tree
-     * 
+     *
      * @param rootName The name of the root node
      * @throws Exception
      */
@@ -368,7 +368,7 @@ public class PermissionsCascadeTest extends AbstractAJAXSession {
 
     /**
      * Creates a folder tree with folders placed randomly in the hierarchy.
-     * 
+     *
      * @param rootName The name of the root node
      * @throws Exception
      */

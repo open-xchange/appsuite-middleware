@@ -78,6 +78,8 @@ import com.openexchange.contact.storage.rdb.search.FulltextAutocompleteAdapter;
 import com.openexchange.contact.storage.rdb.search.SearchAdapter;
 import com.openexchange.contact.storage.rdb.search.SearchTermAdapter;
 import com.openexchange.database.Databases;
+import com.openexchange.database.EmptyResultSet;
+import com.openexchange.database.StringLiteralSQLException;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.contact.helpers.ContactField;
@@ -370,7 +372,7 @@ public class Executor {
              * execute and read out results
              */
             resultSet = logExecuteQuery(stmt);
-            return new ContactReader(contextID, connection, resultSet).readContacts(fields, false);
+            return new ContactReader(contextID, connection, resultSet).readContacts(fields, Arrays.asList(fields).contains(ContactField.USE_COUNT));
         } finally {
             Databases.closeSQLStuff(resultSet, stmt);
         }
@@ -1289,6 +1291,9 @@ public class Executor {
             ResultSet resultSet = stmt.executeQuery();
             LOG.debug("executeQuery: {} - {} ms elapsed.", stmt.toString(), (System.currentTimeMillis() - start));
             return resultSet;
+        } catch (StringLiteralSQLException e) {
+            // Cannot return any match
+            return EmptyResultSet.getInstance();
         } catch (SQLException e) {
             LOG.warn("Error executing \"{}\": {}", stmt, e.getMessage());
             throw e;

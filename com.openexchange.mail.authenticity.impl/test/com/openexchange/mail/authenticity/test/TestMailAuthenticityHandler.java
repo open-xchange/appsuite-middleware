@@ -50,6 +50,7 @@
 package com.openexchange.mail.authenticity.test;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import java.util.HashMap;
@@ -368,11 +369,12 @@ public class TestMailAuthenticityHandler extends AbstractTestMailAuthenticity {
      */
     @Test
     public void testDMARCWithMismatchingFromHeader() throws AddressException {
+        // TODO: is this even possible? If so, don't we need to rather consider the subdomain policy then and make this a pass?
         fromAddresses[0] = new InternetAddress("Jane Doe <jane.doe@some.foobar.com>");
         perform("ox.io; dmarc=pass (p=NONE sp=NONE dis=NONE) header.from=foobar.com");
 
         assertStatus(MailAuthenticityStatus.NEUTRAL, result.getStatus());
-        assertNull("The domain does not match", result.getAttribute(MailAuthenticityResultKey.FROM_DOMAIN));
+        assertEquals("The domain does not match", "foobar.com", result.getAttribute(MailAuthenticityResultKey.FROM_DOMAIN));
         assertAmount(1);
 
         List<MailAuthenticityMechanismResult> results = result.getAttribute(MailAuthenticityResultKey.MAIL_AUTH_MECH_RESULTS, List.class);
@@ -390,7 +392,7 @@ public class TestMailAuthenticityHandler extends AbstractTestMailAuthenticity {
         perform("ox.io; dmarc=pass (p=NONE sp=NONE dis=NONE) header.from=foobar.com; dmarc=fail (p=NONE sp=NONE dis=NONE) header.from=some.foobar.com");
 
         assertStatus(MailAuthenticityStatus.NEUTRAL, result.getStatus());
-        assertNull("The domain does not match", result.getAttribute(MailAuthenticityResultKey.FROM_DOMAIN));
+        assertEquals("The domain does not match", "foobar.com", result.getAttribute(MailAuthenticityResultKey.FROM_DOMAIN));
         assertAmount(1);
         assertUnconsideredAmount(0);
 
@@ -450,8 +452,8 @@ public class TestMailAuthenticityHandler extends AbstractTestMailAuthenticity {
         //@formatter:on
 
         assertStatus(MailAuthenticityStatus.NEUTRAL, result.getStatus());
-        assertNull("The domain does not match", result.getAttribute(MailAuthenticityResultKey.FROM_DOMAIN));
-        assertTrue("Domain mismatch was expected", result.getAttribute(MailAuthenticityResultKey.DOMAN_MISMATCH, Boolean.class)); // FIXME: Should be adjusted accordingly after fixing bug 57353
+        assertEquals("The domain does not match", "foobar.com", result.getAttribute(MailAuthenticityResultKey.FROM_DOMAIN).toString().toLowerCase());
+        assertFalse("No domain mismatch was expected", result.getAttribute(MailAuthenticityResultKey.DOMAIN_MISMATCH, Boolean.class));
 
         List<MailAuthenticityMechanismResult> results = result.getAttribute(MailAuthenticityResultKey.MAIL_AUTH_MECH_RESULTS, List.class);
         assertAuthenticityMechanismResult(results.get(0), "fooBAR.com", DMARCResult.NONE);
