@@ -417,7 +417,8 @@ public class BasicAlarmTriggerTest extends AbstractUserTimezoneAlarmTriggerTest 
         /*
          * 3. create an exception for the event recurrence of the next trigger by shifting the start time by one hour
          */
-        CalendarResult updateResult = eventManager.shiftEvent(event.getId(), alarmTrigger.getRecurrenceId(), event, eventTime, TimeUnit.HOURS, 1, System.currentTimeMillis());
+        eventManager.getEvent(folderId, event.getId());
+        CalendarResult updateResult = eventManager.shiftEvent(event.getId(), alarmTrigger.getRecurrenceId(), event, eventTime, TimeUnit.HOURS, 1, null);
         assertNotNull(updateResult.getCreated());
         assertEquals(1, updateResult.getCreated().size());
         EventData exceptionEvent = updateResult.getCreated().get(0);
