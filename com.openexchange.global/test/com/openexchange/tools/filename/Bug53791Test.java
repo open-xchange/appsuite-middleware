@@ -49,9 +49,7 @@
 
 package com.openexchange.tools.filename;
 
-import static org.junit.Assert.*;
 import org.junit.Test;
-import com.openexchange.java.Strings;
 
 /**
  * {@link BugFileNameToolsTest}
@@ -61,7 +59,7 @@ import com.openexchange.java.Strings;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public class Bug53791Test {
+public class Bug53791Test extends AbstractFileNameToolsTest {
 
     @Test
     public void testDecomposedString() {
@@ -74,14 +72,8 @@ public class Bug53791Test {
             "\u0041\u030Angstrom.txt"
         };
         for (String string : strings) {
-            checkSanitizing(string);
+            checkSanitizing(string, true);
         }
-    }
-
-    private static void checkSanitizing(String string) {
-        String sanitizedString = FileNameTools.sanitizeFilename(string);
-        assertFalse("Sanitized characters in " + sanitizedString, sanitizedString.contains("_"));
-        assertTrue("Unexpected string after sanitizing", Strings.equalsNormalized(string, sanitizedString));
     }
 
 }

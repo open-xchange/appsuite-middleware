@@ -65,6 +65,9 @@ import com.openexchange.session.Session;
  */
 public interface AdvertisementConfigService {
 
+    static final String PACKAGE_ALL = "default";
+    static final String RESELLER_ALL = "default";
+
     public enum ConfigResultType {
         CREATED, UPDATED, DELETED, IGNORED, ERROR
     }

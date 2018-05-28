@@ -47,64 +47,23 @@
  *
  */
 
-package com.openexchange.push.impl.balancing.reschedulerpolicy.portable;
+package com.openexchange.tools.filename;
 
-import java.io.IOException;
-import java.util.concurrent.Callable;
-import com.hazelcast.nio.serialization.PortableReader;
-import com.hazelcast.nio.serialization.PortableWriter;
-import com.openexchange.hazelcast.serialization.AbstractCustomPortable;
-import com.openexchange.push.impl.PushManagerRegistry;
-
+import org.junit.Test;
 
 /**
- * {@link PortableDropAllPermanentListenerCallable}
+ * {@link Bug56499Test}
+ *
+ * Lost support for '&#x3010;' (LEFT BLACK LENTICULAR BRACKET, U+3010) and '&#x3011;' (RIGHT BLACK LENTICULAR BRACKET, U+3011) in file names
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since v7.6.2
+ * @since v7.10.0
  */
-public class PortableDropAllPermanentListenerCallable extends AbstractCustomPortable implements Callable<Boolean> {
+public class Bug56499Test extends AbstractFileNameToolsTest {
 
-    public static final String PARAMETER_CALLER = "caller";
-
-    private String caller;
-
-    /**
-     * Initializes a new {@link PortableDropAllPermanentListenerCallable}.
-     */
-    public PortableDropAllPermanentListenerCallable() {
-        super();
-    }
-
-    /**
-     * Initializes a new {@link PortableDropAllPermanentListenerCallable}.
-     *
-     * @param source The push user to drop
-     */
-    public PortableDropAllPermanentListenerCallable(String caller) {
-        super();
-        this.caller = caller;
-    }
-
-    @Override
-    public Boolean call() throws Exception {
-        PushManagerRegistry.getInstance().stopAllPermanentListener(false); // No reconnect since we are going to restart them in cluster
-        return Boolean.TRUE;
-    }
-
-    @Override
-    public int getClassId() {
-        return 109;
-    }
-
-    @Override
-    public void writePortable(PortableWriter writer) throws IOException {
-        writer.writeUTF(PARAMETER_CALLER, caller);
-    }
-
-    @Override
-    public void readPortable(PortableReader reader) throws IOException {
-        caller = reader.readUTF(PARAMETER_CALLER);
+    @Test
+    public void testDecomposedString() {
+        checkSanitizing("\u3010\u30c9\u30e9\u30d5\u30c8\u7248\u3011\u57fa\u76e4\u6280\u8853\u306e\u9ad8\u5ea6\u5316-20171011.zip", true);
     }
 
 }

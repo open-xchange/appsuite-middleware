@@ -49,6 +49,24 @@ import javax.security.auth.callback.*;
 import com.sun.mail.iap.*;
 import com.sun.mail.imap.*;
 import com.sun.mail.util.*;
+import javax.security.auth.callback.Callback;
+import javax.security.auth.callback.CallbackHandler;
+import javax.security.auth.callback.NameCallback;
+import javax.security.auth.callback.PasswordCallback;
+import javax.security.sasl.RealmCallback;
+import javax.security.sasl.RealmChoiceCallback;
+import javax.security.sasl.Sasl;
+import javax.security.sasl.SaslClient;
+import javax.security.sasl.SaslException;
+import com.sun.mail.iap.Argument;
+import com.sun.mail.iap.ByteArray;
+import com.sun.mail.iap.ProtocolException;
+import com.sun.mail.iap.Response;
+import com.sun.mail.util.ASCIIUtility;
+import com.sun.mail.util.BASE64DecoderStream;
+import com.sun.mail.util.BASE64EncoderStream;
+import com.sun.mail.util.MailLogger;
+import com.sun.mail.util.PropUtil;
 
 /**
  * This class contains a single method that does authentication using

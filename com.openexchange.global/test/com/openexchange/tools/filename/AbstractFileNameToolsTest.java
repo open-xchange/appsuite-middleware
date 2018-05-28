@@ -47,64 +47,39 @@
  *
  */
 
-package com.openexchange.push.impl.balancing.reschedulerpolicy.portable;
+package com.openexchange.tools.filename;
 
-import java.io.IOException;
-import java.util.concurrent.Callable;
-import com.hazelcast.nio.serialization.PortableReader;
-import com.hazelcast.nio.serialization.PortableWriter;
-import com.openexchange.hazelcast.serialization.AbstractCustomPortable;
-import com.openexchange.push.impl.PushManagerRegistry;
-
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import com.openexchange.java.Strings;
 
 /**
- * {@link PortableDropAllPermanentListenerCallable}
+ * {@link AbstractFileNameToolsTest}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since v7.6.2
+ * @since v7.8.0
  */
-public class PortableDropAllPermanentListenerCallable extends AbstractCustomPortable implements Callable<Boolean> {
-
-    public static final String PARAMETER_CALLER = "caller";
-
-    private String caller;
+public abstract class AbstractFileNameToolsTest {
 
     /**
-     * Initializes a new {@link PortableDropAllPermanentListenerCallable}.
+     * Initializes a new {@link AbstractFileNameToolsTest}.
      */
-    public PortableDropAllPermanentListenerCallable() {
+    protected AbstractFileNameToolsTest() {
         super();
     }
 
     /**
-     * Initializes a new {@link PortableDropAllPermanentListenerCallable}.
+     * Checks if specified string "survives" sanitization through {@link FileNameTools#sanitizeFilename(String) sanitizeFilename()}.
      *
-     * @param source The push user to drop
+     * @param string The string to check
+     * @param checkNormalized <code>true</code> to also check if sanitization maintains noralized form, otherwise <code>false</code>
      */
-    public PortableDropAllPermanentListenerCallable(String caller) {
-        super();
-        this.caller = caller;
-    }
-
-    @Override
-    public Boolean call() throws Exception {
-        PushManagerRegistry.getInstance().stopAllPermanentListener(false); // No reconnect since we are going to restart them in cluster
-        return Boolean.TRUE;
-    }
-
-    @Override
-    public int getClassId() {
-        return 109;
-    }
-
-    @Override
-    public void writePortable(PortableWriter writer) throws IOException {
-        writer.writeUTF(PARAMETER_CALLER, caller);
-    }
-
-    @Override
-    public void readPortable(PortableReader reader) throws IOException {
-        caller = reader.readUTF(PARAMETER_CALLER);
+    protected static void checkSanitizing(String string, boolean checkNormalized) {
+        String sanitizedString = FileNameTools.sanitizeFilename(string);
+        assertFalse("Sanitized characters in " + sanitizedString, sanitizedString.indexOf('_') >= 0);
+        if (checkNormalized) {
+            assertTrue("Unexpected string after sanitizing", Strings.equalsNormalized(string, sanitizedString));
+        }
     }
 
 }

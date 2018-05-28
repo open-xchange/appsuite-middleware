@@ -193,7 +193,7 @@ public class DBQuotaFileStorage implements QuotaFileStorage, Serializable /* For
         Iterator<UnifiedQuotaService> iter = unifiedQuotaServices.iterator();
         if (false == iter.hasNext()) {
             // No one available...
-            LOGGER.warn("No Unified Quota service available for file storage '{}' of user {} in context {}, although it has been enabled.", uri, Integer.valueOf(userId), Integer.valueOf(contextId));
+            LOGGER.debug("No Unified Quota service available for file storage '{}' of user {} in context {}.", uri, Integer.valueOf(userId), Integer.valueOf(contextId));
             return null;
         }
 

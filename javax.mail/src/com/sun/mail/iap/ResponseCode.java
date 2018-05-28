@@ -292,6 +292,20 @@ public enum ResponseCode {
      * </pre>
      */
     NONEXISTENT("NONEXISTENT"),
+    /**
+     *
+     * The operation tries to append or move a message to a mailbox,
+     * which does not exist. The server MUST send the response code
+     * "[TRYCREATE]" to give a hint to the client that it can attempt
+     * a CREATE command and retry the APPEND/MOVE if the CREATE is
+     * successful.
+     *
+     * <pre>
+     * C: p MOVE 66466 SomeMailbox
+     * S: p NO [TRYCREATE] Mailbox doesn't exist: SomeMailbox
+     * </pre>
+     */
+    TRYCREATE("TRYCREATE"),
 
     ;
 

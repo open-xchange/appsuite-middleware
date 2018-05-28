@@ -190,11 +190,13 @@ public class RdbCredentialStorage implements CredentialStorage {
             }
 
             // Perform INSERT statement
-            stmt = connection.prepareStatement("INSERT INTO credentials (cid, user, password, login) VALUES (?,?,?,?)");
+            stmt = connection.prepareStatement("INSERT INTO credentials (cid, user, password, login) VALUES (?,?,?,?) ON DUPLICATE KEY UPDATE password=?, login=?");
             stmt.setInt(1, contextId);
             stmt.setInt(2, userId);
             stmt.setString(3, obfuscatedCredentials.getPassword());
             stmt.setString(4, obfuscatedCredentials.getLogin());
+            stmt.setString(5, obfuscatedCredentials.getPassword());
+            stmt.setString(6, obfuscatedCredentials.getLogin());
             try {
                 stmt.executeUpdate();
                 return true;

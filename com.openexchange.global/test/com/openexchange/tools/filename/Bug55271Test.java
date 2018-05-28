@@ -49,7 +49,6 @@
 
 package com.openexchange.tools.filename;
 
-import static org.junit.Assert.*;
 import org.junit.Test;
 
 /**
@@ -60,7 +59,7 @@ import org.junit.Test;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public class Bug55271Test {
+public class Bug55271Test extends AbstractFileNameToolsTest {
 
     @Test
     public void testDecomposedString() {
@@ -68,13 +67,8 @@ public class Bug55271Test {
             "\uff18\u6708\uff12\uff12\u65e5\u6295\u51fd.zip"
         };
         for (String string : strings) {
-            checkSanitizing(string);
+            checkSanitizing(string, false);
         }
-    }
-
-    private static void checkSanitizing(String string) {
-        String sanitizedString = FileNameTools.sanitizeFilename(string);
-        assertFalse("Sanitized characters in " + sanitizedString, sanitizedString.contains("_"));
     }
 
 }

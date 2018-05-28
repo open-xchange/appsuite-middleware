@@ -2723,11 +2723,20 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                     throw MailExceptionCode.DELETE_FAILED_OVER_QUOTA.create(e, new Object[0]);
                 }
                 final Exception nestedExc = e.getNextException();
-                if (nestedExc != null && com.openexchange.java.Strings.toLowerCase(nestedExc.getMessage()).indexOf("quota") >= 0) {
-                    /*
-                     * We face an Over-Quota-Exception
-                     */
-                    throw MailExceptionCode.DELETE_FAILED_OVER_QUOTA.create(e, new Object[0]);
+                if (nestedExc != null) {
+                    if (com.openexchange.java.Strings.toLowerCase(nestedExc.getMessage()).indexOf("quota") >= 0) {
+                        /*
+                         * We face an Over-Quota-Exception
+                         */
+                        throw MailExceptionCode.DELETE_FAILED_OVER_QUOTA.create(e, new Object[0]);
+                    }
+                    if (nestedExc instanceof com.sun.mail.iap.ProtocolException) {
+                        com.sun.mail.iap.ProtocolException pe = (com.sun.mail.iap.ProtocolException) nestedExc;
+                        OXException oxe = MimeMailException.handleProtocolExceptionByResponseCode(pe, imapConfig, session, imapFolder);
+                        if (null != oxe) {
+                            throw oxe;
+                        }
+                    }
                 }
                 throw IMAPException.create(IMAPException.Code.MOVE_ON_DELETE_FAILED, imapConfig, session, e, new Object[0]);
             }

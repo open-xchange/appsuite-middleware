@@ -61,6 +61,10 @@ import com.sun.mail.imap.CopyUID;
 import com.sun.mail.imap.SortTerm;
 import com.sun.mail.imap.ResyncData;
 import com.sun.mail.imap.Utility;
+import com.sun.mail.util.ASCIIUtility;
+import com.sun.mail.util.BASE64EncoderStream;
+import com.sun.mail.util.MailLogger;
+import com.sun.mail.util.PropUtil;
 
 /**
  * This class extends the iap.Protocol object and implements IMAP
@@ -1276,6 +1280,7 @@ public class IMAPProtocol extends Protocol {
     public void sasllogin(final String[] allowed, final String realm, final String authzid,
 				final String u, final String p) throws ProtocolException {
     authenticatedStatusChanging0(true, u, p);
+    try {
     boolean useCanonicalHostName = PropUtil.getBooleanProperty(props,
 		    "mail." + name + ".sasl.usecanonicalhostname", false);
 	String serviceHost;
@@ -1343,6 +1348,11 @@ public class IMAPProtocol extends Protocol {
 	} finally {
 	    resumeTracing();
 	}
+    } finally {
+        if (!authenticated) {
+            authenticatedStatusChanging0(false, u, p);
+        }
+    }
     }
 
     // XXX - for IMAPSaslAuthenticator access to protected method

@@ -47,64 +47,29 @@
  *
  */
 
-package com.openexchange.push.impl.balancing.reschedulerpolicy.portable;
+package com.openexchange.tools.filename;
 
-import java.io.IOException;
-import java.util.concurrent.Callable;
-import com.hazelcast.nio.serialization.PortableReader;
-import com.hazelcast.nio.serialization.PortableWriter;
-import com.openexchange.hazelcast.serialization.AbstractCustomPortable;
-import com.openexchange.push.impl.PushManagerRegistry;
-
+import static org.junit.Assert.assertTrue;
+import org.junit.Test;
 
 /**
- * {@link PortableDropAllPermanentListenerCallable}
+ * {@link Bug58052Test}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since v7.6.2
+ * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
+ * @since v7.10.0
  */
-public class PortableDropAllPermanentListenerCallable extends AbstractCustomPortable implements Callable<Boolean> {
+public class Bug58052Test extends AbstractFileNameToolsTest {
 
-    public static final String PARAMETER_CALLER = "caller";
+    @Test
+    public void testLeaveAllowedUnicodeChars() {
+        String fileName = "\u2460ab\u2461cd\u2462.zip";
 
-    private String caller;
+        String sanitizedString = FileNameTools.sanitizeFilename(fileName);
 
-    /**
-     * Initializes a new {@link PortableDropAllPermanentListenerCallable}.
-     */
-    public PortableDropAllPermanentListenerCallable() {
-        super();
-    }
-
-    /**
-     * Initializes a new {@link PortableDropAllPermanentListenerCallable}.
-     *
-     * @param source The push user to drop
-     */
-    public PortableDropAllPermanentListenerCallable(String caller) {
-        super();
-        this.caller = caller;
-    }
-
-    @Override
-    public Boolean call() throws Exception {
-        PushManagerRegistry.getInstance().stopAllPermanentListener(false); // No reconnect since we are going to restart them in cluster
-        return Boolean.TRUE;
-    }
-
-    @Override
-    public int getClassId() {
-        return 109;
-    }
-
-    @Override
-    public void writePortable(PortableWriter writer) throws IOException {
-        writer.writeUTF(PARAMETER_CALLER, caller);
-    }
-
-    @Override
-    public void readPortable(PortableReader reader) throws IOException {
-        caller = reader.readUTF(PARAMETER_CALLER);
+        assertTrue("Characters wrongly sanitized " + sanitizedString, sanitizedString.contains("\u2460"));
+        assertTrue("Characters wrongly sanitized " + sanitizedString, sanitizedString.contains("\u2461"));
+        assertTrue("Characters wrongly sanitized " + sanitizedString, sanitizedString.contains("\u2462"));
+        assertTrue("Unexpected string after sanitizing", fileName.equalsIgnoreCase(sanitizedString));
     }
 
 }

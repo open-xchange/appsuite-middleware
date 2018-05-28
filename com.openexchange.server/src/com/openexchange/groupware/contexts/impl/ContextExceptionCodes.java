@@ -47,7 +47,6 @@
  *
  */
 
-
 package com.openexchange.groupware.contexts.impl;
 
 import com.openexchange.exception.Category;
@@ -87,9 +86,12 @@ public enum ContextExceptionCodes implements DisplayableOXExceptionCode {
     /**
      * Denied concurrent update for context attributes for context %1$d.
      */
-    CONCURRENT_ATTRIBUTES_UPDATE("Denied concurrent update for context attributes for context %1$d.", ContextExceptionMessage.CONCURRENT_ATTRIBUTES_UPDATE_DISPLAY, Category.CATEGORY_ERROR, 11);
-
-
+    CONCURRENT_ATTRIBUTES_UPDATE("Denied concurrent update for context attributes for context %1$d.", ContextExceptionMessage.CONCURRENT_ATTRIBUTES_UPDATE_DISPLAY, Category.CATEGORY_ERROR, 11),
+    /**
+     * The context %d is located in server with id %d
+     */
+    LOCATED_IN_ANOTHER_SERVER("The context %d is located in server with id %d", OXExceptionStrings.MESSAGE, Category.CATEGORY_ERROR, 12);
+    ;
 
     /**
      * (Log) Message of the exception.

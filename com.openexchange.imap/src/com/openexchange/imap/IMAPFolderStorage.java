@@ -2409,11 +2409,20 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                                         throw MailExceptionCode.DELETE_FAILED_OVER_QUOTA.create(e, new Object[0]);
                                     }
                                     final Exception nestedExc = e.getNextException();
-                                    if (nestedExc != null && nestedExc.getMessage().indexOf("Over quota") > -1) {
-                                        /*
-                                         * We face an Over-Quota-Exception
-                                         */
-                                        throw MailExceptionCode.DELETE_FAILED_OVER_QUOTA.create(e, new Object[0]);
+                                    if (nestedExc != null) {
+                                        if (nestedExc.getMessage().indexOf("Over quota") > -1) {
+                                            /*
+                                             * We face an Over-Quota-Exception
+                                             */
+                                            throw MailExceptionCode.DELETE_FAILED_OVER_QUOTA.create(e, new Object[0]);
+                                        }
+                                        if (nestedExc instanceof com.sun.mail.iap.ProtocolException) {
+                                            com.sun.mail.iap.ProtocolException pe = (com.sun.mail.iap.ProtocolException) nestedExc;
+                                            OXException oxe = MimeMailException.handleProtocolExceptionByResponseCode(pe, imapConfig, session, f);
+                                            if (null != oxe) {
+                                                throw oxe;
+                                            }
+                                        }
                                     }
                                     throw IMAPException.create(
                                         IMAPException.Code.MOVE_ON_DELETE_FAILED,
@@ -2476,13 +2485,21 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                             }
                             new CopyIMAPCommand(f, trashFullname).doCommand();
                         } catch (final MessagingException e) {
-                            if (e.getNextException() instanceof CommandFailedException) {
-                                final CommandFailedException exc = (CommandFailedException) e.getNextException();
+                            Exception nestedExc = e.getNextException();
+                            if (nestedExc instanceof CommandFailedException) {
+                                final CommandFailedException exc = (CommandFailedException) nestedExc;
                                 if (exc.getMessage().indexOf("Over quota") > -1) {
                                     /*
                                      * We face an Over-Quota-Exception
                                      */
                                     throw MailExceptionCode.DELETE_FAILED_OVER_QUOTA.create(e, new Object[0]);
+                                }
+                            }
+                            if (nestedExc instanceof com.sun.mail.iap.ProtocolException) {
+                                com.sun.mail.iap.ProtocolException pe = (com.sun.mail.iap.ProtocolException) nestedExc;
+                                OXException oxe = MimeMailException.handleProtocolExceptionByResponseCode(pe, imapConfig, session, f);
+                                if (null != oxe) {
+                                    throw oxe;
                                 }
                             }
                             throw IMAPException.create(IMAPException.Code.MOVE_ON_DELETE_FAILED, imapConfig, session, e, new Object[0]);
