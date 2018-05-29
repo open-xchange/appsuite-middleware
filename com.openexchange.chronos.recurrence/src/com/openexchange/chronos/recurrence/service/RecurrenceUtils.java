@@ -62,7 +62,6 @@ import org.dmfs.rfc5545.recurrenceset.RecurrenceList;
 import org.dmfs.rfc5545.recurrenceset.RecurrenceRuleAdapter;
 import org.dmfs.rfc5545.recurrenceset.RecurrenceSet;
 import org.dmfs.rfc5545.recurrenceset.RecurrenceSetIterator;
-import com.openexchange.chronos.common.DefaultRecurrenceId;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.service.RecurrenceData;
 import com.openexchange.exception.OXException;
@@ -137,8 +136,6 @@ public class RecurrenceUtils {
                     }
                     if (null != firstOccurrence) {
                         start = firstOccurrence;
-                    } else {
-                        throw CalendarExceptionCodes.INVALID_RECURRENCE_ID.create(new DefaultRecurrenceId(seriesStart), rule);
                     }
                 } finally {
                     if (null != originalCount) {
