@@ -49,7 +49,6 @@
 
 package com.openexchange.chronos.storage.rdb.legacy;
 
-import static com.openexchange.chronos.common.AlarmUtils.findAlarm;
 import static com.openexchange.chronos.common.CalendarUtils.isSeriesMaster;
 import static com.openexchange.groupware.tools.mappings.database.DefaultDbMapper.getParameters;
 import static com.openexchange.java.Autoboxing.I;
@@ -75,7 +74,6 @@ import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.AlarmAction;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
-import com.openexchange.chronos.RelatedTo;
 import com.openexchange.chronos.Trigger;
 import com.openexchange.chronos.common.AlarmUtils;
 import com.openexchange.chronos.common.CalendarUtils;
@@ -374,27 +372,13 @@ public class RdbAlarmStorage extends RdbStorage implements AlarmStorage {
         Date nextRegularTriggerTime = optNextTriggerTime(event, primaryAlarm, entityResolver.getTimeZone(userID), acknowledgedGuardian);
         if (null == nextRegularTriggerTime) {
             return Collections.singletonList(primaryAlarm);
-        }
-        if (reminderData.nextTriggerTime == nextRegularTriggerTime.getTime()) {
+        } else {
             /*
              * use primary alarm with acknowledged guardian to prevent premature triggers
              */
             primaryAlarm.setAcknowledged(acknowledgedGuardian);
             return Collections.singletonList(primaryAlarm);
         }
-        /*
-         * assume primary trigger has been snoozed by marking as acknowledged and adding an accompanying snooze trigger for the trigger time
-         */
-        primaryAlarm.setAcknowledged(acknowledgedGuardian);
-        primaryAlarm.setId(primaryAlarm.getId() * -1);
-        Alarm snoozeAlarm = new Alarm(new Trigger(new Date(reminderData.nextTriggerTime)), primaryAlarm.getAction());
-        //        snoozeAlarm.setDescription(primaryAlarm.getDescription());
-        snoozeAlarm.setRelatedTo(new RelatedTo("SNOOZE", primaryAlarm.getUid()));
-        snoozeAlarm.setId(primaryAlarm.getId());
-        List<Alarm> alarms = new ArrayList<Alarm>(2);
-        alarms.add(primaryAlarm);
-        alarms.add(snoozeAlarm);
-        return alarms;
     }
 
     /**
@@ -430,43 +414,27 @@ public class RdbAlarmStorage extends RdbStorage implements AlarmStorage {
          */
         TimeZone timeZone = entityResolver.getTimeZone(userID);
         List<Alarm> regularAlarms = new ArrayList<Alarm>();
-        List<Alarm> snoozeAlarms = new ArrayList<Alarm>();
         for (Alarm alarm : displayAlarms) {
             if (AlarmUtils.isSnoozed(alarm, displayAlarms)) {
-                snoozeAlarms.add(alarm);
+                addUnsupportedDataError(event.getId(), EventField.ALARMS, ProblemSeverity.MAJOR, "Can't store snoozed alarms");
             } else if (0 <= getReminderMinutes(alarm.getTrigger(), event)) {
                 regularAlarms.add(alarm);
             } else {
                 addUnsupportedDataError(event.getId(), EventField.ALARMS, ProblemSeverity.NORMAL, "Can only store triggers prior start of event");
             }
         }
-        Alarm snoozeAlarm = chooseNextAlarm(event, originalReminder, snoozeAlarms, timeZone);
-        if (null != snoozeAlarm) {
-            /*
-             * prefer the 'snooze' alarm along with the related 'snoozed' one
-             */
-            Alarm snoozedAlarm = findAlarm(regularAlarms, snoozeAlarm.getRelatedTo().getValue());
-            if (null != snoozedAlarm) {
-                Date nextTriggerTime = optNextTriggerTime(event, snoozeAlarm, timeZone, snoozedAlarm.getAcknowledged());
-                if (null != nextTriggerTime) {
-                    int reminderMinutes = getReminderMinutes(snoozedAlarm.getTrigger(), event);
-                    return new ReminderData(null != originalReminder ? originalReminder.id : 0, reminderMinutes, nextTriggerTime.getTime());
-                }
-            }
-        } else {
-            /*
-             * regular alarm, only
-             */
-            if (1 < regularAlarms.size()) {
-                addUnsupportedDataError(event.getId(), EventField.ALARMS, ProblemSeverity.MAJOR, "Cannot store more than one alarm");
-            }
-            Alarm regularAlarm = chooseNextAlarm(event, originalReminder, regularAlarms, timeZone);
-            if (null != regularAlarm) {
-                Date nextTriggerTime = optNextTriggerTime(event, regularAlarm, timeZone);
-                if (null != nextTriggerTime) {
-                    int reminderMinutes = getReminderMinutes(regularAlarm.getTrigger(), event);
-                    return new ReminderData(null != originalReminder ? originalReminder.id : 0, reminderMinutes, nextTriggerTime.getTime());
-                }
+        /*
+         * regular alarm, only
+         */
+        if (1 < regularAlarms.size()) {
+            addUnsupportedDataError(event.getId(), EventField.ALARMS, ProblemSeverity.MAJOR, "Cannot store more than one alarm");
+        }
+        Alarm regularAlarm = chooseNextAlarm(event, originalReminder, regularAlarms, timeZone);
+        if (null != regularAlarm) {
+            Date nextTriggerTime = optNextTriggerTime(event, regularAlarm, timeZone);
+            if (null != nextTriggerTime) {
+                int reminderMinutes = getReminderMinutes(regularAlarm.getTrigger(), event);
+                return new ReminderData(null != originalReminder ? originalReminder.id : 0, reminderMinutes, nextTriggerTime.getTime());
             }
         }
         return null;

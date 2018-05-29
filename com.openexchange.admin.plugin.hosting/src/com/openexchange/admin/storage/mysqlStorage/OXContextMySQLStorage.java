@@ -128,6 +128,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.filestore.FileStorages;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.delete.DeleteEvent;
+import com.openexchange.groupware.delete.DeleteFinishedListenerRegistry;
 import com.openexchange.groupware.delete.DeleteRegistry;
 import com.openexchange.groupware.downgrade.DowngradeEvent;
 import com.openexchange.groupware.downgrade.DowngradeRegistry;
@@ -403,6 +404,13 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                 // Commit groupware data scheme deletes BEFORE database get dropped in "deleteContextFromConfigDB" .see bug #10501
                 conForContext.commit();
                 rollback = false;
+
+                try {
+                    DeleteEvent event = DeleteEvent.createDeleteEventForContextDeletion(this, ctx.getId().intValue(), userIds);
+                    DeleteFinishedListenerRegistry.getInstance().fireDeleteEvent(event);
+                } catch (Exception e) {
+                    LOG.warn("Failed to trigger delete finished listeners", e);
+                }
             } finally {
                 if (rollback) {
                     rollback(conForContext);

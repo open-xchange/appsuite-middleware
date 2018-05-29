@@ -54,20 +54,12 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.assertThat;
-import java.rmi.Naming;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.BlockJUnit4ClassRunner;
-import com.openexchange.admin.rmi.OXUserInterface;
-import com.openexchange.admin.rmi.dataobjects.Context;
-import com.openexchange.admin.rmi.dataobjects.Credentials;
-import com.openexchange.admin.rmi.dataobjects.UserProperty;
 import com.openexchange.ajax.chronos.util.DateTimeUtil;
-import com.openexchange.configuration.AJAXConfig;
-import com.openexchange.configuration.AJAXConfig.Property;
 import com.openexchange.testing.httpclient.models.Attendee;
 import com.openexchange.testing.httpclient.models.Attendee.CuTypeEnum;
 import com.openexchange.testing.httpclient.models.ChronosCalendarResultResponse;
@@ -89,15 +81,16 @@ import edu.emory.mathcs.backport.java.util.Collections;
 public class ChronosQuotaTest extends AbstractChronosTest {
 
     private static final String MODULE = "calendar";
+    private static final HashMap<String, String> CONFIG = new HashMap<>(1);
 
+    static {
+        CONFIG.put("com.openexchange.quota.calendar", "0");
+    }
 
     @Override
     public void setUp() throws Exception {
         super.setUp();
-
-        Map<String, String> userAttributes = new HashMap<>(1);
-        userAttributes.put("com.openexchange.quota.calendar", "0");
-        setQuota(userAttributes);
+        setUpConfiguration();
     }
 
     /**
@@ -140,33 +133,6 @@ public class ChronosQuotaTest extends AbstractChronosTest {
         assertThat("Code does not match. Expected '" + expectedCode + "'.", resultResponse.getCode(), is(expectedCode));
     }
 
-    @Override
-    public void tearDown() throws Exception {
-        Map<String, String> userAttributes = new HashMap<>(1);
-        userAttributes.put("com.openexchange.quota.calendar", "-1");
-        setQuota(userAttributes);
-        super.tearDown();
-    }
-
-    private void setQuota(Map<String, String> props) throws Exception {
-        com.openexchange.admin.rmi.dataobjects.User user = new com.openexchange.admin.rmi.dataobjects.User(getApiClient().getUserId().intValue());
-        for (String property : props.keySet()) {
-            user.setUserAttribute("config", property, props.get(property));
-        }
-        Credentials credentials = new Credentials(admin.getUser(), admin.getPassword());
-        OXUserInterface iface = (OXUserInterface) Naming.lookup("rmi://" + AJAXConfig.getProperty(Property.RMI_HOST) + ":1099/" + OXUserInterface.RMI_NAME);
-        iface.change(new Context(Integer.valueOf(getClient().getValues().getContextId())), user, credentials);
-
-        List<UserProperty> userConfigurationSource = iface.getUserConfigurationSource(new Context(Integer.valueOf(getClient().getValues().getContextId())), user, "quota", credentials);
-        System.out.println("User configuration related to 'quota' after changing the following properties:");
-        for (String property : props.keySet()) {
-            System.out.println(property + "' to " + props.get(property));
-        }
-        for (UserProperty prop : userConfigurationSource) {
-            System.out.println("Property " + prop.getName() + "(" + prop.getScope() + "): " + prop.getValue());
-        }
-    }
-
     @SuppressWarnings("unchecked")
     private EventData createSingleEvent(String summary, DateTimeData startDate, DateTimeData endDate) {
         EventData singleEvent = new EventData();
@@ -186,4 +152,13 @@ public class ChronosQuotaTest extends AbstractChronosTest {
         return createSingleEvent(summary, DateTimeUtil.getDateTime(System.currentTimeMillis()), DateTimeUtil.getDateTime(System.currentTimeMillis() + 5000));
     }
 
+    @Override
+    protected Map<String, String> getNeededConfigurations() {
+        return CONFIG;
+    }
+
+    @Override
+    protected String getScope() {
+        return "user";
+    }
 }

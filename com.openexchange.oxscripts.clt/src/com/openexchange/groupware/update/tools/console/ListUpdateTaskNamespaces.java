@@ -330,6 +330,6 @@ public class ListUpdateTaskNamespaces {
      */
     private void printHelp() {
         HelpFormatter helpFormatter = new HelpFormatter();
-        helpFormatter.printHelp("listnamespaceawareupdatetasks", HEADER, options, FOOTER);
+        helpFormatter.printHelp("listUpdateTaskNamespaces", HEADER, options, FOOTER);
     }
 }

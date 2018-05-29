@@ -111,36 +111,37 @@ public class SnoozeAction extends AbstractChronosAlarmAction {
         Event event = calendarAccess.getEvent(eventID);
         List<Alarm> alarms = new ArrayList<Alarm>(event.getAlarms());
 
-        Alarm alarmToSnooze = null;
-        for (Iterator<Alarm> it = alarms.iterator(); null == alarmToSnooze && it.hasNext();) {
+        Alarm oldAlarmToSnooze = null;
+        for (Iterator<Alarm> it = alarms.iterator(); null == oldAlarmToSnooze && it.hasNext();) {
             Alarm alarm = it.next();
             if (alarm.getId() == alarmId) {
-                alarmToSnooze = alarm;
-                alarmToSnooze.setAcknowledged(now);
+                oldAlarmToSnooze = alarm;
+                oldAlarmToSnooze.setAcknowledged(now);
             }
         }
-        if (alarmToSnooze == null) {
+        if (oldAlarmToSnooze == null) {
             throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create(AlarmParameters.PARAMETER_ALARM_ID, "Unable to find an alarm with id " + alarmId);
         }
 
-        Alarm snoozeAlarm = AlarmMapper.getInstance().copy(alarmToSnooze, null, (AlarmField[]) null);
+        Alarm newSnoozeAlarm = AlarmMapper.getInstance().copy(oldAlarmToSnooze, null, (AlarmField[]) null);
         Trigger trigger = new Trigger(new Date(now.getTime() + snooze.intValue()));
-        snoozeAlarm.setTrigger(trigger);
-        String uid = alarmToSnooze.getUid();
+        newSnoozeAlarm.setTrigger(trigger);
+        String uid = oldAlarmToSnooze.getUid();
         if (Strings.isEmpty(uid)) {
             uid = UUID.randomUUID().toString().toUpperCase();
-            alarmToSnooze.setUid(uid);
+            oldAlarmToSnooze.setUid(uid);
         }
-        snoozeAlarm.setRelatedTo(new RelatedTo("SNOOZE", uid));
-        snoozeAlarm.removeUid();
-        snoozeAlarm.removeId();
-        snoozeAlarm.removeAcknowledged();
+        newSnoozeAlarm.setRelatedTo(new RelatedTo("SNOOZE", uid));
+        newSnoozeAlarm.removeUid();
+        newSnoozeAlarm.removeId();
+        newSnoozeAlarm.removeAcknowledged();
 
-        alarms.add(snoozeAlarm);
+        alarms.add(newSnoozeAlarm);
 
         // Remove old snooze in case it was snoozed again
-        if (alarmToSnooze.getRelatedTo() != null && alarmToSnooze.getRelatedTo().getRelType().equals("SNOOZE")) {
-            alarms.remove(alarmToSnooze);
+        if (oldAlarmToSnooze.getRelatedTo() != null && (oldAlarmToSnooze.getRelatedTo().getRelType() == null || oldAlarmToSnooze.getRelatedTo().getRelType().equals("SNOOZE"))) {
+            newSnoozeAlarm.setRelatedTo(oldAlarmToSnooze.getRelatedTo());
+            alarms.remove(oldAlarmToSnooze);
         }
 
         CalendarResult updateAlarms = calendarAccess.updateAlarms(eventID, alarms, event.getTimestamp());

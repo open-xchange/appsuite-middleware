@@ -47,52 +47,42 @@
  *
  */
 
-package com.openexchange.folderstorage.internal;
+package com.openexchange.groupware.delete;
 
-import java.sql.Connection;
-import com.openexchange.caching.Cache;
-import com.openexchange.caching.CacheService;
-import com.openexchange.folderstorage.cache.memory.FolderMapManagement;
-import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.delete.DeleteEvent;
-import com.openexchange.groupware.delete.DeleteListener;
-import com.openexchange.server.services.ServerServiceRegistry;
+import java.util.concurrent.atomic.AtomicBoolean;
+import com.openexchange.exception.OXException;
+import com.openexchange.server.Initialization;
 
 /**
- * {@link FolderStorageDeleteListener}
+ * {@link DeleteFinishedRegistryInitialization} - Initialisation for {@link DeleteFinishedListenerRegistry}.
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public final class FolderStorageDeleteListener implements DeleteListener {
+public final class DeleteFinishedRegistryInitialization implements Initialization {
+
+    private final AtomicBoolean started;
 
     /**
-     * Initializes a new {@link FolderStorageDeleteListener}.
+     * Initialises a new {@link DeleteFinishedRegistryInitialization}.
      */
-    public FolderStorageDeleteListener() {
+    public DeleteFinishedRegistryInitialization() {
         super();
+        started = new AtomicBoolean();
     }
 
     @Override
-    public void deletePerformed(final DeleteEvent event, final Connection readCon, final Connection writeCon) {
-        if (event.getType() == DeleteEvent.TYPE_USER) {
-            final Context context = event.getContext();
-            final CacheService cacheService = ServerServiceRegistry.getInstance().getService(CacheService.class);
-            if (null != cacheService) {
-                try {
-                    final Cache globalCache = cacheService.getCache("GlobalFolderCache");
-                    globalCache.invalidateGroup(String.valueOf(context.getContextId()));
-                } catch (final Exception e) {
-                    // Ignore
-                }
-                try {
-                    final Cache cache = cacheService.getCache("MailAccount");
-                    cache.clear();
-                } catch (final Exception e) {
-                    // Ignore
-                }
-            }
-            final int userId = event.getId();
-            FolderMapManagement.getInstance().dropFor(userId, context.getContextId());
+    public void start() throws OXException {
+        if (!started.compareAndSet(false, true)) {
+            return;
         }
+        DeleteFinishedListenerRegistry.initInstance();
+    }
+
+    @Override
+    public void stop() throws OXException {
+        if (!started.compareAndSet(true, false)) {
+            return;
+        }
+        DeleteFinishedListenerRegistry.releaseInstance();
     }
 }
