@@ -165,7 +165,7 @@ public class ListUpdateTaskNamespaces extends AbstractRmiCLI<Void> {
      */
     @Override
     protected String getName() {
-        return "listupdatetasknamespaces";
+        return "listUpdateTaskNamespaces";
     }
 
     /**
