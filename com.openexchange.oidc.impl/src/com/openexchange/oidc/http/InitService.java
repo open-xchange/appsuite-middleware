@@ -111,7 +111,7 @@ public class InitService extends OIDCServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         String flow = request.getParameter("flow");
-        if (!flow.equals(THIRD_PARTY) || (flow.equals(THIRD_PARTY) && !provider.validateThirdPartyRequest(request))) {
+        if (!flow.equals(THIRD_PARTY) || !provider.validateThirdPartyRequest(request)) {
             LOG.warn("Either wrong flow or unkown issuer in POST request of third-party login initiation attempt.");
             response.sendError(HttpServletResponse.SC_BAD_REQUEST);
             return;

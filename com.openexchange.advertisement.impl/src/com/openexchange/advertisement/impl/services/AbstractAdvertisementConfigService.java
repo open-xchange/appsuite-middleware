@@ -146,30 +146,7 @@ public abstract class AbstractAdvertisementConfigService implements Advertisemen
         CacheService cacheService = Services.getService(CacheService.class);
         if (cacheService == null) {
             // get config without cache
-        	JSONValue result = getConfigByUserInternal(session);
-            if (result == null) {
-                String reseller = null;
-                String pack = null;
-                try {
-                    reseller = getReseller(session.getContextId());
-                } catch (OXException e) {
-                    LOG.debug("Error while retrieving the reseller for user {} in context {}.", session.getUserId(), session.getContextId(), e);
-                }
-                try {
-                    pack = getPackage(session);
-                } catch (OXException e) {
-                    LOG.debug("Error while retrieving the package for user {} in context {}.", session.getUserId(), session.getContextId(), e);
-                }
-                // fallback to defaults in case reseller or package is empty
-                if (Strings.isEmpty(reseller)) {
-                    reseller = RESELLER_ALL;
-                }
-                if (Strings.isEmpty(pack)) {
-                    pack = PACKAGE_ALL;
-                }
-                result = getConfigInternal(session, reseller, pack);
-            }
-            return result;
+            return loadInternalConfiguration(session);
         }
 
         //check user cache first
@@ -225,6 +202,33 @@ public abstract class AbstractAdvertisementConfigService implements Advertisemen
     	} else {
     		cache.put(key, ImmutableJSONArray.immutableFor(result.toArray()), false);
     	}
+        return result;
+    }
+
+    private JSONValue loadInternalConfiguration(Session session) throws OXException {
+        JSONValue result = getConfigByUserInternal(session);
+        if (result == null) {
+            String reseller = null;
+            String pack = null;
+            try {
+                reseller = getReseller(session.getContextId());
+            } catch (OXException e) {
+                LOG.debug("Error while retrieving the reseller for user {} in context {}.", session.getUserId(), session.getContextId(), e);
+            }
+            try {
+                pack = getPackage(session);
+            } catch (OXException e) {
+                LOG.debug("Error while retrieving the package for user {} in context {}.", session.getUserId(), session.getContextId(), e);
+            }
+            // fallback to defaults in case reseller or package is empty
+            if (Strings.isEmpty(reseller)) {
+                reseller = RESELLER_ALL;
+            }
+            if (Strings.isEmpty(pack)) {
+                pack = PACKAGE_ALL;
+            }
+            result = getConfigInternal(session, reseller, pack);
+        }
         return result;
     }
 
@@ -447,7 +451,7 @@ public abstract class AbstractAdvertisementConfigService implements Advertisemen
 
             if (result.next()) {
 
-                int configId = Integer.valueOf(result.getString(1));
+                int configId = Integer.parseInt(result.getString(1));
                 Databases.closeSQLStuff(result, stmt);
                 if (config == null) {
                     stmt = con.prepareStatement(SQL_DELETE_CONFIG);

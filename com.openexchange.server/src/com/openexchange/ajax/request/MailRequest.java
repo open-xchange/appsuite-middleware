@@ -107,7 +107,7 @@ public final class MailRequest {
     private static final Map<String, Handler> HANDERS_MAP;
 
     static {
-        final Map<String, Handler> m = new HashMap<String, Handler>(24);
+        final Map<String, Handler> m = new HashMap<>(24);
         m.put(AJAXServlet.ACTION_ALL, new Handler() {
 
             @Override
@@ -441,7 +441,7 @@ public final class MailRequest {
          */
         protected CollectObject(final Mail mailServlet) {
             super();
-            this.mailIDs = new LinkedList<String>();
+            this.mailIDs = new LinkedList<>();
             this.mailServlet = mailServlet;
         }
 
@@ -617,7 +617,7 @@ public final class MailRequest {
         public GetCollectObject(final JSONObject dataObject, final Mail mailServlet) throws OXException {
             super(mailServlet);
             this.folder = JSONUtil.requireString(PARAMETER_FOLDERID, dataObject);
-            containers = new LinkedList<ParamContainer>();
+            containers = new LinkedList<>();
             ParamContainer container = ParamContainer.getInstance(dataObject);
             containers.add(container);
             mailIDs.add(container.getStringParam(PARAMETER_ID));
