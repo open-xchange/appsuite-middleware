@@ -119,7 +119,7 @@ public interface UpdateTaskService extends Remote {
      * @param schemaName The schema name
      * @return a list with all executed tasks
      */
-    List<ExecutedTask> getExecutedTasksList(String schemaName) throws RemoteException;
+    List<Map<String, Object>> getExecutedTasksList(String schemaName) throws RemoteException;
 
     /**
      * Returns the status of a scheduled update task job

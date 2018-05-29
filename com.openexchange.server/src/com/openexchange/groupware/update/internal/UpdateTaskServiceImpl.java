@@ -50,7 +50,9 @@
 package com.openexchange.groupware.update.internal;
 
 import java.rmi.RemoteException;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -87,7 +89,9 @@ public class UpdateTaskServiceImpl implements UpdateTaskService {
     private final ConcurrentMap<String, UpdateTaskToolkitJob<?>> jobs;
     private ScheduledTimerTask timerTask; // Guarded by synchronized
 
-    //private final String[] taskTypeNames = { "taskName", "successful", "lastModified", "uuid" };
+    private enum TaskTypeName {
+        taskName, successful, lastModified, uuid;
+    }
 
     /**
      * Initialises a new {@link UpdateTaskServiceImpl}.
@@ -215,7 +219,7 @@ public class UpdateTaskServiceImpl implements UpdateTaskService {
      * @see com.openexchange.groupware.update.UpdateTaskService#getExecutedTasksList(java.lang.String)
      */
     @Override
-    public List<ExecutedTask> getExecutedTasksList(String schemaName) throws RemoteException {
+    public List<Map<String, Object>> getExecutedTasksList(String schemaName) throws RemoteException {
         SchemaStore store = SchemaStore.getInstance();
         try {
             SchemaInfo schemaInfo = UpdateTaskToolkit.getInfoBySchemaName(schemaName);
@@ -225,7 +229,16 @@ public class UpdateTaskServiceImpl implements UpdateTaskService {
             } else {
                 Arrays.sort(tasks);
             }
-            return Arrays.asList(tasks);
+            List<Map<String, Object>> executedTasks = new ArrayList<>(tasks.length);
+            for (ExecutedTask task : tasks) {
+                Map<String, Object> taskMap = new HashMap<>();
+                taskMap.put(TaskTypeName.taskName.name(), task.getTaskName());
+                taskMap.put(TaskTypeName.successful.name(), Boolean.toString(task.isSuccessful()));
+                taskMap.put(TaskTypeName.lastModified.name(), task.getLastModified());
+                taskMap.put(TaskTypeName.uuid.name(), task.getUUID().toString());
+                executedTasks.add(taskMap);
+            }
+            return executedTasks;
         } catch (OXException e) {
             LOG.error("", e);
             throw new RemoteException(e.getPlainLogMessage(), e);
