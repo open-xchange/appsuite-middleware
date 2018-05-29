@@ -149,26 +149,45 @@ abstract class AbstractUpdateTasksCLT<R> extends AbstractRmiCLI<R> {
      * @param comparator The optional sorting {@link Comparator}. If <code>null</code> the entries will not be sorted
      */
     void writeCompositeList(List<Map<String, Object>> compositeList, String[] columns, ColumnFormat[] formats, Comparator<List<Object>> sortingComparator) {
-        List<List<Object>> data = new ArrayList<List<Object>>();
-        List<Object> valuesList = new ArrayList<Object>(columns.length);
-        for (String column : columns) {
-            valuesList.add(column);
+        List<List<Object>> data = prepareData(compositeList, columns);
+        if (sortingComparator != null) {
+            Collections.sort(data, sortingComparator);
         }
-        List<Object> hr = valuesList;
+        // Add header row
+        data.add(0, prepareHeader(columns));
+        new TableWriter(System.out, formats, data).write();
+    }
+
+    /**
+     * Prepare the header row
+     * 
+     * @param columns The header columns
+     * @return A {@link List} with the header columns
+     */
+    private List<Object> prepareHeader(String[] columns) {
+        List<Object> header = new ArrayList<Object>(columns.length);
+        for (String column : columns) {
+            header.add(column);
+        }
+        return header;
+    }
+
+    /**
+     * Prepares the table data
+     * 
+     * @param compositeList The composite list to read the data from
+     * @param columns The column names
+     * @return The prepared data
+     */
+    private List<List<Object>> prepareData(List<Map<String, Object>> compositeList, String[] columns) {
+        List<List<Object>> data = new ArrayList<List<Object>>();
         for (Map<String, Object> executedTask : compositeList) {
-            valuesList = new ArrayList<Object>(columns.length);
+            List<Object> valuesList = new ArrayList<Object>(columns.length);
             for (String column : columns) {
                 valuesList.add(executedTask.get(column));
             }
             data.add(valuesList);
         }
-        valuesList = null;
-        if (sortingComparator != null) {
-            // Sort rows
-            Collections.sort(data, sortingComparator);
-        }
-        // Add header row
-        data.add(0, hr);
-        new TableWriter(System.out, formats, data).write();
+        return data;
     }
 }
