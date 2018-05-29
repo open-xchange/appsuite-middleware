@@ -49,14 +49,11 @@
 
 package com.openexchange.groupware.update.tools.console;
 
-import java.rmi.RemoteException;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Options;
-import com.openexchange.auth.rmi.RemoteAuthenticator;
-import com.openexchange.cli.AbstractRmiCLI;
 import com.openexchange.groupware.update.UpdateTaskService;
 
 /**
@@ -65,7 +62,7 @@ import com.openexchange.groupware.update.UpdateTaskService;
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @since v7.10.0
  */
-public class ListUpdateTaskNamespaces extends AbstractRmiCLI<Void> {
+public class ListUpdateTaskNamespaces extends AbstractUpdateTasksCLT<Void> {
 
     //@formatter:off
     private static final String FOOTER = "This tools lists all namespaces for any update tasks and/or update task sets. The outcome of this tool can be used to " +
@@ -88,17 +85,7 @@ public class ListUpdateTaskNamespaces extends AbstractRmiCLI<Void> {
      * Initialises a new {@link ListUpdateTaskNamespaces}.
      */
     private ListUpdateTaskNamespaces() {
-        super();
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.cli.AbstractRmiCLI#administrativeAuth(java.lang.String, java.lang.String, org.apache.commons.cli.CommandLine, com.openexchange.auth.rmi.RemoteAuthenticator)
-     */
-    @Override
-    protected void administrativeAuth(String login, String password, CommandLine cmd, RemoteAuthenticator authenticator) throws RemoteException {
-        authenticator.doAuthentication(login, password);
+        super("listUpdateTaskNamespaces", FOOTER);
     }
 
     /*
@@ -131,41 +118,11 @@ public class ListUpdateTaskNamespaces extends AbstractRmiCLI<Void> {
     /*
      * (non-Javadoc)
      * 
-     * @see com.openexchange.cli.AbstractAdministrativeCLI#requiresAdministrativePermission()
-     */
-    @Override
-    protected boolean requiresAdministrativePermission() {
-        return true;
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
      * @see com.openexchange.cli.AbstractCLI#checkOptions(org.apache.commons.cli.CommandLine)
      */
     @Override
     protected void checkOptions(CommandLine cmd) {
         printNamespacesOnly = cmd.hasOption('n');
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.cli.AbstractCLI#getFooter()
-     */
-    @Override
-    protected String getFooter() {
-        return FOOTER;
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.cli.AbstractCLI#getName()
-     */
-    @Override
-    protected String getName() {
-        return "listUpdateTaskNamespaces";
     }
 
     /**
