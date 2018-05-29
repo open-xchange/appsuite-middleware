@@ -76,7 +76,7 @@ public final class UpdateTaskRunUpdateCLT extends AbstractUpdateTasksCLT<Void> {
 
     private static final ColumnFormat[] FORMATS = { new ColumnFormat(Align.LEFT), new ColumnFormat(Align.LEFT), new ColumnFormat(Align.LEFT) };
 
-    private static final String[] COLUMNS = { "taskName", "class", "schema" };
+    private static final String[] COLUMNS = { "taskName", "className", "schema" };
 
     private String schemaName;
     private int contextId;

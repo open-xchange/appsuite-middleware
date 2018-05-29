@@ -90,8 +90,8 @@ public class UpdateTaskServiceImpl implements UpdateTaskService {
     private final ConcurrentMap<String, UpdateTaskToolkitJob<?>> jobs;
     private ScheduledTimerTask timerTask; // Guarded by synchronized
 
-    private enum TaskTypeName {
-        taskName, successful, lastModified, uuid;
+    private enum TaskMetadata {
+        taskName, successful, lastModified, uuid, schema, className;
     }
 
     /**
@@ -233,10 +233,10 @@ public class UpdateTaskServiceImpl implements UpdateTaskService {
             List<Map<String, Object>> executedTasks = new ArrayList<>(tasks.length);
             for (ExecutedTask task : tasks) {
                 Map<String, Object> taskMap = new HashMap<>();
-                taskMap.put(TaskTypeName.taskName.name(), task.getTaskName());
-                taskMap.put(TaskTypeName.successful.name(), Boolean.toString(task.isSuccessful()));
-                taskMap.put(TaskTypeName.lastModified.name(), task.getLastModified());
-                taskMap.put(TaskTypeName.uuid.name(), task.getUUID().toString());
+                taskMap.put(TaskMetadata.taskName.name(), task.getTaskName());
+                taskMap.put(TaskMetadata.successful.name(), Boolean.toString(task.isSuccessful()));
+                taskMap.put(TaskMetadata.lastModified.name(), task.getLastModified());
+                taskMap.put(TaskMetadata.uuid.name(), task.getUUID().toString());
                 executedTasks.add(taskMap);
             }
             return executedTasks;
@@ -367,9 +367,9 @@ public class UpdateTaskServiceImpl implements UpdateTaskService {
         List<Map<String, Object>> failuresList = new ArrayList<>(failures.size());
         for (TaskInfo taskInfo : failures) {
             Map<String, Object> failuresMap = new HashMap<>();
-            failuresMap.put("name", taskInfo.getTaskName());
-            failuresMap.put("class", taskInfo.getClass().getName());
-            failuresMap.put("schema", taskInfo.getSchema());
+            failuresMap.put(TaskMetadata.taskName.name(), taskInfo.getTaskName());
+            failuresMap.put(TaskMetadata.className.name(), taskInfo.getClass().getName());
+            failuresMap.put(TaskMetadata.schema.name(), taskInfo.getSchema());
             failuresList.add(failuresMap);
         }
         return failuresList;
