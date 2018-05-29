@@ -113,13 +113,13 @@ final class ForwardedTGTDelegateGenerator implements PrivilegedExceptionAction<C
                 throw KerberosExceptionCodes.DELEGATE_FAILED.create(clientName);
             }
         } catch (GSSException e) {
-        		Object ticketLog = new Object() {
-	    			@Override
-	        		public String toString() {
-	        			return Base64.encode(forwardedTicket);
-	    			}
-			};
-        		LOG.error("Unable to process delegated ticket: {}", ticketLog, e);
+            Object ticketLog = new Object() {
+                @Override
+                public String toString() {
+                    return Base64.encode(forwardedTicket);
+                }
+            };
+            LOG.error("Unable to process delegated ticket: {}", ticketLog, e);
             throw KerberosExceptionCodes.COMM_FAILED.create(e, e.getMessage());
         } finally {
             context.dispose();
