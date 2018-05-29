@@ -62,7 +62,7 @@ import com.openexchange.groupware.update.UpdateTaskService;
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @since v7.10.0
  */
-public class ListUpdateTaskNamespaces extends AbstractUpdateTasksCLT<Void> {
+public final class ListUpdateTaskNamespaces extends AbstractUpdateTasksCLT<Void> {
 
     //@formatter:off
     private static final String FOOTER = "This tools lists all namespaces for any update tasks and/or update task sets. The outcome of this tool can be used to " +

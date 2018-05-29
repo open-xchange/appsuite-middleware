@@ -154,7 +154,7 @@ abstract class AbstractUpdateTasksCLT<R> extends AbstractRmiCLI<R> {
         for (String column : columns) {
             valuesList.add(column);
         }
-        final List<Object> hr = valuesList;
+        List<Object> hr = valuesList;
         for (Map<String, Object> executedTask : compositeList) {
             valuesList = new ArrayList<Object>(columns.length);
             for (String column : columns) {

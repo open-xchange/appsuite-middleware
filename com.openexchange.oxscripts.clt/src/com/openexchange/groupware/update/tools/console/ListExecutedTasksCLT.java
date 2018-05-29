@@ -66,7 +66,7 @@ import com.openexchange.tools.console.TableWriter.ColumnFormat.Align;
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class ListExecutedTasksCLT extends AbstractUpdateTasksCLT<Void> {
+public final class ListExecutedTasksCLT extends AbstractUpdateTasksCLT<Void> {
 
     /**
      * Entry point
