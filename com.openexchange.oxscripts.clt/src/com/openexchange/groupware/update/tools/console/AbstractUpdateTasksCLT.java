@@ -182,12 +182,23 @@ abstract class AbstractUpdateTasksCLT<R> extends AbstractRmiCLI<R> {
     private List<List<Object>> prepareData(List<Map<String, Object>> compositeList, String[] columns) {
         List<List<Object>> data = new ArrayList<List<Object>>();
         for (Map<String, Object> executedTask : compositeList) {
-            List<Object> valuesList = new ArrayList<Object>(columns.length);
-            for (String column : columns) {
-                valuesList.add(executedTask.get(column));
-            }
-            data.add(valuesList);
+            data.add(prepareRow(columns, executedTask));
         }
         return data;
+    }
+
+    /**
+     * Prepares a row for the table data
+     * 
+     * @param columns The columns
+     * @param executedTask The executed task metadata
+     * @return A {@link List} with the row data
+     */
+    private List<Object> prepareRow(String[] columns, Map<String, Object> executedTask) {
+        List<Object> valuesList = new ArrayList<Object>(columns.length);
+        for (String column : columns) {
+            valuesList.add(executedTask.get(column));
+        }
+        return valuesList;
     }
 }
