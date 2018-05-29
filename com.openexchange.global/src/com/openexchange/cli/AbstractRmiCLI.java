@@ -70,6 +70,7 @@ import com.openexchange.java.Strings;
 /**
  * {@link AbstractRmiCLI} - The abstract helper class for RMI-connecting command-line tools.
  *
+ * @param <R> - The return type
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since 7.6.2
  */
