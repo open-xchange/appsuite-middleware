@@ -76,7 +76,7 @@ public final class UpdateTaskRunAllUpdateCLT extends AbstractUpdateTasksCLT<Void
      * Initializes a new {@link UpdateTaskRunAllUpdateCLT}.
      */
     private UpdateTaskRunAllUpdateCLT() {
-        super("runallupdate");
+        super("runallupdate", "Runs the update on all schemas.");
     }
 
     /*

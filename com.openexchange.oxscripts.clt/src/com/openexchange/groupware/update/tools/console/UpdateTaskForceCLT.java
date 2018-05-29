@@ -74,11 +74,13 @@ public final class UpdateTaskForceCLT extends AbstractUpdateTasksCLT<Void> {
     private String className;
     private int contextId = -1;
 
+    private static final String FOOTER = "Force (re-)run of update task denoted by given class name on a specific schema or on all schemata or on a specific context.";
+
     /**
      * Initializes a new {@link UpdateTaskForceCLT}.
      */
     private UpdateTaskForceCLT() {
-        super("forceupdatetask");
+        super("forceupdatetask", FOOTER);
     }
 
     /*

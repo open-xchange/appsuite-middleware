@@ -87,7 +87,7 @@ public class ListExecutedTasksCLT extends AbstractUpdateTasksCLT<Void> {
      * Initialises a new {@link ListExecutedTasksCLT}.
      */
     public ListExecutedTasksCLT() {
-        super("listExecutedTasks");
+        super("listExecutedTasks", "Lists executed update tasks of a schema.");
     }
 
     /*
