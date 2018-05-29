@@ -5,7 +5,7 @@ msgstr ""
 "Project-Id-Version: errors.zh_TW\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2017-09-06 21:27+0800\n"
+"PO-Revision-Date: 2018-05-29 11:42+0200\n"
 "Last-Translator: \n"
 "Language-Team: Traditional Chinese <LL@li.org>\n"
 "Language: zh_TW\n"
@@ -13,7 +13,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
-"X-Generator: Poedit 2.0.3\n"
+"X-Generator: Poedit 1.8.9\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
 #. The verb "accepted", like "User A has accepted an appointment."
@@ -1981,10 +1981,12 @@ msgid "The file version you requested does not exist."
 msgstr "您請求的檔案版本不存在。"
 
 #. A folder named "%1$s" already exists below the parent folder "%2$s".
+#. A folder named "%1$s" already exists.
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:74
-msgid ""
-"A folder named \"%1$s\" already exists below the parent folder \"%2$s\"."
-msgstr "在父資料夾「%2$s」下已經存在一個名為「%1$s」的文件夾。"
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/folderstorage/FolderExceptionMessages.java:74
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:128
+msgid "A folder named \"%1$s\" already exists."
+msgstr "一個名為「%1$s」的資料夾已經存在。"
 
 #. You do not have the appropriate permissions to create a subfolder below the folder "%1$s".
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:77
@@ -3642,6 +3644,12 @@ msgstr "您的郵件過濾器規則看起來無效，請檢查。伺服器的回
 msgid "Managing mail filter rules is not available for your account."
 msgstr "您的帳號無法管理郵件過濾規則。"
 
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.mail.filter/src/com/openexchange/mailfilter/exceptions/MailFilterExceptionMessages.java:70
+msgid ""
+"The maximum amount of redirect rules is reached. Please delete or deactivate "
+"another redirect rule first."
+msgstr "已達最大重導規則數量，請先刪除或停用重導規則。"
+
 #. Maximum number of messages already stored for client %1$s
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.message.timeline/src/com/openexchange/message/timeline/MessageTimelineExceptionMessages.java:63
 msgid "Maximum number of messages already stored for client %1$s"
@@ -4799,6 +4807,21 @@ msgstr "指定的 %2$s 值不正確。"
 msgid "Please add a value for %1$s"
 msgstr "請為 %1$s 新增一個值"
 
+#. No user-associated job found
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/ajax/requesthandler/jobqueue/JobQueueMessages.java:63
+msgid "No such job %1$s"
+msgstr "無此工作 %1$s"
+
+#. A long-running operation is being executed
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/ajax/requesthandler/jobqueue/JobQueueMessages.java:66
+msgid "A long-running operation is being executed"
+msgstr "將執行一個會執行很久的操作"
+
+#. Such a long-running operation is already in progress
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/ajax/requesthandler/jobqueue/JobQueueMessages.java:69
+msgid "Such a long-running operation is already in progress"
+msgstr "該操作已經在處理中"
+
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/authorization/AuthorizationExceptionMessages.java:60
 msgid "User is deactivated"
 msgstr "用戶被停用"
@@ -4917,12 +4940,6 @@ msgstr "指定的資料夾無法使用您提供的內容類型。"
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/folderstorage/FolderExceptionMessages.java:71
 msgid "You do not have appropriate permissions to move the folder."
 msgstr "您沒有適當的權限移動該資料夾。"
-
-#. A folder named "%1$s" already exists.
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/folderstorage/FolderExceptionMessages.java:74
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:128
-msgid "A folder named \"%1$s\" already exists."
-msgstr "一個名為「%1$s」的資料夾已經存在。"
 
 #. You do not have the appropriate permissions to delete the folder.
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/folderstorage/FolderExceptionMessages.java:80
@@ -5349,6 +5366,13 @@ msgstr "無法建立任務，已有相同唯一識別符的任務存在。"
 msgid "Sequence number is outdated."
 msgstr "序號已過時。"
 
+#. *
+#. * The calendar is currently under maintenance. Please try again later.
+#.
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/calendar/OXCalendarExceptionMessage.java:231
+msgid "The calendar is currently under maintenance. Please try again later."
+msgstr "行事曆目前維護中，請稍候再試。"
+
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:61
 msgid "Invalid E-Mail address: '%s'. Please correct the E-Mail address."
 msgstr "電子郵件地址無效:「%s」，請修正。"
@@ -5558,7 +5582,7 @@ msgstr "找不到帳號「%1$s」。"
 #. This exception is triggered by concurrent requests of clients trying to modify the same user attributes in the same moment.
 #. This should happen in very rare conditions and is not visible to the client.
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contexts/impl/ContextExceptionMessage.java:69
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:180
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:181
 msgid "Denied concurrent update of user attributes."
 msgstr "拒絕了同時更新使用者屬性。"
 
@@ -7270,55 +7294,58 @@ msgstr "無法複製物件「%1$s」。"
 msgid "Two users with same identifier \"%1$s\" in context %2$d found."
 msgstr "在環境 %2$d 中找到指示符皆為「%1$s」的兩個用戶。"
 
-#. *
-#. * No permission to modify resources in context %1$s
-#.
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:101
+#. No permission to modify resources in context %1$s
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:99
 msgid "No permission to modify resources in context \"%1$s\""
 msgstr "沒有在環境「%1$s」中修改資源的權限"
+
+#. No permission to access resources in context %1$s
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:102
+msgid "No permission to access resources in context \"%1$s\""
+msgstr "無權存取環境「%1$s」中的資源"
 
 #. *
 #. * Missing or unknown password mechanism %1$s
 #.
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:106
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:107
 msgid "Missing or unknown password mechanism \"%1$s\""
 msgstr "缺少或未知的密碼機制「%1$s」"
 
 #. *
 #. * New password contains invalid characters
 #.
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:111
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:112
 msgid "New password contains invalid characters."
 msgstr "新密碼包含無效字元。"
 
 #. *
 #. * Attributes of user %1$d in context %2$d have been erased.
 #.
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:116
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:117
 msgid "Attributes of user %1$d in context %2$d have been erased."
 msgstr "環境 %2$d 中用戶 %1$d 的屬性 %2$d 已被清除。"
 
 #. *
 #. * Loading one or more users failed.
 #.
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:121
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:122
 msgid "Loading one or more users failed."
 msgstr "載入一個或多個用戶失敗。"
 
 #. * Alias entries are missing for user %1$d in context %2$d.
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:124
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:125
 msgid "Alias entries are missing for user %1$d in context %2$d."
 msgstr "內容 %2$d 當中的使用者 %1$d 缺少暱稱項目。"
 
 #. * Updating attributes failed in context %1$d for user %2$d.
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:127
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:128
 msgid "Updating attributes failed in context %1$d for user %2$d."
 msgstr "無法更新 %2$d 使用者的 %1$d 文本屬性。"
 
 #. *
 #. * Invalid password length. The password must be of minimum length %1$d.
 #.
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:132
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:133
 msgid ""
 "Invalid password length. The password must have a minimum length of %1$d."
 msgstr "密碼長度錯誤。密碼最短只能有 %1$d 個字。"
@@ -7326,7 +7353,7 @@ msgstr "密碼長度錯誤。密碼最短只能有 %1$d 個字。"
 #. *
 #. * Invalid password length. The password must be of maximum length %1$d.
 #.
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:137
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:138
 msgid ""
 "Invalid password length. The password must have a maximum length of %1$d."
 msgstr "密碼長度錯誤。密碼最長只能有 %1$d 個字。"
@@ -7334,27 +7361,27 @@ msgstr "密碼長度錯誤。密碼最長只能有 %1$d 個字。"
 #. *
 #. * The parameter %s for this user is missing.
 #.
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:142
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:143
 msgid "The parameter \"%s\" for this user is missing."
 msgstr "缺少此使用者的「%s」參數。"
 
 #. *
 #. * %s is not a valid locale.
 #.
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:147
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:148
 msgid "\"%s\" is not a valid locale."
 msgstr "「%s」是無效的語系代碼。"
 
 #. *
 #. * %s is not a valid time zone.
 #.
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:152
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:153
 msgid "\"%s\" is not a valid timezone."
 msgstr "「%s」是無效的時區。"
 
 #. This is an internal exception to detect coding problems. A user will never see this exception.
 #. %1$d is replaced with the number of users that attributes should be locked in the database for updating them.
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:156
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:157
 msgid ""
 "Locking attributes of multiple users is not allowed. You tried to lock %1$d "
 "user's attributes."
@@ -7363,7 +7390,7 @@ msgstr "不允許鎖定多個使用者的屬性，您嘗試鎖定 %1$d 位使用
 #. *
 #. * The entered password is illegal and can't be saved. Allowed characters are: %1$s
 #.
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:161
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:162
 msgid ""
 "The entered password is illegal and can't be saved. Allowed characters are: "
 "%1$s"
@@ -7372,7 +7399,7 @@ msgstr "輸入的密碼無效，無法儲存。只允許下列符號: %1$s"
 #. *
 #. * The current password is incorrect. Please enter your correct current password and try again.
 #.
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:166
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:167
 msgid ""
 "The current password is incorrect. Please enter your correct current "
 "password and try again."
@@ -7381,7 +7408,7 @@ msgstr "目前的密碼不正確，請輸入正確的目前密碼並再試一次
 #. *
 #. * The current password is missing. Please enter your current password and try again.
 #.
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:171
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:172
 msgid ""
 "The current password is missing. Please enter your current password and try "
 "again."
@@ -7390,7 +7417,7 @@ msgstr "缺少目前的密碼，請輸入您目前的密碼並再試一次。"
 #. *
 #. * The new password is missing. Please enter your new password and try again.
 #.
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:176
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:177
 msgid ""
 "The new password is missing. Please enter your new password and try again."
 msgstr "缺少新密碼，請輸入您的新密碼並再試一次。"
@@ -7543,8 +7570,8 @@ msgid "Error while inserting task."
 msgstr "插入任務時出錯。"
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:67
-msgid "This is not a task folder."
-msgstr "這不是任務資料夾。"
+msgid "Folder cannot be found."
+msgstr "找不到資料夾。"
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:69
 msgid ""
@@ -7845,6 +7872,18 @@ msgstr "請求被拒絕，因為檔案大小超過最大配置大小 %1$s。"
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/upload/impl/UploadExceptionMessage.java:120
 msgid "Read timed out. Waited too long for incoming data from client."
 msgstr "讀取逾時，客戶端等待資料等待太久。"
+
+#. Image upload denied. Its size exceeds maximum allowed value of %2$s
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/upload/impl/UploadExceptionMessage.java:123
+msgid "Image upload denied. Its size exceeds maximum allowed value of %2$s."
+msgstr "上傳圖片被拒絕，超過最大允許大小 %2$s。"
+
+#. Image upload denied. Its resolution exceeds maximum allowed value of %2$s pixels.
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/upload/impl/UploadExceptionMessage.java:126
+msgid ""
+"Image upload denied. Its resolution exceeds maximum allowed value of %2$s "
+"pixels."
+msgstr "上傳圖片被拒絕，解析度超過最大允許的 %2$s 畫素。"
 
 #. *
 #. * Configuration for user %1$s could not be found in context %2$d
@@ -8607,6 +8646,35 @@ msgid ""
 "Timeout while trying to send to the following recipient: %1$s. Please try "
 "again later."
 msgstr "寄信給下列收件者時發生逾時: %1$s，請稍候再試。"
+
+#. Mail server denies access
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:209
+msgid "Mail server denies access."
+msgstr "郵件伺服器拒絕存取。"
+
+#. The user tried to append or move a message to a mail folder, which does not exist.
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:212
+msgid ""
+"Destination folder does not exist. Please try to create it and retry the "
+"operation."
+msgstr "目標資料夾不存在，請先建立後再試一次。"
+
+#. Temporary failure because a subsystem is down. For example, an IMAP server that uses an LDAP server for authentication might use this response code when the LDAP/Radius server is down.
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:215
+msgid "A temporary failure occurred during login. Please try again later."
+msgstr "登入時發生暫時性的失敗，請稍候再試。"
+
+#. Either authentication succeeded or the server no longer had the necessary data; either way, access is no longer permitted using that passphrase. The client or user should get a new passphrase.
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:218
+msgid ""
+"Access to mail server is no longer permitted using your password. Please "
+"obtain a new one."
+msgstr "您已無法使用目前的密碼存取郵件伺服器。請取得新密碼。"
+
+#. Access to mail server is not permitted due to a lack of privacy. E.g. client is supposed to switch to a connection with Transport Layer Security (TLS).
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:221
+msgid "Access to mail server is not permitted due to a lack of privacy."
+msgstr "由於缺少隱私，不允許您存取郵件伺服器。"
 
 #. The message advertising that everything is fine with checked account
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mailaccount/KnownStatusMessage.java:71
@@ -10179,6 +10247,13 @@ msgid ""
 msgstr ""
 "使用者的檔案由來源環境 %2$s 的使用者 %1$s 擁有，請先設定各使用者或環境相關的"
 "檔案儲存空間。"
+
+#. The user %1$s in source context %2$s does use Unified Quota and therefore cannot be copied.
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.user.copy/src/com/openexchange/user/copy/UserCopyExceptionMessages.java:68
+msgid ""
+"The user %1$s in source context %2$s does use Unified Quota and therefore "
+"cannot be copied."
+msgstr "來源環境 %2$s 的使用者 %1$s 使用統一配額，無法複製。"
 
 #. The provided feedback score is invalid. Please choose a number > 0.
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.userfeedback.starrating/src/com/openexchange/userfeedback/starrating/exception/StarRatingExceptionMessages.java:64
@@ -12455,6 +12530,13 @@ msgstr "UTC"
 #: /home/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:534
 msgid "Zulu"
 msgstr "祖魯"
+
+#~ msgid ""
+#~ "A folder named \"%1$s\" already exists below the parent folder \"%2$s\"."
+#~ msgstr "在父資料夾「%2$s」下已經存在一個名為「%1$s」的文件夾。"
+
+#~ msgid "This is not a task folder."
+#~ msgstr "這不是任務資料夾。"
 
 #~ msgid "⁺∕₋ 1 month"
 #~ msgstr "⁺∕₋ 1 個月"

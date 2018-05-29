@@ -19,7 +19,7 @@ msgstr ""
 "Project-Id-Version: errors.de_DE\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2017-09-11 11:36+0200\n"
+"PO-Revision-Date: 2018-05-23 14:57+0200\n"
 "Last-Translator: \n"
 "Language-Team: German <kde-i18n-de@kde.org>\n"
 "Language: de_DE\n"
@@ -2094,12 +2094,12 @@ msgid "The file version you requested does not exist."
 msgstr "Die von Ihnen angeforderte Dateiversion ist nicht vorhanden."
 
 #. A folder named "%1$s" already exists below the parent folder "%2$s".
+#. A folder named "%1$s" already exists.
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:74
-msgid ""
-"A folder named \"%1$s\" already exists below the parent folder \"%2$s\"."
-msgstr ""
-"Ein Ordner namens \"%1$s\" ist bereits unterhalb des übergeordneten Ordners "
-"\"%2$s\" vorhanden."
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/folderstorage/FolderExceptionMessages.java:74
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:128
+msgid "A folder named \"%1$s\" already exists."
+msgstr "Ein Ordner namens \"%1$s\" ist bereits vorhanden."
 
 #. You do not have the appropriate permissions to create a subfolder below the folder "%1$s".
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:77
@@ -3918,6 +3918,14 @@ msgid "Managing mail filter rules is not available for your account."
 msgstr ""
 "Das Verwalten von Mailfilterregeln ist für Ihren Account nicht verfügbar."
 
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.mail.filter/src/com/openexchange/mailfilter/exceptions/MailFilterExceptionMessages.java:70
+msgid ""
+"The maximum amount of redirect rules is reached. Please delete or deactivate "
+"another redirect rule first."
+msgstr ""
+"Die maximale Anzahl der Umleitungsregeln ist erreicht. Bitte löschen Sie "
+"zuerst eine andere Umleitungsregel."
+
 #. Maximum number of messages already stored for client %1$s
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.message.timeline/src/com/openexchange/message/timeline/MessageTimelineExceptionMessages.java:63
 msgid "Maximum number of messages already stored for client %1$s"
@@ -5206,6 +5214,21 @@ msgstr "Der für %2$s angegebene Wert ist nicht korrekt."
 msgid "Please add a value for %1$s"
 msgstr "Bitte geben Sie einen Wert für %1$s ein"
 
+#. No user-associated job found
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/ajax/requesthandler/jobqueue/JobQueueMessages.java:63
+msgid "No such job %1$s"
+msgstr "Kein solcher Job %1$s"
+
+#. A long-running operation is being executed
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/ajax/requesthandler/jobqueue/JobQueueMessages.java:66
+msgid "A long-running operation is being executed"
+msgstr "Es wird eine lang andauernde Aktion ausgeführt"
+
+#. Such a long-running operation is already in progress
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/ajax/requesthandler/jobqueue/JobQueueMessages.java:69
+msgid "Such a long-running operation is already in progress"
+msgstr "Eine derart lang andauernde Aktion läuft bereits"
+
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/authorization/AuthorizationExceptionMessages.java:60
 msgid "User is deactivated"
 msgstr "Benutzer ist deaktiviert"
@@ -5340,12 +5363,6 @@ msgid "You do not have appropriate permissions to move the folder."
 msgstr ""
 "Sie haben nicht die entsprechenden Berechtigungen zum Verschieben des "
 "Ordners."
-
-#. A folder named "%1$s" already exists.
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/folderstorage/FolderExceptionMessages.java:74
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:128
-msgid "A folder named \"%1$s\" already exists."
-msgstr "Ein Ordner namens \"%1$s\" ist bereits vorhanden."
 
 #. You do not have the appropriate permissions to delete the folder.
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/folderstorage/FolderExceptionMessages.java:80
@@ -5822,6 +5839,14 @@ msgstr ""
 msgid "Sequence number is outdated."
 msgstr "Sequenznummer ist veraltet."
 
+#. *
+#. * The calendar is currently under maintenance. Please try again later.
+#.
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/calendar/OXCalendarExceptionMessage.java:231
+msgid "The calendar is currently under maintenance. Please try again later."
+msgstr ""
+"Der Kalender wird derzeit gewartet. Bitte versuchen Sie es später erneut."
+
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:61
 msgid "Invalid E-Mail address: '%s'. Please correct the E-Mail address."
 msgstr ""
@@ -6066,7 +6091,7 @@ msgstr "Der Account \"%1$s\" wurde nicht gefunden."
 #. This exception is triggered by concurrent requests of clients trying to modify the same user attributes in the same moment.
 #. This should happen in very rare conditions and is not visible to the client.
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contexts/impl/ContextExceptionMessage.java:69
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:180
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:181
 msgid "Denied concurrent update of user attributes."
 msgstr "Gleichzeitige Aktualisierung von Benutzerattributen verweigert."
 
@@ -7818,48 +7843,51 @@ msgid "Two users with same identifier \"%1$s\" in context %2$d found."
 msgstr ""
 "Es wurden zwei Benutzer mit identischer ID \"%1$s\" im Kontext %2$d gefunden."
 
-#. *
-#. * No permission to modify resources in context %1$s
-#.
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:101
+#. No permission to modify resources in context %1$s
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:99
 msgid "No permission to modify resources in context \"%1$s\""
 msgstr "Keine Berechtigung zum Ändern von Ressourcen im Kontext \"%1$s\""
+
+#. No permission to access resources in context %1$s
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:102
+msgid "No permission to access resources in context \"%1$s\""
+msgstr "Keine Berechtigung zum Zugriff auf Ressourcen im Kontext \"%1$s\""
 
 #. *
 #. * Missing or unknown password mechanism %1$s
 #.
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:106
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:107
 msgid "Missing or unknown password mechanism \"%1$s\""
 msgstr "Fehlender oder unbekannter Passwortmechanismus \"%1$s\"."
 
 #. *
 #. * New password contains invalid characters
 #.
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:111
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:112
 msgid "New password contains invalid characters."
 msgstr "Das neue Passwort enthält ungültige Zeichen."
 
 #. *
 #. * Attributes of user %1$d in context %2$d have been erased.
 #.
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:116
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:117
 msgid "Attributes of user %1$d in context %2$d have been erased."
 msgstr "Attribute des Benutzers %1$d im Kontext %2$d wurden gelöscht."
 
 #. *
 #. * Loading one or more users failed.
 #.
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:121
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:122
 msgid "Loading one or more users failed."
 msgstr "Das Laden eines oder mehrerer Benutzer ist fehlgeschlagen."
 
 #. * Alias entries are missing for user %1$d in context %2$d.
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:124
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:125
 msgid "Alias entries are missing for user %1$d in context %2$d."
 msgstr "Alias-Einträge für Benutzer %1$d im Kontext %2$d sind nicht vorhanden."
 
 #. * Updating attributes failed in context %1$d for user %2$d.
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:127
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:128
 msgid "Updating attributes failed in context %1$d for user %2$d."
 msgstr ""
 "Das Aktualisieren der Attribute im Kontext %1$d für Benutzer %2$d ist "
@@ -7868,7 +7896,7 @@ msgstr ""
 #. *
 #. * Invalid password length. The password must be of minimum length %1$d.
 #.
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:132
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:133
 msgid ""
 "Invalid password length. The password must have a minimum length of %1$d."
 msgstr "Ungültige Passwortlänge. Das Passwort muss mindestens %1$d lang sein."
@@ -7876,7 +7904,7 @@ msgstr "Ungültige Passwortlänge. Das Passwort muss mindestens %1$d lang sein."
 #. *
 #. * Invalid password length. The password must be of maximum length %1$d.
 #.
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:137
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:138
 msgid ""
 "Invalid password length. The password must have a maximum length of %1$d."
 msgstr "Ungültige Passwortlänge. Das Passwort darf höchstens %1$d lang sein."
@@ -7884,27 +7912,27 @@ msgstr "Ungültige Passwortlänge. Das Passwort darf höchstens %1$d lang sein."
 #. *
 #. * The parameter %s for this user is missing.
 #.
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:142
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:143
 msgid "The parameter \"%s\" for this user is missing."
 msgstr "Der Parameter %s für diesen Benutzer fehlt."
 
 #. *
 #. * %s is not a valid locale.
 #.
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:147
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:148
 msgid "\"%s\" is not a valid locale."
 msgstr "\"%s\" ist keine gültige Sprachangabe."
 
 #. *
 #. * %s is not a valid time zone.
 #.
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:152
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:153
 msgid "\"%s\" is not a valid timezone."
 msgstr "\"%s\" ist keine gültige Zeitzone."
 
 #. This is an internal exception to detect coding problems. A user will never see this exception.
 #. %1$d is replaced with the number of users that attributes should be locked in the database for updating them.
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:156
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:157
 msgid ""
 "Locking attributes of multiple users is not allowed. You tried to lock %1$d "
 "user's attributes."
@@ -7915,7 +7943,7 @@ msgstr ""
 #. *
 #. * The entered password is illegal and can't be saved. Allowed characters are: %1$s
 #.
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:161
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:162
 msgid ""
 "The entered password is illegal and can't be saved. Allowed characters are: "
 "%1$s"
@@ -7926,7 +7954,7 @@ msgstr ""
 #. *
 #. * The current password is incorrect. Please enter your correct current password and try again.
 #.
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:166
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:167
 msgid ""
 "The current password is incorrect. Please enter your correct current "
 "password and try again."
@@ -7937,7 +7965,7 @@ msgstr ""
 #. *
 #. * The current password is missing. Please enter your current password and try again.
 #.
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:171
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:172
 msgid ""
 "The current password is missing. Please enter your current password and try "
 "again."
@@ -7948,7 +7976,7 @@ msgstr ""
 #. *
 #. * The new password is missing. Please enter your new password and try again.
 #.
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:176
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:177
 msgid ""
 "The new password is missing. Please enter your new password and try again."
 msgstr ""
@@ -8103,8 +8131,8 @@ msgid "Error while inserting task."
 msgstr "Fehler beim Einfügen der Aufgabe."
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:67
-msgid "This is not a task folder."
-msgstr "Dies ist kein Aufgabenordner."
+msgid "Folder cannot be found."
+msgstr "Ordner konnte nicht gefunden werden."
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:69
 msgid ""
@@ -8458,6 +8486,22 @@ msgid "Read timed out. Waited too long for incoming data from client."
 msgstr ""
 "Zeitlimit überschritten. Das Warten auf eingehende Daten vom Client dauerte "
 "zu lange."
+
+#. Image upload denied. Its size exceeds maximum allowed value of %2$s
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/upload/impl/UploadExceptionMessage.java:123
+msgid "Image upload denied. Its size exceeds maximum allowed value of %2$s."
+msgstr ""
+"Hochladen des Bilds verweigert. Seine Größe überschreitet den maximal "
+"zulässigen Wert von %2$s."
+
+#. Image upload denied. Its resolution exceeds maximum allowed value of %2$s pixels.
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/upload/impl/UploadExceptionMessage.java:126
+msgid ""
+"Image upload denied. Its resolution exceeds maximum allowed value of %2$s "
+"pixels."
+msgstr ""
+"Hochladen des Bilds verweigert. Seine Auflösung überschreitet den maximal "
+"zulässigen Wert von%2$s Pixeln."
 
 #. *
 #. * Configuration for user %1$s could not be found in context %2$d
@@ -9338,6 +9382,43 @@ msgid ""
 msgstr ""
 "Zeitüberschreitung beim Versuch, an den folgenden Empfänger zu senden: %1$s. "
 "Bitte versuchen Sie es später erneut."
+
+#. Mail server denies access
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:209
+msgid "Mail server denies access."
+msgstr "Mailserver verweigert den Zugriff."
+
+#. The user tried to append or move a message to a mail folder, which does not exist.
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:212
+msgid ""
+"Destination folder does not exist. Please try to create it and retry the "
+"operation."
+msgstr ""
+"Zielordner existiert nicht. Bitte legen Sie den Ordner an und wiederholen "
+"Sie den Vorgang."
+
+#. Temporary failure because a subsystem is down. For example, an IMAP server that uses an LDAP server for authentication might use this response code when the LDAP/Radius server is down.
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:215
+msgid "A temporary failure occurred during login. Please try again later."
+msgstr ""
+"Beim Anmelden trat ein temporärer Fehler auf. Bitte versuchen Sie es später "
+"erneut."
+
+#. Either authentication succeeded or the server no longer had the necessary data; either way, access is no longer permitted using that passphrase. The client or user should get a new passphrase.
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:218
+msgid ""
+"Access to mail server is no longer permitted using your password. Please "
+"obtain a new one."
+msgstr ""
+"Der Zugriff auf den Mailserver ist mit Ihrem Passwort nicht mehr erlaubt. "
+"Bitte erstellen Sie ein neues Passwort."
+
+#. Access to mail server is not permitted due to a lack of privacy. E.g. client is supposed to switch to a connection with Transport Layer Security (TLS).
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:221
+msgid "Access to mail server is not permitted due to a lack of privacy."
+msgstr ""
+"Der Zugriff auf den Mailserver wird aufgrund mangelnden Datenschutzes "
+"verweigert."
 
 #. The message advertising that everything is fine with checked account
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mailaccount/KnownStatusMessage.java:71
@@ -11126,6 +11207,15 @@ msgstr ""
 "Die Dateien des Benutzers gehören im Quellkontext %2$s dem Benutzer %1$s. "
 "Bitte legen Sie zunächst individuelle oder kontextbezogene Dateispeicher "
 "fest."
+
+#. The user %1$s in source context %2$s does use Unified Quota and therefore cannot be copied.
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.user.copy/src/com/openexchange/user/copy/UserCopyExceptionMessages.java:68
+msgid ""
+"The user %1$s in source context %2$s does use Unified Quota and therefore "
+"cannot be copied."
+msgstr ""
+"Der Benutzer %1$s im Quellkontext %2$s verwendet Unified Quota und kann "
+"deshalb nicht kopiert werden."
 
 #. The provided feedback score is invalid. Please choose a number > 0.
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.userfeedback.starrating/src/com/openexchange/userfeedback/starrating/exception/StarRatingExceptionMessages.java:64
@@ -13422,6 +13512,15 @@ msgstr "UTC"
 #: /home/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:534
 msgid "Zulu"
 msgstr "Zulu"
+
+#~ msgid ""
+#~ "A folder named \"%1$s\" already exists below the parent folder \"%2$s\"."
+#~ msgstr ""
+#~ "Ein Ordner namens \"%1$s\" ist bereits unterhalb des übergeordneten "
+#~ "Ordners \"%2$s\" vorhanden."
+
+#~ msgid "This is not a task folder."
+#~ msgstr "Dies ist kein Aufgabenordner."
 
 #~ msgid "⁺∕₋ 1 month"
 #~ msgstr "⁺∕₋ 1 Monat"
