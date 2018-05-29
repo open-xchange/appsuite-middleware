@@ -52,6 +52,7 @@ package com.openexchange.groupware.update.internal;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -107,11 +108,11 @@ public class UpdateTaskServiceImpl implements UpdateTaskService {
      * @see com.openexchange.groupware.update.UpdateTaskService#runUpdate(int)
      */
     @Override
-    public void runUpdate(int contextId) throws RemoteException {
+    public List<Map<String, String>> runUpdate(int contextId) throws RemoteException {
         try {
             UpdateProcess updateProcess = new UpdateProcess(contextId);
             updateProcess.run();
-            interceptErrors(updateProcess);
+            return getFailures(updateProcess);
         } catch (RuntimeException | Error e) {
             LOG.error("", e);
             throw e;
@@ -124,12 +125,12 @@ public class UpdateTaskServiceImpl implements UpdateTaskService {
      * @see com.openexchange.groupware.update.UpdateTaskService#runUpdate(java.lang.String)
      */
     @Override
-    public void runUpdate(String schemaName) throws RemoteException {
+    public List<Map<String, String>> runUpdate(String schemaName) throws RemoteException {
         try {
             SchemaInfo schema = UpdateTaskToolkit.getInfoBySchemaName(schemaName);
             UpdateProcess updateProcess = new UpdateProcess(schema.getPoolId(), schema.getSchema(), true, false);
             updateProcess.run();
-            interceptErrors(updateProcess);
+            return getFailures(updateProcess);
         } catch (OXException e) {
             LOG.error("", e);
             throw new RemoteException(e.getPlainLogMessage(), e);
@@ -348,31 +349,29 @@ public class UpdateTaskServiceImpl implements UpdateTaskService {
     }
 
     /**
-     * Intercepts any failures the update task encountered
+     * Returns any failures the update task encountered
      * 
      * @param updateProcess the {@link UpdateProcess}
+     * @return the failures
      */
-    private void interceptErrors(UpdateProcess updateProcess) {
+    private List<Map<String, String>> getFailures(UpdateProcess updateProcess) {
         // Return possible failures
         Queue<TaskInfo> failures = updateProcess.getFailures();
         if (failures == null) {
-            return;
+            return Collections.emptyList();
         }
         if (failures.isEmpty()) {
-            return;
+            return Collections.emptyList();
         }
 
-        StringBuilder sb = new StringBuilder("The following update task(s) failed: \\R");
-        boolean first = true;
+        List<Map<String, String>> failuresList = new ArrayList<>(failures.size());
         for (TaskInfo taskInfo : failures) {
-            if (first) {
-                first = false;
-            } else {
-                sb.append("\\R");
-            }
-            sb.append(' ').append(taskInfo.getTaskName()).append(" (class=").append(taskInfo.getClass().getName()).append(')');
-            sb.append(" (schema=").append(taskInfo.getSchema()).append(')');
+            Map<String, String> failuresMap = new HashMap<>();
+            failuresMap.put("name", taskInfo.getTaskName());
+            failuresMap.put("class", taskInfo.getClass().getName());
+            failuresMap.put("schema", taskInfo.getSchema());
+            failuresList.add(failuresMap);
         }
-        //return sb.toString();
+        return failuresList;
     }
 }

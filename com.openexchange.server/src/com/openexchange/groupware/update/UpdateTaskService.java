@@ -73,14 +73,14 @@ public interface UpdateTaskService extends Remote {
      * 
      * @param contextId the context identifier
      */
-    void runUpdate(int contextId) throws RemoteException;
+    List<Map<String, String>> runUpdate(int contextId) throws RemoteException;
 
     /**
      * Executes all pending update tasks for the specified schema.
      * 
      * @param schemaName The schema name
      */
-    void runUpdate(String schemaName) throws RemoteException;
+    List<Map<String, String>> runUpdate(String schemaName) throws RemoteException;
 
     /**
      * Schedules an asynchronous task to execute all update tasks on all available schemata.
