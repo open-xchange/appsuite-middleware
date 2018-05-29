@@ -54,7 +54,6 @@ import static com.openexchange.monitoring.MonitorUtility.getObjectName;
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
 import org.osgi.framework.BundleContext;
-import com.openexchange.groupware.update.tools.UpdateTaskMBeanInit;
 import com.openexchange.management.ManagementService;
 import com.openexchange.osgi.BundleServiceTracker;
 import com.openexchange.report.internal.ReportingInit;
@@ -105,12 +104,10 @@ public final class ManagementServiceTracker extends BundleServiceTracker<Managem
             org.slf4j.LoggerFactory.getLogger(ManagementServiceTracker.class).error("", e);
         }
         new ReportingInit(managementService).start();
-        new UpdateTaskMBeanInit(managementService).start();
     }
 
     @Override
     protected void removedServiceInternal(final ManagementService managementService) {
-        new UpdateTaskMBeanInit(managementService).stop();
         new ReportingInit(managementService).stop();
         try {
             /*

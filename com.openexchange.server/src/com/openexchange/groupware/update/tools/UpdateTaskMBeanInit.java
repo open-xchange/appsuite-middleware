@@ -58,6 +58,7 @@ import com.openexchange.server.Initialization;
  * {@link UpdateTaskMBeanInit}.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @deprecated It will be removed with 7.10.1.
  */
 public final class UpdateTaskMBeanInit implements Initialization {
 

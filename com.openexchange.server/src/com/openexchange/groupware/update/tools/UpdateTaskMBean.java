@@ -92,6 +92,7 @@ import com.openexchange.timer.TimerService;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ * @deprecated Use the UpdateTaskService instead. It will be removed with 7.10.1.
  */
 public final class UpdateTaskMBean implements DynamicMBean {
 

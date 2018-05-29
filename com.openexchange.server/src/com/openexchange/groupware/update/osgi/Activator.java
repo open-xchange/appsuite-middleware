@@ -49,6 +49,7 @@
 
 package com.openexchange.groupware.update.osgi;
 
+import java.rmi.Remote;
 import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.caching.CacheService;
 import com.openexchange.config.ConfigurationService;
@@ -59,6 +60,7 @@ import com.openexchange.groupware.update.internal.CreateUpdateTaskTable;
 import com.openexchange.groupware.update.internal.ExcludedSet;
 import com.openexchange.groupware.update.internal.InternalList;
 import com.openexchange.groupware.update.internal.NamespaceAwareExcludedSet;
+import com.openexchange.groupware.update.internal.UpdateTaskServiceImpl;
 import com.openexchange.groupware.update.tasks.objectpermission.ObjectPermissionCreateTableService;
 import com.openexchange.groupware.update.tasks.objectusagecount.CreateObjectUseCountTableService;
 import com.openexchange.osgi.HousekeepingActivator;
@@ -104,6 +106,8 @@ public class Activator extends HousekeepingActivator {
         registerService(CreateTableService.class, new CreateUpdateTaskTable());
         registerService(CreateTableService.class, new ObjectPermissionCreateTableService());
         registerService(CreateTableService.class, new CreateObjectUseCountTableService());
+
+        registerService(Remote.class, new UpdateTaskServiceImpl());
     }
 
     @Override
