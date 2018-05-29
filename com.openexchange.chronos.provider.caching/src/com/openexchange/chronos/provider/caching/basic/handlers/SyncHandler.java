@@ -211,11 +211,11 @@ public class SyncHandler extends AbstractExtensionHandler {
      * @param updatedSince The updated since timestamp
      * @return The compiled {@link SearchTerm}
      */
-    private SearchTerm<?> createSearchTerm(long updatedSince) {
+    SearchTerm<?> createSearchTerm(long updatedSince) {
         return SearchUtils.getSearchTerm(EventField.TIMESTAMP, SingleOperation.GREATER_THAN, L(updatedSince));
     }
 
-    private List<Event> resolveResource(CalendarStorage storage, String resourceName) throws OXException {
+    List<Event> resolveResource(CalendarStorage storage, String resourceName) throws OXException {
         CompositeSearchTerm searchTerm = new CompositeSearchTerm(CompositeOperation.OR);
         searchTerm.addSearchTerm(SearchUtils.getSearchTerm(EventField.UID, SingleOperation.EQUALS, resourceName));
         searchTerm.addSearchTerm(SearchUtils.getSearchTerm(EventField.FILENAME, SingleOperation.EQUALS, resourceName));
