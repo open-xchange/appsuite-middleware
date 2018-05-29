@@ -180,7 +180,7 @@ abstract class AbstractUpdateTasksCLT<R> extends AbstractRmiCLI<R> {
      * @return The prepared data
      */
     private List<List<Object>> prepareData(List<Map<String, Object>> compositeList, String[] columns) {
-        List<List<Object>> data = new ArrayList<List<Object>>();
+        List<List<Object>> data = new ArrayList<List<Object>>(compositeList.size());
         for (Map<String, Object> executedTask : compositeList) {
             data.add(prepareRow(columns, executedTask));
         }
