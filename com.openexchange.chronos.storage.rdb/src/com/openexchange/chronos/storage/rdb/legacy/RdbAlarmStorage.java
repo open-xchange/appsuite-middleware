@@ -74,7 +74,6 @@ import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.AlarmAction;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
-import com.openexchange.chronos.RelatedTo;
 import com.openexchange.chronos.Trigger;
 import com.openexchange.chronos.common.AlarmUtils;
 import com.openexchange.chronos.common.CalendarUtils;
@@ -373,27 +372,13 @@ public class RdbAlarmStorage extends RdbStorage implements AlarmStorage {
         Date nextRegularTriggerTime = optNextTriggerTime(event, primaryAlarm, entityResolver.getTimeZone(userID), acknowledgedGuardian);
         if (null == nextRegularTriggerTime) {
             return Collections.singletonList(primaryAlarm);
-        }
-        if (reminderData.nextTriggerTime == nextRegularTriggerTime.getTime()) {
+        } else {
             /*
              * use primary alarm with acknowledged guardian to prevent premature triggers
              */
             primaryAlarm.setAcknowledged(acknowledgedGuardian);
             return Collections.singletonList(primaryAlarm);
         }
-        /*
-         * assume primary trigger has been snoozed by marking as acknowledged and adding an accompanying snooze trigger for the trigger time
-         */
-        primaryAlarm.setAcknowledged(acknowledgedGuardian);
-        primaryAlarm.setId(primaryAlarm.getId() * -1);
-        Alarm snoozeAlarm = new Alarm(new Trigger(new Date(reminderData.nextTriggerTime)), primaryAlarm.getAction());
-        //        snoozeAlarm.setDescription(primaryAlarm.getDescription());
-        snoozeAlarm.setRelatedTo(new RelatedTo("SNOOZE", primaryAlarm.getUid()));
-        snoozeAlarm.setId(primaryAlarm.getId());
-        List<Alarm> alarms = new ArrayList<Alarm>(2);
-        alarms.add(primaryAlarm);
-        alarms.add(snoozeAlarm);
-        return alarms;
     }
 
     /**
