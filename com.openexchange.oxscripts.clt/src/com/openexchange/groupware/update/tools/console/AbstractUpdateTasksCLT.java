@@ -55,15 +55,23 @@ import com.openexchange.auth.rmi.RemoteAuthenticator;
 import com.openexchange.cli.AbstractRmiCLI;
 
 /**
- * {@link AbstractUpdateTasksCLT}
+ * {@link AbstractUpdateTasksCLT} - An abstraction for all the Update Tasks related command line tools
  *
+ * @param <R> - The return type of the invocation method
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
- * @since v7.10.0
+ * @since v7.10.1
  */
 abstract class AbstractUpdateTasksCLT<R> extends AbstractRmiCLI<R> {
 
     private final String name;
     private final String footer;
+
+    /**
+     * Initialises a new {@link AbstractUpdateTasksCLT}.
+     */
+    public AbstractUpdateTasksCLT(String name) {
+        this(name, "");
+    }
 
     /**
      * Initialises a new {@link AbstractUpdateTasksCLT}.
@@ -103,7 +111,7 @@ abstract class AbstractUpdateTasksCLT<R> extends AbstractRmiCLI<R> {
     protected String getName() {
         return name;
     }
-    
+
     /*
      * (non-Javadoc)
      * 
