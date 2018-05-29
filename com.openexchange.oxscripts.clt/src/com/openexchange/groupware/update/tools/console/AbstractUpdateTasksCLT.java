@@ -76,14 +76,14 @@ abstract class AbstractUpdateTasksCLT<R> extends AbstractRmiCLI<R> {
     /**
      * Initialises a new {@link AbstractUpdateTasksCLT}.
      */
-    public AbstractUpdateTasksCLT(String name) {
+    AbstractUpdateTasksCLT(String name) {
         this(name, "");
     }
 
     /**
      * Initialises a new {@link AbstractUpdateTasksCLT}.
      */
-    public AbstractUpdateTasksCLT(String name, String footer) {
+    AbstractUpdateTasksCLT(String name, String footer) {
         super();
         this.name = name;
         this.footer = footer;
