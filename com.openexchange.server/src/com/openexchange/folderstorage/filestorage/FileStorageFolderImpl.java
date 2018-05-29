@@ -255,18 +255,7 @@ public final class FileStorageFolderImpl extends AbstractFolder {
             }
             parent = null != parentId ? parentId : fsFolder.getParentId();
         }
-        {
-            final List<FileStoragePermission> fsPermissions = fsFolder.getPermissions();
-            final int size = fsPermissions.size();
-            permissions = new Permission[size];
-            for (int i = 0; i < size; i++) {
-                FileStoragePermissionImpl permissionImpl = new FileStoragePermissionImpl(fsPermissions.get(i));
-                if (permissionImpl.isAdmin() && !permissionImpl.isGroup()) {
-                    createdBy = permissionImpl.getEntity();
-                }
-                permissions[i] = permissionImpl;
-            }
-        }
+        initPermissions(fsFolder);
         type = SystemType.getInstance();
         subscribed = fsFolder.isSubscribed();
         subscribedSubfolders = fsFolder.hasSubscribedSubfolders();
@@ -274,7 +263,6 @@ public final class FileStorageFolderImpl extends AbstractFolder {
             boolean hasSubfolders = fsFolder.hasSubfolders();
             setSubfolderIDs(hasSubfolders ? null : new String[0]);
         }
-        // capabilities = parseCaps(messagingFolder.getCapabilities());
         deefault = fsFolder.isDefaultFolder();
         total = fsFolder.getFileCount();
         defaultType = deefault ? FileStorageContentType.getInstance().getModule() : 0;
@@ -284,76 +272,70 @@ public final class FileStorageFolderImpl extends AbstractFolder {
             cacheable = !fsFolder.isDefaultFolder();
         }
         meta = fsFolder.getMeta();
-        Set<String> supportedCapabilities = fsFolder.getCapabilities();
-        if (optCheckCapability(fsFolder.getId(), FileStorageCapability.ZIPPABLE_FOLDER, folderAccess)) {
-            if (null == supportedCapabilities) {
-                supportedCapabilities = new LinkedHashSet<>(4);
-            } else {
-                supportedCapabilities = new LinkedHashSet<>(supportedCapabilities);
-            }
-            supportedCapabilities.add(CAPABILITY_ZIPPABLE_FOLDER);
-        }
-        if (optCheckCapability(fsFolder.getId(), FileStorageCapability.FILE_VERSIONS, folderAccess)) {
-            if (null == supportedCapabilities) {
-                supportedCapabilities = new LinkedHashSet<>(4);
-            } else {
-                supportedCapabilities = new LinkedHashSet<>(supportedCapabilities);
-            }
-            supportedCapabilities.add(CAPABILITY_FILE_VERSIONS);
-        }
-        if (optCheckCapability(fsFolder.getId(), FileStorageCapability.EXTENDED_METADATA, folderAccess)) {
-            if (null == supportedCapabilities) {
-                supportedCapabilities = new LinkedHashSet<>(4);
-            } else {
-                supportedCapabilities = new LinkedHashSet<>(supportedCapabilities);
-            }
-            supportedCapabilities.add(CAPABILITY_EXTENDED_METADATA);
-        }
-        if (optCheckCapability(fsFolder.getId(), FileStorageCapability.LOCKS, folderAccess)) {
-            if (null == supportedCapabilities) {
-                supportedCapabilities = new LinkedHashSet<>(4);
-            } else {
-                supportedCapabilities = new LinkedHashSet<>(supportedCapabilities);
-            }
-            supportedCapabilities.add(CAPABILITY_LOCKS);
-        }
-        if (optCheckCapability(fsFolder.getId(), FileStorageCapability.COUNT_TOTAL, folderAccess)) {
-            if (null == supportedCapabilities) {
-                supportedCapabilities = new LinkedHashSet<>(4);
-            } else {
-                supportedCapabilities = new LinkedHashSet<>(supportedCapabilities);
-            }
-            supportedCapabilities.add(CAPABILITY_COUNT_TOTAL);
-        }
-        if (optCheckCapability(fsFolder.getId(), FileStorageCapability.CASE_INSENSITIVE, folderAccess)) {
-            if (null == supportedCapabilities) {
-                supportedCapabilities = new LinkedHashSet<>(4);
-            } else {
-                supportedCapabilities = new LinkedHashSet<>(supportedCapabilities);
-            }
-            supportedCapabilities.add(CAPABILITY_CASE_INSENSITIVE);
-        }
-        if (optCheckCapability(fsFolder.getId(), FileStorageCapability.AUTO_RENAME_FOLDERS, folderAccess)) {
-            if (null == supportedCapabilities) {
-                supportedCapabilities = new LinkedHashSet<>(4);
-            } else {
-                supportedCapabilities = new LinkedHashSet<>(supportedCapabilities);
-            }
-            supportedCapabilities.add(CAPABILITY_AUTO_RENAME_FOLDERS);
-        }
-        if (optCheckCapability(fsFolder.getId(), FileStorageCapability.RESTORE, folderAccess)) {
-            if (null == supportedCapabilities) {
-                supportedCapabilities = new LinkedHashSet<>(4);
-            } else {
-                supportedCapabilities = new LinkedHashSet<>(supportedCapabilities);
-            }
-            supportedCapabilities.add(CAPABILITY_RESTORE);
-        }
-        this.supportedCapabilities = supportedCapabilities;
+        this.supportedCapabilities = getSupportedCapabilities(fsFolder, folderAccess);
         lastModified = fsFolder.getLastModifiedDate();
         creationDate = fsFolder.getCreationDate();
         createdBy = fsFolder.getCreatedBy();
         modifiedBy = fsFolder.getModifiedBy();
+    }
+
+    private Set<String> getSupportedCapabilities(FileStorageFolder fsFolder, IDBasedFolderAccess folderAccess) {
+        Set<String> supportedCapabilities = fsFolder.getCapabilities();
+        if (optCheckCapability(fsFolder.getId(), FileStorageCapability.ZIPPABLE_FOLDER, folderAccess)) {
+            supportedCapabilities = initSupportedCapabilities(supportedCapabilities);
+            supportedCapabilities.add(CAPABILITY_ZIPPABLE_FOLDER);
+        }
+        if (optCheckCapability(fsFolder.getId(), FileStorageCapability.FILE_VERSIONS, folderAccess)) {
+            supportedCapabilities = initSupportedCapabilities(supportedCapabilities);
+            supportedCapabilities.add(CAPABILITY_FILE_VERSIONS);
+        }
+        if (optCheckCapability(fsFolder.getId(), FileStorageCapability.EXTENDED_METADATA, folderAccess)) {
+            supportedCapabilities = initSupportedCapabilities(supportedCapabilities);
+            supportedCapabilities.add(CAPABILITY_EXTENDED_METADATA);
+        }
+        if (optCheckCapability(fsFolder.getId(), FileStorageCapability.LOCKS, folderAccess)) {
+            supportedCapabilities = initSupportedCapabilities(supportedCapabilities);
+            supportedCapabilities.add(CAPABILITY_LOCKS);
+        }
+        if (optCheckCapability(fsFolder.getId(), FileStorageCapability.COUNT_TOTAL, folderAccess)) {
+            supportedCapabilities = initSupportedCapabilities(supportedCapabilities);
+            supportedCapabilities.add(CAPABILITY_COUNT_TOTAL);
+        }
+        if (optCheckCapability(fsFolder.getId(), FileStorageCapability.CASE_INSENSITIVE, folderAccess)) {
+            supportedCapabilities = initSupportedCapabilities(supportedCapabilities);
+            supportedCapabilities.add(CAPABILITY_CASE_INSENSITIVE);
+        }
+        if (optCheckCapability(fsFolder.getId(), FileStorageCapability.AUTO_RENAME_FOLDERS, folderAccess)) {
+            supportedCapabilities = initSupportedCapabilities(supportedCapabilities);
+            supportedCapabilities.add(CAPABILITY_AUTO_RENAME_FOLDERS);
+        }
+        if (optCheckCapability(fsFolder.getId(), FileStorageCapability.RESTORE, folderAccess)) {
+            supportedCapabilities = initSupportedCapabilities(supportedCapabilities);
+            supportedCapabilities.add(CAPABILITY_RESTORE);
+        }
+        return supportedCapabilities;
+    }
+
+    private void initPermissions(FileStorageFolder fsFolder) {
+        final List<FileStoragePermission> fsPermissions = fsFolder.getPermissions();
+        final int size = fsPermissions.size();
+        permissions = new Permission[size];
+        for (int i = 0; i < size; i++) {
+            FileStoragePermissionImpl permissionImpl = new FileStoragePermissionImpl(fsPermissions.get(i));
+            if (permissionImpl.isAdmin() && !permissionImpl.isGroup()) {
+                createdBy = permissionImpl.getEntity();
+            }
+            permissions[i] = permissionImpl;
+        }
+    }
+
+    private Set<String> initSupportedCapabilities(Set<String> supportedCapabilities) {
+        if (null == supportedCapabilities) {
+            supportedCapabilities = new LinkedHashSet<>(4);
+        } else {
+            supportedCapabilities = new LinkedHashSet<>(supportedCapabilities);
+        }
+        return supportedCapabilities;
     }
 
     private static boolean optCheckCapability(String folderId, FileStorageCapability capability, IDBasedFolderAccess folderAccess) {
