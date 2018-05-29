@@ -524,6 +524,12 @@ public final class NewAction extends AbstractMailAction implements EnqueuableAJA
                 LOG.warn("Contact collector could not be triggered.", e);
             }
 
+            try {
+                triggerUseCountIncrementForGAB(session, sentMessage.getAllRecipients());
+            } catch (OXException e) {
+                LOG.warn("Use count could not be incremented.", e);
+            }
+
             if (msgIdentifier == null) {
                 if (userSettingMail.isNoCopyIntoStandardSentFolder()) {
                     final AJAXRequestResult result = resultFor(null, false);

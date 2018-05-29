@@ -162,7 +162,7 @@ public class OIDCTools {
      * @throws OXException If the path can not be parsed
      */
     public static URI getURIFromPath(String path) throws OXException{
-        LOG.trace("getURIFromPath("+ path +")");
+        LOG.trace("getURIFromPath({})", path);
         try {
             return new URI(path);
         } catch (URISyntaxException e) {
@@ -381,7 +381,7 @@ public class OIDCTools {
         Session session = null;
         SessiondService sessiondService = Services.getService(SessiondService.class);
         Collection<String> sessions = sessiondService.findSessions(SessionFilter.create("(" + OIDCTools.SESSION_COOKIE + "=" + oidcAtologinCookie.getValue() + ")"));
-        if (sessions.size() > 0) {
+        if (!sessions.isEmpty()) {
             session = sessiondService.getSession(sessions.iterator().next());
         }
         

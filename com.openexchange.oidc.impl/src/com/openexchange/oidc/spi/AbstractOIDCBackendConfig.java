@@ -69,7 +69,7 @@ import com.openexchange.oidc.OIDCProperty;
  */
 public abstract class AbstractOIDCBackendConfig implements OIDCBackendConfig {
 
-    private final static Logger LOG = LoggerFactory.getLogger(AbstractOIDCBackendConfig.class);
+    private static final Logger LOG = LoggerFactory.getLogger(AbstractOIDCBackendConfig.class);
 
     /** The reference to tracked <code>LeanConfigurationService</code> */
     protected final LeanConfigurationService leanConfigurationService;
@@ -185,10 +185,11 @@ public abstract class AbstractOIDCBackendConfig implements OIDCBackendConfig {
     @Override
     public boolean isAutologinEnabled() {
         boolean result = false;
-        AutologinMode autologinMode = OIDCBackendConfig.AutologinMode.get(this.autologinCookieMode());
+        String autologinCookieMode = this.autologinCookieMode();
+        AutologinMode autologinMode = OIDCBackendConfig.AutologinMode.get(autologinCookieMode);
 
         if (autologinMode == null) {
-            LOG.debug("Unknown value for parameter com.openexchange.oidc.autologinCookieMode. Value is: {}", this.autologinCookieMode());
+            LOG.debug("Unknown value for parameter com.openexchange.oidc.autologinCookieMode. Value is: {}", autologinCookieMode);
         } else {
             result = (autologinMode == AutologinMode.OX_DIRECT || autologinMode == AutologinMode.SSO_REDIRECT);
         }

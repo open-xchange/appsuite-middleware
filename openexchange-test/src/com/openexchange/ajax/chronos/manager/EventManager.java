@@ -285,6 +285,7 @@ public class EventManager extends AbstractManager {
             throw new ChronosApiException(eventsResponse.getCode(), eventsResponse.getError());
         }
         checkResponse(eventsResponse.getError(), eventsResponse.getError(), eventsResponse.getCategories(), eventsResponse.getData());
+        lastTimeStamp = eventsResponse.getTimestamp();
         return eventsResponse.getData();
     }
 
@@ -301,7 +302,7 @@ public class EventManager extends AbstractManager {
      * @return The {@link CalendarResult}
      * @throws ApiException if an API error is occurred
      */
-    public CalendarResult shiftEvent(String eventId, String recurrence, EventData event, Calendar startTime, TimeUnit unit, int value, long timestamp) throws ApiException {
+    public CalendarResult shiftEvent(String eventId, String recurrence, EventData event, Calendar startTime, TimeUnit unit, int value, Long timestamp) throws ApiException {
         Calendar newStartTime = Calendar.getInstance(startTime.getTimeZone());
         newStartTime.setTimeInMillis(startTime.getTimeInMillis() + unit.toMillis(value));
         event.setStartDate(DateTimeUtil.getDateTime(newStartTime));
@@ -310,7 +311,7 @@ public class EventManager extends AbstractManager {
         endTime.setTimeInMillis(startTime.getTimeInMillis());
         endTime.add(Calendar.HOUR, 1);
         event.setEndDate(DateTimeUtil.getDateTime(endTime));
-        ChronosCalendarResultResponse updateEvent = userApi.getChronosApi().updateEvent(userApi.getSession(), getFolder(event), eventId, event, timestamp, recurrence, null, false, false, false, null, null, EXPAND_SERIES);
+        ChronosCalendarResultResponse updateEvent = userApi.getChronosApi().updateEvent(userApi.getSession(), getFolder(event), eventId, event, timestamp == null ? lastTimeStamp : timestamp, recurrence, null, false, false, false, null, null, EXPAND_SERIES);
         assertNull(updateEvent.getErrorDesc(), updateEvent.getError());
         assertNotNull("Missing timestamp", updateEvent.getTimestamp());
         lastTimeStamp = updateEvent.getTimestamp();

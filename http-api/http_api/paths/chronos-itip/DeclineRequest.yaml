@@ -1,11 +1,11 @@
-/chronos/itip?action=analyze:
+/chronos/itip?action=decline:
   put:
-    operationId: analyze
+    operationId: decline
     tags:
       - Chronos
     consumes:
       - application/json
-    summary: Analyzes an itip message.
+    summary: Declines an itip invitation.
     parameters:
       - $ref: "#/parameters/gblQueryParamSession"
       - in: query
@@ -21,6 +21,6 @@
           $ref: "#/definitions/ConversionDataSource"
     responses:
       200:
-        description: An analyze response describing what the ical intends to do and handling suggestions.
+        description: An array of Events that were newly created or changed.
         schema:
-          $ref: "#/definitions/AnalyzeResponse"
+          $ref: "#/definitions/EventData"

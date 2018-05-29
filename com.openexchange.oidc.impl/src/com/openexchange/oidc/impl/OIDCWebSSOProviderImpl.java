@@ -210,7 +210,7 @@ public class OIDCWebSSOProviderImpl implements OIDCWebSSOProvider {
         return null;
     }
 
-    private String getRedirectLocationForSession(HttpServletRequest request, Session session) throws OXException {
+    private String getRedirectLocationForSession(HttpServletRequest request, Session session) {
         LOG.trace("getRedirectLocationForSession(HttpServletRequest request: {}, Session session: {})", request.getRequestURI(), session.getSessionID());
         return OIDCTools.buildFrontendRedirectLocation(session, OIDCTools.getUIWebPath(this.loginConfiguration, this.backend.getBackendConfig()), request.getParameter(OIDCTools.PARAM_DEEP_LINK));
     }

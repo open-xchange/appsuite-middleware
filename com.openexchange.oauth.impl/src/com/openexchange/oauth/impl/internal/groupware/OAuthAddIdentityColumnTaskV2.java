@@ -57,19 +57,20 @@ import com.openexchange.tools.update.Column;
 import com.openexchange.tools.update.Tools;
 
 /**
- * {@link OAuthAddIdentityColumnTask}
+ * {@link OAuthAddIdentityColumnTaskV2}
+ * Adds the 'identity' column and an index for the identity (cid,identity(191))
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @since 7.10.0
  */
-public class OAuthAddIdentityColumnTask extends AbstractOAuthUpdateTask {
+public class OAuthAddIdentityColumnTaskV2 extends AbstractOAuthUpdateTask {
 
-    private static final String IDENTITY_COLUMN_NAME = "identity";
+    private static final String IDENTITY_NAME = "`identity`";
 
     /**
-     * Initialises a new {@link OAuthAddIdentityColumnTask}.
+     * Initialises a new {@link OAuthAddIdentityColumnTaskV2}.
      */
-    public OAuthAddIdentityColumnTask() {
+    public OAuthAddIdentityColumnTaskV2() {
         super();
     }
 
@@ -80,11 +81,11 @@ public class OAuthAddIdentityColumnTask extends AbstractOAuthUpdateTask {
      */
     @Override
     void innerPerform(Connection connection, PerformParameters performParameters) throws OXException, SQLException {
-        if (Tools.columnExists(connection, CreateOAuthAccountTable.TABLE_NAME, IDENTITY_COLUMN_NAME)) {
+        if (Tools.columnExists(connection, CreateOAuthAccountTable.TABLE_NAME, IDENTITY_NAME)) {
             return;
         }
-        Tools.addColumns(connection, CreateOAuthAccountTable.TABLE_NAME, new Column(IDENTITY_COLUMN_NAME, "varchar(767)"));
-        Tools.createIndex(connection, CreateOAuthAccountTable.TABLE_NAME, new String[] { IDENTITY_COLUMN_NAME });
+        Tools.addColumns(connection, CreateOAuthAccountTable.TABLE_NAME, new Column(IDENTITY_NAME, "varchar(767)"));
+        Tools.createIndex(connection, CreateOAuthAccountTable.TABLE_NAME, IDENTITY_NAME, new String[] { "`cid`", "`identity`(191)" }, false);
     }
 
     /*

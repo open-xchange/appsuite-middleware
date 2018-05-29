@@ -99,6 +99,10 @@ import com.openexchange.session.Session;
 public class OIDCBackendRegistry extends ServiceTracker<OIDCBackend, OIDCBackend>{
 
     private static final Logger LOG = LoggerFactory.getLogger(OIDCBackendRegistry.class);
+    
+    private static final String ERROR_WHILE_REMOVING_PATH_FOR_OIDC_BACKEND = "Error while removing path for OIDC Backend";
+
+    private static final String OIDC_PATH = "oidcPath";
 
     private final ServiceLookup services;
     private final ConcurrentList<OIDCBackend> backends;
@@ -123,9 +127,9 @@ public class OIDCBackendRegistry extends ServiceTracker<OIDCBackend, OIDCBackend
 
         final Stack<String> servlets = new Stack<>();
         HttpService httpService = this.services.getService(HttpService.class);
-        final Stack<ServiceRegistration<?>> serviceRegistrations = new Stack<ServiceRegistration<?>>();
+        final Stack<ServiceRegistration<?>> serviceRegistrations = new Stack<>();
 
-        if (false == backends.addIfAbsent(oidcBackend)) {
+        if (!backends.addIfAbsent(oidcBackend)) {
             // Such a back-end already exists. Release obtained service and return
             this.context.ungetService(reference);
             return null;
@@ -141,7 +145,7 @@ public class OIDCBackendRegistry extends ServiceTracker<OIDCBackend, OIDCBackend
                 throw OIDCExceptionCode.MISSING_BACKEND_CONFIGURATION.create(Strings.isEmpty(path) ? "No path available" : path);
             }
 
-            if (false == Strings.isEmpty(path)) {
+            if (!Strings.isEmpty(path)) {
                 OIDCTools.validatePath(path);
             }
             serviceRegistrations.push(context.registerService(ComputedServerConfigValueService.class, getOidcPathComputedValue(oidcBackend),null));
@@ -195,7 +199,7 @@ public class OIDCBackendRegistry extends ServiceTracker<OIDCBackend, OIDCBackend
             @Override
             public void addValue(Map<String, Object> serverConfig, String hostName, int userID, int contextID, Session optSession) throws OXException {
 
-                if (serverConfig.containsKey("oidcPath")) {
+                if (serverConfig.containsKey(OIDC_PATH)) {
                     return;
                 }
 
@@ -207,13 +211,13 @@ public class OIDCBackendRegistry extends ServiceTracker<OIDCBackend, OIDCBackend
 
                 List<String> hosts = oidcBackend.getBackendConfig().getHosts();
                 if (hosts.contains("all")) {
-                    serverConfig.put("oidcPath", oidcPath);
+                    serverConfig.put(OIDC_PATH, oidcPath);
                     return;
                 }
 
                 for (String hostIdentifer: hosts) {
                     if (!Strings.isEmpty(hostIdentifer) && hostIdentifer.equalsIgnoreCase(hostName)) {
-                        serverConfig.put("oidcPath", oidcPath);
+                        serverConfig.put(OIDC_PATH, oidcPath);
                         return;
                     }
                 }
@@ -259,7 +263,7 @@ public class OIDCBackendRegistry extends ServiceTracker<OIDCBackend, OIDCBackend
                     }
                 }
             } catch (Exception e) {
-                LOG.error("Error while removing path for OIDC Backend", e);
+                LOG.error(ERROR_WHILE_REMOVING_PATH_FOR_OIDC_BACKEND, e);
             }
             Stack<ServiceRegistration<?>> registrations = backendServiceRegistrations.remove(oidcBackend);
             try {
@@ -269,7 +273,7 @@ public class OIDCBackendRegistry extends ServiceTracker<OIDCBackend, OIDCBackend
                     }
                 }
             } catch (Exception e) {
-                LOG.error("Error while removing path for OIDC Backend", e);
+                LOG.error(ERROR_WHILE_REMOVING_PATH_FOR_OIDC_BACKEND, e);
             }
         }
     }
@@ -277,7 +281,7 @@ public class OIDCBackendRegistry extends ServiceTracker<OIDCBackend, OIDCBackend
     @Override
     public void removedService(ServiceReference<OIDCBackend> reference, OIDCBackend oidcBackend) {
         boolean removed = backends.remove(oidcBackend);
-        if (false == removed) {
+        if (!removed) {
             // Was not contained
             return;
         }
@@ -291,7 +295,7 @@ public class OIDCBackendRegistry extends ServiceTracker<OIDCBackend, OIDCBackend
                 }
             }
         } catch (Exception e) {
-            LOG.error("Error while removing path for OIDC Backend", e);
+            LOG.error(ERROR_WHILE_REMOVING_PATH_FOR_OIDC_BACKEND, e);
         }
         Stack<ServiceRegistration<?>> registrations = backendServiceRegistrations.remove(oidcBackend);
         try {
@@ -301,7 +305,7 @@ public class OIDCBackendRegistry extends ServiceTracker<OIDCBackend, OIDCBackend
                 }
             }
         } catch (Exception e) {
-            LOG.error("Error while removing path for OIDC Backend", e);
+            LOG.error(ERROR_WHILE_REMOVING_PATH_FOR_OIDC_BACKEND, e);
         }
         context.ungetService(reference);
     }

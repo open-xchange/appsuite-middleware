@@ -116,9 +116,6 @@ public class OIDCLoginRequestHandler implements LoginRequestHandler {
     private boolean respondWithJson(HttpServletRequest request) {
         LOG.trace("respondWithJson (HttpServletRequest request: {})", request.getRequestURI());
         String acceptHeader = request.getHeader("Accept");
-        if (null != acceptHeader && acceptHeader.toLowerCase().equals("application/json")) {
-            return true;
-        }
-        return false;
+        return (null != acceptHeader && acceptHeader.equalsIgnoreCase("application/json"));
     }
 }
