@@ -111,6 +111,8 @@ import com.openexchange.version.Version;
  */
 public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMessageStorage> implements Serializable, IMailStorage {
 
+    private static final String LOOKUP_MAIL_ACCESS_CACHE_PROPERTY = "com.openexchange.mail.lookupMailAccessCache";
+
     /**
      * Serial version UID
      */
@@ -120,7 +122,7 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
 
     // --------------------------------------------------------------------------------------------------------------------------------- //
 
-    private static final ConcurrentMap<Key, AcquiredLatch> SYNCHRONIZER = new ConcurrentHashMap<Key, AcquiredLatch>(256);
+    private static final ConcurrentMap<Key, AcquiredLatch> SYNCHRONIZER = new ConcurrentHashMap<>(256);
 
     private static AcquiredLatch acquireFor(Key key) {
         AcquiredLatch latch = SYNCHRONIZER.get(key);
@@ -166,6 +168,11 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
 
     static final class FastThrowable extends Throwable {
 
+        /**
+         * serialVersionUID
+         */
+        private static final long serialVersionUID = -4289366816690399774L;
+
         FastThrowable() {
             super("tracked mail connection usage");
         }
@@ -194,7 +201,7 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
     protected final int accountId;
 
     /** A collection of wanrings */
-    protected final Collection<OXException> warnings;
+    protected final transient Collection<OXException> warnings;
 
     /** Whether this access is cacheable */
     protected volatile boolean cacheable;
@@ -209,7 +216,7 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
     protected volatile boolean waiting;
 
     /** The associated mail provider */
-    protected MailProvider provider;
+    protected transient MailProvider provider;
 
     private volatile boolean tracked;
 
@@ -239,7 +246,7 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
      */
     protected MailAccess(final Session session, final int accountId) {
         super();
-        warnings = new ArrayList<OXException>(2);
+        warnings = new ArrayList<>(2);
         this.session = session;
         this.accountId = accountId;
         cacheable = true;
@@ -423,7 +430,7 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
     }
 
     private static MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> doGetInstance(Session session, int accountId) throws OXException {
-        Object tmp = session.getParameter("com.openexchange.mail.lookupMailAccessCache");
+        Object tmp = session.getParameter(LOOKUP_MAIL_ACCESS_CACHE_PROPERTY);
         if (null == tmp || toBool(tmp)) {
             // Look-up cached, already connected instance
             final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = getMailAccessCache().removeMailAccess(session, accountId);
@@ -453,10 +460,10 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
      * @throws OXException If a new, un-cached <tt>MailAccess</tt> instance cannot be returned
      */
     public static final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> getNewInstance(final Session session, final int accountId) throws OXException {
-        final String name = "com.openexchange.mail.lookupMailAccessCache";
+        final String name = LOOKUP_MAIL_ACCESS_CACHE_PROPERTY;
         final boolean setParam;
         {
-            final Object tmp = session.getParameter("com.openexchange.mail.lookupMailAccessCache");
+            final Object tmp = session.getParameter(LOOKUP_MAIL_ACCESS_CACHE_PROPERTY);
             setParam = (null == tmp || toBool(tmp));
         }
         if (setParam) {
@@ -804,7 +811,7 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
         if ((MailAccount.DEFAULT_ID == accountId) && (session instanceof PutIfAbsent)) {
             ((PutIfAbsent) session).setParameterIfAbsent(PARAM_MAIL_ACCESS, this);
         }
-        if (isTrackable() && false == tracked) {
+        if (isTrackable() && !tracked) {
             MailAccessWatcher.addMailAccess(this);
             tracked = true;
         }
@@ -1000,7 +1007,6 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
                 LOG.error("Resources could not be properly released. Dropping mail connection for safety reasons", e);
                 put = false;
             }
-            // resetFields();
             if (put && isCacheable()) {
                 try {
                     // Cache connection if desired/possible anymore
@@ -1142,8 +1148,9 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
         /*
          * Start at index 3
          */
+        String at = "    at ";
         for (int i = 3; i < trace.length; i++) {
-            sBuilder.append("    at ").append(trace[i]).append(lineSeparator);
+            sBuilder.append(at).append(trace[i]).append(lineSeparator);
         }
         if ((null != usingThread) && usingThread.isAlive()) {
             sBuilder.append("Current Using Thread: ").append(usingThread.getName()).append(lineSeparator);
@@ -1152,9 +1159,9 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
              * MailAccessWatcher.
              */
             StackTraceElement[] trace = usingThread.getStackTrace();
-            sBuilder.append("    at ").append(trace[0]);
+            sBuilder.append(at).append(trace[0]);
             for (int i = 1; i < trace.length; i++) {
-                sBuilder.append(lineSeparator).append("    at ").append(trace[i]);
+                sBuilder.append(lineSeparator).append(at).append(trace[i]);
             }
         }
         return sBuilder.toString();
@@ -1327,11 +1334,8 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
         } else {
             boolean wasWaiting = this.waiting;
             this.waiting = waiting;
-            if (wasWaiting) {
-                // Switched from waiting to non-waiting mode
-                if (tracked) {
-                    MailAccessWatcher.touchMailAccess(this);
-                }
+            if (wasWaiting && tracked) {
+                MailAccessWatcher.touchMailAccess(this);
             }
         }
     }
