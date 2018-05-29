@@ -72,7 +72,7 @@ public final class UpdateTaskForceCLT extends AbstractUpdateTasksCLT<Void> {
 
     private String schemaName;
     private String className;
-    private int contextId;
+    private int contextId = -1;
 
     /**
      * Initializes a new {@link UpdateTaskForceCLT}.
