@@ -49,8 +49,6 @@
 
 package com.openexchange.groupware.update.tools.console;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
@@ -59,7 +57,6 @@ import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import com.openexchange.groupware.update.UpdateTaskService;
-import com.openexchange.tools.console.TableWriter;
 import com.openexchange.tools.console.TableWriter.ColumnFormat;
 import com.openexchange.tools.console.TableWriter.ColumnFormat.Align;
 
@@ -79,6 +76,10 @@ public class ListExecutedTasksCLT extends AbstractUpdateTasksCLT<Void> {
     public static void main(String[] args) {
         new ListExecutedTasksCLT().execute(args);
     }
+
+    private static final ColumnFormat[] FORMATS = { new ColumnFormat(Align.LEFT), new ColumnFormat(Align.LEFT), new ColumnFormat(Align.LEFT) };
+
+    private static final String[] COLUMNS = { "taskName", "successful", "lastModified" };
 
     private String schemaName;
 
@@ -110,7 +111,21 @@ public class ListExecutedTasksCLT extends AbstractUpdateTasksCLT<Void> {
     protected Void invoke(Options options, CommandLine cmd, String optRmiHostName) throws Exception {
         UpdateTaskService updateTaskService = getRmiStub(UpdateTaskService.RMI_NAME);
         List<Map<String, Object>> executedTasksList = updateTaskService.getExecutedTasksList(schemaName);
-        writeTasks(executedTasksList);
+        writeCompositeList(executedTasksList, COLUMNS, FORMATS, new Comparator<List<Object>>() {
+
+            @Override
+            public int compare(List<Object> o1, List<Object> o2) {
+                Object object1 = o1.get(2);
+                Object object2 = o2.get(2);
+                if (null == object1) {
+                    return null == object2 ? 0 : -1;
+                }
+                if (null == object2) {
+                    return 1;
+                }
+                return ((Date) object1).compareTo((Date) object2);
+            }
+        });
         return null;
     }
 
@@ -127,52 +142,5 @@ public class ListExecutedTasksCLT extends AbstractUpdateTasksCLT<Void> {
             System.exit(1);
         }
         schemaName = cmd.getOptionValue('n');
-    }
-
-    ///////////////////////////////// HELPERS ///////////////////////////////////
-
-    private static final ColumnFormat[] FORMATS = { new ColumnFormat(Align.LEFT), new ColumnFormat(Align.LEFT), new ColumnFormat(Align.LEFT) };
-
-    private static final String[] COLUMNS = { "taskName", "successful", "lastModified" };
-
-    /**
-     * Write tasks to console
-     * 
-     * @param taskList The task list
-     */
-    private static void writeTasks(List<Map<String, Object>> taskList) {
-        List<List<Object>> data = new ArrayList<List<Object>>();
-        List<Object> valuesList = new ArrayList<Object>(COLUMNS.length);
-        for (String column : COLUMNS) {
-            valuesList.add(column);
-        }
-        final List<Object> hr = valuesList;
-        for (Map<String, Object> executedTask : taskList) {
-            valuesList = new ArrayList<Object>(COLUMNS.length);
-            for (String column : COLUMNS) {
-                valuesList.add(executedTask.get(column));
-            }
-            data.add(valuesList);
-        }
-        valuesList = null;
-        // Sort rows
-        Collections.sort(data, new Comparator<List<Object>>() {
-
-            @Override
-            public int compare(final List<Object> o1, final List<Object> o2) {
-                Object object1 = o1.get(2);
-                Object object2 = o2.get(2);
-                if (null == object1) {
-                    return null == object2 ? 0 : -1;
-                }
-                if (null == object2) {
-                    return 1;
-                }
-                return ((Date) object1).compareTo((Date) object2);
-            }
-        });
-        // Add header row
-        data.add(0, hr);
-        new TableWriter(System.out, FORMATS, data).write();
     }
 }

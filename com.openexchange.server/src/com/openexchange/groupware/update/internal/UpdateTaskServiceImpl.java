@@ -108,7 +108,7 @@ public class UpdateTaskServiceImpl implements UpdateTaskService {
      * @see com.openexchange.groupware.update.UpdateTaskService#runUpdate(int)
      */
     @Override
-    public List<Map<String, String>> runUpdate(int contextId) throws RemoteException {
+    public List<Map<String, Object>> runUpdate(int contextId) throws RemoteException {
         try {
             UpdateProcess updateProcess = new UpdateProcess(contextId);
             updateProcess.run();
@@ -125,7 +125,7 @@ public class UpdateTaskServiceImpl implements UpdateTaskService {
      * @see com.openexchange.groupware.update.UpdateTaskService#runUpdate(java.lang.String)
      */
     @Override
-    public List<Map<String, String>> runUpdate(String schemaName) throws RemoteException {
+    public List<Map<String, Object>> runUpdate(String schemaName) throws RemoteException {
         try {
             SchemaInfo schema = UpdateTaskToolkit.getInfoBySchemaName(schemaName);
             UpdateProcess updateProcess = new UpdateProcess(schema.getPoolId(), schema.getSchema(), true, false);
@@ -354,7 +354,7 @@ public class UpdateTaskServiceImpl implements UpdateTaskService {
      * @param updateProcess the {@link UpdateProcess}
      * @return the failures
      */
-    private List<Map<String, String>> getFailures(UpdateProcess updateProcess) {
+    private List<Map<String, Object>> getFailures(UpdateProcess updateProcess) {
         // Return possible failures
         Queue<TaskInfo> failures = updateProcess.getFailures();
         if (failures == null) {
@@ -364,9 +364,9 @@ public class UpdateTaskServiceImpl implements UpdateTaskService {
             return Collections.emptyList();
         }
 
-        List<Map<String, String>> failuresList = new ArrayList<>(failures.size());
+        List<Map<String, Object>> failuresList = new ArrayList<>(failures.size());
         for (TaskInfo taskInfo : failures) {
-            Map<String, String> failuresMap = new HashMap<>();
+            Map<String, Object> failuresMap = new HashMap<>();
             failuresMap.put("name", taskInfo.getTaskName());
             failuresMap.put("class", taskInfo.getClass().getName());
             failuresMap.put("schema", taskInfo.getSchema());

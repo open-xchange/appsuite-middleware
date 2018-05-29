@@ -50,9 +50,16 @@
 package com.openexchange.groupware.update.tools.console;
 
 import java.rmi.RemoteException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
 import org.apache.commons.cli.CommandLine;
 import com.openexchange.auth.rmi.RemoteAuthenticator;
 import com.openexchange.cli.AbstractRmiCLI;
+import com.openexchange.tools.console.TableWriter;
+import com.openexchange.tools.console.TableWriter.ColumnFormat;
 
 /**
  * {@link AbstractUpdateTasksCLT} - An abstraction for all the Update Tasks related command line tools
@@ -120,5 +127,48 @@ abstract class AbstractUpdateTasksCLT<R> extends AbstractRmiCLI<R> {
     @Override
     protected String getFooter() {
         return footer;
+    }
+
+    /**
+     * Writes the specified composite list to the console
+     * 
+     * @param compositeList The composite list to write
+     * @param columns The column names
+     * @param formats The formatting of the columns
+     */
+    void writeCompositeList(List<Map<String, Object>> compositeList, String[] columns, ColumnFormat[] formats) {
+        writeCompositeList(compositeList, columns, formats, null);
+    }
+
+    /**
+     * Writes the specified composite list to the console
+     * 
+     * @param compositeList The composite list to write
+     * @param columns The column names
+     * @param formats The formatting of the columns
+     * @param comparator The optional sorting {@link Comparator}. If <code>null</code> the entries will not be sorted
+     */
+    void writeCompositeList(List<Map<String, Object>> compositeList, String[] columns, ColumnFormat[] formats, Comparator<List<Object>> sortingComparator) {
+        List<List<Object>> data = new ArrayList<List<Object>>();
+        List<Object> valuesList = new ArrayList<Object>(columns.length);
+        for (String column : columns) {
+            valuesList.add(column);
+        }
+        final List<Object> hr = valuesList;
+        for (Map<String, Object> executedTask : compositeList) {
+            valuesList = new ArrayList<Object>(columns.length);
+            for (String column : columns) {
+                valuesList.add(executedTask.get(column));
+            }
+            data.add(valuesList);
+        }
+        valuesList = null;
+        if (sortingComparator != null) {
+            // Sort rows
+            Collections.sort(data, sortingComparator);
+        }
+        // Add header row
+        data.add(0, hr);
+        new TableWriter(System.out, formats, data).write();
     }
 }

@@ -49,13 +49,11 @@
 
 package com.openexchange.groupware.update.tools.console;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Options;
 import com.openexchange.groupware.update.UpdateTaskService;
-import com.openexchange.tools.console.TableWriter;
 import com.openexchange.tools.console.TableWriter.ColumnFormat;
 import com.openexchange.tools.console.TableWriter.ColumnFormat.Align;
 
@@ -75,6 +73,10 @@ public final class UpdateTaskRunUpdateCLT extends AbstractUpdateTasksCLT<Void> {
     public static void main(String[] args) {
         new UpdateTaskRunUpdateCLT().execute(args);
     }
+
+    private static final ColumnFormat[] FORMATS = { new ColumnFormat(Align.LEFT), new ColumnFormat(Align.LEFT), new ColumnFormat(Align.LEFT) };
+
+    private static final String[] COLUMNS = { "taskName", "class", "schema" };
 
     private String schemaName;
     private int contextId;
@@ -106,12 +108,12 @@ public final class UpdateTaskRunUpdateCLT extends AbstractUpdateTasksCLT<Void> {
     protected Void invoke(Options options, CommandLine cmd, String optRmiHostName) throws Exception {
         UpdateTaskService updateTaskService = getRmiStub(UpdateTaskService.RMI_NAME);
 
-        List<Map<String, String>> failures = schemaName == null ? updateTaskService.runUpdate(contextId) : updateTaskService.runUpdate(schemaName);
+        List<Map<String, Object>> failures = schemaName == null ? updateTaskService.runUpdate(contextId) : updateTaskService.runUpdate(schemaName);
         if (failures == null || failures.isEmpty()) {
             return null;
         }
         System.out.println("The following update task(s) failed:");
-        writeFailures(failures);
+        writeCompositeList(failures, COLUMNS, FORMATS);
         return null;
     }
 
@@ -139,34 +141,5 @@ public final class UpdateTaskRunUpdateCLT extends AbstractUpdateTasksCLT<Void> {
                 System.exit(1);
             }
         }
-    }
-
-    private static final ColumnFormat[] FORMATS = { new ColumnFormat(Align.LEFT), new ColumnFormat(Align.LEFT), new ColumnFormat(Align.LEFT) };
-
-    private static final String[] COLUMNS = { "taskName", "class", "schema" };
-
-    /**
-     * Write failures to the console
-     * 
-     * @param failures The failures to write
-     */
-    private static void writeFailures(List<Map<String, String>> failures) {
-        List<List<Object>> data = new ArrayList<List<Object>>();
-        List<Object> valuesList = new ArrayList<Object>(COLUMNS.length);
-        for (String column : COLUMNS) {
-            valuesList.add(column);
-        }
-        final List<Object> hr = valuesList;
-        for (Map<String, String> executedTask : failures) {
-            valuesList = new ArrayList<Object>(COLUMNS.length);
-            for (String column : COLUMNS) {
-                valuesList.add(executedTask.get(column));
-            }
-            data.add(valuesList);
-        }
-        valuesList = null;
-        // Add header row
-        data.add(0, hr);
-        new TableWriter(System.out, FORMATS, data).write();
     }
 }
