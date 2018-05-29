@@ -182,7 +182,7 @@ public class Appointment2Event {
             case 4:
                 return "#F7C7E0"; //"pink"; // #e2b3e2 ~ #FFC0CB
             case 5:
-                return "FFE2E2"; // "red"; // #e7a9ab ~ #FF0000
+                return "#FFE2E2"; // "red"; // #e7a9ab ~ #FF0000
             case 6:
                 return "#FDE2B9"; // "orange"; // #ffb870 ~ FFA500
             case 7:
