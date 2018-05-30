@@ -74,11 +74,6 @@ public class OAuthAddIdentityColumnTaskV2 extends AbstractOAuthUpdateTask {
         super();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.oauth.impl.internal.groupware.AbstractOAuthUpdateTask#innerPerform(java.sql.Connection, com.openexchange.groupware.update.PerformParameters)
-     */
     @Override
     void innerPerform(Connection connection, PerformParameters performParameters) throws OXException, SQLException {
         if (!Tools.columnExists(connection, CreateOAuthAccountTable.TABLE_NAME, IDENTITY_NAME)) {
@@ -88,16 +83,16 @@ public class OAuthAddIdentityColumnTaskV2 extends AbstractOAuthUpdateTask {
         if (indexName != null) {
             Tools.dropIndex(connection, CreateOAuthAccountTable.TABLE_NAME, indexName);
         }
+        indexName = Tools.existsIndex(connection, CreateOAuthAccountTable.TABLE_NAME, new String[] { "identity" });
+        if (indexName != null) {
+            Tools.dropIndex(connection, CreateOAuthAccountTable.TABLE_NAME, indexName);
+        }
         Tools.createIndex(connection, CreateOAuthAccountTable.TABLE_NAME, IDENTITY_NAME, new String[] { "cid", "`identity`(191)" }, false);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.groupware.update.UpdateTaskV2#getDependencies()
-     */
     @Override
     public String[] getDependencies() {
         return new String[] { DropForeignKeyFromOAuthAccountTask.class.getName() };
     }
+
 }
