@@ -88,7 +88,7 @@ public class OAuthAddIdentityColumnTaskV2 extends AbstractOAuthUpdateTask {
         if (indexName != null) {
             Tools.dropIndex(connection, CreateOAuthAccountTable.TABLE_NAME, indexName);
         }
-        Tools.createIndex(connection, CreateOAuthAccountTable.TABLE_NAME, IDENTITY_NAME, new String[] { "cid", "identity(191)" }, false);
+        Tools.createIndex(connection, CreateOAuthAccountTable.TABLE_NAME, IDENTITY_NAME, new String[] { "cid", "`identity`(191)" }, false);
     }
 
     /*
