@@ -104,7 +104,7 @@ public class LocalReportService extends AbstractReportService {
 
     private static final Cache<String, Map<String, Report>> failedReportCache = CacheBuilder.newBuilder().concurrencyLevel(ReportProperties.getMaxThreadPoolSize()).expireAfterWrite(180, TimeUnit.MINUTES).<String, Map<String, Report>> build();
 
-    private static AtomicReference<ExecutorService> EXECUTOR_SERVICE_REF = new AtomicReference<ExecutorService>();
+    private static AtomicReference<ExecutorService> EXECUTOR_SERVICE_REF = new AtomicReference<>();
 
     private final AtomicInteger threadNumber = new AtomicInteger();
 
@@ -114,7 +114,7 @@ public class LocalReportService extends AbstractReportService {
      */
     @Override
     public Report getLastReport(String reportType) {
-        LOG.info("Get the latest report of type: " + reportType);
+        LOG.info("Get the latest report of type: {}", reportType);
         Map<String, Report> finishedReports = reportCache.asMap().get(REPORTS_KEY);
         if (finishedReports == null) {
             return null;
@@ -127,7 +127,7 @@ public class LocalReportService extends AbstractReportService {
      */
     @Override
     public Report[] getPendingReports(String reportType) {
-        LOG.info("Get all pending reports of type: " + reportType);
+        LOG.info("Get all pending reports of type: {}", reportType);
         Map<String, Report> pendingReports = reportCache.asMap().get(PENDING_REPORTS_PRE_KEY + reportType);
         if (pendingReports == null) {
             return null;
@@ -140,7 +140,7 @@ public class LocalReportService extends AbstractReportService {
      */
     @Override
     public void flushPending(String uuid, String reportType) {
-        LOG.info("Remove pending report of type: " + reportType + " and id: " + uuid);
+        LOG.info("Remove pending report of type: {} and id: {}" ,reportType, uuid);
         Map<String, Report> pendingReports = reportCache.asMap().get(PENDING_REPORTS_PRE_KEY + reportType);
         pendingReports.remove(uuid);
         List<Runnable> shutdownNow = EXECUTOR_SERVICE_REF.get().shutdownNow();
@@ -202,7 +202,7 @@ public class LocalReportService extends AbstractReportService {
 
     @Override
     public void abortGeneration(String uuid, String reportType, String reason) {
-        LOG.info("Abort report generation with the uuid: " + uuid + "and type: " + reportType + " with the given reason: " + reason);
+        LOG.info("Abort report generation with the uuid: {} and type: {} with the given reason: {}", uuid, reportType, reason);
         Map<String, Report> pendingReports = reportCache.asMap().get(PENDING_REPORTS_PRE_KEY + reportType);
         Report stoppedReport = pendingReports.get(uuid);
         if (stoppedReport == null) { // already removed from pending reports
@@ -228,7 +228,7 @@ public class LocalReportService extends AbstractReportService {
 
     @Override
     public Report getLastErrorReport(String reportType) {
-        LOG.info("Get the last error report of type: " + reportType);
+        LOG.info("Get the last error report of type: {}", reportType);
         Map<String, Report> errorReports = failedReportCache.asMap().get(REPORTS_ERROR_KEY + reportType);
         if (errorReports == null) {
             return null;
@@ -238,7 +238,7 @@ public class LocalReportService extends AbstractReportService {
 
     @Override
     public String run(ReportConfigs reportConfig) throws OXException {
-        LOG.info("Start creation of a report with the type: " + reportConfig.getType());
+        LOG.info("Start creation of a report with the type: {}", reportConfig.getType());
         Map<String, Report> pendingReports = reportCache.asMap().get(PENDING_REPORTS_PRE_KEY + reportConfig.getType());
         if (pendingReports == null) {
             pendingReports = new HashMap<>();
@@ -251,7 +251,7 @@ public class LocalReportService extends AbstractReportService {
 
         // No, we have to set up a  new report
         String uuid = UUIDs.getUnformattedString(UUID.randomUUID());
-        LOG.debug("Report uuid is: " + uuid);
+        LOG.debug("Report uuid is: {}", uuid);
 
         // Load all contextIds & Set up an AnalyzeContextBatch instance for every chunk of contextIds
         List<Integer> allContextIds = Services.getService(ContextService.class).getAllContextIds();
@@ -269,7 +269,7 @@ public class LocalReportService extends AbstractReportService {
 
     //--------------------Private helper methods--------------------
     private void setUpContextAnalyzer(final List<Integer> allContextIds, final Report report) throws OXException {
-        LOG.info("Setup context analyzer to prozess all contexts for report with uuid: " + report.getUUID());
+        LOG.info("Setup context analyzer to prozess all contexts for report with uuid: {}", report.getUUID());
         new Thread() {
 
             @Override
@@ -295,7 +295,7 @@ public class LocalReportService extends AbstractReportService {
                 int firstContextId = allContextIds.get(0).intValue();
 
                 currentSchemaIds = dataloaderMySQL.getAllContextIdsInSameSchema(firstContextId);
-                if (currentSchemaIds.size() == 0) {
+                if (currentSchemaIds.isEmpty()) {
                     currentSchemaIds.add(firstContextId);
                 }
                 contextsInSchemas.add(currentSchemaIds);
@@ -308,7 +308,7 @@ public class LocalReportService extends AbstractReportService {
     }
 
     private void processAllContexts(Report report, List<List<Integer>> contextsInSchemas) throws OXException {
-        LOG.info("Start processing all contexts of all schemas. schemas in total: " + contextsInSchemas.size() + " report uuid: " + report.getUUID());
+        LOG.info("Start processing all contexts of all schemas. schemas in total: {} report uuid: {}", contextsInSchemas.size(), report.getUUID());
         ExecutorService reportSchemaThreadPool = Executors.newFixedThreadPool(ReportProperties.getMaxThreadPoolSize(), new ThreadFactory() {
 
             @Override
@@ -338,7 +338,7 @@ public class LocalReportService extends AbstractReportService {
             try {
                 Future<Integer> finishedContexts = schemaProcessor.take();
                 Integer finishedAmount = finishedContexts.get();
-                LOG.debug("Context processing finished for another schema and report: " + report.getUUID() + " contexts processed: " + finishedAmount);
+                LOG.debug("Context processing finished for another schema and report: {} contexts processed: {}", report.getUUID(), finishedAmount);
                 report.setTaskState(report.getNumberOfTasks(), report.getNumberOfPendingTasks() - finishedAmount);
                 if (report.getNumberOfPendingTasks() <= 0) {
                     finishUpReport(report);

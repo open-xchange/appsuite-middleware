@@ -88,7 +88,7 @@ public final class MailRequest {
     static final String DATA = ResponseFields.DATA;
     static final String PARAMETER_FOLDERID = AJAXServlet.PARAMETER_FOLDERID;
 
-    private static enum CollectableOperation {
+    private enum CollectableOperation {
         MOVE, COPY, STORE_FLAG, COLOR_LABEL, GET;
     }
 
@@ -408,7 +408,7 @@ public final class MailRequest {
         return true;
     }
 
-    private static abstract class CollectObject {
+    private abstract static class CollectObject {
 
         public static CollectObject newInstance(final JSONObject jsonObject, final CollectableOperation op, final Mail mailServlet) throws OXException {
             switch (op) {

@@ -158,7 +158,7 @@ public class CapabilityHandler implements ReportUserHandler, ReportContextHandle
     }
 
     private ArrayList<String> createSortedListOfCapabilityIds(CapabilitySet userCapabilitySet) {
-        ArrayList<String> userCapabilityIds = new ArrayList<String>(userCapabilitySet.size());
+        ArrayList<String> userCapabilityIds = new ArrayList<>(userCapabilitySet.size());
 
         for (Capability capability : userCapabilitySet) {
             userCapabilityIds.add(capability.getId().toLowerCase());
@@ -191,11 +191,13 @@ public class CapabilityHandler implements ReportUserHandler, ReportContextHandle
             } else {
                 userReport.set(Report.MACDETAIL, Report.MAILADMIN, Boolean.FALSE);
             }
-            userReport.set(Report.MACDETAIL, Report.USER_LOGINS, getUserLoginsForPastYear(userReport.getContext().getContextId(), userReport.getUser().getId()));
+            HashMap<String, Long> userLogins = (HashMap<String, Long>) getUserLoginsForPastYear(userReport.getContext().getContextId(), userReport.getUser().getId());
+            
+            userReport.set(Report.MACDETAIL, Report.USER_LOGINS, userLogins);
         }
     }
 
-    public HashMap<String, Long> getUserLoginsForPastYear(int contextId, int userId) throws OXException {
+    public Map<String, Long> getUserLoginsForPastYear(int contextId, int userId) throws OXException {
         Calendar calender = Calendar.getInstance();
         Date endDate = calender.getTime();
         calender.add(Calendar.YEAR, -1);
@@ -289,7 +291,7 @@ public class CapabilityHandler implements ReportUserHandler, ReportContextHandle
             LinkedHashMap<Integer, ArrayList<Integer>> capSContextMap = (LinkedHashMap<Integer, ArrayList<Integer>>) report.getTenantMap().get("deployment").get(capSpec);
             // This capS are not available yet
             if (capSContextMap == null) {
-                capSContextMap = new LinkedHashMap<Integer, ArrayList<Integer>>();
+                capSContextMap = new LinkedHashMap<>();
                 report.getTenantMap().get("deployment").put(capSpec, capSContextMap);
             }
             // For each context in this capSMap, add the context/User map
@@ -305,7 +307,7 @@ public class CapabilityHandler implements ReportUserHandler, ReportContextHandle
     public void prepareReportForStorageOfContent(Report report) {
         report.setNeedsComposition(true);
         Map<String, Object> reportMacdetail = report.getNamespace(Report.MACDETAIL);
-        ArrayList<Object> values = new ArrayList<Object>(reportMacdetail.values());
+        ArrayList<Object> values = new ArrayList<>(reportMacdetail.values());
         report.clearNamespace(Report.MACDETAIL);
         this.sumClientsInSingleMap(values);
         report.set(Report.MACDETAIL, Report.CAPABILITY_SETS, values);
@@ -316,7 +318,7 @@ public class CapabilityHandler implements ReportUserHandler, ReportContextHandle
     public void finish(Report report) throws OXException {
         Map<String, Object> macdetail = report.getNamespace(Report.MACDETAIL);
 
-        ArrayList<Object> values = new ArrayList<Object>(macdetail.values());
+        ArrayList<Object> values = new ArrayList<>(macdetail.values());
 
         if (report.getType().equals("extended")) {
             addDriveMetricsToReport(report);
@@ -337,7 +339,7 @@ public class CapabilityHandler implements ReportUserHandler, ReportContextHandle
         Map<String, Object> macdetail = report.getNamespace(Report.MACDETAIL);
         for (Entry<String, LinkedHashMap<String, Object>> currentTenant : report.getTenantMap().entrySet()) {
             for (Entry<String, Object> currentCapS : currentTenant.getValue().entrySet()) {
-                String compositionCapS = currentCapS.getKey().substring(0, currentCapS.getKey().lastIndexOf(","));
+                String compositionCapS = currentCapS.getKey().substring(0, currentCapS.getKey().lastIndexOf(','));
                 ArrayList<String> compositionCapSList = null;
                 if (report.isNeedsComposition()) {
                     macdetail.put(currentCapS.getKey(), new HashMap<>());
@@ -355,11 +357,9 @@ public class CapabilityHandler implements ReportUserHandler, ReportContextHandle
     public void storeAndMergeReportParts(Report report) {
         // create storage folder, if not already exists
         File storageFolder = new File(ReportProperties.getStoragePath());
-        if (!storageFolder.exists()) {
-            if (!storageFolder.mkdir()) {
-                LOG.error("Failed to create storage folder");
-                return;
-            }
+        if (!storageFolder.exists() && !storageFolder.mkdir()) {
+            LOG.error("Failed to create storage folder");
+            return;
         }
 
         // Get all capability sets
@@ -393,7 +393,7 @@ public class CapabilityHandler implements ReportUserHandler, ReportContextHandle
         // The context report maintains a mapping of unique capabilities set -> a map of counts for admins / disabled users  and regular users
         HashMap<String, Long> counts = contextReport.get(Report.MACDETAIL, capString, HashMap.class);
         if (counts == null) {
-            counts = new HashMap<String, Long>();
+            counts = new HashMap<>();
         }
         // Depending on the users type, we have to increase the accompanying count
         if (userReport.get(Report.MACDETAIL, Report.MAILADMIN, Boolean.class).booleanValue()) {
@@ -417,7 +417,7 @@ public class CapabilityHandler implements ReportUserHandler, ReportContextHandle
         contextReport.set(Report.MACDETAIL_LISTS, capString, capSet);
         LinkedHashMap<Integer, ArrayList<Integer>> capSContextMap = contextReport.getCapSToContext().get(capString);
         if (capSContextMap == null) {
-            capSContextMap = new LinkedHashMap<Integer, ArrayList<Integer>>();
+            capSContextMap = new LinkedHashMap<>();
             capSContextMap.put(I(contextReport.getContext().getContextId()), new ArrayList<Integer>());
             contextReport.getCapSToContext().put(capString, capSContextMap);
         }
@@ -532,6 +532,16 @@ public class CapabilityHandler implements ReportUserHandler, ReportContextHandle
         capSMap.put(Report.DRIVE_USER, driveUserMetrics);
         capSMap.put(Report.DRIVE_OVERALL, driveMetrics);
 
+        addDriveMetricsToReport(report, driveUserMetrics, driveMetrics);
+        // Merge drive metrics into files and remove the data from the report, if neccessary
+        if (report.isNeedsComposition()) {
+            capSMap.put(Report.CAPABILITIES, compositionCapS);
+            report.get(Report.MACDETAIL, Report.CAPABILITY_SETS, new ArrayList<>(), ArrayList.class).add(capSMap);
+            storeAndMergeReportParts(report);
+        }
+    }
+
+    private void addDriveMetricsToReport(Report report, LinkedHashMap<String, Integer> driveUserMetrics, LinkedHashMap<String, Integer> driveMetrics) {
         LinkedHashMap<String, Long> totalDrive = report.get(Report.TOTAL, Report.DRIVE_TOTAL, LinkedHashMap.class);
         if (totalDrive == null) {
             totalDrive = new LinkedHashMap<>();
@@ -555,7 +565,10 @@ public class CapabilityHandler implements ReportUserHandler, ReportContextHandle
         // clean up, this metrics are only needed for the total part of the report
         driveUserMetrics.remove("quota-usage-percent-total");
         driveUserMetrics.remove("quota-usage-percent-sum");
-        // place all calculated metrics into the total report
+        addDriveMetricsToTotals(report, driveMetrics, totalDrive);
+    }
+
+    private void addDriveMetricsToTotals(Report report, LinkedHashMap<String, Integer> driveMetrics, LinkedHashMap<String, Long> totalDrive) {
         for (Entry<String, Integer> entry : driveMetrics.entrySet()) {
             Long value = totalDrive.get(entry.getKey());
             if (value == null) {
@@ -565,12 +578,6 @@ public class CapabilityHandler implements ReportUserHandler, ReportContextHandle
             }
         }
         report.set(Report.TOTAL, Report.DRIVE_TOTAL, totalDrive);
-        // Merge drive metrics into files and remove the data from the report, if neccessary
-        if (report.isNeedsComposition()) {
-            capSMap.put(Report.CAPABILITIES, compositionCapS);
-            report.get(Report.MACDETAIL, Report.CAPABILITY_SETS, new ArrayList<>(), ArrayList.class).add(capSMap);
-            storeAndMergeReportParts(report);
-        }
     }
 
     private Map<PoolAndSchema, Map<Integer,List<Integer>>> getDbContextToUsersBash(Map<Integer, List<Integer>> usersInContext) throws OXException {

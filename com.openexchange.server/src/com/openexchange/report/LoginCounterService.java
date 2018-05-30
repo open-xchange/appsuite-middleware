@@ -116,6 +116,6 @@ public interface LoginCounterService {
      *          milliseconds since January 1, 1970, 00:00:00 GMT
      * @throws OXException
      */
-    public HashMap<String, Long> getLastClientLogIns(int userId, int contextId, Date startDate, Date endDate) throws OXException;
+    public Map<String, Long> getLastClientLogIns(int userId, int contextId, Date startDate, Date endDate) throws OXException;
 
 }
