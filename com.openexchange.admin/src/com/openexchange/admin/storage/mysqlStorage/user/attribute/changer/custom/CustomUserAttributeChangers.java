@@ -146,9 +146,18 @@ public class CustomUserAttributeChangers extends AbstractAttributeChangers {
      * @throws SQLException if an SQL error is occurred
      */
     private PreparedStatement prepareStatement(String sqlStatement, int contextId, int userId, Connection connection) throws SQLException {
-        PreparedStatement preparedStatement = connection.prepareStatement(sqlStatement);
-        preparedStatement.setInt(1, contextId);
-        preparedStatement.setInt(2, userId);
-        return preparedStatement;
+        boolean error = true;
+        PreparedStatement preparedStatement = null;
+        try {
+            preparedStatement = connection.prepareStatement(sqlStatement);
+            preparedStatement.setInt(1, contextId);
+            preparedStatement.setInt(2, userId);
+            error = false;
+            return preparedStatement;
+        } finally {
+            if (error) {
+                Databases.closeSQLStuff(preparedStatement);
+            }
+        }
     }
 }
