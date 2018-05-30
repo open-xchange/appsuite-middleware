@@ -61,8 +61,6 @@ import java.util.StringTokenizer;
 import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
 import org.dmfs.rfc5545.DateTime;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.AlarmAction;
 import com.openexchange.chronos.AlarmField;
@@ -90,8 +88,6 @@ import com.openexchange.java.Strings;
  */
 public class AlarmUtils extends CalendarUtils {
 
-    private final static Logger LOGGER = LoggerFactory.getLogger(AlarmUtils.class);
-
     /**
      * Constructs a duration string that consists of the supplied properties.
      *
@@ -106,10 +102,6 @@ public class AlarmUtils extends CalendarUtils {
     public static String getDuration(boolean negative, long weeks, long days, long hours, long minutes, long seconds) {
         if (0 == weeks + days + hours + minutes + seconds) {
             return "PT0S";
-        }
-        if (minutes > 1000) {
-            // FIXME Remove me before 7.10.0 release!!
-            LOGGER.error("Found a trigger with more than 1000 minutes. Details: ", new Throwable("DEBUG"));
         }
         StringBuilder stringBuilder = new StringBuilder();
         if (negative) {
