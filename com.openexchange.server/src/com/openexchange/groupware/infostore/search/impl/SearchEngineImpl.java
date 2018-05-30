@@ -665,7 +665,6 @@ public class SearchEngineImpl extends DBService {
         boolean id = false;
         for (String currentField : DB_RESULT_FIELDS) {
             if (currentField.equals("infostore.id")) {
-                currentField = "infostore.id";
                 id = true;
             }
             selectFields.append(currentField);
