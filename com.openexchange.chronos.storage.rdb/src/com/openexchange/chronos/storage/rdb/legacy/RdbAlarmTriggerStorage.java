@@ -50,7 +50,6 @@
 package com.openexchange.chronos.storage.rdb.legacy;
 
 import static com.openexchange.chronos.common.AlarmUtils.filter;
-import static com.openexchange.chronos.common.AlarmUtils.findAlarm;
 import static com.openexchange.chronos.common.CalendarUtils.getFolderView;
 import static com.openexchange.chronos.common.CalendarUtils.isSeriesMaster;
 import static com.openexchange.groupware.tools.mappings.database.DefaultDbMapper.getParameters;
@@ -76,11 +75,13 @@ import com.openexchange.chronos.AlarmAction;
 import com.openexchange.chronos.AlarmTrigger;
 import com.openexchange.chronos.DelegatingEvent;
 import com.openexchange.chronos.Event;
+import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.Trigger;
 import com.openexchange.chronos.common.AlarmUtils;
 import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.common.DefaultRecurrenceData;
+import com.openexchange.chronos.exception.ProblemSeverity;
 import com.openexchange.chronos.service.EntityResolver;
 import com.openexchange.chronos.service.RecurrenceData;
 import com.openexchange.chronos.service.RecurrenceIterator;
@@ -217,38 +218,22 @@ public class RdbAlarmTriggerStorage extends RdbStorage implements AlarmTriggerSt
          */
         TimeZone timeZone = entityResolver.getTimeZone(userID);
         List<Alarm> regularAlarms = new ArrayList<Alarm>();
-        List<Alarm> snoozeAlarms = new ArrayList<Alarm>();
         for (Alarm alarm : displayAlarms) {
             if (AlarmUtils.isSnoozed(alarm, displayAlarms)) {
-                snoozeAlarms.add(alarm);
+                addUnsupportedDataError(event.getId(), EventField.ALARMS, ProblemSeverity.MAJOR, "Can't store snoozed alarms");
             } else if (0 <= getReminderMinutes(alarm.getTrigger(), event)) {
                 regularAlarms.add(alarm);
             }
         }
-        Alarm snoozeAlarm = chooseNextAlarm(event, originalReminder, snoozeAlarms, timeZone);
-        if (null != snoozeAlarm) {
-            /*
-             * prefer the 'snooze' alarm along with the related 'snoozed' one
-             */
-            Alarm snoozedAlarm = findAlarm(regularAlarms, snoozeAlarm.getRelatedTo().getValue());
-            if (null != snoozedAlarm) {
-                Date nextTriggerTime = optNextTriggerTime(event, snoozeAlarm, timeZone, snoozedAlarm.getAcknowledged());
-                if (null != nextTriggerTime) {
-                    int reminderMinutes = getReminderMinutes(snoozedAlarm.getTrigger(), event);
-                    return new ReminderData(null != originalReminder ? originalReminder.id : 0, reminderMinutes, nextTriggerTime.getTime());
-                }
-            }
-        } else {
-            /*
-             * regular alarm, only
-             */
-            Alarm regularAlarm = chooseNextAlarm(event, originalReminder, regularAlarms, timeZone);
-            if (null != regularAlarm) {
-                Date nextTriggerTime = optNextTriggerTime(event, regularAlarm, timeZone);
-                if (null != nextTriggerTime) {
-                    int reminderMinutes = getReminderMinutes(regularAlarm.getTrigger(), event);
-                    return new ReminderData(null != originalReminder ? originalReminder.id : 0, reminderMinutes, nextTriggerTime.getTime());
-                }
+        /*
+         * regular alarm, only
+         */
+        Alarm regularAlarm = chooseNextAlarm(event, originalReminder, regularAlarms, timeZone);
+        if (null != regularAlarm) {
+            Date nextTriggerTime = optNextTriggerTime(event, regularAlarm, timeZone);
+            if (null != nextTriggerTime) {
+                int reminderMinutes = getReminderMinutes(regularAlarm.getTrigger(), event);
+                return new ReminderData(null != originalReminder ? originalReminder.id : 0, reminderMinutes, nextTriggerTime.getTime());
             }
         }
         return null;

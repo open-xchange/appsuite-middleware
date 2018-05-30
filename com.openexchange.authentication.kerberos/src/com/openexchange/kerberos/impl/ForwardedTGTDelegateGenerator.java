@@ -58,9 +58,13 @@ import org.ietf.jgss.GSSCredential;
 import org.ietf.jgss.GSSException;
 import org.ietf.jgss.GSSManager;
 import org.ietf.jgss.GSSName;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.openexchange.exception.OXException;
 import com.openexchange.kerberos.ClientPrincipal;
 import com.openexchange.kerberos.KerberosExceptionCodes;
+import com.openexchange.tools.encoding.Base64;
 
 /**
  * Creates a delegation ticket for the client to contact a backend service.
@@ -68,6 +72,8 @@ import com.openexchange.kerberos.KerberosExceptionCodes;
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
 final class ForwardedTGTDelegateGenerator implements PrivilegedExceptionAction<ClientPrincipal> {
+	
+	private static final Logger LOG = LoggerFactory.getLogger(ForwardedTGTDelegateGenerator.class);
 
     private final GSSManager manager;
     private final byte[] forwardedTicket;
@@ -107,6 +113,13 @@ final class ForwardedTGTDelegateGenerator implements PrivilegedExceptionAction<C
                 throw KerberosExceptionCodes.DELEGATE_FAILED.create(clientName);
             }
         } catch (GSSException e) {
+            Object ticketLog = new Object() {
+                @Override
+                public String toString() {
+                    return Base64.encode(forwardedTicket);
+                }
+            };
+            LOG.error("Unable to process delegated ticket: {}", ticketLog, e);
             throw KerberosExceptionCodes.COMM_FAILED.create(e, e.getMessage());
         } finally {
             context.dispose();

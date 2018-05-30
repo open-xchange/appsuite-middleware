@@ -69,6 +69,7 @@ import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.delete.DeleteEvent;
+import com.openexchange.groupware.delete.DeleteFinishedListenerRegistry;
 import com.openexchange.groupware.delete.DeleteRegistry;
 import com.openexchange.groupware.impl.IDGenerator;
 
@@ -310,6 +311,13 @@ public class OXResourceMySQLStorage extends OXResourceSQLStorage implements OXMy
 
             con.commit();
             rollback = false;
+
+            try {
+                DeleteFinishedListenerRegistry.getInstance().fireDeleteEvent(delev);
+            } catch (Exception e) {
+                log.warn("Failed to trigger delete finished listeners", e);
+            }
+
             log.info("Resource {} deleted!", resource_id);
         } catch (SQLException e) {
             log.error("SQL Error", e);
@@ -350,6 +358,13 @@ public class OXResourceMySQLStorage extends OXResourceSQLStorage implements OXMy
 
             con.commit();
             rollback = false;
+
+            try {
+                DeleteFinishedListenerRegistry.getInstance().fireDeleteEvent(delev);
+            } catch (Exception e) {
+                log.warn("Failed to trigger delete finished listeners", e);
+            }
+
             log.info("Resource {} deleted!", resourceId);
         } catch (SQLException e) {
             log.error("SQL Error", e);

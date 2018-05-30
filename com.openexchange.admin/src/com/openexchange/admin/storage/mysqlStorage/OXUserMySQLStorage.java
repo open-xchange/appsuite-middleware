@@ -147,6 +147,7 @@ import com.openexchange.groupware.contexts.impl.ContextExceptionCodes;
 import com.openexchange.groupware.contexts.impl.ContextImpl;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.delete.DeleteEvent;
+import com.openexchange.groupware.delete.DeleteFinishedListenerRegistry;
 import com.openexchange.groupware.delete.DeleteRegistry;
 import com.openexchange.groupware.impl.IDGenerator;
 import com.openexchange.groupware.settings.Setting;
@@ -2315,6 +2316,16 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
 
                     con.commit();
                     rollback = false;
+
+                    for (final User user : users) {
+                        try {
+                            DeleteEvent delev = DeleteEvent.createDeleteEventForUserDeletion(this, user.getId().intValue(), 0, ContextStorage.getInstance().getContext(contextId), destUser);
+                            DeleteFinishedListenerRegistry.getInstance().fireDeleteEvent(delev);
+                        } catch (Exception e) {
+                            LOG.warn("Failed to trigger delete finished listeners", e);
+                        }
+                        LOG.info("User {} deleted!", user.getId());
+                    }
                 } catch (final StorageException st) {
                     final SQLException sqle = DBUtils.extractSqlException(st);
                     if (!condition.isFailedTransactionRollback(sqle)) {
