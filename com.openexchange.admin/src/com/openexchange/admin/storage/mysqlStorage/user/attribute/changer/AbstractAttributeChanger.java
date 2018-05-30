@@ -279,23 +279,6 @@ public abstract class AbstractAttributeChanger {
      */
     protected abstract PreparedStatement prepareDefaultStatement(String table, Set<Attribute> attributes, Connection connection) throws SQLException;
 
-    //////////////////////////////////// HELPERS //////////////////////////////////
-
-    /**
-     * Executes the update
-     * 
-     * @param stmt The {@link PreparedStatement}
-     * @return <code>true</code> if the update was successful; <code>false</code> otherwise
-     * @throws SQLException
-     */
-    private boolean executeUpdate(PreparedStatement stmt) throws SQLException {
-        try {
-            return stmt.executeUpdate() == 1; // we expect exactly one change
-        } finally {
-            Databases.closeSQLStuff(stmt);
-        }
-    }
-
     //////////////////////////////// PRIVATE INTERFACES ///////////////////////////////
 
     /**
