@@ -194,7 +194,8 @@ public interface RecurrenceService {
      * Calculates the last occurrence of a recurring event series represented by the supplied recurrence data.
      *
      * @param recurrenceData The recurrence data to get the last occurrence for
-     * @return The recurrence identifier of the last occurrence, or <code>null</code> for a never ending series
+     * @return The recurrence identifier of the last occurrence, <code>null</code> for a never ending series, or a synthetic recurrence
+     *         identifier for the supplied series start date
      * @throws OXException {@link CalendarExceptionCodes#INVALID_RRULE}
      */
     RecurrenceId getLastOccurrence(RecurrenceData recurrenceData) throws OXException;
