@@ -131,11 +131,15 @@ public abstract class AbstractAttributeChanger {
         }
 
         PreparedStatement stmt = prepareStatement(table, attributes.keySet(), connection);
-        if (stmt == null) {
-            return false;
+        try {
+            if (stmt == null) {
+                return false;
+            }
+            fillSetStatement(stmt, settersMap, attributes, userId, contextId);
+            return stmt.executeUpdate() == 1; // we expect exactly one change
+        } finally {
+            Databases.closeSQLStuff(stmt);
         }
-        fillSetStatement(stmt, settersMap, attributes, userId, contextId);
-        return executeUpdate(stmt);
     }
 
     /**
@@ -151,12 +155,16 @@ public abstract class AbstractAttributeChanger {
      */
     protected boolean setAttributesDefault(int userId, int contextId, String table, Set<Attribute> attributes, Connection connection) throws SQLException {
         PreparedStatement stmt = prepareDefaultStatement(table, attributes, connection);
-        if (stmt == null) {
-            return false;
+        try {
+            if (stmt == null) {
+                return false;
+            }
+            int parameterIndex = 0;
+            appendContextUser(contextId, userId, stmt, parameterIndex);
+            return stmt.executeUpdate() == 1; // we expect exactly one change
+        } finally {
+            Databases.closeSQLStuff(stmt);
         }
-        int parameterIndex = 0;
-        appendContextUser(contextId, userId, stmt, parameterIndex);
-        return executeUpdate(stmt);
     }
 
     /**
@@ -183,11 +191,15 @@ public abstract class AbstractAttributeChanger {
             return false;
         }
         PreparedStatement stmt = prepareStatement(table, attributes, connection);
-        if (stmt == null) {
-            return false;
+        try {
+            if (stmt == null) {
+                return false;
+            }
+            fillUnsetStatement(stmt, unsettersMap, attributes, userId, contextId);
+            return stmt.executeUpdate() == 1; // we expect exactly one change
+        } finally {
+            Databases.closeSQLStuff(stmt);
         }
-        fillUnsetStatement(stmt, unsettersMap, attributes, userId, contextId);
-        return executeUpdate(stmt);
     }
 
     /**
