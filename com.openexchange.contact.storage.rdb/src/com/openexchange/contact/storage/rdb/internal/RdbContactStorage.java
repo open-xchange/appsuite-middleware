@@ -70,9 +70,11 @@ import com.openexchange.contact.storage.rdb.fields.QueryFields;
 import com.openexchange.contact.storage.rdb.mapping.Mappers;
 import com.openexchange.contact.storage.rdb.sql.Executor;
 import com.openexchange.contact.storage.rdb.sql.Table;
+import com.openexchange.database.DatabaseExceptionCodes;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.database.Databases;
 import com.openexchange.database.IncorrectStringSQLException;
+import com.openexchange.database.StringLiteralSQLException;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.ContactConfig;
 import com.openexchange.groupware.contact.ContactExceptionCodes;
@@ -101,12 +103,9 @@ import com.openexchange.tools.session.ServerSessionAdapter;
 /**
  * {@link RdbContactStorage} - Database storage for contacts.
  *
- * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias
- *         Friedrich</a>
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public class RdbContactStorage extends DefaultContactStorage implements ContactUserStorage {
-
-    private static org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(RdbContactStorage.class);
 
     private static boolean PREFETCH_ATTACHMENT_INFO = true;
 
@@ -194,6 +193,7 @@ public class RdbContactStorage extends DefaultContactStorage implements ContactU
         final ServerSession serverSession = ServerSessionAdapter.valueOf(session);
         final ConnectionHelper connectionHelper = new ConnectionHelper(session);
         final Connection connection = connectionHelper.getWritable();
+        boolean rollback = true;
         try {
             /*
              * (re-)check folder/permissions with this connection
@@ -245,19 +245,21 @@ public class RdbContactStorage extends DefaultContactStorage implements ContactU
              * commit
              */
             connectionHelper.commit();
+            rollback = false;
         } catch (final IncorrectStringSQLException e) {
-            Databases.rollback(connection);
             throw Tools.getIncorrectStringException(serverSession, connection, e, contact, Table.CONTACTS);
         } catch (final DataTruncation e) {
-            Databases.rollback(connection);
             throw Tools.getTruncationException(session, connection, e, contact, Table.CONTACTS);
+        } catch (final StringLiteralSQLException e) {
+            throw DatabaseExceptionCodes.STRING_LITERAL_ERROR.create(e, e.getMessage());
         } catch (final SQLException e) {
-            Databases.rollback(connection);
             throw ContactExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } catch (final OXException e) {
-            Databases.rollback(connection);
             throw e;
         } finally {
+            if (rollback) {
+                Databases.rollback(connection);
+            }
             connectionHelper.backWritable();
         }
     }
@@ -269,6 +271,7 @@ public class RdbContactStorage extends DefaultContactStorage implements ContactU
         final ServerSession serverSession = ServerSessionAdapter.valueOf(session);
         final ConnectionHelper connectionHelper = new ConnectionHelper(session);
         final Connection connection = connectionHelper.getWritable();
+        boolean rollback = true;
         try {
             /*
              * (re-)check folder/permissions with this connection
@@ -288,13 +291,15 @@ public class RdbContactStorage extends DefaultContactStorage implements ContactU
              * commit
              */
             connectionHelper.commit();
+            rollback = false;
         } catch (final SQLException e) {
-            Databases.rollback(connection);
             throw ContactExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } catch (final OXException e) {
-            Databases.rollback(connection);
             throw e;
         } finally {
+            if (rollback) {
+                Databases.rollback(connection);
+            }
             connectionHelper.backWritable();
         }
     }
@@ -307,6 +312,7 @@ public class RdbContactStorage extends DefaultContactStorage implements ContactU
         final ConnectionHelper connectionHelper = new ConnectionHelper(session);
         final Connection connection = connectionHelper.getWritable();
         int deletedContacts = 0;
+        boolean rollback = true;
         try {
             /*
              * get a list of object IDs to delete
@@ -333,13 +339,15 @@ public class RdbContactStorage extends DefaultContactStorage implements ContactU
              * commit
              */
             connectionHelper.commit();
+            rollback = false;
         } catch (final SQLException e) {
-            Databases.rollback(connection);
             throw ContactExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } catch (final OXException e) {
-            Databases.rollback(connection);
             throw e;
         } finally {
+            if (rollback) {
+                Databases.rollback(connection);
+            }
             if (deletedContacts <= 0) {
                 connectionHelper.backWritableAfterReading();
             } else {
@@ -354,6 +362,7 @@ public class RdbContactStorage extends DefaultContactStorage implements ContactU
         final ServerSession serverSession = ServerSessionAdapter.valueOf(session);
         final ConnectionHelper connectionHelper = new ConnectionHelper(session);
         final Connection connection = connectionHelper.getWritable();
+        boolean rollback = true;
         try {
             /*
              * (re-)check folder/permissions with this connection
@@ -371,13 +380,15 @@ public class RdbContactStorage extends DefaultContactStorage implements ContactU
              * commit
              */
             connectionHelper.commit();
+            rollback = false;
         } catch (final SQLException e) {
-            Databases.rollback(connection);
             throw ContactExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } catch (final OXException e) {
-            Databases.rollback(connection);
             throw e;
         } finally {
+            if (rollback) {
+                Databases.rollback(connection);
+            }
             connectionHelper.backWritable();
         }
     }
@@ -391,6 +402,7 @@ public class RdbContactStorage extends DefaultContactStorage implements ContactU
         final ServerSession serverSession = ServerSessionAdapter.valueOf(session);
         final ConnectionHelper connectionHelper = new ConnectionHelper(session);
         final Connection connection = connectionHelper.getWritable();
+        boolean rollback = true;
         try {
             /*
              * (re-)check folder/permissions with this connection
@@ -464,15 +476,19 @@ public class RdbContactStorage extends DefaultContactStorage implements ContactU
              * commit
              */
             connectionHelper.commit();
+            rollback = false;
         } catch (final IncorrectStringSQLException e) {
-            Databases.rollback(connection);
             throw Tools.getIncorrectStringException(serverSession, connection, e, contact, Table.CONTACTS);
         } catch (final DataTruncation e) {
-            Databases.rollback(connection);
             throw Tools.getTruncationException(session, connection, e, contact, Table.CONTACTS);
+        } catch (final StringLiteralSQLException e) {
+            throw DatabaseExceptionCodes.STRING_LITERAL_ERROR.create(e, e.getMessage());
         } catch (final SQLException e) {
             throw ContactExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } finally {
+            if (rollback) {
+                Databases.rollback(connection);
+            }
             connectionHelper.backWritable();
         }
     }
@@ -501,6 +517,7 @@ public class RdbContactStorage extends DefaultContactStorage implements ContactU
         }
         final int contextID = session.getContextId();
         final ConnectionHelper connectionHelper = new ConnectionHelper(session);
+        boolean rollback = true;
         try {
             /*
              * Check which existing member references are affected
@@ -533,14 +550,19 @@ public class RdbContactStorage extends DefaultContactStorage implements ContactU
              * commit
              */
             connectionHelper.commit();
+            rollback = false;
         } catch (final IncorrectStringSQLException e) {
             throw Tools.getIncorrectStringException(session, connectionHelper.getReadOnly(), e, updatedContact, Table.CONTACTS);
         } catch (final DataTruncation e) {
-            Databases.rollback(connectionHelper.getWritable());
             throw Tools.getTruncationException(session, connectionHelper.getReadOnly(), e, updatedContact, Table.CONTACTS);
+        } catch (final StringLiteralSQLException e) {
+            throw DatabaseExceptionCodes.STRING_LITERAL_ERROR.create(e, e.getMessage());
         } catch (final SQLException e) {
             throw ContactExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } finally {
+            if (rollback) {
+                Databases.rollback(connectionHelper.getWritable());
+            }
             connectionHelper.back();
         }
     }

@@ -49,9 +49,9 @@
 
 package com.openexchange.pgp.core;
 
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyLong;
-import static org.mockito.Matchers.anyString;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import java.io.ByteArrayInputStream;
@@ -78,7 +78,7 @@ public class PGPIntegrityCheckTests extends AbstractPGPTest {
     @Rule
     public final ExpectedException expectedException = ExpectedException.none();
 
-    private PGPDecryptionResult encryptDecryptTestData(PacketProcessorHandler modificationHandler, PGPDecrypter.MDCValidationMode mdcValidationMode) throws Exception {
+    private PGPDecryptionResult encryptDecryptTestData(PacketProcessorHandler modificationHandler, PGPDecrypter.MDCValidationMode mdcValidationMode, boolean writeMDC) throws Exception {
 
         PGPKeyRingGenerator keyGenerator = createPGPKeyPairGenerator();
         PGPSecretKey secretKey = getSecretKeyFromGenerator(keyGenerator);
@@ -88,7 +88,7 @@ public class PGPIntegrityCheckTests extends AbstractPGPTest {
         byte[] testData = generateTestData();
         ByteArrayInputStream testDataStream = new ByteArrayInputStream(testData);
         ByteArrayOutputStream encryptedDataOutputStream = new ByteArrayOutputStream();
-        PGPEncrypter encrypter = new PGPEncrypter();
+        PGPEncrypter encrypter = new PGPEncrypter().setWithIntegrityPacket(writeMDC);
         encrypter.encrypt(testDataStream, encryptedDataOutputStream, armored, testIdentity.getPublicKey());
 
         ByteArrayInputStream encryptedDataStream = new ByteArrayInputStream(encryptedDataOutputStream.toByteArray());
@@ -117,6 +117,7 @@ public class PGPIntegrityCheckTests extends AbstractPGPTest {
     public void dataManipulationShouldThrowException() throws Exception{
         expectedException.expect(OXException.class);
         expectedException.expectMessage("PGP-CORE-0006");
+        final boolean writeMDC = true;
         encryptDecryptTestData(new PacketProcessorHandler() {
 
             @Override
@@ -131,6 +132,50 @@ public class PGPIntegrityCheckTests extends AbstractPGPTest {
                 return packetData;
             }
 
-        }, PGPDecrypter.MDCValidationMode.FAIL_ON_MISSING);
+        },
+        PGPDecrypter.MDCValidationMode.FAIL_ON_MISSING,
+        writeMDC);
+    }
+
+    @Test
+    public void missingMDCshouldFail() throws Exception{
+        expectedException.expect(OXException.class);
+        expectedException.expectMessage("PGP-CORE-0006");
+        final boolean writeMDC = false;
+        encryptDecryptTestData(new PacketProcessorHandler() {
+
+            @Override
+            public PGPPacket[] handlePacket(PGPPacket packet) throws Exception {
+                return new PGPPacket[] {packet};
+            }
+
+            @Override
+            public byte[] handlePacketData(PGPPacket packet, byte[] packetData) {
+                return packetData;
+            }
+        },
+        PGPDecrypter.MDCValidationMode.FAIL_ON_MISSING,
+        writeMDC);
+    }
+
+    @Test
+    public void missingMDCshouldNotFail() throws Exception{
+        final boolean writeMDC = false;
+        PGPDecryptionResult result = encryptDecryptTestData(new PacketProcessorHandler() {
+
+            @Override
+            public PGPPacket[] handlePacket(PGPPacket packet) throws Exception {
+                return new PGPPacket[] {packet};
+            }
+
+            @Override
+            public byte[] handlePacketData(PGPPacket packet, byte[] packetData) {
+                return packetData;
+            }
+        },
+        PGPDecrypter.MDCValidationMode.WARN_ON_MISSING,
+        writeMDC);
+        Assert.assertFalse("The decryption result should not have a MDC present", result.getMDCVerificationResult().isPresent());
+        Assert.assertFalse("The decryption result should not have a validated MDC", result.getMDCVerificationResult().isVerified());
     }
 }

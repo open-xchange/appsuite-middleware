@@ -74,82 +74,82 @@ public class Starter implements Initialization {
      * This contains the components to be started if a normal groupware startup is done.
      */
     private final Initialization[] inits = new Initialization[] {
-    /**
-     * Reads system.properties.
-     */
-    com.openexchange.configuration.SystemConfig.getInstance(),
-    /**
-     * Cache availability registry start-up
-     */
-    com.openexchange.cache.registry.CacheAvailabilityRegistryInit.getInstance(),
-    /**
-     * Initialization for custom charset provider
-     */
-    new com.openexchange.charset.CustomCharsetProviderInit(),
-    /**
-     * Setup of ContextStorage and LoginInfo.
-     */
-    com.openexchange.groupware.contexts.impl.ContextInit.getInstance(),
-    /**
-     * Folder initialization
-     */
-    com.openexchange.tools.oxfolder.OXFolderProperties.getInstance(),
-    new com.openexchange.folder.internal.FolderInitialization(),
-    /**
-     * Mail initialization
-     */
-    com.openexchange.mail.MailInitialization.getInstance(),
-    /**
-     * Transport initialization
-     */
-    com.openexchange.mail.transport.TransportInitialization.getInstance(),
-    /**
-     * Infostore Configuration
-     */
-    com.openexchange.groupware.infostore.InfostoreConfig.getInstance(),
-    /**
-     * Attachment Configuration
-     */
-    com.openexchange.groupware.attach.AttachmentConfig.getInstance(),
-    /**
-     * Group storage init
-     */
-    com.openexchange.group.internal.GroupInit.getInstance(),
-    /**
-     * Resource storage init
-     */
-    com.openexchange.resource.internal.ResourceStorageInit.getInstance(),
-    /**
-     * User configuration init
-     */
-    com.openexchange.groupware.userconfiguration.UserConfigurationStorageInit.getInstance(),
-    /**
-     * Notification Configuration
-     */
-    com.openexchange.groupware.notify.NotificationConfig.getInstance(),
-    /**
-     * Sets up the configuration tree.
-     */
-    com.openexchange.groupware.settings.impl.ConfigTreeInit.getInstance(),
-    /**
-     * Responsible for starting and stopping the EventQueue
-     */
-    new com.openexchange.event.impl.EventInit(),
-    /**
-     * Responsible for registering all instances for deleting users and groups.
-     */
-    new com.openexchange.groupware.delete.DeleteRegistryInitialization(),
-    /**
-     * Downgrade registry start-up
-     */
-    com.openexchange.groupware.downgrade.DowngradeRegistryInit.getInstance(),
-    /**
-     * Initializes the Attachment Calendar Listener
-     */
-    new com.openexchange.groupware.attach.AttachmentInit(),
-    new com.openexchange.mailaccount.internal.MailAccountStorageInit(),
-    new com.openexchange.multiple.internal.MultipleHandlerInit(),
-    new com.openexchange.groupware.impl.id.IDGeneratorInit() };
+        /**
+         * Reads system.properties.
+         */
+        com.openexchange.configuration.SystemConfig.getInstance(),
+        /**
+         * Cache availability registry start-up
+         */
+        com.openexchange.cache.registry.CacheAvailabilityRegistryInit.getInstance(),
+        /**
+         * Initialization for custom charset provider
+         */
+        new com.openexchange.charset.CustomCharsetProviderInit(),
+        /**
+         * Setup of ContextStorage and LoginInfo.
+         */
+        com.openexchange.groupware.contexts.impl.ContextInit.getInstance(),
+        /**
+         * Folder initialization
+         */
+        com.openexchange.tools.oxfolder.OXFolderProperties.getInstance(), new com.openexchange.folder.internal.FolderInitialization(),
+        /**
+         * Mail initialization
+         */
+        com.openexchange.mail.MailInitialization.getInstance(),
+        /**
+         * Transport initialization
+         */
+        com.openexchange.mail.transport.TransportInitialization.getInstance(),
+        /**
+         * Infostore Configuration
+         */
+        com.openexchange.groupware.infostore.InfostoreConfig.getInstance(),
+        /**
+         * Attachment Configuration
+         */
+        com.openexchange.groupware.attach.AttachmentConfig.getInstance(),
+        /**
+         * Group storage init
+         */
+        com.openexchange.group.internal.GroupInit.getInstance(),
+        /**
+         * Resource storage init
+         */
+        com.openexchange.resource.internal.ResourceStorageInit.getInstance(),
+        /**
+         * User configuration init
+         */
+        com.openexchange.groupware.userconfiguration.UserConfigurationStorageInit.getInstance(),
+        /**
+         * Notification Configuration
+         */
+        com.openexchange.groupware.notify.NotificationConfig.getInstance(),
+        /**
+         * Sets up the configuration tree.
+         */
+        com.openexchange.groupware.settings.impl.ConfigTreeInit.getInstance(),
+        /**
+         * Responsible for starting and stopping the EventQueue
+         */
+        new com.openexchange.event.impl.EventInit(),
+        /**
+         * Responsible for registering all instances for deleting users and groups.
+         */
+        new com.openexchange.groupware.delete.DeleteRegistryInitialization(),
+        /**
+         * Responsible for registering all instances for evicting caches of users and groups.
+         */
+        new com.openexchange.groupware.delete.DeleteFinishedRegistryInitialization(),
+        /**
+         * Downgrade registry start-up
+         */
+        com.openexchange.groupware.downgrade.DowngradeRegistryInit.getInstance(),
+        /**
+         * Initializes the Attachment Calendar Listener
+         */
+        new com.openexchange.groupware.attach.AttachmentInit(), new com.openexchange.mailaccount.internal.MailAccountStorageInit(), new com.openexchange.multiple.internal.MultipleHandlerInit(), new com.openexchange.groupware.impl.id.IDGeneratorInit() };
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Starter.class);
 
@@ -204,7 +204,6 @@ public class Starter implements Initialization {
             args.add(p.getProperty("os.arch"));
             args.add(p.getProperty("os.version"));
             args.add(sep);
-
 
             message.append("Java             : {}{}");
             args.add(p.getProperty("java.runtime.version"));

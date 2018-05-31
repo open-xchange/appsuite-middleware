@@ -16,7 +16,7 @@ BuildRequires: java-1_8_0-openjdk-devel
 BuildRequires: java-1.8.0-openjdk-devel
 %endif
 Version:       @OXVERSION@
-%define        ox_release 5
+%define        ox_release 6
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -535,6 +535,12 @@ EOF
     ox_add_property html.style.-webkit-box-sizing '"border-box"' ${whlipr}
     ox_add_property html.style.-moz-box-sizing '"border-box"' ${whlipr}
 
+    # SoftwareChange_Request-174
+    ox_remove_property IGNORE_SHARED_ADDRESSBOOK /opt/open-xchange/etc/foldercache.properties
+
+    # SoftwareChange_Request-175
+    ox_add_property com.openexchange.server.migrationRedirectURL "" /opt/open-xchange/etc/server.properties
+
 fi
 
 PROTECT=( autoconfig.properties configdb.properties hazelcast.properties jolokia.properties mail.properties mail-push.properties management.properties secret.properties secrets server.properties sessiond.properties share.properties tokenlogin-secrets )
@@ -583,6 +589,8 @@ exit 0
 %doc com.openexchange.database/doc/examples
 
 %changelog
+* Fri May 18 2018 Marcus Klein <marcus.klein@open-xchange.com>
+Sixth preview of 7.10.0 release
 * Thu Apr 19 2018 Marcus Klein <marcus.klein@open-xchange.com>
 Fifth preview of 7.10.0 release
 * Tue Apr 03 2018 Marcus Klein <marcus.klein@open-xchange.com>

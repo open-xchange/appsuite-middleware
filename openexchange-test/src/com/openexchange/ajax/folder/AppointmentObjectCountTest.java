@@ -66,7 +66,7 @@ import com.openexchange.test.FolderTestManager;
 
 /**
  * {@link AppointmentObjectCountTest}
- * 
+ *
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
 public class AppointmentObjectCountTest extends AbstractObjectCountTest {
@@ -77,6 +77,7 @@ public class AppointmentObjectCountTest extends AbstractObjectCountTest {
 
     private CalendarTestManager ctm2;
 
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
@@ -149,6 +150,7 @@ public class AppointmentObjectCountTest extends AbstractObjectCountTest {
         assertEquals("Wrong amount.", 6, getCount(client2, folder));
     }
 
+    @Override
     @After
     public void tearDown() throws Exception {
         try {

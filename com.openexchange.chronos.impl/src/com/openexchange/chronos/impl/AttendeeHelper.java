@@ -428,24 +428,18 @@ public class AttendeeHelper implements CollectionUpdate<Attendee, AttendeeField>
      * actual calendar user.
      * <p/>
      * If the default attendee is enforced, this method ensures that the calendar user attendee is always present in
-     * personal calendar folders. Otherwise, if the actual calendar user would be the last one in the resulting attendee list, this
-     * attendee is removed.
+     * personal calendar folders, and there is at least one attendee present for events in public folders. Otherwise, if the actual
+     * calendar user would be the last one in the resulting attendee list, this attendee is removed.
      *
      * @param enforceDefaultAttendee <code>true</code> the current calendar user should be added as default attendee to events implicitly,
      *            <code>false</code>, otherwise
      */
     private void handleDefaultAttendee(boolean enforceDefaultAttendee) throws OXException {
-        /*
-         * no default-attendee handling in public folders
-         */
-        if (PublicType.getInstance().equals(folder.getType())) {
-            return;
-        }
+        int calendarUserId = getCalendarUserId(folder);
+        List<Attendee> attendees = previewChanges();
         /*
          * check if resulting attendees would lead to a "group-scheduled" event or not
          */
-        int calendarUserId = getCalendarUserId(folder);
-        List<Attendee> attendees = previewChanges();
         if (false == enforceDefaultAttendee && (attendees.isEmpty() || isLastUserAttendee(attendees, calendarUserId))) {
             /*
              * event is not (or no longer) a group-scheduled one, remove default attendee
@@ -466,9 +460,23 @@ public class AttendeeHelper implements CollectionUpdate<Attendee, AttendeeField>
             }
         } else {
             /*
-             * ensure the calendar user is always present in group-scheduled events in personal calendar folders
+             * enforce at least the calendar user to be present in public folders
              */
-            if (false == PublicType.getInstance().equals(folder.getType()) && false == contains(attendees, calendarUserId)) {
+            if (PublicType.getInstance().equals(folder.getType())) {
+                if (attendees.isEmpty()) {
+                    Attendee defaultAttendee = find(attendeesToDelete, calendarUserId);
+                    if (null != defaultAttendee) {
+                        LOG.info("Implicitly preserving default calendar user {} in public folder {}.", I(calendarUserId), folder);
+                        attendeesToDelete.remove(defaultAttendee);
+                    } else {
+                        LOG.info("Implicitly adding default calendar user {} in public folder {}.", I(calendarUserId), folder);
+                        attendeesToInsert.add(getDefaultAttendee(session, folder, null));
+                    }
+                }
+            } else if (false == contains(attendees, calendarUserId)) {
+                /*
+                 * ensure the calendar user is always present in personal calendar folders
+                 */
                 Attendee defaultAttendee = find(attendeesToDelete, calendarUserId);
                 if (null != defaultAttendee) {
                     LOG.info("Implicitly preserving default calendar user {} in personal folder {}.", I(calendarUserId), folder);

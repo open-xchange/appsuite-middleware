@@ -88,7 +88,7 @@ public final class MailRequest {
     static final String DATA = ResponseFields.DATA;
     static final String PARAMETER_FOLDERID = AJAXServlet.PARAMETER_FOLDERID;
 
-    private static enum CollectableOperation {
+    private enum CollectableOperation {
         MOVE, COPY, STORE_FLAG, COLOR_LABEL, GET;
     }
 
@@ -107,7 +107,7 @@ public final class MailRequest {
     private static final Map<String, Handler> HANDERS_MAP;
 
     static {
-        final Map<String, Handler> m = new HashMap<String, Handler>(24);
+        final Map<String, Handler> m = new HashMap<>(24);
         m.put(AJAXServlet.ACTION_ALL, new Handler() {
 
             @Override
@@ -408,7 +408,7 @@ public final class MailRequest {
         return true;
     }
 
-    private static abstract class CollectObject {
+    private abstract static class CollectObject {
 
         public static CollectObject newInstance(final JSONObject jsonObject, final CollectableOperation op, final Mail mailServlet) throws OXException {
             switch (op) {
@@ -441,7 +441,7 @@ public final class MailRequest {
          */
         protected CollectObject(final Mail mailServlet) {
             super();
-            this.mailIDs = new LinkedList<String>();
+            this.mailIDs = new LinkedList<>();
             this.mailServlet = mailServlet;
         }
 
@@ -617,7 +617,7 @@ public final class MailRequest {
         public GetCollectObject(final JSONObject dataObject, final Mail mailServlet) throws OXException {
             super(mailServlet);
             this.folder = JSONUtil.requireString(PARAMETER_FOLDERID, dataObject);
-            containers = new LinkedList<ParamContainer>();
+            containers = new LinkedList<>();
             ParamContainer container = ParamContainer.getInstance(dataObject);
             containers.add(container);
             mailIDs.add(container.getStringParam(PARAMETER_ID));

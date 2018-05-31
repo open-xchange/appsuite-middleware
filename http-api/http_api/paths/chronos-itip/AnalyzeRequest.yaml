@@ -21,6 +21,6 @@
           $ref: "#/definitions/ConversionDataSource"
     responses:
       200:
-        description: An analyze response describing what the ical intends to do and ahndling suggestions.
+        description: An analyze response describing what the ical intends to do and handling suggestions.
         schema:
           $ref: "#/definitions/AnalyzeResponse"

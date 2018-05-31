@@ -50,10 +50,8 @@
 package com.openexchange.ajax.share.tests;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-import java.util.List;
 import java.util.UUID;
 import org.junit.Test;
 import com.openexchange.ajax.folder.manager.FolderApi;
@@ -63,7 +61,6 @@ import com.openexchange.testing.httpclient.invoker.ApiClient;
 import com.openexchange.testing.httpclient.invoker.ApiException;
 import com.openexchange.testing.httpclient.models.FolderData;
 import com.openexchange.testing.httpclient.models.FolderExtendedPermission;
-import com.openexchange.testing.httpclient.models.FoldersVisibilityData;
 import com.openexchange.testing.httpclient.models.ShareLinkResponse;
 import com.openexchange.testing.httpclient.models.ShareTargetData;
 import com.openexchange.testing.httpclient.modules.ShareManagementApi;
@@ -90,7 +87,7 @@ public class GetLinkInheritanceWrongModuleTest extends AbstractAPIClientSession 
         rememberClient(client);
         folderManager = new FolderManager(new FolderApi(client, testUser), "1");
         shareManagementApi = new ShareManagementApi(client);
-        infostoreRoot = findCalendarRoot();
+        infostoreRoot = "1";
 
         /*
          * Create the following folder structure:
@@ -110,8 +107,13 @@ public class GetLinkInheritanceWrongModuleTest extends AbstractAPIClientSession 
 
     @Override
     public void tearDown() throws Exception {
-        super.tearDown();
+        A = null;
+        B = null;
+        C = null;
+        D = null;
+        E = null;
         folderManager.cleanUp();
+        super.tearDown();
     }
 
     @Test
@@ -231,29 +233,6 @@ public class GetLinkInheritanceWrongModuleTest extends AbstractAPIClientSession 
         checkResponse(shareLink.getError(), shareLink.getErrorDesc(), shareLink.getData());
         folderManager.setLastTimestamp(shareLink.getTimestamp());
         return shareLink.getData().getEntity();
-    }
-
-    /**
-     * Finds the calendar root folder
-     *
-     * @return The folder id of the calendar root
-     * @throws ApiException
-     */
-    private String findCalendarRoot() throws ApiException {
-        FoldersVisibilityData allFolders = folderManager.getAllFolders("calendar", "1,20,300,301,302");
-        Object folders = allFolders.getPrivate();
-        assertNotNull(folders);
-        @SuppressWarnings("unchecked") List<List<?>> folderArray = (List<List<?>>) folders;
-        // find parent
-        String parent = null;
-        for (List<?> o : folderArray) {
-            if (o.get(1).equals("1")) {
-                parent = (String) o.get(0);
-                break;
-            }
-        }
-        assertNotNull("Unable to find parent folder!", parent);
-        return parent;
     }
 
 }

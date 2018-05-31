@@ -55,12 +55,10 @@ import com.openexchange.caching.CacheService;
 import com.openexchange.chronos.service.CalendarUtilities;
 import com.openexchange.chronos.service.RecurrenceService;
 import com.openexchange.chronos.storage.CalendarStorageFactory;
-import com.openexchange.chronos.storage.rdb.groupware.AlarmTriggerConsistencyTask;
+import com.openexchange.chronos.storage.rdb.groupware.CalendarAlarmRepairShiftedTriggersTask;
 import com.openexchange.chronos.storage.rdb.groupware.CalendarEventAddRDateColumnTask;
 import com.openexchange.chronos.storage.rdb.groupware.ChronosCreateTableService;
 import com.openexchange.chronos.storage.rdb.groupware.ChronosCreateTableTask;
-import com.openexchange.chronos.storage.rdb.groupware.DeleteAndChangeExceptionConsistencyTask;
-import com.openexchange.chronos.storage.rdb.groupware.ExceptionSeriesPatternConsistencyTask;
 import com.openexchange.chronos.storage.rdb.migration.ChronosStorageMigrationTask;
 import com.openexchange.chronos.storage.rdb.migration.ChronosStoragePurgeLegacyDataTask;
 import com.openexchange.config.ConfigurationService;
@@ -117,10 +115,8 @@ public class RdbCalendarStorageActivator extends HousekeepingActivator {
              * register services for infrastructure
              */
             registerService(CreateTableService.class, new ChronosCreateTableService());
-            registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(new DeleteAndChangeExceptionConsistencyTask()));
-            registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(new ExceptionSeriesPatternConsistencyTask()));
             registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(new ChronosCreateTableTask(), new CalendarEventAddRDateColumnTask(), new ChronosStorageMigrationTask(this)));
-            registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(new AlarmTriggerConsistencyTask()));
+            registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(new CalendarAlarmRepairShiftedTriggersTask(this)));
             if (getService(ConfigurationService.class).getBoolProperty("com.openexchange.calendar.migration.purgeLegacyData", false)) {
                 registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(new ChronosStoragePurgeLegacyDataTask()));
             }

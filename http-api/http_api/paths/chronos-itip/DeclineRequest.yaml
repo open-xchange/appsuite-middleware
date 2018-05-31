@@ -1,0 +1,26 @@
+/chronos/itip?action=decline:
+  put:
+    operationId: decline
+    tags:
+      - Chronos
+    consumes:
+      - application/json
+    summary: Declines an itip invitation.
+    parameters:
+      - $ref: "#/parameters/gblQueryParamSession"
+      - in: query
+        name: dataSoure
+        type: string
+        description: The identifier of the data source. Currently only "com.openexchange.mail.ical" is valid.
+        required: true
+      - in: body
+        name: body
+        description: The data source object.
+        required: true
+        schema:
+          $ref: "#/definitions/ConversionDataSource"
+    responses:
+      200:
+        description: An array of Events that were newly created or changed.
+        schema:
+          $ref: "#/definitions/EventData"

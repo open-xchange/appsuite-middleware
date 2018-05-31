@@ -682,6 +682,9 @@ public class RdbAttendeeStorage extends RdbStorage implements AttendeeStorage {
     }
 
     private int insertOrReplaceAttendees(Connection connection, boolean deleted, boolean replace, int contextID, int objectID, List<Attendee> attendees) throws OXException {
+        if (null == attendees || attendees.isEmpty()) {
+            return 0;
+        }
         int updated = 0;
         Set<Integer> usedEntities = new HashSet<Integer>();
         for (Attendee attendee : attendees) {

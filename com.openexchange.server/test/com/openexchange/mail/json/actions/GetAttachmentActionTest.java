@@ -58,7 +58,7 @@ import static org.powermock.api.mockito.PowerMockito.when;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Matchers;
+import org.mockito.ArgumentMatchers;
 import org.mockito.MockitoAnnotations;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
@@ -80,14 +80,13 @@ import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.strings.BasicTypesStringParser;
 import com.openexchange.tools.strings.StringParser;
 
-
 /**
  * {@link GetAttachmentActionTest}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({GetAttachmentAction.class, AbstractMailAction.class, MailRequest.class, MailProperties.class, MessageUtility.class})
+@PrepareForTest({ GetAttachmentAction.class, AbstractMailAction.class, MailRequest.class, MailProperties.class, MessageUtility.class })
 public class GetAttachmentActionTest {
 
     public GetAttachmentActionTest() {
@@ -101,7 +100,7 @@ public class GetAttachmentActionTest {
         PowerMockito.mockStatic(MailProperties.class);
         PowerMockito.mockStatic(MessageUtility.class);
 
-        PowerMockito.when(MessageUtility.readMailPart((MailPart)Matchers.any(), Matchers.anyString())).thenReturn("MailPartContent_but_I_am_not_in_the_mood_to_get_a_correct_content_example");
+        PowerMockito.when(MessageUtility.readMailPart(ArgumentMatchers.any(MailPart.class), ArgumentMatchers.anyString())).thenReturn("MailPartContent_but_I_am_not_in_the_mood_to_get_a_correct_content_example");
 
         MailProperties mailProperties = PowerMockito.mock(MailProperties.class);
         PowerMockito.when(mailProperties.getDefaultMimeCharset()).thenReturn("UTF-8");
@@ -114,8 +113,8 @@ public class GetAttachmentActionTest {
      * parameters, something like 'image/jpeg; name=I_am_a_filename_for_an_image.jpg' was returned. That's wrong, we expect
      * only 'image/jpeg' here.
      */
-     @Test
-     public void testReturnedContentTypeAndModifiedParameters() throws Exception {
+    @Test
+    public void testReturnedContentTypeAndModifiedParameters() throws Exception {
         String folder = "default0/INBOX";
         String uid = "1";
         String attachmentId = "2";
@@ -154,8 +153,8 @@ public class GetAttachmentActionTest {
         assertEquals("Wrong content type", "image/jpeg", ((IFileHolder) object).getContentType());
     }
 
-     @Test
-     public void testProperlyDetectedInvalidHtmlContent() throws Exception {
+    @Test
+    public void testProperlyDetectedInvalidHtmlContent() throws Exception {
         String folder = "default0/INBOX";
         String uid = "1";
         String attachmentId = "2";
@@ -190,11 +189,11 @@ public class GetAttachmentActionTest {
         assertEquals("Wrong format", "file", ajaxRequestData.getFormat());
         assertEquals("Wrong caching value", false, ajaxRequestData.getParameter("cache", boolean.class));
         assertTrue("Wrong class", IFileHolder.class.isInstance(object));
-        assertEquals("Wrong content type", "text/html", ((IFileHolder) object).getContentType());
+        assertEquals("Wrong content type", "text/html; charset=ISO-8859-1", ((IFileHolder) object).getContentType());
     }
 
-     @Test
-     public void testProperlyDetectedNonHtmlBinary() throws Exception {
+    @Test
+    public void testProperlyDetectedNonHtmlBinary() throws Exception {
         String folder = "default0/INBOX";
         String uid = "1";
         String attachmentId = "2";

@@ -3,8 +3,8 @@ title: Http proxy support
 ---
 
 Depending on the network infrastructure, it may be the case that middleware nodes do not have direct access to the internet.
-In those cases access is only possible via a http proxy. With 7.10.0 it will be possible to configure such a http proxy via
-well known java system properties:
+In those cases access is only possible via an HTTP proxy. With 7.10.0 it will be possible to configure such an HTTP proxy via
+well known Java system properties:
 
 * http.proxyHost
 * http.proxyPort
@@ -16,7 +16,7 @@ well known java system properties:
 * https.proxyUser
 * https.proxyPassword
 
-For example this can be achieved by adding the properties to the ox-scriptconf.sh script:
+For example this can be achieved by adding the properties to the `ox-scriptconf.sh` script:
 
 ```
 [...]

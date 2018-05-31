@@ -63,8 +63,7 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import com.google.common.collect.ImmutableList;
 import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.group.GroupStorage;
@@ -189,11 +188,11 @@ public final class OXFolderIteratorSQL {
      * @param permissionIds The user's permission identifiers
      * @param accessibleModules The user's accessible modules
      * @param additionalCondition The optional additional condition; pass <code>null</code> to ignore
-     * @param orderBy The optional <code>ORDER BY</code> clause; pass <code>null</code> to ignore
+     * @param queryAppendix The optional <code>ORDER BY</code> and/or <code>LIMIT</code> clause; pass <code>null</code> to ignore
      * @return The core SQL statement to query user-visible folders
      */
-    private static String getSQLUserVisibleFolders(final String fields, final String permissionIds, final String accessibleModules, final String additionalCondition, final String orderBy) {
-        return getSQLUserVisibleFolders(OXFOLDER_TREE, OXFOLDER_PERMISSIONS, fields, permissionIds, accessibleModules, additionalCondition, orderBy, false);
+    private static String getSQLUserVisibleFolders(final String fields, final String permissionIds, final String accessibleModules, final String additionalCondition, final QueryAppendix queryAppendix) {
+        return getSQLUserVisibleFolders(OXFOLDER_TREE, OXFOLDER_PERMISSIONS, fields, permissionIds, accessibleModules, additionalCondition, queryAppendix, false);
     }
 
     /**
@@ -217,12 +216,12 @@ public final class OXFolderIteratorSQL {
      * @param permissionIds The user's permission identifiers
      * @param accessibleModules The user's accessible modules
      * @param additionalCondition The optional additional condition; pass <code>null</code> to ignore
-     * @param orderBy The optional <code>ORDER BY</code> clause; pass <code>null</code> to ignore
+     * @param queryAppendix The optional <code>ORDER BY</code> and/or <code>LIMIT</code> clause; pass <code>null</code> to ignore
      * @param queryOptUserPrivate <code>true</code> to also query user private folders (optional); otherwise <code>false</code> for pure permission-wise query
      * @return The core SQL statement to query user-visible folders
      */
-    private static String getSQLUserVisibleFolders(final String folderTable, final String permissionTable, final String fields, final String permissionIds, final String accessibleModules, final String additionalCondition, final String orderBy, final boolean queryOptUserPrivate) {
-        return getSQLUserVisibleFolders(folderTable, permissionTable, fields, permissionIds, accessibleModules, additionalCondition, orderBy, queryOptUserPrivate, new String[0]);
+    private static String getSQLUserVisibleFolders(final String folderTable, final String permissionTable, final String fields, final String permissionIds, final String accessibleModules, final String additionalCondition, final QueryAppendix queryAppendix, final boolean queryOptUserPrivate) {
+        return getSQLUserVisibleFolders(folderTable, permissionTable, fields, permissionIds, accessibleModules, additionalCondition, queryAppendix, queryOptUserPrivate, new String[0]);
     }
 
     /**
@@ -246,27 +245,66 @@ public final class OXFolderIteratorSQL {
      * @param permissionIds The user's permission identifiers
      * @param accessibleModules The user's accessible modules
      * @param additionalCondition The optional additional condition; pass <code>null</code> to ignore
-     * @param orderBy The optional <code>ORDER BY</code> clause; pass <code>null</code> to ignore
+     * @param queryAppendix The optional <code>ORDER BY</code> and/or <code>LIMIT</code> clause; pass <code>null</code> to ignore
      * @param queryOptUserPrivate <code>true</code> to also query user private folders (optional); otherwise <code>false</code> for pure permission-wise query
      * @param indexNames The optional indexes to use (<code>"...FORCE INDEX..."</code>)
      * @return The core SQL statement to query user-visible folders
      */
-    private static String getSQLUserVisibleFolders(final String folderTable, final String permissionTable, final String fields, final String permissionIds, final String accessibleModules, final String additionalCondition, final String orderBy, final boolean queryOptUserPrivate, final String... indexNames) {
-        final StringBuilder sb = new StringBuilder(256);
+    private static String getSQLUserVisibleFolders(String folderTable, String permissionTable, String fields, String permissionIds, String accessibleModules, String additionalCondition, QueryAppendix queryAppendix, boolean queryOptUserPrivate, String... indexNames) {
+        return getSQLUserVisibleFolders(false, folderTable, permissionTable, fields, permissionIds, accessibleModules, additionalCondition, queryAppendix, queryOptUserPrivate, indexNames);
+    }
+
+    /**
+     * Generates the core SQL statement to query user-visible folders.
+     * <p>
+     * Returned {@link String} is supposed to be used within a {@link PreparedStatement}.<br>
+     * The following fields have to be set via {@link PreparedStatement#setInt(int, int)} method:
+     * <ol>
+     * <li>Context ID</li>
+     * <li>User ID</li>
+     * <li>Context ID</li>
+     * <li>Context ID</li>
+     * <li>User ID</li>
+     * <li>Context ID</li>
+     * <li>Context ID</li>
+     * <ol>
+     *
+     * @param useUnionAll Whether to use <code>"UNION ALL"</code> if duplicates are allowed
+     * @param folderTable The folder table name
+     * @param permissionTable The permission table name
+     * @param fields The fields to select
+     * @param permissionIds The user's permission identifiers
+     * @param accessibleModules The user's accessible modules
+     * @param additionalCondition The optional additional condition; pass <code>null</code> to ignore
+     * @param queryAppendix The optional <code>ORDER BY</code> and/or <code>LIMIT</code> clause; pass <code>null</code> to ignore
+     * @param queryOptUserPrivate <code>true</code> to also query user private folders (optional); otherwise <code>false</code> for pure permission-wise query
+     * @param indexNames The optional indexes to use (<code>"...FORCE INDEX..."</code>)
+     * @return The core SQL statement to query user-visible folders
+     */
+    private static String getSQLUserVisibleFolders(boolean useUnionAll, String folderTable, String permissionTable, String fields, String permissionIds, String accessibleModules, String additionalCondition, QueryAppendix queryAppendix, boolean queryOptUserPrivate, String... indexNames) {
         /*
          * Compose SELECT string prepended to each UNION statement
          */
-        final String preparedOrderBy;
+        final StringBuilder sb = new StringBuilder(256);
         sb.append(STR_SELECT).append(fields);
-        if (null == orderBy) {
-            preparedOrderBy = null;
+        final String preparedQueryAppendix;
+        if (null == queryAppendix) {
+            preparedQueryAppendix = null;
         } else {
             /*
              * Ensure each field contained in ORDER BY clause is contained in selected fields
              */
-            final String[] orderFields = parseFieldsFromOrderBy(orderBy);
-            if (0 < orderFields.length) {
-                for (final String orderField : orderFields) {
+            OrderBy orderBy = queryAppendix.orderBy;
+            if (null != orderBy) {
+                StringBuilder tmp = null;
+                List<ColumnAndDirection> columnsToOrderBy = orderBy.columns;
+                for (ColumnAndDirection columnToOrderBy : columnsToOrderBy) {
+                    if (null == tmp) {
+                        tmp = new StringBuilder(16);
+                    } else {
+                        tmp.setLength(0);
+                    }
+                    String orderField = tmp.append(columnToOrderBy.tableAlias).append('.').append(columnToOrderBy.columnName).toString();
                     if (-1 == fields.indexOf(orderField)) {
                         sb.append(", ").append(orderField);
                     }
@@ -275,7 +313,7 @@ public final class OXFolderIteratorSQL {
             /*
              * Prepare the ORDER BY clause by removing table alias
              */
-            preparedOrderBy = prepareOrderBy(orderBy);
+            preparedQueryAppendix = queryAppendix.toString();
         }
         sb.append(" FROM ").append(folderTable).append(" AS ot");
         /*
@@ -343,11 +381,14 @@ public final class OXFolderIteratorSQL {
         }
         for (int i = whereClauses.size() - 1; i-- > 0;) {
             sb.append(" UNION ");
+            if (useUnionAll) {
+                sb.append("ALL ");
+            }
             sb.append(select);
             sb.append(it.next());
         }
-        if (null != preparedOrderBy) {
-            sb.append(' ').append(preparedOrderBy);
+        if (null != preparedQueryAppendix) {
+            sb.append(' ').append(preparedQueryAppendix);
         }
         return sb.toString();
     }
@@ -367,86 +408,16 @@ public final class OXFolderIteratorSQL {
         }
     }
 
-    private static final Pattern PAT_ORDER_BY = Pattern.compile("( *ORDER +BY +)(?:([a-zA-Z0-9_.]+)(?: *ASC *| *DESC *)?)(?:, *[a-zA-Z0-9_.]+(?: *ASC *| *DESC *)?)?", Pattern.CASE_INSENSITIVE);
-
-    private static final Pattern PAT_FIELD = Pattern.compile("(?:([a-zA-Z0-9_.]+)(?: *ASC| *DESC)?)", Pattern.CASE_INSENSITIVE);
-
-    /**
-     * Parses denoted fields out of specified <code>ORDER BY</code> statement; <code>" ORDER BY co.field01 DESC "</code>
-     *
-     * @param orderBy The <code>ORDER BY</code> statement
-     * @return The parsed fields
-     */
-    private static String[] parseFieldsFromOrderBy(final String orderBy) {
-        // ORDER BY oc.field01 DESC
-        Matcher m = PAT_ORDER_BY.matcher(orderBy);
-        if (m.matches()) {
-            m = PAT_FIELD.matcher(orderBy.substring(m.end(1)));
-            final List<String> l = new ArrayList<String>(2);
-            while (m.find()) {
-                l.add(m.group(1));
-            }
-            return l.toArray(new String[l.size()]);
-        }
-        return new String[0];
-    }
-
-    private static final Pattern PAT_PREP = Pattern.compile("[a-zA-Z0-9_]+\\.([a-zA-Z0-9_])");
-
-    /**
-     * Prepares given <code>ORDER BY</code> statement to be used within a <code>UNION</code> statement.
-     *
-     * <pre>
-     * ORDER BY co.field01 DESC -&gt; ORDER BY field01 DESC
-     * </pre>
-     *
-     * @param orderBy The <code>ORDER BY</code> statement
-     * @return The prepared <code>ORDER BY</code> statement
-     */
-    private static final String prepareOrderBy(final String orderBy) {
-        if (null == orderBy) {
-            return null;
-        }
-        return PAT_PREP.matcher(orderBy).replaceAll("$1");
-    }
-
     private final static String STR_OT = "ot";
-
-    private final static String STR_ORDER_BY = "ORDER BY ";
 
     private final static String STR_FUID = "fuid";
 
-    private final static String STR_DEFAULTFLAG_DESC = "default_flag DESC";
-
-    private final static String STR_FNAME = "fname";
-
-    private static String getRootOrderBy(final String tableAlias) {
-        return getOrderBy(tableAlias, STR_FUID);
+    private static QueryAppendix getRootOrderBy(final String tableAlias, final int limit) {
+        return new QueryAppendix(new OrderBy(new ColumnAndDirection(tableAlias, "fuid", Order.ASC)), limit);
     }
 
-    private static String getSubfolderOrderBy(final String tableAlias) {
-        return getOrderBy(tableAlias, STR_DEFAULTFLAG_DESC, STR_FNAME);
-    }
-
-    private static String getOrderBy(final String tableAlias, final String... strings) {
-        if (strings == null || strings.length == 0) {
-            return null;
-        }
-        final StringBuilder sb = new StringBuilder(32);
-        final String alias;
-        if (tableAlias == null) {
-            alias = STR_EMPTY;
-        } else {
-            alias = sb.append(tableAlias).append('.').toString();
-            sb.setLength(0);
-        }
-        sb.append(STR_ORDER_BY);
-        sb.append(alias).append(strings[0]);
-        for (int i = 1; i < strings.length; i++) {
-            sb.append(", ");
-            sb.append(alias).append(strings[i]);
-        }
-        return sb.toString();
+    private static QueryAppendix getSubfolderOrderBy(final String tableAlias, final int limit) {
+        return new QueryAppendix(new OrderBy(new ColumnAndDirection(tableAlias, "default_flag", Order.DESC), new ColumnAndDirection(tableAlias, "fname", Order.ASC)), limit);
     }
 
     private final static String STR_GROUP_BY = "GROUP BY ";
@@ -486,7 +457,7 @@ public final class OXFolderIteratorSQL {
         if (!permissionBits.hasInfostore()) {
             condBuilder.append(" AND (ot.fuid != ").append(SYSTEM_INFOSTORE_FOLDER_ID).append(')');
         }
-        final String sqlSelectStr = getSQLUserVisibleFolders(FolderObjectIterator.getFieldsForSQL(STR_OT), permissionIds(userId, memberInGroups, ctx), StringCollection.getSqlInString(permissionBits.getAccessibleModules()), condBuilder.toString(), getRootOrderBy(STR_OT));
+        final String sqlSelectStr = getSQLUserVisibleFolders(FolderObjectIterator.getFieldsForSQL(STR_OT), permissionIds(userId, memberInGroups, ctx), StringCollection.getSqlInString(permissionBits.getAccessibleModules()), condBuilder.toString(), getRootOrderBy(STR_OT, 0));
         condBuilder = null;
         Connection readCon = null;
         PreparedStatement stmt = null;
@@ -585,7 +556,7 @@ public final class OXFolderIteratorSQL {
         if (since != null) {
             condBuilder.append(" AND (changing_date > ").append(since.getTime()).append(')');
         }
-        final String sqlSelectStr = getSQLUserVisibleFolders(FolderObjectIterator.getFieldsForSQL(STR_OT), permissionIds(userId, groups, ctx), StringCollection.getSqlInString(accessibleModules), condBuilder.toString(), getSubfolderOrderBy(STR_OT));
+        final String sqlSelectStr = getSQLUserVisibleFolders(FolderObjectIterator.getFieldsForSQL(STR_OT), permissionIds(userId, groups, ctx), StringCollection.getSqlInString(accessibleModules), condBuilder.toString(), getSubfolderOrderBy(STR_OT, 0));
         Connection readCon = con;
         boolean closeCon = false;
         PreparedStatement stmt = null;
@@ -675,7 +646,7 @@ public final class OXFolderIteratorSQL {
         if (null != since) {
             condBuilder.append(" AND (changing_date > ").append(since.getTime()).append(')');
         }
-        final String sqlSelectStr = getSQLUserVisibleFolders(FolderObjectIterator.getFieldsForSQL(STR_OT), permissionIds(userId, groups, ctx), StringCollection.getSqlInString(accessibleModules), condBuilder.toString(), getSubfolderOrderBy(STR_OT));
+        final String sqlSelectStr = getSQLUserVisibleFolders(FolderObjectIterator.getFieldsForSQL(STR_OT), permissionIds(userId, groups, ctx), StringCollection.getSqlInString(accessibleModules), condBuilder.toString(), getSubfolderOrderBy(STR_OT, 0));
         Connection readCon = con;
         boolean closeCon = false;
         PreparedStatement stmt = null;
@@ -752,7 +723,7 @@ public final class OXFolderIteratorSQL {
         if (null != since) {
             condBuilder.append(" AND (changing_date > ").append(since.getTime()).append(')');
         }
-        final String sqlSelectStr = getSQLUserVisibleFolders(FolderObjectIterator.getFieldsForSQL(STR_OT), permissionIds(userId, memberInGroups, ctx), StringCollection.getSqlInString(accessibleModules), condBuilder.toString(), getSubfolderOrderBy(STR_OT));
+        final String sqlSelectStr = getSQLUserVisibleFolders(FolderObjectIterator.getFieldsForSQL(STR_OT), permissionIds(userId, memberInGroups, ctx), StringCollection.getSqlInString(accessibleModules), condBuilder.toString(), getSubfolderOrderBy(STR_OT, 0));
         Connection readCon = con;
         boolean closeCon = false;
         PreparedStatement stmt = null;
@@ -820,7 +791,7 @@ public final class OXFolderIteratorSQL {
         final String fields = condBuilder.append(STR_OT).append(".fuid").toString();
         condBuilder.setLength(0);
         condBuilder.append("AND (ot.fuid = ").append(folderId).append(')');
-        final String sqlSelectStr = getSQLUserVisibleFolders(fields, permissionIds(userId, memberInGroups, ctx), StringCollection.getSqlInString(accessibleModules), condBuilder.toString(), getSubfolderOrderBy(STR_OT));
+        final String sqlSelectStr = getSQLUserVisibleFolders(fields, permissionIds(userId, memberInGroups, ctx), StringCollection.getSqlInString(accessibleModules), condBuilder.toString(), getSubfolderOrderBy(STR_OT, 0));
         Connection readCon = con;
         boolean closeCon = false;
         PreparedStatement stmt = null;
@@ -881,7 +852,7 @@ public final class OXFolderIteratorSQL {
         final String fields = condBuilder.append(STR_OT).append(".fuid").toString();
         condBuilder.setLength(0);
         condBuilder.append("AND (ot.parent = ").append(parent).append(')');
-        final String sqlSelectStr = getSQLUserVisibleFolders(fields, permissionIds(userId, memberInGroups, ctx), StringCollection.getSqlInString(accessibleModules), condBuilder.toString(), getSubfolderOrderBy(STR_OT));
+        final String sqlSelectStr = getSQLUserVisibleFolders(fields, permissionIds(userId, memberInGroups, ctx), StringCollection.getSqlInString(accessibleModules), condBuilder.toString(), getSubfolderOrderBy(STR_OT, 0));
         Connection readCon = con;
         boolean closeCon = false;
         PreparedStatement stmt = null;
@@ -981,7 +952,7 @@ public final class OXFolderIteratorSQL {
         if (since != null) {
             condBuilder.append(" AND (changing_date > ").append(since.getTime()).append(')');
         }
-        final String sqlSelectStr = getSQLUserVisibleFolders(FolderObjectIterator.getFieldsForSQL(STR_OT), permissionIds(userId, memberInGroups, ctx), StringCollection.getSqlInString(accessibleModules), condBuilder.toString(), getSubfolderOrderBy(STR_OT));
+        final String sqlSelectStr = getSQLUserVisibleFolders(FolderObjectIterator.getFieldsForSQL(STR_OT), permissionIds(userId, memberInGroups, ctx), StringCollection.getSqlInString(accessibleModules), condBuilder.toString(), getSubfolderOrderBy(STR_OT, 0));
         Connection readCon = con;
         boolean closeCon = false;
         PreparedStatement stmt = null;
@@ -1112,8 +1083,7 @@ public final class OXFolderIteratorSQL {
              */
             TIntSet modulesToCheck = new TIntHashSet(modules);
             String condition = (modulesToCheck.contains(FolderObject.INFOSTORE) ? new StringBuilder("AND (ot.type IN (").append(PUBLIC).append(',').append(TRASH).append("))") : new StringBuilder("AND (ot.type = ").append(PUBLIC).append(')')).toString();
-            stmt = rc.prepareStatement(getSQLUserVisibleFolders("ot.fuid, ot.parent, ot.module",
-                permissionIds(userId, groups, ctx), StringCollection.getSqlInString(permissionBits.getAccessibleModules()), condition, getSubfolderOrderBy(STR_OT)));
+            stmt = rc.prepareStatement(getSQLUserVisibleFolders(true, OXFOLDER_TREE, OXFOLDER_PERMISSIONS, "ot.fuid, ot.parent, ot.module", permissionIds(userId, groups, ctx), StringCollection.getSqlInString(permissionBits.getAccessibleModules()), condition, null, false, new String[0]));
             int pos = 1;
             stmt.setInt(pos++, contextId);
             stmt.setInt(pos++, contextId);
@@ -1186,7 +1156,7 @@ public final class OXFolderIteratorSQL {
                 }
                 condBuilder.append(')');
                 stmt = rc.prepareStatement(getSQLUserVisibleFolders("ot.fuid, ot.parent", // fuid, parent, ...
-                permissionIds(userId, groups, ctx), StringCollection.getSqlInString(permissionBits.getAccessibleModules()), condBuilder.toString(), getSubfolderOrderBy(STR_OT)));
+                permissionIds(userId, groups, ctx), StringCollection.getSqlInString(permissionBits.getAccessibleModules()), condBuilder.toString(), getSubfolderOrderBy(STR_OT, 0)));
             }
             int pos = 1;
             // stmt.setInt(pos++, contextId);
@@ -1227,7 +1197,7 @@ public final class OXFolderIteratorSQL {
             if (fuid2parent.isEmpty()) {
                 return FolderObjectIterator.EMPTY_FOLDER_ITERATOR;
             }
-            stmt = rc.prepareStatement("SELECT " + FolderObjectIterator.getFieldsForSQL(STR_OT) + " FROM oxfolder_tree AS ot WHERE ot.cid = ? AND ot.fuid IN " + StringCollection.getSqlInString(fuid2parent.keys()) + ' ' + getSubfolderOrderBy(STR_OT));
+            stmt = rc.prepareStatement("SELECT " + FolderObjectIterator.getFieldsForSQL(STR_OT) + " FROM oxfolder_tree AS ot WHERE ot.cid = ? AND ot.fuid IN " + StringCollection.getSqlInString(fuid2parent.keys()) + ' ' + getSubfolderOrderBy(STR_OT, 0));
             stmt.setInt(1, contextId);
             rs = executeQuery(stmt);
             closeResources = false;
@@ -1478,7 +1448,7 @@ public final class OXFolderIteratorSQL {
                 readCon = DBPool.pickup(ctx);
                 closeCon = true;
             }
-            stmt = readCon.prepareStatement(getSQLUserVisibleFolders(FolderObjectIterator.getFieldsForSQL(STR_OT), permissionIds(userId, memberInGroups, ctx), StringCollection.getSqlInString(accessibleModules), condBuilder.toString(), getSubfolderOrderBy(STR_OT)));
+            stmt = readCon.prepareStatement(getSQLUserVisibleFolders(FolderObjectIterator.getFieldsForSQL(STR_OT), permissionIds(userId, memberInGroups, ctx), StringCollection.getSqlInString(accessibleModules), condBuilder.toString(), getSubfolderOrderBy(STR_OT, 0)));
             int pos = 1;
             // stmt.setInt(pos++, contextId);
             // stmt.setInt(pos++, userId);
@@ -1540,7 +1510,7 @@ public final class OXFolderIteratorSQL {
         stringBuilder.append(')');
         String additionalCondition = stringBuilder.toString();
         String sql = getSQLUserVisibleFolders(FolderObjectIterator.getFieldsForSQL(STR_OT), permissionIds(userId, memberInGroups, ctx),
-            StringCollection.getSqlInString(accessibleModules), additionalCondition, getSubfolderOrderBy(STR_OT) + " LIMIT 1");
+            StringCollection.getSqlInString(accessibleModules), additionalCondition, new QueryAppendix(null, 1));
         Connection readCon;
         boolean closeReadCon = (con == null);
         {
@@ -1589,7 +1559,7 @@ public final class OXFolderIteratorSQL {
         /*
          * Query database
          */
-        final String sqlSelectStr = getSQLUserVisibleFolders(FolderObjectIterator.getFieldsForSQL(STR_OT), permissionIds(userId, memberInGroups, ctx), StringCollection.getSqlInString(accessibleModules), new StringBuilder("AND (ot.module = ").append(module).append(')').toString(), getSubfolderOrderBy(STR_OT));
+        final String sqlSelectStr = getSQLUserVisibleFolders(FolderObjectIterator.getFieldsForSQL(STR_OT), permissionIds(userId, memberInGroups, ctx), StringCollection.getSqlInString(accessibleModules), new StringBuilder("AND (ot.module = ").append(module).append(')').toString(), getSubfolderOrderBy(STR_OT, 0));
         final Connection readCon;
         final boolean closeReadCon = (con == null);
         final int contextId = ctx.getContextId();
@@ -1662,7 +1632,7 @@ public final class OXFolderIteratorSQL {
     public static SearchIterator<FolderObject> getDeletedFoldersSince(final Date since, final int userId, final int[] memberInGroups, final int[] accessibleModules, final Context ctx, final Connection con) throws OXException {
         final String fields = FolderObjectIterator.getFieldsForSQL(STR_OT);
         final String condition = since == null ? null : new StringBuilder(" AND (ot.changing_date > ").append(since.getTime()).append(')').toString();
-        final String sqlSelectStr = getSQLUserVisibleFolders("del_oxfolder_tree", "del_oxfolder_permissions", fields, permissionIds(userId, memberInGroups, ctx), StringCollection.getSqlInString(accessibleModules), condition, "ORDER by ot.fuid", false);
+        final String sqlSelectStr = getSQLUserVisibleFolders("del_oxfolder_tree", "del_oxfolder_permissions", fields, permissionIds(userId, memberInGroups, ctx), StringCollection.getSqlInString(accessibleModules), condition, new QueryAppendix(new OrderBy(new ColumnAndDirection("ot", "fuid", Order.ASC)), 0), false);
         Connection readCon = con;
         boolean closeCon = false;
         PreparedStatement stmt = null;
@@ -1717,7 +1687,7 @@ public final class OXFolderIteratorSQL {
         if (userFoldersOnly) {
             condBuilder.append(" AND (ot.created_from = ").append(userId).append(") ");
         }
-        final String sqlSelectStr = getSQLUserVisibleFolders(FolderObjectIterator.getFieldsForSQL(STR_OT), permissionIds(userId, memberInGroups, ctx), StringCollection.getSqlInString(accessibleModules), condBuilder.toString(), getSubfolderOrderBy(STR_OT));
+        final String sqlSelectStr = getSQLUserVisibleFolders(FolderObjectIterator.getFieldsForSQL(STR_OT), permissionIds(userId, memberInGroups, ctx), StringCollection.getSqlInString(accessibleModules), condBuilder.toString(), getSubfolderOrderBy(STR_OT, 0));
         Connection readCon = null;
         PreparedStatement stmt = null;
         ResultSet rs = null;
@@ -1946,5 +1916,96 @@ public final class OXFolderIteratorSQL {
         }
         // Retry from storage...
     }
+
+    private static class QueryAppendix {
+
+        final OrderBy orderBy;
+        final int limit;
+
+        QueryAppendix(OrderBy orderBy, int limit) {
+            super();
+            this.orderBy = orderBy;
+            this.limit = limit;
+        }
+
+        @Override
+        public String toString() {
+            StringBuilder sb = null;
+            if (null != orderBy) {
+                sb = new StringBuilder(32).append("ORDER BY ");
+                List<ColumnAndDirection> columns = orderBy.columns;
+                boolean first = true;
+                for (ColumnAndDirection columnAndDirection : columns) {
+                    if (first) {
+                        first = false;
+                    } else {
+                        sb.append(", ");
+                    }
+                    sb.append(columnAndDirection.columnName);
+                    Order order = columnAndDirection.order;
+                    if (order == Order.DESC) {
+                        sb.append(" ").append(order.id);
+                    }
+                }
+            }
+            if (limit > 0) {
+                if (null == sb) {
+                    sb = new StringBuilder(16);
+                } else {
+                    sb.append(' ');
+                }
+                sb.append("LIMIT ").append(limit);
+            }
+            return null == sb ? null : sb.toString();
+        }
+    }
+
+    private static class OrderBy {
+
+        final List<ColumnAndDirection> columns;
+
+        OrderBy(ColumnAndDirection column, ColumnAndDirection... others) {
+            super();
+            if (null == others || others.length == 0) {
+                columns = ImmutableList.of(column);
+            } else {
+                ImmutableList.Builder<ColumnAndDirection> list = ImmutableList.builderWithExpectedSize(others.length + 1);
+                list.add(column);
+                for (ColumnAndDirection c : others) {
+                    if (null != c) {
+                        list.add(c);
+                    }
+                }
+                columns = list.build();
+            }
+        }
+    }
+
+    private static class ColumnAndDirection {
+
+        final String tableAlias;
+        final String columnName;
+        final Order order;
+
+        ColumnAndDirection(String tableAlias, String columnName, Order order) {
+            super();
+            this.tableAlias = tableAlias;
+            this.columnName = columnName;
+            this.order = order;
+        }
+    }
+
+    private static enum Order {
+        ASC("ASC"),
+        DESC("DESC"),
+        ;
+
+        final String id;
+
+        private Order(String id) {
+            this.id = id;
+        }
+    }
+
 
 }

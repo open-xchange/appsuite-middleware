@@ -351,7 +351,17 @@ public class EventUpdateProcessor implements EventUpdate {
                     }
                 }
                 break;
+            case ORGANIZER:
+                /*
+                 * (re-)check organizer
+                 */
+                Check.internalOrganizerIsAttendee(updatedEvent);
+                break;
             case ATTENDEES:
+                /*
+                 * (re-)check organizer
+                 */
+                Check.internalOrganizerIsAttendee(updatedEvent);
                 /*
                  * (re-)check classification validity
                  */

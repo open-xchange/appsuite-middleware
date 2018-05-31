@@ -231,7 +231,7 @@ public class WebClientInfoProvider implements ClientInfoProvider {
                     browserFamily = BROWSER_EDGE;
                 }
             }
-            if ("Mozilla".equals(browser)) {
+            if ("Mozilla".equals(browser) || "IE".equals(browser)) {
                 if (userAgent.contains("Trident/7.0; rv:11.0")) { //MSIE 11
                     browser = "Internet Explorer";
                     browserVersion = "11";

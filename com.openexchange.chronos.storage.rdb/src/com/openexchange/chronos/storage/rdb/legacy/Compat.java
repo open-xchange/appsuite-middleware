@@ -73,6 +73,7 @@ import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.compat.Appointment2Event;
 import com.openexchange.chronos.compat.SeriesPattern;
+import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.exception.ProblemSeverity;
 import com.openexchange.chronos.service.RecurrenceData;
 import com.openexchange.chronos.service.RecurrenceService;
@@ -233,8 +234,13 @@ public class Compat {
                 absoluteDuration = Integer.parseInt(event.getRecurrenceRule().substring(0, idx));
                 String databasePattern = event.getRecurrenceRule().substring(idx + 1);
                 recurrenceData = getRecurrenceData(new SeriesPattern(databasePattern), timeZone, event.getStartDate().isAllDay());
+                Services.getService(RecurrenceService.class, true).validate(recurrenceData);
             } catch (IllegalArgumentException | OXException e) {
                 String message = "Ignoring invalid legacy series pattern \"" + event.getRecurrenceRule() + '"';
+                if (null != recurrenceData) {
+                    message += " | " + recurrenceData;
+                    recurrenceData = null;
+                }
                 eventStorage.addInvalidDataWaring(event.getId(), EventField.RECURRENCE_RULE, ProblemSeverity.MAJOR, message, e);
             }
             /*
@@ -295,10 +301,11 @@ public class Compat {
                 try {
                     recurrenceId = getRecurrenceID(Services.getService(RecurrenceService.class, true), recurrenceData, recurrencePosition);
                 } catch (OXException e) {
-                    if (false == "CAL-4061".equals(e.getErrorCode())) {
+                    if (CalendarExceptionCodes.INVALID_RRULE.equals(e) || CalendarExceptionCodes.INVALID_RECURRENCE_ID.equals(e)) {
+                        eventStorage.addInvalidDataWaring(event.getId(), EventField.RECURRENCE_ID, ProblemSeverity.MINOR, "Skipping invalid recurrence position \"" + recurrencePosition + '"', e);
+                    } else {
                         throw e;
                     }
-                    eventStorage.addInvalidDataWaring(event.getId(), EventField.RECURRENCE_ID, ProblemSeverity.MINOR, "Skipping invalid recurrence position \"" + recurrencePosition + '"', e);
                 }
             }
             if (null != recurrenceId) {
@@ -389,7 +396,7 @@ public class Compat {
         try {
             return Appointment2Event.getRecurrenceIDs(recurrenceService, recurrenceData, recurrenceDatePositions);
         } catch (OXException e) {
-            if (false == "CAL-4061".equals(e.getErrorCode())) {
+            if (false == CalendarExceptionCodes.INVALID_RRULE.equals(e) && false == CalendarExceptionCodes.INVALID_RECURRENCE_ID.equals(e)) {
                 throw e;
             }
         }
@@ -401,10 +408,11 @@ public class Compat {
             try {
                 recurrenceIDs.add(getRecurrenceID(recurrenceService, recurrenceData, date));
             } catch (OXException e) {
-                if (false == "CAL-4061".equals(e.getErrorCode())) {
+                if (CalendarExceptionCodes.INVALID_RRULE.equals(e) || CalendarExceptionCodes.INVALID_RECURRENCE_ID.equals(e)) {
+                    eventStorage.addInvalidDataWaring(eventId, EventField.RECURRENCE_ID, ProblemSeverity.MINOR, "Skipping invalid recurrence date position \"" + date.getTime() + '"', e);
+                } else {
                     throw e;
                 }
-                eventStorage.addInvalidDataWaring(eventId, field, ProblemSeverity.MINOR, "Skipping invalid recurrence date position \"" + date.getTime() + '"', e);
             }
         }
         return recurrenceIDs;

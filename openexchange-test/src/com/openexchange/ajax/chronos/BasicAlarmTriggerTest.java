@@ -67,6 +67,7 @@ import com.openexchange.ajax.chronos.factory.AttendeeFactory;
 import com.openexchange.ajax.chronos.factory.EventFactory;
 import com.openexchange.ajax.chronos.manager.ChronosApiException;
 import com.openexchange.ajax.chronos.util.DateTimeUtil;
+import com.openexchange.junit.Assert;
 import com.openexchange.testing.httpclient.invoker.ApiException;
 import com.openexchange.testing.httpclient.models.AlarmTrigger;
 import com.openexchange.testing.httpclient.models.AlarmTriggerData;
@@ -120,7 +121,7 @@ public class BasicAlarmTriggerTest extends AbstractUserTimezoneAlarmTriggerTest 
 
         assertTrue(alarmTrigger.getEventId().equals(event.getId()));
         // 3. Get only mail alarms within the next two days
-        getAndCheckAlarmTrigger(currentTime + TimeUnit.DAYS.toMillis(2), "MAIL", 0); // No triggers
+        getAndCheckAlarmTrigger(currentTime + TimeUnit.DAYS.toMillis(2), "MAIL", 0 + currentTriggers); // No triggers
 
     }
 
@@ -245,7 +246,7 @@ public class BasicAlarmTriggerTest extends AbstractUserTimezoneAlarmTriggerTest 
 
     @Test
     public void testEventSeriesAlarmTriggerTimeRoundtripForSingleUser() throws Exception {
-
+        int currentTriggers = getAlarmTriggers().size();
         /*
          * 1. Create an event series and test if the time is correct
          */
@@ -266,9 +267,8 @@ public class BasicAlarmTriggerTest extends AbstractUserTimezoneAlarmTriggerTest 
 
         // Check if next trigger is at correct time
         long currentTime = System.currentTimeMillis();
-        AlarmTriggerData triggers = getAndCheckAlarmTrigger(1); // The created alarm
-        AlarmTrigger alarmTrigger = triggers.get(0);
-        assertTrue(alarmTrigger.getEventId().equals(event.getId()));
+        AlarmTriggerData triggers = getAndCheckAlarmTrigger(1 + currentTriggers); // The created alarm
+        AlarmTrigger alarmTrigger = findTrigger(event.getId(), triggers);
         Calendar eventTime = Calendar.getInstance(UTC);
         eventTime.setTimeInMillis(cal.getTimeInMillis());
         if (currentTime < (cal.getTimeInMillis() - TimeUnit.MINUTES.toMillis(15) + TimeUnit.DAYS.toMillis(1))) {
@@ -281,7 +281,7 @@ public class BasicAlarmTriggerTest extends AbstractUserTimezoneAlarmTriggerTest 
         Calendar alarmTriggerTime = Calendar.getInstance(UTC);
         alarmTriggerTime.setTime(eventTime.getTime());
         alarmTriggerTime.add(Calendar.MINUTE, -15);
-        checkAlarmTime(triggers.get(0), event.getId(), alarmTriggerTime.getTimeInMillis());
+        checkAlarmTime(alarmTrigger, event.getId(), alarmTriggerTime.getTimeInMillis());
 
         /*
          * 2. create an exception for the event recurrence of the next trigger by shifting the start time by one hour
@@ -292,19 +292,21 @@ public class BasicAlarmTriggerTest extends AbstractUserTimezoneAlarmTriggerTest 
         EventData exceptionEvent = updateResult.getCreated().get(0);
 
         // Check if trigger times are correct
-        triggers = getAndCheckAlarmTrigger(2); // The alarm of the series and the alarm for the exception
+        triggers = getAndCheckAlarmTrigger(2 + currentTriggers); // The alarm of the series and the alarm for the exception
 
         // Check the exception
+        AlarmTrigger trigger = findTrigger(exceptionEvent.getId(), triggers);
         Calendar exceptionTriggerTime = Calendar.getInstance(UTC);
         exceptionTriggerTime.setTimeInMillis(alarmTriggerTime.getTimeInMillis());
         exceptionTriggerTime.add(Calendar.HOUR, 1); // Old alarm time shifted by one hour
-        checkAlarmTime(triggers.get(0), exceptionEvent.getId(), exceptionTriggerTime.getTimeInMillis());
+        checkAlarmTime(trigger, exceptionEvent.getId(), exceptionTriggerTime.getTimeInMillis());
 
         // Check the normal alarm
+        trigger = findTrigger(event.getId(), triggers);
         Calendar newAlarmTriggerTime = Calendar.getInstance(UTC);
         newAlarmTriggerTime.setTimeInMillis(alarmTriggerTime.getTimeInMillis());
         newAlarmTriggerTime.add(Calendar.DAY_OF_MONTH, 1); // Old alarm time shifted by one day (next recurrence)
-        checkAlarmTime(triggers.get(1), event.getId(), newAlarmTriggerTime.getTimeInMillis());
+        checkAlarmTime(trigger, event.getId(), newAlarmTriggerTime.getTimeInMillis());
 
         /*
          * 3. Delete the exception
@@ -315,8 +317,8 @@ public class BasicAlarmTriggerTest extends AbstractUserTimezoneAlarmTriggerTest 
         eventManager.deleteEvent(toDelete);
 
         // Check the normal alarm
-        triggers = getAndCheckAlarmTrigger(1); // Only the alarm of the series
-        checkAlarmTime(triggers.get(0), event.getId(), newAlarmTriggerTime.getTimeInMillis());
+        triggers = getAndCheckAlarmTrigger(1 + currentTriggers); // Only the alarm of the series
+        checkAlarmTime(findTrigger(event.getId(), triggers), event.getId(), newAlarmTriggerTime.getTimeInMillis());
 
         /*
          * 4. Delete series too
@@ -327,7 +329,17 @@ public class BasicAlarmTriggerTest extends AbstractUserTimezoneAlarmTriggerTest 
         eventManager.deleteEvent(toDelete);
 
         // Check the normal alarm
-        getAndCheckAlarmTrigger(0); // No upcoming triggers
+        getAndCheckAlarmTrigger(0 + currentTriggers); // No upcoming triggers
+    }
+
+    private AlarmTrigger findTrigger(String eventId, List<AlarmTrigger> triggers) {
+        for(AlarmTrigger trigger: triggers) {
+            if(trigger.getEventId().equals(eventId)) {
+                return trigger;
+            }
+        }
+        Assert.fail("Alarm trigger not found.");
+        return null;
     }
 
     @Test
@@ -417,7 +429,8 @@ public class BasicAlarmTriggerTest extends AbstractUserTimezoneAlarmTriggerTest 
         /*
          * 3. create an exception for the event recurrence of the next trigger by shifting the start time by one hour
          */
-        CalendarResult updateResult = eventManager.shiftEvent(event.getId(), alarmTrigger.getRecurrenceId(), event, eventTime, TimeUnit.HOURS, 1, System.currentTimeMillis());
+        eventManager.getEvent(folderId, event.getId());
+        CalendarResult updateResult = eventManager.shiftEvent(event.getId(), alarmTrigger.getRecurrenceId(), event, eventTime, TimeUnit.HOURS, 1, null);
         assertNotNull(updateResult.getCreated());
         assertEquals(1, updateResult.getCreated().size());
         EventData exceptionEvent = updateResult.getCreated().get(0);

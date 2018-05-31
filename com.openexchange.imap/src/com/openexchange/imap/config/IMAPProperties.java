@@ -128,6 +128,7 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
             boolean useMultipleAddressesUserHash;
             int useMultipleAddressesMaxRetryAttempts;
             boolean ignoreDeletedMails;
+            boolean includeSharedInboxExplicitly;
 
             Params() {
                 super();
@@ -150,6 +151,7 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
         final boolean useMultipleAddressesUserHash;
         final int useMultipleAddressesMaxRetryAttempts;
         final boolean ignoreDeletedMails;
+        final boolean includeSharedInboxExplicitly;
 
         PrimaryIMAPProperties(Params params) {
             super();
@@ -166,6 +168,7 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
             this.useMultipleAddressesUserHash = params.useMultipleAddressesUserHash;
             this.useMultipleAddressesMaxRetryAttempts = params.useMultipleAddressesMaxRetryAttempts;
             this.ignoreDeletedMails = params.ignoreDeletedMails;
+            this.includeSharedInboxExplicitly = params.includeSharedInboxExplicitly;
         }
     }
 
@@ -350,6 +353,14 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
 
             logMessageBuilder.append("  Ignore deleted mails: {}{}");
             args.add(Autoboxing.valueOf(params.ignoreDeletedMails));
+            args.add(Strings.getLineSeparator());
+        }
+
+        {
+            params.includeSharedInboxExplicitly = ConfigViews.getDefinedBoolPropertyFrom("com.openexchange.imap.includeSharedInboxExplicitly", false, view);
+
+            logMessageBuilder.append("  Include shared inbox explicitly: {}{}");
+            args.add(Autoboxing.valueOf(params.includeSharedInboxExplicitly));
             args.add(Strings.getLineSeparator());
         }
 
@@ -1021,6 +1032,23 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
             return primaryIMAPProps.ignoreDeletedMails;
         } catch (Exception e) {
             LOG.error("Failed to get ignoreDeleted for user {} in context {}. Using default default {} instead.", I(userId), I(contextId), Boolean.FALSE.toString(), e);
+            return false;
+        }
+    }
+
+    /**
+     * Checks whether shared INBOX should be visible as "shared/user" or "shared/user/INBOX"
+     *
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @return <code>true</code> to explicitly include "INBOX"; otherwise <code>false</code>
+     */
+    public boolean includeSharedInboxExplicitly(int userId, int contextId) {
+        try {
+            PrimaryIMAPProperties primaryIMAPProps = getPrimaryIMAPProps(userId, contextId);
+            return primaryIMAPProps.includeSharedInboxExplicitly;
+        } catch (Exception e) {
+            LOG.error("Failed to get includeSharedInboxExplicitly for user {} in context {}. Using default default {} instead.", I(userId), I(contextId), Boolean.FALSE.toString(), e);
             return false;
         }
     }

@@ -182,7 +182,7 @@ public class Appointment2Event {
             case 4:
                 return "#F7C7E0"; //"pink"; // #e2b3e2 ~ #FFC0CB
             case 5:
-                return "FFE2E2"; // "red"; // #e7a9ab ~ #FF0000
+                return "#FFE2E2"; // "red"; // #e7a9ab ~ #FF0000
             case 6:
                 return "#FDE2B9"; // "orange"; // #ffb870 ~ FFA500
             case 7:
@@ -316,6 +316,9 @@ public class Appointment2Event {
      * @throws {@link CalendarExceptionCodes#INVALID_RECURRENCE_ID}
      */
     public static RecurrenceId getRecurrenceID(RecurrenceService recurrenceService, RecurrenceData recurrenceData, int recurrencePosition) throws OXException {
+        if(recurrenceData == null) {
+            throw CalendarExceptionCodes.UNEXPECTED_ERROR.create("Missing recurrence data");
+        }
         RecurrenceIterator<RecurrenceId> iterator = recurrenceService.iterateRecurrenceIds(recurrenceData, Autoboxing.I(recurrencePosition), null);
         while (iterator.hasNext()) {
             DateTime next = iterator.next().getValue();

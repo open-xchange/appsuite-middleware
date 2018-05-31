@@ -184,12 +184,15 @@ public class BasicFreeBusyTest extends AbstractChronosTest {
         Long timestamp = allEvents.getTimestamp();
 
         // Create a event and accept that event as tentative
+        if(timestamp == null) {
+            timestamp = Calendar.getInstance(TimeZone.getTimeZone("UTC")).getTimeInMillis();
+        }
         EventData createEvent = createEvent("test", first, first + TimeUnit.HOURS.toMillis(1), users);
         createEvent.setStatus("TENTATIVE");
         ChronosCalendarResultResponse updateEvent = defaultUserApi.getChronosApi().updateEvent(defaultUserApi.getSession(), folderId, createEvent.getId(), createEvent, createEvent.getTimestamp(), null, null, false, false, false, null, null, false);
         setLastTimestamp(updateEvent.getTimestamp());
 
-        ChronosUpdatesResponse updates = secondUserChronosApi.getUpdates(secondSession, secondUserFolder, timestamp == null ? first - TimeUnit.HOURS.toMillis(1) : timestamp, null, null, null, null, null, false, false);
+        ChronosUpdatesResponse updates = secondUserChronosApi.getUpdates(secondSession, secondUserFolder, timestamp, null, null, null, null, null, false, false);
         assertNull(updates.getErrorDesc(), updates.getError());
         assertNotNull(updates.getData());
         assertEquals(1, updates.getData().getNewAndModified().size());

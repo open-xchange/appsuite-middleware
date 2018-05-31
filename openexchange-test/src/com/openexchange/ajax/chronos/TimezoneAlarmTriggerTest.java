@@ -84,6 +84,7 @@ public class TimezoneAlarmTriggerTest extends AbstractUserTimezoneAlarmTriggerTe
 
     @Test
     public void testTrigger() throws ApiException, ParseException, ChronosApiException {
+        int currentTriggers = getAlarmTriggers().size();
         Calendar start = DateTimeUtil.getUTCCalendar();
         start.add(Calendar.DAY_OF_MONTH, 1);
         DateTimeData startDate = DateTimeUtil.getDateTime(start);
@@ -103,7 +104,7 @@ public class TimezoneAlarmTriggerTest extends AbstractUserTimezoneAlarmTriggerTe
             getAndAssertAlarms(event, 1, folderId);
 
             // Get alarms within the next two days
-            AlarmTriggerData triggers = getAndCheckAlarmTrigger(1); // one trigger
+            AlarmTriggerData triggers = getAndCheckAlarmTrigger(currentTriggers + 1); // one trigger
             AlarmTrigger alarmTrigger = triggers.get(0);
             checkAlarmTime(alarmTrigger, event.getId(), start.getTimeInMillis() - TimeUnit.MINUTES.toMillis(10));
             EventId eventId = new EventId();
@@ -121,7 +122,7 @@ public class TimezoneAlarmTriggerTest extends AbstractUserTimezoneAlarmTriggerTe
             getAndAssertAlarms(event, 1, folderId);
 
             // Get alarms within the next two days
-            AlarmTriggerData triggers = getAndCheckAlarmTrigger(1); // one trigger
+            AlarmTriggerData triggers = getAndCheckAlarmTrigger(currentTriggers + 1); // one trigger
             AlarmTrigger alarmTrigger = triggers.get(0);
             checkAlarmTime(alarmTrigger, event.getId(), end.getTimeInMillis() - TimeUnit.MINUTES.toMillis(10));
         }
@@ -129,6 +130,7 @@ public class TimezoneAlarmTriggerTest extends AbstractUserTimezoneAlarmTriggerTe
 
     @Test
     public void testTriggerWithPositiveDuration() throws ApiException, ParseException, ChronosApiException {
+        int currentTriggers = getAlarmTriggers().size();
         Calendar start = DateTimeUtil.getUTCCalendar();
         start.add(Calendar.DAY_OF_MONTH, 1);
         DateTimeData startDate = DateTimeUtil.getDateTime(start);
@@ -148,7 +150,7 @@ public class TimezoneAlarmTriggerTest extends AbstractUserTimezoneAlarmTriggerTe
             getAndAssertAlarms(event, 1, folderId);
 
             // Get alarms within the next two days
-            AlarmTriggerData triggers = getAndCheckAlarmTrigger(1); // one trigger
+            AlarmTriggerData triggers = getAndCheckAlarmTrigger(currentTriggers + 1); // one trigger
             AlarmTrigger alarmTrigger = triggers.get(0);
             checkAlarmTime(alarmTrigger, event.getId(), start.getTimeInMillis() - TimeUnit.MINUTES.toMillis(10));
             EventId eventId = new EventId();
@@ -166,7 +168,7 @@ public class TimezoneAlarmTriggerTest extends AbstractUserTimezoneAlarmTriggerTe
             getAndAssertAlarms(event, 1, folderId);
 
             // Get alarms within the next two days
-            AlarmTriggerData triggers = getAndCheckAlarmTrigger(1); // one trigger
+            AlarmTriggerData triggers = getAndCheckAlarmTrigger(currentTriggers + 1); // one trigger
             AlarmTrigger alarmTrigger = triggers.get(0);
             checkAlarmTime(alarmTrigger, event.getId(), end.getTimeInMillis() + TimeUnit.MINUTES.toMillis(10));
         }

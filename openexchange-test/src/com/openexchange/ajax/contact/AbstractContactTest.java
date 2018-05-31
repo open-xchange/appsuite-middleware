@@ -125,6 +125,7 @@ public class AbstractContactTest extends AbstractAJAXSession {
 
     protected TimeZone tz;
 
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();

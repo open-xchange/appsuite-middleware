@@ -99,7 +99,7 @@ public class JMXReport {
             boolean adminMailLoginEnabled = Services.getService(ConfigurationService.class).getBoolProperty("com.openexchange.mail.adminMailLoginEnabled", false);
             Map<String, Object> configs = lData.get("configs");
             if (configs == null) {
-                configs = new HashMap<String, Object>();
+                configs = new HashMap<>();
             }
             configs.put("com.openexchange.mail.adminMailLoginEnabled", Boolean.toString(adminMailLoginEnabled));
             lData.put("configs", configs);

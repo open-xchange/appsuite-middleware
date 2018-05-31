@@ -1,2 +1,7 @@
 requests:
-  - AnalyzeRequest.yaml
+  - AnalyzeReuest.yaml
+  - AcceptRequest.yaml
+  - TentativeRequest.yaml
+  - DeclineRequest.yaml
+  - Accept_and_ignore_conflictsRequest.yaml
+  - UpdateRequest.yaml

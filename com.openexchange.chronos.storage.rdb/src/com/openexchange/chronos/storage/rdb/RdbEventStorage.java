@@ -65,7 +65,6 @@ import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 import org.dmfs.rfc5545.DateTime;
@@ -76,6 +75,7 @@ import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.common.DefaultRecurrenceData;
+import com.openexchange.chronos.exception.ProblemSeverity;
 import com.openexchange.chronos.service.EntityResolver;
 import com.openexchange.chronos.service.RecurrenceService;
 import com.openexchange.chronos.service.SearchFilter;
@@ -586,7 +586,8 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
             stringBuilder.append(" AND e.rangeFrom<?");
         }
         stringBuilder.append(" AND ").append(adapter.getClause()).append(getSortOptions(MAPPER, searchOptions, "e.")).append(';');
-        Set<Event> events = new LinkedHashSet<>();
+        Set<String> ids = new HashSet<String>();
+        List<Event> events = new ArrayList<Event>();
         try (PreparedStatement stmt = connection.prepareStatement(stringBuilder.toString())) {
             int parameterIndex = 1;
             stmt.setInt(parameterIndex++, context.getContextId());
@@ -600,11 +601,14 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
             adapter.setParameters(stmt, parameterIndex++);
             try (ResultSet resultSet = logExecuteQuery(stmt)) {
                 while (resultSet.next()) {
-                    events.add(readEvent(resultSet, mappedFields, "e."));
+                    Event event = readEvent(resultSet, mappedFields, "e.");
+                    if (null == event.getId() || ids.add(event.getId())) {
+                        events.add(event);
+                    }
                 }
             }
         }
-        return new ArrayList<>(events);
+        return events;
     }
 
     private long countEvents(Connection connection, boolean deleted, SearchTerm<?> searchTerm) throws SQLException, OXException {
@@ -679,14 +683,15 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
         }
         if (null != entities && 0 < entities.length) {
             if (1 == entities.length) {
-                stringBuilder.append(" AND ((e.folder IS NULL AND a.entity=?) OR (e.folder IS NOT NULL AND e.user=?))");
+                stringBuilder.append(" AND (a.entity=? OR (e.folder IS NOT NULL AND e.user=?))");
             } else {
-                stringBuilder.append(" AND ((e.folder IS NULL AND a.entity IN (").append(EventMapper.getParameters(entities.length)).append(")) OR ")
+                stringBuilder.append(" AND (a.entity IN (").append(EventMapper.getParameters(entities.length)).append(") OR ")
                     .append("(e.folder IS NOT NULL AND e.user IN (").append(EventMapper.getParameters(entities.length)).append(")))");
             }
         }
         stringBuilder.append(getSortOptions(MAPPER, searchOptions, "e.")).append(';');
-        Set<Event> events = new LinkedHashSet<>();
+        Set<String> ids = new HashSet<String>();
+        List<Event> events = new ArrayList<Event>();
         try (PreparedStatement stmt = connection.prepareStatement(stringBuilder.toString())) {
             int parameterIndex = 1;
             stmt.setInt(parameterIndex++, context.getContextId());
@@ -707,11 +712,14 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
             }
             try (ResultSet resultSet = logExecuteQuery(stmt)) {
                 while (resultSet.next()) {
-                    events.add(readEvent(resultSet, mappedFields, "e."));
+                    Event event = readEvent(resultSet, mappedFields, "e.");
+                    if (null == event.getId() || ids.add(event.getId())) {
+                        events.add(event);
+                    }
                 }
             }
         }
-        return new ArrayList<>(events);
+        return events;
     }
 
     private Event readEvent(ResultSet resultSet, EventField[] fields, String columnLabelPrefix) throws SQLException, OXException {
@@ -752,7 +760,7 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
      * @param event The event to get the range for
      * @return The start time of the effective range of an event
      */
-    private static long getRangeFrom(Event event) {
+    private long getRangeFrom(Event event) {
         DateTime rangeFrom = event.getStartDate();
         if (null == rangeFrom) {
             /*
@@ -789,7 +797,7 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
      * @param event The event to get the range for
      * @return The start time of the effective range of an event
      */
-    private static long getRangeUntil(Event event) throws OXException {
+    private long getRangeUntil(Event event) {
         DateTime rangeUntil = null != event.getEndDate() ? event.getEndDate() : event.getStartDate();
         if (null == rangeUntil) {
             /*
@@ -801,13 +809,17 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
             /*
              * take over end-date of last occurrence
              */
-            DefaultRecurrenceData recurrenceData = new DefaultRecurrenceData(event.getRecurrenceRule(), event.getStartDate(), null);
-            RecurrenceId lastRecurrenceId = Services.getService(RecurrenceService.class).getLastOccurrence(recurrenceData);
-            if (null == lastRecurrenceId) {
-                return Long.MAX_VALUE; // never ending series
+            try {
+                DefaultRecurrenceData recurrenceData = new DefaultRecurrenceData(event.getRecurrenceRule(), event.getStartDate(), null);
+                RecurrenceId lastRecurrenceId = Services.getService(RecurrenceService.class).getLastOccurrence(recurrenceData);
+                if (null == lastRecurrenceId) {
+                    return Long.MAX_VALUE; // never ending series
+                }
+                long eventDuration = event.getEndDate().getTimestamp() - event.getStartDate().getTimestamp();
+                rangeUntil = new DateTime(rangeUntil.getTimeZone(), lastRecurrenceId.getValue().getTimestamp() + eventDuration);
+            } catch (OXException e) {
+                addInvalidDataWaring(event.getId(), EventField.RECURRENCE_RULE, ProblemSeverity.NORMAL, "Unable to determine effective range for series master event", e);
             }
-            long eventDuration = event.getEndDate().getTimestamp() - event.getStartDate().getTimestamp();
-            rangeUntil = new DateTime(rangeUntil.getTimeZone(), lastRecurrenceId.getValue().getTimestamp() + eventDuration);
         } else if (isSeriesException(event) && null != event.getRecurrenceId() && 0 < compare(event.getRecurrenceId().getValue(), rangeUntil, TimeZones.UTC)) {
             /*
              * extend range to include original event start date (based on recurrence id) for overridden instances

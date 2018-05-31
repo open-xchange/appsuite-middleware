@@ -74,6 +74,11 @@ public enum OXMFSubscriptionErrorMessage implements DisplayableOXExceptionCode {
      * The string cannot be parsed to a valid URL.
      */
     INVALID_URL(CATEGORY_USER_INPUT, 7, OXMFErrorStrings.INVALID_URL, "The string cannot be parsed to a valid URL."),
+    /**
+     * <li>You provided no URL.</li>
+     * <li>No URL was provided.</li>
+     */
+    NO_URL(CATEGORY_USER_INPUT, 8, OXMFErrorStrings.EMPTY_URL, "No URL was provided."),
 
     ;
 

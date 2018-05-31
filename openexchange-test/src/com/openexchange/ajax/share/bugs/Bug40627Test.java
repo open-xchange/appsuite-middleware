@@ -245,7 +245,7 @@ public class Bug40627Test extends ShareTest {
                         assertNotNull(permissionEntity.getContact());
                         assertEquals(expectedUser.getSurname(), permissionEntity.getContact().getSurName());
                         assertEquals(expectedUser.getGivenName(), permissionEntity.getContact().getGivenName());
-                        assertEquals(expectedUser.getMail(), permissionEntity.getContact().getEmail1());
+                        assertFalse(permissionEntity.getContact().containsEmail1()); // Shouldn't contain the email1 field, because a guest doesn't has the webmail permission
                     } else {
                         assertEquals("User " + permissionEntity.getEntity(), permissionEntity.getDisplayName());
                         assertNotNull(permissionEntity.getContact());

@@ -280,7 +280,6 @@ public class OIDCWebSSoProviderImplTest {
 
             @Override
             public String toAuthorizationHeader() {
-                // TODO Auto-generated method stub
                 return null;
             }
         }, new RefreshToken()));
@@ -311,7 +310,6 @@ public class OIDCWebSSoProviderImplTest {
 
             @Override
             public String toAuthorizationHeader() {
-                // TODO Auto-generated method stub
                 return null;
             }
         }, new RefreshToken()));

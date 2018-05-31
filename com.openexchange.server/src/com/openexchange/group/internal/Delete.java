@@ -66,6 +66,7 @@ import com.openexchange.group.GroupStorage;
 import com.openexchange.group.GroupStorage.StorageType;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.delete.DeleteEvent;
+import com.openexchange.groupware.delete.DeleteFinishedListenerRegistry;
 import com.openexchange.groupware.delete.DeleteRegistry;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
@@ -181,6 +182,7 @@ public final class Delete {
             propagateDelete(con);
             delete(con);
             con.commit();
+            propagateDeleteFinished();
         } catch (final SQLException e) {
             Databases.rollback(con);
             throw GroupExceptionCodes.SQL_ERROR.create(e, e.getMessage());
@@ -201,6 +203,15 @@ public final class Delete {
         // Delete all references to that group.
         final DeleteEvent event = DeleteEvent.createDeleteEventForGroupDeletion(getOrig(), groupId, ctx);
         DeleteRegistry.getInstance().fireDeleteEvent(event, con, con);
+    }
+
+    private void propagateDeleteFinished() {
+        try {
+            final DeleteEvent event = DeleteEvent.createDeleteEventForGroupDeletion(getOrig(), groupId, ctx);
+            DeleteFinishedListenerRegistry.getInstance().fireDeleteEvent(event);
+        } catch (OXException e) {
+            LOG.warn("Failed to trigger delete finished listeners", e);
+        }
     }
 
     private void delete(final Connection con) throws OXException {

@@ -179,8 +179,8 @@ public final class MultipleMailPartHandler implements MailMessageHandler {
      */
     public MultipleMailPartHandler(final boolean errorOnAbsence) {
         super();
-        this.ids = new HashSet<String>();
-        mailParts = new HashMap<String, MailPart>();
+        this.ids = new HashSet<>();
+        mailParts = new HashMap<>();
         this.errorOnAbsence = errorOnAbsence;
     }
 
@@ -193,11 +193,11 @@ public final class MultipleMailPartHandler implements MailMessageHandler {
     public MultipleMailPartHandler(final String[] ids, final boolean errorOnAbsence) {
         super();
         if (null == ids) {
-            this.ids = new HashSet<String>(0);
+            this.ids = new HashSet<>(0);
         } else {
-            this.ids = new HashSet<String>(Arrays.asList(ids));
+            this.ids = new HashSet<>(Arrays.asList(ids));
         }
-        mailParts = new HashMap<String, MailPart>(this.ids.size());
+        mailParts = new HashMap<>(this.ids.size());
         this.errorOnAbsence = errorOnAbsence;
     }
 
@@ -210,11 +210,11 @@ public final class MultipleMailPartHandler implements MailMessageHandler {
     public MultipleMailPartHandler(final Set<String> ids, final boolean errorOnAbsence) {
         super();
         if (null == ids) {
-            this.ids = new HashSet<String>(0);
+            this.ids = new HashSet<>(0);
         } else {
-            this.ids = new HashSet<String>(ids);
+            this.ids = new HashSet<>(ids);
         }
-        mailParts = new HashMap<String, MailPart>(this.ids.size());
+        mailParts = new HashMap<>(this.ids.size());
         this.errorOnAbsence = errorOnAbsence;
     }
 
@@ -250,14 +250,7 @@ public final class MultipleMailPartHandler implements MailMessageHandler {
 
     @Override
     public boolean handleAttachment(final MailPart part, final boolean isInline, final String baseContentType, final String fileName, final String id) throws OXException {
-        if (ids.contains(id)) {
-            mailParts.put(id, part);
-            if (!isInline) {
-                checkFilename(part, id, baseContentType);
-            }
-            return (ids.size() > mailParts.size());
-        }
-        return true;
+        return handleAttachmentOrImage(part, baseContentType, isInline, id);
     }
 
     @Override
@@ -297,6 +290,10 @@ public final class MultipleMailPartHandler implements MailMessageHandler {
 
     @Override
     public boolean handleImagePart(final MailPart part, final String imageCID, final String baseContentType, final boolean isInline, final String fileName, final String id) throws OXException {
+        return handleAttachmentOrImage(part, baseContentType, isInline, id);
+    }
+
+    private boolean handleAttachmentOrImage(final MailPart part, final String baseContentType, final boolean isInline, final String id) {
         if (ids.contains(id)) {
             mailParts.put(id, part);
             if (!isInline) {
@@ -463,7 +460,7 @@ public final class MultipleMailPartHandler implements MailMessageHandler {
      * @return The identified mail part matching given sequence IDs
      */
     public Map<String, MailPart> getMailParts() {
-        return new HashMap<String, MailPart>(mailParts);
+        return new HashMap<>(mailParts);
     }
 
     private Map<String, MailPart> getMailParts0() {

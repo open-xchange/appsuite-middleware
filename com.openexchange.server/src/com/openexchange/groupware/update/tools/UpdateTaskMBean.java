@@ -92,6 +92,7 @@ import com.openexchange.timer.TimerService;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ * @deprecated Use the UpdateTaskService instead. It will be removed with 7.10.1.
  */
 public final class UpdateTaskMBean implements DynamicMBean {
 
@@ -379,6 +380,16 @@ public final class UpdateTaskMBean implements DynamicMBean {
         } else if (actionName.equals("getStatus")) {
             try {
                 return getJobStatusText(params);
+            } catch (final RuntimeException e) {
+                LOG.error("", e);
+                throw e;
+            } catch (final Error e) {
+                LOG.error("", e);
+                throw e;
+            }
+        } else if (actionName.equals("getNamespaceAware")) {
+            try {
+                return UpdateTaskToolkit.getNamespaceAwareUpdateTasks();
             } catch (final RuntimeException e) {
                 LOG.error("", e);
                 throw e;

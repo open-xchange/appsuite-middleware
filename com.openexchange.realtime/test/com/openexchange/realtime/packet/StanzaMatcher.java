@@ -48,18 +48,15 @@
  */
 
 package com.openexchange.realtime.packet;
-
-import org.hamcrest.BaseMatcher;
-import org.hamcrest.Description;
+import org.mockito.ArgumentMatcher;
 import org.hamcrest.Matcher;
-
 
 /**
  * {@link StanzaMatcher}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class StanzaMatcher extends BaseMatcher<Stanza> {
+public class StanzaMatcher implements ArgumentMatcher<Stanza> {
 
     private ID from;
     private ID to;
@@ -67,7 +64,7 @@ public class StanzaMatcher extends BaseMatcher<Stanza> {
     private String name;
     private Object payload;
     private String selector;
-    
+
     /**
      * 
      * @param from sender
@@ -80,12 +77,11 @@ public class StanzaMatcher extends BaseMatcher<Stanza> {
     public static StanzaMatcher isStanza(ID from, ID to, String namespace, String name, Object payload) {
         return new StanzaMatcher(from, to, namespace, name, null, payload);
     }
-    
 
     public static StanzaMatcher isStanza(ID from, ID to, String namespace, String name, String selector, Object payload) {
         return new StanzaMatcher(from, to, namespace, name, selector, payload);
     }
-    
+
     public StanzaMatcher(ID from, ID to, String namespace, String name, String selector, Object payload) {
         this.from = from;
         this.to = to;
@@ -96,11 +92,7 @@ public class StanzaMatcher extends BaseMatcher<Stanza> {
     }
 
     @Override
-    public boolean matches(Object arg0) {
-        if (! (arg0 instanceof Stanza)) {
-            return false;
-        }
-        
+    public boolean matches(Stanza arg0) {
         Stanza s = (Stanza) arg0;
         if (selector != null) {
             if (!s.getSelector().equals(selector)) {
@@ -117,16 +109,8 @@ public class StanzaMatcher extends BaseMatcher<Stanza> {
                 return false;
             }
         }
-        return s.getFrom().equals(from) &&
-            s.getTo().equals(to) &&
-            s.getPayload().getNamespace().equals(namespace) &&
-            s.getPayload().getElementName().equals(name);
-           
-    }
+        return s.getFrom().equals(from) && s.getTo().equals(to) && s.getPayload().getNamespace().equals(namespace) && s.getPayload().getElementName().equals(name);
 
-    @Override
-    public void describeTo(Description arg0) {
-        
     }
 
 }

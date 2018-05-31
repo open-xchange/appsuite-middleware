@@ -50,12 +50,17 @@
 package com.openexchange.groupware.update.internal;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.Set;
+import java.util.concurrent.atomic.AtomicReference;
+import com.google.common.collect.ImmutableList;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.update.NamespaceAwareUpdateTask;
 import com.openexchange.groupware.update.SchemaUpdateState;
 import com.openexchange.groupware.update.SeparatedTasks;
+import com.openexchange.groupware.update.UpdateConcurrency;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskV2;
 import com.openexchange.java.Strings;
@@ -64,6 +69,7 @@ import com.openexchange.java.Strings;
  * {@link UpdateTaskCollection} - Collection for update tasks.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 class UpdateTaskCollection {
 
@@ -71,40 +77,50 @@ class UpdateTaskCollection {
 
     private static final UpdateTaskCollection SINGLETON = new UpdateTaskCollection();
 
-    private final AtomicBoolean versionDirty = new AtomicBoolean(true);
-
-    private UpdateTaskCollection() {
-        super();
-    }
-
+    /**
+     * Returns the instance of the {@link UpdateTaskCollection}
+     *
+     * @return the instance of the {@link UpdateTaskCollection}
+     */
     static UpdateTaskCollection getInstance() {
         return SINGLETON;
+    }
+
+    // ----------------------------------------------------------------------------------------------------------
+
+    private final AtomicReference<List<UpdateTaskV2>> effectiveTasksRef = new AtomicReference<List<UpdateTaskV2>>(null);
+
+    /**
+     * Initialises a new {@link UpdateTaskCollection}.
+     */
+    private UpdateTaskCollection() {
+        super();
     }
 
     /**
      * Drops statically loaded update tasks and working queue as well.
      */
     void dispose() {
-        versionDirty.set(true);
+        effectiveTasksRef.set(null);
     }
 
-    private final List<UpdateTaskV2> getFilteredUpdateTasks(SchemaUpdateState schema) {
-        List<UpdateTaskV2> tasks = getListWithoutExcludes();
-        // Filter
-        Filter filter = new ExecutedFilter();
-        List<UpdateTaskV2> filtered = new ArrayList<UpdateTaskV2>();
-        for (UpdateTaskV2 task : tasks) {
-            if (filter.mustBeExecuted(schema, task)) {
-                filtered.add(task);
-            }
-        }
-        return filtered;
-    }
-
+    /**
+     * Filters the update tasks that must be executed
+     *
+     * @param state The {@link SchemaUpdateState}
+     * @return The filtered {@link SeparatedTasks}
+     */
     SeparatedTasks getFilteredAndSeparatedTasks(SchemaUpdateState state) {
         return separateTasks(getFilteredUpdateTasks(state));
     }
 
+    /**
+     * Separates the {@link UpdateTaskV2} tasks in {@link UpdateConcurrency#BLOCKING}
+     * and {@link UpdateConcurrency#BACKGROUND}
+     *
+     * @param tasks The {@link List} of {@link UpdateTaskV2} tasks
+     * @return The {@link SeparatedTasks}
+     */
     SeparatedTasks separateTasks(List<UpdateTaskV2> tasks) {
         final List<UpdateTaskV2> blocking = new ArrayList<UpdateTaskV2>();
         final List<UpdateTaskV2> background = new ArrayList<UpdateTaskV2>();
@@ -123,10 +139,12 @@ class UpdateTaskCollection {
             }
         }
         return new SeparatedTasks() {
+
             @Override
             public List<UpdateTaskV2> getBlocking() {
                 return blocking;
             }
+
             @Override
             public List<UpdateTaskV2> getBackground() {
                 return background;
@@ -134,6 +152,15 @@ class UpdateTaskCollection {
         };
     }
 
+    /**
+     * Returns a {@link List} with all {@link UpdateTaskV2} tasks filtered and sorted with the {@link UpdateConcurrency#BLOCKING}
+     * tasks prior any {@link UpdateConcurrency#BACKGROUND} tasks (controlled by the <code>blocking</code> argument
+     *
+     * @param schema The {@link SchemaUpdateState}
+     * @param blocking Whether the {@link UpdateConcurrency#BLOCKING} tasks will be first on the returned {@link List}
+     * @return A {@link List} with the filtered and sorted {@link UpdateTaskV2} tasks
+     * @throws OXException if there is no preference in executing the blocking tasks first, but there are blocking tasks to be executed
+     */
     final List<UpdateTaskV2> getFilteredAndSortedUpdateTasks(SchemaUpdateState schema, boolean blocking) throws OXException {
         SeparatedTasks tasks = getFilteredAndSeparatedTasks(schema);
         List<UpdateTaskV2> retval = new ArrayList<UpdateTaskV2>();
@@ -151,35 +178,117 @@ class UpdateTaskCollection {
         return retval;
     }
 
+    /**
+     * Returns a {@link List} with all the {@link UpdateTaskV2} tasks
+     * without the excluded ones.
+     *
+     * @return a {@link List} with all {@link UpdateTaskV2} without the excluded ones
+     */
     List<UpdateTaskV2> getListWithoutExcludes() {
-        List<UpdateTaskV2> retval = getFullList();
-        for (String excluded : ExcludedList.getInstance().getTaskList()) {
-            // Matching must be done based on task class name.
-            Iterator<UpdateTaskV2> iter = retval.iterator();
-            while (iter.hasNext()) {
-                if (excluded.equals(iter.next().getClass().getName())) {
-                    iter.remove();
+        List<UpdateTaskV2> effectiveTasks = effectiveTasksRef.get();
+        if (null == effectiveTasks) {
+            synchronized (this) {
+                effectiveTasks = effectiveTasksRef.get();
+                if (null == effectiveTasks) {
+                    Set<UpdateTaskV2> fullSet = DynamicSet.getInstance().getTaskSet();
+
+                    Set<String> tasksToExclude = ExcludedSet.getInstance().getTaskSet();
+                    boolean hasTasksToExclude = !tasksToExclude.isEmpty();
+                    Set<String> namespacesToExclude = NamespaceAwareExcludedSet.getInstance().getTaskSet();
+                    boolean hasNamespacesToExclude = !namespacesToExclude.isEmpty();
+
+                    if (hasTasksToExclude) {
+                        if (hasNamespacesToExclude) {
+                            for (Iterator<UpdateTaskV2> it = fullSet.iterator(); it.hasNext(); ) {
+                                Class<? extends UpdateTaskV2> clazz = it.next().getClass();
+                                if (tasksToExclude.contains(clazz.getName())) {
+                                    // Excluded by task name
+                                    it.remove();
+                                } else {
+                                    NamespaceAwareUpdateTask annotation = clazz.getAnnotation(NamespaceAwareUpdateTask.class);
+                                    if (annotation != null && namespacesToExclude.contains(annotation.namespace())) {
+                                        // Excluded by namespace
+                                        it.remove();
+                                    }
+                                }
+                            }
+                        } else {
+                            for (Iterator<UpdateTaskV2> it = fullSet.iterator(); it.hasNext(); ) {
+                                Class<? extends UpdateTaskV2> clazz = it.next().getClass();
+                                if (tasksToExclude.contains(clazz.getName())) {
+                                    // Excluded by task name
+                                    it.remove();
+                                }
+                            }
+                        }
+                    } else {
+                        if (hasNamespacesToExclude) {
+                            for (Iterator<UpdateTaskV2> it = fullSet.iterator(); it.hasNext(); ) {
+                                Class<? extends UpdateTaskV2> clazz = it.next().getClass();
+                                NamespaceAwareUpdateTask annotation = clazz.getAnnotation(NamespaceAwareUpdateTask.class);
+                                if (annotation != null && namespacesToExclude.contains(annotation.namespace())) {
+                                    // Excluded by namespace
+                                    it.remove();
+                                }
+                            }
+                        }
+                    }
+                    effectiveTasks = ImmutableList.copyOf(fullSet);
+                    effectiveTasksRef.set(effectiveTasks);
                 }
             }
         }
-        return retval;
+        return effectiveTasks;
     }
 
-    private List<UpdateTaskV2> getFullList() {
-        return DynamicList.getInstance().getTaskList();
-    }
-
+    /**
+     * Marks it as dirty
+     */
     void dirtyVersion() {
-        versionDirty.set(true);
+        effectiveTasksRef.set(null);
     }
 
+    /**
+     * Checks whether there are any pending update tasks
+     *
+     * @param state The {@link SchemaUpdateState}
+     * @return <code>true</code> if at least one task is pending for execution; <code>false</code> otherwise
+     */
     boolean needsUpdate(SchemaUpdateState state) {
-        List<UpdateTaskV2> tasks = getListWithoutExcludes();
-        for (UpdateTaskV2 task : tasks) {
+        for (UpdateTaskV2 task : getListWithoutExcludes()) {
             if (!state.isExecuted(task.getClass().getName())) {
                 return true;
             }
         }
         return false;
     }
+
+    /////////////////////////////////// HELPERS ////////////////////////////////////
+
+    /**
+     * Returns a {@link List} with all tasks that must be executed
+     *
+     * @param schema The {@link SchemaUpdateState}
+     * @return A {@link List} with all must-executed update tasks
+     */
+    private List<UpdateTaskV2> getFilteredUpdateTasks(SchemaUpdateState schema) {
+        List<UpdateTaskV2> tasks = getListWithoutExcludes();
+        if (tasks.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        // Filter
+        Filter filter = new ExecutedFilter();
+        List<UpdateTaskV2> filtered = null;
+        for (UpdateTaskV2 task : tasks) {
+            if (filter.mustBeExecuted(schema, task)) {
+                if (null == filtered) {
+                    filtered = new ArrayList<UpdateTaskV2>(tasks.size());
+                }
+                filtered.add(task);
+            }
+        }
+        return null == filtered ? Collections.emptyList() : filtered;
+    }
+
 }

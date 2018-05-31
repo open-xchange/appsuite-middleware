@@ -76,6 +76,7 @@ import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.java.util.UUIDs;
+import com.openexchange.log.LogProperties;
 import com.openexchange.login.LoginRequest;
 import com.openexchange.login.LoginResult;
 import com.openexchange.login.internal.LoginPerformer;
@@ -143,6 +144,7 @@ public final class HTTPAuthLogin implements LoginRequestHandler {
             }
             if (Authorization.checkForBasicAuthorization(auth)) {
                 creds = Authorization.decode(auth);
+                LogProperties.putProperty(LogProperties.Name.LOGIN_LOGIN, creds.getLogin());
                 version = conf.getClientVersion();
             } else if (Authorization.checkForKerberosAuthorization(auth)) {
                 creds = new Credentials("kerberos", "");
