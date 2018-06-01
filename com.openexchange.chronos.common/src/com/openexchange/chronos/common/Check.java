@@ -77,6 +77,7 @@ import com.openexchange.chronos.service.RecurrenceData;
 import com.openexchange.chronos.service.RecurrenceService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.tools.mappings.Mapping;
+import com.openexchange.java.Strings;
 
 /**
  * {@link Check}
@@ -266,14 +267,14 @@ public class Check {
             }
             return alarm;
         } else if (AlarmAction.EMAIL.equals(alarm.getAction())) {
-            if ((!alarm.containsDescription()) || alarm.getDescription().isEmpty()) {
+            if ((!alarm.containsDescription()) || Strings.isEmpty(alarm.getDescription())) {
                 throw CalendarExceptionCodes.MANDATORY_FIELD.create(AlarmField.DESCRIPTION.toString());
             }
-            if ((!alarm.containsSummary()) || alarm.getSummary().isEmpty()) {
+            if ((!alarm.containsSummary()) || Strings.isEmpty(alarm.getSummary())) {
                 throw CalendarExceptionCodes.MANDATORY_FIELD.create(AlarmField.SUMMARY.toString());
             }
 
-            if ((!alarm.containsAttendees()) || alarm.getAttendees().isEmpty()) {
+            if ((!alarm.containsAttendees()) || null ==  alarm.getAttendees() || alarm.getAttendees().isEmpty()) {
                 throw CalendarExceptionCodes.MANDATORY_FIELD.create(AlarmField.ATTENDEES.toString());
             }
             for (Attendee attendee : alarm.getAttendees()) {
