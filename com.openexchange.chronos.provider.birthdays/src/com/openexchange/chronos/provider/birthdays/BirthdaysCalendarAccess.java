@@ -59,6 +59,7 @@ import static com.openexchange.tools.arrays.Arrays.contains;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
@@ -128,6 +129,12 @@ public class BirthdaysCalendarAccess implements BasicCalendarAccess, SubscribeAw
     /** Search term to query for contacts having a birthday */
     private static final SearchTerm<?> HAS_BIRTHDAY_TERM = new CompositeSearchTerm(CompositeOperation.NOT)
         .addSearchTerm(new SingleSearchTerm(SingleOperation.ISNULL).addOperand(new ContactFieldOperand(ContactField.BIRTHDAY)));
+
+    /** The fields queried from the contact storage */
+    private static final ContactField[] CONTACT_FIELDS = new ContactField[] {
+        ContactField.OBJECT_ID, ContactField.FOLDER_ID, ContactField.INTERNAL_USERID, ContactField.UID, ContactField.BIRTHDAY,
+        ContactField.LAST_MODIFIED, ContactField.DEPARTMENT, ContactField.SUR_NAME, ContactField.GIVEN_NAME, ContactField.EMAIL1
+    };
 
     private final ServerSession session;
     private final ServiceLookup services;
@@ -291,7 +298,7 @@ public class BirthdaysCalendarAccess implements BasicCalendarAccess, SubscribeAw
     private Contact getBirthdayContact(String eventId) throws OXException {
         try {
             int[] decodedId = eventConverter.decodeEventId(eventId);
-            Contact contact = services.getService(ContactService.class).getContact(session, String.valueOf(decodedId[0]), String.valueOf(decodedId[1]));
+            Contact contact = services.getService(ContactService.class).getContact(session, String.valueOf(decodedId[0]), String.valueOf(decodedId[1]), CONTACT_FIELDS);
             if (null == contact.getBirthday()) {
                 throw OXException.notFound(eventId);
             }
@@ -353,7 +360,7 @@ public class BirthdaysCalendarAccess implements BasicCalendarAccess, SubscribeAw
         List<Contact> contacts = new ArrayList<Contact>();
         SearchIterator<Contact> searchIterator = null;
         try {
-            searchIterator = services.getService(ContactService.class).searchContacts(session, searchTerm, sortOptions);
+            searchIterator = services.getService(ContactService.class).searchContacts(session, searchTerm, CONTACT_FIELDS, sortOptions);
             while (searchIterator.hasNext()) {
                 Contact contact = searchIterator.next();
                 if (null == contact.getBirthday()) {
@@ -392,8 +399,15 @@ public class BirthdaysCalendarAccess implements BasicCalendarAccess, SubscribeAw
         if (null == typesJSONArray) {
             return null;
         }
+        Set<String> types = new HashSet<String>(typesJSONArray.length());
         for (int i = 0; i < typesJSONArray.length(); i++) {
-            folderIds.addAll(getContactFolderIds(typesJSONArray.optString(i)));
+            types.add(typesJSONArray.optString(i));
+        }
+        if (types.contains("public") && types.contains("shared") && types.contains("private")) {
+            return null;
+        }
+        for (String type : types) {
+            folderIds.addAll(getContactFolderIds(type));
         }
         return folderIds;
     }
