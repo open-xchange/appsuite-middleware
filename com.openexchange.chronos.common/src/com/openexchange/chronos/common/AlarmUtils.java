@@ -49,7 +49,6 @@
 
 package com.openexchange.chronos.common;
 
-import static com.openexchange.java.Autoboxing.L;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
@@ -62,8 +61,6 @@ import java.util.StringTokenizer;
 import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
 import org.dmfs.rfc5545.DateTime;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.AlarmAction;
 import com.openexchange.chronos.AlarmField;
@@ -91,8 +88,6 @@ import com.openexchange.java.Strings;
  */
 public class AlarmUtils extends CalendarUtils {
 
-    private final static Logger LOGGER = LoggerFactory.getLogger(AlarmUtils.class);
-
     /**
      * Constructs a duration string that consists of the supplied properties.
      *
@@ -107,10 +102,6 @@ public class AlarmUtils extends CalendarUtils {
     public static String getDuration(boolean negative, long weeks, long days, long hours, long minutes, long seconds) {
         if (0 == weeks + days + hours + minutes + seconds) {
             return "PT0S";
-        }
-        if (minutes > 10000 || hours > 2 || days > 1 || weeks > 0) {
-            // FIXME Remove me before 7.10.0 release!!
-            LOGGER.error("Found a trigger with unlikley duration. W:{}, D: {}, H: {}, M: {}.", L(weeks), L(days), L(hours), L(minutes), new Throwable("DEBUG"));
         }
         StringBuilder stringBuilder = new StringBuilder();
         if (negative) {
@@ -192,9 +183,6 @@ public class AlarmUtils extends CalendarUtils {
                     // skip
                     break;
             }
-        }
-        if (TimeUnit.DAYS.convert(totalMillis, TimeUnit.MILLISECONDS) >= 7) {
-            LOGGER.error("Found a trigger with unlikley duration. M: {} ", L(TimeUnit.MINUTES.convert(totalMillis, TimeUnit.MILLISECONDS)), new Throwable("DEBUG"));
         }
         return negative ? -1 * totalMillis : totalMillis;
     }
@@ -401,7 +389,6 @@ public class AlarmUtils extends CalendarUtils {
         if (0 < days) {
             stringBuilder.append(days).append('D');
             duration -= unit.convert(days, TimeUnit.DAYS);
-            LOGGER.error("Found a trigger with unlikley duration. D: {}", L(days), new Throwable("DEBUG"));
         }
         if (0 == duration) {
             return stringBuilder.toString();
@@ -411,17 +398,11 @@ public class AlarmUtils extends CalendarUtils {
         if (0 < hours) {
             stringBuilder.append(hours).append('H');
             duration -= unit.convert(hours, TimeUnit.HOURS);
-            if (hours > 1) {
-                LOGGER.error("Found a trigger with unlikley duration. H: {}", L(hours), new Throwable("DEBUG"));
-            }
         }
         long minutes = unit.toMinutes(duration);
         if (0 < minutes) {
             stringBuilder.append(minutes).append('M');
             duration -= unit.convert(minutes, TimeUnit.MINUTES);
-            if (minutes > 10000) {
-                LOGGER.error("Found a trigger with unlikley duration. M: {}", L(minutes), new Throwable("DEBUG"));
-            }
         }
         long seconds = unit.toSeconds(duration);
         if (0 < seconds) {

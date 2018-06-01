@@ -898,9 +898,32 @@ public class Utils {
             return seriesMaster;
         }
         /*
+         * apply userized exception dates
+         */
+        return applyExceptionDates(seriesMaster, getRecurrenceIds(attendedChangeExceptions));
+    }
+
+    /**
+     * Applies <i>userized</i> versions of change- and delete-exception dates in the series master event based on the user's actual
+     * attendance.
+     *
+     * @param seriesMaster The series master event
+     * @param attendedChangeExceptionDates The exception dates the user actually attends
+     * @return The passed event reference, with possibly adjusted exception dates
+     * @see <a href="https://tools.ietf.org/html/rfc6638#section-3.2.6">RFC 6638, section 3.2.6</a>
+     */
+    public static Event applyExceptionDates(Event seriesMaster, SortedSet<RecurrenceId> attendedChangeExceptionDates) throws OXException {
+        /*
+         * check which change exceptions exist where the user is attending
+         */
+        SortedSet<RecurrenceId> changeExceptionDates = seriesMaster.getChangeExceptionDates();
+        if (null == changeExceptionDates || 0 == changeExceptionDates.size()) {
+            return seriesMaster;
+        }
+        /*
          * apply a 'userized' version of exception dates by moving exception date from change- to delete-exceptions
          */
-        SortedSet<RecurrenceId> userizedChangeExceptions = getRecurrenceIds(attendedChangeExceptions);
+        SortedSet<RecurrenceId> userizedChangeExceptions = new TreeSet<RecurrenceId>(attendedChangeExceptionDates);
         SortedSet<RecurrenceId> userizedDeleteExceptions = new TreeSet<RecurrenceId>();
         if (null != seriesMaster.getDeleteExceptionDates()) {
             userizedDeleteExceptions.addAll(seriesMaster.getDeleteExceptionDates());

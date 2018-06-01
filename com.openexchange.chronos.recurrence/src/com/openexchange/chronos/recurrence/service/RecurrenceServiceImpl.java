@@ -191,7 +191,7 @@ public class RecurrenceServiceImpl implements RecurrenceService {
         }
         RecurrenceSetIterator iterator = RecurrenceUtils.getRecurrenceIterator(recurrenceData, true);
         if (false == iterator.hasNext()) {
-            return null;
+            return null != recurrenceData.getSeriesStart() ? new DefaultRecurrenceId(recurrenceData.getSeriesStart()) : null;
         }
         DateTime dateTime;
         do {

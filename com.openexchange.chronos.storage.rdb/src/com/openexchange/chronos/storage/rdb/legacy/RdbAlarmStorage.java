@@ -574,6 +574,7 @@ public class RdbAlarmStorage extends RdbStorage implements AlarmStorage {
             updated += logExecuteUpdate(stmt);
         }
         try (PreparedStatement stmt = connection.prepareStatement("UPDATE prg_dates_members SET reminder=? WHERE cid=? AND object_id=? AND member_uid=?;")) {
+            logMinutes(event.getId(), reminder.reminderMinutes);
             stmt.setInt(1, reminder.reminderMinutes);
             stmt.setInt(2, contextID);
             stmt.setInt(3, asInt(event.getId()));
@@ -587,6 +588,7 @@ public class RdbAlarmStorage extends RdbStorage implements AlarmStorage {
         String sql = "INSERT INTO reminder (cid,object_id,last_modified,target_id,module,userid,alarm,recurrence,folder) VALUES (?,?,?,?,?,?,?,?,?) " +
             "ON DUPLICATE KEY UPDATE last_modified=?,alarm=?,recurrence=?,folder=?;"
         ;
+        logMinutes(event.getId(), TimeUnit.MILLISECONDS.toMinutes(event.getStartDate().getTimestamp() - triggerTime));
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
             stmt.setInt(1, contextID);
             stmt.setInt(2, IDGenerator.getId(contextID, Types.REMINDER, connection));
@@ -606,6 +608,7 @@ public class RdbAlarmStorage extends RdbStorage implements AlarmStorage {
     }
 
     private static int updateReminderMinutes(Connection connection, int contextID, Event event, int userID, int reminderMinutes) throws SQLException {
+        logMinutes(event.getId(), reminderMinutes);
         try (PreparedStatement stmt = connection.prepareStatement("UPDATE prg_dates_members SET reminder=? WHERE cid=? AND object_id=? AND member_uid=?;")) {
             stmt.setInt(1, reminderMinutes);
             stmt.setInt(2, contextID);
@@ -810,6 +813,12 @@ public class RdbAlarmStorage extends RdbStorage implements AlarmStorage {
             return calendar.getTime();
         }
         return null;
+    }
+
+    private static void logMinutes(String eventId, long minutes) {
+        if (minutes > 1000) {
+            LOG.debug("A trigger with unlikely duration is inserted. Event {}, minutes {}", eventId, Long.valueOf(minutes), new Throwable("Trigger"));
+        }
     }
 
     private static final class ReminderData {
