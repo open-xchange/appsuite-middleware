@@ -154,11 +154,15 @@ public class SearchEngineImpl extends DBService {
             con = getReadConnection(session.getContext());
             stmt = con.prepareStatement(sqlQuery);
             try {
-                iter = InfostoreSearchIterator.createInfostoreSearchIterator(stmt.executeQuery(), this, cols, session.getContext(), con, stmt);
+                if (sqlQuery.indexOf("LIMIT ", 0) > 0) {
+                    iter = InfostoreSearchIterator.createIteratorWithErrorOnDuplicate(stmt.executeQuery(), this, cols, session.getContext(), con, stmt);
+                } else {
+                    iter = InfostoreSearchIterator.createIteratorWithIgnoreOnDuplicate(stmt.executeQuery(), this, cols, session.getContext(), con, stmt);
+                }
             } catch (RepeatWithDistinctException e) {
                 Databases.closeSQLStuff(stmt);
                 stmt = con.prepareStatement(injectDistinctInQuery(sqlQuery));
-                iter = InfostoreSearchIterator.createInfostoreSearchIteratorWithDistinct(stmt.executeQuery(), this, cols, session.getContext(), con, stmt);
+                iter = InfostoreSearchIterator.createIteratorWithNoopOnDuplicate(stmt.executeQuery(), this, cols, session.getContext(), con, stmt);
             }
             // Iterator has been successfully generated, thus closing DB resources is performed by iterator instance.
             successful = true;
@@ -280,7 +284,11 @@ public class SearchEngineImpl extends DBService {
                     }
                 }
                 try {
-                    iter = InfostoreSearchIterator.createInfostoreSearchIterator(stmt.executeQuery(), this, cols, session.getContext(), con, stmt);
+                    if (SQL_QUERY.indexOf("LIMIT ", 0) > 0) {
+                        iter = InfostoreSearchIterator.createIteratorWithErrorOnDuplicate(stmt.executeQuery(), this, cols, session.getContext(), con, stmt);
+                    } else {
+                        iter = InfostoreSearchIterator.createIteratorWithIgnoreOnDuplicate(stmt.executeQuery(), this, cols, session.getContext(), con, stmt);
+                    }
                 } catch (RepeatWithDistinctException e) {
                     Databases.closeSQLStuff(stmt);
                     stmt = con.prepareStatement(injectDistinctInQuery(SQL_QUERY.toString()));
@@ -289,7 +297,7 @@ public class SearchEngineImpl extends DBService {
                             stmt.setString(i + 1, q);
                         }
                     }
-                    iter = InfostoreSearchIterator.createInfostoreSearchIteratorWithDistinct(stmt.executeQuery(), this, cols, session.getContext(), con, stmt);
+                    iter = InfostoreSearchIterator.createIteratorWithNoopOnDuplicate(stmt.executeQuery(), this, cols, session.getContext(), con, stmt);
                 }
 
 
@@ -540,11 +548,15 @@ public class SearchEngineImpl extends DBService {
             try {
                 stmt = connection.prepareStatement(sqlQuery.toString());
                 try {
-                    iter = InfostoreSearchIterator.createInfostoreSearchIterator(stmt.executeQuery(), this, cols, session.getContext(), connection, stmt);
+                    if (sqlQuery.indexOf("LIMIT ", 0) > 0) {
+                        iter = InfostoreSearchIterator.createIteratorWithErrorOnDuplicate(stmt.executeQuery(), this, cols, session.getContext(), connection, stmt);
+                    } else {
+                        iter = InfostoreSearchIterator.createIteratorWithIgnoreOnDuplicate(stmt.executeQuery(), this, cols, session.getContext(), connection, stmt);
+                    }
                 } catch (RepeatWithDistinctException e) {
                     Databases.closeSQLStuff(stmt);
                     stmt = connection.prepareStatement(injectDistinctInQuery(sqlQuery.toString()));
-                    iter = InfostoreSearchIterator.createInfostoreSearchIteratorWithDistinct(stmt.executeQuery(), this, cols, session.getContext(), connection, stmt);
+                    iter = InfostoreSearchIterator.createIteratorWithNoopOnDuplicate(stmt.executeQuery(), this, cols, session.getContext(), connection, stmt);
                 }
                 // Iterator has been successfully generated, thus closing DB resources is performed by iterator instance.
                 closeResources = false;
@@ -719,37 +731,54 @@ public class SearchEngineImpl extends DBService {
     /** The special <code>SearchIterator</code> for an executed Infostore search */
     public static class InfostoreSearchIterator implements SearchIterator<DocumentMetadata> {
 
-        static InfostoreSearchIterator createInfostoreSearchIteratorWithDistinct(ResultSet rs, SearchEngineImpl s, Metadata[] columns, Context ctx, Connection readCon, Statement stmt) throws OXException {
+        static InfostoreSearchIterator createIteratorWithNoopOnDuplicate(ResultSet rs, SearchEngineImpl s, Metadata[] columns, Context ctx, Connection readCon, Statement stmt) throws OXException {
             try {
-                return new InfostoreSearchIterator(rs, s, columns, ctx, readCon, stmt, true);
+                return new InfostoreSearchIterator(rs, s, columns, ctx, readCon, stmt, Mode.ON_DUPLICATE_NOOP);
             } catch (RepeatWithDistinctException e) {
                 // Cannot occur
                 throw new IllegalStateException(e);
             }
         }
 
-        static InfostoreSearchIterator createInfostoreSearchIterator(ResultSet rs, SearchEngineImpl s, Metadata[] columns, Context ctx, Connection readCon, Statement stmt) throws OXException, RepeatWithDistinctException {
-            return new InfostoreSearchIterator(rs, s, columns, ctx, readCon, stmt, false);
+        static InfostoreSearchIterator createIteratorWithErrorOnDuplicate(ResultSet rs, SearchEngineImpl s, Metadata[] columns, Context ctx, Connection readCon, Statement stmt) throws OXException, RepeatWithDistinctException {
+            return new InfostoreSearchIterator(rs, s, columns, ctx, readCon, stmt, Mode.ON_DUPLICATE_ERROR);
+        }
+
+        static InfostoreSearchIterator createIteratorWithIgnoreOnDuplicate(ResultSet rs, SearchEngineImpl s, Metadata[] columns, Context ctx, Connection readCon, Statement stmt) throws OXException {
+            try {
+                return new InfostoreSearchIterator(rs, s, columns, ctx, readCon, stmt, Mode.ON_DUPLICATE_IGNORE);
+            } catch (RepeatWithDistinctException e) {
+                // Cannot occur
+                throw new IllegalStateException(e);
+            }
+        }
+
+        private static enum Mode {
+            ON_DUPLICATE_NOOP,
+            ON_DUPLICATE_IGNORE,
+            ON_DUPLICATE_ERROR,
+            ;
         }
 
         // -------------------------------------------------------------------------------------------------------------------
 
         private final SearchIterator<DocumentMetadata> delegate;
 
-        private InfostoreSearchIterator(ResultSet rs, SearchEngineImpl s, Metadata[] columns, Context ctx, Connection readCon, Statement stmt, boolean withDistinct) throws OXException, RepeatWithDistinctException {
+        private InfostoreSearchIterator(ResultSet rs, SearchEngineImpl s, Metadata[] columns, Context ctx, Connection readCon, Statement stmt, Mode mode) throws OXException, RepeatWithDistinctException {
             super();
             SearchIterator<DocumentMetadata> delegate = null;
             try {
                 if (rs.next()) {
                     List<DocumentMetadata> list = new LinkedList<DocumentMetadata>();
-                    TIntSet ids = withDistinct ? null : new TIntHashSet();
+                    TIntSet ids = mode == Mode.ON_DUPLICATE_NOOP ? null : new TIntHashSet();
+                    boolean errorOnDuplicate = mode == Mode.ON_DUPLICATE_ERROR;
                     DocumentMetadata current = null;
                     boolean goahead = true;
                     while (goahead) {
-                        current = fillDocumentMetadata(columns, rs, ids);
+                        current = fillDocumentMetadata(columns, rs, ids, errorOnDuplicate);
                         NextObject: while (current == null) {
                             if (rs.next()) {
-                                current = fillDocumentMetadata(columns, rs, ids);
+                                current = fillDocumentMetadata(columns, rs, ids, errorOnDuplicate);
                             } else {
                                 break NextObject;
                             }
@@ -814,13 +843,16 @@ public class SearchEngineImpl extends DBService {
             return delegate.hasWarnings();
         }
 
-        private DocumentMetadataImpl fillDocumentMetadata(Metadata[] columns, ResultSet result, TIntSet optIds) throws SQLException, OXException, RepeatWithDistinctException {
+        private DocumentMetadataImpl fillDocumentMetadata(Metadata[] columns, ResultSet result, TIntSet optIds, boolean errorOnDuplicate) throws SQLException, OXException, RepeatWithDistinctException {
             DocumentMetadataImpl retval;
             if (null != optIds) {
                 int id = result.getInt("id");
                 if (false == optIds.add(id)) {
                     // Already contained
-                    throw new RepeatWithDistinctException();
+                    if (errorOnDuplicate) {
+                        throw new RepeatWithDistinctException();
+                    }
+                    return null;
                 }
                 retval = new DocumentMetadataImpl();
                 retval.setId(id);

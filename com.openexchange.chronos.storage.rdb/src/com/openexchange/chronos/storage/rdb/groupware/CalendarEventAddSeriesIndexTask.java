@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2018-2020 OX Software GmbH
+ *     Copyright (C) 2016-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,48 +47,57 @@
  *
  */
 
-package com.openexchange.oauth.impl.internal.groupware;
+package com.openexchange.chronos.storage.rdb.groupware;
 
+import static com.openexchange.database.Databases.autocommit;
+import static com.openexchange.database.Databases.rollback;
 import java.sql.Connection;
 import java.sql.SQLException;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.PerformParameters;
-import com.openexchange.tools.update.Column;
+import com.openexchange.groupware.update.UpdateExceptionCodes;
+import com.openexchange.groupware.update.UpdateTaskAdapter;
 import com.openexchange.tools.update.Tools;
 
 /**
- * {@link OAuthAddIdentityColumnTaskV2}
- * Adds the 'identity' column and an index for the identity (cid,identity(191))
+ * {@link CalendarEventAddSeriesIndexTask}
  *
- * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
- * @since 7.10.0
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @since v7.10.0
  */
-public class OAuthAddIdentityColumnTaskV2 extends AbstractOAuthUpdateTask {
-
-    private static final String IDENTITY_NAME = "identity";
-
-    /**
-     * Initialises a new {@link OAuthAddIdentityColumnTaskV2}.
-     */
-    public OAuthAddIdentityColumnTaskV2() {
-        super();
-    }
-
-    @Override
-    void innerPerform(Connection connection, PerformParameters performParameters) throws OXException, SQLException {
-        if (!Tools.columnExists(connection, CreateOAuthAccountTable.TABLE_NAME, IDENTITY_NAME)) {
-            Tools.addColumns(connection, CreateOAuthAccountTable.TABLE_NAME, new Column(IDENTITY_NAME, "varchar(767)"));
-        }
-        String indexName = Tools.existsIndex(connection, CreateOAuthAccountTable.TABLE_NAME, new String[] { "identity" });
-        if (indexName != null) {
-            Tools.dropIndex(connection, CreateOAuthAccountTable.TABLE_NAME, indexName);
-        }
-        Tools.createIndex(connection, CreateOAuthAccountTable.TABLE_NAME, IDENTITY_NAME, new String[] { "cid", "`identity`(191)" }, false);
-    }
+public class CalendarEventAddSeriesIndexTask extends UpdateTaskAdapter {
 
     @Override
     public String[] getDependencies() {
-        return new String[] { DropForeignKeyFromOAuthAccountTask.class.getName() };
+        return new String[] { "com.openexchange.chronos.storage.rdb.groupware.ChronosCreateTableTask"
+        };
+    }
+
+    @Override
+    public void perform(PerformParameters params) throws OXException {
+        Connection connection = params.getConnection();
+        boolean rollback = false;
+        try {
+            connection.setAutoCommit(false);
+            rollback = true;
+            String[] indexColumns = new String[] { "cid", "account", "series" };
+            for (String tableName : new String[] { "calendar_event", "calendar_event_tombstone" }) {
+                if (null == Tools.existsIndex(connection, tableName, indexColumns)) {
+                    Tools.createIndex(connection, tableName, "series", indexColumns, false);
+                }
+            }
+            connection.commit();
+            rollback = false;
+        } catch (SQLException e) {
+            throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
+        } catch (RuntimeException e) {
+            throw UpdateExceptionCodes.OTHER_PROBLEM.create(e, e.getMessage());
+        } finally {
+            if (rollback) {
+                rollback(connection);
+            }
+            autocommit(connection);
+        }
     }
 
 }

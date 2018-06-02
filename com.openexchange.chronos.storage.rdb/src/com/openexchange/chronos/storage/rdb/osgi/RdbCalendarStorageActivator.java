@@ -55,8 +55,8 @@ import com.openexchange.caching.CacheService;
 import com.openexchange.chronos.service.CalendarUtilities;
 import com.openexchange.chronos.service.RecurrenceService;
 import com.openexchange.chronos.storage.CalendarStorageFactory;
-import com.openexchange.chronos.storage.rdb.groupware.CalendarAlarmRepairShiftedTriggersTask;
 import com.openexchange.chronos.storage.rdb.groupware.CalendarEventAddRDateColumnTask;
+import com.openexchange.chronos.storage.rdb.groupware.CalendarEventAddSeriesIndexTask;
 import com.openexchange.chronos.storage.rdb.groupware.ChronosCreateTableService;
 import com.openexchange.chronos.storage.rdb.groupware.ChronosCreateTableTask;
 import com.openexchange.chronos.storage.rdb.migration.ChronosStorageMigrationTask;
@@ -115,8 +115,12 @@ public class RdbCalendarStorageActivator extends HousekeepingActivator {
              * register services for infrastructure
              */
             registerService(CreateTableService.class, new ChronosCreateTableService());
-            registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(new ChronosCreateTableTask(), new CalendarEventAddRDateColumnTask(), new ChronosStorageMigrationTask(this)));
-            registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(new CalendarAlarmRepairShiftedTriggersTask(this)));
+            registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(
+                new ChronosCreateTableTask(), 
+                new CalendarEventAddRDateColumnTask(), 
+                new CalendarEventAddSeriesIndexTask(),
+                new ChronosStorageMigrationTask(this)
+            ));
             if (getService(ConfigurationService.class).getBoolProperty("com.openexchange.calendar.migration.purgeLegacyData", false)) {
                 registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(new ChronosStoragePurgeLegacyDataTask()));
             }
