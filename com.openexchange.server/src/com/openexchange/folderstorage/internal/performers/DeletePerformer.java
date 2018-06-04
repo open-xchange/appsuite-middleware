@@ -155,7 +155,7 @@ public final class DeletePerformer extends AbstractUserizedFolderPerformer {
                     /*
                      * Real delete
                      */
-                    deleteRealFolder(folderId, folderStorage, transactionManager);
+                    deleteRealFolder(folderId, folderStorage);
                 } else {
                     /*-
                      * Virtual delete:
@@ -168,7 +168,7 @@ public final class DeletePerformer extends AbstractUserizedFolderPerformer {
                         throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(FolderStorage.REAL_TREE_ID, folderId);
                     }
                     if (folderStorage.equals(realStorage)) {
-                        deleteRealFolder(folderId, realStorage, transactionManager);
+                        deleteRealFolder(folderId, realStorage);
                     } else {
                         /*
                          * Delete from virtual storage
@@ -236,7 +236,7 @@ public final class DeletePerformer extends AbstractUserizedFolderPerformer {
                     /*
                      * Real delete
                      */
-                    result = trashRealFolder(folderId, folderStorage, transactionManager);
+                    result = trashRealFolder(folderId, folderStorage);
                 } else {
                     /*-
                      * Virtual delete:
@@ -249,7 +249,7 @@ public final class DeletePerformer extends AbstractUserizedFolderPerformer {
                         throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(FolderStorage.REAL_TREE_ID, folderId);
                     }
                     if (folderStorage.equals(realStorage)) {
-                        result = trashRealFolder(folderId, folderStorage, transactionManager);
+                        result = trashRealFolder(folderId, folderStorage);
                     } else {
                         /*
                          * Delete from virtual storage
@@ -340,7 +340,7 @@ public final class DeletePerformer extends AbstractUserizedFolderPerformer {
             throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(FolderStorage.REAL_TREE_ID, folderId);
         }
         checkOpenedStorage(realStorage, openedStorages);
-        deleteRealFolder(folder, realStorage, transactionManager);
+        deleteRealFolder(folder, realStorage);
         /*
          * And now from virtual storage
          */
@@ -394,30 +394,29 @@ public final class DeletePerformer extends AbstractUserizedFolderPerformer {
             throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(FolderStorage.REAL_TREE_ID, folderId);
         }
         checkOpenedStorage(realStorage, openedStorages);
-        trashRealFolder(folder, realStorage, transactionManager);
+        trashRealFolder(folder, realStorage);
         /*
          * And now from virtual storage
          */
-        TrashResult result = ((TrashAwareFolderStorage) folderStorage).trashFolder(treeId, folderId, storageParameters);
-        return result;
+        return ((TrashAwareFolderStorage) folderStorage).trashFolder(treeId, folderId, storageParameters);
     }
 
-    private void deleteRealFolder(String id, FolderStorage storage, TransactionManager transactionManager) throws OXException {
-        deleteRealFolder(storage.getFolder(FolderStorage.REAL_TREE_ID, id, storageParameters), storage, transactionManager);
+    private void deleteRealFolder(String id, FolderStorage storage) throws OXException {
+        deleteRealFolder(storage.getFolder(FolderStorage.REAL_TREE_ID, id, storageParameters), storage);
     }
 
-    private TrashResult trashRealFolder(String id, FolderStorage storage, TransactionManager transactionManager) throws OXException {
-        return trashRealFolder(storage.getFolder(FolderStorage.REAL_TREE_ID, id, storageParameters), storage, transactionManager);
+    private TrashResult trashRealFolder(String id, FolderStorage storage) throws OXException {
+        return trashRealFolder(storage.getFolder(FolderStorage.REAL_TREE_ID, id, storageParameters), storage);
     }
 
-    private void deleteRealFolder(Folder folder, FolderStorage storage, TransactionManager transactionManager) throws OXException {
+    private void deleteRealFolder(Folder folder, FolderStorage storage) throws OXException {
         /*
          * delete folder
          */
         storage.deleteFolder(FolderStorage.REAL_TREE_ID, folder.getID(), storageParameters);
     }
 
-    private TrashResult trashRealFolder(Folder folder, FolderStorage storage, TransactionManager transactionManager) throws OXException {
+    private TrashResult trashRealFolder(Folder folder, FolderStorage storage) throws OXException {
         /*
          * trash folder
          */
