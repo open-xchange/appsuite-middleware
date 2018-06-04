@@ -116,6 +116,27 @@ if [ ${1:-0} -eq 2 ]; then # only when updating
     newline=$(sed -r -e 's/oxupdaterinstall *,? *| *,? *oxupdaterinstall//' <<<${enabled_scenarios_line})
     ox_set_property ${enabled_scenarios} "${newline}" ${pfile}
 
+    # SCR-187
+    pfile=/opt/open-xchange/etc/client-onboarding-mailapp.properties
+    playstore_key=com.openexchange.client.onboarding.mailapp.store.google.playstore
+    playstore_old_default=https://play.google.com/store/apps/details?id=com.openexchange.mobile.mailapp.enterprise
+    playstore_new_default=https://play.google.com/store/apps/details?id=com.openxchange.mobile.oxmail
+    appstore_key=com.openexchange.client.onboarding.mailapp.store.apple.appstore
+    appstore_old_default=https://itunes.apple.com/us/app/ox-mail/id1008644994
+    appstore_new_default=https://itunes.apple.com/us/app/ox-mail-v2/id1385582725
+
+    playstore_curr_val=$(ox_read_property ${playstore_key} ${pfile})
+    if [ "${playstore_curr_val}" == ${playstore_old_default} ]
+    then
+      ox_set_property ${playstore_key} ${playstore_new_default} ${pfile}
+    fi
+
+    appstore_curr_val=$(ox_read_property ${appstore_key} ${pfile})
+    if [ "${appstore_curr_val}" == "${appstore_old_default}" ]
+    then
+      ox_set_property ${appstore_key} ${appstore_new_default} ${pfile}
+    fi
+
 fi
 
 %clean
