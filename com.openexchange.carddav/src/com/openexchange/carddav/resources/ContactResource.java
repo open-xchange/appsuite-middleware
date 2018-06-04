@@ -298,7 +298,7 @@ public class ContactResource extends CommonResource<Contact> {
              * set initial parent folder to the default contacts folder in case of an iOS client
              */
             contact.setContextId(session.getContextId());
-            String parentFolderID = DAVUserAgent.IOS.equals(getUserAgent()) ? factory.getState().getDefaultFolder().getID() : String.valueOf(this.parentFolderID);
+            String parentFolderID = DAVUserAgent.IOS.equals(getUserAgent()) ? factory.getState().getDefaultFolder().getID() : String.valueOf(getId(parent));
             if (contact.getMarkAsDistribtuionlist()) {
                 /*
                  * insert & delete not supported contact group (next sync cleans up the client)
