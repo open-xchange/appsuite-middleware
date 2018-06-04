@@ -116,7 +116,7 @@ public final class CacheEventServiceImpl implements CacheEventService, CacheEven
                     try {
                         drained.clear();
 
-                        // Blocking wait for at least 1 DelayedPushMsObject to expire.
+                        // Blocking wait for at least 1 StampedCacheEvent to expire.
                         StampedCacheEvent object = delayedEvents.take();
                         if (POISON == object) {
                             return;
