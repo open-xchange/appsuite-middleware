@@ -406,6 +406,9 @@ public abstract class AbstractPerformer {
         return folderStorageDiscoverer;
     }
 
+    // --------------------------------------------------------------------------------------------------
+
+    /** A folder implementation supporting <code>SetterAwareFolder</code> interface */
     protected static final class UpdateFolder extends AbstractFolder implements SetterAwareFolder {
 
         private static final long serialVersionUID = -6666991788068206301L;
