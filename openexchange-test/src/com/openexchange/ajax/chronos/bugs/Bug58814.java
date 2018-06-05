@@ -113,7 +113,7 @@ public class Bug58814 extends AbstractChronosTest {
         EventData updatedEvent = eventManager.updateEvent(createdEvent);
 
         // Ensure that the 'until' part was successfully adjusted to match the 'start' part type
-        expectedRR = "FREQ=" + frequency.name() + ";BYDAY=" + weekday.name() + ";UNTIL=" + until.getValue() + "T000000";
+        expectedRR = "FREQ=" + frequency.name() + ";BYDAY=" + weekday.name() + ";UNTIL=" + until.getValue();
         actualRR = updatedEvent.getRrule();
         Assert.assertEquals(expectedRR, actualRR);
     }
@@ -135,23 +135,25 @@ public class Bug58814 extends AbstractChronosTest {
         DateTimeData startDate = DateTimeUtil.getDateTimeWithoutTimeInformation(now);
         DateTimeData endDate = DateTimeUtil.getDateTimeWithoutTimeInformation(now + TimeUnit.HOURS.toMillis(2));
         DateTimeData until = DateTimeUtil.getDateTime(untilTimestamp);
+        DateTimeData expectedUntil = DateTimeUtil.getDateTimeWithoutTimeInformation(untilTimestamp);
         // Create the full day event series
         EventData event = EventFactory.createSeriesEvent(defaultUserApi.getCalUser(), "Bug 58814 - testFullDayToNonFullDay", startDate, endDate, until, frequency, weekday, defaultFolderId);
         EventData createdEvent = eventManager.createEvent(event);
 
         // Ensure that the 'until' part was successfully adjusted to match the 'start' part type
-        String expectedRR = "FREQ=" + frequency.name() + ";BYDAY=" + weekday.name() + ";UNTIL=" + until.getValue() + "T000000Z";
+        String expectedRR = "FREQ=" + frequency.name() + ";BYDAY=" + weekday.name() + ";UNTIL=" + expectedUntil.getValue();
         String actualRR = createdEvent.getRrule();
         Assert.assertEquals(expectedRR, actualRR);
 
         // Switch to non-full day event (timezone and hour information present)
-        createdEvent.setStartDate(DateTimeUtil.getDateTime(System.currentTimeMillis()));
-        createdEvent.setEndDate(DateTimeUtil.getDateTime(System.currentTimeMillis() + TimeUnit.HOURS.toMillis(1)));
+        createdEvent.setStartDate(DateTimeUtil.getDateTime(now));
+        createdEvent.setEndDate(DateTimeUtil.getDateTime(now + TimeUnit.HOURS.toMillis(2)));
         EventData updatedEvent = eventManager.updateEvent(createdEvent);
 
         // Ensure that the 'until' part was successfully adjusted to match the 'start' part type
-        expectedRR = "FREQ=" + frequency.name() + ";BYDAY=" + weekday.name() + ";UNTIL=" + until.getValue() + "T000000Z";
+        expectedRR = "FREQ=" + frequency.name() + ";BYDAY=" + weekday.name() + ";UNTIL=" + expectedUntil.getValue() + "T000000Z";
         actualRR = updatedEvent.getRrule();
         Assert.assertEquals(expectedRR, actualRR);
     }
 }
+
