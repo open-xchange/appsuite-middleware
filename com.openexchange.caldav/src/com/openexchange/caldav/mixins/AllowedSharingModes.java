@@ -80,16 +80,16 @@ public class AllowedSharingModes extends SingleXMLPropertyMixin {
     @Override
     protected String getValue() {
         if (supportsPermissions() && hasFullSharedFolderAccess()) {
-            return "<CS:can-be-shared/><CS:can-be-published/>";
+            return "<can-be-shared/><can-be-published/>";
         }
-        return ""; // sharing not allowed
+        return "<never-shared/><never-publish/>";
     }
-    
+
     private boolean supportsPermissions() {
-        return null != collection.getFolder() && null != collection.getFolder().getSupportedCapabilities() && 
+        return null != collection.getFolder() && null != collection.getFolder().getSupportedCapabilities() &&
             collection.getFolder().getSupportedCapabilities().contains("permissions");
     }
-    
+
     private boolean hasFullSharedFolderAccess() {
         try {
             UserPermissionBits permissionBits = ServerSessionAdapter.valueOf(collection.getFactory().getSession()).getUserPermissionBits();

@@ -161,6 +161,7 @@ public class EventCollection extends FolderCollection<Event> implements Filterin
             maxDateTime,
             new CalendarOwner(this),
             new Organizer(this),
+            new AllowedSharingModes(this),
             new ScheduleDefaultCalendarURL(factory),
             new ScheduleDefaultTasksURL(factory),
             new CalendarColor(this),
@@ -174,7 +175,7 @@ public class EventCollection extends FolderCollection<Event> implements Filterin
             new DefaultAlarmVeventDatetime()
         );
         if (supportsPermissions(folder)) {
-            includeProperties(new Invite(factory, this), new AllowedSharingModes(this));
+            includeProperties(new Invite(factory, this));
         }
         if (CalendarOrder.NO_ORDER != order) {
             includeProperties(new CalendarOrder(order));
