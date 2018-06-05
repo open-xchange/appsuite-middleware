@@ -126,12 +126,22 @@ public abstract class FolderCollection<T> extends DAVCollection {
                 new ACL(folder.getPermissions()),
                 new ACLRestrictions(),
                 new SupportedPrivilegeSet(),
-                new ShareAccess(this),
-                new Invite(this),
-                new ShareResourceURI(this),
                 new Principal(getOwner())
             );
+            if (supportsPermissions(folder)) {
+                includeProperties(new ShareAccess(this), new Invite(this), new ShareResourceURI(this));
+            }
         }
+    }
+
+    /**
+     * Gets a value indicating whether a specific folder supports permissions or not.
+     *
+     * @param folder The folder to check
+     * @return <code>true</code> if permissions are supported, <code>false</code>, otherwise
+     */
+    protected static boolean supportsPermissions(UserizedFolder folder) {
+        return null != folder && null != folder.getSupportedCapabilities() && folder.getSupportedCapabilities().contains("permissions");
     }
 
     @Override

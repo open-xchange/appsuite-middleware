@@ -151,7 +151,7 @@ public abstract class CalDAVFolderCollection<T extends CalendarObject> extends C
             minDateTime,
             maxDateTime,
             new Invite(factory, this),
-            new AllowedSharingModes(factory.getSession()),
+            new AllowedSharingModes(this),
             new CalendarOwner(this),
             new Organizer(this),
             new ScheduleDefaultCalendarURL(factory),
