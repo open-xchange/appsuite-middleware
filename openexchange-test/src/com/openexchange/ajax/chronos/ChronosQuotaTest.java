@@ -54,12 +54,15 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.assertThat;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.BlockJUnit4ClassRunner;
 import com.openexchange.ajax.chronos.util.DateTimeUtil;
+import com.openexchange.ajax.framework.config.util.ChangePropertiesRequest;
+import com.openexchange.ajax.framework.config.util.ChangePropertiesResponse;
 import com.openexchange.testing.httpclient.models.Attendee;
 import com.openexchange.testing.httpclient.models.Attendee.CuTypeEnum;
 import com.openexchange.testing.httpclient.models.ChronosCalendarResultResponse;
@@ -69,7 +72,6 @@ import com.openexchange.testing.httpclient.models.EventData.TranspEnum;
 import com.openexchange.testing.httpclient.models.LoginResponse;
 import com.openexchange.testing.httpclient.models.QuotasResponse;
 import com.openexchange.testing.httpclient.modules.QuotaApi;
-import edu.emory.mathcs.backport.java.util.Collections;
 
 /**
  * {@link ChronosQuotaTest} - For new CalendarQuotaProvider
@@ -91,6 +93,18 @@ public class ChronosQuotaTest extends AbstractChronosTest {
     public void setUp() throws Exception {
         super.setUp();
         setUpConfiguration();
+    }
+
+    @Override
+    public void tearDown() throws Exception {
+        // Restore unlimited quota
+        Map<String, String> map = Collections.singletonMap("com.openexchange.quota.calendar", "-1");
+        if (!map.isEmpty()) {
+            // change configuration to new values
+            ChangePropertiesRequest<ChangePropertiesResponse> req = new ChangePropertiesRequest<>(map, getScope(), getReloadables());
+            getClient().execute(req);
+        }
+        super.tearDown();
     }
 
     /**
@@ -133,7 +147,6 @@ public class ChronosQuotaTest extends AbstractChronosTest {
         assertThat("Code does not match. Expected '" + expectedCode + "'.", resultResponse.getCode(), is(expectedCode));
     }
 
-    @SuppressWarnings("unchecked")
     private EventData createSingleEvent(String summary, DateTimeData startDate, DateTimeData endDate) {
         EventData singleEvent = new EventData();
         singleEvent.setPropertyClass("PUBLIC");
