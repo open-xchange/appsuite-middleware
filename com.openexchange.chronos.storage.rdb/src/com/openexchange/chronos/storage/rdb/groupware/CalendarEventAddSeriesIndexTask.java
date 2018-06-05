@@ -53,8 +53,13 @@ import static com.openexchange.database.Databases.autocommit;
 import static com.openexchange.database.Databases.rollback;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.List;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.PerformParameters;
+import com.openexchange.groupware.update.ProgressState;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
 import com.openexchange.tools.update.Tools;
@@ -84,18 +89,33 @@ public class CalendarEventAddSeriesIndexTask extends UpdateTaskAdapter {
         Connection connection = params.getConnection();
         int rollback = 0;
         try {
-            connection.setAutoCommit(false);
-            rollback = 1;
-
             String[] indexColumns = new String[] { "cid", "account", "series" };
-            for (String tableName : new String[] { "calendar_event", "calendar_event_tombstone" }) {
-                if (null == Tools.existsIndex(connection, tableName, indexColumns)) {
-                    Tools.createIndex(connection, tableName, "series", indexColumns, false);
+
+            // Check if there is no such index
+            List<String> tables = new ArrayList<>(Arrays.asList("calendar_event", "calendar_event_tombstone"));
+            for (Iterator<String> it = tables.iterator(); it.hasNext(); ) {
+                if (null != Tools.existsIndex(connection, it.next(), indexColumns)) {
+                    // Such an index already exists
+                    it.remove();
                 }
             }
 
-            connection.commit();
-            rollback = 2;
+            // Check if there is any index, which needs to be added
+            int size = tables.size();
+            if (size > 0) {
+                connection.setAutoCommit(false);
+                rollback = 1;
+
+                ProgressState progressState = params.getProgressState();
+                progressState.setTotal(size);
+                for (String tableName : tables) {
+                    Tools.createIndex(connection, tableName, "series", indexColumns, false);
+                    progressState.incrementState();
+                }
+
+                connection.commit();
+                rollback = 2;
+            }
         } catch (SQLException e) {
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } catch (RuntimeException e) {
