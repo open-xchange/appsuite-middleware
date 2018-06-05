@@ -65,18 +65,18 @@ import com.openexchange.testing.httpclient.models.DateTimeData;
 import com.openexchange.testing.httpclient.models.EventData;
 
 /**
- * {@link Bug58814} - Tests for <a href="https://bugs.open-xchange.com/show_bug.cgi?id=58814">Bug 58814</a>
+ * {@link Bug58814Test} - Tests for <a href="https://bugs.open-xchange.com/show_bug.cgi?id=58814">Bug 58814</a>
  * - .ics import fails with 'The specified recurrence rule is invalid'
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @since v7.10.0
  */
-public class Bug58814 extends AbstractChronosTest {
+public class Bug58814Test extends AbstractChronosTest {
 
     /**
-     * Initialises a new {@link Bug58814}.
+     * Initialises a new {@link Bug58814Test}.
      */
-    public Bug58814() {
+    public Bug58814Test() {
         super();
     }
 

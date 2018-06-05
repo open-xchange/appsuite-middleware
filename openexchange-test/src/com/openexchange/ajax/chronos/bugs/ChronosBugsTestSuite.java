@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2017-2020 OX Software GmbH
+ *     Copyright (C) 2018-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,43 +47,24 @@
  *
  */
 
-package com.openexchange.ajax.chronos;
+package com.openexchange.ajax.chronos.bugs;
 
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
-import com.openexchange.ajax.chronos.bugs.ChronosBugsTestSuite;
-import com.openexchange.ajax.chronos.schedjoules.BasicSchedJoulesAPITest;
-import com.openexchange.ajax.chronos.schedjoules.SchedJoulesTestSuite;
 import com.openexchange.test.concurrent.ParallelSuite;
 
 /**
- * {@link ChronosTestSuite}
+ * {@link ChronosBugsTestSuite}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 @RunWith(ParallelSuite.class)
 @Suite.SuiteClasses({
     // @formatter:off
-    AcknowledgeAndSnoozeTest.class,
-    BasicAlarmTest.class,
-    BasicAlarmTriggerTest.class,
-    //BasicAvailabilityTest.class,
-    BasicFreeBusyTest.class,
-    BasicSchedJoulesAPITest.class,
-    SchedJoulesTestSuite.class,
-    BasicSelfProtectionTest.class,
-    BasicSeriesEventTest.class,
-    BasicSingleEventTest.class,
-    ChronosQuotaTest.class,
-    TimezoneAlarmTriggerTest.class,
-    ICalEventImportExportTest.class,
-    RestrictedAttendeePermissionsTest.class,
-    BasicICalCalendarProviderTest.class,
-    ICalImportAccessTest.class,
-    ChronosBugsTestSuite.class
+    Bug58814Test.class,
     // @formatter:on
 
 })
-public class ChronosTestSuite {
-  // empty
+public class ChronosBugsTestSuite {
+
 }
