@@ -179,9 +179,31 @@ public class Bug58814Test extends AbstractChronosTest {
 
         List<EventId> eventIds = importExportManager.parseImportJSONResponseToEventIds(response);
         eventManager.rememberEventIds(eventIds);
-        List<EventData> eventData = eventManager.listEvents(eventIds);
-        assertEquals(4, eventData.size());
+        List<EventData> eventDataList = eventManager.listEvents(eventIds);
+        assertEquals(4, eventDataList.size());
 
-        //TODO: assert data
+        EventData eventData = eventDataList.get(0);
+        assertEquals("Test Bug 58814 - Recurrence Check No-Full-Day", eventData.getSummary());
+        assertEquals(DateTimeUtil.getDateTimeData("20140604T170000", "America/New_York"), eventData.getStartDate());
+        assertEquals(DateTimeUtil.getDateTimeData("20140604T200000", "America/New_York"), eventData.getEndDate());
+        assertEquals("FREQ=WEEKLY;UNTIL=20140924T210000Z;BYDAY=WE", eventData.getRrule());
+
+        eventData = eventDataList.get(1);
+        assertEquals("Test Bug 58814 - Recurrence Check Full-Day", eventData.getSummary());
+        assertEquals(DateTimeUtil.getDateTimeData("20100826", null), eventData.getStartDate());
+        assertEquals(DateTimeUtil.getDateTimeData("20100827", null), eventData.getEndDate());
+        assertEquals("FREQ=DAILY;WKST=SU;UNTIL=20100905", eventData.getRrule());
+
+        eventData = eventDataList.get(2);
+        assertEquals("Test Bug 58814 - Recurrence Check Start/End Full-Day, Recurrence Until No-Full-Day", eventData.getSummary());
+        assertEquals(DateTimeUtil.getDateTimeData("20081208", null), eventData.getStartDate());
+        assertEquals(DateTimeUtil.getDateTimeData("20081209", null), eventData.getEndDate());
+        assertEquals("FREQ=DAILY;UNTIL=20081214", eventData.getRrule());
+
+        eventData = eventDataList.get(3);
+        assertEquals("Test Bug 58814 - Recurrence Check Start/End No-Full-Day, Recurrence Until Full-Day", eventData.getSummary());
+        assertEquals(DateTimeUtil.getDateTimeData("20100406T133000Z", null), eventData.getStartDate());
+        assertEquals(DateTimeUtil.getDateTimeData("20100406T143000Z", null), eventData.getEndDate());
+        assertEquals("FREQ=DAILY;WKST=SU;UNTIL=20100421T000000Z", eventData.getRrule());
     }
 }
