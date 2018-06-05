@@ -53,7 +53,7 @@ import com.openexchange.client.onboarding.mail.MailOnboardingProvider;
 import com.openexchange.session.Session;
 
 /**
- * {@link CustomLoginSource} provides the imap and smtp login name for the {@link MailOnboardingProvider}
+ * {@link CustomLoginSource} - Provides the IMAP and SMTP login name for the {@link MailOnboardingProvider}.
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.8.4
@@ -61,16 +61,19 @@ import com.openexchange.session.Session;
 public interface CustomLoginSource {
 
     /**
-     * Provides the imap login for the {@link MailOnboardingProvider}
+     * Provides the IMAP login for the {@link MailOnboardingProvider}.
+     *
      * @param session The session
-     * @return the imap login
+     * @return the IMAP login
      */
-    public String getImapLogin(Session session);
+    String getImapLogin(Session session);
 
     /**
-     * Provides the smtp login for the {@link MailOnboardingProvider}
+     * Provides the SMTP login for the {@link MailOnboardingProvider}.
+     *
      * @param session The session
-     * @return the smtp login
+     * @return the SMTP login
      */
-    public String getSmtpLogin(Session session);
+    String getSmtpLogin(Session session);
+
 }
