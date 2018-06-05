@@ -215,9 +215,9 @@ public class ITipAnalysisResultConverter implements ResultConverter {
 
         List<EventConflict> conflicts = change.getConflicts();
         if (conflicts != null && !conflicts.isEmpty()) {
-            JSONArray array = new JSONArray();
+            JSONArray array = new JSONArray(conflicts.size());
             for (EventConflict conflict : conflicts) {
-                JSONObject jsonConflict = new JSONObject(2);
+                JSONObject jsonConflict = new JSONObject(3);
                 jsonConflict.put(ChronosEventConflictJsonFields.EventConflict.HARD_CONFLICT, conflict.isHardConflict());
                 jsonConflict.put(ChronosEventConflictJsonFields.EventConflict.CONFLICTING_ATTENDEES, convertAttendees(conflict.getConflictingAttendees()));
                 jsonConflict.put(ChronosEventConflictJsonFields.EventConflict.EVENT, EventMapper.getInstance().serialize(conflict.getConflictingEvent(), EventMapper.getInstance().getAssignedFields(conflict.getConflictingEvent()), tz, session));
