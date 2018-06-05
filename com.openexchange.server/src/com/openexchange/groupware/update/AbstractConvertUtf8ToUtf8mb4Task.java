@@ -83,7 +83,7 @@ import com.openexchange.tools.update.Tools;
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @since v7.10.0
  */
-@NamespaceAwareUpdateTask(namespace = "groupware.utf8mb4", description = "All utf8 to utf8mb4 convert tasks")
+@NamespaceAwareUpdateTask(namespace = "groupware.utf8mb4", description = "All utf8 to utf8mb4 conversion tasks")
 public abstract class AbstractConvertUtf8ToUtf8mb4Task extends UpdateTaskAdapter {
 
     private static final org.slf4j.Logger LOGGER = org.slf4j.LoggerFactory.getLogger(AbstractConvertUtf8ToUtf8mb4Task.class);
@@ -501,7 +501,7 @@ public abstract class AbstractConvertUtf8ToUtf8mb4Task extends UpdateTaskAdapter
     /**
      * Changes the charset/collation of the specified table and (optionally) shrinks the specified VARCHAR columns and
      * a {@link List} with the definitions of {@link Column}s to modify
-     * 
+     *
      * @param connection The connection to use
      * @param schema The schema name
      * @param table The table name
@@ -636,7 +636,7 @@ public abstract class AbstractConvertUtf8ToUtf8mb4Task extends UpdateTaskAdapter
 
     /**
      * Re-creates the specified key for the specified table.
-     * 
+     *
      * @param connection The {@link Connection}
      * @param table The table's name
      * @param columnNames the column names
