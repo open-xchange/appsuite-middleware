@@ -236,8 +236,6 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                 throw new StorageException(e);
             }
 
-            List<Integer> userIds = null;
-
             DBUtils.TransactionRollbackCondition condition = new DBUtils.TransactionRollbackCondition(3);
             do {
                 SubmittingRunnable<Void> pendingInvocation = null;
@@ -245,28 +243,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                 try {
                     // Initialize connection to context-associated database schema
                     conForContext = adminCache.getWRITENoTimeoutConnectionForPoolId(poolId, scheme);
-
-                    // Determine remaining users (if not done already)
-                    if (null == userIds) {
-                        PreparedStatement stmt = null;
-                        ResultSet rs = null;
-                        try {
-                            stmt = conForContext.prepareStatement("SELECT id FROM user WHERE cid=?");
-                            stmt.setInt(1, ctx.getId().intValue());
-                            rs = stmt.executeQuery();
-                            if (rs.next()) {
-                                userIds = new LinkedList<>();
-                                do {
-                                    userIds.add(Integer.valueOf(rs.getInt(1)));
-                                } while (rs.next());
-                            } else {
-                                userIds = Collections.emptyList();
-                            }
-                        } finally {
-                            Databases.closeSQLStuff(rs, stmt);
-                        }
-                    }
-
+                    List<Integer> userIds = getUsersToDelete(ctx, conForContext);
                     // Loop through tables and execute delete statements on each table (using transaction)
                     pendingInvocation = deleteContextData(ctx, conForContext, userIds, poolId, scheme);
                 } catch (PoolException e) {
@@ -371,6 +348,35 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
             }
         } catch (final Exception e) {
             LOG.error("Error invalidating context {} in ox context storage", ctx.getId(), e);
+        }
+    }
+
+    /**
+     * Gets the users to delete
+     * 
+     * @param ctx The {@link Context}
+     * @param conForContext The {@link Connection}
+     * @return A {@link List} with all users of the context, or an empty list if there are none.
+     * @throws SQLException if an SQL Error is occurred
+     */
+    private List<Integer> getUsersToDelete(final Context ctx, Connection conForContext) throws SQLException {
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            stmt = conForContext.prepareStatement("SELECT id FROM user WHERE cid=?");
+            stmt.setInt(1, ctx.getId().intValue());
+            rs = stmt.executeQuery();
+            if (false == rs.next()) {
+                return Collections.emptyList();
+            }
+
+            List<Integer> userIds = new LinkedList<>();
+            do {
+                userIds.add(Integer.valueOf(rs.getInt(1)));
+            } while (rs.next());
+            return userIds;
+        } finally {
+            Databases.closeSQLStuff(rs, stmt);
         }
     }
 
@@ -2156,39 +2162,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
     }
 
     // Deduced from https://dev.mysql.com/doc/connector-j/5.1/en/connector-j-reference-type-conversions.html
-    private static final Map<String, Integer> MYSQL_TYPES = ImmutableMap.<String, Integer> builder()
-        .put("BIT", Types.BIT)
-        .put("TINYINT", Types.TINYINT)
-        .put("BOOL", Types.BOOLEAN)
-        .put("BOOLEAN", Types.BOOLEAN)
-        .put("SMALLINT", Types.SMALLINT)
-        .put("MEDIUMINT", Types.INTEGER)
-        .put("INT", Types.INTEGER)
-        .put("INTEGERR", Types.INTEGER)
-        .put("BIGINT", Types.BIGINT)
-        .put("FLOAT", Types.FLOAT)
-        .put("DOUBLE", Types.DOUBLE)
-        .put("DECIMAL", Types.DECIMAL)
-        .put("DATE", Types.DATE)
-        .put("DATETIME", Types.TIMESTAMP)
-        .put("TIMESTAMP", Types.TIMESTAMP)
-        .put("TIME", Types.TIME)
-        .put("YEAR", Types.DATE)
-        .put("CHAR", Types.CHAR)
-        .put("VARCHAR", Types.VARCHAR)
-        .put("BINARY", Types.BINARY)
-        .put("VARBINARY", Types.VARBINARY)
-        .put("TINYBLOB", Types.BLOB)
-        .put("TINYTEXT", Types.VARCHAR)
-        .put("BLOB", Types.BLOB)
-        .put("TEXT", Types.VARCHAR)
-        .put("MEDIUMBLOB", Types.BLOB)
-        .put("MEDIUMTEXT", Types.VARCHAR)
-        .put("LONGBLOB", Types.BLOB)
-        .put("LONGTEXT", Types.VARCHAR)
-        .put("ENUM", Types.CHAR)
-        .put("SET", Types.CHAR)
-        .build();
+    private static final Map<String, Integer> MYSQL_TYPES = ImmutableMap.<String, Integer> builder().put("BIT", Types.BIT).put("TINYINT", Types.TINYINT).put("BOOL", Types.BOOLEAN).put("BOOLEAN", Types.BOOLEAN).put("SMALLINT", Types.SMALLINT).put("MEDIUMINT", Types.INTEGER).put("INT", Types.INTEGER).put("INTEGERR", Types.INTEGER).put("BIGINT", Types.BIGINT).put("FLOAT", Types.FLOAT).put("DOUBLE", Types.DOUBLE).put("DECIMAL", Types.DECIMAL).put("DATE", Types.DATE).put("DATETIME", Types.TIMESTAMP).put("TIMESTAMP", Types.TIMESTAMP).put("TIME", Types.TIME).put("YEAR", Types.DATE).put("CHAR", Types.CHAR).put("VARCHAR", Types.VARCHAR).put("BINARY", Types.BINARY).put("VARBINARY", Types.VARBINARY).put("TINYBLOB", Types.BLOB).put("TINYTEXT", Types.VARCHAR).put("BLOB", Types.BLOB).put("TEXT", Types.VARCHAR).put("MEDIUMBLOB", Types.BLOB).put("MEDIUMTEXT", Types.VARCHAR).put("LONGBLOB", Types.BLOB).put("LONGTEXT", Types.VARCHAR).put("ENUM", Types.CHAR).put("SET", Types.CHAR).build();
 
     private static List<TableObject> fetchTableObjects(String selectionCriteria, Connection ox_db_write_connection) throws SQLException {
         PreparedStatement stmt = null;
@@ -3729,7 +3703,8 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                     this.count = count;
                     this.schemaName = schemaName;
                 }
-            };
+            }
+            ;
 
             Map<Integer, List<SchemaCount>> counts = new LinkedHashMap<Integer, List<SchemaCount>>(32, 0.9F);
             for (Integer poolId : poolIds) {
