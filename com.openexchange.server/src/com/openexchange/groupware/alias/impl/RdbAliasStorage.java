@@ -69,6 +69,7 @@ import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.alias.UserAliasStorage;
 import com.openexchange.groupware.alias.UserAliasStorageExceptionCodes;
+import com.openexchange.java.Strings;
 import com.openexchange.java.util.UUIDs;
 import com.openexchange.tools.arrays.Arrays;
 import gnu.trove.iterator.TIntObjectIterator;
@@ -85,7 +86,7 @@ import gnu.trove.map.hash.TIntObjectHashMap;
 public class RdbAliasStorage implements UserAliasStorage {
 
     /**
-     * Initialises a new {@link RdbAliasStorage}.
+     * Initializes a new {@link RdbAliasStorage}.
      */
     public RdbAliasStorage() {
         super();
@@ -227,6 +228,11 @@ public class RdbAliasStorage implements UserAliasStorage {
 
     @Override
     public int getUserId(int contextId, String alias) throws OXException {
+        if (Strings.containsSurrogatePairs(alias)) {
+            // Cannot be contained
+            return -1;
+        }
+
         Connection con = Database.get(contextId, false);
         PreparedStatement stmt = null;
         ResultSet rs = null;
@@ -453,6 +459,11 @@ public class RdbAliasStorage implements UserAliasStorage {
             return updateAlias(contextId, userId, oldAlias, newAlias);
         }
 
+        if (Strings.containsSurrogatePairs(oldAlias)) {
+            // Cannot be contained
+            return false;
+        }
+
         PreparedStatement stmt = null;
         try {
             int index = 0;
@@ -482,6 +493,11 @@ public class RdbAliasStorage implements UserAliasStorage {
     public boolean deleteAlias(Connection con, int contextId, int userId, String alias) throws OXException {
         if (con == null) {
             return deleteAlias(contextId, userId, alias);
+        }
+
+        if (Strings.containsSurrogatePairs(alias)) {
+            // Cannot be contained
+            return false;
         }
 
         PreparedStatement stmt = null;
@@ -530,6 +546,11 @@ public class RdbAliasStorage implements UserAliasStorage {
 
     @Override
     public List<Integer> getUserIdsByAliasDomain(int contextId, String aliasDomain) throws OXException {
+        if (Strings.containsSurrogatePairs(aliasDomain)) {
+            // Cannot be contained
+            return Collections.emptyList();
+        }
+
         Connection con = null;
         PreparedStatement stmt = null;
         ResultSet rs = null;

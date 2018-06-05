@@ -69,9 +69,9 @@ public class RdbSnippetTables {
             " cid INT4 unsigned NOT NULL," +
             " user INT4 unsigned NOT NULL," +
             " id INT4 unsigned NOT NULL," +
-            " content TEXT CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL," +
+            " content TEXT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL," +
             " PRIMARY KEY (cid, user, id)" +
-            ") ENGINE=InnoDB";
+            ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci";
     }
 
     /*-
@@ -88,11 +88,11 @@ public class RdbSnippetTables {
             " user INT4 unsigned NOT NULL," +
             " id INT4 unsigned NOT NULL," +
             " referenceId VARCHAR(255) CHARACTER SET latin1 NOT NULL," +
-            " fileName VARCHAR(255) CHARACTER SET utf8 COLLATE utf8_unicode_ci DEFAULT NULL," +
-            " mimeType VARCHAR(255) CHARACTER SET utf8 COLLATE utf8_unicode_ci DEFAULT NULL," +
-            " disposition VARCHAR(255) CHARACTER SET utf8 COLLATE utf8_unicode_ci DEFAULT NULL," +
+            " fileName VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL," +
+            " mimeType VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL," +
+            " disposition VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL," +
             " PRIMARY KEY (cid, user, id, referenceId(64))" +
-            ") ENGINE=InnoDB";
+            ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci";
     }
 
     /*-
@@ -110,7 +110,7 @@ public class RdbSnippetTables {
             " id INT4 unsigned NOT NULL," +
             " json TEXT CHARACTER SET latin1 NOT NULL," +
             " PRIMARY KEY (cid, user, id)" +
-            ") ENGINE=InnoDB";
+            ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci";
     }
 
     /*-
@@ -127,6 +127,6 @@ public class RdbSnippetTables {
             " referenceId VARCHAR(64) CHARACTER SET latin1 NOT NULL," +
             " data MEDIUMBLOB NOT NULL," +
             " PRIMARY KEY (cid, referenceId)" +
-            ") ENGINE=InnoDB";
+            ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci";
     }
 }

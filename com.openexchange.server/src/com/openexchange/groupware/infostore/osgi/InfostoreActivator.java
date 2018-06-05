@@ -50,7 +50,6 @@
 package com.openexchange.groupware.infostore.osgi;
 
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.LinkedList;
@@ -76,6 +75,7 @@ import com.openexchange.groupware.infostore.InfostoreAvailable;
 import com.openexchange.groupware.infostore.InfostoreFacades;
 import com.openexchange.groupware.infostore.database.InfostoreFilestoreLocationUpdater;
 import com.openexchange.groupware.infostore.database.impl.InfostoreFilenameReservationsCreateTableTask;
+import com.openexchange.groupware.infostore.database.impl.InfostoreReservedPathsConvertUtf8ToUtf8mb4UpdateTask;
 import com.openexchange.groupware.infostore.facade.impl.InfostoreFacadeImpl;
 import com.openexchange.groupware.infostore.webdav.EntityLockManagerImpl;
 import com.openexchange.groupware.infostore.webdav.LockCleaner;
@@ -164,12 +164,7 @@ public class InfostoreActivator implements BundleActivator {
 
             final InfostoreFilenameReservationsCreateTableTask task = new InfostoreFilenameReservationsCreateTableTask();
             context.registerService(CreateTableService.class, task, null);
-            context.registerService(UpdateTaskProviderService.class.getName(), new UpdateTaskProviderService() {
-                @Override
-                public Collection<UpdateTaskV2> getUpdateTasks() {
-                    return Arrays.asList(((UpdateTaskV2) task));
-                }
-            }, null);
+            context.registerService(UpdateTaskProviderService.class.getName(), (UpdateTaskProviderService) () -> Arrays.asList(((UpdateTaskV2) task), new InfostoreReservedPathsConvertUtf8ToUtf8mb4UpdateTask()), null);
 
             ServiceTracker<ConfigurationService, ConfigurationService> configTracker = new ServiceTracker<ConfigurationService, ConfigurationService>(context, ConfigurationService.class, new ServiceTrackerCustomizer<ConfigurationService, ConfigurationService>() {
 

@@ -85,7 +85,7 @@ public class SwiftCreateTableService extends AbstractCreateTableImpl {
             " PRIMARY KEY (cid, user, document_id, swift_id)," +
             " UNIQUE KEY `swift_key` (`swift_id`)," +
             " INDEX `swift_index` (`cid`, `swift_id`)" +
-            ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" };
+            ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci" };
     }
 
     /**

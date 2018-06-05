@@ -4428,6 +4428,50 @@ msgstr "Úlohy"
 msgid "Export"
 msgstr "Export"
 
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.importexport/src/com/openexchange/importexport/exceptions/ImportExportExceptionMessages.java:141
+msgid "Could not create a proper name for the export file."
+msgstr "Nepodarilo sa vytvoriť správny názov exportovaného súboru."
+
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.importexport/src/com/openexchange/importexport/exceptions/ImportExportExceptionMessages.java:143
+msgid "Not all of the objects could be imported due to a configured limitation"
+msgstr ""
+"Nie všetky objekty bolo možné importovať z dôvodu nakonfigurovaného "
+"obmedzenia"
+
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.importexport/src/com/openexchange/importexport/exceptions/ImportExportExceptionMessages.java:145
+msgid ""
+"%1$sd warnings when importing file and not all of the objects could be "
+"imported due to a configured limitation"
+msgstr ""
+"%1$sd upozornení pri importe súboru a nie všetky objekty bolo možné "
+"naimportovať z dôvodu nakonfigurovaného obmedzenia"
+
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.importexport/src/com/openexchange/importexport/exceptions/ImportExportExceptionMessages.java:147
+msgid "Could not parse json body parameters for folders and objects."
+msgstr "Nepodarilo sa analyzovať parametre tela JSON pre priečinky a objekty."
+
+#. *
+#. * The default file name for an ical appointment export, when using batch data
+#.
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.importexport/src/com/openexchange/importexport/helpers/ExportDefaultFileNames.java:71
+msgid "Appointments"
+msgstr "Schôdzky"
+
+#. *
+#. * The default file name for an ical task export, when using batch data
+#.
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.importexport/src/com/openexchange/importexport/helpers/ExportDefaultFileNames.java:81
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/FolderStrings.java:92
+msgid "Tasks"
+msgstr "Úlohy"
+
+#. *
+#. * The default file name for an ical task export, when using batch data
+#.
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.importexport/src/com/openexchange/importexport/helpers/ExportDefaultFileNames.java:86
+msgid "Export"
+msgstr "Export"
+
 #. Referenced JSlob %1$s must not be set for service %2$s. Nothing will be done.
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.jslob/src/com/openexchange/jslob/JSlobExceptionMessages.java:62
 msgid ""
@@ -10927,6 +10971,24 @@ msgstr ""
 "%1$s (%2$s) s vami zdieľa %3$d kalendárov. Môžete ich zobraziť kliknutím na "
 "tlačidlo nižšie."
 
+#. * $username ($user_email) has shared calendar $folder with you. Please click the button below to view it.
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:150
+msgid ""
+"%1$s (%2$s) has shared the calendar \"%3$s\" with you. Please click the "
+"button below to view it."
+msgstr ""
+"%1$s (%2$s) s vami zdieľa kalendár „%3$s“. Môžete ho zobraziť kliknutím na "
+"tlačidlo nižšie."
+
+#. * $username ($user_email) has shared $number calendars with you. Please click the button below to view them.
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:153
+msgid ""
+"%1$s (%2$s) has shared %3$ calendars with you. Please click the button below "
+"to view them."
+msgstr ""
+"%1$s (%2$s) s vami zdieľa %3$s kalendárov. Môžete ich zobraziť kliknutím na "
+"tlačidlo nižšie."
+
 #. * $username ($user_email) has shared file "$filename" with the group "Sales Dept.". Please click the button below to view it.
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:156
 msgid ""
@@ -11121,8 +11183,7 @@ msgstr ""
 msgid ""
 "%1$s (%2$s) has shared the item \"%3$s\" with the group \"%4$s\" and left a "
 "message:"
-msgstr ""
-"%1$s (%2$s) zdieľa položku „%3$s“ so skupinou „%4$s“ a zanechal správu:"
+msgstr "%1$s (%2$s) zdieľa položku „%3$s“ so skupinou „%4$s“ a zanechal správu:"
 
 #. * $username ($user_email) has shared $number_of_items items with the group "Sales Dept." and left a message:
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:237

@@ -1056,6 +1056,9 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
         }
 
         String sqlPattern = null == pattern ? null : pattern.replace('*', '%');
+        if (Strings.containsSurrogatePairs(sqlPattern)) {
+            return new Context[0];
+        }
         if ((null == sqlPattern || "%".equals(sqlPattern)) && (null == filters || filters.isEmpty())) {
             Connection con = null;
             PreparedStatement stmt = null;
@@ -3029,6 +3032,9 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
             for (final String loginMapping : loginMappings) {
                 if (loginMapping.length() == 0) {
                     LOG.warn("Ignoring empty login mapping.");
+                    continue;
+                } else if (Strings.containsSurrogatePairs(loginMapping)) {
+                    LOG.warn("Ignoring login mapping that contains surrogate pairs '{}'.", loginMapping);
                     continue;
                 }
                 stmt.setString(1, loginMapping);

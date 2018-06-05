@@ -91,4 +91,17 @@ public class Column {
     public String getDefinition() {
         return definition;
     }
+
+    @Override
+    public String toString() {
+        StringBuilder builder = new StringBuilder(32);
+        if (name != null) {
+            builder.append(name);
+        }
+        if (definition != null) {
+            builder.append(" ").append(definition);
+        }
+        return builder.toString();
+    }
+
 }

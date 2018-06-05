@@ -59,6 +59,7 @@ import com.openexchange.database.DatabaseService;
 import com.openexchange.download.limit.internal.Services;
 import com.openexchange.download.limit.limiter.FilesDownloadLimiter;
 import com.openexchange.download.limit.limiter.InfostoreDownloadLimiter;
+import com.openexchange.download.limit.rdb.FileAccessConvertUtf8ToUtf8mb4UpdateTask;
 import com.openexchange.download.limit.rdb.FileAccessCreateTableService;
 import com.openexchange.download.limit.rdb.FileAccessCreateTableTask;
 import com.openexchange.download.limit.util.LimitConfig;
@@ -103,7 +104,7 @@ public class ShareLimitActivator extends AJAXModuleActivator {
         registerService(CreateTableService.class, new FileAccessCreateTableService());
 
         // Register update tasks for user schema
-        registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(new FileAccessCreateTableTask(getService(DatabaseService.class))));
+        registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(new FileAccessCreateTableTask(getService(DatabaseService.class)), new FileAccessConvertUtf8ToUtf8mb4UpdateTask()));
 
         ConfigViewFactory configView = getService(ConfigViewFactory.class);
         final FilesDownloadLimiter filesDownloadLimiter = new FilesDownloadLimiter(configView);

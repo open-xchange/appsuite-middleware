@@ -83,10 +83,10 @@ public class InfostoreFilenameReservationsCreateTableTask extends AbstractCreate
         return "CREATE TABLE infostoreReservedPaths (" +
                 " cid INT4 unsigned NOT NULL," +
                 " folder INT4 unsigned NOT NULL, " +
-                " name VARCHAR(767) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL, " +
+                " name VARCHAR(767) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL, " +
                 " uuid BINARY(16) NOT NULL, " +
                 " PRIMARY KEY (cid, uuid) " +
-                ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci";
+            ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci";
     }
 
     @Override
@@ -109,12 +109,12 @@ public class InfostoreFilenameReservationsCreateTableTask extends AbstractCreate
         Connection con = params.getConnection();
         createTable(INFOSTORE_RESERVED_PATHS, getTableSQL(), con);
         final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(InfostoreFilenameReservationsCreateTableTask.class);
-            logger.info("UpdateTask ''{}'' successfully performed!", InfostoreFilenameReservationsCreateTableTask.class.getSimpleName());
+        logger.info("UpdateTask ''{}'' successfully performed!", InfostoreFilenameReservationsCreateTableTask.class.getSimpleName());
     }
 
     @Override
     public String[] requiredTables() {
-        return new String[] { };
+        return new String[] {};
     }
 
     @Override

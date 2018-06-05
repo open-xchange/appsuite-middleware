@@ -69,6 +69,7 @@ import com.openexchange.pns.subscription.storage.CompositePushSubscriptionRegist
 import com.openexchange.pns.subscription.storage.groupware.CreatePnsSubscriptionTable;
 import com.openexchange.pns.subscription.storage.groupware.PnsCreateTableTask;
 import com.openexchange.pns.subscription.storage.groupware.PnsDeleteListener;
+import com.openexchange.pns.subscription.storage.groupware.PnsSubscriptionTablesUtf8Mb4UpdateTask;
 import com.openexchange.pns.subscription.storage.groupware.PnsSubscriptionsAddExpiresColumTask;
 import com.openexchange.pns.subscription.storage.groupware.PnsSubscriptionsAddIndexTask;
 import com.openexchange.pns.subscription.storage.groupware.PnsSubscriptionsReindexTask;
@@ -133,7 +134,7 @@ public class PushSubscriptionRegistryActivator extends HousekeepingActivator {
         // Register update task, create table job and delete listener
         boolean registerGroupwareStuff = true;
         if (registerGroupwareStuff) {
-            registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(new PnsCreateTableTask(), new PnsSubscriptionsReindexTask(), new PnsSubscriptionsAddExpiresColumTask(), new PnsSubscriptionsAddIndexTask()));
+            registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(new PnsCreateTableTask(), new PnsSubscriptionsReindexTask(), new PnsSubscriptionsAddExpiresColumTask(), new PnsSubscriptionsAddIndexTask(), new PnsSubscriptionTablesUtf8Mb4UpdateTask()));
             registerService(CreateTableService.class, new CreatePnsSubscriptionTable());
             registerService(DeleteListener.class, new PnsDeleteListener(persistentRegistry));
         }

@@ -71,7 +71,7 @@ public final class AuthCodeCreateTableService extends AbstractCreateTableImpl {
         " `nanos` BIGINT(64) NOT NULL," +
         " PRIMARY KEY (`code`)," +
         " KEY `userIndex` (`cid`,`user`)" +
-        ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci";
+        ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci";
 
     /**
      * Gets the table names.

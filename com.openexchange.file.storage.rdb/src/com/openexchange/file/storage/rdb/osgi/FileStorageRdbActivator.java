@@ -62,6 +62,7 @@ import com.openexchange.file.storage.FileStorageAccountDeleteListener;
 import com.openexchange.file.storage.FileStorageAccountManagerProvider;
 import com.openexchange.file.storage.FileStorageService;
 import com.openexchange.file.storage.rdb.Services;
+import com.openexchange.file.storage.rdb.groupware.FileStorageConvertUtf8ToUtf8mb4Task;
 import com.openexchange.file.storage.rdb.groupware.FileStorageRdbCreateTableTask;
 import com.openexchange.file.storage.rdb.groupware.FileStorageRdbDeleteListener;
 import com.openexchange.file.storage.rdb.internal.CachingFileStorageAccountStorage;
@@ -151,7 +152,7 @@ public class FileStorageRdbActivator extends HousekeepingActivator {
              * The update task/create table service
              */
             final FileStorageRdbCreateTableTask createTableTask = new FileStorageRdbCreateTableTask();
-            registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(createTableTask));
+            registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(createTableTask, new FileStorageConvertUtf8ToUtf8mb4Task()));
             registerService(CreateTableService.class, createTableTask);
             /*
              * The delete listener

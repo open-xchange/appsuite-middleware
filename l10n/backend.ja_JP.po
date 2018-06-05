@@ -9684,6 +9684,16 @@ msgstr "%1$s ( %2$s)は予定表 \"%3$s\" を共有しています。下のボ�
 msgid "%1$s (%2$s) has shared %3$d calendars with you. Please click the button below to view them."
 msgstr "%1$s ( %2$s)は %3$d予定表を共有しています。下のボタンをクリックして表示してください。"
 
+#. * $username ($user_email) has shared calendar $folder with you. Please click the button below to view it.
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:150
+msgid "%1$s (%2$s) has shared the calendar \"%3$s\" with you. Please click the button below to view it."
+msgstr "%1$s ( %2$s)は予定表 \"%3$s\" を共有しています。下のボタンをクリックして表示してください。"
+
+#. * $username ($user_email) has shared $number calendars with you. Please click the button below to view them.
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:153
+msgid "%1$s (%2$s) has shared %3$ calendars with you. Please click the button below to view them."
+msgstr "%1$s ( %2$s)は %3$ 予定表を共有しています。下のボタンをクリックして表示してください。"
+
 #. * $username ($user_email) has shared file "$filename" with the group "Sales Dept.". Please click the button below to view it.
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:156
 msgid "%1$s (%2$s) has shared the file \"%3$s\" with the group \"%4$s\". Please click the button below to view it."
@@ -9733,6 +9743,16 @@ msgstr "%1$s (%2$s) が予定表 %3$s をグループ%4$sと共有していま�
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:183
 msgid "%1$s (%2$s) has shared %3$d calendars with the group \"%4$s\". Please click the button below to view them."
 msgstr "%1$s (%2$s) が予定表%3$dつをグループ\"%4$s\"と共有しています。下のボタンをクリックして表示してください。"
+
+#. * $username ($user_email) has shared the calendar $folder with the group "Sales Dept.". Please click the button below to view it.
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:180
+msgid "%1$s (%2$s) has shared the calendar \"%3$s\" with the group \"%4$s\". Please click the button below to view it."
+msgstr "%1$s (%2$s) が予定表 %3$s をグループ%4$sと共有しています。下のボタンをクリックして表示してください。"
+
+#. * $username ($user_email) has shared $number calendars with the group "Sales Dept.". Please click the button below to view them.
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:183
+msgid "%1$s (%2$s) has shared %3$ calendars with the group \"%4$s\". Please click the button below to view them."
+msgstr "%1$s (%2$s) が予定表 %3$ つをグループ%4$sと共有しています。下のボタンをクリックして表示してください。"
 
 #. * $username ($user_email) has shared file "$filename" with you and left you a message:
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:186

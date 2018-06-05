@@ -218,4 +218,62 @@
 		<customChange class="com.openexchange.database.internal.change.custom.CountTablesCustomTaskChange" />
 	</changeSet>
 
+	<changeSet id="7.10.0:configdb:toUtf8Mb4" author="martin.schneider@open-xchange.com" failOnError="false">
+		<comment>Converts the table/column definition to support utf8mb4</comment>
+		<customChange class="com.openexchange.database.internal.change.utf8mb4.configdb.ConfigDbToUtf8mb4Change" />
+	</changeSet>
+
+	<changeSet id="7.10.0:reseller:toUtf8Mb4" author="martin.schneider@open-xchange.com" failOnError="false">
+		<comment>Converts the table/column definition to support utf8mb4</comment>
+		<customChange class="com.openexchange.database.internal.change.utf8mb4.configdb.ResellerToUtf8mb4Change" />
+	</changeSet>
+	
+	<changeSet id="7.10.0:advertisement_config:toUtf8Mb4" author="martin.schneider@open-xchange.com" failOnError="false">
+		<preConditions onFail="CONTINUE">
+			<changeSetExecuted id="7.8.3:advertisement_config:createForConfigDB" author="kevin.ruthmann@open-xchange.com" changeLogFile="configdbChangeLog" />
+		</preConditions>
+		<comment>Converts the table/column definition to support utf8mb4</comment>
+		<customChange class="com.openexchange.database.internal.change.utf8mb4.configdb.AdvertisementConfigToUtf8mb4Change" />
+	</changeSet>
+
+	<changeSet id="7.10.0:advertisement_mapping:toUtf8Mb4" author="martin.schneider@open-xchange.com" failOnError="false">
+		<preConditions onFail="CONTINUE">
+			<changeSetExecuted id="7.8.3:advertisement_mapping:createForConfigDB" author="kevin.ruthmann@open-xchange.com" changeLogFile="configdbChangeLog" />
+		</preConditions>
+		<comment>Converts the table/column definition to support utf8mb4</comment>
+		<customChange class="com.openexchange.database.internal.change.utf8mb4.configdb.AdvertisementMappingToUtf8mb4Change" />
+	</changeSet>
+
+	<changeSet id="7.10.0:context2push_registration:toUtf8Mb4" author="martin.schneider@open-xchange.com" failOnError="false">
+		<preConditions onFail="CONTINUE">
+			<changeSetExecuted id="7.6.2:context2push_registration" author="thorben.betten@open-xchange.com" changeLogFile="configdbChangeLog" />
+		</preConditions>
+		<comment>Converts the table/column definition to support utf8mb4</comment>
+		<customChange class="com.openexchange.database.internal.change.utf8mb4.configdb.Context2pushRegistrationToUtf8mb4Change" />
+	</changeSet>
+
+	<changeSet id="7.10.0:filestore2user:toUtf8Mb4" author="martin.schneider@open-xchange.com" failOnError="false">
+		<preConditions onFail="CONTINUE">
+			<changeSetExecuted id="7.8.2:filestore2user" author="thorben.betten@open-xchange.com" changeLogFile="configdbChangeLog" />
+		</preConditions>
+		<comment>Converts the table/column definition to support utf8mb4</comment>
+		<customChange class="com.openexchange.database.internal.change.utf8mb4.configdb.Filestore2userToUtf8mb4Change" />
+	</changeSet>
+
+	<changeSet id="7.10.0:replicationMonitor:toUtf8Mb4" author="martin.schneider@open-xchange.com" failOnError="false">
+		<preConditions onFail="CONTINUE">
+			<changeSetExecuted id="7.8.1:replicationMonitor:createForConfigDB" author="martin.schneider@open-xchange.com" changeLogFile="configdbChangeLog" />
+		</preConditions>
+		<comment>Converts the table/column definition to support utf8mb4</comment>
+		<customChange class="com.openexchange.database.internal.change.utf8mb4.configdb.ReplicationMonitorToUtf8mb4Change" />
+	</changeSet>
+	
+	<changeSet id="7.10.0:countTables:toUtf8Mb4" author="martin.schneider@open-xchange.com" failOnError="false">
+		<preConditions onFail="CONTINUE">
+			<changeSetExecuted id="7.10:com.openexchange.database.migration:createcounttables" author="thorben.betten@open-xchange.com" changeLogFile="configdbChangeLog" />
+		</preConditions>
+		<comment>Converts the table/column definition to support utf8mb4</comment>
+		<customChange class="com.openexchange.database.internal.change.utf8mb4.configdb.CountTablesToUtf8mb4Change" />
+	</changeSet>
+
 </databaseChangeLog>

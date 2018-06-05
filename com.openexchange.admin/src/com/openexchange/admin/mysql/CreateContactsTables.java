@@ -81,7 +81,7 @@ public class CreateContactsTables extends AbstractCreateTableImpl {
         + "PRIMARY KEY(uuid, cid, intfield01),"
         + "INDEX (intfield01, cid),"
         + "INDEX (intfield01, intfield02, intfield03, cid)"
-        + ") ENGINE  = InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
+        + ") ENGINE  = InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;";
 
     /**
      * Table name of del_dlist table
@@ -105,7 +105,7 @@ public class CreateContactsTables extends AbstractCreateTableImpl {
         + "PRIMARY KEY (uuid, cid, intfield01),"
         + "INDEX (intfield01, cid),"
         + "INDEX (intfield01, intfield02, intfield03, cid)"
-        + ") ENGINE = InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
+        + ") ENGINE = InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;";
 
     /**
      * Table name of prg_contacts_linkage table
@@ -123,8 +123,9 @@ public class CreateContactsTables extends AbstractCreateTableImpl {
         + "cid INT4 NOT NULL,"
         + "uuid binary(16) NOT NULL,"
         + "PRIMARY KEY (cid, uuid),"
-        + "INDEX (intfield01, intfield02, cid)"
-        + ") ENGINE = InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
+        + "INDEX (intfield01, intfield02, cid),"
+        + "INDEX (cid)"
+        + ") ENGINE = InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;";
 
     /**
      * Table name of prg_contacts_image table
@@ -141,7 +142,7 @@ public class CreateContactsTables extends AbstractCreateTableImpl {
         + "mime_type VARCHAR(32) NOT NULL,"
         + "cid INT4 NOT NULL,"
         + "PRIMARY KEY (cid, intfield01)"
-        + ") ENGINE = InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
+        + ") ENGINE = InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;";
 
     /**
      * Table name of del_contacts_image table
@@ -158,7 +159,7 @@ public class CreateContactsTables extends AbstractCreateTableImpl {
         + "mime_type VARCHAR(32) NOT NULL,"
         + "cid INT4 NOT NULL,"
         + "PRIMARY KEY (cid, intfield01)"
-        + ") ENGINE = InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
+        + ") ENGINE = InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;";
 
     /**
      * Table name of del_contacts table
@@ -203,7 +204,7 @@ public class CreateContactsTables extends AbstractCreateTableImpl {
         + "field14 VARCHAR(64),"
         + "field15 VARCHAR(64),"
         + "field16 VARCHAR(64),"
-        + "field17 VARCHAR(5680),"
+        + "field17 TEXT,"
         + "field18 VARCHAR(512),"
         + "field19 VARCHAR(128),"
         + "field20 VARCHAR(128),"
@@ -281,24 +282,24 @@ public class CreateContactsTables extends AbstractCreateTableImpl {
         + "yomiFirstName VARCHAR(128),"
         + "yomiLastName VARCHAR(128),"
         + "yomiCompany VARCHAR(512),"
-        + "homeAddress VARCHAR(512) collate utf8_unicode_ci default NULL,"
-        + "businessAddress VARCHAR(512) collate utf8_unicode_ci default NULL,"
-        + "otherAddress VARCHAR(512) collate utf8_unicode_ci default NULL,"
-        + "uid VARCHAR(255) collate utf8_unicode_ci default NULL,"
-        + "filename VARCHAR(255) collate utf8_unicode_ci default NULL,"
-        + "vCardId VARCHAR(256) collate utf8_unicode_ci default NULL,"
+        + "homeAddress VARCHAR(512) collate utf8mb4_unicode_ci default NULL,"
+        + "businessAddress VARCHAR(512) collate utf8mb4_unicode_ci default NULL,"
+        + "otherAddress VARCHAR(512) collate utf8mb4_unicode_ci default NULL,"
+        + "uid VARCHAR(255) collate utf8mb4_unicode_ci default NULL,"
+        + "filename VARCHAR(255) collate utf8mb4_unicode_ci default NULL,"
+        + "vCardId VARCHAR(256) collate utf8mb4_unicode_ci default NULL,"
         + "INDEX (created_from),"
         + "INDEX (changing_date),"
         + "INDEX (userid),"
         + "INDEX (cid, fid),"
         + "INDEX `givenname` (`cid`,`field03`),"
         + "INDEX `surname` (`cid`,`field02`),"
-        + "INDEX `displayname` (`cid`,`field01`(255)),"
-        + "INDEX `email1` (`cid`,`field65`(255)),"
-        + "INDEX `email2` (`cid`,`field66`(255)),"
-        + "INDEX `email3` (`cid`,`field67`(255)),"
+        + "INDEX `displayname` (`cid`,`field01`(191)),"
+        + "INDEX `email1` (`cid`,`field65`(191)),"
+        + "INDEX `email2` (`cid`,`field66`(191)),"
+        + "INDEX `email3` (`cid`,`field67`(191)),"
         + "PRIMARY KEY (cid, intfield01, fid)"
-        + ") ENGINE = InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
+        + ") ENGINE = InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;";
 
     /**
      * Table name of prg_contacts table
@@ -343,7 +344,7 @@ public class CreateContactsTables extends AbstractCreateTableImpl {
         + "field14 VARCHAR(64),"
         + "field15 VARCHAR(64),"
         + "field16 VARCHAR(64),"
-        + "field17 VARCHAR(5680),"
+        + "field17 TEXT,"
         + "field18 VARCHAR(512),"
         + "field19 VARCHAR(128),"
         + "field20 VARCHAR(128),"
@@ -421,25 +422,25 @@ public class CreateContactsTables extends AbstractCreateTableImpl {
         + "yomiFirstName VARCHAR(128),"
         + "yomiLastName VARCHAR(128),"
         + "yomiCompany VARCHAR(512),"
-        + "homeAddress VARCHAR(512) collate utf8_unicode_ci default NULL,"
-        + "businessAddress VARCHAR(512) collate utf8_unicode_ci default NULL,"
-        + "otherAddress VARCHAR(512) collate utf8_unicode_ci default NULL,"
-        + "uid VARCHAR(255) collate utf8_unicode_ci default NULL,"
-        + "filename VARCHAR(255) collate utf8_unicode_ci default NULL,"
-        + "vCardId VARCHAR(256) collate utf8_unicode_ci default NULL,"
+        + "homeAddress VARCHAR(512) collate utf8mb4_unicode_ci default NULL,"
+        + "businessAddress VARCHAR(512) collate utf8mb4_unicode_ci default NULL,"
+        + "otherAddress VARCHAR(512) collate utf8mb4_unicode_ci default NULL,"
+        + "uid VARCHAR(255) collate utf8mb4_unicode_ci default NULL,"
+        + "filename VARCHAR(255) collate utf8mb4_unicode_ci default NULL,"
+        + "vCardId VARCHAR(256) collate utf8mb4_unicode_ci default NULL,"
         + "INDEX (created_from),"
         + "INDEX (changing_date),"
         + "INDEX (userid),"
         + "INDEX (cid, fid),"
         + "INDEX `givenname` (`cid`,`field03`),"
         + "INDEX `surname` (`cid`,`field02`),"
-        + "INDEX `displayname` (`cid`,`field01`(255)),"
-        + "INDEX `email1` (`cid`,`field65`(255)),"
-        + "INDEX `email2` (`cid`,`field66`(255)),"
-        + "INDEX `email3` (`cid`,`field67`(255)),"
+        + "INDEX `displayname` (`cid`,`field01`(191)),"
+        + "INDEX `email1` (`cid`,`field65`(191)),"
+        + "INDEX `email2` (`cid`,`field66`(191)),"
+        + "INDEX `email3` (`cid`,`field67`(191)),"
         + "INDEX `department` (`cid`,`field19`(128)),"
         + "PRIMARY KEY (cid, intfield01, fid)"
-        + ") ENGINE = InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
+        + ") ENGINE = InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;";
 
     /**
      * Initializes a new {@link CreateContactsTables}.

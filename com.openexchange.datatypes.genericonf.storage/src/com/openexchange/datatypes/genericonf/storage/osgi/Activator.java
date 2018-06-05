@@ -55,8 +55,11 @@ import com.openexchange.database.provider.DBProvider;
 import com.openexchange.datatypes.genericonf.storage.GenericConfigurationStorageService;
 import com.openexchange.datatypes.genericonf.storage.impl.ClearGenConfTables;
 import com.openexchange.datatypes.genericonf.storage.impl.CreateGenConfTables;
+import com.openexchange.datatypes.genericonf.storage.impl.GenConfConvertUtf8ToUtf8mb4UpdateTask;
 import com.openexchange.datatypes.genericonf.storage.impl.MySQLGenericConfigurationStorage;
 import com.openexchange.groupware.delete.DeleteListener;
+import com.openexchange.groupware.update.DefaultUpdateTaskProviderService;
+import com.openexchange.groupware.update.UpdateTaskProviderService;
 import com.openexchange.osgi.HousekeepingActivator;
 
 public class Activator extends HousekeepingActivator {
@@ -78,6 +81,7 @@ public class Activator extends HousekeepingActivator {
         registerService(DeleteListener.class, new ClearGenConfTables(), null);
         registerService(CreateTableService.class, new CreateGenConfTables(), null);
         registerService(GenericConfigurationStorageService.class, mySQLGenericConfigurationStorage, null);
+        registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(new GenConfConvertUtf8ToUtf8mb4UpdateTask()));
         REF.set(mySQLGenericConfigurationStorage);
     }
 

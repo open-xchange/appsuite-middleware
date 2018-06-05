@@ -310,8 +310,37 @@ public final class Tools {
         }
     }
 
+    /**
+     * This method drops an index with the given foreign key. Beware, this method is vulnerable to SQL injection because table and foreign key name can
+     * not be set through a {@link PreparedStatement}.
+     *
+     * @param con writable database connection.
+     * @param table table name that index should be dropped.
+     * @param foreignKey name of the foreign key to drop.
+     * @throws SQLException if some SQL problem occurs.
+     */
     public static final void dropForeignKey(final Connection con, final String table, final String foreignKey) throws SQLException {
         final String sql = "ALTER TABLE `" + table + "` DROP FOREIGN KEY `" + foreignKey + "`";
+        Statement stmt = null;
+        try {
+            stmt = con.createStatement();
+            stmt.execute(sql);
+        } finally {
+            closeSQLStuff(null, stmt);
+        }
+    }
+
+    /**
+     * Drops the key with the specified name. Beware, this method is vulnerable to SQL injection because table and key name can
+     * not be set through a {@link PreparedStatement}.
+     * 
+     * @param con writable database connection.
+     * @param table table name that index should be dropped.
+     * @param key name of the key to drop.
+     * @throws SQLException if some SQL problem occurs.
+     */
+    public static final void dropKey(Connection con, String table, String key) throws SQLException {
+        String sql = "ALTER TABLE `" + table + "` DROP KEY `" + key + "`";
         Statement stmt = null;
         try {
             stmt = con.createStatement();
@@ -332,9 +361,33 @@ public final class Tools {
      * @throws SQLException if some SQL problem occurs.
      */
     public static final void createPrimaryKey(final Connection con, final String table, final String[] columns, final int[] lengths) throws SQLException {
+        createKey(con, table, columns, lengths, true, null);
+    }
+    
+    /**
+     * This method creates a new (primary) key on a table. Beware, this method is vulnerable to SQL injection because table and column names
+     * can not be set through a {@link PreparedStatement}.
+     *
+     * @param con writable database connection.
+     * @param table name of the table that should get a new primary key.
+     * @param columns names of the columns the key should cover.
+     * @param lengths The column lengths; <code>-1</code> for full column
+     * @param primary <code>true</code> if a <code>PRIMARY KEY</code> is to be created; <code>false</code> for a <code>KEY</code>
+     * @param name The name of the <code>KEY</code>. In case of a <code>PRIMARY KEY</code> the name will simply be ignored. 
+     * @throws SQLException if some SQL problem occurs.
+     */
+    public static final void createKey(final Connection con, final String table, final String[] columns, final int[] lengths, boolean primary, String name) throws SQLException {
         final StringBuilder sql = new StringBuilder("ALTER TABLE `");
         sql.append(table);
-        sql.append("` ADD PRIMARY KEY (");
+        sql.append("` ADD ");
+        if (primary) {
+            sql.append("PRIMARY ");
+        }
+        sql.append("KEY ");
+        if (!primary && Strings.isNotEmpty(name)) {
+            sql.append('`').append(name).append('`');
+        }
+        sql.append(" (");
         {
             final String column = columns[0];
             sql.append('`').append(column).append('`');

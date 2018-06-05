@@ -77,19 +77,19 @@ public final class MALPollCreateTableTask extends AbstractCreateTableImpl implem
         " cid INT4 UNSIGNED NOT NULL," +
         " user INT4 UNSIGNED NOT NULL," +
         " id INT4 UNSIGNED NOT NULL," +
-        " fullname VARCHAR(64) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL," +
+        " fullname VARCHAR(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL," +
         " hash BINARY(16) NOT NULL," +
         " PRIMARY KEY (cid,user,id,fullname)" +
-        ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
+        ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;";
     }
 
     private static final String getCreateUIDsTable() {
         return "CREATE TABLE malPollUid (" +
         " cid INT4 UNSIGNED NOT NULL," +
         " hash BINARY(16) NOT NULL," +
-        " uid VARCHAR(70) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL," +
+        " uid VARCHAR(70) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL," +
         " PRIMARY KEY (cid,hash,uid(32))" +
-        ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
+        ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;";
     }
 
     @Override

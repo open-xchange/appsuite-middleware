@@ -101,7 +101,7 @@ public class MailAuthenticityMetricFileLogger implements MailAuthenticityMetricL
 
     /**
      * Compiles the entire log entry
-     *
+     * 
      * @param mailId The mail identifier
      * @param rawHeaders a {@link List} with the raw headers of the message
      * @param overallResult The overall {@link MailAuthenticityResult}

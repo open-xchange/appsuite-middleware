@@ -199,7 +199,7 @@ class UpdateTaskCollection {
 
                     if (hasTasksToExclude) {
                         if (hasNamespacesToExclude) {
-                            for (Iterator<UpdateTaskV2> it = fullSet.iterator(); it.hasNext(); ) {
+                            for (Iterator<UpdateTaskV2> it = fullSet.iterator(); it.hasNext();) {
                                 Class<? extends UpdateTaskV2> clazz = it.next().getClass();
                                 if (tasksToExclude.contains(clazz.getName())) {
                                     // Excluded by task name
@@ -213,7 +213,7 @@ class UpdateTaskCollection {
                                 }
                             }
                         } else {
-                            for (Iterator<UpdateTaskV2> it = fullSet.iterator(); it.hasNext(); ) {
+                            for (Iterator<UpdateTaskV2> it = fullSet.iterator(); it.hasNext();) {
                                 Class<? extends UpdateTaskV2> clazz = it.next().getClass();
                                 if (tasksToExclude.contains(clazz.getName())) {
                                     // Excluded by task name
@@ -223,7 +223,7 @@ class UpdateTaskCollection {
                         }
                     } else {
                         if (hasNamespacesToExclude) {
-                            for (Iterator<UpdateTaskV2> it = fullSet.iterator(); it.hasNext(); ) {
+                            for (Iterator<UpdateTaskV2> it = fullSet.iterator(); it.hasNext();) {
                                 Class<? extends UpdateTaskV2> clazz = it.next().getClass();
                                 NamespaceAwareUpdateTask annotation = clazz.getAnnotation(NamespaceAwareUpdateTask.class);
                                 if (annotation != null && namespacesToExclude.contains(annotation.namespace())) {

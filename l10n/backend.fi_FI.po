@@ -10890,6 +10890,24 @@ msgstr ""
 "%1$s (%2$s) on jakanut  %3$d kalenteria kanssasi. Katsele niitä "
 "napsauttamalla allaolevaa painiketta."
 
+#. * $username ($user_email) has shared calendar $folder with you. Please click the button below to view it.
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:150
+msgid ""
+"%1$s (%2$s) has shared the calendar \"%3$s\" with you. Please click the "
+"button below to view it."
+msgstr ""
+"%1$s  (%2$s)  on jakanut kanssasi kalenterin \"%3$s\". Katsele kalenteria "
+"klikkaamalla allaolevaa painiketta."
+
+#. * $username ($user_email) has shared $number calendars with you. Please click the button below to view them.
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:153
+msgid ""
+"%1$s (%2$s) has shared %3$ calendars with you. Please click the button below "
+"to view them."
+msgstr ""
+"%1$s  (%2$s)  on jakanut kanssasi %3$ kalenteria. Katsele kalentereita "
+"klikkaamalla allaolevaa painiketta."
+
 #. * $username ($user_email) has shared file "$filename" with the group "Sales Dept.". Please click the button below to view it.
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:156
 msgid ""
@@ -10979,6 +10997,24 @@ msgid ""
 msgstr ""
 "%1$s (%2$s) on jakanut  %3$d kalenteria ryhmässä \"%4$s\". Katsele niitä "
 "napsauttamalla allaolevaa painiketta."
+
+#. * $username ($user_email) has shared the calendar $folder with the group "Sales Dept.". Please click the button below to view it.
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:180
+msgid ""
+"%1$s (%2$s) has shared the calendar \"%3$s\" with the group \"%4$s\". Please "
+"click the button below to view it."
+msgstr ""
+"%1$s  (%2$s)  on jakanut kalenterin  \"%3$s\" ryhmän \"%4$s\" kanssa . "
+"Katsele kalenteria klikkaamalla allaolevaa painiketta."
+
+#. * $username ($user_email) has shared $number calendars with the group "Sales Dept.". Please click the button below to view them.
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:183
+msgid ""
+"%1$s (%2$s) has shared %3$ calendars with the group \"%4$s\". Please click "
+"the button below to view them."
+msgstr ""
+"%1$s  (%2$s)  on jakanut %3$ kalenteria ryhmän  \"%4$s\" kanssa . Katsele "
+"kalentereita klikkaamalla allaolevaa painiketta."
 
 #. * $username ($user_email) has shared file "$filename" with you and left you a message:
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:186

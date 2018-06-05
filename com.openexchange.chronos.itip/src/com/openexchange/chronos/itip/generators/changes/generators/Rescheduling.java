@@ -211,6 +211,7 @@ public class Rescheduling implements ChangeDescriptionGenerator {
 
     private List<Sentence> handleChangedTimeZones(Event original, Event updated) {
         List<Sentence> sentences = new LinkedList<>();
+
         if (null != original) {
             String defaultValue = "UTC";
             String originalStartId = notNull(original, original.getStartDate(), original.getStartDate().getTimeZone()) ? original.getStartDate().getTimeZone().getID() : defaultValue;

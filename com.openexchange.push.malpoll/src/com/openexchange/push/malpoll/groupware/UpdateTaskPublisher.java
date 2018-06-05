@@ -72,10 +72,11 @@ public final class UpdateTaskPublisher implements UpdateTaskProviderService {
 
     @Override
     public Collection<UpdateTaskV2> getUpdateTasks() {
-        List<UpdateTaskV2> tasks = new ArrayList<UpdateTaskV2>(3);
+        List<UpdateTaskV2> tasks = new ArrayList<UpdateTaskV2>(6);
         tasks.add(new MALPollCreateTableTask());
         tasks.add(new MALPollModifyTableTask());
         tasks.add(new MALPollDropForeignKeysTask());
+        tasks.add(new MALPollConvertToUtf8mb4());
         return tasks;
     }
 

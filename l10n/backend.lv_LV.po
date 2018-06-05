@@ -10890,6 +10890,24 @@ msgstr ""
 "%1$s (%2$s) ir koplietojis ar jums %3$d kalendārus. Lai tos skatītu, lūdzu "
 "piespiediet zemāk redzamo taustiņu."
 
+#. * $username ($user_email) has shared calendar $folder with you. Please click the button below to view it.
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:150
+msgid ""
+"%1$s (%2$s) has shared the calendar \"%3$s\" with you. Please click the "
+"button below to view it."
+msgstr ""
+"Lietotājs %1$s (%2$s) ir ar jums koplietojis kalendāru \"%3$s\". Lai to "
+"apskatītu, piespiediet zemāk redzamo taustiņu."
+
+#. * $username ($user_email) has shared $number calendars with you. Please click the button below to view them.
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:153
+msgid ""
+"%1$s (%2$s) has shared %3$ calendars with you. Please click the button below "
+"to view them."
+msgstr ""
+"Lietotājs %1$s (%2$s) ir ar jums koplietojis %3$ kalendārus. Lai tos "
+"apskatītu, piespiediet zemāk redzamo taustiņu."
+
 #. * $username ($user_email) has shared file "$filename" with the group "Sales Dept.". Please click the button below to view it.
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:156
 msgid ""
