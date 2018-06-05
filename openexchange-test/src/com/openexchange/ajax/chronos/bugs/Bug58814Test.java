@@ -176,11 +176,11 @@ public class Bug58814Test extends AbstractChronosTest {
 
         Asset asset = assetManager.getAsset(AssetType.ics, "bug58814.ics");
         String response = importExportManager.importICalFile(defaultUserApi.getSession(), defaultFolderId, new File(asset.getAbsolutePath()), true, false);
-
+        
         List<EventId> eventIds = importExportManager.parseImportJSONResponseToEventIds(response);
         eventManager.rememberEventIds(eventIds);
         List<EventData> eventDataList = eventManager.listEvents(eventIds);
-        assertEquals(4, eventDataList.size());
+        assertEquals("Expected 4 events but response was: " + response, 4, eventDataList.size());
 
         EventData eventData = eventDataList.get(0);
         assertEquals("Test Bug 58814 - Recurrence Check No-Full-Day", eventData.getSummary());
@@ -202,8 +202,8 @@ public class Bug58814Test extends AbstractChronosTest {
 
         eventData = eventDataList.get(3);
         assertEquals("Test Bug 58814 - Recurrence Check Start/End No-Full-Day, Recurrence Until Full-Day", eventData.getSummary());
-        assertEquals(DateTimeUtil.getDateTimeData("20100406T133000Z", null), eventData.getStartDate());
-        assertEquals(DateTimeUtil.getDateTimeData("20100406T143000Z", null), eventData.getEndDate());
+        assertEquals(DateTimeUtil.getDateTimeData("20100406T133000", "America/New_York"), eventData.getStartDate());
+        assertEquals(DateTimeUtil.getDateTimeData("20100406T143000", "America/New_York"), eventData.getEndDate());
         assertEquals("FREQ=DAILY;WKST=SU;UNTIL=20100421T000000Z", eventData.getRrule());
     }
 }
