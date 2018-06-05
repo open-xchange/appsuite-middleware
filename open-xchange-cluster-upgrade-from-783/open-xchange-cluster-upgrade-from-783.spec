@@ -18,7 +18,7 @@ BuildRequires: java-devel >= 1.7.0
 %endif
 %endif
 Version:        @OXVERSION@
-%define         ox_release 19
+%define         ox_release 20
 Release:        %{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GPL-2.0
@@ -62,6 +62,8 @@ GLOBIGNORE='*'
 /opt/open-xchange/osgi/bundle.d/*
 
 %changelog
+* Tue Jun 05 2018 Thorben Betten <thorben.betten@open-xchange.com>
+Build for patch 2018-06-06 (4773)
 * Tue May 22 2018 Thorben Betten <thorben.betten@open-xchange.com>
 Build for patch 2018-05-28 (4758)
 * Mon Apr 30 2018 Thorben Betten <thorben.betten@open-xchange.com>
