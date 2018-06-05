@@ -312,10 +312,10 @@ public enum Privilege {
             applying.add(READ);
         }
         if (permission.getWritePermission() >= Permission.WRITE_OWN_OBJECTS) {
+            applying.add(WRITE);
             applying.add(WRITE_CONTENT);
         }
         if (permission.isAdmin()) {
-            applying.add(WRITE);
             applying.add(WRITE_PROPERTIES);
             applying.add(WRITE_ACL);
         } else if (allowWriteProperties) {
