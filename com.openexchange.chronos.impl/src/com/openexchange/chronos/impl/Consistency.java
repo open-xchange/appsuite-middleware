@@ -133,10 +133,16 @@ public class Consistency {
         }
         DateTime until = rule.getUntil();
         TimeZone timeZone = event.getStartDate().getTimeZone();
-        if ((event.getStartDate().isAllDay() != until.isAllDay()) || event.getStartDate().isFloating() != until.isFloating()) {
+        boolean startAllDay = event.getStartDate().isAllDay();
+        boolean untilAllDay = until.isAllDay();
+        if (startAllDay && !untilAllDay) {
+            rule.setUntil(until.toAllDay());
+        } else if (!startAllDay && untilAllDay) {
             rule.setUntil(new DateTime(until.getCalendarMetrics(), timeZone, until.getTimestamp()));
-            event.setRecurrenceRule(rule.toString());
+        } else {
+            return;
         }
+        event.setRecurrenceRule(rule.toString());
     }
 
     public static void setModified(CalendarSession session, Date lastModified, Event event, int modifiedBy) throws OXException {
