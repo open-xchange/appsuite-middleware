@@ -73,7 +73,6 @@ public abstract class DAVObjectResource<T> extends DAVResource {
     protected static org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(DAVObjectResource.class);
 
     protected final FolderCollection<T> parent;
-    protected final int parentFolderID;
 
     protected T object;
     protected boolean exists;
@@ -90,7 +89,6 @@ public abstract class DAVObjectResource<T> extends DAVResource {
         this.parent = parent;
         this.object = object;
         this.exists = null != object;
-        this.parentFolderID = getId(parent);
     }
 
     /**

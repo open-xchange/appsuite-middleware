@@ -67,36 +67,46 @@ import com.openexchange.tools.update.Tools;
  */
 public class CalendarEventAddSeriesIndexTask extends UpdateTaskAdapter {
 
+    /**
+     * Initializes a new {@link CalendarEventAddSeriesIndexTask}.
+     */
+    public CalendarEventAddSeriesIndexTask() {
+        super();
+    }
+
     @Override
     public String[] getDependencies() {
-        return new String[] { "com.openexchange.chronos.storage.rdb.groupware.ChronosCreateTableTask"
-        };
+        return new String[] { ChronosCreateTableTask.class.getName() };
     }
 
     @Override
     public void perform(PerformParameters params) throws OXException {
         Connection connection = params.getConnection();
-        boolean rollback = false;
+        int rollback = 0;
         try {
             connection.setAutoCommit(false);
-            rollback = true;
+            rollback = 1;
+
             String[] indexColumns = new String[] { "cid", "account", "series" };
             for (String tableName : new String[] { "calendar_event", "calendar_event_tombstone" }) {
                 if (null == Tools.existsIndex(connection, tableName, indexColumns)) {
                     Tools.createIndex(connection, tableName, "series", indexColumns, false);
                 }
             }
+
             connection.commit();
-            rollback = false;
+            rollback = 2;
         } catch (SQLException e) {
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } catch (RuntimeException e) {
             throw UpdateExceptionCodes.OTHER_PROBLEM.create(e, e.getMessage());
         } finally {
-            if (rollback) {
-                rollback(connection);
+            if (rollback > 0) {
+                if (rollback == 1) {
+                    rollback(connection);
+                }
+                autocommit(connection);
             }
-            autocommit(connection);
         }
     }
 
