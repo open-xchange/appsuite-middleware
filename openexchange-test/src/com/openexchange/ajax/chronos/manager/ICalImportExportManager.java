@@ -95,7 +95,7 @@ public class ICalImportExportManager {
         this.importApi = importApi;
     }
 
-    public String importICalFile(String session, String folder, File file, boolean suppressNotification, boolean ignoreUIDs ) throws Exception {
+    public String importICalFile(String session, String folder, File file, boolean suppressNotification, boolean ignoreUIDs) throws Exception {
         return importApi.importICal(session, folder, file, suppressNotification, ignoreUIDs, true);
     }
 
@@ -109,7 +109,10 @@ public class ICalImportExportManager {
 
     public List<EventId> parseImportJSONResponseToEventIds(String response) throws JSONException {
         JSONObject object = new JSONObject(response);
-        JSONArray data = object.getJSONArray("data");
+        JSONArray data = object.optJSONArray("data");
+        if (data == null) {
+            return Collections.emptyList();
+        }
         int length = data.length();
         if (length <= 0) {
             return Collections.emptyList();
