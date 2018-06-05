@@ -49,7 +49,10 @@
 
 package com.openexchange.ajax.chronos.bugs;
 
+import static org.junit.Assert.assertEquals;
+import java.io.File;
 import java.text.ParseException;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 import org.dmfs.rfc5545.recur.InvalidRecurrenceRuleException;
 import org.junit.Assert;
@@ -59,10 +62,16 @@ import com.openexchange.ajax.chronos.factory.EventFactory;
 import com.openexchange.ajax.chronos.factory.EventFactory.RecurringFrequency;
 import com.openexchange.ajax.chronos.factory.EventFactory.Weekday;
 import com.openexchange.ajax.chronos.manager.ChronosApiException;
+import com.openexchange.ajax.chronos.manager.ICalImportExportManager;
 import com.openexchange.ajax.chronos.util.DateTimeUtil;
+import com.openexchange.configuration.asset.Asset;
+import com.openexchange.configuration.asset.AssetType;
 import com.openexchange.testing.httpclient.invoker.ApiException;
 import com.openexchange.testing.httpclient.models.DateTimeData;
 import com.openexchange.testing.httpclient.models.EventData;
+import com.openexchange.testing.httpclient.models.EventId;
+import com.openexchange.testing.httpclient.modules.ExportApi;
+import com.openexchange.testing.httpclient.modules.ImportApi;
 
 /**
  * {@link Bug58814Test} - Tests for <a href="https://bugs.open-xchange.com/show_bug.cgi?id=58814">Bug 58814</a>
@@ -155,5 +164,24 @@ public class Bug58814Test extends AbstractChronosTest {
         actualRR = updatedEvent.getRrule();
         Assert.assertEquals(expectedRR, actualRR);
     }
-}
 
+    /**
+     * Test <code>.ics</code> file import with invalid RFC start/end/until combos
+     */
+    @Test
+    public void testSeriesEventImport() throws Exception {
+        ImportApi importApi = new ImportApi(getApiClient());
+        ExportApi exportApi = new ExportApi(getApiClient());
+        ICalImportExportManager importExportManager = new ICalImportExportManager(exportApi, importApi);
+
+        Asset asset = assetManager.getAsset(AssetType.ics, "bug58814.ics");
+        String response = importExportManager.importICalFile(defaultUserApi.getSession(), defaultFolderId, new File(asset.getAbsolutePath()), true, false);
+
+        List<EventId> eventIds = importExportManager.parseImportJSONResponseToEventIds(response);
+        eventManager.rememberEventIds(eventIds);
+        List<EventData> eventData = eventManager.listEvents(eventIds);
+        assertEquals(4, eventData.size());
+
+        //TODO: assert data
+    }
+}
