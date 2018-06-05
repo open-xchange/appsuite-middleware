@@ -141,6 +141,10 @@ public class Starter implements Initialization {
      */
     new com.openexchange.groupware.delete.DeleteRegistryInitialization(),
     /**
+     * Responsible for registering all instances for evicting caches of users and groups.
+     */
+    new com.openexchange.groupware.delete.DeleteFinishedRegistryInitialization(),
+    /**
      * Downgrade registry start-up
      */
     com.openexchange.groupware.downgrade.DowngradeRegistryInit.getInstance(),

@@ -192,7 +192,6 @@ public final class DeleteRegistry {
             /*
              * Insert folder delete listener
              */
-            new FolderStorageDeleteListener(),
             new OXFolderDeleteListener(),
             /*
              * Remove FileStorage if context is deleted.

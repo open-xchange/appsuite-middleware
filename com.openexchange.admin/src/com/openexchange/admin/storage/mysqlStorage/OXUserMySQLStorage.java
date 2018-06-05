@@ -128,6 +128,7 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.impl.ContextImpl;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.delete.DeleteEvent;
+import com.openexchange.groupware.delete.DeleteFinishedListenerRegistry;
 import com.openexchange.groupware.delete.DeleteRegistry;
 import com.openexchange.groupware.impl.IDGenerator;
 import com.openexchange.groupware.settings.Setting;
@@ -3159,12 +3160,19 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                     lock(contextId, con);
 
                     delete(ctx, users, destUser, con);
-                    for (final User user : users) {
-                        log.info("User {} deleted!", user.getId());
-                    }
-
+                    
                     con.commit();
                     rollback = false;
+                    
+                    for (final User user : users) {
+                        try {
+                            DeleteEvent delev = DeleteEvent.createDeleteEventForUserDeletion(this, user.getId().intValue(), 0, ContextStorage.getInstance().getContext(contextId), destUser);
+                            DeleteFinishedListenerRegistry.getInstance().fireDeleteEvent(delev);
+                        } catch (Exception e) {
+                            log.warn("Failed to trigger delete finished listeners", e);
+                        }
+                        log.info("User {} deleted!", user.getId());
+                    }
                 } catch (final PoolException e) {
                     log.error("Pool Error", e);
                     throw new StorageException(e);

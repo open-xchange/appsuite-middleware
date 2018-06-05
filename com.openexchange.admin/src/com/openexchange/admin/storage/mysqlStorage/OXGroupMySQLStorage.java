@@ -78,7 +78,9 @@ import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheKey;
 import com.openexchange.caching.CacheService;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.delete.DeleteEvent;
+import com.openexchange.groupware.delete.DeleteFinishedListenerRegistry;
 import com.openexchange.groupware.delete.DeleteRegistry;
 import com.openexchange.groupware.impl.IDGenerator;
 import com.openexchange.tools.oxfolder.OXFolderAdminHelper;
@@ -492,7 +494,14 @@ public class OXGroupMySQLStorage extends OXGroupSQLStorage implements OXMySQLDef
             }
             con.commit();
 
+            com.openexchange.groupware.contexts.Context gwContext = ContextStorage.getInstance().getContext(ctxId);
             for (Group group : groups) {
+                try {
+                    DeleteEvent delev = DeleteEvent.createDeleteEventForGroupDeletion(this, i(group.getId()), gwContext);
+                    DeleteFinishedListenerRegistry.getInstance().fireDeleteEvent(delev);
+                } catch (Exception e) {
+                    log.warn("Failed to trigger delete finished listeners", e);
+                }
                 log.info("Group {} deleted!", group.getId());
             }
         } catch (SQLException e) {
