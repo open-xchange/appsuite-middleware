@@ -291,7 +291,10 @@ public enum CalendarFolderProperty {
                 try {
                     return clazz.cast(property.getValue());
                 } catch (ClassCastException e) {
-                    // ignore
+                    // special handling for boolean strings, ignore, otherwise
+                    if (Boolean.class.equals(clazz) && String.class.isInstance(property.getValue())) {
+                        return clazz.cast(Boolean.valueOf((String) property.getValue()));
+                    }
                 }
             }
         }
