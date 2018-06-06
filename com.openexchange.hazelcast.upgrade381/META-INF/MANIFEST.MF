@@ -16,7 +16,8 @@ Import-Package: com.openexchange.caching.events,
  com.openexchange.tools.strings,
  javax.security.auth.login,
  org.osgi.framework,
- org.slf4j
+ org.slf4j,
+ sun.misc
 Bundle-Activator: com.openexchange.hazelcast.upgrade381.osgi.HazelcastUpgradeActivator
 Bundle-ClassPath: lib/hazelcast-all-3.8.1.jar,
  .
