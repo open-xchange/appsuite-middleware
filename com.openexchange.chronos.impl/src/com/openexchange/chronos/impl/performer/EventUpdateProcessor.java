@@ -808,6 +808,15 @@ public class EventUpdateProcessor implements EventUpdate {
                 return true;
             }
         }
+        if (false == EventMapper.getInstance().get(EventField.RECURRENCE_DATES).equals(originalEvent, updatedEvent)) {
+            /*
+             * reset if there are 'new' occurrences (caused by newly introduced recurrence dates)
+             */
+            SimpleCollectionUpdate<RecurrenceId> exceptionDateUpdates = getExceptionDateUpdates(originalEvent.getRecurrenceDates(), updatedEvent.getRecurrenceDates());
+            if (false == exceptionDateUpdates.getAddedItems().isEmpty()) {
+                return true;
+            }
+        }
         if (false == EventMapper.getInstance().get(EventField.START_DATE).equals(originalEvent, updatedEvent)) {
             /*
              * reset if updated start is before the original start
