@@ -229,6 +229,7 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
         Event eventUpdate = new Event();
         eventUpdate.setId(originalMasterEvent.getId());
         eventUpdate.setChangeExceptionDates(changeExceptionDates);
+        eventUpdate.setSequence(originalMasterEvent.getSequence() + 1);
         Consistency.setModified(session, timestamp, eventUpdate, session.getUserId());
         storage.getEventStorage().updateEvent(eventUpdate);
     }
