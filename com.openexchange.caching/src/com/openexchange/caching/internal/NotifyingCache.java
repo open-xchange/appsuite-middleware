@@ -97,7 +97,7 @@ public class NotifyingCache extends AbstractCache implements CacheListener {
         this.eventService = eventService;
         this.notifyOnLocalOperations = notifyOnLocalOperations;
         if (null != eventService && (notifyOnLocalOperations || false == isLocal())) {
-            this.eventService.addListener(region, this);
+            eventService.addListener(region, this);
         }
     }
 
@@ -348,10 +348,13 @@ public class NotifyingCache extends AbstractCache implements CacheListener {
     }
 
     private void fireInvalidateGroup(String groupName) {
-        if ((notifyOnLocalOperations || false == isLocal()) && null != eventService) {
-            CacheEvent event = CacheEvent.INVALIDATE_GROUP(region, groupName);
-            LOG.debug("fireInvalidateGroup: {}", event);
-            eventService.notify(this, event, false);
+        if (notifyOnLocalOperations || false == isLocal()) {
+            CacheEventService eventService = this.eventService;
+            if (null != eventService) {
+                CacheEvent event = CacheEvent.INVALIDATE_GROUP(region, groupName);
+                LOG.debug("fireInvalidateGroup: {}", event);
+                notify(event, eventService);
+            }
         }
     }
 
@@ -364,27 +367,40 @@ public class NotifyingCache extends AbstractCache implements CacheListener {
     }
 
     private void fireInvalidate(Serializable key, String groupName) {
-        if ((notifyOnLocalOperations || false == isLocal()) && null != eventService) {
-            CacheEvent event = CacheEvent.INVALIDATE(region, groupName, key);
-            LOG.debug("fireInvalidate: {}", event);
-            eventService.notify(this, event, false);
+        if (notifyOnLocalOperations || false == isLocal()) {
+            CacheEventService eventService = this.eventService;
+            if (null != eventService) {
+                CacheEvent event = CacheEvent.INVALIDATE(region, groupName, key);
+                LOG.debug("fireInvalidate: {}", event);
+                notify(event, eventService);
+            }
         }
     }
 
     private void fireInvalidate(List<Serializable> keys, String groupName) {
-        if ((notifyOnLocalOperations || false == isLocal()) && null != eventService) {
-            CacheEvent event = CacheEvent.INVALIDATE(region, groupName, keys);
-            LOG.debug("fireInvalidate: {}", event);
-            eventService.notify(this, event, false);
+        if (notifyOnLocalOperations || false == isLocal()) {
+            CacheEventService eventService = this.eventService;
+            if (null != eventService) {
+                CacheEvent event = CacheEvent.INVALIDATE(region, groupName, keys);
+                LOG.debug("fireInvalidate: {}", event);
+                notify(event, eventService);
+            }
         }
     }
 
     private void fireClear() {
-        if ((notifyOnLocalOperations || false == isLocal()) && null != eventService) {
-            CacheEvent event = CacheEvent.CLEAR(region);
-            LOG.debug("fireClear: {}", event);
-            eventService.notify(this, event, false);
+        if (notifyOnLocalOperations || false == isLocal()) {
+            CacheEventService eventService = this.eventService;
+            if (null != eventService) {
+                CacheEvent event = CacheEvent.CLEAR(region);
+                LOG.debug("fireClear: {}", event);
+                notify(event, eventService);
+            }
         }
+    }
+
+    private void notify(CacheEvent event, CacheEventService eventService) {
+        eventService.notify(this, event, false);
     }
 
     @Override
