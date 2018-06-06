@@ -82,30 +82,30 @@ public final class CreateMailAccountTables extends AbstractCreateTableImpl {
             + "id INT4 UNSIGNED NOT NULL,"
             + "cid INT4 UNSIGNED NOT NULL,"
             + "user INT4 UNSIGNED NOT NULL,"
-            + "name VARCHAR(256) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,"
-            + "url VARCHAR(256) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,"
-            + "login VARCHAR(128) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,"
-            + "password VARCHAR(256) CHARACTER SET utf8 COLLATE utf8_unicode_ci DEFAULT NULL,"
-            + "primary_addr VARCHAR(256) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,"
-            + "personal VARCHAR(64) CHARACTER SET utf8 COLLATE utf8_unicode_ci DEFAULT NULL,"
-            + "replyTo VARCHAR(64) CHARACTER SET utf8 COLLATE utf8_unicode_ci DEFAULT NULL,"
+            + "name VARCHAR(256) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,"
+            + "url VARCHAR(256) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,"
+            + "login VARCHAR(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,"
+            + "password VARCHAR(256) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,"
+            + "primary_addr VARCHAR(256) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,"
+            + "personal VARCHAR(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,"
+            + "replyTo VARCHAR(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,"
             + "default_flag TINYINT UNSIGNED NOT NULL DEFAULT 0,"
-            + "spam_handler VARCHAR(128) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,"
-            + "trash VARCHAR(64) CHARACTER SET utf8 COLLATE utf8_unicode_ci,"
-            + "sent VARCHAR(64) CHARACTER SET utf8 COLLATE utf8_unicode_ci,"
-            + "drafts VARCHAR(64) CHARACTER SET utf8 COLLATE utf8_unicode_ci,"
-            + "spam VARCHAR(64) CHARACTER SET utf8 COLLATE utf8_unicode_ci,"
-            + "confirmed_spam VARCHAR(64) CHARACTER SET utf8 COLLATE utf8_unicode_ci,"
-            + "confirmed_ham VARCHAR(64) CHARACTER SET utf8 COLLATE utf8_unicode_ci,"
-            + "archive VARCHAR(64) CHARACTER SET utf8 COLLATE utf8_unicode_ci DEFAULT '',"
+            + "spam_handler VARCHAR(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,"
+            + "trash VARCHAR(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,"
+            + "sent VARCHAR(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,"
+            + "drafts VARCHAR(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,"
+            + "spam VARCHAR(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,"
+            + "confirmed_spam VARCHAR(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,"
+            + "confirmed_ham VARCHAR(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,"
+            + "archive VARCHAR(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT '',"
             + "unified_inbox TINYINT UNSIGNED DEFAULT 0,"
-            + "trash_fullname VARCHAR(256) CHARACTER SET utf8 COLLATE utf8_unicode_ci,"
-            + "sent_fullname VARCHAR(256) CHARACTER SET utf8 COLLATE utf8_unicode_ci,"
-            + "drafts_fullname VARCHAR(256) CHARACTER SET utf8 COLLATE utf8_unicode_ci,"
-            + "spam_fullname VARCHAR(256) CHARACTER SET utf8 COLLATE utf8_unicode_ci,"
-            + "confirmed_spam_fullname VARCHAR(256) CHARACTER SET utf8 COLLATE utf8_unicode_ci,"
-            + "confirmed_ham_fullname VARCHAR(256) CHARACTER SET utf8 COLLATE utf8_unicode_ci,"
-            + "archive_fullname VARCHAR(256) CHARACTER SET utf8 COLLATE utf8_unicode_ci DEFAULT '',"
+            + "trash_fullname VARCHAR(256) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,"
+            + "sent_fullname VARCHAR(256) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,"
+            + "drafts_fullname VARCHAR(256) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,"
+            + "spam_fullname VARCHAR(256) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,"
+            + "confirmed_spam_fullname VARCHAR(256) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,"
+            + "confirmed_ham_fullname VARCHAR(256) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,"
+            + "archive_fullname VARCHAR(256) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT '',"
             + "starttls TINYINT UNSIGNED NOT NULL DEFAULT 0,"
             + "oauth INT(10) UNSIGNED DEFAULT NULL,"
             + "disabled TINYINT UNSIGNED NOT NULL DEFAULT 0,"
@@ -113,7 +113,7 @@ public final class CreateMailAccountTables extends AbstractCreateTableImpl {
             + "failed_auth_date BIGINT(64) NOT NULL DEFAULT 0,"
             + "PRIMARY KEY (cid, id, user),"
             + "INDEX (cid, user)"
-            + ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci";
+            + ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci";
     }
 
     public static final String getCreateTransportAccount() {  // --> com.openexchange.mailaccount.internal.CreateMailAccountTables
@@ -121,13 +121,13 @@ public final class CreateMailAccountTables extends AbstractCreateTableImpl {
             + "id INT4 UNSIGNED NOT NULL,"
             + "cid INT4 UNSIGNED NOT NULL,"
             + "user INT4 UNSIGNED NOT NULL,"
-            + "name VARCHAR(256) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,"
-            + "url VARCHAR(256) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,"
-            + "login VARCHAR(128) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,"
-            + "password VARCHAR(256) CHARACTER SET utf8 COLLATE utf8_unicode_ci DEFAULT NULL,"
-            + "send_addr VARCHAR(256) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,"
-            + "personal VARCHAR(64) CHARACTER SET utf8 COLLATE utf8_unicode_ci DEFAULT NULL,"
-            + "replyTo VARCHAR(64) CHARACTER SET utf8 COLLATE utf8_unicode_ci DEFAULT NULL,"
+            + "name VARCHAR(256) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,"
+            + "url VARCHAR(256) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,"
+            + "login VARCHAR(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,"
+            + "password VARCHAR(256) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,"
+            + "send_addr VARCHAR(256) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,"
+            + "personal VARCHAR(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,"
+            + "replyTo VARCHAR(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,"
             + "default_flag TINYINT UNSIGNED NOT NULL DEFAULT 0,"
             + "unified_inbox TINYINT UNSIGNED DEFAULT 0,"
             + "starttls TINYINT UNSIGNED NOT NULL DEFAULT 0,"
@@ -137,7 +137,7 @@ public final class CreateMailAccountTables extends AbstractCreateTableImpl {
             + "failed_auth_date BIGINT(64) NOT NULL DEFAULT 0,"
             + "PRIMARY KEY (cid, id, user),"
             + "INDEX (cid, user)"
-            + ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci";
+            + ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci";
     }
 
     public static final String getCreateMailAccountProperties() {  // --> com.openexchange.mailaccount.internal.CreateMailAccountTables
@@ -145,10 +145,10 @@ public final class CreateMailAccountTables extends AbstractCreateTableImpl {
             + "id INT4 UNSIGNED NOT NULL,"
             + "cid INT4 UNSIGNED NOT NULL,"
             + "user INT4 UNSIGNED NOT NULL,"
-            + "name VARCHAR(128) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,"
-            + "value VARCHAR(256) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,"
+            + "name VARCHAR(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,"
+            + "value VARCHAR(256) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,"
             + "PRIMARY KEY (cid, id, user, name)"
-            + ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci";
+            + ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci";
     }
 
     public static final String getCreateTransportAccountProperties() {  // --> com.openexchange.mailaccount.internal.CreateMailAccountTables
@@ -156,10 +156,10 @@ public final class CreateMailAccountTables extends AbstractCreateTableImpl {
             + "id INT4 UNSIGNED NOT NULL,"
             + "cid INT4 UNSIGNED NOT NULL,"
             + "user INT4 UNSIGNED NOT NULL,"
-            + "name VARCHAR(128) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,"
-            + "value VARCHAR(256) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,"
+            + "name VARCHAR(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,"
+            + "value VARCHAR(256) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,"
             + "PRIMARY KEY (cid, id, user, name)"
-            + ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci";
+            + ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci";
     }
 
     private static final String getCreateSequence() {
@@ -167,7 +167,7 @@ public final class CreateMailAccountTables extends AbstractCreateTableImpl {
             "cid INT4 unsigned NOT NULL," +
             "id INT4 unsigned NOT NULL," +
             "PRIMARY KEY (cid)" +
-            ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci";
+            ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci";
     }
 
     private static final String[] requiredTables = { "user" };
@@ -191,10 +191,10 @@ public final class CreateMailAccountTables extends AbstractCreateTableImpl {
         + "user INT4 UNSIGNED NOT NULL,"
         + "id INT4 UNSIGNED NOT NULL,"
         + "uidl VARCHAR(128) CHARACTER SET latin1 NOT NULL,"
-        + "fullname VARCHAR(256) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,"
-        + "uid VARCHAR(256) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,"
+        + "fullname VARCHAR(256) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,"
+        + "uid VARCHAR(256) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,"
         + "PRIMARY KEY (cid, user, id, uidl)"
-        + ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci",
+        + ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci",
 
         "CREATE TABLE pop3_storage_deleted ("
         + "cid INT4 UNSIGNED NOT NULL,"
@@ -202,6 +202,6 @@ public final class CreateMailAccountTables extends AbstractCreateTableImpl {
         + "id INT4 UNSIGNED NOT NULL,"
         + "uidl VARCHAR(128) CHARACTER SET latin1 NOT NULL,"
         + "PRIMARY KEY (cid, user, id, uidl)"
-        + ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci"
+        + ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci"
     };
 }

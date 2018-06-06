@@ -133,7 +133,7 @@ public class EventConflictResultConverter implements ResultConverter {
             for (ProblematicAttribute problematic : problematics) {
                 if (problematic instanceof EventConflict) {
                     EventConflict conflict = (EventConflict) problematic;
-                    JSONObject jsonConflict = new JSONObject(2);
+                    JSONObject jsonConflict = new JSONObject(3);
                     jsonConflict.put(ChronosEventConflictJsonFields.EventConflict.HARD_CONFLICT, conflict.isHardConflict());
                     jsonConflict.put(ChronosEventConflictJsonFields.EventConflict.CONFLICTING_ATTENDEES, parseAttendees(conflict.getConflictingAttendees()));
                     jsonConflict.put(ChronosEventConflictJsonFields.EventConflict.EVENT, EventMapper.getInstance().serialize(conflict.getConflictingEvent(), EventMapper.getInstance().getAssignedFields(conflict.getConflictingEvent()), timeZoneID, session));

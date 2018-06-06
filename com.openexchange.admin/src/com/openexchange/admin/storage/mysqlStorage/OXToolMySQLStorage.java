@@ -280,6 +280,9 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
                 final HashSet<String> logmaps = ctx.getLoginMappings();
 
                 for (final String mpi : logmaps) {
+                    if (Strings.containsSurrogatePairs(mpi)) {
+                        continue;
+                    }
                     prep_check = configdb_connection.prepareStatement("SELECT cid from login2context where login_info = ?");
                     prep_check.setString(1, mpi);
                     rs = prep_check.executeQuery();

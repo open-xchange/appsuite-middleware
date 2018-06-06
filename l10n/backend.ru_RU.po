@@ -1122,71 +1122,6 @@ msgstr "Внутренний календарь"
 msgid "Private"
 msgstr "Личное"
 
-#. * The displayed name for the {@link EventField#SUMMARY} property of an event
-#. Search in original mail subject
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/CalendarStrings.java:66
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.mail/src/com/openexchange/file/storage/mail/find/MailDriveStrings.java:73
-msgid "Subject"
-msgstr "Тема"
-
-#. * The displayed name for the {@link EventField#START_DATE} property of an event
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/CalendarStrings.java:72
-msgid "Starts on"
-msgstr "Начало:"
-
-#. * The displayed name for the {@link EventField#END_DATE} property of an event
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/CalendarStrings.java:75
-msgid "Ends on"
-msgstr "Конец:"
-
-#. * The displayed name for the {@link EventField#RECURRENCE_RULE} property of an event
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/CalendarStrings.java:78
-msgid "Repeat"
-msgstr "Повтор"
-
-#. * The displayed name for the {@link EventField#DESCRIPTION} property of an event
-#. A document's description
-#. Task attribute name
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/CalendarStrings.java:81
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/infostore/InfostoreStrings.java:73
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/AttributeNames.java:84
-msgid "Description"
-msgstr "Описание"
-
-#. * The displayed name for the {@link EventField#ALARMS} property of an event
-#. -
-#. * MISC
-#.
-#. Reminder
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/CalendarStrings.java:87
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:636
-msgid "Reminder"
-msgstr "Напоминание"
-
-#. * The displayed name for the {@link EventField#CLASSIFICATION} property of an event
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/CalendarStrings.java:90
-msgid "Visibility"
-msgstr "Видимость Видимость"
-
-#. * The displayed name for the {@link EventField#COLOR} property of an event
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/CalendarStrings.java:93
-msgid "Color"
-msgstr "Цвет"
-
-#. * The displayed name for the {@link EventField#TRANSP} property of an event
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/CalendarStrings.java:96
-msgid "Show as"
-msgstr "Показать как"
-
-#. * The displayed name for the {@link EventField#ATTACHMENTS} property of an event
-#. Has attachment
-#. The module attachments
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/CalendarStrings.java:99
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/mail/MailStrings.java:89
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/attach/impl/AttachmentStrings.java:62
-msgid "Attachments"
-msgstr "Вложения"
-
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:62
 msgid "The requested appointment was not found."
 msgstr "Запрашиваемый календарь не найден."
@@ -10675,6 +10610,22 @@ msgid ""
 msgstr ""
 "%1$s (%2$s) открыл доступ к %3$s календарям группе «%4$s». Нажмите кнопку "
 "ниже для просмотра."
+
+#. * $username ($user_email) has shared the calendar $folder with the group "Sales Dept.". Please click the button below to view it.
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:180
+msgid ""
+"%1$s (%2$s) has shared the calendar \"%3$s\" with the group \"%4$s\". Please "
+"click the button below to view it."
+msgstr ""
+"%1$s (%2$s) открыл группе «%4$s» доступ к календарю «%3$s». Нажмите кнопку ниже "
+"для просмотра."
+
+#. * $username ($user_email) has shared $number calendars with the group "Sales Dept.". Please click the button below to view them.
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:183
+msgid ""
+"%1$s (%2$s) has shared %3$ calendars with the group \"%4$s\". Please click "
+"the button below to view them."
+msgstr "%1$s (%2$s) открыл группе «%4$s» доступ к %3$s календарям. Нажмите кнопку ниже для просмотра."
 
 #. * $username ($user_email) has shared file "$filename" with you and left you a message:
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:186

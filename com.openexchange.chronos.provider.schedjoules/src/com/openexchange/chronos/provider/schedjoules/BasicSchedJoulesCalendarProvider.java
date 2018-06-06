@@ -51,6 +51,7 @@ package com.openexchange.chronos.provider.schedjoules;
 
 import static com.openexchange.chronos.provider.CalendarFolderProperty.COLOR;
 import static com.openexchange.chronos.provider.CalendarFolderProperty.COLOR_LITERAL;
+import static com.openexchange.chronos.provider.CalendarFolderProperty.USED_FOR_SYNC_LITERAL;
 import static com.openexchange.chronos.provider.CalendarFolderProperty.optPropertyValue;
 import static com.openexchange.chronos.provider.schedjoules.SchedJoulesFields.ITEM_ID;
 import static com.openexchange.chronos.provider.schedjoules.SchedJoulesFields.LOCALE;
@@ -66,10 +67,12 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONValue;
 import com.openexchange.chronos.ExtendedProperties;
+import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.provider.CalendarAccount;
 import com.openexchange.chronos.provider.CalendarCapability;
 import com.openexchange.chronos.provider.basic.BasicCalendarAccess;
 import com.openexchange.chronos.provider.basic.CalendarSettings;
+import com.openexchange.chronos.provider.caching.CachingCalendarUtils;
 import com.openexchange.chronos.provider.caching.basic.BasicCachingCalendarProvider;
 import com.openexchange.chronos.provider.schedjoules.exception.SchedJoulesProviderExceptionCodes;
 import com.openexchange.chronos.provider.schedjoules.osgi.Services;
@@ -211,7 +214,10 @@ public class BasicSchedJoulesCalendarProvider extends BasicCachingCalendarProvid
         if (null != colorValue && String.class.isInstance(colorValue)) {
             internalConfig.putSafe(SchedJoulesFields.COLOR, colorValue);
         }
-
+        Boolean usedForSync = optPropertyValue(settings.getExtendedProperties(), USED_FOR_SYNC_LITERAL, Boolean.class);
+        if (null != usedForSync && CachingCalendarUtils.canBeUsedForSync(PROVIDER_ID, session)) {
+            internalConfig.putSafe("usedForSync", usedForSync.booleanValue());
+        }
         try {
             if (Strings.isNotEmpty(settings.getName())) {
                 internalConfig.putSafe(SchedJoulesFields.NAME, settings.getName());
@@ -248,6 +254,17 @@ public class BasicSchedJoulesCalendarProvider extends BasicCachingCalendarProvid
         if (Strings.isNotEmpty(settings.getName()) && false == settings.getName().equals(internalConfig.opt(SchedJoulesFields.NAME))) {
             internalConfig.putSafe(SchedJoulesFields.NAME, settings.getName());
             changed = true;
+        }
+        Boolean usedForSyncValue = optPropertyValue(settings.getExtendedProperties(), USED_FOR_SYNC_LITERAL, Boolean.class);
+        if (null != usedForSyncValue) {
+            boolean usedForSync = usedForSyncValue.booleanValue();
+            if (false == internalConfig.has("usedForSync") || usedForSync != internalConfig.optBoolean("usedForSync", false)) {
+                if (usedForSync && false == CachingCalendarUtils.canBeUsedForSync(PROVIDER_ID, session)) {
+                    throw CalendarExceptionCodes.INVALID_CONFIGURATION.create(USED_FOR_SYNC_LITERAL);
+                }
+                internalConfig.putSafe("usedForSync", usedForSync);
+                changed = true;
+            }
         }
         return changed ? internalConfig : null;
     }

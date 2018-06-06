@@ -62,8 +62,15 @@ public final class CreateUpdateTaskTable extends AbstractCreateTableImpl {
     private static final String[] CREATED_TABLES = { "updateTask" };
 
     static final String[] CREATES_PRIMARY_KEY = {
-        "CREATE TABLE updateTask (cid INT4 UNSIGNED NOT NULL,taskName VARCHAR(1024) NOT NULL,successful BOOLEAN NOT NULL," +
-            "lastModified INT8 NOT NULL,uuid BINARY(16) NOT NULL,PRIMARY KEY (cid, uuid),INDEX full (cid,taskName(255))) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci"
+         "CREATE TABLE updateTask " +
+         "(cid INT4 UNSIGNED NOT NULL," +
+         "taskName VARCHAR(1024) NOT NULL," +
+         "successful BOOLEAN NOT NULL," +
+         "lastModified INT8 NOT NULL," +
+         "uuid BINARY(16) NOT NULL," +
+         "PRIMARY KEY (cid, uuid)," +
+         "INDEX full (cid,taskName(191))) " +
+         "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci"
     };
 
     public CreateUpdateTaskTable() {

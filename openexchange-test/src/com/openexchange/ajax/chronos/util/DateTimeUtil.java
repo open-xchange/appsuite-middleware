@@ -85,6 +85,28 @@ public final class DateTimeUtil {
     };
 
     /**
+     * Thread local {@link SimpleDateFormat} using <code>yyyyMMdd</code> as pattern.
+     */
+    private static final ThreadLocal<SimpleDateFormat> SIMPLE_FORMATER = new ThreadLocal<SimpleDateFormat>() {
+
+        @Override
+        protected SimpleDateFormat initialValue() {
+            return new SimpleDateFormat("yyyyMMdd");
+        }
+    };
+    
+    /**
+     * Thread local {@link SimpleDateFormat} using <code>yyyyMMdd'T'HHmmss</code> as pattern.
+     */
+    private static final ThreadLocal<SimpleDateFormat> DATE_TIME_FORMATTER = new ThreadLocal<SimpleDateFormat>() {
+
+        @Override
+        protected SimpleDateFormat initialValue() {
+            return new SimpleDateFormat("yyyyMMdd'T'HHmmss");
+        }
+    };
+
+    /**
      * Parses the specified millisecond timestamp into a proper {@link DateTimeData} in ZULU format
      *
      * @param millis The millisecond timestamp
@@ -144,6 +166,20 @@ public final class DateTimeUtil {
     }
 
     /**
+     * Parses the specified millisecond timestamp into a proper {@link DateTimeData} format
+     * without the time information
+     * 
+     * @param millis The millisecond timestamp
+     * @return The {@link DateTimeData}
+     */
+    public static DateTimeData getDateTimeWithoutTimeInformation(long millis) {
+        DateTimeData result = new DateTimeData();
+        Date date = new Date(millis);
+        result.setValue(SIMPLE_FORMATER.get().format(date));
+        return result;
+    }
+
+    /**
      * Parses the specified {@link DateTimeData} object to a {@link Date} object
      *
      * @param time The {@link DateTimeData} object
@@ -152,7 +188,7 @@ public final class DateTimeUtil {
      */
     public static Date parseDateTime(DateTimeData time) throws ParseException {
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd'T'HHmmss");
-        if(time.getTzid() != null) {
+        if (time.getTzid() != null) {
             dateFormat.setTimeZone(TimeZone.getTimeZone(time.getTzid()));
         }
         return dateFormat.parse(time.getValue());
@@ -192,7 +228,7 @@ public final class DateTimeUtil {
 
         Date date = new Date(millis);
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd'T'HHmmss");
-        if(timezoneId != null) {
+        if (timezoneId != null) {
             dateFormat.setTimeZone(TimeZone.getTimeZone(timezoneId));
         }
         result.setValue(dateFormat.format(date));
@@ -210,7 +246,7 @@ public final class DateTimeUtil {
      */
     public static DateTimeData incrementDateTimeData(DateTimeData data, long millis) throws ParseException {
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd'T'HHmmss");
-        if(data.getTzid() != null) {
+        if (data.getTzid() != null) {
             dateFormat.setTimeZone(TimeZone.getTimeZone(data.getTzid()));
         }
         Date date = dateFormat.parse(data.getValue());
@@ -237,7 +273,7 @@ public final class DateTimeUtil {
     }
 
     /**
-     * Returns an {@link Calendar} object with time set to today 12 o clock and timezone set to 'utc'
+     * Returns a {@link Calendar} object with time set to today 12 o clock and timezone set to 'utc'
      *
      * @return The calendar
      */
@@ -249,6 +285,13 @@ public final class DateTimeUtil {
         cal.set(Calendar.SECOND, 0);
         cal.set(Calendar.MILLISECOND, 0);
         return cal;
+    }
+    
+    public static DateTimeData getDateTimeData(String timestamp, String timezoneId) throws ParseException {
+        DateTimeData result = new DateTimeData();
+        result.setTzid(timezoneId);
+        result.setValue(timestamp);
+        return result;
     }
 
     /**
@@ -267,5 +310,19 @@ public final class DateTimeUtil {
 
         cal.setTimeInMillis(nextTransition.getInstant().getEpochSecond() * 1000);
         return cal;
+    }
+
+    /**
+     * Strips the time information from the specified {@link DateTimeData} and returns
+     * a new version of the data
+     * 
+     * @param data The {@link DateTimeData}
+     * @return The new {@link DateTimeData} without the time information
+     * @throws ParseException if a parsing error is occurred
+     */
+    public static DateTimeData stripTimeInformation(DateTimeData data) throws ParseException {
+        long timestamp = parseDateTime(data).getTime();
+        return getDateTimeWithoutTimeInformation(timestamp);
+
     }
 }

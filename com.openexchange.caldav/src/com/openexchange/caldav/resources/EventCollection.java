@@ -129,7 +129,7 @@ public class EventCollection extends FolderCollection<Event> implements Filterin
     /** Fields that are always retrieved when requesting event lists from the service */
     private static final EventField[] BASIC_FIELDS = new EventField[] {
         EventField.UID, EventField.FILENAME, EventField.FOLDER_ID, EventField.ID, EventField.SERIES_ID,
-        EventField.CREATED, EventField.CREATED_BY, EventField.TIMESTAMP, EventField.LAST_MODIFIED, EventField.MODIFIED_BY, 
+        EventField.CREATED, EventField.CREATED_BY, EventField.TIMESTAMP, EventField.LAST_MODIFIED, EventField.MODIFIED_BY,
         EventField.CLASSIFICATION, EventField.START_DATE, EventField.END_DATE, EventField.RECURRENCE_RULE
     };
 
@@ -159,10 +159,9 @@ public class EventCollection extends FolderCollection<Event> implements Filterin
             new SupportedReportSet(),
             minDateTime,
             maxDateTime,
-            new Invite(factory, this),
-            new AllowedSharingModes(factory.getSession()),
             new CalendarOwner(this),
             new Organizer(this),
+            new AllowedSharingModes(this),
             new ScheduleDefaultCalendarURL(factory),
             new ScheduleDefaultTasksURL(factory),
             new CalendarColor(this),
@@ -175,6 +174,9 @@ public class EventCollection extends FolderCollection<Event> implements Filterin
             new DefaultAlarmVeventDate(),
             new DefaultAlarmVeventDatetime()
         );
+        if (supportsPermissions(folder)) {
+            includeProperties(new Invite(factory, this));
+        }
         if (CalendarOrder.NO_ORDER != order) {
             includeProperties(new CalendarOrder(order));
         }

@@ -49,7 +49,6 @@
 
 package com.openexchange.frontend.uwa.internal.groupware;
 
-import com.openexchange.database.DatabaseService;
 import com.openexchange.groupware.update.CreateTableUpdateTask;
 
 
@@ -60,8 +59,8 @@ import com.openexchange.groupware.update.CreateTableUpdateTask;
  */
 public class CreatePositionsTableTask extends CreateTableUpdateTask {
 
-    public CreatePositionsTableTask(DatabaseService databaseService) {
-        super(new CreatePositionsTable(), new String[0], databaseService);
+    public CreatePositionsTableTask() {
+        super(new CreatePositionsTable(), new String[0]);
     }
 
 }

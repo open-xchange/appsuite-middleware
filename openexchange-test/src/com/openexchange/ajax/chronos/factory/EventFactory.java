@@ -70,6 +70,21 @@ import com.openexchange.testing.httpclient.models.EventData.TranspEnum;
 public final class EventFactory {
 
     /**
+     * {@link RecurringFrequency} - The recurring frequency of a series
+     * as described in <a href="https://tools.ietf.org/html/rfc5545#section-3.3.10">RFC-5545, Section 3.3.10</a>
+     */
+    public enum RecurringFrequency {
+        SECONDLY, MINUTELY, HOURLY, DAILY, WEEKLY, MONTHLY, YEARLY;
+    }
+
+    /**
+     * {@link Weekday} - The weekday as described in <a href="https://tools.ietf.org/html/rfc5545#section-3.3.10">RFC-5545, Section 3.3.10</a>
+     */
+    public enum Weekday {
+        SU, MO, TU, WE, TH, FR, SA;
+    }
+
+    /**
      * Creates a single event for the specified user with in the specified interval.
      *
      * @param userId The user identifier
@@ -108,6 +123,38 @@ public final class EventFactory {
     }
 
     /**
+     * Creates a simple two hour event with the specified amount of occurrences and recurring frequency
+     * 
+     * @param userId The user identifier
+     * @param summary The summary of the event
+     * @param occurences The number of occurrences
+     * @param folderId The folder identifier
+     * @param freq The recurring frequency
+     * @return The series {@link EventData}
+     */
+    public static EventData createSeriesEvent(int userId, String summary, DateTimeData until, String folderId, RecurringFrequency freq, Weekday weekday) {
+        EventData seriesEvent = createSingleTwoHourEvent(userId, summary, folderId);
+        seriesEvent.setRrule("FREQ=" + freq.name() + ";BYDAY=" + weekday.name() + ";UNTIL=" + until.getValue());
+        return seriesEvent;
+    }
+
+    /**
+     * Creates a simple two hour event with the specified amount of occurrences and recurring frequency
+     * 
+     * @param userId The user identifier
+     * @param summary The summary of the event
+     * @param occurences The number of occurences
+     * @param folderId The folder identifier
+     * @param freq The recurring frequency
+     * @return The series {@link EventData}
+     */
+    public static EventData createSeriesEvent(int userId, String summary, int occurences, String folderId, RecurringFrequency freq) {
+        EventData seriesEvent = createSingleTwoHourEvent(userId, summary, folderId);
+        seriesEvent.setRrule("FREQ=" + freq.name() + ";COUNT=" + occurences);
+        return seriesEvent;
+    }
+
+    /**
      * Creates a simple daily two hour event with the specified amount of occurrences
      *
      * @param userId The user identifier
@@ -115,9 +162,7 @@ public final class EventFactory {
      * @return The series {@link EventData}
      */
     public static EventData createSeriesEvent(int userId, String summary, int occurences, String folderId) {
-        EventData seriesEvent = createSingleTwoHourEvent(userId, summary, folderId);
-        seriesEvent.setRrule("FREQ=DAILY;COUNT=" + occurences);
-        return seriesEvent;
+        return createSeriesEvent(userId, summary, occurences, folderId, RecurringFrequency.DAILY);
     }
 
     /**
@@ -141,12 +186,18 @@ public final class EventFactory {
      * @param summary The summary of the event
      * @param startDate The start date
      * @param endDate The end date
-     * @param occurences The number of occurences
+     * @param occurences The number of occurrences
      * @return The series {@link EventData}
      */
     public static EventData createSeriesEvent(int userId, String summary, DateTimeData startDate, DateTimeData endDate, int occurences, String folderId) {
         EventData seriesEvent = createSingleEvent(userId, summary, startDate, endDate, folderId);
         seriesEvent.setRrule("FREQ=DAILY;COUNT=" + occurences);
+        return seriesEvent;
+    }
+    
+    public static EventData createSeriesEvent(int userId, String summary, DateTimeData startDate, DateTimeData endDate, DateTimeData until, RecurringFrequency freq, Weekday weekday, String folderId) {
+        EventData seriesEvent = createSingleEvent(userId, summary, startDate, endDate, folderId);
+        seriesEvent.setRrule("FREQ=" + freq.name() + ";BYDAY=" + weekday.name() + ";UNTIL=" + until.getValue());
         return seriesEvent;
     }
 

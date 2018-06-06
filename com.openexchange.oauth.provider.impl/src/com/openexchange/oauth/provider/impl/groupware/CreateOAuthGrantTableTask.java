@@ -58,7 +58,6 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
-import com.openexchange.server.ServiceLookup;
 
 /**
  * {@link CreateOAuthGrantTableTask}
@@ -68,16 +67,11 @@ import com.openexchange.server.ServiceLookup;
  */
 public class CreateOAuthGrantTableTask extends UpdateTaskAdapter {
 
-    private final ServiceLookup services;
-
     /**
      * Initializes a new {@link CreateOAuthGrantTableTask}.
-     *
-     * @param dbService
      */
-    public CreateOAuthGrantTableTask(ServiceLookup services) {
+    public CreateOAuthGrantTableTask() {
         super();
-        this.services = services;
     }
 
     @Override

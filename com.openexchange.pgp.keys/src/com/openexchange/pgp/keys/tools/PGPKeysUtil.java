@@ -52,7 +52,10 @@ package com.openexchange.pgp.keys.tools;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.Objects;
+import org.bouncycastle.bcpg.CompressionAlgorithmTags;
 import org.bouncycastle.bcpg.HashAlgorithmTags;
+import org.bouncycastle.bcpg.SymmetricKeyAlgorithmTags;
+import org.bouncycastle.bcpg.sig.Features;
 import org.bouncycastle.bcpg.sig.KeyFlags;
 import org.bouncycastle.bcpg.sig.RevocationReasonTags;
 import org.bouncycastle.openpgp.PGPException;
@@ -373,7 +376,7 @@ public final class PGPKeysUtil {
         PGPPublicKey publicMasterKey = publicKeyRing.getPublicKey();
         PGPPublicKey newPublicMasterKey = addUID(publicMasterKey, privateKey, userId);
         publicKeyRing = PGPPublicKeyRing.removePublicKey(publicKeyRing, publicMasterKey);
-        if (null != publicKeyRing) {            
+        if (null != publicKeyRing) {
             publicKeyRing = PGPPublicKeyRing.insertPublicKey(publicKeyRing, newPublicMasterKey);
         }
         return publicKeyRing;
@@ -408,10 +411,93 @@ public final class PGPKeysUtil {
         PGPSignatureGenerator generator = new PGPSignatureGenerator(
             new BcPGPContentSignerBuilder(PGPPublicKey.RSA_GENERAL, org.bouncycastle.openpgp.PGPUtil.SHA1));
         generator.init(PGPSignature.POSITIVE_CERTIFICATION, privateKey);
-        PGPSignatureSubpacketGenerator signhashgen = new PGPSignatureSubpacketGenerator();
+        PGPSignatureSubpacketGenerator signhashgen = createSignatureGeneratorFromPrior (publicKey, privateKey.getKeyID());
         generator.setHashedSubpackets(signhashgen.generate());
         PGPSignature certification = generator.generateCertification(userId, publicKey);
         return PGPPublicKey.addCertification(publicKey, userId, certification);
+    }
+
+    /**
+     * Find either the primary UserId, or the most recent, and use those hashes for a new PGPSignatureSubpacketGenerator
+     * @param publicKey
+     * @param keyId
+     * @return
+     */
+    private static PGPSignatureSubpacketGenerator createSignatureGeneratorFromPrior (PGPPublicKey publicKey, Long keyId) {
+        PGPSignatureSubpacketGenerator gen = new PGPSignatureSubpacketGenerator();
+        Iterator<byte[]> userIds = publicKey.getRawUserIDs();
+        PGPSignatureSubpacketVector last = null;
+        Date mostRecentSignatureDate = null;
+        while (userIds.hasNext()) {
+            byte[] rawId = userIds.next();
+            Iterator<PGPSignature> sigs = publicKey.getSignaturesForID(rawId);
+            while (sigs.hasNext()) {
+                PGPSignature sig = sigs.next();
+                if (sig.isCertification() && sig.getKeyID() == keyId) {
+                    PGPSignatureSubpacketVector vectors = sig.getHashedSubPackets();
+                    if (vectors != null) {
+                        if (vectors.isPrimaryUserID()) {
+                            return setHashes (gen, vectors);
+                        }
+                        Date signatureCreationTime = vectors.getSignatureCreationTime();
+                        if(mostRecentSignatureDate == null || (signatureCreationTime != null && signatureCreationTime.getTime() >  mostRecentSignatureDate.getTime())) {
+                            mostRecentSignatureDate = signatureCreationTime;
+                            last = vectors;
+                        }
+                    }
+                }
+            }
+        }
+        if (last != null) {
+            return setHashes(gen, last);
+        }
+        return defaultHashSettings (gen);
+    }
+
+    /**
+     * Return a PGPSignatureSubpacketGenerator populated with vectors
+     * @param gen
+     * @param vectors
+     * @return
+     */
+    private static PGPSignatureSubpacketGenerator setHashes (PGPSignatureSubpacketGenerator gen, PGPSignatureSubpacketVector vectors) {
+        gen.setKeyFlags(false, vectors.getKeyFlags());
+        if (vectors.getFeatures() != null) {
+            byte[] features = vectors.getFeatures().getData();
+            for (byte feature : features) {
+                gen.setFeature(vectors.getFeatures().isCritical(), feature);
+            }
+        }
+        if (vectors.getPreferredCompressionAlgorithms() != null) {
+            gen.setPreferredCompressionAlgorithms(false, vectors.getPreferredCompressionAlgorithms());
+        }
+        if (vectors.getPreferredHashAlgorithms() != null) {
+            gen.setPreferredHashAlgorithms(false, vectors.getPreferredHashAlgorithms());
+        }
+        if (vectors.getPreferredSymmetricAlgorithms() != null) {
+            gen.setPreferredSymmetricAlgorithms(false, vectors.getPreferredSymmetricAlgorithms());
+        }
+        if (vectors.getPreferredCompressionAlgorithms() != null) {
+            gen.setPreferredCompressionAlgorithms(false, vectors.getPreferredCompressionAlgorithms());
+        }
+        if (vectors.isPrimaryUserID()) {
+            gen.setPrimaryUserID(false, true);
+        }
+        return gen;
+    }
+
+    /**
+     * Set PGPSignatureSubpacketGenerator to a set of defaults
+     * @param gen
+     * @return
+     */
+    private static PGPSignatureSubpacketGenerator defaultHashSettings (PGPSignatureSubpacketGenerator gen) {
+        gen.setPreferredHashAlgorithms(false, new int[] { HashAlgorithmTags.SHA512 });
+        gen.setPreferredSymmetricAlgorithms(false, new int[] { SymmetricKeyAlgorithmTags.AES_256 });
+        gen.setPreferredCompressionAlgorithms(false, new int[] { CompressionAlgorithmTags.ZIP });
+        gen.setFeature(true, Features.FEATURE_MODIFICATION_DETECTION);
+        gen.setKeyFlags(false, KeyFlags.SIGN_DATA | KeyFlags.CERTIFY_OTHER);
+        return gen;
     }
 
     /**

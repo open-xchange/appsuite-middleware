@@ -54,6 +54,8 @@ import static com.openexchange.chronos.provider.CalendarFolderProperty.DESCRIPTI
 import static com.openexchange.chronos.provider.CalendarFolderProperty.LAST_UPDATE;
 import static com.openexchange.chronos.provider.CalendarFolderProperty.SCHEDULE_TRANSP;
 import static com.openexchange.chronos.provider.CalendarFolderProperty.USED_FOR_SYNC;
+import static com.openexchange.chronos.provider.schedjoules.BasicSchedJoulesCalendarProvider.PROVIDER_ID;
+import static com.openexchange.java.Autoboxing.B;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Collections;
@@ -65,6 +67,7 @@ import com.openexchange.chronos.ExtendedProperties;
 import com.openexchange.chronos.TimeTransparency;
 import com.openexchange.chronos.provider.CalendarAccount;
 import com.openexchange.chronos.provider.basic.CalendarSettings;
+import com.openexchange.chronos.provider.caching.CachingCalendarUtils;
 import com.openexchange.chronos.provider.caching.ExternalCalendarResult;
 import com.openexchange.chronos.provider.caching.basic.BasicCachingCalendarAccess;
 import com.openexchange.chronos.provider.schedjoules.exception.SchedJoulesProviderExceptionCodes;
@@ -122,7 +125,11 @@ public class BasicSchedJoulesCalendarAccess extends BasicCachingCalendarAccess {
         ExtendedProperties extendedProperties = new ExtendedProperties();
         extendedProperties.add(SCHEDULE_TRANSP(TimeTransparency.TRANSPARENT, true));
         extendedProperties.add(DESCRIPTION(internalConfig.optString(SchedJoulesFields.DESCRIPTION, null)));
-        extendedProperties.add(USED_FOR_SYNC(Boolean.FALSE, true));
+        if (CachingCalendarUtils.canBeUsedForSync(PROVIDER_ID, session)) {
+            extendedProperties.add(USED_FOR_SYNC(B(internalConfig.optBoolean("usedForSync", false)), false));
+        } else {
+            extendedProperties.add(USED_FOR_SYNC(Boolean.FALSE, true));
+        }
         extendedProperties.add(COLOR(internalConfig.optString(SchedJoulesFields.COLOR, null), false));
         extendedProperties.add(LAST_UPDATE(optLastUpdate()));
 

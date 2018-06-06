@@ -81,6 +81,7 @@ import com.openexchange.push.impl.credstorage.inmemory.HazelcastCredentialStorag
 import com.openexchange.push.impl.credstorage.inmemory.portable.PortableCredentialsFactory;
 import com.openexchange.push.impl.credstorage.rdb.RdbCredentialStorage;
 import com.openexchange.push.impl.credstorage.rdb.groupware.CreateCredStorageTable;
+import com.openexchange.push.impl.credstorage.rdb.groupware.CredConvertUtf8ToUtf8mb4Task;
 import com.openexchange.push.impl.credstorage.rdb.groupware.CredStorageCreateTableTask;
 import com.openexchange.push.impl.credstorage.rdb.groupware.CredStorageDeleteListener;
 import com.openexchange.push.impl.portable.HazelcastInstanceNotActiveExceptionHandler;
@@ -211,7 +212,7 @@ public class CredStorageActivator extends HousekeepingActivator implements Hazel
 
         registerService(CreateTableService.class, new CreateCredStorageTable(), null);
         registerService(DeleteListener.class, new CredStorageDeleteListener(), null);
-        registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(new CredStorageCreateTableTask()));
+        registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(new CredStorageCreateTableTask(), new CredConvertUtf8ToUtf8mb4Task()));
 
         registerService(CredentialStorageProvider.class, storageProvider);
         addService(CredentialStorageProvider.class, storageProvider);

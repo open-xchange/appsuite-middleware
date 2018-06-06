@@ -57,9 +57,9 @@ import java.lang.annotation.Target;
 import com.openexchange.groupware.update.internal.ExcludedSet;
 
 /**
- * {@link NamespaceAwareUpdateTask} - Makes an {@link UpdateTaskV2} namespace-aware.
+ * {@link NamespaceAwareUpdateTask} - Marks an {@link UpdateTaskV2} as 'excludable'.
  * 
- * @see {@link UpdateTaskCollection} and {@link ExcludedSet}
+ * @see {@link UpdateTaskCollection} and {@link ExcludedList}
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @since v7.10.0
  */
@@ -69,9 +69,9 @@ import com.openexchange.groupware.update.internal.ExcludedSet;
 public @interface NamespaceAwareUpdateTask {
 
     /**
-     * Returns the namespace of the update task(s)
+     * Returns the namespace of the excludable update task(s)
      * 
-     * @return the namespace of the update task(s)
+     * @return the namespace of the excludable update task(s)
      */
     String namespace();
 

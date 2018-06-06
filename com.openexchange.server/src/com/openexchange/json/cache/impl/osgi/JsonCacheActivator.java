@@ -87,7 +87,8 @@ public final class JsonCacheActivator extends HousekeepingActivator {
             new JsonCacheCreateTableTask(),
             new JsonCacheAddInProgressFieldTask(),
             new JsonCacheMediumTextTask(),
-            new JsonCacheAddOtherFieldsTask()));
+            new JsonCacheAddOtherFieldsTask(),
+            new JsonCacheEnsureLatin1AsDefault()));
         registerService(DeleteListener.class, new JsonCacheDeleteListener());
         /*
          * Register cache service

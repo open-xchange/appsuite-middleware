@@ -84,10 +84,10 @@ public final class CreateIDSequenceTable extends AbstractCreateTableImpl {
     private static final String[] createStatements = {
         "CREATE TABLE sequenceIds ("
         + "cid INT4 UNSIGNED NOT NULL,"
-        + "type VARCHAR(128) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,"
+        + "type VARCHAR(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,"
         + "id INT4 UNSIGNED NOT NULL,"
         + "PRIMARY KEY (cid, type)"
-        + ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci"
+        + ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci"
     };
 
 }

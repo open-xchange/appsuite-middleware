@@ -97,10 +97,12 @@ import com.openexchange.oauth.provider.impl.client.storage.RdbOAuthClientStorage
 import com.openexchange.oauth.provider.impl.grant.DbGrantStorage;
 import com.openexchange.oauth.provider.impl.grant.GrantManagementImpl;
 import com.openexchange.oauth.provider.impl.grant.OAuthGrantStorage;
+import com.openexchange.oauth.provider.impl.groupware.AuthCodeConvertUtf8ToUtf8mb4Task;
 import com.openexchange.oauth.provider.impl.groupware.AuthCodeCreateTableService;
 import com.openexchange.oauth.provider.impl.groupware.AuthCodeCreateTableTask;
 import com.openexchange.oauth.provider.impl.groupware.CreateOAuthGrantTableService;
 import com.openexchange.oauth.provider.impl.groupware.CreateOAuthGrantTableTask;
+import com.openexchange.oauth.provider.impl.groupware.OAuthGrantConvertUtf8ToUtf8mb4Task;
 import com.openexchange.oauth.provider.impl.groupware.OAuthProviderDeleteListener;
 import com.openexchange.oauth.provider.impl.servlets.AuthorizationEndpoint;
 import com.openexchange.oauth.provider.impl.servlets.RevokeEndpoint;
@@ -213,9 +215,9 @@ public final class OAuthProviderActivator extends HousekeepingActivator {
     private void startAuthorizationServer(AbstractAuthorizationCodeProvider authCodeProvider) throws Exception {
         // Register update task, create table job and delete listener
         registerService(CreateTableService.class, new AuthCodeCreateTableService());
-        registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(new AuthCodeCreateTableTask(this)));
+        registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(new AuthCodeCreateTableTask(), new AuthCodeConvertUtf8ToUtf8mb4Task()));
         registerService(CreateTableService.class, new CreateOAuthGrantTableService());
-        registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(new CreateOAuthGrantTableTask(this)));
+        registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(new CreateOAuthGrantTableTask(), new OAuthGrantConvertUtf8ToUtf8mb4Task()));
         registerService(DeleteListener.class, new OAuthProviderDeleteListener());
 
         // Register client and grant management

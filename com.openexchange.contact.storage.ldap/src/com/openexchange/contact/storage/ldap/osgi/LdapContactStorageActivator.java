@@ -63,6 +63,7 @@ import com.openexchange.config.Interests;
 import com.openexchange.config.Reloadable;
 import com.openexchange.contact.storage.ContactStorage;
 import com.openexchange.contact.storage.ldap.config.LdapContactStorageFactory;
+import com.openexchange.contact.storage.ldap.database.LdapConvertUtf8ToUtf8mb4UpdateTask;
 import com.openexchange.contact.storage.ldap.database.LdapCreateTableService;
 import com.openexchange.contact.storage.ldap.database.LdapCreateTableTask;
 import com.openexchange.contact.storage.ldap.database.LdapDeleteListener;
@@ -88,7 +89,6 @@ import com.openexchange.user.UserService;
 public class LdapContactStorageActivator extends HousekeepingActivator implements Reloadable {
 
     private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(LdapContactStorageActivator.class);
-    private static final String[] PROPERTIES = new String[] {"all properties in file"};
     private static File[] oldProperties;
 
     /**
@@ -113,7 +113,7 @@ public class LdapContactStorageActivator extends HousekeepingActivator implement
              * register update task, create table job and delete listener
              */
             registerService(CreateTableService.class, new LdapCreateTableService());
-            registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(new LdapCreateTableTask()));
+            registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(new LdapCreateTableTask(), new LdapConvertUtf8ToUtf8mb4UpdateTask()));
             registerService(DeleteListener.class, new LdapDeleteListener());
             /*
              * register configured storages
@@ -151,7 +151,7 @@ public class LdapContactStorageActivator extends HousekeepingActivator implement
              * register update task, create table job and delete listener
              */
             registerService(CreateTableService.class, new LdapCreateTableService());
-            registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(new LdapCreateTableTask()));
+            registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(new LdapCreateTableTask(), new LdapConvertUtf8ToUtf8mb4UpdateTask()));
             registerService(DeleteListener.class, new LdapDeleteListener());
             /*
              * register configured storages

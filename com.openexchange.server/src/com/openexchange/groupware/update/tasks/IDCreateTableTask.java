@@ -67,7 +67,12 @@ import com.openexchange.groupware.update.UpdateTaskAdapter;
  */
 public class IDCreateTableTask extends UpdateTaskAdapter {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(IDCreateTableTask.class);
+    /**
+     * Initializes a new {@link IDCreateTableTask}.
+     */
+    public IDCreateTableTask() {
+        super();
+    }
 
     @Override
     public String[] getDependencies() {
@@ -77,18 +82,15 @@ public class IDCreateTableTask extends UpdateTaskAdapter {
     private static final String getCreate() {
         return "CREATE TABLE sequenceIds ("
         + "cid INT4 UNSIGNED NOT NULL,"
-        + "type VARCHAR(128) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,"
+        + "type VARCHAR(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,"
         + "id INT4 UNSIGNED NOT NULL,"
         + "PRIMARY KEY (cid, type)"
-        + ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci";
+        + ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci";
     }
 
     @Override
     public void perform(final PerformParameters params) throws OXException {
         createTable("sequenceIds", getCreate(), params.getConnectionProvider().getConnection());
-        if (LOG.isInfoEnabled()) {
-            LOG.info("UpdateTask 'IDCreateTableTask' successfully performed!");
-        }
     }
 
     private static void createTable(String tablename, String sqlCreate, Connection con) throws OXException {
