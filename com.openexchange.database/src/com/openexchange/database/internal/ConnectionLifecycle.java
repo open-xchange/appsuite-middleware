@@ -61,7 +61,6 @@ import java.util.Iterator;
 import java.util.Properties;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicReference;
-import com.mysql.jdbc.ConnectionImpl;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.DefaultInterests;
 import com.openexchange.config.Interests;
@@ -109,69 +108,6 @@ class ConnectionLifecycle implements PoolableLifecycle<Connection> {
         return openStatementsField;
     }
 
-    private static final Field mysqlConnectionField;
-    static {
-        Field f;
-        try {
-            f = com.mysql.jdbc.MysqlIO.class.getDeclaredField("mysqlConnection");
-            f.setAccessible(true);
-        } catch (final SecurityException e) {
-            f = null;
-        } catch (final NoSuchFieldException e) {
-            f = null;
-        }
-        mysqlConnectionField = f;
-    }
-
-    /** The closed state for a connection */
-    private static enum ClosedState {
-        /** Connection appears to be open */
-        OPEN,
-        /** Connection has been explicitly closed since {@link Connection#isClosed()} signaled <code>true</code> */
-        EXPLICITLY_CLOSED,
-        /** Connection seems to be internally closed; meaning necessary resources were closed rendering connection unusable */
-        INTERNALLY_CLOSED;
-    }
-
-    private static boolean seemsClosed(com.mysql.jdbc.ConnectionImpl mysqlConnectionImpl) {
-        try {
-            Field mysqlConnectionField = ConnectionLifecycle.mysqlConnectionField;
-            if (null != mysqlConnectionField) {
-                return null == mysqlConnectionField.get(mysqlConnectionImpl.getIO());
-            }
-        } catch (Exception e) {
-            // Ignore
-        }
-
-        // Not definitely known
-        return false;
-    }
-
-    private static ClosedState isClosed(final Connection con) throws SQLException {
-        boolean closed = con.isClosed();
-        if (closed) {
-            return ClosedState.EXPLICITLY_CLOSED;
-        }
-
-        if (con instanceof com.mysql.jdbc.ConnectionImpl) {
-            com.mysql.jdbc.ConnectionImpl mysqlConnectionImpl = (com.mysql.jdbc.ConnectionImpl) con;
-            if (seemsClosed(mysqlConnectionImpl)) {
-                closeSafe(mysqlConnectionImpl);
-                return ClosedState.INTERNALLY_CLOSED;
-            }
-        }
-
-        return ClosedState.OPEN;
-    }
-
-    private static void closeSafe(ConnectionImpl mysqlConnection) {
-        try {
-            mysqlConnection.realClose(false, false, false, null);
-        } catch (Exception e) {
-            // ignore, we're going away.
-        }
-    }
-
     // ----------------------------------------------------------------------------------------------
 
     private final String url;
@@ -194,7 +130,7 @@ class ConnectionLifecycle implements PoolableLifecycle<Connection> {
         Statement stmt = null;
         ResultSet result = null;
         try {
-            retval = ClosedState.OPEN == isClosed(con);
+            retval = MysqlUtils.ClosedState.OPEN == MysqlUtils.isClosed(con, true);
             if (data.getTimeDiff() > checkTime) {
                 stmt = con.createStatement();
                 result = stmt.executeQuery(TEST_SELECT);
@@ -294,9 +230,9 @@ class ConnectionLifecycle implements PoolableLifecycle<Connection> {
         final Connection con = data.getPooled();
         boolean retval = true;
         try {
-            ClosedState closedState = isClosed(con);
-            if (ClosedState.OPEN != closedState) {
-                if (ClosedState.EXPLICITLY_CLOSED == closedState) {
+            MysqlUtils.ClosedState closedState = MysqlUtils.isClosed(con, true);
+            if (MysqlUtils.ClosedState.OPEN != closedState) {
+                if (MysqlUtils.ClosedState.EXPLICITLY_CLOSED == closedState) {
                     ConnectionPool.LOG.error("Found closed connection.");
                 }
                 retval = false;

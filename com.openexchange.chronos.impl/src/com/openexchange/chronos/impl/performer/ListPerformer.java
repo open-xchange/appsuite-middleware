@@ -50,13 +50,12 @@
 package com.openexchange.chronos.impl.performer;
 
 import static com.openexchange.chronos.common.CalendarUtils.find;
+import static com.openexchange.chronos.common.CalendarUtils.getOccurrence;
 import static com.openexchange.chronos.common.CalendarUtils.isSeriesMaster;
 import static com.openexchange.chronos.impl.Utils.anonymizeIfNeeded;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -138,11 +137,12 @@ public class ListPerformer extends AbstractQueryPerformer {
                     if (null != storage.getEventStorage().loadException(event.getId(), recurrenceId, new EventField[] { EventField.ID })) {
                         throw CalendarExceptionCodes.EVENT_RECURRENCE_NOT_FOUND.create(eventID.getObjectID(), recurrenceId);
                     }
-                    Iterator<Event> iterator = session.getRecurrenceService().iterateEventOccurrences(event, new Date(recurrenceId.getValue().getTimestamp()), null);
-                    if (false == iterator.hasNext()) {
+                    Event occurrence = getOccurrence(session.getRecurrenceService(), event, recurrenceId);
+                    if (null == occurrence) {
                         throw CalendarExceptionCodes.EVENT_RECURRENCE_NOT_FOUND.create(eventID.getObjectID(), recurrenceId);
+
                     }
-                    orderedEvents.add(iterator.next());
+                    orderedEvents.add(occurrence);
                 } else if (recurrenceId.equals(event.getRecurrenceId())) {
                     orderedEvents.add(event);
                 } else {

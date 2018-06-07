@@ -64,6 +64,7 @@ import com.openexchange.caldav.EventPatches;
 import com.openexchange.caldav.GroupwareCaldavFactory;
 import com.openexchange.caldav.PhantomMaster;
 import com.openexchange.caldav.Tools;
+import com.openexchange.caldav.mixins.ScheduleTag;
 import com.openexchange.chronos.CalendarUser;
 import com.openexchange.chronos.CalendarUserType;
 import com.openexchange.chronos.Event;
@@ -121,6 +122,7 @@ public class EventResource extends DAVObjectResource<Event> {
         super(parent, event, url);
         this.parent = parent;
         this.object = event;
+        includeProperties(new ScheduleTag(this));
     }
 
     /**
@@ -188,6 +190,19 @@ public class EventResource extends DAVObjectResource<Event> {
         } catch (OXException e) {
             throw getProtocolException(e);
         }
+    }
+
+    /**
+     * Gets the schedule-tag, a value indicating whether the scheduling object resource has had a
+     * <i>consequential</i> change made to it.
+     *
+     * @return The event resource's schedule-tag
+     */
+    public String getScheduleTag() {
+        if (null == object) {
+            return null;
+        }
+        return '"' + String.valueOf(object.getSequence()) + '"';
     }
 
     /**
@@ -334,11 +349,12 @@ public class EventResource extends DAVObjectResource<Event> {
                 }
                 StringBuilder stringBuilder = new StringBuilder();
                 if (null != calendarUser) {
-                    stringBuilder.append("<CS:first-name>").append("<D:href>mailto:").append(calendarUser.getUri()).append("</D:href>");
+                    stringBuilder.append("<D:href>mailto:").append(calendarUser.getUri()).append("</D:href>");
                     if (CalendarUtils.isInternal(calendarUser, CalendarUserType.INDIVIDUAL)) {
                         try {
                             User user = factory.getService(UserService.class).getUser(calendarUser.getEntity(), factory.getContext());
-                            stringBuilder.append("<CS:first-name>").append(user.getGivenName()).append("</CS:first-name>").append("<CS:last-name>").append(user.getSurname()).append("</CS:last-name>");
+                            stringBuilder.append("<CS:first-name>").append(user.getGivenName()).append("</CS:first-name>")
+                                .append("<CS:last-name>").append(user.getSurname()).append("</CS:last-name>");
                         } catch (OXException e) {
                             LOG.warn("error resolving user '{}'", calendarUser, e);
                         }

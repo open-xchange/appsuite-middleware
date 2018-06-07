@@ -136,8 +136,7 @@ public class UserFilestoreDataMover extends FilestoreDataMover {
 
             File fsDirectory = new File(srcFullUri);
             if (fsDirectory.exists()) {
-                ArrayOutput output = new ShellExecutor().executeprocargs(new String[] {
-                    "rsync", "-a", srcFullUri.toString(), ensureEndingSlash(dstBaseUri).toString() });
+                ArrayOutput output = new ShellExecutor().executeprocargs(new String[] { "rsync", "-a", fsDirectory.getAbsolutePath(), ensureEndingSlash(dstBaseUri.getPath()).toString() });
                 if (0 != output.exitstatus) {
                     throw new ProgrammErrorException("Wrong exit status. Exit status was: " + output.exitstatus + " Stderr was: \n" + output.errOutput.toString() + '\n' + "and stdout was: \n" + output.stdOutput.toString());
                 }

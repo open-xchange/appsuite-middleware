@@ -112,6 +112,7 @@ import com.openexchange.chronos.service.EventConflict;
 import com.openexchange.chronos.service.EventID;
 import com.openexchange.chronos.service.EventUpdates;
 import com.openexchange.chronos.service.RecurrenceData;
+import com.openexchange.chronos.service.RecurrenceIterator;
 import com.openexchange.chronos.service.RecurrenceService;
 import com.openexchange.chronos.service.SimpleCollectionUpdate;
 import com.openexchange.chronos.service.SortOrder;
@@ -1292,6 +1293,29 @@ public class CalendarUtils {
     public static boolean isInPast(RecurrenceService recurrenceService, Event seriesMaster, Date now, TimeZone timeZone) throws OXException {
         RecurrenceData recurrenceData = new DefaultRecurrenceData(seriesMaster.getRecurrenceRule(), seriesMaster.getStartDate(), null);
         return false == recurrenceService.iterateRecurrenceIds(recurrenceData, now, null).hasNext();
+    }
+
+    /**
+     * Gets a specific occurrence from an event series by iterating the recurrence set.
+     *
+     * @param recurrenceService A reference to the recurrence service
+     * @param seriesMaster The series master event to get the occurrence from
+     * @param recurrenceId The recurrence identifier to get the occurrence for
+     * @return The event occurrence, or <code>null</code> if not found in the recurrence set
+     */
+    public static Event getOccurrence(RecurrenceService recurrenceService, Event seriesMaster, RecurrenceId recurrenceId) throws OXException {
+        long recurrenceTimestamp = recurrenceId.getValue().getTimestamp();
+        RecurrenceIterator<Event> iterator = recurrenceService.iterateEventOccurrences(seriesMaster, new Date(recurrenceTimestamp), null);
+        while (iterator.hasNext()) {
+            Event occurrence = iterator.next();
+            if (recurrenceId.equals(occurrence.getRecurrenceId())) {
+                return occurrence;
+            }
+            if (occurrence.getRecurrenceId().getValue().getTimestamp() > recurrenceTimestamp) {
+                break;
+            }
+        }
+        return null;
     }
 
     /**

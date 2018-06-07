@@ -547,7 +547,9 @@ public class EventUpdateProcessor implements EventUpdate {
      */
     private static boolean needsSequenceNumberIncrement(Event originalEvent, Event updatedEvent) throws OXException {
         EventField[] relevantFields = new EventField[] {
-            EventField.SUMMARY, EventField.LOCATION, EventField.RECURRENCE_RULE, EventField.START_DATE, EventField.END_DATE };
+            EventField.SUMMARY, EventField.LOCATION, EventField.RECURRENCE_RULE, EventField.START_DATE, EventField.END_DATE, 
+            EventField.RECURRENCE_DATES, EventField.DELETE_EXCEPTION_DATES, EventField.TRANSP 
+        };
         if (false == EventMapper.getInstance().equalsByFields(originalEvent, updatedEvent, relevantFields)) {
             return true;
         }
@@ -805,6 +807,15 @@ public class EventUpdateProcessor implements EventUpdate {
              */
             SimpleCollectionUpdate<RecurrenceId> exceptionDateUpdates = getExceptionDateUpdates(originalEvent.getDeleteExceptionDates(), updatedEvent.getDeleteExceptionDates());
             if (false == exceptionDateUpdates.getRemovedItems().isEmpty()) {
+                return true;
+            }
+        }
+        if (false == EventMapper.getInstance().get(EventField.RECURRENCE_DATES).equals(originalEvent, updatedEvent)) {
+            /*
+             * reset if there are 'new' occurrences (caused by newly introduced recurrence dates)
+             */
+            SimpleCollectionUpdate<RecurrenceId> exceptionDateUpdates = getExceptionDateUpdates(originalEvent.getRecurrenceDates(), updatedEvent.getRecurrenceDates());
+            if (false == exceptionDateUpdates.getAddedItems().isEmpty()) {
                 return true;
             }
         }
