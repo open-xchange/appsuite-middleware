@@ -52,13 +52,12 @@ package com.openexchange.chronos.impl.performer;
 import static com.openexchange.chronos.common.CalendarUtils.contains;
 import static com.openexchange.chronos.common.CalendarUtils.getFields;
 import static com.openexchange.chronos.common.CalendarUtils.getFlags;
+import static com.openexchange.chronos.common.CalendarUtils.getOccurrence;
 import static com.openexchange.chronos.common.CalendarUtils.isSeriesMaster;
 import static com.openexchange.chronos.impl.Utils.anonymizeIfNeeded;
 import static com.openexchange.chronos.impl.Utils.applyExceptionDates;
 import static com.openexchange.chronos.impl.Utils.getCalendarUserId;
 import static com.openexchange.chronos.impl.Utils.getFolder;
-import java.util.Date;
-import java.util.Iterator;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.RecurrenceId;
@@ -125,8 +124,7 @@ public class GetPerformer extends AbstractQueryPerformer {
                         event = exceptionEvent;
                     }
                 } else {
-                    Iterator<Event> iterator = session.getRecurrenceService().iterateEventOccurrences(event, new Date(recurrenceId.getValue().getTimestamp()), null);
-                    event = iterator.hasNext() ? iterator.next() : null;
+                    event = getOccurrence(session.getRecurrenceService(), event, recurrenceId);
                 }
             }
             if (null == event || false == recurrenceId.equals(event.getRecurrenceId())) {
