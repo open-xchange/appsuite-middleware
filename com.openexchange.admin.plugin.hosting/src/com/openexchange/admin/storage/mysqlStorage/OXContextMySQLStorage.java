@@ -127,6 +127,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.filestore.FileStorages;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.delete.DeleteEvent;
+import com.openexchange.groupware.delete.DeleteFinishedListenerRegistry;
 import com.openexchange.groupware.delete.DeleteRegistry;
 import com.openexchange.groupware.downgrade.DowngradeEvent;
 import com.openexchange.groupware.downgrade.DowngradeRegistry;
@@ -257,8 +258,28 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                         List<TableObject> sorted_tables = sortTableObjects(fetchTableObjects, conForContext);
                         LOG.debug("Dependencies found and tables sorted for context {}", ctx.getId());
 
+                        List<Integer> userIds = null;
+                        // Determine remaining users (if not done already)
+                        PreparedStatement stmt = null;
+                        ResultSet rs = null;
+                        try {
+                            stmt = conForContext.prepareStatement("SELECT id FROM user WHERE cid=?");
+                            stmt.setInt(1, ctx.getId().intValue());
+                            rs = stmt.executeQuery();
+                            if (rs.next()) {
+                                userIds = new LinkedList<>();
+                                do {
+                                    userIds.add(Integer.valueOf(rs.getInt(1)));
+                                } while (rs.next());
+                            } else {
+                                userIds = Collections.emptyList();
+                            }
+                        } finally {
+                            Databases.closeSQLStuff(rs, stmt);
+                        }
+                        
                         // Loop through tables and execute delete statements on each table (using transaction)
-                        deleteContextData(ctx, conForContext, sorted_tables);
+                        deleteContextData(ctx, conForContext, sorted_tables, userIds);
                     } catch (SQLException e) {
                         LOG.error("SQL Error", e);
                         throw new StorageException(e);
@@ -354,7 +375,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
         return retry;
     }
 
-    private void deleteContextData(Context ctx, Connection con, List<TableObject> sorted_tables) throws StorageException {
+    private void deleteContextData(Context ctx, Connection con, List<TableObject> sorted_tables, List<Integer> userIds) throws StorageException {
         LOG.debug("Now deleting data for context {}", ctx.getId());
 
         boolean rollback = false;
@@ -366,6 +387,13 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
 
             con.commit();
             rollback = false;
+            
+            try {
+                DeleteEvent event = DeleteEvent.createDeleteEventForContextDeletion(this, ctx.getId().intValue(), userIds);
+                DeleteFinishedListenerRegistry.getInstance().fireDeleteEvent(event);
+            } catch (Exception e) {
+                LOG.warn("Failed to trigger delete finished listeners", e);
+            }
         } catch (SQLException e) {
             throw new StorageException(e);
         } finally {

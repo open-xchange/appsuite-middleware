@@ -19,7 +19,7 @@ BuildRequires: java-devel >= 1.7.0
 %endif
 %endif
 Version:       @OXVERSION@
-%define        ox_release 31
+%define        ox_release 32
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -105,6 +105,8 @@ fi
 %config(noreplace) /opt/open-xchange/etc/*
 
 %changelog
+* Tue Jun 05 2018 Marc Arens <marc.arens@open-xchange.com>
+Build for patch 2018-06-06 (4773)
 * Tue May 22 2018 Marc Arens <marc.arens@open-xchange.com>
 Build for patch 2018-05-28 (4758)
 * Mon Apr 30 2018 Marc Arens <marc.arens@open-xchange.com>

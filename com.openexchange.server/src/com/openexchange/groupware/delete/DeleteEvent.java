@@ -50,6 +50,7 @@
 package com.openexchange.groupware.delete;
 
 import java.util.EventObject;
+import java.util.List;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
@@ -98,7 +99,6 @@ public class DeleteEvent extends EventObject {
      */
     public static final int SUBTYPE_INVITED_GUEST = 102;
 
-
     private static final long serialVersionUID = 2636570955675454470L;
 
     private transient final Context ctx;
@@ -112,6 +112,8 @@ public class DeleteEvent extends EventObject {
     protected Integer destUserID;
 
     private transient Session session;
+
+    private final List<Integer> userIds;
 
     /**
      * Initializes a new {@link DeleteEvent}.
@@ -150,15 +152,33 @@ public class DeleteEvent extends EventObject {
      * @param type The object's subtype, or <code>0</code> if not specified
      * @param ctx the context
      * @param destUserID The identifier of the user to reassign shared/public data to, <code>null</code> to reassign to the context admin
-     *        (default), or <code>0</code> to not reassign at all
+     *            (default), or <code>0</code> to not reassign at all
      */
     public DeleteEvent(final Object source, final int id, final int type, int subType, final Context ctx, Integer destUserID) {
+        this(source, id, type, subType, ctx, destUserID, null);
+    }
+
+    /**
+     * Initializes a new {@link DeleteEvent}.
+     *
+     * @param source the object on which the Event initially occurred
+     * @param id the object's ID
+     * @param type the object's type; either <code>{@link #TYPE_USER}</code>, <code>{@link #TYPE_GROUP}</code>,
+     *            <code>{@link #TYPE_RESOURCE}</code>, <code>{@value #TYPE_RESOURCE_GROUP}</code>, or <code>{@value #TYPE_CONTEXT}</code>
+     * @param subType The object's subtype, or <code>0</code> if not specified
+     * @param ctx the context
+     * @param destUserID The identifier of the user to reassign shared/public data to, <code>null</code> to reassign to the context admin
+     *            (default), or <code>0</code> to not reassign at all
+     * @param The user identifiers in case of context deletion
+     */
+    private DeleteEvent(final Object source, final int id, final int type, int subType, final Context ctx, Integer destUserID, List<Integer> userIds) {
         super(source);
         this.id = id;
         this.type = type;
         this.subType = subType;
         this.ctx = ctx;
         this.destUserID = destUserID;
+        this.userIds = userIds;
     }
 
     /**
@@ -222,5 +242,43 @@ public class DeleteEvent extends EventObject {
     public Integer getDestinationUserID() {
         return destUserID;
     }
+    
+    /**
+     * Creates a delete event for context deletion.
+     *
+     * @param source The source object, which invokes the deletion
+     * @param contextId The context identifier
+     * @param userIds The identifiers of the remaining users in the context
+     * @return The delete event
+     * @throws OXException If context cannot be loaded for given identifier
+     */
+    public static DeleteEvent createDeleteEventForContextDeletion(Object source, int contextId, List<Integer> userIds) throws OXException {
+        return new DeleteEvent(source, contextId, TYPE_CONTEXT, 0, ContextStorage.getInstance().getContext(contextId), null, userIds);
+    }
 
+    /**
+     * Creates a delete event for user deletion.
+     *
+     * @param source The source object, which invokes the deletion
+     * @param userId The user identifier
+     * @param subType The object's subtype, or <code>0</code> if not specified
+     * @param context The context
+     * @param destUserID The identifier of the user to reassign shared/public data to, <code>null</code> to reassign to the context administrator (default), or <code>0</code> to not reassign at all
+     * @return The delete event
+     */
+    public static DeleteEvent createDeleteEventForUserDeletion(Object source, int userId, int subType, Context context, Integer destUserID) {
+        return new DeleteEvent(source, userId, TYPE_USER, subType, context, destUserID, null);
+    }
+
+    /**
+     * Creates a delete event for group deletion.
+     *
+     * @param source The source object, which invokes the deletion
+     * @param groupId The group identifier
+     * @param context The context
+     * @return The delete event
+     */
+    public static DeleteEvent createDeleteEventForGroupDeletion(Object source, int groupId, Context context) {
+        return new DeleteEvent(source, groupId, TYPE_GROUP, 0, context, null, null);
+    }
 }
