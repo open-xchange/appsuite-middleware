@@ -311,7 +311,7 @@ public abstract class AbstractOIDCBackend implements OIDCBackend {
             throw OIDCExceptionCode.UNABLE_TO_LOAD_USERINFO.create("unable to get a valid subject.");
         }
         AuthenticationInfo resultInfo = this.loadUserFromServer(subject);
-        resultInfo.getProperties().put(AUTH_RESPONSE, tokenResponse.toJSONObject().toJSONString());
+        resultInfo.setProperty(AUTH_RESPONSE, tokenResponse.toJSONObject().toJSONString());
         return resultInfo;
     }
 

@@ -49,6 +49,7 @@
 
 package com.openexchange.oidc;
 
+import com.google.common.collect.ImmutableMap;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -61,7 +62,7 @@ import java.util.Map;
  */
 public class AuthenticationInfo {
 
-    private final Map<String, String> properties = new HashMap<String, String>();
+    private final Map<String, String> properties = new HashMap<>();
 
     private final int contextId;
 
@@ -102,8 +103,8 @@ public class AuthenticationInfo {
      *
      * @return The properties, possibly empty but not <code>null</code>
      */
-    public Map<String, String> getProperties() {
-        return properties;
+    public ImmutableMap<String, String> getProperties() {
+        return ImmutableMap.copyOf(this.properties);
     }
 
     /**
