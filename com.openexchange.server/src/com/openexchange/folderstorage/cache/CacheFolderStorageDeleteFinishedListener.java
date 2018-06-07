@@ -61,6 +61,7 @@ import com.openexchange.groupware.delete.DeleteFinishedListener;
  * {@link CacheFolderStorageDeleteFinishedListener}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @since 7.10.0
  */
 public class CacheFolderStorageDeleteFinishedListener implements DeleteFinishedListener {
 
