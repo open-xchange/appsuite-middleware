@@ -1,5 +1,5 @@
 requests:
-  - AnalyzeReuest.yaml
+  - AnalyzeRequest.yaml
   - AcceptRequest.yaml
   - TentativeRequest.yaml
   - DeclineRequest.yaml
