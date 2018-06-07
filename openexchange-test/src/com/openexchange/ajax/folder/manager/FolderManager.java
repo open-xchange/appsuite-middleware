@@ -149,7 +149,7 @@ public class FolderManager {
         folder.setFolderId(newParent);
         folder.setPermissions(null);
         body.setFolder(folder);
-        FolderUpdateResponse updateFolder = folderApi.getFoldersApi().updateFolder(getSession(), folderId, lastTimestamp, body, false, tree, null, true);
+        FolderUpdateResponse updateFolder = folderApi.getFoldersApi().updateFolder(getSession(), folderId, body, Boolean.FALSE, Long.valueOf(lastTimestamp), tree, null, Boolean.TRUE);
         checkResponse(updateFolder.getError(), updateFolder.getErrorDesc(), updateFolder.getData());
         lastTimestamp = updateFolder.getTimestamp();
     }

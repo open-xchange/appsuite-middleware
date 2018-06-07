@@ -202,7 +202,7 @@ public class CalendarFolderManager extends AbstractManager {
         FolderBody body = new FolderBody();
         body.setFolder(folderData);
 
-        FolderUpdateResponse response = foldersApi.updateFolder(userApi.getSession(), folderData.getId(), folderData.getLastModifiedUtc(), body, false, TREE_ID, CALENDAR_MODULE, true);
+        FolderUpdateResponse response = foldersApi.updateFolder(userApi.getSession(), folderData.getId(), body, Boolean.FALSE, folderData.getLastModified(), TREE_ID, CALENDAR_MODULE, Boolean.TRUE);
         if (expectedException) {
             assertNotNull("An error was expected", response.getError());
             throw new ChronosApiException(response.getCode(), response.getError());
