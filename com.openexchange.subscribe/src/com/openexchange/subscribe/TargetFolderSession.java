@@ -242,11 +242,31 @@ public class TargetFolderSession implements Session {
 
     @Override
     public Set<String> getParameterNames() {
-        Set<String> retval = new HashSet<String>();
+        Set<String> retval = new HashSet<String>(8);
         if (null != params) {
             retval.addAll(params.keySet());
+        } else {
+            retval.addAll(session.getParameterNames());
         }
-        retval.addAll(session.getParameterNames());
         return retval;
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder retval = new StringBuilder();
+        retval.append("Context=").append(contextId).append(",");
+        retval.append("UserId=").append(userId).append(",");
+        if (null != session) {
+            retval.append(session.toString());
+        } else {
+            retval.append("parameters:[");
+            for (String s : getParameterNames()) {
+                retval.append(s).append("=").append(getParameter(s));
+                retval.append(",");
+            }
+            retval.deleteCharAt(retval.length() - 1);
+            retval.append("]");
+        }
+        return retval.toString();
     }
 }
