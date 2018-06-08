@@ -57,6 +57,7 @@ import com.google.common.collect.ImmutableList;
 import com.openexchange.database.Databases;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.SimpleConvertUtf8ToUtf8mb4UpdateTask;
+import com.openexchange.tools.update.Tools;
 
 /**
  * {@link ServiceSchemaConvertUtf8ToUtf8mb4UpdateTask}
@@ -82,6 +83,9 @@ public class ServiceSchemaConvertUtf8ToUtf8mb4UpdateTask extends SimpleConvertUt
         for (String t : tablesToConvert()) {
             PreparedStatement stmt = null;
             try {
+                if (!Tools.tableExists(connection, t)) {
+                    continue;
+                }
                 String alterTable = alterTable(t, getColumsToModify(connection, params.getSchema().getSchema(), t, "latin1", Collections.emptyList()), UTF8MB4_CHARSET, UTF8MB4_UNICODE_COLLATION);
                 stmt = connection.prepareStatement(alterTable);
                 stmt.execute();

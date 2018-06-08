@@ -56,6 +56,7 @@ import com.openexchange.exception.OXException;
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since 7.10.0
  */
 public interface DeleteFinishedListener {
 

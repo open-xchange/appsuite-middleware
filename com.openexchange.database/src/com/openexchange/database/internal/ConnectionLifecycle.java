@@ -234,6 +234,8 @@ class ConnectionLifecycle implements PoolableLifecycle<Connection> {
             if (MysqlUtils.ClosedState.OPEN != closedState) {
                 if (MysqlUtils.ClosedState.EXPLICITLY_CLOSED == closedState) {
                     ConnectionPool.LOG.error("Found closed connection.");
+                } else {
+                    ConnectionPool.LOG.error("Found internally closed connection.");
                 }
                 retval = false;
             } else if (!con.getAutoCommit()) {

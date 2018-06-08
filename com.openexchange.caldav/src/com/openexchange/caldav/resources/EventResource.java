@@ -64,7 +64,7 @@ import com.openexchange.caldav.EventPatches;
 import com.openexchange.caldav.GroupwareCaldavFactory;
 import com.openexchange.caldav.PhantomMaster;
 import com.openexchange.caldav.Tools;
-import com.openexchange.caldav.mixins.ScheduleTag;
+//import com.openexchange.caldav.mixins.ScheduleTag;
 import com.openexchange.chronos.CalendarUser;
 import com.openexchange.chronos.CalendarUserType;
 import com.openexchange.chronos.Event;
@@ -122,7 +122,7 @@ public class EventResource extends DAVObjectResource<Event> {
         super(parent, event, url);
         this.parent = parent;
         this.object = event;
-        includeProperties(new ScheduleTag(this));
+        // includeProperties(new ScheduleTag(this));
     }
 
     /**

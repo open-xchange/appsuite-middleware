@@ -577,9 +577,13 @@ public abstract class JDBC4ConnectionReturner implements Connection, StateAware,
             throw new SQLException("Connection was already closed.");
         }
 
-        if (MysqlUtils.ClosedState.OPEN != MysqlUtils.isClosed(delegate, false)) {
-            // Connection explicitly closed or lost its internal network resources, thus unusable
-            throw new SQLException("Connection is internally closed.");
+        MysqlUtils.ClosedState closedState = MysqlUtils.isClosed(delegate, false);
+        if (MysqlUtils.ClosedState.OPEN != closedState) {
+            if (MysqlUtils.ClosedState.INTERNALLY_CLOSED == closedState) {
+                // Connection explicitly closed or lost its internal network resources, thus unusable
+                throw new SQLException("Connection is internally closed.");
+            }
+            throw new SQLException("Connection is closed.");
         }
 
         touch();
