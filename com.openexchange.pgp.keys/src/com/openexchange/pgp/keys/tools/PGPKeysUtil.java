@@ -431,6 +431,9 @@ public final class PGPKeysUtil {
         while (userIds.hasNext()) {
             byte[] rawId = userIds.next();
             Iterator<PGPSignature> sigs = publicKey.getSignaturesForID(rawId);
+            if (sigs == null) {
+                continue;
+            }
             while (sigs.hasNext()) {
                 PGPSignature sig = sigs.next();
                 if (sig.isCertification() && sig.getKeyID() == keyId) {
