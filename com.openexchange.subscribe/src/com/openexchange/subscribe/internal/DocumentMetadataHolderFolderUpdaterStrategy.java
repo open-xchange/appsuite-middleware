@@ -211,11 +211,11 @@ public class DocumentMetadataHolderFolderUpdaterStrategy implements FolderUpdate
 
     private class InfostoreSession {
 
-        public int folderId;
-        public User user;
-        public ServerSession serverSession;
+        final int folderId;
+        final User user;
+        final ServerSession serverSession;
 
-        public InfostoreSession(final TargetFolderDefinition target) throws OXException, OXException, OXException {
+        InfostoreSession(final TargetFolderDefinition target) throws OXException, OXException, OXException {
             user = users.getUser(target.getUserId(), target.getContext());
             serverSession = new ServerSessionAdapter(new TargetFolderSession(target), target.getContext(), user);
             folderId = target.getFolderIdAsInt();
