@@ -53,6 +53,8 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Collection;
 import java.util.LinkedHashSet;
+import com.openexchange.caching.ThreadLocalConditionHolder;
+import com.openexchange.caching.events.DefaultCondition;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.database.Databases;
 import com.openexchange.database.Heartbeat;
@@ -171,6 +173,8 @@ public class TransactionManager {
 
     private int initCount = 0;
 
+    private final DefaultCondition cacheCondition;
+
     /**
      * Initializes a new {@link TransactionManager}.
      * @param storageParameters
@@ -195,6 +199,14 @@ public class TransactionManager {
             } catch (SQLException e) {
                 throw FolderExceptionErrorMessage.SQL_ERROR.create(e.getMessage());
             }
+        }
+
+        if (ownsConnection) {
+            DefaultCondition condition = new DefaultCondition();
+            this.cacheCondition = condition;
+            ThreadLocalConditionHolder.getInstance().setCondition(condition);
+        } else {
+            this.cacheCondition = null;
         }
     }
 
@@ -239,6 +251,14 @@ public class TransactionManager {
         return connection;
     }
 
+    /**
+     * Signals how many storages do currently use this transaction manager instance.
+     *
+     * @return The usage count
+     */
+    public int getUsageCount() {
+        return initCount;
+    }
 
     /**
      * Rolls back this transaction via calling rollback on the managed database connection
@@ -251,6 +271,10 @@ public class TransactionManager {
     public void rollback() {
         if (--initCount <= 0) {
             if (ownsConnection && connection != null) {
+                if (null != cacheCondition) {
+                    cacheCondition.set(false);
+                    ThreadLocalConditionHolder.getInstance().clear();
+                }
                 Databases.rollback(connection);
                 Databases.autocommit(connection);
                 if (connection instanceof Heartbeat) {
@@ -283,6 +307,10 @@ public class TransactionManager {
                     connection.commit();
                 } catch (SQLException e) {
                     throw FolderExceptionErrorMessage.SQL_ERROR.create(e.getMessage());
+                }
+                if (null != cacheCondition) {
+                    cacheCondition.set(true);
+                    ThreadLocalConditionHolder.getInstance().clear();
                 }
 
                 Databases.autocommit(connection);
