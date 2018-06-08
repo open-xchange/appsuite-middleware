@@ -90,6 +90,10 @@ public final class CacheEventServiceActivator extends HousekeepingActivator {
         org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(CacheEventServiceActivator.class);
         logger.info("starting bundle: {}", context.getBundle().getSymbolicName());
 
+        CacheEventServiceLookup.set(this);
+        CacheEventServiceImpl service = new CacheEventServiceImpl(new CacheEventConfigurationImpl(getService(ConfigurationService.class)));
+        this.service = service;
+
         final BundleContext context = this.context;
         track(ThreadPoolService.class, new ServiceTrackerCustomizer<ThreadPoolService, ThreadPoolService>() {
 
@@ -97,6 +101,7 @@ public final class CacheEventServiceActivator extends HousekeepingActivator {
             public ThreadPoolService addingService(ServiceReference<ThreadPoolService> reference) {
                 ThreadPoolService threadPool = context.getService(reference);
                 CacheEventServiceImpl.setThreadPoolService(threadPool);
+                service.submitQueueConsumer();
                 return threadPool;
             }
 
@@ -114,9 +119,6 @@ public final class CacheEventServiceActivator extends HousekeepingActivator {
         track(ManagementService.class, new ManagementRegisterer(service, context));
         openTrackers();
 
-        CacheEventServiceLookup.set(this);
-        CacheEventServiceImpl service = new CacheEventServiceImpl(new CacheEventConfigurationImpl(getService(ConfigurationService.class)));
-        this.service = service;
         registerService(CacheEventService.class, service);
         registerService(Reloadable.class, service);
     }
