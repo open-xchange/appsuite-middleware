@@ -213,7 +213,7 @@ public abstract class AbstractLiquibaseUtf8mb4Adapter implements CustomTaskChang
         try {
             // Next, determine the 'utf8' columns, which need to be converted to 'utf8mb4'
             Map<String, Column> columnsToModify = getColumsToModifyAsMap(connection, schema, table, optColumnsToIgnore);
-            if (false == columnsToModify.isEmpty() && null != optVarcharColumns) {
+            if (columnsToModify != null && false == columnsToModify.isEmpty() && null != optVarcharColumns) {
                 for (Map.Entry<String, Integer> varcharColumn : optVarcharColumns.entrySet()) {
                     String columnName = varcharColumn.getKey();
                     Column column = columnsToModify.get(columnName);

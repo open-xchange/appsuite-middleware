@@ -60,9 +60,12 @@ import com.openexchange.caching.CacheElement;
 import com.openexchange.caching.CacheKey;
 import com.openexchange.caching.CacheStatistics;
 import com.openexchange.caching.ElementAttributes;
+import com.openexchange.caching.ThreadLocalConditionHolder;
 import com.openexchange.caching.events.CacheEvent;
 import com.openexchange.caching.events.CacheEventService;
 import com.openexchange.caching.events.CacheListener;
+import com.openexchange.caching.events.Condition;
+import com.openexchange.caching.events.ConditionalCacheEvent;
 import com.openexchange.exception.OXException;
 
 /**
@@ -400,7 +403,8 @@ public class NotifyingCache extends AbstractCache implements CacheListener {
     }
 
     private void notify(CacheEvent event, CacheEventService eventService) {
-        eventService.notify(this, event, false);
+        Condition condition = ThreadLocalConditionHolder.getInstance().getCondition();
+        eventService.notify(this, null == condition ? event : new ConditionalCacheEvent(event, condition), false);
     }
 
     @Override

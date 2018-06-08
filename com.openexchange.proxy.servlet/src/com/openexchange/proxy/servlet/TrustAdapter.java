@@ -116,7 +116,10 @@ public class TrustAdapter implements SecureProtocolSocketFactory {
                 final SocketAddress remoteaddr = new InetSocketAddress(host, port);
                 socket.bind(localaddr);
                 socket.connect(remoteaddr, timeout);
-                return socket;
+
+                Socket retval = socket;
+                socket = null;
+                return retval;
             }
             final int linger = params.getLinger();
             if (linger == 0) {

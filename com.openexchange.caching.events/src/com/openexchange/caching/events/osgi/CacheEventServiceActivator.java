@@ -49,6 +49,9 @@
 
 package com.openexchange.caching.events.osgi;
 
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
+import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.caching.events.CacheEventService;
 import com.openexchange.caching.events.internal.CacheEventConfigurationImpl;
 import com.openexchange.caching.events.internal.CacheEventServiceImpl;
@@ -79,24 +82,43 @@ public final class CacheEventServiceActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ThreadPoolService.class, ConfigurationService.class };
+        return new Class<?>[] { ConfigurationService.class };
     }
 
     @Override
     protected void startBundle() throws Exception {
         org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(CacheEventServiceActivator.class);
         logger.info("starting bundle: {}", context.getBundle().getSymbolicName());
+
+        final BundleContext context = this.context;
+        track(ThreadPoolService.class, new ServiceTrackerCustomizer<ThreadPoolService, ThreadPoolService>() {
+
+            @Override
+            public ThreadPoolService addingService(ServiceReference<ThreadPoolService> reference) {
+                ThreadPoolService threadPool = context.getService(reference);
+                CacheEventServiceImpl.setThreadPoolService(threadPool);
+                return threadPool;
+            }
+
+            @Override
+            public void modifiedService(ServiceReference<ThreadPoolService> reference, ThreadPoolService threadPool) {
+                // Ignore
+            }
+
+            @Override
+            public void removedService(ServiceReference<ThreadPoolService> reference, ThreadPoolService threadPool) {
+                CacheEventServiceImpl.setThreadPoolService(null);
+                context.ungetService(reference);
+            }
+        });
+        track(ManagementService.class, new ManagementRegisterer(service, context));
+        openTrackers();
+
         CacheEventServiceLookup.set(this);
         CacheEventServiceImpl service = new CacheEventServiceImpl(new CacheEventConfigurationImpl(getService(ConfigurationService.class)));
         this.service = service;
         registerService(CacheEventService.class, service);
         registerService(Reloadable.class, service);
-        try {
-            track(ManagementService.class, new ManagementRegisterer(service, context));
-            openTrackers();
-        } catch (Throwable t) {
-            t.printStackTrace();
-        }
     }
 
     @Override

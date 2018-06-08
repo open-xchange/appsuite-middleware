@@ -114,10 +114,11 @@ public class CacheEvent implements Serializable {
 
     private static final long serialVersionUID = 7172029773641345572L;
 
-    private final CacheOperation operation;
-    private final ListSet<Serializable> keys;
-    private final String groupName;
-    private final String region;
+    protected final CacheOperation operation;
+    protected final ListSet<Serializable> keys;
+    protected final String groupName;
+    protected final String region;
+    protected final Condition condition;
 
     /**
      * Initializes a new {@link CacheEvent}.
@@ -128,11 +129,25 @@ public class CacheEvent implements Serializable {
      * @param groupName The cache group name
      */
     public CacheEvent(CacheOperation operation, String region, List<Serializable> keys, String groupName) {
+        this(operation, region, keys, groupName, null);
+    }
+
+    /**
+     * Initializes a new {@link CacheEvent}.
+     *
+     * @param operation The cache operation
+     * @param region The cache region
+     * @param keys The keys of the affected cache entries
+     * @param groupName The cache group name
+     * @param condition The condition to wait for; must not be <code>null</code>
+     */
+    protected CacheEvent(CacheOperation operation, String region, List<Serializable> keys, String groupName, Condition condition) {
         super();
         this.operation = operation;
         this.region = region;
         this.keys = getPreparedKeys(keys);
         this.groupName = groupName;
+        this.condition = condition;
     }
 
     private static ListSet<Serializable> getPreparedKeys(List<Serializable> keys) {
@@ -156,6 +171,18 @@ public class CacheEvent implements Serializable {
         // Check operation
         if (this.operation != event.operation) {
             return false;
+        }
+
+        // Check condition
+        {
+            Condition thisCondition = this.condition;
+            if (null == thisCondition) {
+                if (null != event.condition) {
+                    return false;
+                }
+            } else if (thisCondition != event.condition) { // Yepp, "==" operator
+                return false;
+            }
         }
 
         // Check region name

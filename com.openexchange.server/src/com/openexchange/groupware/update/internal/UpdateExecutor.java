@@ -93,7 +93,7 @@ public final class UpdateExecutor {
     private static final SchemaStore store = SchemaStore.getInstance();
 
     private volatile SchemaUpdateState state;
-    private final int contextId;
+    private final int optContextId;
     private final int poolId;
     private final String schema;
     private final List<UpdateTaskV2> tasks;
@@ -102,13 +102,13 @@ public final class UpdateExecutor {
      * Initializes a new {@link UpdateExecutor}.
      *
      * @param state The schema information
-     * @param contextId The optional context identifier; otherwise <code>0</code> (zero)
+     * @param optContextId The optional context identifier; otherwise <code>0</code> (zero)
      * @param tasks The optional tasks to perform; otherwise <code>null</code> (all tasks will be executed)
      */
-    public UpdateExecutor(SchemaUpdateState state, int contextId, List<UpdateTaskV2> tasks) {
+    public UpdateExecutor(SchemaUpdateState state, int optContextId, List<UpdateTaskV2> tasks) {
         super();
         this.state = state;
-        this.contextId = contextId;
+        this.optContextId = optContextId;
         this.tasks = tasks;
         this.poolId = state.getPoolId();
         this.schema = state.getSchema();
@@ -217,7 +217,7 @@ public final class UpdateExecutor {
 
             // Perform updates
             int poolId = this.poolId;
-            AbstractConnectionProvider connectionProvider = contextId > 0 ? new ContextConnectionProvider(contextId) : new PoolAndSchemaConnectionProvider(poolId, schema);
+            AbstractConnectionProvider connectionProvider = optContextId > 0 ? new ContextConnectionProvider(optContextId) : new PoolAndSchemaConnectionProvider(poolId, schema);
             try {
                 long startNanos;
                 long durMillis;
@@ -228,7 +228,7 @@ public final class UpdateExecutor {
                     try {
                         LOG.info("Starting update task {} on schema {}.", taskName, state.getSchema());
                         ProgressState logger = new ProgressStatusImpl(taskName, state.getSchema());
-                        PerformParameters params = new PerformParametersImpl(state, connectionProvider, contextId, logger);
+                        PerformParameters params = new PerformParametersImpl(state, connectionProvider, optContextId, logger);
                         task.perform(params);
                         success = true;
                     } catch (final OXException e) {
