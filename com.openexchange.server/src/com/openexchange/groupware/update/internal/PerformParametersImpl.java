@@ -65,7 +65,7 @@ import com.openexchange.groupware.update.Schema;
 public class PerformParametersImpl implements PerformParameters {
 
     private final Schema schema;
-    private final int contextId;
+    private final int optContextId;
     private final ProgressState logger;
     private final ConnectionProvider connectionProvider;
 
@@ -75,7 +75,7 @@ public class PerformParametersImpl implements PerformParameters {
     public PerformParametersImpl(Schema schema, ConnectionProvider connectionProvider, int optContextId, ProgressState logger) {
         super();
         this.schema = schema;
-        this.contextId = optContextId;
+        this.optContextId = optContextId;
         this.logger = logger;
         this.connectionProvider = connectionProvider;
     }
@@ -92,7 +92,7 @@ public class PerformParametersImpl implements PerformParameters {
 
     @Override
     public int optContextId() {
-        return contextId;
+        return optContextId;
     }
 
     @Override
