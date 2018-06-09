@@ -1991,10 +1991,13 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                         if (length > 0) {
                             System.arraycopy(unflaggedSeqNums, 0, sortedSeqNums, 0, length);
                         }
-
                         numToCopy -= length;
                         if (numToCopy > 0) {
-                            System.arraycopy(flaggedSeqNums, 0, sortedSeqNums, length, numToCopy);
+                            int start = fromIndex - unflaggedSeqNums.length;
+                            if (start < 0) {
+                                start = 0;
+                            }
+                            System.arraycopy(flaggedSeqNums, start, sortedSeqNums, length, numToCopy);
                         }
                     } else {
                         int length = Math.min(flaggedSeqNums.length - fromIndex, numToCopy);
@@ -2004,10 +2007,13 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                         if (length > 0) {
                             System.arraycopy(flaggedSeqNums, 0, sortedSeqNums, 0, length);
                         }
-
                         numToCopy -= length;
                         if (numToCopy > 0) {
-                            System.arraycopy(unflaggedSeqNums, 0, sortedSeqNums, length, numToCopy);
+                            int start = fromIndex - flaggedSeqNums.length;
+                            if (start < 0) {
+                                start = 0;
+                            }
+                            System.arraycopy(unflaggedSeqNums, start, sortedSeqNums, length, numToCopy);
                         }
                     }
                 }

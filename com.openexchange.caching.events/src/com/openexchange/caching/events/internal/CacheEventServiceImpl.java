@@ -154,9 +154,6 @@ public final class CacheEventServiceImpl implements CacheEventService, CacheEven
         this.delayedEvents = delayedEvents;
         final AtomicBoolean keepgoing = new AtomicBoolean(true);
         this.keepgoing = keepgoing;
-
-        Task<Void> queueConsumer = new CacheEventQueueConsumer(keepgoing, delayedEvents, numDeliveredEvents);
-        ThreadPools.getThreadPool().submit(queueConsumer);
     }
 
     @Override
@@ -172,6 +169,19 @@ public final class CacheEventServiceImpl implements CacheEventService, CacheEven
     @Override
     public long getDeliveredEvents() {
         return numDeliveredEvents.get();
+    }
+
+    /**
+     * Submits the {@link CacheEventQueueConsumer} to the thread pool
+     */
+    public void submitQueueConsumer() {
+        Task<Void> queueConsumer = new CacheEventQueueConsumer(keepgoing, delayedEvents, numDeliveredEvents);
+        ThreadPoolService threadPool = ThreadPools.getThreadPool();
+        if (threadPool == null) {
+            LOG.warn("The cache event queue consumer was not submitted to the thread pool. The ThreadPoolService is not registered yet.");
+            return;
+        }
+        threadPool.submit(queueConsumer);
     }
 
     /**
