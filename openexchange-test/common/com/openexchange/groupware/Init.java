@@ -960,7 +960,8 @@ public final class Init {
                     return false;
                 }
             };
-            CacheEventService cacheEventService = new CacheEventServiceImpl(config);
+            ThreadPoolService threadPool = (ThreadPoolService) services.get(ThreadPoolService.class);
+            CacheEventService cacheEventService = new CacheEventServiceImpl(config, threadPool);
             services.put(CacheEventService.class, cacheEventService);
             TestServiceRegistry.getInstance().addService(CacheEventService.class, cacheEventService);
             JCSCacheServiceInit.initInstance();

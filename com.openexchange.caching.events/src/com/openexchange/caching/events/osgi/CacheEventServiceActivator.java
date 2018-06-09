@@ -49,9 +49,6 @@
 
 package com.openexchange.caching.events.osgi;
 
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceReference;
-import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.caching.events.CacheEventService;
 import com.openexchange.caching.events.internal.CacheEventConfigurationImpl;
 import com.openexchange.caching.events.internal.CacheEventServiceImpl;
@@ -71,7 +68,7 @@ import com.openexchange.threadpool.ThreadPoolService;
  */
 public final class CacheEventServiceActivator extends HousekeepingActivator {
 
-    private volatile CacheEventServiceImpl service;
+    private CacheEventServiceImpl service;
 
     /**
      * Initializes a new {@link CacheEventServiceActivator}.
@@ -82,40 +79,38 @@ public final class CacheEventServiceActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigurationService.class };
+        return new Class<?>[] { ThreadPoolService.class, ConfigurationService.class };
     }
 
     @Override
-    protected void startBundle() throws Exception {
+    protected synchronized void handleAvailability(Class<?> clazz) {
+        if (ThreadPoolService.class.equals(clazz)) {
+            CacheEventServiceImpl service = this.service;
+            if (null != service) {
+                service.setThreadPoolService(getService(ThreadPoolService.class));
+            }
+        }
+    }
+
+    @Override
+    protected synchronized void handleUnavailability(Class<?> clazz) {
+        if (ThreadPoolService.class.equals(clazz)) {
+            CacheEventServiceImpl service = this.service;
+            if (null != service) {
+                service.setThreadPoolService(null);
+            }
+        }
+    }
+
+    @Override
+    protected synchronized void startBundle() throws Exception {
         org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(CacheEventServiceActivator.class);
         logger.info("starting bundle: {}", context.getBundle().getSymbolicName());
 
         CacheEventServiceLookup.set(this);
-        CacheEventServiceImpl service = new CacheEventServiceImpl(new CacheEventConfigurationImpl(getService(ConfigurationService.class)));
+        CacheEventServiceImpl service = new CacheEventServiceImpl(new CacheEventConfigurationImpl(getService(ConfigurationService.class)), getService(ThreadPoolService.class));
         this.service = service;
 
-        final BundleContext context = this.context;
-        track(ThreadPoolService.class, new ServiceTrackerCustomizer<ThreadPoolService, ThreadPoolService>() {
-
-            @Override
-            public ThreadPoolService addingService(ServiceReference<ThreadPoolService> reference) {
-                ThreadPoolService threadPool = context.getService(reference);
-                CacheEventServiceImpl.setThreadPoolService(threadPool);
-                service.submitQueueConsumer();
-                return threadPool;
-            }
-
-            @Override
-            public void modifiedService(ServiceReference<ThreadPoolService> reference, ThreadPoolService threadPool) {
-                // Ignore
-            }
-
-            @Override
-            public void removedService(ServiceReference<ThreadPoolService> reference, ThreadPoolService threadPool) {
-                CacheEventServiceImpl.setThreadPoolService(null);
-                context.ungetService(reference);
-            }
-        });
         track(ManagementService.class, new ManagementRegisterer(service, context));
         openTrackers();
 
@@ -124,7 +119,7 @@ public final class CacheEventServiceActivator extends HousekeepingActivator {
     }
 
     @Override
-    protected void stopBundle() throws Exception {
+    protected synchronized void stopBundle() throws Exception {
         org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(CacheEventServiceActivator.class);
         logger.info("stopping bundle: {}", context.getBundle().getSymbolicName());
         CacheEventServiceImpl service = this.service;
