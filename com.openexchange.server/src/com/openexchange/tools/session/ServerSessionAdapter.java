@@ -78,8 +78,6 @@ import com.openexchange.userconf.UserPermissionService;
  */
 public class ServerSessionAdapter implements ServerSession, PutIfAbsent {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ServerSessionAdapter.class);
-
     /**
      * Gets the server session for specified session.
      *

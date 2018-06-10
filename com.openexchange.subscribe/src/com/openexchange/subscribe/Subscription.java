@@ -145,11 +145,11 @@ public class Subscription extends TargetFolderDefinition {
     }
 
     public boolean isEnabled() {
-        return enabled == null ? true : enabled;
+        return enabled == null ? true : enabled.booleanValue();
     }
 
     public void setEnabled(boolean enabled) {
-        this.enabled = enabled;
+        this.enabled = Boolean.valueOf(enabled);
     }
 
     public boolean containsEnabled() {

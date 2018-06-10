@@ -56,6 +56,8 @@ import java.util.Set;
 import com.openexchange.groupware.generic.TargetFolderDefinition;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessiondService;
+import com.openexchange.tools.session.ServerSession;
+import com.openexchange.tools.session.ServerSessionAdapter;
 
 
 /**
@@ -68,21 +70,33 @@ public class TargetFolderSession implements Session {
     private final int contextId;
     private final int userId;
     private final Map<String, Object> params;
-    private final Session session;
+    private final ServerSession session;
 
     public TargetFolderSession(final TargetFolderDefinition target) {
         super();
         contextId = target.getContext().getContextId();
         userId = target.getUserId();
+        
+        Subscription subscription = null;
+
+        if(Subscription.class.isAssignableFrom(target.getClass())) {
+            subscription = (Subscription) target;
+        }
+
         // Initialize
-        final SessiondService service = SessiondService.SERVICE_REFERENCE.get();
-        Session ses = null;
-        if (null != service && null != (ses = service.getAnyActiveSessionForUser(target.getUserId(), target.getContext().getContextId()))) {
-            session = ses;
+        if (null != subscription && null != subscription.getSession()) {
+            session = subscription.getSession();
             params = null;
         } else {
-            session = null;
-            params = new HashMap<String, Object>(8);
+            final SessiondService service = SessiondService.SERVICE_REFERENCE.get();
+            Session ses = null;
+            if (null != service && null != (ses = service.getAnyActiveSessionForUser(target.getUserId(), target.getContext().getContextId()))) {
+                session = ServerSessionAdapter.valueOf(ses, target.getContext());
+                params = null;
+            } else {
+                session = null;
+                params = new HashMap<String, Object>(8);
+            }
         }
     }
 

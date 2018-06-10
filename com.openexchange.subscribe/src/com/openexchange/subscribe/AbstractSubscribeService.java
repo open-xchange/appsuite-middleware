@@ -486,14 +486,16 @@ public abstract class AbstractSubscribeService implements SubscribeService {
         throw SubscriptionErrorMessage.PERMISSION_DENIED.create();
     }
     public void checkUpdate(final Subscription subscription) throws OXException {
-        if (subscription.getSession().getUserId() == subscription.getUserId() || isFolderAdmin(subscription)) {
+        Session session = subscription.getSession();
+        if (null != session && session.getUserId() == subscription.getUserId() || isFolderAdmin(subscription)) {
             return;
         }
         throw SubscriptionErrorMessage.PERMISSION_DENIED.create();
     }
 
     public void checkDelete(final Subscription subscription) throws OXException {
-        if (subscription.getSession().getUserId() == subscription.getUserId() || isFolderAdmin(subscription)) {
+        Session session = subscription.getSession();
+        if (null != session && session.getUserId() == subscription.getUserId() || isFolderAdmin(subscription)) {
             return;
         }
         throw SubscriptionErrorMessage.PERMISSION_DENIED.create();
