@@ -70,7 +70,7 @@ public class Credentials {
     private final int userid;
     private final int contextid;
     private final boolean b_contextid;
-    private final Subject subject;
+    private final Subject kerberosSubject;
     private final String oauthToken;
 
     /**
@@ -87,7 +87,7 @@ public class Credentials {
         password = session.getPassword();
         userid = session.getUserId();
         contextid = session.getContextId();
-        subject = (Subject) session.getParameter("kerberosSubject");
+        kerberosSubject = (Subject) session.getParameter("kerberosSubject");
         oauthToken = (String) session.getParameter(Session.PARAM_OAUTH_ACCESS_TOKEN);
         username = null;
         b_contextid = true;
@@ -123,10 +123,10 @@ public class Credentials {
      * @param userid The session users user id.
      * @param contextid The session users context id.
      * @param username The user name of the effected user which configuration is being touched.
-     * @param subject The kerberos subject
+     * @param kerberosSubject The Kerberos subject
      * @param oauthToken The oauth token
      */
-    public Credentials(String authname, String password, int userid, int contextid, String username, Subject subject, String oauthToken) {
+    public Credentials(String authname, String password, int userid, int contextid, String username, Subject kerberosSubject, String oauthToken) {
         super();
         this.authname = authname;
         this.password = password;
@@ -134,19 +134,19 @@ public class Credentials {
         this.contextid = contextid;
         this.username = username;
         b_contextid = true;
-        this.subject = subject;
+        this.kerberosSubject = kerberosSubject;
         this.oauthToken = oauthToken;
     }
 
     /**
-     * @return the username
+     * @return the user name
      */
     public final String getUsername() {
         return username;
     }
 
     /**
-     * @param username the username to set
+     * @param username the user name to set
      */
     public final void setUsername(final String username) {
         this.username = username;
@@ -167,41 +167,41 @@ public class Credentials {
     }
 
     /**
-     * @return the authname
+     * @return the auth-name
      */
     public final String getAuthname() {
         return authname;
     }
 
     /**
-     * @param authname the authname to set
+     * @param authname the auth-name to set
      */
     public final void setAuthname(final String authname) {
         this.authname = authname;
     }
 
     /**
-     * @return the userid
+     * @return the user identifier
      */
     public final int getUserid() {
         return userid;
     }
 
     /**
-     * @return the contextid
+     * @return the context identifier
      */
     public final int getContextid() {
         return contextid;
     }
 
     /**
-     * This method returns the right username. If username is null this is the authname otherwise the username
+     * This method returns the right user name.
+     * <p>
+     * If user name is <code>null</code> the {@link #getAuthname() auth-name} is returned; otherwise the user name
      */
     public final String getRightUsername() {
-        if (null == this.username) {
-            return this.authname;
-        }
-        return this.username;
+        String username = this.username;
+        return null == username ? authname : username;
     }
 
     /**
@@ -214,12 +214,12 @@ public class Credentials {
     }
 
     /**
-     * Gets the subject
+     * Gets the optional Kerberos subject
      *
-     * @return The subject or <code>null</code> if absent
+     * @return The Kerberos subject or <code>null</code> if absent
      */
     public Subject getSubject() {
-        return subject;
+        return kerberosSubject;
     }
 
     /**
@@ -231,14 +231,9 @@ public class Credentials {
         return oauthToken;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see java.lang.Object#toString()
-     */
     @Override
     public String toString() {
-        return "Username: " + this.username;
+        return "Username: " + getRightUsername();
     }
 
 }

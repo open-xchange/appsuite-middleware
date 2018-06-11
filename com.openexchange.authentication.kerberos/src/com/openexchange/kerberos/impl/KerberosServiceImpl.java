@@ -136,6 +136,10 @@ public final class KerberosServiceImpl implements KerberosService {
 
     @Override
     public ClientPrincipal verifyAndDelegate(byte[] ticket) throws OXException {
+    		if (ticket.length == 0) {
+    			throw KerberosExceptionCodes.TICKET_WRONG.create("Ticket was empty.");
+    		}
+    	
         final ForwardedTGTDelegateGenerator generator = new ForwardedTGTDelegateGenerator(MANAGER, ticket);
         final ClientPrincipal principal;
         try {

@@ -6,7 +6,7 @@ msgstr ""
 "Project-Id-Version: backend\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2017-11-07 15:15+0100\n"
+"PO-Revision-Date: 2018-05-23 15:26+0200\n"
 "Last-Translator: Ivar Snaaijer <Ivar@bureau-cornavin.com>\n"
 "Language-Team: Dutch <kde-i18n-nl@kde.org>\n"
 "Language: nl_NL\n"
@@ -54,8 +54,8 @@ msgstr "voorlopig geaccepteerd"
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.apps.manifests.json/src/com/openexchange/apps/manifests/json/exception/ManifestsExceptionStrings.java:61
 msgid ""
-"The server configuration cannot be retrieved due to an internal server error. "
-"Please try again later."
+"The server configuration cannot be retrieved due to an internal server "
+"error. Please try again later."
 msgstr ""
 "De serversinstellingen kunnen niet opgehaald worden door een interne "
 "serverfout. Probeer het alstublieft later opnieuw."
@@ -392,7 +392,8 @@ msgstr "Geen einddatum"
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:61
 msgid "An attendee would like to be brought up to date about this appointment."
-msgstr "Een deelnemer wil graag op de hoogte gehouden worden van deze afspraak."
+msgstr ""
+"Een deelnemer wil graag op de hoogte gehouden worden van deze afspraak."
 
 #. *
 #. * Example: "This appointment has attachments, please see the appointment at http://ox.superhoster.invalid/index.html#m=calendar&f=bla&i=bla to retrieve them"
@@ -418,12 +419,12 @@ msgstr ""
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:70
 msgid ""
 "The organizer would like to change the occurrence of a recurrence on a day "
-"that already contains such a change. The server can only store one change for "
-"a series per day."
+"that already contains such a change. The server can only store one change "
+"for a series per day."
 msgstr ""
-"De organisator wil een wijziging maken in één afspraak van een afsprakenreeks "
-"op een dag waar al een dergelijke wijziging heeft plaatsgevonden. Ik kan "
-"slechts één wijziging per reeks per dag opslaan."
+"De organisator wil een wijziging maken in één afspraak van een "
+"afsprakenreeks op een dag waar al een dergelijke wijziging heeft "
+"plaatsgevonden. Ik kan slechts één wijziging per reeks per dag opslaan."
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:71
 msgid ""
@@ -433,8 +434,8 @@ msgstr ""
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:72
 msgid ""
-"An attendee wanted to change his/her participant state in an appointment that "
-"could not be found. Probably the appointment was already canceled."
+"An attendee wanted to change his/her participant state in an appointment "
+"that could not be found. Probably the appointment was already canceled."
 msgstr ""
 "Een deelnemer wil zijn/haar deelnamestatus aanpassen van een afspraak die "
 "niet gevonden kan worden. Waarschijnlijk is deze afspraak reeds afgezegd."
@@ -471,7 +472,8 @@ msgstr ""
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:77
 msgid ""
 "An attendee wants to be brought up to date about an appointment that could "
-"not be found. It was probably deleted at some point. Best ignore this message."
+"not be found. It was probably deleted at some point. Best ignore this "
+"message."
 msgstr ""
 "Een deelnemer wil graag op de hoogte gehouden worden van een afspraak die "
 "niet kan worden gevonden. Waarschijnlijk is deze afspraak verwijderd. Het is "
@@ -531,9 +533,10 @@ msgstr "%1$s heeft uw tegenvoorstel voor de afspraak %2$s afgewezen."
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:96
 msgid ""
-"%1$s has declined your proposed changes on behalf of %2$s for the appointment "
-"%3$s."
-msgstr "%1$s heeft namens %2$ uw tegenvoorstel voor de afspraak %3$s afgewezen."
+"%1$s has declined your proposed changes on behalf of %2$s for the "
+"appointment %3$s."
+msgstr ""
+"%1$s heeft namens %2$ uw tegenvoorstel voor de afspraak %3$s afgewezen."
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:98
 msgid ""
@@ -926,7 +929,8 @@ msgstr "Uitvoering afgewezen. Kies alstublieft een andere optie."
 
 #. Sent quota exceeded. You are only allowed to send 1 SMS in %1$s seconds.
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.client.onboarding/src/com/openexchange/client/onboarding/OnboardingExceptionMessages.java:82
-msgid "Sent quota exceeded. You are only allowed to send 1 SMS in %1$s seconds."
+msgid ""
+"Sent quota exceeded. You are only allowed to send 1 SMS in %1$s seconds."
 msgstr ""
 "Het verzend quota is overschreden. U mag slechts 1 SMS sturen per %1$s "
 "seconden."
@@ -1066,8 +1070,8 @@ msgid ""
 "The LDAP search in distribution lists for specific attributes is not "
 "supported."
 msgstr ""
-"De LDAP zoekactie in distributielijsten voor specifieke attributen wordt niet "
-"ondersteund."
+"De LDAP zoekactie in distributielijsten voor specifieke attributen wordt "
+"niet ondersteund."
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:62
 msgid "Display name"
@@ -1734,8 +1738,8 @@ msgid ""
 "A temporary failure because a subsystem is down (maybe due to maintenance). "
 "Please try again later."
 msgstr ""
-"Er is een tijdelijke fout ontstaan omdat een subsysteem is gestopt (misschien "
-"door onderhoud). Probeer het later alstublieft opnieuw."
+"Er is een tijdelijke fout ontstaan omdat een subsysteem is gestopt "
+"(misschien door onderhoud). Probeer het later alstublieft opnieuw."
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.download.limit/src/com/openexchange/download/limit/limiter/exceptions/DownloadLimitedExceptionMessages.java:63
 msgid ""
@@ -1756,7 +1760,8 @@ msgstr "Het pad \"%1$s\" is niet gevonden. Probeer de synchronisatie opnieuw."
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.drive/src/com/openexchange/drive/DriveExceptionMessages.java:64
 msgid ""
-"The file \"%1$s\" was not found at \"%2$s\". Please retry the synchronization."
+"The file \"%1$s\" was not found at \"%2$s\". Please retry the "
+"synchronization."
 msgstr ""
 "Het bestand \"%1$s\" is niet aangetroffen in \"%2$s\". Probeer de "
 "synchronisatie opnieuw."
@@ -1766,8 +1771,8 @@ msgid ""
 "Unable to access the file at the requested position. Please retry the "
 "synchronization."
 msgstr ""
-"Het is niet mogelijk het bestand op de opgegeven plaats te benaderen. Probeer "
-"de synchronisatie opnieuw."
+"Het is niet mogelijk het bestand op de opgegeven plaats te benaderen. "
+"Probeer de synchronisatie opnieuw."
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.drive/src/com/openexchange/drive/DriveExceptionMessages.java:66
 msgid ""
@@ -1845,7 +1850,8 @@ msgstr "Push berichten zijn niet beschikbaar."
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.drive/src/com/openexchange/drive/DriveExceptionMessages.java:82
 msgid "The server is too busy at the moment - please try again later."
-msgstr "De server is te druk momenteel - Probeer het alstublieft later opnieuw."
+msgstr ""
+"De server is te druk momenteel - Probeer het alstublieft later opnieuw."
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.drive/src/com/openexchange/drive/DriveExceptionMessages.java:83
 msgid "The path \"%1$s\" is ignored."
@@ -1889,13 +1895,15 @@ msgstr ""
 "in \"%2$s\"."
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.drive/src/com/openexchange/drive/DriveExceptionMessages.java:90
-msgid "The path \"%1$s\" is conflicting with an equally named file at \"%2$s\"."
+msgid ""
+"The path \"%1$s\" is conflicting with an equally named file at \"%2$s\"."
 msgstr ""
 "Het pad \"%1$s\" is conflicterend met een map met de zelfde naam in \"%2$s\"."
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.drive/src/com/openexchange/drive/DriveExceptionMessages.java:91
 msgid ""
-"The directory \"%1$s\" is not synchronizable. Please select another directory."
+"The directory \"%1$s\" is not synchronizable. Please select another "
+"directory."
 msgstr ""
 "De map \"%1$s\" is niet te synchroniseren. Selecteer alstublieft een andere "
 "map."
@@ -1909,8 +1917,9 @@ msgid ""
 "The maximum number of synchronizable directories (%1$d) is exceeded. Please "
 "remove some directories and try again, or select another root folder."
 msgstr ""
-"Het maximum aantal synchroniseerbare mappen (%1$d) is overschreden. Verwijder "
-"alstublieft een aantal mappen en probeer opnieuw, of kies een andere hoofdmap."
+"Het maximum aantal synchroniseerbare mappen (%1$d) is overschreden. "
+"Verwijder alstublieft een aantal mappen en probeer opnieuw, of kies een "
+"andere hoofdmap."
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.drive/src/com/openexchange/drive/DriveExceptionMessages.java:94
 msgid ""
@@ -2056,10 +2065,12 @@ msgid "The file version you requested does not exist."
 msgstr "De bestandsversie welke u heeft aangevraagd bestaat niet."
 
 #. A folder named "%1$s" already exists below the parent folder "%2$s".
+#. A folder named "%1$s" already exists.
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:74
-msgid "A folder named \"%1$s\" already exists below the parent folder \"%2$s\"."
-msgstr ""
-"Een map met de naam \"%1$s\" bestaat reeds in de bovenliggende map \"%2$s\"."
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/folderstorage/FolderExceptionMessages.java:74
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:128
+msgid "A folder named \"%1$s\" already exists."
+msgstr "Een map met de naam \"%1$s\" bestaat al."
 
 #. You do not have the appropriate permissions to create a subfolder below the folder "%1$s".
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:77
@@ -2076,7 +2087,8 @@ msgstr ""
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:135
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:122
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:138
-msgid "In order to accomplish the search, %1$d or more characters are required."
+msgid ""
+"In order to accomplish the search, %1$d or more characters are required."
 msgstr "Om de zoekactie uit te voeren zijn %1$d of meer tekens nodig."
 
 #. Invalid URL \"%1$s\". Please correct the value and try again.
@@ -2091,8 +2103,8 @@ msgid ""
 "The allowed quota is reached. Please delete some items in order to store new "
 "ones."
 msgstr ""
-"Het toegestane quota is overschreden. Verwijder alstublieft wat items zodat u "
-"weer nieuwe kan maken."
+"Het toegestane quota is overschreden. Verwijder alstublieft wat items zodat "
+"u weer nieuwe kan maken."
 
 #. ZIP archive exceeds max. allowed size of %1$s
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:89
@@ -2129,14 +2141,14 @@ msgid ""
 "All previous versions of the file \"%1$s\" in folder \"%2$s\" are lost when "
 "moving it into the account \"%3$s\"."
 msgstr ""
-"Alle vorige versies van het bestand \"%1$s\" in de map \"%2$s\" zijn verloren "
-"gegaan bij het verplaatsen naar het account \"%3$s\"."
+"Alle vorige versies van het bestand \"%1$s\" in de map \"%2$s\" zijn "
+"verloren gegaan bij het verplaatsen naar het account \"%3$s\"."
 
 #. All previous versions of the file \"%1$s\" in folder \"%2$s\" are lost when moving it into the account \"%3$s\".
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:107
 msgid ""
-"The assigned categories of the file \"%1$s\" in folder \"%2$s\" are lost when "
-"moving it into the account \"%3$s\"."
+"The assigned categories of the file \"%1$s\" in folder \"%2$s\" are lost "
+"when moving it into the account \"%3$s\"."
 msgstr ""
 "De toegewezen categorieën van het bestand \"%1$s\" in de map \"%2$s\" zijn "
 "verloren gegaan bij het verplaatsen naar het account \"%3$s\"."
@@ -2153,8 +2165,8 @@ msgstr ""
 #. The shared folder \"%1$s\" is no longer accessible by other users when moving it into the account \"%2$s\".
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:113
 msgid ""
-"The shared folder \"%1$s\" is no longer accessible by other users when moving "
-"it into the account \"%2$s\"."
+"The shared folder \"%1$s\" is no longer accessible by other users when "
+"moving it into the account \"%2$s\"."
 msgstr ""
 "De gedeelde map \"%1$s\" is niet meer beschikbaar voor andere gebruikers na "
 "het verplaatsen naar het account \"%2$s\"."
@@ -2174,8 +2186,8 @@ msgid ""
 "The file(s) were not moved due to possible data loss. Please review the "
 "warnings for details."
 msgstr ""
-"De bestanden zijn niet verplaatst wegens mogelijk gegevensverlies. Controleer "
-"alstublieft de waarschuwingen voor details."
+"De bestanden zijn niet verplaatst wegens mogelijk gegevensverlies. "
+"Controleer alstublieft de waarschuwingen voor details."
 
 #. The %1$s URL does not denote a file: %2$s
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:122
@@ -2234,8 +2246,8 @@ msgstr "Individuele rechten worden niet ondersteund in het account \"%1$s\"."
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:154
 msgid "Saving notes for file \"%1$s\" is not supported in account \"%2$s\"."
 msgstr ""
-"Notities opslaan voor bestand  \"%1$s\" wordt niet ondersteund in het account "
-"\"%2$s\"."
+"Notities opslaan voor bestand  \"%1$s\" wordt niet ondersteund in het "
+"account \"%2$s\"."
 
 #. Assigning categories to file \"%1$s\" is not supported in account \"%2$s\".
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:157
@@ -2277,7 +2289,8 @@ msgid ""
 "You need to get sufficient permissions to perform the operation on the "
 "specified entity."
 msgstr ""
-"U moet voldoende rechten krijgen om deze actie uit te voeren op deze entiteit."
+"U moet voldoende rechten krijgen om deze actie uit te voeren op deze "
+"entiteit."
 
 #. File name contains not allowed characters: \"%1$s\"
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:172
@@ -2315,30 +2328,32 @@ msgid ""
 "There is a problem with your AWS account that prevents the operation from "
 "completing successfully."
 msgstr ""
-"Er is een probleem met uw AWS account waardoor de operatie niet afgemaakt kan "
-"worden."
+"Er is een probleem met uw AWS account waardoor de operatie niet afgemaakt "
+"kan worden."
 
 #. The e-mail address you provided is associated with more than one account
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.filestore.s3/src/com/openexchange/filestore/s3/internal/S3ExceptionMessages.java:71
-msgid "The e-mail address you provided is associated with more than one account"
+msgid ""
+"The e-mail address you provided is associated with more than one account"
 msgstr "Het opgegeven e-mailadres is gekoppeld aan meer dan één account"
 
 #. The requested bucket name is not available. The bucket namespace is shared by all users of the system. Please select a different name and try again.
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.filestore.s3/src/com/openexchange/filestore/s3/internal/S3ExceptionMessages.java:74
 msgid ""
-"The requested bucket name is not available. The bucket namespace is shared by "
-"all users of the system. Please select a different name and try again."
+"The requested bucket name is not available. The bucket namespace is shared "
+"by all users of the system. Please select a different name and try again."
 msgstr ""
-"De gevraagde container is niet beschikbaar. De namen van containers worden in "
-"één lijst bijgehouden voor alle gebruikers van het systeem. Kies alstublieft "
-"een andere naam en probeer opnieuw."
+"De gevraagde container is niet beschikbaar. De namen van containers worden "
+"in één lijst bijgehouden voor alle gebruikers van het systeem. Kies "
+"alstublieft een andere naam en probeer opnieuw."
 
 #. Your previous request to create the named bucket succeeded and you already own it.
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.filestore.s3/src/com/openexchange/filestore/s3/internal/S3ExceptionMessages.java:77
 msgid ""
 "Your previous request to create the named bucket succeeded and you already "
 "own it."
-msgstr "Uw vorige verzoek om een container te maken is gelukt en deze is van u."
+msgstr ""
+"Uw vorige verzoek om een container te maken is gelukt en deze is van u."
 
 #. The bucket you tried to delete is not empty.
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.filestore.s3/src/com/openexchange/filestore/s3/internal/S3ExceptionMessages.java:80
@@ -2353,8 +2368,8 @@ msgstr "Dit verzoek is niet mogelijk met uw rechten."
 #. Cross location logging not allowed. Buckets in one geographic location cannot log information to a bucket in another location.
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.filestore.s3/src/com/openexchange/filestore/s3/internal/S3ExceptionMessages.java:86
 msgid ""
-"Cross location logging not allowed. Buckets in one geographic location cannot "
-"log information to a bucket in another location."
+"Cross location logging not allowed. Buckets in one geographic location "
+"cannot log information to a bucket in another location."
 msgstr ""
 "Inloggen op een container uit een andere locatie is niet toegestaan. "
 "Containers in één geografische locatie kan geen informatie plaatsen in "
@@ -2449,7 +2464,8 @@ msgstr ""
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.filestore.s3/src/com/openexchange/filestore/s3/internal/S3ExceptionMessages.java:136
 msgid "At least one of the preconditions you specified did not hold."
 msgstr ""
-"Minstens één van de voorwaarden welke u heeft vastgesteld worden niet gehaald."
+"Minstens één van de voorwaarden welke u heeft vastgesteld worden niet "
+"gehaald."
 
 #. Temporary redirect.
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.filestore.s3/src/com/openexchange/filestore/s3/internal/S3ExceptionMessages.java:139
@@ -2464,7 +2480,8 @@ msgstr "Object herstel is reeds bezig."
 #. You are being redirected to the bucket while DNS updates.
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.filestore.s3/src/com/openexchange/filestore/s3/internal/S3ExceptionMessages.java:145
 msgid "You are being redirected to the bucket while DNS updates."
-msgstr "U wordt doorgestuurd naar de container terwijl de DNS wordt bijgewerkt."
+msgstr ""
+"U wordt doorgestuurd naar de container terwijl de DNS wordt bijgewerkt."
 
 #. The provided token must be refreshed.
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.filestore.s3/src/com/openexchange/filestore/s3/internal/S3ExceptionMessages.java:148
@@ -2480,8 +2497,8 @@ msgstr "Het e-mailadres welke u heeft gegeven komt niet voor in onze database."
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.filestore.s3/src/com/openexchange/filestore/s3/internal/S3ExceptionMessages.java:154
 msgid ""
 "The S3 storage responds with \"Bad Request\". Please check whether com."
-"openexchange.filestore.s3.[filestoreID].signerOverride is properly configured "
-"for this filestore."
+"openexchange.filestore.s3.[filestoreID].signerOverride is properly "
+"configured for this filestore."
 msgstr ""
 "De S3 opslag reageert met \"Foute Aanvraag\". Controleer alstublieft of  com."
 "openexchange.filestore.s3.[filestoreID].signerOverride correct is ingesteld "
@@ -2513,11 +2530,11 @@ msgstr "De verbinding naar de client is plotseling gesloten"
 #. * The allowed Quota is reached.
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.filestore/src/com/openexchange/filestore/QuotaFileStorageExceptionMessage.java:62
 msgid ""
-"The allowed quota is reached. Please delete some items in order to create new "
-"ones."
+"The allowed quota is reached. Please delete some items in order to create "
+"new ones."
 msgstr ""
-"Het toegestane quota is bereikt. Verwijder alstublieft een aantal items zodat "
-"u weer nieuwe kan maken."
+"Het toegestane quota is bereikt. Verwijder alstublieft een aantal items "
+"zodat u weer nieuwe kan maken."
 
 #. The service you requested is currently not available. Please try again later.
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/FindExceptionMessages.java:66
@@ -2530,7 +2547,8 @@ msgstr ""
 #. A filter for field '%1$s' is missing but is required to search in module %2$s.
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/FindExceptionMessages.java:69
 msgid ""
-"A filter for field '%1$s' is missing but is required to search in module %2$s."
+"A filter for field '%1$s' is missing but is required to search in module "
+"%2$s."
 msgstr ""
 "Een filter voor het veld '%1$s' ontbreekt maar is noodzakelijk om te zoeken "
 "in module %2$s."
@@ -2576,8 +2594,8 @@ msgid ""
 "The facet types \"%1$s\" and \"%2$s\" conflict with each other and must not "
 "be used within one request."
 msgstr ""
-"De facetonderdelen \"%1$s\" en \"%2$s\" conflicteren met elkaar en mogen niet "
-"gebruikt worden in één verzoek."
+"De facetonderdelen \"%1$s\" en \"%2$s\" conflicteren met elkaar en mogen "
+"niet gebruikt worden in één verzoek."
 
 #. You are not allowed to search in module \"%1$s\".
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/FindExceptionMessages.java:99
@@ -2587,8 +2605,8 @@ msgstr "U mag niet zoeken in de module \"%1$s\"."
 #. The query yielded too many results to be displayed. Please refine your search options and try again.
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/FindExceptionMessages.java:102
 msgid ""
-"The query yielded too many results to be displayed. Please refine your search "
-"options and try again."
+"The query yielded too many results to be displayed. Please refine your "
+"search options and try again."
 msgstr ""
 "De zoekvraag heeft te veel resultaten opgeleverd. Maak uw zoekvraag "
 "alstublieft een preciezer en probeer opnieuw."
@@ -3000,7 +3018,8 @@ msgstr "De opgegeven gebruikersnaam of het wachtwoord is onjuist."
 #. This message is used if the password of the user expired and must be changed.
 #. %1$s is replaced by an URL for changing the password or by the name of the system that is able to do that.
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/authentication/LoginExceptionMessages.java:79
-msgid "Your password has expired. In order to change it, please log in to %1$s."
+msgid ""
+"Your password has expired. In order to change it, please log in to %1$s."
 msgstr ""
 "Uw wachtwoord is verlopen. Teneinde het te wijzigen meldt u zich aan op %1$s."
 
@@ -3345,12 +3364,12 @@ msgstr ""
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:90
 msgid ""
 "The composed rights could not be applied to new folder due to missing "
-"administer right in its initial rights specified by IMAP server. However, the "
-"folder has been created."
+"administer right in its initial rights specified by IMAP server. However, "
+"the folder has been created."
 msgstr ""
 "De samengestelde rechten zijn niet toe te passen op de nieuwe map door de "
-"afwezigheid van beheerdersrechten in de basis rechten zoals gedefinieerd door "
-"de IMAP server. De map is toch aangemaakt."
+"afwezigheid van beheerdersrechten in de basis rechten zoals gedefinieerd "
+"door de IMAP server. De map is toch aangemaakt."
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:92
 msgid "No administer permission specified for folder"
@@ -3396,7 +3415,8 @@ msgstr "Vlag %1$s kan niet worden gezet met als reden \"%2$s\""
 #.
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:110
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:156
-msgid "Number of search fields (%d) do not match number of search patterns (%d)"
+msgid ""
+"Number of search fields (%d) do not match number of search patterns (%d)"
 msgstr ""
 "Het aantal zoekvelden (%d) is niet gelijk aan het aantal zoekpatronen (%d)"
 
@@ -3428,8 +3448,8 @@ msgstr "E-mail map mag niet verplaatst worden naar de volgende map"
 msgid ""
 "This message could not be moved to trash folder, possibly because your "
 "mailbox is nearly full.\n"
-"In that case, please try to empty your deleted items first, or delete smaller "
-"messages first."
+"In that case, please try to empty your deleted items first, or delete "
+"smaller messages first."
 msgstr ""
 "Dit bericht kon niet naar de prullenbakmap verplaatst worden, mogelijk omdat "
 "uw postvak bijna vol is.\n"
@@ -3458,7 +3478,8 @@ msgstr "Onbekende methode  %1$s voor het openen van een map"
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:130
 msgid "One or more message in folder %2$s could not be deleted"
-msgstr "Eén of meerdere berichten kunnen niet uit de map %2$s verwijderd worden"
+msgstr ""
+"Eén of meerdere berichten kunnen niet uit de map %2$s verwijderd worden"
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:132
 msgid "Not allowed to open folder %1$s due to missing read access"
@@ -3497,7 +3518,8 @@ msgstr ""
 msgid ""
 "Mailbox' root folder must not be source or the destination full name of a "
 "move operation."
-msgstr "E-mail hoofdmap mag niet de bron- of doelmap zijn van een verplaatsing."
+msgstr ""
+"E-mail hoofdmap mag niet de bron- of doelmap zijn van een verplaatsing."
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:146
 msgid "Sort field %1$s is not supported via IMAP SORT command"
@@ -3639,8 +3661,8 @@ msgstr "Kan een los informatieveld niet vertalen. Item %s is niet ingevoegd."
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.importexport/src/com/openexchange/importexport/exceptions/ImportExportExceptionMessages.java:97
 msgid ""
-"File does not contain fields for assigning contact names: no name, company or "
-"E-Mail."
+"File does not contain fields for assigning contact names: no name, company "
+"or E-Mail."
 msgstr ""
 "Het bestand bevat geen velden voor het toewijzen van contact namen: geen "
 "naam, bedrijf of E-mail."
@@ -3730,7 +3752,8 @@ msgstr ""
 msgid ""
 "The character encoding \"%1$s\" is not supported. Please choose another one."
 msgstr ""
-"De tekencodering \"%1$s\" wordt niet ondersteund. Kies alstublieft een andere."
+"De tekencodering \"%1$s\" wordt niet ondersteund. Kies alstublieft een "
+"andere."
 
 #. The contact with uid %1$s is too similar to the existing contact with uid %2$s in folder %3$s
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.importexport/src/com/openexchange/importexport/exceptions/ImportExportExceptionMessages.java:139
@@ -3738,8 +3761,8 @@ msgid ""
 "The contact with uid %1$s is too similar to the existing contact with uid "
 "%2$s in folder %3$s"
 msgstr ""
-"Het contactpersoon met uid %1$s is te veel hetzelfde al het bestaande contact "
-"met uid %2$s in map %3$s"
+"Het contactpersoon met uid %1$s is te veel hetzelfde al het bestaande "
+"contact met uid %2$s in map %3$s"
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.importexport/src/com/openexchange/importexport/exceptions/ImportExportExceptionMessages.java:141
 msgid "Could not create a proper name for the export file."
@@ -3756,8 +3779,8 @@ msgid ""
 "%1$sd warnings when importing file and not all of the objects could be "
 "imported due to a configured limitation"
 msgstr ""
-"%1$sd waarschuwingen bij het importeren van het bestand en niet alle objecten "
-"konden worden geïmporteerd door een beperking in de inrichting."
+"%1$sd waarschuwingen bij het importeren van het bestand en niet alle "
+"objecten konden worden geïmporteerd door een beperking in de inrichting."
 
 #. Referenced JSlob %1$s must not be set for service %2$s. Nothing will be done.
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.jslob/src/com/openexchange/jslob/JSlobExceptionMessages.java:62
@@ -3835,6 +3858,14 @@ msgstr ""
 msgid "Managing mail filter rules is not available for your account."
 msgstr "Het beheren van mailfilterregels is niet beschikbaar voor uw account."
 
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.mail.filter/src/com/openexchange/mailfilter/exceptions/MailFilterExceptionMessages.java:70
+msgid ""
+"The maximum amount of redirect rules is reached. Please delete or deactivate "
+"another redirect rule first."
+msgstr ""
+"Het maximaal aantal routeregels is bereikt. Verwijder of deactiveer eerst "
+"een andere regel."
+
 #. Maximum number of messages already stored for client %1$s
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.message.timeline/src/com/openexchange/message/timeline/MessageTimelineExceptionMessages.java:63
 msgid "Maximum number of messages already stored for client %1$s"
@@ -3887,7 +3918,8 @@ msgstr "Onbekende kleurlabelindex: %1$s"
 #. A duplicate folder named "%1$s" already exists below parent folder "%2$s".
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.messaging/src/com/openexchange/messaging/MessagingExceptionMessages.java:82
 msgid ""
-"A duplicate folder named \"%1$s\" already exists below parent folder \"%2$s\"."
+"A duplicate folder named \"%1$s\" already exists below parent folder \"%2$s"
+"\"."
 msgstr ""
 "Een dubbele map genaamd \"%1$s\" bestaat al in de bovenliggende map \"%2$s\"."
 
@@ -3941,8 +3973,8 @@ msgstr "Het certificaat voor domein \"%1$s\" is niet vertrouwd."
 #. The certificate for domain "%1$s" is untrusted. You can change your general trust level in the settings.
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.net.ssl/src/com/openexchange/net/ssl/exception/SSLExceptionMessages.java:67
 msgid ""
-"The certificate for domain \"%1$s\" is untrusted. You can change your general "
-"trust level in the settings."
+"The certificate for domain \"%1$s\" is untrusted. You can change your "
+"general trust level in the settings."
 msgstr ""
 "Het certificaat voor domein \"%1$s\" is niet vertrouwd. U kan uw algemene "
 "vertrouwensinstellingen aanpassen bij de instellingen."
@@ -4121,8 +4153,8 @@ msgid ""
 "applications. Please revoke access for the ones you don't longer need."
 msgstr ""
 "U heeft het maximaal aantal van %3$d mogelijke toestemmingen voor externe "
-"applicaties bereikt. Verwijder de toestemming voor één van de programma's die "
-"u niet meer gebruikt."
+"applicaties bereikt. Verwijder de toestemming voor één van de programma's "
+"die u niet meer gebruikt."
 
 #. There is no associated OAuth account for identifier %1$s.
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:63
@@ -4148,7 +4180,8 @@ msgstr ""
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:71
 msgid "The address %1$s is not white-listed as for the %2$s OAuth API"
-msgstr "Het adres %1$s is niet opgenomen in de wittelijst van de %2$s OAuth API"
+msgstr ""
+"Het adres %1$s is niet opgenomen in de wittelijst van de %2$s OAuth API"
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:73
 msgid "The request sent was missing its body"
@@ -4177,7 +4210,8 @@ msgstr "Geef alstublieft minimaal één bereik."
 #. The associated OAuth provider denied the request: %1$s.
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:88
 msgid "The associated OAuth provider denied the request: %1$s."
-msgstr "De bijbehorende OAuth dienstverlener heeft het verzoek afgewezen: %1$s."
+msgstr ""
+"De bijbehorende OAuth dienstverlener heeft het verzoek afgewezen: %1$s."
 
 #. The OAuth authentication process has been canceled.
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:91
@@ -4228,7 +4262,8 @@ msgstr ""
 #. Your access token for '%1$s' is invalid. You have to reauthorize your account.
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:109
 msgid ""
-"Your access token for '%1$s' is invalid. You have to reauthorize your account."
+"Your access token for '%1$s' is invalid. You have to reauthorize your "
+"account."
 msgstr ""
 "Uw toegangstoken voor '%1$s' is ongeldig. U moet uw account opnieuw "
 "authenticeren."
@@ -4337,7 +4372,8 @@ msgstr "U heeft niet de juiste rechten om de e-mailmap %1$s te beheren"
 #. * No write access to POP3 folder %1$s
 #.
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:99
-msgid "You do not have the appropriate permissions to write to POP3 folder %1$s"
+msgid ""
+"You do not have the appropriate permissions to write to POP3 folder %1$s"
 msgstr "U heeft niet de juiste rechten om te schreven in de POP3 map %1$s"
 
 #. *
@@ -4492,8 +4528,8 @@ msgstr ""
 msgid ""
 "Missing %1$s folder in mail move operation. Please provide one and try again."
 msgstr ""
-"De map %1$s ontbreekt tijdens het verplaatsen van e-mail. Geef er alstublieft "
-"één op en probeer opnieuw."
+"De map %1$s ontbreekt tijdens het verplaatsen van e-mail. Geef er "
+"alstublieft één op en probeer opnieuw."
 
 #. *
 #. * Message move aborted for user %1$s. Source and destination folder are equal: %2$s
@@ -4724,10 +4760,10 @@ msgstr ""
 #.
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:295
 msgid ""
-"Validation of POP3 credentials is disabled due to possible login restrictions "
-"by provider. Otherwise subsequent login attempt might not work. Please be "
-"advised that while it is safe to ignore this warning, the POP3 account might "
-"not work if the supplied credentials are invalid."
+"Validation of POP3 credentials is disabled due to possible login "
+"restrictions by provider. Otherwise subsequent login attempt might not work. "
+"Please be advised that while it is safe to ignore this warning, the POP3 "
+"account might not work if the supplied credentials are invalid."
 msgstr ""
 "Controle van POP3 inloggegevens is uitgeschakeld door aanmeldbeperkingen van "
 "de dienstverlener. Anders werken vervolgaanmeldingen mogelijk niet meer. Het "
@@ -4763,8 +4799,8 @@ msgstr "Miniatuurafbeelding niet beschikbaar."
 #. No preview service for MIME type %1$s
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.preview/src/com/openexchange/preview/PreviewExceptionMessages.java:70
 msgid ""
-"The preview service for MIME type %1$s is currently not available. Please try "
-"again later"
+"The preview service for MIME type %1$s is currently not available. Please "
+"try again later"
 msgstr ""
 "De voorbeeld generator voor MIME type %1$s is tijdelijk niet beschikbaar. "
 "Probeer het later nogmaals."
@@ -4804,8 +4840,8 @@ msgid ""
 "Privacy:\n"
 "The data and any references contained in this webpage are shared with you "
 "under the assumption that the owner of the data was entitled to make them "
-"available to you. Neither %s, nor any of its subsidiaries or affiliates shall "
-"be liable for its publication or re-publication.\n"
+"available to you. Neither %s, nor any of its subsidiaries or affiliates "
+"shall be liable for its publication or re-publication.\n"
 "Any unauthorized use or dissemination of this data is prohibited. If you "
 "intend to store, process, or pass on this data, please make sure that you "
 "have the right to do so.\n"
@@ -4816,11 +4852,11 @@ msgid ""
 "Data published by %s on %s\n"
 msgstr ""
 "Privacy:\n"
-"De gegevens en enige verwijzingen die in deze webpagina zijn opgenomen worden "
-"met u gedeeld onder de aanname dat de eigenaar ervan ze rechtmatig aan u "
-"beschikbaar heeft gemaakt. Noch %s, noch enige van zijn onderdelen of "
-"partners kan aansprakelijk worden gesteld voor de publicatie of herpublicatie "
-"ervan.\n"
+"De gegevens en enige verwijzingen die in deze webpagina zijn opgenomen "
+"worden met u gedeeld onder de aanname dat de eigenaar ervan ze rechtmatig "
+"aan u beschikbaar heeft gemaakt. Noch %s, noch enige van zijn onderdelen of "
+"partners kan aansprakelijk worden gesteld voor de publicatie of "
+"herpublicatie ervan.\n"
 "Ieder ongeautoriseerd gebruik of verspreiding van deze gegevens is verboden. "
 "Als u van plan bent deze gegevens op te slaan, te verwerken, of door te "
 "geven, zorg er dan voor dat u het recht heeft om dit te doen.\n"
@@ -4896,9 +4932,9 @@ msgid ""
 "tasks of all users in this context."
 msgstr ""
 "Quota overschreden voor taken. Quotalimiet: %2$s. Quota gebruikt: %1$s. "
-"Verwijder alstublieft een aantal taken zodat u weer nieuwe kan maken. Houd er "
-"rekening mee dat het quota geld voor alle taken van alle gebruikers in deze "
-"context."
+"Verwijder alstublieft een aantal taken zodat u weer nieuwe kan maken. Houd "
+"er rekening mee dat het quota geld voor alle taken van alle gebruikers in "
+"deze context."
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.quota/src/com/openexchange/quota/QuotaExceptionMessages.java:70
 msgid ""
@@ -4918,15 +4954,15 @@ msgid ""
 "refers to all attachments of all users in this context."
 msgstr ""
 "Quota overschreden voor bijlagen. Quotalimiet: %2$s. Quota gebruikt: %1$s. "
-"Verwijder alstublieft een aantal bijlagen zodat u weer nieuwe kan maken. Houd "
-"er rekening mee dat het quota geld voor alle bijlagen van alle gebruikers in "
-"deze context."
+"Verwijder alstublieft een aantal bijlagen zodat u weer nieuwe kan maken. "
+"Houd er rekening mee dat het quota geld voor alle bijlagen van alle "
+"gebruikers in deze context."
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.quota/src/com/openexchange/quota/QuotaExceptionMessages.java:74
 msgid ""
-"Quota exceeded for shares. Quota limit: %2$s. Quota used: %1$s. Please delete "
-"some shares in order to create new ones. Please note: The quota refers to all "
-"shares of one user in this context."
+"Quota exceeded for shares. Quota limit: %2$s. Quota used: %1$s. Please "
+"delete some shares in order to create new ones. Please note: The quota "
+"refers to all shares of one user in this context."
 msgstr ""
 "Quota overschreden voor gedeelde items. Quotalimiet: %2$s. Quota gebruikt: "
 "%1$s. Verwijder alstublieft een aantal items zodat u weer nieuwe kan maken. "
@@ -4936,8 +4972,8 @@ msgstr ""
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.quota/src/com/openexchange/quota/QuotaExceptionMessages.java:76
 msgid ""
 "Quota exceeded for share links. Quota limit: %2$s. Quota used: %1$s. Please "
-"delete some shares in order to create new ones. Please note: The quota refers "
-"to all shares of one user in this context."
+"delete some shares in order to create new ones. Please note: The quota "
+"refers to all shares of one user in this context."
 msgstr ""
 "Quota overschreden voor gedeelde links. Quotalimiet: %2$s. Quota gebruikt: "
 "%1$s. Verwijder alstublieft een aantal links zodat u weer nieuwe kan maken. "
@@ -4947,8 +4983,8 @@ msgstr ""
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.quota/src/com/openexchange/quota/QuotaExceptionMessages.java:78
 msgid ""
 "Quota exceeded for guest users. Quota limit: %2$s. Quota used: %1$s. Please "
-"delete some shares in order to create new ones. Please note: The quota refers "
-"to all shares of one user in this context."
+"delete some shares in order to create new ones. Please note: The quota "
+"refers to all shares of one user in this context."
 msgstr ""
 "Quota overschreden voor gastgebruikers. Quotalimiet: %2$s. Quota gebruikt: "
 "%1$s. Verwijder alstublieft een aantal links zodat u weer nieuwe kan maken. "
@@ -4966,8 +5002,8 @@ msgstr ""
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.quota/src/com/openexchange/quota/QuotaExceptionMessages.java:82
 msgid ""
-"The storage limit for signatures is %1$s. Delete old signatures to be able to "
-"store a new one."
+"The storage limit for signatures is %1$s. Delete old signatures to be able "
+"to store a new one."
 msgstr ""
 "De opslaglimiet voor ondertekeningen is %1$s. Verwijder oude ondertekeningen "
 "zodat u een nieuwe kan opslaan."
@@ -5093,6 +5129,21 @@ msgstr "De waarde ingevoegd voor %2$s is niet juist."
 msgid "Please add a value for %1$s"
 msgstr "Voeg alstublieft een waarde toe voor %1$s"
 
+#. No user-associated job found
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/ajax/requesthandler/jobqueue/JobQueueMessages.java:63
+msgid "No such job %1$s"
+msgstr "Taak %1$s bestaat niet"
+
+#. A long-running operation is being executed
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/ajax/requesthandler/jobqueue/JobQueueMessages.java:66
+msgid "A long-running operation is being executed"
+msgstr "Een langlopende actie wordt uitgevoerd."
+
+#. Such a long-running operation is already in progress
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/ajax/requesthandler/jobqueue/JobQueueMessages.java:69
+msgid "Such a long-running operation is already in progress"
+msgstr "Een dergelijke langlopende actie wordt reeds uitgevoerd."
+
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/authorization/AuthorizationExceptionMessages.java:60
 msgid "User is deactivated"
 msgstr "Gebruiker is gedeactiveerd."
@@ -5151,8 +5202,8 @@ msgstr "DTSTART ontbreekt"
 #. Private Appointments can not have attendees. Removing attendees and accepting appointment anyway.
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/data/conversion/ical/ConversionWarningMessage.java:87
 msgid ""
-"Private appointments can not have attendees. Removing attendees and accepting "
-"appointment anyway."
+"Private appointments can not have attendees. Removing attendees and "
+"accepting appointment anyway."
 msgstr ""
 "Privé-afspraken kunnen geen bijwoners hebben. Bijwoners worden verwijderd en "
 "de afspraak wordt toch geaccepteerd."
@@ -5166,7 +5217,8 @@ msgstr "Niet-ondersteund terugkeerpatroon: BYMONTH"
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/data/conversion/ical/ConversionWarningMessage.java:93
 msgid "This does not look like an iCal file. Please check the file."
 msgstr ""
-"Dit ziet er niet uit als een iCal-bestand. Controleer het bestand alstublieft."
+"Dit ziet er niet uit als een iCal-bestand. Controleer het bestand "
+"alstublieft."
 
 #. Empty "CLASS" element.
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/data/conversion/ical/ConversionWarningMessage.java:96
@@ -5223,12 +5275,6 @@ msgstr "Het inhoudstype dat u heeft opgegeven past niet bij de opgegeven map.."
 msgid "You do not have appropriate permissions to move the folder."
 msgstr "U heeft niet de juiste rechten om de map te verplaatsen."
 
-#. A folder named "%1$s" already exists.
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/folderstorage/FolderExceptionMessages.java:74
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:128
-msgid "A folder named \"%1$s\" already exists."
-msgstr "Een map met de naam \"%1$s\" bestaat al."
-
 #. You do not have the appropriate permissions to delete the folder.
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/folderstorage/FolderExceptionMessages.java:80
 msgid "You do not have the appropriate permissions to delete the folder."
@@ -5253,7 +5299,8 @@ msgstr "Het is niet toegestaan een e-mailmap te maken onder een openbare map."
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/folderstorage/FolderExceptionMessages.java:92
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:121
 msgid "The folder name \"%1$s\" is reserved. Please choose another name."
-msgstr "De map naam \"%1$s\" is gereserveerd. Kies alstublieft een andere naam."
+msgstr ""
+"De map naam \"%1$s\" is gereserveerd. Kies alstublieft een andere naam."
 
 #. Found two folders named "%1$s" located below the parent folder. Please rename one of the folders. There should be no two folders with the same name.
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/folderstorage/FolderExceptionMessages.java:95
@@ -5322,13 +5369,13 @@ msgstr "U mag geen groepen aanmaken."
 #. or synchronize and try again.
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/group/GroupExceptionMessage.java:91
 msgid ""
-"Edit Conflict. Your change cannot be completed because somebody else has made "
-"a conflicting change to the same item. Please refresh or synchronize and try "
-"again."
+"Edit Conflict. Your change cannot be completed because somebody else has "
+"made a conflicting change to the same item. Please refresh or synchronize "
+"and try again."
 msgstr ""
-"Bewerkingsconflict. Uw wijziging kan niet worden voltooid omdat iemand anders "
-"een conflicterende wijziging gemaakt heeft aan hetzelfde item. Ververs of "
-"synchroniseer alstublieft en probeer het nogmaals."
+"Bewerkingsconflict. Uw wijziging kan niet worden voltooid omdat iemand "
+"anders een conflicterende wijziging gemaakt heeft aan hetzelfde item. "
+"Ververs of synchroniseer alstublieft en probeer het nogmaals."
 
 #. You are not allowed to change groups.
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/group/GroupExceptionMessage.java:95
@@ -5393,8 +5440,8 @@ msgstr "De metagegevens van de bijlage bevat ongeldige tekens."
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/attach/AttachmentExceptionMessages.java:77
 msgid ""
-"Invalid parameter sent in request. Parameter '%1$s' was '%2$s' which does not "
-"look like a number."
+"Invalid parameter sent in request. Parameter '%1$s' was '%2$s' which does "
+"not look like a number."
 msgstr ""
 "Ongeldige parameter verzonden in aanvraag. Parameter '%1$s' was '%2$s' wat "
 "geen geldig getal is."
@@ -5539,8 +5586,8 @@ msgstr "De map is niet van het type Agenda."
 msgid ""
 "Moving an appointment with private flag to a public folder is not allowed."
 msgstr ""
-"Verplaatsen van een afspraak met een privé vlag naar een publieke map is niet "
-"toegestaan."
+"Verplaatsen van een afspraak met een privé vlag naar een publieke map is "
+"niet toegestaan."
 
 #. *
 #. * You do not have the appropriate permissions to modify this object.
@@ -5601,8 +5648,8 @@ msgstr ""
 msgid ""
 "Moving an appointment with private flag to a shared folder is not allowed."
 msgstr ""
-"Verplaatsen van een afspraak met een privé vlag naar een gedeelde map is niet "
-"toegestaan."
+"Verplaatsen van een afspraak met een privé vlag naar een gedeelde map is "
+"niet toegestaan."
 
 #. *
 #. * You can not use different private flags for one element of a recurring appointment.
@@ -5644,8 +5691,8 @@ msgid ""
 "An external participant with the E-Mail address %1$s is already included. "
 "Please remove participant duplicate and retry."
 msgstr ""
-"Een externe deelnemer met het email adres %1$s is reeds toegevoegd. Verwijder "
-"de dubbele vermelding en probeer opnieuw."
+"Een externe deelnemer met het email adres %1$s is reeds toegevoegd. "
+"Verwijder de dubbele vermelding en probeer opnieuw."
 
 #. *
 #. * Moving a recurring appointment to another folder is not supported.
@@ -5683,6 +5730,14 @@ msgstr ""
 msgid "Sequence number is outdated."
 msgstr "Volgnummer is verlopen."
 
+#. *
+#. * The calendar is currently under maintenance. Please try again later.
+#.
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/calendar/OXCalendarExceptionMessage.java:231
+msgid "The calendar is currently under maintenance. Please try again later."
+msgstr ""
+"De agenda is momenteel in onderhoud. Probeer het alstublieft later opnieuw."
+
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:61
 msgid "Invalid E-Mail address: '%s'. Please correct the E-Mail address."
 msgstr "Ongeldig e-mailadres: '%s'. Corrigeer alstublieft het e-mailadres."
@@ -5700,7 +5755,8 @@ msgid ""
 "You do not have the appropriate permission to access objects in the folder "
 "\"%1$s\"."
 msgstr ""
-"U heeft niet de juiste rechten om de objecten in de map \"%1$s\" te benaderen."
+"U heeft niet de juiste rechten om de objecten in de map \"%1$s\" te "
+"benaderen."
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:69
 msgid "Unable to scale image down."
@@ -5715,7 +5771,8 @@ msgid ""
 "You do not have the appropriate permission to create objects in the folder "
 "\"%1$s\"."
 msgstr ""
-"U heeft niet de juiste rechten om de objecten in de map \"%1$s\" aan te maken."
+"U heeft niet de juiste rechten om de objecten in de map \"%1$s\" aan te "
+"maken."
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:75
 msgid "Unable to synchronize the old contact with the new changes."
@@ -5805,8 +5862,8 @@ msgstr "Mime-type is niet gedefinieerd."
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:107
 msgid "Storing a contact with private flag in a shared folder is not allowed."
 msgstr ""
-"Contacten welke als privé zijn gemarkeerd mogen niet opgeslagen worden in een "
-"gedeelde map."
+"Contacten welke als privé zijn gemarkeerd mogen niet opgeslagen worden in "
+"een gedeelde map."
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:109
 msgid "Image size too large. Image size: %1$s. Max. size: %2$s."
@@ -5830,8 +5887,8 @@ msgstr "U mag dit contactpersoon niet aanpassen"
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:119
 msgid ""
-"An E-Mail address is mandatory for external distribution list members. Please "
-"add a valid E-Mail address to the contact \"%1$s\"."
+"An E-Mail address is mandatory for external distribution list members. "
+"Please add a valid E-Mail address to the contact \"%1$s\"."
 msgstr ""
 "Een e-mailadres is verplicht voor een deelnemer in een externe "
 "distributielijst. Voer alstublieft een geldig e-mailadres in bij het contact "
@@ -5881,8 +5938,8 @@ msgid ""
 "The character \"%1$s\" in field \"%2$s\" can't be saved. Please remove the "
 "problematic character and try again."
 msgstr ""
-"Het teken \"%1$s\" in het veld \"%2$s\" kan niet opgeslagen worden. Verwijder "
-"het problematische teken alstublieft en probeer opnieuw."
+"Het teken \"%1$s\" in het veld \"%2$s\" kan niet opgeslagen worden. "
+"Verwijder het problematische teken alstublieft en probeer opnieuw."
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:139
 msgid ""
@@ -5921,7 +5978,7 @@ msgstr "Het account \"%1$s\" is niet gevonden"
 #. This exception is triggered by concurrent requests of clients trying to modify the same user attributes in the same moment.
 #. This should happen in very rare conditions and is not visible to the client.
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contexts/impl/ContextExceptionMessage.java:69
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:180
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:181
 msgid "Denied concurrent update of user attributes."
 msgstr ""
 "Meerdere aanpassingen tegelijk maken op gebruikersattributen is geweigerd."
@@ -6126,8 +6183,8 @@ msgid ""
 "#RECIPIENT# with subject \"#SUBJECT#\".\n"
 "\n"
 "Note: This delivery receipt only acknowledges that the message was displayed "
-"on the recipients computer. There is no guarantee that the recipient has read "
-"or understood the message contents."
+"on the recipients computer. There is no guarantee that the recipient has "
+"read or understood the message contents."
 msgstr ""
 "Dit is een ontvangstbevestiging voor de e-mail die u op #DATE# aan "
 "#RECIPIENT# hebt gestuurd met als onderwerp \"#SUBJECT#\".\n"
@@ -6184,7 +6241,8 @@ msgstr "[Geen onderwerp]"
 #. The internationalized text put into text body of an email of which attachments exceed user's quota limitation
 #. Hints to the available attachments for affected message
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:153
-msgid "The available attachments for this E-Mail can be accessed via the links:"
+msgid ""
+"The available attachments for this E-Mail can be accessed via the links:"
 msgstr "De bijlagen van deze e-mail zijn beschikbaar via deze links:"
 
 #. The internationalized text put into text body of an email of which attachments exceed user's quota limitation
@@ -7471,7 +7529,8 @@ msgstr "Het document dat u opvroeg bestaat niet."
 #. Unable to load the document(s). Please try again.
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/infostore/InfostoreExceptionMessages.java:65
 msgid "Unable to load the document(s). Please try again."
-msgstr "Het is niet mogelijk de documenten te laden. Probeer het later opnieuw."
+msgstr ""
+"Het is niet mogelijk de documenten te laden. Probeer het later opnieuw."
 
 #. The folder %1$s you requested is not an Infostore folder.
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/infostore/InfostoreExceptionMessages.java:68
@@ -7540,7 +7599,8 @@ msgstr "U heeft niet de juiste rechten om een document te verwijderen."
 
 #. In order to accomplish the search, %1$s or more characters are required.
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/infostore/InfostoreExceptionMessages.java:107
-msgid "In order to accomplish the search, %1$s or more characters are required."
+msgid ""
+"In order to accomplish the search, %1$s or more characters are required."
 msgstr "Om de zoekactie uit te voeren zijn %1$s of meer tekens nodig."
 
 #. The document could not be updated because it was modified. Please try again.
@@ -7595,11 +7655,11 @@ msgstr "Niet ondersteund karakter. Corrigeer alstublieft uw invoer."
 #. Due to limited capabilities of user \"%1$s\", it is not possible to apply the permission changes.
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/infostore/InfostoreExceptionMessages.java:131
 msgid ""
-"Due to limited capabilities of user \"%1$s\", it is not possible to apply the "
-"permission changes."
+"Due to limited capabilities of user \"%1$s\", it is not possible to apply "
+"the permission changes."
 msgstr ""
-"Door de beperkte mogelijkheden van gebruiker \"%1$s\" is het niet mogelijk om "
-"de rechten te wijzigen."
+"Door de beperkte mogelijkheden van gebruiker \"%1$s\" is het niet mogelijk "
+"om de rechten te wijzigen."
 
 #. Group %1$s can't be used for object permissions.
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/infostore/InfostoreExceptionMessages.java:134
@@ -7707,48 +7767,51 @@ msgstr "Kan object \"%1$s\" niet klonen."
 msgid "Two users with same identifier \"%1$s\" in context %2$d found."
 msgstr "Twee gebruikers gevonden met kenmerk \"%1$s\" in context %2$d."
 
-#. *
-#. * No permission to modify resources in context %1$s
-#.
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:101
+#. No permission to modify resources in context %1$s
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:99
 msgid "No permission to modify resources in context \"%1$s\""
 msgstr "Geen rechten om bronnen te wijzigen in context \"%1$s\""
+
+#. No permission to access resources in context %1$s
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:102
+msgid "No permission to access resources in context \"%1$s\""
+msgstr "Geen rechten om bronnen te benaderen in context \"%1$s\""
 
 #. *
 #. * Missing or unknown password mechanism %1$s
 #.
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:106
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:107
 msgid "Missing or unknown password mechanism \"%1$s\""
 msgstr "Ontbrekend of onbekend wachtwoordmechanisme \"%1$s\""
 
 #. *
 #. * New password contains invalid characters
 #.
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:111
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:112
 msgid "New password contains invalid characters."
 msgstr "Nieuw wachtwoord bevat ongeldige tekens."
 
 #. *
 #. * Attributes of user %1$d in context %2$d have been erased.
 #.
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:116
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:117
 msgid "Attributes of user %1$d in context %2$d have been erased."
 msgstr "Attributen van gebruiker %1$d in context %2$d zijn verwijderd."
 
 #. *
 #. * Loading one or more users failed.
 #.
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:121
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:122
 msgid "Loading one or more users failed."
 msgstr "Inlezen van één of meer gebruikers is mislukt."
 
 #. * Alias entries are missing for user %1$d in context %2$d.
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:124
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:125
 msgid "Alias entries are missing for user %1$d in context %2$d."
 msgstr "E-mailalias voor gebruiker %1$s bestaat niet in context %2$s."
 
 #. * Updating attributes failed in context %1$d for user %2$d.
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:127
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:128
 msgid "Updating attributes failed in context %1$d for user %2$d."
 msgstr ""
 "Het is mislukt om de attributen bij te werken in context %1$d voor gebruiker "
@@ -7757,7 +7820,7 @@ msgstr ""
 #. *
 #. * Invalid password length. The password must be of minimum length %1$d.
 #.
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:132
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:133
 msgid ""
 "Invalid password length. The password must have a minimum length of %1$d."
 msgstr ""
@@ -7766,7 +7829,7 @@ msgstr ""
 #. *
 #. * Invalid password length. The password must be of maximum length %1$d.
 #.
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:137
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:138
 msgid ""
 "Invalid password length. The password must have a maximum length of %1$d."
 msgstr ""
@@ -7775,27 +7838,27 @@ msgstr ""
 #. *
 #. * The parameter %s for this user is missing.
 #.
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:142
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:143
 msgid "The parameter \"%s\" for this user is missing."
 msgstr "De parameter \"%s\" ontbreekt voor deze gebruiker."
 
 #. *
 #. * %s is not a valid locale.
 #.
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:147
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:148
 msgid "\"%s\" is not a valid locale."
 msgstr "\"%s\" is geen geldige landinstelling."
 
 #. *
 #. * %s is not a valid time zone.
 #.
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:152
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:153
 msgid "\"%s\" is not a valid timezone."
 msgstr "\"%s\" is geen geldige tijdzone."
 
 #. This is an internal exception to detect coding problems. A user will never see this exception.
 #. %1$d is replaced with the number of users that attributes should be locked in the database for updating them.
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:156
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:157
 msgid ""
 "Locking attributes of multiple users is not allowed. You tried to lock %1$d "
 "user's attributes."
@@ -7806,7 +7869,7 @@ msgstr ""
 #. *
 #. * The entered password is illegal and can't be saved. Allowed characters are: %1$s
 #.
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:161
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:162
 msgid ""
 "The entered password is illegal and can't be saved. Allowed characters are: "
 "%1$s"
@@ -7817,10 +7880,10 @@ msgstr ""
 #. *
 #. * The current password is incorrect. Please enter your correct current password and try again.
 #.
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:166
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:167
 msgid ""
-"The current password is incorrect. Please enter your correct current password "
-"and try again."
+"The current password is incorrect. Please enter your correct current "
+"password and try again."
 msgstr ""
 "Het huidige wachtwoord is ongeldig. Geef alstublieft het correcte wachtwoord "
 "en probeer opnieuw."
@@ -7828,7 +7891,7 @@ msgstr ""
 #. *
 #. * The current password is missing. Please enter your current password and try again.
 #.
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:171
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:172
 msgid ""
 "The current password is missing. Please enter your current password and try "
 "again."
@@ -7839,7 +7902,7 @@ msgstr ""
 #. *
 #. * The new password is missing. Please enter your new password and try again.
 #.
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:176
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:177
 msgid ""
 "The new password is missing. Please enter your new password and try again."
 msgstr ""
@@ -7994,18 +8057,18 @@ msgid "Error while inserting task."
 msgstr "Fout bij invoegen van een taak."
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:67
-msgid "This is not a task folder."
-msgstr "Dit is geen takenmap."
+msgid "Folder cannot be found."
+msgstr "Map kan niet gevonden worden."
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:69
 msgid ""
-"Edit conflict. Your change cannot be completed because somebody else has made "
-"a conflicting change to the same item. Please refresh or synchronize and try "
-"again."
+"Edit conflict. Your change cannot be completed because somebody else has "
+"made a conflicting change to the same item. Please refresh or synchronize "
+"and try again."
 msgstr ""
-"Bewerkingsconflict. Uw wijziging kan niet worden voltooid omdat iemand anders "
-"een conflicterende wijziging gemaakt heeft aan hetzelfde item. Ververs of "
-"synchroniseer alstublieft en probeer het nogmaals."
+"Bewerkingsconflict. Uw wijziging kan niet worden voltooid omdat iemand "
+"anders een conflicterende wijziging gemaakt heeft aan hetzelfde item. "
+"Ververs of synchroniseer alstublieft en probeer het nogmaals."
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:71
 msgid "Cannot create private task in public/shared folder."
@@ -8066,7 +8129,8 @@ msgstr ""
 "Taken die niet zijn gestart dienen het percentage 0 te hebben en niet %d."
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:97
-msgid "You do not have the appropriate permissions to edit tasks in that folder"
+msgid ""
+"You do not have the appropriate permissions to edit tasks in that folder"
 msgstr "U heeft niet voldoende rechten om een taak te bewerken uit deze map"
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:99
@@ -8095,8 +8159,8 @@ msgid ""
 "Current length \"%3$d\" is more than allowed length of \"%2$d\" characters."
 msgstr ""
 "De taak kon niet worden opgeslagen. Verkort de \"%1$s\" en probeer het "
-"opnieuw. Huidige lengte \"%3$d\" is langer dan de toegestane lengte van \"%2$d"
-"\" tekens."
+"opnieuw. Huidige lengte \"%3$d\" is langer dan de toegestane lengte van "
+"\"%2$d\" tekens."
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:112
 msgid "Tasks with private flag cannot be moved to a public folder."
@@ -8138,8 +8202,8 @@ msgstr "U heeft niet de juiste rechten om de map te zien."
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/update/UpdateExceptionMessages.java:62
 msgid ""
-"The current version number %1$s is already lower than or equal to the desired "
-"version number %2$s."
+"The current version number %1$s is already lower than or equal to the "
+"desired version number %2$s."
 msgstr ""
 "Het huidige versienummer %1$s is al lager of gelijk aan het gewenste "
 "versienummer %2$s."
@@ -8173,8 +8237,8 @@ msgid ""
 "Unable to determine next update task to execute. Executed: \"%1$s\". "
 "Enqueued: \"%2$s\". Scheduled: \"%3$s\"."
 msgstr ""
-"Kan de volgende uit te voeren taak niet bepalen. Uitgevoerd: %1$s. Ingepland: "
-"%2$s. Niet geplanned: %3$s."
+"Kan de volgende uit te voeren taak niet bepalen. Uitgevoerd: %1$s. "
+"Ingepland: %2$s. Niet geplanned: %3$s."
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/update/UpdateExceptionMessages.java:74
 msgid ""
@@ -8238,8 +8302,8 @@ msgid ""
 "Request rejected because its size (%1$s) exceeds the maximum configured size "
 "of %2$s."
 msgstr ""
-"Aanvraag geweigerd omdat de grootte (%1$s) de maximum geconfigureerde grootte "
-"van %2$s overschrijdt."
+"Aanvraag geweigerd omdat de grootte (%1$s) de maximum geconfigureerde "
+"grootte van %2$s overschrijdt."
 
 #. Missing parameter %1$s
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/upload/impl/UploadExceptionMessage.java:85
@@ -8271,7 +8335,8 @@ msgstr "Uploadbestand met id %1$s is onvindbaar."
 #. Thrown to indicate that currently uploaded file's MIME type does not obey a certain search criterion
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/upload/impl/UploadExceptionMessage.java:101
 msgid ""
-"Upload file's content type \"%1$s\" does not match given file filter \"%2$s\"."
+"Upload file's content type \"%1$s\" does not match given file filter \"%2$s"
+"\"."
 msgstr ""
 "Inhoudstype van geupload bestand \"%1$s\" past niet bij de opgegeven "
 "bestandsfilter \"%2$s\"."
@@ -8285,7 +8350,8 @@ msgstr "Het geüploade bestand is ongeldig of niet toegestaan."
 #. Request rejected because its size exceeds the maximum configured size of %1$s
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/upload/impl/UploadExceptionMessage.java:108
 msgid ""
-"Request rejected because its size exceeds the maximum configured size of %1$s."
+"Request rejected because its size exceeds the maximum configured size of "
+"%1$s."
 msgstr ""
 "Aanvraag geweigerd omdat de grootte de maximum geconfigureerde grootte van "
 "%1$s overschrijdt."
@@ -8293,16 +8359,17 @@ msgstr ""
 #. Connection has been closed unexpectedly. Please try again.
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/upload/impl/UploadExceptionMessage.java:111
 msgid "Connection has been closed unexpectedly. Please try again."
-msgstr "De verbinding is plotseling verbroken. Probeer het alstublieft opnieuw."
+msgstr ""
+"De verbinding is plotseling verbroken. Probeer het alstublieft opnieuw."
 
 #. Request rejected because file size (%1$s) exceeds the maximum configured file size of %2$s.
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/upload/impl/UploadExceptionMessage.java:114
 msgid ""
-"Request rejected because file size (%1$s) exceeds the maximum configured file "
-"size of %2$s."
+"Request rejected because file size (%1$s) exceeds the maximum configured "
+"file size of %2$s."
 msgstr ""
-"Aanvraag geweigerd omdat de bestandsgrootte (%1$s) de maximum geconfigureerde "
-"grootte van %2$s overschrijdt."
+"Aanvraag geweigerd omdat de bestandsgrootte (%1$s) de maximum "
+"geconfigureerde grootte van %2$s overschrijdt."
 
 #. Request rejected because file size exceeds the maximum configured file size of %1$s.
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/upload/impl/UploadExceptionMessage.java:117
@@ -8319,6 +8386,22 @@ msgid "Read timed out. Waited too long for incoming data from client."
 msgstr ""
 "Leestijd verstreken. Het systeem moest te lang wachten op inkomende gegevens "
 "van de client."
+
+#. Image upload denied. Its size exceeds maximum allowed value of %2$s
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/upload/impl/UploadExceptionMessage.java:123
+msgid "Image upload denied. Its size exceeds maximum allowed value of %2$s."
+msgstr ""
+"Afbeelding uploaden is mislukt. De grootte is meer dan de toegestane waarde "
+"%2$s."
+
+#. Image upload denied. Its resolution exceeds maximum allowed value of %2$s pixels.
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/upload/impl/UploadExceptionMessage.java:126
+msgid ""
+"Image upload denied. Its resolution exceeds maximum allowed value of %2$s "
+"pixels."
+msgstr ""
+"Afbeelding uploaden wordt geweigerd. De resolutie is hoger dan het "
+"toegestane aantal van %2$s pixels."
 
 #. *
 #. * Configuration for user %1$s could not be found in context %2$d
@@ -8355,7 +8438,8 @@ msgstr ""
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/userconfiguration/UserConfigurationExceptionMessage.java:91
 msgid "Mail settings for user \"%1$s\" could not be found in context %2$d."
 msgstr ""
-"De e-mailinstellingen voor gebruiker \"%1$s\" zijn onvindbaar in context %2$d."
+"De e-mailinstellingen voor gebruiker \"%1$s\" zijn onvindbaar in context "
+"%2$d."
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/guest/GuestExceptionMessage.java:63
 msgid ""
@@ -8370,8 +8454,8 @@ msgid ""
 "The provided mail address is empty! It cannot be added to guest "
 "administration."
 msgstr ""
-"Het opgegeven e-mailadres is leeg! Deze kan daarom niet toegevoegd worden aan "
-"de gastenadministratie."
+"Het opgegeven e-mailadres is leeg! Deze kan daarom niet toegevoegd worden "
+"aan de gastenadministratie."
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/guest/GuestExceptionMessage.java:67
 msgid "The new password might not be empty! Please provide a password."
@@ -8440,8 +8524,8 @@ msgstr "Geen inhoud beschikbaar in e-mailgedeelte."
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:94
 msgid ""
-"Message has been successfully sent. Due to exceeded quota a copy could not be "
-"placed in your sent folder though."
+"Message has been successfully sent. Due to exceeded quota a copy could not "
+"be placed in your sent folder though."
 msgstr ""
 "Het bericht is met succes verstuurd. Omdat uw quota is overschreden was het "
 "niet mogelijk een kopie in uw verzonden-map te plaatsen."
@@ -8454,7 +8538,8 @@ msgstr ""
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:98
 msgid "Unable to save the mail, due to exceeded quota."
 msgstr ""
-"Niet in staat om het e-mailbericht op te slaan omdat u uw quota bereikt heeft."
+"Niet in staat om het e-mailbericht op te slaan omdat u uw quota bereikt "
+"heeft."
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:100
 msgid ""
@@ -8514,8 +8599,9 @@ msgid ""
 "delete other folders first in order to re-use the mail module again"
 msgstr ""
 "Standaard mappen kunnen niet aangemaakt worden omdat het systeem geen nieuwe "
-"mappen meer toestaat. Het e-mailprogramma is daarom niet bruikbaar. Verwijder "
-"alstublieft eerst andere mappen voordat u de e-mailmodule opnieuw gebruikt"
+"mappen meer toestaat. Het e-mailprogramma is daarom niet bruikbaar. "
+"Verwijder alstublieft eerst andere mappen voordat u de e-mailmodule opnieuw "
+"gebruikt"
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:120
 msgid "The types of specified data source are not supported."
@@ -8584,11 +8670,11 @@ msgstr ""
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:156
 msgid ""
-"Please limit your recipients to %1$s  (including To/Cc/Bcc), and click 'Send' "
-"again."
+"Please limit your recipients to %1$s  (including To/Cc/Bcc), and click "
+"'Send' again."
 msgstr ""
-"Beperk alstublieft het aantal ontvangers tot %1$s  (inclusief Aan/Cc/Bcc), en "
-"klik opnieuw op 'Verzenden'."
+"Beperk alstublieft het aantal ontvangers tot %1$s  (inclusief Aan/Cc/Bcc), "
+"en klik opnieuw op 'Verzenden'."
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:158
 msgid "Unable to parse mail server URI \"%1$s\"."
@@ -8600,19 +8686,21 @@ msgstr "E-mail aanhangsel is verlopen of afwezig."
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:162
 msgid "Account has been checked successfully but with a non-secure connection."
-msgstr "Account is succesvol gevalideerd maar zonder een beveiligde verbinding."
+msgstr ""
+"Account is succesvol gevalideerd maar zonder een beveiligde verbinding."
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:164
 msgid ""
-"Cannot forward more than %1$s messages at once. Please divide the messages to "
-"forward in chunks of appropriate size."
+"Cannot forward more than %1$s messages at once. Please divide the messages "
+"to forward in chunks of appropriate size."
 msgstr ""
 "Het is niet mogelijk meer dan  %1$s berichten per keer door te sturen. "
 "Verdeel deze over een gepast aantal berichten."
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:166
 msgid "Your account has been created but will not use a secure connection."
-msgstr "Uw account is toegevoegd maar zal geen beveiligde verbinding gebruiken."
+msgstr ""
+"Uw account is toegevoegd maar zal geen beveiligde verbinding gebruiken."
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:168
 msgid ""
@@ -8624,7 +8712,8 @@ msgstr ""
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:170
 msgid ""
-"Mail folder cannot be created/renamed. Folder name exceeds max length of %1$s."
+"Mail folder cannot be created/renamed. Folder name exceeds max length of "
+"%1$s."
 msgstr ""
 "E-mailmap kan niet worden aangemaakt/hernoemd. De mapnaam is langer dan de "
 "maximale lengte %1$s."
@@ -8815,8 +8904,8 @@ msgstr ""
 #. Thrown when a mail transport has been disabled. That is it exceeded the limit for failed authentication count.
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:258
 msgid ""
-"Your mail transport for  %2$s was disabled due to invalid credentials. Please "
-"edit the account and enter correct credentials to enable it again"
+"Your mail transport for  %2$s was disabled due to invalid credentials. "
+"Please edit the account and enter correct credentials to enable it again"
 msgstr ""
 "Het e-mailtransport voor %2$s is uitgeschakeld door ongeldige aanmeldingen. "
 "Bewerk alstublieft het account en geef de juiste aanmeldgegevens op om deze "
@@ -8898,9 +8987,9 @@ msgstr ""
 #.
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:65
 msgid ""
-"There was an issue while authenticating. This may be due to a recent password "
-"change. To continue please log out and log back in with your most current "
-"password."
+"There was an issue while authenticating. This may be due to a recent "
+"password change. To continue please log out and log back in with your most "
+"current password."
 msgstr ""
 "Er trad een probleem op bij het controleren van uw e-mailwachtwoord. Dit kan "
 "veroorzaakt zijn door een recente wachtwoordverandering. Om door te gaan "
@@ -8985,7 +9074,8 @@ msgid ""
 "You do not have the appropriate permissions to change the content of folder "
 "\"%1$s\"."
 msgstr ""
-"U heeft niet de juiste rechten om de inhoud van de map \"%1$s\" te veranderen."
+"U heeft niet de juiste rechten om de inhoud van de map \"%1$s\" te "
+"veranderen."
 
 #. *
 #. * An attempt was made to open a read-only folder with read-write "%1$s" on mail server %2$s with login %3$s (user=%4$s, context=%5$s)
@@ -9069,7 +9159,8 @@ msgstr ""
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:160
 msgid "Connection closed to mail server %1$s. Please try again later."
 msgstr ""
-"Verbinding met de mailserver %1$s. Probeer het alstublieft later nog een keer."
+"Verbinding met de mailserver %1$s. Probeer het alstublieft later nog een "
+"keer."
 
 #. *
 #. * The connection to remote server %1$s was refused or timed out while attempting to connect.
@@ -9097,7 +9188,8 @@ msgstr ""
 #. * Mail server %1$s unexpectedly closed connection for user %2$s.
 #.
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:175
-msgid "Mail server %1$s unexpectedly closed connection. Please try again later."
+msgid ""
+"Mail server %1$s unexpectedly closed connection. Please try again later."
 msgstr ""
 "Mailserver %1$s heeft onverwacht de verbinding verbroken. Probeer het "
 "alstublieft later nog een keer."
@@ -9163,6 +9255,42 @@ msgid ""
 msgstr ""
 "Timeout bij het versturen naar de volgende deelnemer: %1$s. Probeer het "
 "alstublieft later nog een keer."
+
+#. Mail server denies access
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:209
+msgid "Mail server denies access."
+msgstr "De mailserver weigert toegang."
+
+#. The user tried to append or move a message to a mail folder, which does not exist.
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:212
+msgid ""
+"Destination folder does not exist. Please try to create it and retry the "
+"operation."
+msgstr ""
+"Doelmap bestaat niet. Probeer deze aan te maken en probeer het daarna nog "
+"een keer."
+
+#. Temporary failure because a subsystem is down. For example, an IMAP server that uses an LDAP server for authentication might use this response code when the LDAP/Radius server is down.
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:215
+msgid "A temporary failure occurred during login. Please try again later."
+msgstr ""
+"Er is een tijdelijke fout opgetreden tijdens het aanmelden. Probeer het "
+"later nog een keer."
+
+#. Either authentication succeeded or the server no longer had the necessary data; either way, access is no longer permitted using that passphrase. The client or user should get a new passphrase.
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:218
+msgid ""
+"Access to mail server is no longer permitted using your password. Please "
+"obtain a new one."
+msgstr ""
+"Toegang tot de e-mailserver is niet meer toegestaan met dit wachtwoord. "
+"Vraag alstublieft een nieuwe aan."
+
+#. Access to mail server is not permitted due to a lack of privacy. E.g. client is supposed to switch to a connection with Transport Layer Security (TLS).
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:221
+msgid "Access to mail server is not permitted due to a lack of privacy."
+msgstr ""
+"Toegang tot de e-mailserver is niet toegestaan door het gebrek aan privacy."
 
 #. The message advertising that everything is fine with checked account
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mailaccount/KnownStatusMessage.java:71
@@ -9289,14 +9417,14 @@ msgid ""
 "Could not connect to transport server \"%1$s\" for login %2$s. Please review "
 "your settings."
 msgstr ""
-"Kan geen verbinding maken met transportserver \"%1$s\" voor aanmeldnaam %2$s. "
-"Controleer alstublieft uw instellingen."
+"Kan geen verbinding maken met transportserver \"%1$s\" voor aanmeldnaam "
+"%2$s. Controleer alstublieft uw instellingen."
 
 #. Shown when no SSL port was set but SSL enabled
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mailaccount/MailAccountExceptionStrings.java:110
 msgid ""
-"Default port specified for mail protocol \"%1$s\", but SSL is enabled. Please "
-"review if appropriate."
+"Default port specified for mail protocol \"%1$s\", but SSL is enabled. "
+"Please review if appropriate."
 msgstr ""
 "Standaardpoort opgegeven voor e-mailprotocol \"%1$s\", maar SSL is "
 "ingeschakeld. Controleer dit alstublieft."
@@ -9325,8 +9453,8 @@ msgid ""
 "Secure port specified for transport protocol \"%1$s\", but SSL is not "
 "enabled. Please review if appropriate."
 msgstr ""
-"Beveiligde poort opgegeven voor protocol \"%1$s\", maar SSL is uitgeschakeld. "
-"Controleer dit alstublieft."
+"Beveiligde poort opgegeven voor protocol \"%1$s\", maar SSL is "
+"uitgeschakeld. Controleer dit alstublieft."
 
 #. The given host name "%1$s" is invalid.
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mailaccount/MailAccountExceptionStrings.java:122
@@ -9552,7 +9680,8 @@ msgid ""
 "The folder is a default folder. Hence its owner needs to hold administrative "
 "permissions."
 msgstr ""
-"De map is een standaard map. Daarom heeft de eigenaar er beheerdersrechten op."
+"De map is een standaard map. Daarom heeft de eigenaar er beheerdersrechten "
+"op."
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:103
 msgid "You do not have appropriate permissions to share the folder."
@@ -9565,8 +9694,8 @@ msgstr ""
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:105
 msgid ""
-"It is not possible to apply the changes as a result of restricted permissions "
-"of the user \"%1$s\"."
+"It is not possible to apply the changes as a result of restricted "
+"permissions of the user \"%1$s\"."
 msgstr ""
 "Door de beperkte rechten van de gebruiker \"%1$s\" is het niet mogelijk de "
 "wijzigingen toe te passen."
@@ -9598,8 +9727,8 @@ msgid ""
 "rename the folder before sharing it with this user."
 msgstr ""
 "U heeft reeds een persoonlijke map met de naam \"%1$s\" gedeeld met deze "
-"gebruiker. Dit is niet mogelijk. Geef de map een andere naam alvorens deze te "
-"delen met deze gebruiker."
+"gebruiker. Dit is niet mogelijk. Geef de map een andere naam alvorens deze "
+"te delen met deze gebruiker."
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:110
 msgid "Duplicate permission defined. Only one permission per user is allowed."
@@ -9610,7 +9739,8 @@ msgstr ""
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:111
 msgid "Duplicate permission defined. Only one permission per group is allowed."
 msgstr ""
-"Dubbele rechten gedefinieerd. Slechts één bevoegdheid per groep is toegestaan."
+"Dubbele rechten gedefinieerd. Slechts één bevoegdheid per groep is "
+"toegestaan."
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:112
 msgid "Only the folder visibility permission is allowed to be changed."
@@ -9662,8 +9792,8 @@ msgid ""
 "You are not allowed to change the permissions of the trash folder or any of "
 "its subfolders"
 msgstr ""
-"Het is u niet toegestaan de rechten te veranderen van de prullenbakmap of een "
-"van de submappen hiervan."
+"Het is u niet toegestaan de rechten te veranderen van de prullenbakmap of "
+"een van de submappen hiervan."
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/servlet/AjaxExceptionMessages.java:62
 msgid "The requested operation is not permitted via a non-secure connection."
@@ -9789,8 +9919,8 @@ msgstr "map"
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:69
 msgid "%1$s has shared the %2$s \"%3$s\" with you. Please log in to view it. "
 msgstr ""
-"%1$s heeft het %2$s \"%3$s\" met u gedeeld. Meld u alstublieft aan om deze te "
-"zien."
+"%1$s heeft het %2$s \"%3$s\" met u gedeeld. Meld u alstublieft aan om deze "
+"te zien."
 
 #. We sent a message to john.doe@example.com with further instructions on how to set a new password.
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:72
@@ -9839,8 +9969,8 @@ msgid ""
 "Access to the file you're looking for has been removed. Please contact the "
 "owner if you want access again."
 msgstr ""
-"Toegang tot het bestand dat u heeft gezocht is geweigerd. Neem contact op met "
-"de eigenaar als u deze opnieuw wilt benaderen."
+"Toegang tot het bestand dat u heeft gezocht is geweigerd. Neem contact op "
+"met de eigenaar als u deze opnieuw wilt benaderen."
 
 #. Access to the file you're looking for has been removed. Please contact <John Doe> if you want access again.
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:90
@@ -9848,8 +9978,8 @@ msgid ""
 "Access to the file you're looking for has been removed. Please contact %1$s "
 "if you want access again."
 msgstr ""
-"Toegang tot het bestand dat u heeft gezocht is geweigerd. Neem contact op met "
-"%1$s als u deze opnieuw wilt benaderen."
+"Toegang tot het bestand dat u heeft gezocht is geweigerd. Neem contact op "
+"met %1$s als u deze opnieuw wilt benaderen."
 
 #. Access to the folder you're looking for has been removed. Please contact the owner if you want access again.
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:93
@@ -9863,11 +9993,11 @@ msgstr ""
 #. Access to the folder you're looking for has been removed. Please contact <John Doe> if you want access again.
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:96
 msgid ""
-"Access to the folder you're looking for has been removed. Please contact %1$s "
-"if you want access again."
+"Access to the folder you're looking for has been removed. Please contact "
+"%1$s if you want access again."
 msgstr ""
-"Toegang tot de map die u heeft gezocht is geweigerd. Neem contact op met %1$s "
-"als u deze opnieuw wilt benaderen."
+"Toegang tot de map die u heeft gezocht is geweigerd. Neem contact op met "
+"%1$s als u deze opnieuw wilt benaderen."
 
 #. Access to the share you're looking for has been removed. Please contact the owner if you want access again.
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:99
@@ -9894,19 +10024,20 @@ msgid ""
 "owner if you want access again. To view your other shared files, click "
 "\"Continue\"."
 msgstr ""
-"Toegang tot het bestand dat u heeft gezocht is geweigerd. Neem contact op met "
-"de eigenaar als u deze opnieuw wilt benaderen. Om uw andere gedeelde "
+"Toegang tot het bestand dat u heeft gezocht is geweigerd. Neem contact op "
+"met de eigenaar als u deze opnieuw wilt benaderen. Om uw andere gedeelde "
 "bestanden te zien klikt u op \"Doorgaan\"."
 
 #. Access to the file you're looking for has been removed. Please contact <John Doe> if you want access again. To view your other shared files, click "Continue".
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:108
 msgid ""
 "Access to the file you're looking for has been removed. Please contact %1$s "
-"if you want access again. To view your other shared files, click \"Continue\"."
+"if you want access again. To view your other shared files, click \"Continue"
+"\"."
 msgstr ""
-"Toegang tot het bestand dat u heeft gezocht is geweigerd. Neem contact op met "
-"%1$s als u deze opnieuw wilt benaderen. Om uw andere gedeelde bestanden te "
-"zien klikt u op \"Doorgaan\"."
+"Toegang tot het bestand dat u heeft gezocht is geweigerd. Neem contact op "
+"met %1$s als u deze opnieuw wilt benaderen. Om uw andere gedeelde bestanden "
+"te zien klikt u op \"Doorgaan\"."
 
 #. Access to the folder you're looking for has been removed. Please contact the owner if you want access again. To view your other shared files, click "Continue".
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:111
@@ -9922,12 +10053,13 @@ msgstr ""
 #. Access to the folder you're looking for has been removed. Please contact <John Doe> if you want access again. To view your other shared files, click "Continue".
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:114
 msgid ""
-"Access to the folder you're looking for has been removed. Please contact %1$s "
-"if you want access again. To view your other shared files, click \"Continue\"."
+"Access to the folder you're looking for has been removed. Please contact "
+"%1$s if you want access again. To view your other shared files, click "
+"\"Continue\"."
 msgstr ""
-"Toegang tot de map die u heeft gezocht is geweigerd. Neem contact op met %1$s "
-"als u deze opnieuw wilt benaderen. Om uw andere gedeelde bestanden te zien "
-"klikt u op \"Doorgaan\"."
+"Toegang tot de map die u heeft gezocht is geweigerd. Neem contact op met "
+"%1$s als u deze opnieuw wilt benaderen. Om uw andere gedeelde bestanden te "
+"zien klikt u op \"Doorgaan\"."
 
 #. Access to the share you're looking for has been removed. Please contact the owner if you want access again. To view your other shared files, click "Continue".
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:117
@@ -9944,7 +10076,8 @@ msgstr ""
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:120
 msgid ""
 "Access to the share you're looking for has been removed. Please contact %1$s "
-"if you want access again. To view your other shared files, click \"Continue\"."
+"if you want access again. To view your other shared files, click \"Continue"
+"\"."
 msgstr ""
 "Toegang tot het gedeelde item dat u heeft gezocht is geweigerd. Neem contact "
 "op met %1$s als u deze opnieuw wilt benaderen. Om uw andere gedeelde "
@@ -9957,8 +10090,8 @@ msgid ""
 "owner if you want access again. To view your other shared files, please log "
 "in."
 msgstr ""
-"Toegang tot het bestand dat u heeft gezocht is geweigerd. Neem contact op met "
-"de eigenaar als u deze opnieuw wilt benaderen. Om uw andere gedeelde "
+"Toegang tot het bestand dat u heeft gezocht is geweigerd. Neem contact op "
+"met de eigenaar als u deze opnieuw wilt benaderen. Om uw andere gedeelde "
 "bestanden te zien moet u aanmelden."
 
 #. Access to the file you're looking for has been removed. Please contact <John Doe> if you want access again. To view your other shared files, please log in.
@@ -9967,9 +10100,9 @@ msgid ""
 "Access to the file you're looking for has been removed. Please contact %1$s "
 "if you want access again. To view your other shared files, please log in."
 msgstr ""
-"Toegang tot het bestand dat u heeft gezocht is geweigerd. Neem contact op met "
-"%1$s als u deze opnieuw wilt benaderen. Om uw andere gedeelde bestanden te "
-"zien moet u aanmelden."
+"Toegang tot het bestand dat u heeft gezocht is geweigerd. Neem contact op "
+"met %1$s als u deze opnieuw wilt benaderen. Om uw andere gedeelde bestanden "
+"te zien moet u aanmelden."
 
 #. Access to the folder you're looking for has been removed. Please contact the owner if you want access again. To view your other shared files, please log in.
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:129
@@ -9985,12 +10118,13 @@ msgstr ""
 #. Access to the folder you're looking for has been removed. Please contact <John Doe> if you want access again. To view your other shared files, please log in.
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:132
 msgid ""
-"Access to the folder you're looking for has been removed. Please contact %1$s "
-"if you want access again. To view your other shared files, please log in."
+"Access to the folder you're looking for has been removed. Please contact "
+"%1$s if you want access again. To view your other shared files, please log "
+"in."
 msgstr ""
-"Toegang tot de map die u heeft gezocht is geweigerd. Neem contact op met %1$s "
-"als u deze opnieuw wilt benaderen. Om uw andere gedeelde bestanden te zien "
-"moet u aanmelden."
+"Toegang tot de map die u heeft gezocht is geweigerd. Neem contact op met "
+"%1$s als u deze opnieuw wilt benaderen. Om uw andere gedeelde bestanden te "
+"zien moet u aanmelden."
 
 #. Access to the share you're looking for has been removed. Please contact the owner if you want access again. To view your other shared files, please log in.
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:135
@@ -10202,8 +10336,8 @@ msgstr ""
 #. * $username ($user_email) has shared $number_of_images images with you. Please click the button below to view them.
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:123
 msgid ""
-"%1$s (%2$s) has shared %3$s images with you. Please click the button below to "
-"view them."
+"%1$s (%2$s) has shared %3$s images with you. Please click the button below "
+"to view them."
 msgstr ""
 "%1$s (%2$s) heeft %3$s afbeeldingen met u gedeeld. Klik alstublieft op de "
 "knop hieronder om deze te zien."
@@ -10238,8 +10372,8 @@ msgstr ""
 #. * $username ($user_email) has shared folder $number folders with you. Please click the button below to view them.
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:135
 msgid ""
-"%1$s (%2$s) has shared %3$ folders with you. Please click the button below to "
-"view them."
+"%1$s (%2$s) has shared %3$ folders with you. Please click the button below "
+"to view them."
 msgstr ""
 "%1$s (%2$s) heeft %3$s mappen met u gedeeld. Klik alstublieft op de knop "
 "hieronder om deze te zien."
@@ -10313,8 +10447,8 @@ msgid ""
 "%1$s (%2$s) has shared %3$ folders with the group \"%4$s\". Please click the "
 "button below to view them."
 msgstr ""
-"%1$s (%2$s) heeft %3$d mappen met de groep \"%4$s\" gedeeld. Klik alstublieft "
-"op de knop hieronder om deze te zien."
+"%1$s (%2$s) heeft %3$d mappen met de groep \"%4$s\" gedeeld. Klik "
+"alstublieft op de knop hieronder om deze te zien."
 
 #. * $username ($user_email) has shared file "$filename" with you and left you a message:
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:163
@@ -10366,7 +10500,8 @@ msgstr ""
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:181
 msgid "%1$s (%2$s) has shared %3$d items with you and left you a message:"
 msgstr ""
-"%1$s (%2$s) heeft %3$d items met u gedeeld en heeft een bericht achtergelaten:"
+"%1$s (%2$s) heeft %3$d items met u gedeeld en heeft een bericht "
+"achtergelaten:"
 
 #. * $username ($user_email) has shared $number_of_folder items with you.
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:184
@@ -10381,16 +10516,16 @@ msgid ""
 "%1$s (%2$s) has shared the file \"%3$s\" with the group \"%4$s\" and left a "
 "message:"
 msgstr ""
-"%1$s (%2$s) heeft het bestand \"%3$s\" met de groep \"%4$s\" gedeeld en heeft "
-"een bericht achtergelaten:"
+"%1$s (%2$s) heeft het bestand \"%3$s\" met de groep \"%4$s\" gedeeld en "
+"heeft een bericht achtergelaten:"
 
 #. * $username ($user_email) has shared $number_of_files files with the group "Sales Dept." and left a message:
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:190
 msgid ""
 "%1$s (%2$s) has shared %3$s files with the group \"%4$s\" and left a message:"
 msgstr ""
-"%1$s (%2$s) heeft het bestand \"%3$s\" met de groep \"%4$s\" gedeeld en heeft "
-"een bericht achtergelaten:"
+"%1$s (%2$s) heeft het bestand \"%3$s\" met de groep \"%4$s\" gedeeld en "
+"heeft een bericht achtergelaten:"
 
 #. * $username ($user_email) has shared photo "$filename" with the group "Sales Dept." and left a message:
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:193
@@ -10404,7 +10539,8 @@ msgstr ""
 #. * $username ($user_email) has shared $number_of_images images with the group "Sales Dept." and left a message:
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:196
 msgid ""
-"%1$s (%2$s) has shared %3$s images with the group \"%4$s\" and left a message:"
+"%1$s (%2$s) has shared %3$s images with the group \"%4$s\" and left a "
+"message:"
 msgstr ""
 "%1$s (%2$s) heeft %3$s afbeeldingen met de groep \"%4$s\" gedeeld en heeft "
 "een bericht achtergelaten:"
@@ -10412,8 +10548,8 @@ msgstr ""
 #. * $username ($user_email) has shared a folder with the group "Sales Dept." and left a message:
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:199
 msgid ""
-"%1$s (%2$s) has shared the folder \"%3$s\" with the group \"%4$s\" and left a "
-"message:"
+"%1$s (%2$s) has shared the folder \"%3$s\" with the group \"%4$s\" and left "
+"a message:"
 msgstr ""
 "%1$s (%2$s) heeft de map \"%3$s\" met de groep \"%4$s\" gedeeld en heeft een "
 "bericht achtergelaten:"
@@ -10561,8 +10697,8 @@ msgstr ""
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/ShareNotifyExceptionMessages.java:68
 msgid "An error occurred, we were unable to send out the notification mails."
 msgstr ""
-"Er is een fout opgetreden, we waren niet in staat een kennisgevingsbericht te "
-"sturen."
+"Er is een fout opgetreden, we waren niet in staat een kennisgevingsbericht "
+"te sturen."
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/ShareNotifyExceptionMessages.java:70
 msgid ""
@@ -10635,7 +10771,8 @@ msgstr ""
 
 #. Thrown if a user tries to create a snippet/signature containing more than max. number of allowed images
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.snippet/src/com/openexchange/snippet/SnippetStrings.java:77
-msgid "The maximum allowed number of '%1$s' images in the signature is reached."
+msgid ""
+"The maximum allowed number of '%1$s' images in the signature is reached."
 msgstr ""
 "De maximaal toelaatbare aantal bestanden van '%1$s' voor "
 "ondertekeningsafbeeldingen is bereikt."
@@ -10683,8 +10820,8 @@ msgid ""
 "Could not fetch site at %1$s. Please check the spelling or whether you can "
 "reach the site in your browser."
 msgstr ""
-"Kan de site op %1$s niet benaderen. Controleer de spelling of probeer de site "
-"direct met uw browser te bereiken."
+"Kan de site op %1$s niet benaderen. Controleer de spelling of probeer de "
+"site direct met uw browser te bereiken."
 
 #. The string cannot be parsed to a valid URL.
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.subscribe.microformats/src/com/openexchange/subscribe/microformats/OXMFErrorStrings.java:72
@@ -10750,11 +10887,11 @@ msgstr "Uw account moet geverifieerd worden: %1$s"
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.subscribe/src/com/openexchange/subscribe/SubscriptionErrorStrings.java:89
 msgid ""
 "The service provider asked for an identity confirmation. This happens for "
-"some accounts and cannot fixed by us. It is in the provider's responsibility. "
-"For this reason, the subscription cannot be completed."
+"some accounts and cannot fixed by us. It is in the provider's "
+"responsibility. For this reason, the subscription cannot be completed."
 msgstr ""
-"De service verlener vraagt om een bevestig van uw identiteit. Dit gebeurt bij "
-"sommige accounts en kan niet door ons opgelost worden. Het is de "
+"De service verlener vraagt om een bevestig van uw identiteit. Dit gebeurt "
+"bij sommige accounts en kan niet door ons opgelost worden. Het is de "
 "verantwoordelijkheid van de dienstverlener. Het is daarom niet mogelijk dit "
 "abonnement af te configureren."
 
@@ -10901,6 +11038,15 @@ msgstr ""
 "De bestanden van de gebruiker zijn eigendom van %1$s in broncontext %2$s. "
 "Stel de juiste individuele of context-specifieke bestandsopslaglijst in."
 
+#. The user %1$s in source context %2$s does use Unified Quota and therefore cannot be copied.
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.user.copy/src/com/openexchange/user/copy/UserCopyExceptionMessages.java:68
+msgid ""
+"The user %1$s in source context %2$s does use Unified Quota and therefore "
+"cannot be copied."
+msgstr ""
+"De gebruiker %1$s in de context $2$s maakt geen gebruik van Unified Quota en "
+"kan daarom niet gekopieerd worden."
+
 #. The provided feedback score is invalid. Please choose a number > 0.
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.userfeedback.starrating/src/com/openexchange/userfeedback/starrating/exception/StarRatingExceptionMessages.java:64
 msgid "The provided feedback score is invalid. Please choose a number > 0."
@@ -10920,7 +11066,8 @@ msgstr "Het opgegeven waarderingscijfer bevat niet het verplichte veld '%s'."
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.userfeedback.starrating/src/com/openexchange/userfeedback/starrating/exception/StarRatingExceptionMessages.java:73
 msgid "The provided feedback for key '%s' cannot be parsed."
 msgstr ""
-"Het opgegeven waarderingscijfer voor de sleutel '%s' kan niet worden verwerkt."
+"Het opgegeven waarderingscijfer voor de sleutel '%s' kan niet worden "
+"verwerkt."
 
 #. The value given in the property %1$s is no integer value
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.utils/src/com/openexchange/utils/propertyhandling/internal/ConfigurationExceptionMessages.java:63
@@ -13187,6 +13334,15 @@ msgstr "UTC"
 msgid "Zulu"
 msgstr "Zoeloe"
 
+#~ msgid ""
+#~ "A folder named \"%1$s\" already exists below the parent folder \"%2$s\"."
+#~ msgstr ""
+#~ "Een map met de naam \"%1$s\" bestaat reeds in de bovenliggende map \"%2$s"
+#~ "\"."
+
+#~ msgid "This is not a task folder."
+#~ msgstr "Dit is geen takenmap."
+
 #~ msgid "⁺∕₋ 1 month"
 #~ msgstr "⁺∕₋ 1 maand"
 
@@ -13199,12 +13355,13 @@ msgstr "Zoeloe"
 #~ msgid "The scope %1$s is not supported by the provider"
 #~ msgstr "De scope %1$s wordt niet ondersteund door de dienstverlener"
 
-#~ msgid "Folder \"%1$s\" has been closed. Probably your request took too long."
+#~ msgid ""
+#~ "Folder \"%1$s\" has been closed. Probably your request took too long."
 #~ msgstr "De map \"%1$s\" is gesloten. Mogelijk duurde de aanvraag te lang."
 
 #~ msgid ""
-#~ "Folder \"%1$s\" has been closed on mail server %2$s. Probably your request "
-#~ "took too long."
+#~ "Folder \"%1$s\" has been closed on mail server %2$s. Probably your "
+#~ "request took too long."
 #~ msgstr ""
 #~ "De map \"%1$s\" is gesloten op de e-mailserver. Mogelijk duurde de "
 #~ "aanvraag te lang."
@@ -13223,7 +13380,8 @@ msgstr "Zoeloe"
 #~ "tijd bij het maken van een verbinding."
 
 #~ msgid ""
-#~ "The connection to remote server %1$s timed out while awaiting the response."
+#~ "The connection to remote server %1$s timed out while awaiting the "
+#~ "response."
 #~ msgstr ""
 #~ "Verbinding met externe server %1$s overschreed de toegestane tijd bij het "
 #~ "wachten op een antwoord."
@@ -13251,17 +13409,18 @@ msgstr "Zoeloe"
 #~ msgid ""
 #~ "Message(s) %1$s in folder %2$s could not be deleted due to error \"%3$s\""
 #~ msgstr ""
-#~ "Bericht(en) %1$s in map %2$s kunnen niet verwijderd worden door fout \"%3$s"
-#~ "\""
+#~ "Bericht(en) %1$s in map %2$s kunnen niet verwijderd worden door fout "
+#~ "\"%3$s\""
 
 #~ msgid ""
-#~ "You do not have the appropriate permissions to read appointments in folder "
-#~ "%1$d."
+#~ "You do not have the appropriate permissions to read appointments in "
+#~ "folder %1$d."
 #~ msgstr ""
 #~ "U heeft niet voldoende rechten om afspraken te lezen uit de map %1$d."
 
 #~ msgid ""
-#~ "Move not supported: Cannot move an appointment from folder %d to folder %d."
+#~ "Move not supported: Cannot move an appointment from folder %d to folder "
+#~ "%d."
 #~ msgstr ""
 #~ "Verplaatsen niet ondersteund: Kan de afspraak niet van map %d naar map %d "
 #~ "verplaatsen."
@@ -13270,8 +13429,8 @@ msgstr "Zoeloe"
 #~ "Cannot insert appointment (%1$s). An appointment with the unique "
 #~ "identifier (%2$s) already exists."
 #~ msgstr ""
-#~ "Het is niet mogelijk de afspraak (%1$s) toe te voegen. Een afspraak met de "
-#~ "unieke identificatie code (%2$s) bestaat reeds."
+#~ "Het is niet mogelijk de afspraak (%1$s) toe te voegen. Een afspraak met "
+#~ "de unieke identificatie code (%2$s) bestaat reeds."
 
 #~ msgid ""
 #~ "Cannot insert task (%1$s). A task with the unique identifier (%2$s) "
@@ -13287,14 +13446,15 @@ msgstr "Zoeloe"
 #~ "You do not have the appropriate permissions to read the contents of the "
 #~ "folder with id %1$d."
 #~ msgstr ""
-#~ "U heeft niet de juiste rechten om de inhoud van de map met het nummer %1$d "
-#~ "te lezen."
+#~ "U heeft niet de juiste rechten om de inhoud van de map met het nummer "
+#~ "%1$d te lezen."
 
 #~ msgid ""
 #~ "You do not have the appropriate permissions to create tasks in folder "
 #~ "\"%1$s\"."
 #~ msgstr ""
-#~ "U heeft niet voldoende rechten om een taak aan te maken in de map \"%1$s\"."
+#~ "U heeft niet voldoende rechten om een taak aan te maken in de map \"%1$s"
+#~ "\"."
 
 #~ msgid ""
 #~ "You do not have the appropriate permissions to edit tasks in the folder "
@@ -13352,8 +13512,8 @@ msgstr "Zoeloe"
 #~ msgstr "Kan indeling %2$s niet importeren in map %1$s."
 
 #~ msgid ""
-#~ "You do not have the appropriate permissions to read the contents of folder "
-#~ "\"%1$s\"."
+#~ "You do not have the appropriate permissions to read the contents of "
+#~ "folder \"%1$s\"."
 #~ msgstr ""
 #~ "U heeft niet de juiste rechten om de inhoud van map \"%1$s\" in te zien."
 
@@ -13383,7 +13543,8 @@ msgstr "Zoeloe"
 #~ "lijsten. Voeg alstublieft een geldig e-mailadres toe."
 
 #~ msgid ""
-#~ "The available attachments for this E-Mail can be accessed via the link %1$s"
+#~ "The available attachments for this E-Mail can be accessed via the link "
+#~ "%1$s"
 #~ msgstr ""
 #~ "De beschikbare bijlagen voor dit e-mailbericht zijn te benaderen via de "
 #~ "link %1$s"
@@ -13577,7 +13738,8 @@ msgstr "Zoeloe"
 #~ "Map \"%1$s\" is niet zichtbaar voor gebruiker \"%2$s\" in context \"%3$s\""
 
 #~ msgid ""
-#~ "The content type you provided is not allowed for the given folder \"%1$s\"."
+#~ "The content type you provided is not allowed for the given folder \"%1$s"
+#~ "\"."
 #~ msgstr ""
 #~ "Het inhoudstype dat u heeft opgegeven past niet bij de opgegeven map  "
 #~ "\"%1$s\"."
@@ -13594,9 +13756,9 @@ msgstr "Zoeloe"
 #~ msgstr "U heeft niet de juiste rechten om de map \"%1$s\" te verplaatsen."
 
 #~ msgid ""
-#~ "Found two folders named \"%1$s\" located below the parent folder \"%2$s\". "
-#~ "Please rename one of the folders. There should be no two folders with the "
-#~ "same name."
+#~ "Found two folders named \"%1$s\" located below the parent folder \"%2$s"
+#~ "\". Please rename one of the folders. There should be no two folders with "
+#~ "the same name."
 #~ msgstr ""
 #~ "Twee mappen met de naam \"%1$s\" gevonden onder de map \"%2$s\". Hernoem "
 #~ "één van de mappen. Het is niet mogelijk twee mappen met de zelfde naam te "
@@ -13727,7 +13889,8 @@ msgstr "Zoeloe"
 #~ "De map \"%2$s\" is een standaard map waarop de eigenaar beheerdersrechten "
 #~ "moet hebben."
 
-#~ msgid "You do not have appropriate permissions to share the folder \"%2$s\"."
+#~ msgid ""
+#~ "You do not have appropriate permissions to share the folder \"%2$s\"."
 #~ msgstr "U heeft niet de juiste rechten om de map \"%1$s\" te delen."
 
 #~ msgid ""
@@ -13738,11 +13901,11 @@ msgstr "Zoeloe"
 #~ "wijzigingen toe te passen op de map \"%2$s\"."
 
 #~ msgid ""
-#~ "The folder \"%1$s\" cannot be deleted since it contains a hidden subfolder "
-#~ "you don't have the appropriate permissions for."
+#~ "The folder \"%1$s\" cannot be deleted since it contains a hidden "
+#~ "subfolder you don't have the appropriate permissions for."
 #~ msgstr ""
-#~ "De map \"%1$s\" kan niet worden verwijderd omdat deze een verborgen submap "
-#~ "heeft waarvoor u niet de juiste rechten heeft."
+#~ "De map \"%1$s\" kan niet worden verwijderd omdat deze een verborgen "
+#~ "submap heeft waarvoor u niet de juiste rechten heeft."
 
 #~ msgid ""
 #~ "The folder \"%2$s\" already contains a folder named \"%1$s\". Please "
@@ -13772,8 +13935,8 @@ msgstr "Zoeloe"
 #~ "Alleen de zichtbaarheid mag veranderd worden door voor de map \"%1$s\"."
 
 #~ msgid ""
-#~ "Only individual user permissions, but no group permissions are allowed for "
-#~ "folder \"%1$s\"."
+#~ "Only individual user permissions, but no group permissions are allowed "
+#~ "for folder \"%1$s\"."
 #~ msgstr ""
 #~ "Alleen individuele gebruikersrechten, maar geen groepsrechten, zijn "
 #~ "toegestaan voor de map \"%1$\"s."
@@ -13866,8 +14029,8 @@ msgstr "Zoeloe"
 #~ "The client has sent a message that is malformed or cannot be processed: "
 #~ "%1$s"
 #~ msgstr ""
-#~ "De client heeft een misvormd bericht gestuurd of kan niet worden verwerkt: "
-#~ "%1$s"
+#~ "De client heeft een misvormd bericht gestuurd of kan niet worden "
+#~ "verwerkt: %1$s"
 
 #~ msgid ""
 #~ "The server could not process the stanza because of a misconfiguration or "
@@ -13993,10 +14156,11 @@ msgstr "Zoeloe"
 #~ msgstr "Er is een Box fout opgetreden: %1$s"
 
 #~ msgid ""
-#~ "A Box server error occurred with HTTP status code %1$s. Error message: %2$s"
-#~ msgstr ""
-#~ "Er is een Box serverfout opgetreden met HTTP statuscode %1$s. Foutmelding: "
+#~ "A Box server error occurred with HTTP status code %1$s. Error message: "
 #~ "%2$s"
+#~ msgstr ""
+#~ "Er is een Box serverfout opgetreden met HTTP statuscode %1$s. "
+#~ "Foutmelding: %2$s"
 
 #~ msgid "The provided Box URL: %1$s is invalid"
 #~ msgstr "De opgegeven Box-URL: %1$s is ongeldig"
@@ -14076,7 +14240,8 @@ msgstr "Zoeloe"
 
 #~ msgid "The data area passed to a system call is too small."
 #~ msgstr ""
-#~ "Het gegevensgebied welke is aangeboden aan een systeem-aanroep is te klein."
+#~ "Het gegevensgebied welke is aangeboden aan een systeem-aanroep is te "
+#~ "klein."
 
 #~ msgid "The filename, directory name, or volume label syntax is incorrect."
 #~ msgstr "De bestandsnaam, mapnaam of volumenaam syntax is onjuist."
@@ -14094,8 +14259,8 @@ msgstr "Zoeloe"
 #~ "The process cannot access the file because it is being used by another "
 #~ "process."
 #~ msgstr ""
-#~ "Het systeem kan het opgegeven bestand niet benaderen omdat deze in gebruik "
-#~ "is bij een ander process."
+#~ "Het systeem kan het opgegeven bestand niet benaderen omdat deze in "
+#~ "gebruik is bij een ander process."
 
 #~ msgid ""
 #~ "There are currently no logon servers available to service the logon "
@@ -14280,8 +14445,8 @@ msgstr "Zoeloe"
 #~ msgstr "Er is een Dropbox fout opgetreden: %1$s"
 
 #~ msgid ""
-#~ "A Dropbox server error occurred with HTTP status code %1$s. Error message: "
-#~ "%2$s"
+#~ "A Dropbox server error occurred with HTTP status code %1$s. Error "
+#~ "message: %2$s"
 #~ msgstr ""
 #~ "Er is een Dropbox serverfout opgetreden met HTTP statuscode %1$s. "
 #~ "Foutmelding: %2$s"
@@ -14330,7 +14495,8 @@ msgstr "Zoeloe"
 
 #~ msgid "Delete denied for the provided Google Drive resource: %1$s"
 #~ msgstr ""
-#~ "Het verwijderen van de opgegeven Google Drive bron is niet toegestaan: %1$s"
+#~ "Het verwijderen van de opgegeven Google Drive bron is niet toegestaan: "
+#~ "%1$s"
 
 #~ msgid "The provided Google Drive URL does not denote a file: %1$s"
 #~ msgstr "De opgegeven Google Drive-URL verwijst niet naar een bestand: %1$s"
@@ -14424,7 +14590,8 @@ msgstr "Zoeloe"
 #~ msgid "Account not found with identifier %1$s for user %2$s"
 #~ msgstr "Kan account met kenmerk %1$s voor gebruiker %2$s niet gevonden"
 
-#~ msgid "Account not found with identifier %1$s for user %2$s in context %3$s."
+#~ msgid ""
+#~ "Account not found with identifier %1$s for user %2$s in context %3$s."
 #~ msgstr ""
 #~ "Kan account met kenmerk %1$s voor gebruiker %2$s niet vinden in context "
 #~ "%3$s."
@@ -14445,8 +14612,8 @@ msgstr "Zoeloe"
 #~ "opnieuw."
 
 #~ msgid ""
-#~ "You do not have the appropriate permission to change objects in the folder "
-#~ "\"%2$s\"."
+#~ "You do not have the appropriate permission to change objects in the "
+#~ "folder \"%2$s\"."
 #~ msgstr ""
 #~ "U heeft niet de juiste rechten om de objecten in de map \"%2$s\" te "
 #~ "veranderen."
@@ -14572,11 +14739,11 @@ msgstr "Zoeloe"
 #~ msgstr "De pipe is gestopt."
 
 #~ msgid ""
-#~ "The SAM database on the Windows NT Server does not have a computer account "
-#~ "for this workstation trust relationship."
+#~ "The SAM database on the Windows NT Server does not have a computer "
+#~ "account for this workstation trust relationship."
 #~ msgstr ""
-#~ "De SAM database op de Windows NT server heeft geen computeraccount voor de "
-#~ "vertrouwensgegevens van dit werkstation."
+#~ "De SAM database op de Windows NT server heeft geen computeraccount voor "
+#~ "de vertrouwensgegevens van dit werkstation."
 
 #~ msgid ""
 #~ "The trust relationship between the primary domain and the trusted domain "
@@ -14662,7 +14829,8 @@ msgstr "Zoeloe"
 
 #~ msgid "The following needed feature could not be enabled: \"%1$s\""
 #~ msgstr ""
-#~ "De volgende noodzakelijke eigenschappen zijn niet in te schakelen: \"%1$s\""
+#~ "De volgende noodzakelijke eigenschappen zijn niet in te schakelen: \"%1$s"
+#~ "\""
 
 #~ msgid "File \"%1$s\" could not be found."
 #~ msgstr "Bestand \"%1$s\" is onvindbaar."
@@ -14766,8 +14934,8 @@ msgstr "Zoeloe"
 #~ msgstr "De actie wordt niet ondersteund door dienst %1$s."
 
 #~ msgid ""
-#~ "The folder \"%1$s\" cannot be found in account %2$s of service \"%3$s\" of "
-#~ "user %4$s in context %5$s."
+#~ "The folder \"%1$s\" cannot be found in account %2$s of service \"%3$s\" "
+#~ "of user %4$s in context %5$s."
 #~ msgstr ""
 #~ "De map \"%1$s\" is onvindbaar in account %2$s van dienst \"%3$s\" van "
 #~ "gebruiker %4$s in context %5$s."
@@ -15073,8 +15241,8 @@ msgstr "Zoeloe"
 #~ msgstr "Verbeter het login of wachtwoord en probeer opnieuw"
 
 #~ msgid ""
-#~ "Make sure the service is still available and there are no major changes on "
-#~ "the website."
+#~ "Make sure the service is still available and there are no major changes "
+#~ "on the website."
 #~ msgstr ""
 #~ "Controleer of de dienst nog beschikbaar is en dat er geen grote "
 #~ "veranderingen op de website zijn"
@@ -15104,8 +15272,8 @@ msgstr "Zoeloe"
 #~ "service again at a later time"
 #~ msgstr ""
 #~ "Deze dienst is tijdelijk niet beschikbaar. Dit kan ontstaan door een "
-#~ "tijdelijk probleem of door een definitieve aanpassing bij de derde partij. "
-#~ "Probeer deze dienst later nog een keer te gebruiken."
+#~ "tijdelijk probleem of door een definitieve aanpassing bij de derde "
+#~ "partij. Probeer deze dienst later nog een keer te gebruiken."
 
 #~ msgid "Missing argument. %1$s"
 #~ msgstr "Ontbrekend argument. %1$s"
@@ -15171,8 +15339,8 @@ msgstr "Zoeloe"
 #~ "Unable to determine next copy task to execute. Enqueued: %1$s. To sort: "
 #~ "%2$s."
 #~ msgstr ""
-#~ "Het is niet mogelijk de volgende bijwerktaak te bepalen. Toegevoegd aan de "
-#~ "rij: %1$s. Te kort: %2$s."
+#~ "Het is niet mogelijk de volgende bijwerktaak te bepalen. Toegevoegd aan "
+#~ "de rij: %1$s. Te kort: %2$s."
 
 #~ msgid "SQL problem."
 #~ msgstr "SQL-probleem."
@@ -15265,8 +15433,8 @@ msgstr "Zoeloe"
 
 #~ msgid ""
 #~ "One or more of the specified parts could not be found. The part might not "
-#~ "have been uploaded, or the specified entity tag might not have matched the "
-#~ "part's entity tag."
+#~ "have been uploaded, or the specified entity tag might not have matched "
+#~ "the part's entity tag."
 #~ msgstr ""
 #~ "Een of meer van de opgegeven delen worden niet gevonden. Deze delen zijn "
 #~ "misschien niet geupload of de opgegeven entiteit-code komt niet overeen "
@@ -15290,8 +15458,8 @@ msgstr "Zoeloe"
 #~ msgstr "SOAP verzoeken moeten gemaakt worden over een HTTPS verbinding."
 
 #~ msgid ""
-#~ "The target bucket for logging does not exist, is not owned by you, or does "
-#~ "not have the appropriate grants for the log-delivery group."
+#~ "The target bucket for logging does not exist, is not owned by you, or "
+#~ "does not have the appropriate grants for the log-delivery group."
 #~ msgstr ""
 #~ "De doelcontainer voor logging bestaat niet, is niet uw eigendom of heeft "
 #~ "niet de benodigde rechten voor de logging groep."
@@ -15303,10 +15471,11 @@ msgstr "Zoeloe"
 #~ "De XML die u heeft aangeboden is niet correct of valideert niet met het "
 #~ "door ons gepubliceerde schema."
 
-#~ msgid "The body of your POST request is not well-formed multipart/form-data."
+#~ msgid ""
+#~ "The body of your POST request is not well-formed multipart/form-data."
 #~ msgstr ""
-#~ "De inhoud van uw POST aanvraag is een niet goed vormgegeven multipart/form-"
-#~ "data."
+#~ "De inhoud van uw POST aanvraag is een niet goed vormgegeven multipart/"
+#~ "form-data."
 
 #~ msgid ""
 #~ "The XML was not well-formed or did not validate against our published "
@@ -15384,9 +15553,11 @@ msgstr "Zoeloe"
 #~ "de time-out periode."
 
 #~ msgid ""
-#~ "The difference between the request time and the server's time is too large."
+#~ "The difference between the request time and the server's time is too "
+#~ "large."
 #~ msgstr ""
-#~ "Het tijdsverschil tussen de vraag en het antwoord van de server is te lang."
+#~ "Het tijdsverschil tussen de vraag en het antwoord van de server is te "
+#~ "lang."
 
 #~ msgid "Requesting the torrent file of a bucket is not permitted."
 #~ msgstr ""
@@ -15410,8 +15581,8 @@ msgstr "Zoeloe"
 #~ msgstr "Deze aanvraag ondersteund de inhoud niet."
 
 #~ msgid ""
-#~ "The bucket POST must contain the specified field name. If it is specified, "
-#~ "please check the order of the fields."
+#~ "The bucket POST must contain the specified field name. If it is "
+#~ "specified, please check the order of the fields."
 #~ msgstr ""
 #~ "De container POST moet de specifieke veldnaam bevatten. Als deze is "
 #~ "opgegeven moet u de volgorde van de velden controleren."
@@ -15446,7 +15617,8 @@ msgstr "Zoeloe"
 #~ msgid "No cache found for region name: %1$s"
 #~ msgstr "Geen buffer gevonden voor regionaam: %1$s"
 
-#~ msgid "Missing default auxiliary defined by property: jcs.default=<aux-name>"
+#~ msgid ""
+#~ "Missing default auxiliary defined by property: jcs.default=<aux-name>"
 #~ msgstr ""
 #~ "De standaard uitbreiding is niet beschikbaar controleer de definitie: jcs."
 #~ "default=<aux-name>"
@@ -15543,7 +15715,8 @@ msgstr "Zoeloe"
 #~ msgid ""
 #~ "The value given for pooltimeout \"%s\" in file \"%s\" is no integer value"
 #~ msgstr ""
-#~ "De opgegeven waarde voor pooltimeout \"%s\" in bestand \"%s\" is geen getal"
+#~ "De opgegeven waarde voor pooltimeout \"%s\" in bestand \"%s\" is geen "
+#~ "getal"
 
 #~ msgid "The value given for derefAliases \"%s\" in file \"%s\" is invalid"
 #~ msgstr ""
@@ -15557,8 +15730,8 @@ msgstr "Zoeloe"
 #~ msgstr "De opgegeven waarde \"%s\" is niet mogelijk voor sorteren"
 
 #~ msgid ""
-#~ "The folderid object is null. This is an internal error. Please notify Open-"
-#~ "Xchange."
+#~ "The folderid object is null. This is an internal error. Please notify "
+#~ "Open-Xchange."
 #~ msgstr ""
 #~ "Het mapid object is 'null'. Dit is een interne fout. Neem alstublieft "
 #~ "contact op met Open-Xchange."
@@ -15571,15 +15744,16 @@ msgstr "Zoeloe"
 #~ "niet ondersteund."
 
 #~ msgid ""
-#~ "The mapping table does not contain the long uid %s i.e., it has never been "
-#~ "accessed before"
+#~ "The mapping table does not contain the long uid %s i.e., it has never "
+#~ "been accessed before"
 #~ msgstr ""
 #~ "De vertaaltabel bevat de lange uid %s niet, deze is mogelijk nooit eerder "
 #~ "benaderd."
 
 #~ msgid "Multi-values are not allowed for date attribute: %s"
 #~ msgstr ""
-#~ "Het is niet mogelijk meerdere waarden op te geven voor datum attribuut: %s "
+#~ "Het is niet mogelijk meerdere waarden op te geven voor datum attribuut: "
+#~ "%s "
 
 #~ msgid "Multi-values are not allowed for int attribute: %s"
 #~ msgstr ""
@@ -15588,8 +15762,8 @@ msgstr "Zoeloe"
 #~ msgid ""
 #~ "An error occurred while trying to get the user object from the database"
 #~ msgstr ""
-#~ "Er is een fout opgetreden bij het opvragen van het gebruikersobject uit de "
-#~ "database."
+#~ "Er is een fout opgetreden bij het opvragen van het gebruikersobject uit "
+#~ "de database."
 
 #~ msgid "The given userLoginSource is not possible: %s"
 #~ msgstr "De opgegeven waarde voor userLoginSource is niet mogelijk: %s"
@@ -15618,7 +15792,8 @@ msgstr "Zoeloe"
 #~ "Er is een fout opgetreden bij het lezen van het defaultNamingContext "
 #~ "attribuut."
 
-#~ msgid "The contact object with id \"%s\" could not be found in folder \"%s\""
+#~ msgid ""
+#~ "The contact object with id \"%s\" could not be found in folder \"%s\""
 #~ msgstr "Het contact object met id \"%s\" is onvindbaar in map \"%s\""
 
 #~ msgid ""
@@ -15859,8 +16034,8 @@ msgstr "Zoeloe"
 #~ "parameter. Please use a string identifying the client software."
 #~ msgstr ""
 #~ "De waarde van het User-Agent header veld mag niet worden gebruikt als de "
-#~ "waarde van een gebruikersinstelling. Gebruik alstublieft een waarde die de "
-#~ "gebruikssoftware identificeert."
+#~ "waarde van een gebruikersinstelling. Gebruik alstublieft een waarde die "
+#~ "de gebruikssoftware identificeert."
 
 #~ msgid "Put into cache failed."
 #~ msgstr "Schrijven in buffer is mislukt."
@@ -16045,15 +16220,15 @@ msgstr "Zoeloe"
 #~ "No read access to mail folder %1$s on server %2$s with login %3$s (user="
 #~ "%4$s, context=%5$s)"
 #~ msgstr ""
-#~ "Geen leesrechten op e-mailmap %1$s op server %2$s met aanmeldingsnaam %3$s "
-#~ "(gebruiker=%4$s, context=%5$s)."
+#~ "Geen leesrechten op e-mailmap %1$s op server %2$s met aanmeldingsnaam "
+#~ "%3$s (gebruiker=%4$s, context=%5$s)."
 
 #~ msgid ""
 #~ "No delete access to mail folder %1$s on server %2$s with login %3$s (user="
 #~ "%4$s, context=%5$s)"
 #~ msgstr ""
-#~ "Geen verwijderrechten op e-mailmap %1$s op server %2$s met aanmeldingsnaam "
-#~ "%3$s (gebruiker=%4$s, context=%5$s)"
+#~ "Geen verwijderrechten op e-mailmap %1$s op server %2$s met "
+#~ "aanmeldingsnaam %3$s (gebruiker=%4$s, context=%5$s)"
 
 #~ msgid ""
 #~ "No insert access to mail folder %1$s on server %2$s with login %3$s (user="
@@ -16084,8 +16259,8 @@ msgstr "Zoeloe"
 #~ "aanmeldingsnaam %3$s (gebruiker=%4$s, context=%5$s)."
 
 #~ msgid ""
-#~ "Folder %1$s does not allow subfolders on server %2$s with login %3$s (user="
-#~ "%4$s, context=%5$s)."
+#~ "Folder %1$s does not allow subfolders on server %2$s with login %3$s "
+#~ "(user=%4$s, context=%5$s)."
 #~ msgstr ""
 #~ "Map %1$s kan geen submappen bevatten op mailserver %2$s met "
 #~ "aanmeldingsnaam %3$s (gebruiker=%4$s, context=%5$s)."
@@ -16101,10 +16276,10 @@ msgstr "Zoeloe"
 #~ "%6$s)."
 
 #~ msgid ""
-#~ "The composed rights could not be applied to new folder %1$s due to missing "
-#~ "administer right in its initial rights specified by IMAP server. However, "
-#~ "the folder has been created on server %2$s with login %3$s (user=%4$s, "
-#~ "context=%5$s)."
+#~ "The composed rights could not be applied to new folder %1$s due to "
+#~ "missing administer right in its initial rights specified by IMAP server. "
+#~ "However, the folder has been created on server %2$s with login %3$s (user="
+#~ "%4$s, context=%5$s)."
 #~ msgstr ""
 #~ "De samengestelde rechten zijn niet toe te passen op de nieuwe map %1$s "
 #~ "door de afwezigheid van beheerdersrechten in de basis rechten zoals "
@@ -16161,8 +16336,8 @@ msgstr "Zoeloe"
 #~ "%3$s (gebruiker=%4$s, context=%5$s)"
 
 #~ msgid ""
-#~ "Default folder %1$s cannot be deleted on server %2$s with login %3$s (user="
-#~ "%4$s, context=%5$s)"
+#~ "Default folder %1$s cannot be deleted on server %2$s with login %3$s "
+#~ "(user=%4$s, context=%5$s)"
 #~ msgstr ""
 #~ "Standaardmap %1$s kan niet worden verwijderd van de server %2$s terwijl u "
 #~ "aangemeld bent met %3$s (gebruiker=%4$s, context=%5$s)"
@@ -16192,8 +16367,8 @@ msgstr "Zoeloe"
 #~ "Unknown search field: %1$s on server %2$s with login %3$s (user=%4$s, "
 #~ "context=%5$s)"
 #~ msgstr ""
-#~ "Onbekend zoekveld: %1$s op server %2$s met aanmeldingsnaam %3$s (gebruiker="
-#~ "%4$s, context=%5$s)."
+#~ "Onbekend zoekveld: %1$s op server %2$s met aanmeldingsnaam %3$s "
+#~ "(gebruiker=%4$s, context=%5$s)."
 
 #~ msgid ""
 #~ "Mail folder %1$s must not be moved to subsequent folder %2$s on server "
@@ -16248,8 +16423,9 @@ msgstr "Zoeloe"
 #~ "Message(s) %1$s in folder %2$s could not be deleted due to error \"%3$s\" "
 #~ "on server %4$s with login %5$s (user=%6$s, context=%7$s)"
 #~ msgstr ""
-#~ "Bericht(en) %1$s in map %2$s kunnen niet verwijderd worden door fout \"%3$s"
-#~ "\" op server %4$s met aanmeldingsnaam %5$s (gebruiker=%6$s, context=%7$s)."
+#~ "Bericht(en) %1$s in map %2$s kunnen niet verwijderd worden door fout "
+#~ "\"%3$s\" op server %4$s met aanmeldingsnaam %5$s (gebruiker=%6$s, context="
+#~ "%7$s)."
 
 #~ msgid ""
 #~ "Not allowed to open folder %1$s due to missing read access on server %2$s "
@@ -16281,8 +16457,8 @@ msgstr "Zoeloe"
 #~ "aanmeldingsnaam %3$s (gebruiker=%4$s, context=%5$s)."
 
 #~ msgid ""
-#~ "Sort field %1$s is not supported via IMAP SORT command on server %2$s with "
-#~ "login %3$s (user=%4$s, context=%5$s)"
+#~ "Sort field %1$s is not supported via IMAP SORT command on server %2$s "
+#~ "with login %3$s (user=%4$s, context=%5$s)"
 #~ msgstr ""
 #~ "Sorteerveld %1$s wordt niet ondersteund door het IMAP SORT commando op "
 #~ "server %2$s met aanmeldingsnaam %3$s (gebruiker=%4$s, context=%5$s)."
@@ -16305,8 +16481,8 @@ msgstr "Zoeloe"
 #~ "Default folder %1$s must not be unsubscribed on server %2$s with login "
 #~ "%3$s (user=%4$s, context=%5$s)"
 #~ msgstr ""
-#~ "Het is niet mogelijk het abonnement te stoppen van standaardmap %1$s op de "
-#~ "server %2$s terwijl u aangemeld bent met %3$s (gebruiker=%4$s, context="
+#~ "Het is niet mogelijk het abonnement te stoppen van standaardmap %1$s op "
+#~ "de server %2$s terwijl u aangemeld bent met %3$s (gebruiker=%4$s, context="
 #~ "%5$s)"
 
 #~ msgid ""
@@ -16380,15 +16556,15 @@ msgstr "Zoeloe"
 #~ msgid ""
 #~ "Index search for module %1$d is not enabled for user %2$d in context %3$d."
 #~ msgstr ""
-#~ "Op index zoeken in module %1$d is niet ingeschakeld voor gebruiker %2$d in "
-#~ "context %3$d."
+#~ "Op index zoeken in module %1$d is niet ingeschakeld voor gebruiker %2$d "
+#~ "in context %3$d."
 
 #~ msgid ""
 #~ "The index for module %1$d for user %2$d in context %3$d is currently "
 #~ "locked."
 #~ msgstr ""
-#~ "De index voor module %1$d voor gebruiker %2$d in context %3$d is momenteel "
-#~ "geblokkeerd."
+#~ "De index voor module %1$d voor gebruiker %2$d in context %3$d is "
+#~ "momenteel geblokkeerd."
 
 #~ msgid "MBean registration denied: ManagementAgent is not running."
 #~ msgstr "MBean registratie niet toegestaan: ManagementAgent is niet gestart."
@@ -16446,9 +16622,10 @@ msgstr "Zoeloe"
 #~ msgstr "Er is een fout opgetreden bij het uitvoeren van een script."
 
 #~ msgid ""
-#~ "Missing permission for the application associated with configured Facebook "
-#~ "API key: %1$s\n"
-#~ "Please grant access for that application in your Facebook account settings."
+#~ "Missing permission for the application associated with configured "
+#~ "Facebook API key: %1$s\n"
+#~ "Please grant access for that application in your Facebook account "
+#~ "settings."
 #~ msgstr ""
 #~ "De applicatie gekoppeld met de ingestelde Facebook-API-sleutel heeft "
 #~ "ontbrekende rechten: %1$s\n"
@@ -16559,9 +16736,9 @@ msgstr "Zoeloe"
 #~ "access:\n"
 #~ "%3$s"
 #~ msgstr ""
-#~ "Ontbrekende toestemming \"%1$s\" in facebook login %2$s. Kopieer a.u.b. de "
-#~ "volgende url in uw browser, meld u aan als %2$s (als dat al niet gebeurd "
-#~ "is) en verleen toegang:\n"
+#~ "Ontbrekende toestemming \"%1$s\" in facebook login %2$s. Kopieer a.u.b. "
+#~ "de volgende url in uw browser, meld u aan als %2$s (als dat al niet "
+#~ "gebeurd is) en verleen toegang:\n"
 #~ "%3$s"
 
 #~ msgid "An error occurred while processing a script."
@@ -16595,8 +16772,8 @@ msgstr "Zoeloe"
 
 #~ msgid "Either no such queue or a topic or could not be created: %1$s"
 #~ msgstr ""
-#~ "Deze wachtrij bestaat niet of is een onderwerp of kan niet gemaakt worden: "
-#~ "%1$s"
+#~ "Deze wachtrij bestaat niet of is een onderwerp of kan niet gemaakt "
+#~ "worden: %1$s"
 
 #~ msgid "A security problem occurred: %1$s"
 #~ msgstr "Een beveligingsprobleem is opgetreden: %1$s"
@@ -16755,8 +16932,8 @@ msgstr "Zoeloe"
 
 #~ msgid "Please check the spelling of the id, or load a list of known targets"
 #~ msgstr ""
-#~ "Controleer alstublieft de schrijfwijze van de ID, of gebruik een lijst van "
-#~ "bekende doelen"
+#~ "Controleer alstublieft de schrijfwijze van de ID, of gebruik een lijst "
+#~ "van bekende doelen"
 
 #~ msgid "Could not load publications of type %1$s"
 #~ msgstr "Het is niet mogelijk publicaties te laden van het type %1$s"
@@ -16836,8 +17013,8 @@ msgstr "Zoeloe"
 #~ msgstr "Mapid ontbreekt."
 
 #~ msgid ""
-#~ "Parent folder \"%1$s\" does not allow folder content type \"%2$s\" in tree "
-#~ "\"%3$s\" for user %4$s in context %5$s."
+#~ "Parent folder \"%1$s\" does not allow folder content type \"%2$s\" in "
+#~ "tree \"%3$s\" for user %4$s in context %5$s."
 #~ msgstr ""
 #~ "Bovenliggende map \"%1$s\" staat type mapinhoud \"%2$s\" niet toe in boom "
 #~ "\"%3$s\" voor gebruiker %4$s in context %5$s."
@@ -16878,14 +17055,14 @@ msgstr "Zoeloe"
 #~ msgid ""
 #~ "Folder \"%1$s\" must not be deleted by user \"%2$s\" in context \"%3$s\"."
 #~ msgstr ""
-#~ "Map \"%1$s\" mag niet verwijderd worden door gebruiker \"%2$s\" in context "
-#~ "\"%3$s\"."
+#~ "Map \"%1$s\" mag niet verwijderd worden door gebruiker \"%2$s\" in "
+#~ "context \"%3$s\"."
 
 #~ msgid ""
 #~ "Folder \"%1$s\" must not be moved by user \"%2$s\" in context \"%3$s\"."
 #~ msgstr ""
-#~ "Map \"%1$s\" mag niet verplaatst worden door gebruiker \"%2$s\" in context "
-#~ "\"%3$s\"."
+#~ "Map \"%1$s\" mag niet verplaatst worden door gebruiker \"%2$s\" in "
+#~ "context \"%3$s\"."
 
 #~ msgid "A temporary error occurred. Please retry."
 #~ msgstr "Er is een tijdelijke fout opgetreden. Probeer het later nog eens."
@@ -16910,8 +17087,8 @@ msgstr "Zoeloe"
 #~ "Could not find an attachment with the file id %s. Either the file is "
 #~ "orphaned or belongs to another module."
 #~ msgstr ""
-#~ "Kan geen aanhangsel vinden met de bestandsid %s. Ofwel het bestand is wees "
-#~ "of het behoort toe aan een andere module."
+#~ "Kan geen aanhangsel vinden met de bestandsid %s. Ofwel het bestand is "
+#~ "wees of het behoort toe aan een andere module."
 
 #~ msgid "Could not delete files from file store. Context: %d."
 #~ msgstr "Kan bestanden niet verwijderen uit bestandsdepot. Context: %d."
@@ -16946,7 +17123,8 @@ msgstr "Zoeloe"
 
 #~ msgid "Conflicting services registered for context %1$i and folder %2$i"
 #~ msgstr ""
-#~ "Er zijn conflicterende diensten geregistreerd voor context %1$i en map %2$i"
+#~ "Er zijn conflicterende diensten geregistreerd voor context %1$i en map "
+#~ "%2$i"
 
 #~ msgid "CalendarFolderObject not initialized."
 #~ msgstr "CalendarFolderObject niet geïnitialiseerd."
@@ -17003,7 +17181,8 @@ msgstr "Zoeloe"
 #~ msgid "Unsupported private flag value %d"
 #~ msgstr "Niet ondersteunde privévlag-waarde %d"
 
-#~ msgid "Unable to create exception, recurring position can not be calculated."
+#~ msgid ""
+#~ "Unable to create exception, recurring position can not be calculated."
 #~ msgstr ""
 #~ "Het is niet mogelijk om een uitzondering aan te maken, kan "
 #~ "terugkeerpositie niet berekenen."
@@ -17040,8 +17219,8 @@ msgstr "Zoeloe"
 #~ "Cannot resolve recurrence position because neither the recurring position "
 #~ "nor the recurring date position is known."
 #~ msgstr ""
-#~ "Kan herhalingsdatum niet herleiden omdat noch het terugkeer veld, noch een "
-#~ "herhalingsdatum veld is ingevuld."
+#~ "Kan herhalingsdatum niet herleiden omdat noch het terugkeer veld, noch "
+#~ "een herhalingsdatum veld is ingevuld."
 
 #~ msgid "Missing start date, unable to calculate recurrence."
 #~ msgstr ""
@@ -17066,10 +17245,11 @@ msgstr "Zoeloe"
 #~ msgstr "Niet in staat om deelnemer %d te verwijderen"
 
 #~ msgid ""
-#~ "Unable to remove participant because this participant is the last remaining"
+#~ "Unable to remove participant because this participant is the last "
+#~ "remaining"
 #~ msgstr ""
-#~ "Het is niet mogelijk deze deelnemer te verwijderen omdat deze deelnemer de "
-#~ "laatste is"
+#~ "Het is niet mogelijk deze deelnemer te verwijderen omdat deze deelnemer "
+#~ "de laatste is"
 
 #~ msgid "Action type not supported : %d"
 #~ msgstr "Actietype niet ondersteund: %d"
@@ -17087,8 +17267,8 @@ msgstr "Zoeloe"
 #~ "Got the wrong folder identification. You do not have the appropriate "
 #~ "permissions to modify this object."
 #~ msgstr ""
-#~ "Verkeerde mapidentificatie gekregen. U heeft niet de juiste rechten om dit "
-#~ "object te wijzigen."
+#~ "Verkeerde mapidentificatie gekregen. U heeft niet de juiste rechten om "
+#~ "dit object te wijzigen."
 
 #~ msgid ""
 #~ "Got the wrong shared folder identification. You do not have the "
@@ -17101,8 +17281,8 @@ msgstr "Zoeloe"
 #~ "You cannot move one instance of a recurring appointment into another "
 #~ "folder."
 #~ msgstr ""
-#~ "U kunt niet één element van een terugkerende afspraak verplaatsen naar een "
-#~ "andere map."
+#~ "U kunt niet één element van een terugkerende afspraak verplaatsen naar "
+#~ "een andere map."
 
 #~ msgid "A database update exception occurred."
 #~ msgstr "Er is een database-update uitzondering opgetreden."
@@ -17195,8 +17375,8 @@ msgstr "Zoeloe"
 #~ "The recurring appointment has been deleted or is outside of the range of "
 #~ "the recurrence."
 #~ msgstr ""
-#~ "De terugkerende afspraak is verwijderd of buiten de reeks van de herhaling "
-#~ "gekomen."
+#~ "De terugkerende afspraak is verwijderd of buiten de reeks van de "
+#~ "herhaling gekomen."
 
 #~ msgid "Changing an exception into a series is not supported."
 #~ msgstr ""
@@ -17227,8 +17407,8 @@ msgstr "Zoeloe"
 #~ msgstr "Afspraak is niet terugkerend."
 
 #~ msgid ""
-#~ "Found a user contact outside global address book in folder %1$d in context "
-#~ "%2$d."
+#~ "Found a user contact outside global address book in folder %1$d in "
+#~ "context %2$d."
 #~ msgstr ""
 #~ "Er is een gebruiker gevonden buiten het globale adresboek in map %1$d in "
 #~ "context %2$d."
@@ -17238,10 +17418,10 @@ msgstr "Zoeloe"
 #~ "supported type (JPG, GIF, BMP or PNG) or the size exceed %3$d. Your file "
 #~ "type is %1$s and your image size is %2$d."
 #~ msgstr ""
-#~ "Het is niet mogelijk om deze contactpersoonafbeelding te importeren. Ofwel "
-#~ "het bestandstype is een niet ondersteund formaat (zoals JPG, GIF, BMP of "
-#~ "PNG) of het bestand is groter dan %3$d. Uw bestandstype is %1$s en uw "
-#~ "afbeeldingsgrootte is %2$d."
+#~ "Het is niet mogelijk om deze contactpersoonafbeelding te importeren. "
+#~ "Ofwel het bestandstype is een niet ondersteund formaat (zoals JPG, GIF, "
+#~ "BMP of PNG) of het bestand is groter dan %3$d. Uw bestandstype is %1$s en "
+#~ "uw afbeeldingsgrootte is %2$d."
 
 #~ msgid ""
 #~ "You are not allowed to store this contact in a non-contact folder: folder "
@@ -17251,8 +17431,8 @@ msgstr "Zoeloe"
 #~ "%1$d in context %2$d met gebruiker %3$d"
 
 #~ msgid ""
-#~ "You do not have the permission to access objects in the folder %1$d in the "
-#~ "context %2$d as user %3$d"
+#~ "You do not have the permission to access objects in the folder %1$d in "
+#~ "the context %2$d as user %3$d"
 #~ msgstr ""
 #~ "U heeft geen rechten om objecten in map %1$d te benaderen in context %2$d "
 #~ "als gebruiker %3$d"
@@ -17430,8 +17610,8 @@ msgstr "Zoeloe"
 #~ msgstr "U heeft schrijftoegang nodig om een document te ontgrendelen."
 
 #~ msgid ""
-#~ "Files attached to InfoStore items must have unique names. File name: %1$s. "
-#~ "The other document with this file name is %2$s."
+#~ "Files attached to InfoStore items must have unique names. File name: "
+#~ "%1$s. The other document with this file name is %2$s."
 #~ msgstr ""
 #~ "Bestanden die aan gegevensdepot-items worden toegevoegd dienen een unieke "
 #~ "naam te hebben. Bestandsnaam: %1$s. Het andere document met deze "
@@ -17498,7 +17678,8 @@ msgstr "Zoeloe"
 
 #~ msgid ""
 #~ "Unable to access the link between these two objects. Insufficient rights. "
-#~ "First object %1$d folder %2$d. Second object %3$d folder %4$d context %5$d."
+#~ "First object %1$d folder %2$d. Second object %3$d folder %4$d context "
+#~ "%5$d."
 #~ msgstr ""
 #~ "Het is niet mogelijk om deze twee objecten te koppelen. Niet voldoende "
 #~ "rechten. Het eerste object %1$d map %2$d. Het tweede object %3$d map %4$d "
@@ -17548,7 +17729,8 @@ msgstr "Zoeloe"
 
 #~ msgid "Found duplicate database identifier %d. Not adding preferences item."
 #~ msgstr ""
-#~ "Dubbel database-kenmerk %d gevonden. Voorkeuren-item wordt niet toegevoegd."
+#~ "Dubbel database-kenmerk %d gevonden. Voorkeuren-item wordt niet "
+#~ "toegevoegd."
 
 #~ msgid "Found duplicate path %s."
 #~ msgstr "Dubbel pad %s gevonden."
@@ -17591,7 +17773,8 @@ msgstr "Zoeloe"
 
 #~ msgid "Tried to delete %1$d folders but only %2$d were deleted."
 #~ msgstr ""
-#~ "Geprobeerd om %1$d mappen te verwijderen maar slechts %1$d zijn verwijderd."
+#~ "Geprobeerd om %1$d mappen te verwijderen maar slechts %1$d zijn "
+#~ "verwijderd."
 
 #~ msgid "Tried to delete %1$d participants but only %2$d were deleted."
 #~ msgstr ""
@@ -17661,7 +17844,8 @@ msgstr "Zoeloe"
 #~ "Update conflict detected. Another process is currently updating schema "
 #~ "%1$s."
 #~ msgstr ""
-#~ "Update-conflict gevonden. Een ander proces werkt momenteel schema %1$s bij."
+#~ "Update-conflict gevonden. Een ander proces werkt momenteel schema %1$s "
+#~ "bij."
 
 #~ msgid "Table update failed. Schema %1$s could not be locked."
 #~ msgstr "Tabelupdate mislukt. Schema %1$s kan niet worden vergrendeld."
@@ -17674,8 +17858,8 @@ msgstr "Zoeloe"
 #~ "Schema %1$s could not be unlocked. Lock information could no be removed "
 #~ "from database."
 #~ msgstr ""
-#~ "Schema %1$s kan niet gedeblokkeerd worden. Blokkeerinformatie kan niet uit "
-#~ "database worden verwijderd."
+#~ "Schema %1$s kan niet gedeblokkeerd worden. Blokkeerinformatie kan niet "
+#~ "uit database worden verwijderd."
 
 #~ msgid "A DBPooling error occurred"
 #~ msgstr "Er is een DBPooling-fout opgetreden"
@@ -17699,8 +17883,8 @@ msgstr "Zoeloe"
 #~ msgid ""
 #~ "A part's content could not be read from message %1$s in mail folder %2$s"
 #~ msgstr ""
-#~ "De inhoud van een deel kon niet worden gelezen uit bericht %1$s in postmap "
-#~ "%2$s"
+#~ "De inhoud van een deel kon niet worden gelezen uit bericht %1$s in "
+#~ "postmap %2$s"
 
 #~ msgid "Invalid message path: %1$s"
 #~ msgstr "Ongeldig berichtpad: %1$s"
@@ -17795,9 +17979,9 @@ msgstr "Zoeloe"
 #~ "to be present to determine if a mail folder create or update shall be "
 #~ "performed"
 #~ msgstr ""
-#~ "Onvoldoende mapattributen: Ofwel existentiestatus of volledige naam dienen "
-#~ "aanwezig te zijn om te bepalen of een e-mailmap wordt aangemaakt of "
-#~ "bijgewerkt"
+#~ "Onvoldoende mapattributen: Ofwel existentiestatus of volledige naam "
+#~ "dienen aanwezig te zijn om te bepalen of een e-mailmap wordt aangemaakt "
+#~ "of bijgewerkt"
 
 #~ msgid "No transport provider could be found for protocol/URL \"%1$s\""
 #~ msgstr "Geen transportprovider gevonden voor protocol/URL \"%1$s\""
@@ -17806,8 +17990,8 @@ msgstr "Zoeloe"
 #~ msgstr "Volledige naam van postmap ontbreekt"
 
 #~ msgid ""
-#~ "Checking default folders on server %1$s for user %2$s (%3$s) in context on "
-#~ "%4$s failed: %5$s"
+#~ "Checking default folders on server %1$s for user %2$s (%3$s) in context "
+#~ "on %4$s failed: %5$s"
 #~ msgstr ""
 #~ "Controleren van standaardmappen op server %1$s voor gebruiker %2$s (%3$s) "
 #~ "in context %4$s is mislukt: %5$s"
@@ -17819,8 +18003,8 @@ msgstr "Zoeloe"
 #~ "A folder named %1$s already exists on server %2$s with login %3$s (user="
 #~ "%4$s, context=%5$s)."
 #~ msgstr ""
-#~ "Een map met de naam %1$s betaat al op server %2$s met aanmeldingsnaam %3$s "
-#~ "(gebruiker=%4$s, context=%5$s)."
+#~ "Een map met de naam %1$s betaat al op server %2$s met aanmeldingsnaam "
+#~ "%3$s (gebruiker=%4$s, context=%5$s)."
 
 #~ msgid ""
 #~ "No create access on mail folder %1$s on server %2$s with login %3$s (user="
@@ -17843,8 +18027,8 @@ msgstr "Zoeloe"
 #~ msgstr "Aangeroepen methode wordt niet ondersteund."
 
 #~ msgid ""
-#~ "Wrong or missing login data to access mail server %1$s. Error message from "
-#~ "mail server: %2$s"
+#~ "Wrong or missing login data to access mail server %1$s. Error message "
+#~ "from mail server: %2$s"
 #~ msgstr ""
 #~ "Verkeerde of ontbrekende aanmeldgegevens naar mail server %1$s. Melding "
 #~ "van de mail server: %2$s"
@@ -17891,8 +18075,8 @@ msgstr "Zoeloe"
 #~ "te openen: %1$s"
 
 #~ msgid ""
-#~ "An attempt was made to open a read-only folder with read-write \"%1$s\" on "
-#~ "mail server %2$s with login %3$s (user=%4$s, context=%5$s)"
+#~ "An attempt was made to open a read-only folder with read-write \"%1$s\" "
+#~ "on mail server %2$s with login %3$s (user=%4$s, context=%5$s)"
 #~ msgstr ""
 #~ "Er is een poging gedaan om een alleen-lezen-map met lees-schrijf rechten "
 #~ "te openen:  \"%1$s\" op mailserver %2$s met aanmeldingsnaam %3$s "
@@ -17920,7 +18104,8 @@ msgstr "Zoeloe"
 #~ msgid "Port %1$s was unreachable on remote server"
 #~ msgstr "Poort %1$s was onbereikbaar op de server op afstand"
 
-#~ msgid "Connection is broken due to a socket exception on remote server: %1$s"
+#~ msgid ""
+#~ "Connection is broken due to a socket exception on remote server: %1$s"
 #~ msgstr ""
 #~ "Verbinding is verbroken ten gevolgde van een socketfout op de server op "
 #~ "afstand: %1$s"
@@ -17935,8 +18120,8 @@ msgstr "Zoeloe"
 #~ "The quota on mail server \"%1$s\" exceeded with login %2$s (user=%3$s, "
 #~ "context=%4$s). Error message: %5$s"
 #~ msgstr ""
-#~ "Het quota op mailserver \"%1$s\" is overschreden met login %2$s (gebruiker="
-#~ "%3$s, context=%4$s). Foutmelding: %1$s"
+#~ "Het quota op mailserver \"%1$s\" is overschreden met login %2$s "
+#~ "(gebruiker=%3$s, context=%4$s). Foutmelding: %1$s"
 
 #~ msgid "A command sent to mail server failed. Server response: %1$s"
 #~ msgstr ""
@@ -17947,8 +18132,8 @@ msgstr "Zoeloe"
 #~ "A command failed on mail server %1$s with login %2$s (user=%3$s, context="
 #~ "%4$s). Server response: %5$s"
 #~ msgstr ""
-#~ "Een opdracht is mislukt op mailserver %1$s met aanmeldnaam %2$s (gebruiker="
-#~ "%3$s, context=%4$s). Servermelding: %5$s"
+#~ "Een opdracht is mislukt op mailserver %1$s met aanmeldnaam %2$s "
+#~ "(gebruiker=%3$s, context=%4$s). Servermelding: %5$s"
 
 #~ msgid "Mail server indicates a bad command. Server response: %1$s"
 #~ msgstr "Mailserver meldt een onjuiste opdracht. Servermelding: %1$s"
@@ -17985,15 +18170,16 @@ msgstr "Zoeloe"
 #~ "login %2$s (user=%3$s, context=%4$s). Error message from mail transport "
 #~ "server: %5$s"
 #~ msgstr ""
-#~ "Verkeerde of ontbrekende aanmeldgegevens voor de doorstuur server %1$s met "
-#~ "aanmeldingsnaam %2$s (gebruiker=%3$s, context=%4$s). Melding van de "
+#~ "Verkeerde of ontbrekende aanmeldgegevens voor de doorstuur server %1$s "
+#~ "met aanmeldingsnaam %2$s (gebruiker=%3$s, context=%4$s). Melding van de "
 #~ "server: %5$s"
 
 #~ msgid ""
-#~ "Error processing mail server response. The administrator has been informed."
+#~ "Error processing mail server response. The administrator has been "
+#~ "informed."
 #~ msgstr ""
-#~ "Het was niet mogelijk de E-mail server antwoorden te verwerken. Dit is aan "
-#~ "de beheerder doorgegeven."
+#~ "Het was niet mogelijk de E-mail server antwoorden te verwerken. Dit is "
+#~ "aan de beheerder doorgegeven."
 
 #~ msgid ""
 #~ "Error processing %1$s mail server response for login %2$s (user=%3$s, "
@@ -18003,8 +18189,8 @@ msgstr "Zoeloe"
 #~ "(gebruiker=%3$s, context=%4$s). De beheerder wordt geinformeerd."
 
 #~ msgid ""
-#~ "I/O error \"%1$s\" occurred in communication with \"%2$s\" mail server for "
-#~ "login %3$s (user=%4$s, context=%5$s)."
+#~ "I/O error \"%1$s\" occurred in communication with \"%2$s\" mail server "
+#~ "for login %3$s (user=%4$s, context=%5$s)."
 #~ msgstr ""
 #~ "Er is een I/O fout \"%1$s\" opgetreden tijdens communicatie met \"%2$s\" "
 #~ "mailserver met aanmeldingsnaam %3$s (gebruiker=%4$s, context=%5$s)."
@@ -18013,16 +18199,16 @@ msgstr "Zoeloe"
 #~ "Error processing mail server response. The administrator has been "
 #~ "informed. Error message: %1$s"
 #~ msgstr ""
-#~ "Het was niet mogelijk de E-mail server antwoorden te verwerken. Dit is aan "
-#~ "de beheerder doorgegeven. Foutmelding: %1$s"
+#~ "Het was niet mogelijk de E-mail server antwoorden te verwerken. Dit is "
+#~ "aan de beheerder doorgegeven. Foutmelding: %1$s"
 
 #~ msgid ""
 #~ "Error processing %1$s mail server response for login %2$s (user=%3$s, "
 #~ "context=%4$s). The administrator has been informed. Error message: %5$s"
 #~ msgstr ""
 #~ "Fout bij het verwerken van mailserver antwoord %1$s met aanmeldnaam %2$s "
-#~ "(gebruiker=%3$s, context=%4$s). De beheerder is geinformeerd. Foutmelding: "
-#~ "%5$s"
+#~ "(gebruiker=%3$s, context=%4$s). De beheerder is geinformeerd. "
+#~ "Foutmelding: %5$s"
 
 #~ msgid ""
 #~ "That mailbox is already in use by another process on %1$s mail server for "
@@ -18030,8 +18216,8 @@ msgstr "Zoeloe"
 #~ "message: %5$s"
 #~ msgstr ""
 #~ "Deze mailbox is reeds in gebruik bij een ander proces op mailserver %1$s "
-#~ "met login %2$s (gebruiker=%3$s, context=%4$s). Probeer het later opnieuw.  "
-#~ "Foutmelding: %5$s"
+#~ "met login %2$s (gebruiker=%3$s, context=%4$s). Probeer het later "
+#~ "opnieuw.  Foutmelding: %5$s"
 
 #~ msgid "Unexpected error: %1$s."
 #~ msgstr "Onverwachte fout: %1$s."
@@ -18043,15 +18229,16 @@ msgstr "Zoeloe"
 #~ "Kan e-mail account met kenmerk %1$s voor gebruiker %2$s niet vinden in "
 #~ "context %3$s."
 
-#~ msgid "Denied deletion of default mail account of user %1$s in context %2$s."
+#~ msgid ""
+#~ "Denied deletion of default mail account of user %1$s in context %2$s."
 #~ msgstr ""
 #~ "Operatie niet uitvoerbaar op standaard e-mail account van gebruiker %1$s "
 #~ "in context %2$s."
 
 #~ msgid "Denied update of default mail account of user %1$s in context %2$s."
 #~ msgstr ""
-#~ "Niet toegestaan om wijzigingen aan te brengen aan standaard e-mail account "
-#~ "van gebruiker %1$s in context %2$s."
+#~ "Niet toegestaan om wijzigingen aan te brengen aan standaard e-mail "
+#~ "account van gebruiker %1$s in context %2$s."
 
 #~ msgid "No duplicate default account allowed."
 #~ msgstr "Het is niet toegestaan twee identieke standaard accounts te maken."
@@ -18226,18 +18413,19 @@ msgstr "Zoeloe"
 #~ "User %1$s has no access on shared folder %2$s in context %3$s due to user "
 #~ "configuration"
 #~ msgstr ""
-#~ "Gebruiker %1$s heeft geen toegang op gedeelde map %2$s in context %3$s als "
-#~ "gevolg van gebruikersconfiguratie"
+#~ "Gebruiker %1$s heeft geen toegang op gedeelde map %2$s in context %3$s "
+#~ "als gevolg van gebruikersconfiguratie"
 
 #~ msgid ""
-#~ "User %1$s has no write access on public folder %2$s in context %3$s due to "
-#~ "user configuration"
+#~ "User %1$s has no write access on public folder %2$s in context %3$s due "
+#~ "to user configuration"
 #~ msgstr ""
 #~ "Gebruiker %1$s heeft geen schrijftoegang op openbare map %2$s in context "
 #~ "%3$s als gevolg van gebruikersconfiguratie"
 
 #~ msgid ""
-#~ "User %1$s has no create-subfolder permission on folder %2$s in context %3$s"
+#~ "User %1$s has no create-subfolder permission on folder %2$s in context "
+#~ "%3$s"
 #~ msgstr ""
 #~ "Gebruiker %1$s heeft geen recht op submap aanmaken in map %2$s in context "
 #~ "%3$s"
@@ -18251,7 +18439,8 @@ msgstr "Zoeloe"
 #~ msgid ""
 #~ "Folder %1$s has been modified after last sync timestamp in context %2$s"
 #~ msgstr ""
-#~ "Map %1$s is gewijzigd na het laatste synchronisatietijdstip in context %2$s"
+#~ "Map %1$s is gewijzigd na het laatste synchronisatietijdstip in context "
+#~ "%2$s"
 
 #~ msgid "User %1$s has no admin access to folder %2$s in context %3$s"
 #~ msgstr ""
@@ -18276,15 +18465,15 @@ msgstr "Zoeloe"
 #~ "Administration rights required. In the Rights tab add at least one user "
 #~ "with administration rights."
 #~ msgstr ""
-#~ "Beheerrechten vereist. Voeg in het Rechten-tabblad tenminste één gebruiker "
-#~ "toe met beheerrechten."
+#~ "Beheerrechten vereist. Voeg in het Rechten-tabblad tenminste één "
+#~ "gebruiker toe met beheerrechten."
 
 #~ msgid "Invalid object ID %1$s"
 #~ msgstr "Ongeldig object-id %1$s"
 
 #~ msgid ""
-#~ "Not allowed to change parent id of folder %1$s through an update call. Use "
-#~ "move method instead."
+#~ "Not allowed to change parent id of folder %1$s through an update call. "
+#~ "Use move method instead."
 #~ msgstr ""
 #~ "Het wijzigen van de id van de map %1$s via een update-aanroep is niet "
 #~ "toegestaan. Gebruik in plaats daarvan de verplaatsmethode."
@@ -18295,7 +18484,8 @@ msgstr "Zoeloe"
 #~ msgid "Target folder %1$s contains a duplicate folder in context %2$s"
 #~ msgstr "Doelmap %1$s bevat een dubbele map in context %2$s"
 
-#~ msgid "Shared folder %1$s cannot be target of move operation in context %2$s"
+#~ msgid ""
+#~ "Shared folder %1$s cannot be target of move operation in context %2$s"
 #~ msgstr ""
 #~ "Gedeelde map %1$s kan niet het doel zijn van verplaatsingsoperatie in "
 #~ "context %2$s"
@@ -18313,7 +18503,8 @@ msgstr "Zoeloe"
 #~ "Gebruiker %1$s mag niet alle submappen van map %2$s in context %3$s "
 #~ "verplaatsen"
 
-#~ msgid "User %1$s is not allowed to delete shared folder %2$s in context %3$s"
+#~ msgid ""
+#~ "User %1$s is not allowed to delete shared folder %2$s in context %3$s"
 #~ msgstr ""
 #~ "Gebruiker %1$s mag de gedeelde map %2$s in context %3$s niet verwijderen"
 
@@ -18378,7 +18569,8 @@ msgstr "Zoeloe"
 #~ msgstr "Er is een LDAP-fout opgetreden in context %1$s"
 
 #~ msgid ""
-#~ "Attribute \"%1$s\" is not set in FolderObject instance %2$s in context %3$s"
+#~ "Attribute \"%1$s\" is not set in FolderObject instance %2$s in context "
+#~ "%3$s"
 #~ msgstr ""
 #~ "Attribuut \"%1$s\" niet ingesteld in FolderObject-instantie %2$s in "
 #~ "context %3$s"
@@ -18390,8 +18582,8 @@ msgstr "Zoeloe"
 #~ "Folder cache (region name = %1$s) could not be initialized due to the "
 #~ "following reason: %2$s"
 #~ msgstr ""
-#~ "Mappenbuffer (regionaam = %1$s) kan niet worden geïnitialiseerd als gevolg "
-#~ "van: %2$s"
+#~ "Mappenbuffer (regionaam = %1$s) kan niet worden geïnitialiseerd als "
+#~ "gevolg van: %2$s"
 
 #~ msgid "Folder cache has not been enabled in config file %1$s"
 #~ msgstr "Mappenbuffer is niet ingeschakeld in configbestand %1$s"
@@ -18400,7 +18592,8 @@ msgstr "Zoeloe"
 #~ msgstr "Map %1$s kon niet worden verwijderd uit mappenbuffer"
 
 #~ msgid "User %1$s has no write permission on folder %2$s in context %3$s"
-#~ msgstr "Gebruiker %1$s heeft geen schrijftoegang op map %2$s in context %3$s"
+#~ msgstr ""
+#~ "Gebruiker %1$s heeft geen schrijftoegang op map %2$s in context %3$s"
 
 #~ msgid "Unknown parameter container type: %1$s"
 #~ msgstr "Onbekende parameter containertype: %1$s"
@@ -18441,8 +18634,8 @@ msgstr "Zoeloe"
 
 #~ msgid ""
 #~ "User %1$s granted invalid permissions on shared folder %2$s in context "
-#~ "%3$s. Only the owner of the parent shared folder %4$s can administrate the "
-#~ "folder."
+#~ "%3$s. Only the owner of the parent shared folder %4$s can administrate "
+#~ "the folder."
 #~ msgstr ""
 #~ "Gebruiker %1$s geeft ongeldige rechten op gedeelde map %2$s in context "
 #~ "%3$s. Alleen de eigenaar van de bovenliggende gedeelde map %4$s mag "
@@ -18457,8 +18650,8 @@ msgstr "Zoeloe"
 
 #~ msgid ""
 #~ "Folder %1$s in context %2$s contains a hidden subfolder. User %3$s has no "
-#~ "delete rights for this subfolder and consequently cannot delete its parent "
-#~ "folder."
+#~ "delete rights for this subfolder and consequently cannot delete its "
+#~ "parent folder."
 #~ msgstr ""
 #~ "Map %1$s in context %2$s bevat een verborgen submap. Gebruiker %3$s heeft "
 #~ "geen wisrechten voor deze submap en kan daarom de bovenliggende map ook "
@@ -18468,8 +18661,8 @@ msgstr "Zoeloe"
 #~ "An infostore folder named %1$s already exists below folder %2$s (%3$s) in "
 #~ "context %4$s. Please choose another display name."
 #~ msgstr ""
-#~ "Een gegevensdepot-map met de naam %1$s bestaat al onder map %2$s (%3$s) in "
-#~ "context %4$s. Kies een andere weergavenaam."
+#~ "Een gegevensdepot-map met de naam %1$s bestaat al onder map %2$s (%3$s) "
+#~ "in context %4$s. Kies een andere weergavenaam."
 
 #~ msgid "Folder contains invalid data: \"%1$s\""
 #~ msgstr "Map bevat ongeldige data: \"%1$s\""
@@ -18694,8 +18887,8 @@ msgstr "Zoeloe"
 #~ "This Apache Solr Core's instance directory (%1$s) already exists and its "
 #~ "structure is inconsistent."
 #~ msgstr ""
-#~ "Deze Apache Solr Core's instantie map (%1$s) bestaat reeds en de structuur "
-#~ "is tegenstrijdig."
+#~ "Deze Apache Solr Core's instantie map (%1$s) bestaat reeds en de "
+#~ "structuur is tegenstrijdig."
 
 #~ msgid ""
 #~ "Could neither delegate Apache Solr request to a local nor to a remote "
@@ -18717,15 +18910,15 @@ msgstr "Zoeloe"
 #~ "Can not reach Apache Solr Core Store. URI %1$s does not lead to an "
 #~ "existing directory."
 #~ msgstr ""
-#~ "Kan de Apache Solr Core opslag niet benaderen. URI %1$s verwijst niet naar "
-#~ "een bestaande map."
+#~ "Kan de Apache Solr Core opslag niet benaderen. URI %1$s verwijst niet "
+#~ "naar een bestaande map."
 
 #~ msgid ""
-#~ "The affected Apache Solr Core %1$s is not started up yet. Please try again "
-#~ "later."
+#~ "The affected Apache Solr Core %1$s is not started up yet. Please try "
+#~ "again later."
 #~ msgstr ""
-#~ "De vereiste Apache Solr Core %1$s is nog niet opgestart. Probeer het later "
-#~ "nogmaals."
+#~ "De vereiste Apache Solr Core %1$s is nog niet opgestart. Probeer het "
+#~ "later nogmaals."
 
 #~ msgid "The document with uuid %1$s could not be found."
 #~ msgstr "Het document met uuid %1$s is niet gevonden."
@@ -18764,7 +18957,8 @@ msgstr "Zoeloe"
 #~ msgid "Spamd returned wrong exit code \"%s\""
 #~ msgstr "Spamd geeft onjuiste stopcode \"%s\""
 
-#~ msgid "Internal error: Wrong arguments are given to the tell command: \"%s\""
+#~ msgid ""
+#~ "Internal error: Wrong arguments are given to the tell command: \"%s\""
 #~ msgstr "Interne fout: tell-opdracht ontving onjuiste argumenten: \"%s\""
 
 #~ msgid "Error during communication with spamd: \"%s\""
@@ -18906,8 +19100,8 @@ msgstr "Zoeloe"
 #~ "In that case, please try to empty your deleted items first, or delete "
 #~ "smaller messages first."
 #~ msgstr ""
-#~ "Als dit correct is, probeer dan eerst de verwijderde items te verwijderen, "
-#~ "of verwijder eerst kleine berichten."
+#~ "Als dit correct is, probeer dan eerst de verwijderde items te "
+#~ "verwijderen, of verwijder eerst kleine berichten."
 
 #~ msgid "Error message from server: %5$s"
 #~ msgstr "Foutmelding van de server: %5$s"
@@ -18979,8 +19173,8 @@ msgstr "Zoeloe"
 #~ "SmartDrive user \"%1$s\" is not authenticated for stateful access to "
 #~ "SmarTDrive server \"%2$s\"."
 #~ msgstr ""
-#~ "SmartDrive gebruiker \"%1$s\" is niet geauthoriseerd voor speciale toegang "
-#~ "tot SmartDrive server \"%2$s\"."
+#~ "SmartDrive gebruiker \"%1$s\" is niet geauthoriseerd voor speciale "
+#~ "toegang tot SmartDrive server \"%2$s\"."
 
 #~ msgid "This resource is not a file"
 #~ msgstr "Deze bron is geen bestand"
@@ -19071,7 +19265,8 @@ msgstr "Zoeloe"
 
 #~ msgid "Mail could not be moved to trash folder. Quota exceeded."
 #~ msgstr ""
-#~ "E-mail kan niet naar de prullenbakmap verplaatst worden. Quota overschreden"
+#~ "E-mail kan niet naar de prullenbakmap verplaatst worden. Quota "
+#~ "overschreden"
 
 #~ msgid ""
 #~ "The mail folder cannot be created/renamed. The name must not contain the "
@@ -19192,8 +19387,8 @@ msgstr "Zoeloe"
 #~ "filter server %1$s op poort %2$s"
 
 #~ msgid ""
-#~ "Error while communicating with the sieve server %1$s at port %2$s for user "
-#~ "%3$s in context %4$s"
+#~ "Error while communicating with the sieve server %1$s at port %2$s for "
+#~ "user %3$s in context %4$s"
 #~ msgstr ""
 #~ "Er is een fout opgetreden tijdens het communiceren met de filter server "
 #~ "%1$s op poort %2$s voor gebruiker %3$s in context %4$s"
@@ -19233,8 +19428,8 @@ msgstr "Zoeloe"
 #~ "%1$s met aanmeldingsnaam %2$s (gebruiker=%3$s, context=%4$s)."
 
 #~ msgid ""
-#~ "Message has been successfully sent, but a copy could not be placed in your "
-#~ "sent folder due to exceeded quota."
+#~ "Message has been successfully sent, but a copy could not be placed in "
+#~ "your sent folder due to exceeded quota."
 #~ msgstr ""
 #~ "Bericht is met succes verstuurd, maar een kopie kon niet in uw verzonden-"
 #~ "map worden geplaatst als gevolg van overschreden quota."
@@ -19319,8 +19514,8 @@ msgstr "Zoeloe"
 #~ "Socket closed by web server. Wait for input data of package #%1$d took "
 #~ "%2$dmsec."
 #~ msgstr ""
-#~ "Socket gesloten door webserver. Wachten op invoergegevens van pakket #%1$d "
-#~ "duurde %2$d msec."
+#~ "Socket gesloten door webserver. Wachten op invoergegevens van pakket #"
+#~ "%1$d duurde %2$d msec."
 
 #~ msgid "String parse exception: No ending 0x00 found"
 #~ msgstr "Fout bij analyseren tekenreeks: geen 0x00-eindmarkering gevonden"
@@ -19329,8 +19524,8 @@ msgstr "Zoeloe"
 #~ "The configuration requests a master password but none is given in the "
 #~ "configuration file"
 #~ msgstr ""
-#~ "De configuratie vraagt ​​een hoofdwachtwoord maar er is er geen opgegeven in "
-#~ "het configuratiebestand"
+#~ "De configuratie vraagt ​​een hoofdwachtwoord maar er is er geen opgegeven "
+#~ "in het configuratiebestand"
 
 #~ msgid "The credsrc given in the config file is not a valid one"
 #~ msgstr "De geconfigureerde credsrc is niet geldig"
@@ -19344,7 +19539,8 @@ msgstr "Zoeloe"
 #~ msgid "The given value for sorting \"%s\" is not a possible one"
 #~ msgstr "De opgegeven waarde voor sorteren \"%s\" is geen geldige optie"
 
-#~ msgid "The id is missing inside the update request or has a non integer type"
+#~ msgid ""
+#~ "The id is missing inside the update request or has a non integer type"
 #~ msgstr "Het id ontbreekt in het update verzoek of is geen getal"
 
 #~ msgid "The login type given in the config file is not a valid one"
@@ -19426,9 +19622,10 @@ msgstr "Zoeloe"
 #~ msgstr "Het pad %s is reeds in gebruik"
 
 #~ msgid ""
-#~ "It seems we ran into measures to protect your account from abuse (probably "
-#~ "a location-check). Please use your account directly in the browser once "
-#~ "from your current location. After that it should work here as well."
+#~ "It seems we ran into measures to protect your account from abuse "
+#~ "(probably a location-check). Please use your account directly in the "
+#~ "browser once from your current location. After that it should work here "
+#~ "as well."
 #~ msgstr ""
 #~ "We hebben maatregelen moeten nemen om uw account te beschermen tegen "
 #~ "misbruik (waarschijnlijk een locatiecontrole). Gebruik uw account "
@@ -19462,8 +19659,8 @@ msgstr "Zoeloe"
 #~ "contactpersonen niet importeren."
 
 #~ msgid ""
-#~ "No field can be found that could be used to name contacts in this file: no "
-#~ "name, no company nor e-mail."
+#~ "No field can be found that could be used to name contacts in this file: "
+#~ "no name, no company nor e-mail."
 #~ msgstr ""
 #~ "Er is geen veld om contactpersonen in dit bestand te benoemen: geen naam, "
 #~ "bedrijf of e-mail."
@@ -19494,14 +19691,16 @@ msgstr "Zoeloe"
 #~ msgid "Store already closed: %1$s"
 #~ msgstr "Opslag is al gesloten: %1$s"
 
-#~ msgid "Session secret is different. Given %1$s differs from %2$s in session."
+#~ msgid ""
+#~ "Session secret is different. Given %1$s differs from %2$s in session."
 #~ msgstr ""
 #~ "Sessiegeheim is verschillend. Gegeven %1$s verschilt van %2$s in sessie."
 
 #~ msgid "Account \"%s\" is not ready yet."
 #~ msgstr "Account ‘%s’ is nog niet klaar."
 
-#~ msgid "OAuth Token has expired. Please authorize this account and try again."
+#~ msgid ""
+#~ "OAuth Token has expired. Please authorize this account and try again."
 #~ msgstr ""
 #~ "OAuth Token is verlopen. Gelive dit account opnieuw te autoriseren en dan "
 #~ "opnieuw proberen."
@@ -19533,7 +19732,8 @@ msgstr "Zoeloe"
 #~ "Een SQL-fout is opgetreden tijdens het herleiden van mapnaamconflicten: %s"
 
 #~ msgid "A SQL error occurred while performing task %1$s: %2$s."
-#~ msgstr "Er is een SQL-fout opgetreden bij het uitvoeren van taak %1$s: %2$s."
+#~ msgstr ""
+#~ "Er is een SQL-fout opgetreden bij het uitvoeren van taak %1$s: %2$s."
 
 #~ msgid ""
 #~ "A SQL error occurred while performing task "
@@ -19604,8 +19804,8 @@ msgstr "Zoeloe"
 #~ msgstr "Er is een invoer-/uitvoerfout opgetreden %1$s"
 
 #~ msgid ""
-#~ "An SQL error occurred while performing task ContactsChangedFromUpdateTask: "
-#~ "%1$s."
+#~ "An SQL error occurred while performing task "
+#~ "ContactsChangedFromUpdateTask: %1$s."
 #~ msgstr ""
 #~ "Er is een SQL-fout opgetreden bij het uitvoeren van de taak "
 #~ "ContactsChangedFromUpdateTask: %1$s"
@@ -19658,8 +19858,8 @@ msgstr "Zoeloe"
 #~ "simpele zoekactie. Context %1$d Map %2$d Gebruiker %3$d"
 
 #~ msgid ""
-#~ "An error occurred during the load of folder objects by an extended search. "
-#~ "Context %1$d User %2$d"
+#~ "An error occurred during the load of folder objects by an extended "
+#~ "search. Context %1$d User %2$d"
 #~ msgstr ""
 #~ "Er is een fout opgetreden tijdens het laden van mapobjecten door een "
 #~ "uitgebreide zoekactie. Context %1$d Gebruiker %2$d"
@@ -19748,9 +19948,9 @@ msgstr "Zoeloe"
 #~ "Changes were made to the object of this attachment and cannot be undone. "
 #~ "Your database is probably inconsistent, run the consistency tool."
 #~ msgstr ""
-#~ "Wijzigingen gemaakt aan het object van dit bijvoegsel kunnen niet ongedaan "
-#~ "worden gemaakt. Uw database is waarschijnlijk inconsistent, draai het "
-#~ "herstelprogramma."
+#~ "Wijzigingen gemaakt aan het object van dit bijvoegsel kunnen niet "
+#~ "ongedaan worden gemaakt. Uw database is waarschijnlijk inconsistent, "
+#~ "draai het herstelprogramma."
 
 #~ msgid "Could not delete file from file store. Filestore: %s Context: %s"
 #~ msgstr ""
@@ -19767,7 +19967,8 @@ msgstr "Zoeloe"
 #~ msgstr "Kan de ICalEmitter-dienst niet vinden. Is de dienst geëxporteerd?"
 
 #~ msgid ""
-#~ "Could not find suitable ICalParser. Is an ICalParser exported as a service?"
+#~ "Could not find suitable ICalParser. Is an ICalParser exported as a "
+#~ "service?"
 #~ msgstr ""
 #~ "Kan geen geschikte ICalParser vinden. Is er een ICalParser als dienst "
 #~ "geëxporteerd?"
@@ -19818,8 +20019,8 @@ msgstr "Zoeloe"
 #~ msgstr ""
 #~ "Bewerkingsconflict. Uw wijziging kan niet worden voltooid omdat iemand "
 #~ "anders een conflicterende wijziging gemaakt heeft aan hetzelfde item. "
-#~ "Ververs of synchroniseer alstublieft en probeer het nogmaals. Context %1$d "
-#~ "Map %2$d Gebruiker %3$d Object %4$d"
+#~ "Ververs of synchroniseer alstublieft en probeer het nogmaals. Context "
+#~ "%1$d Map %2$d Gebruiker %3$d Object %4$d"
 
 #~ msgid "Error in SQL Statement"
 #~ msgstr "Fout in SQL-statement"
@@ -19906,7 +20107,8 @@ msgstr "Zoeloe"
 #~ "ContactsAddUseCountColumnUpdateTask: %1$s."
 
 #~ msgid ""
-#~ "SQL error occurred while performing task ContactsFieldSizeUpdateTask: %1$s."
+#~ "SQL error occurred while performing task ContactsFieldSizeUpdateTask: "
+#~ "%1$s."
 #~ msgstr ""
 #~ "Er is een SQL-fout opgetreden bij het uitvoeren van de taak "
 #~ "ContactsFieldSizeUpdateTask: %1$s"
@@ -19939,8 +20141,8 @@ msgstr "Zoeloe"
 #~ "The document you want to change does not exist anymore. It was probably "
 #~ "removed during your update."
 #~ msgstr ""
-#~ "Het document dat u wilt aanpassen bestaat niet meer. Het is waarschijnlijk "
-#~ "verwijderd tijdens het verversen."
+#~ "Het document dat u wilt aanpassen bestaat niet meer. Het is "
+#~ "waarschijnlijk verwijderd tijdens het verversen."
 
 #~ msgid ""
 #~ "The file cannot be added to filestore. File size: %s Quota: %s Used: %s"
@@ -19955,8 +20157,8 @@ msgstr "Zoeloe"
 #~ "The object you requested can not be found. Try again. Context %1$d Folder "
 #~ "%2$d User %3$d Object %4$d"
 #~ msgstr ""
-#~ "Het door u aangevraagde object is onvindbaar. Probeer het opnieuw. Context "
-#~ "%1$d Map %2$d Gebruiker %3$d Object %4$d"
+#~ "Het door u aangevraagde object is onvindbaar. Probeer het opnieuw. "
+#~ "Context %1$d Map %2$d Gebruiker %3$d Object %4$d"
 
 #~ msgid "This Contact has no FolderID: Entry %1$d Context %2$d"
 #~ msgstr "Deze contactpersoon heeft geen FolderID: Item %1$d Context %2$d"
@@ -19967,8 +20169,8 @@ msgstr "Zoeloe"
 #~ msgid ""
 #~ "This gif image is too large. It can not be scaled and will not be accepted"
 #~ msgstr ""
-#~ "Deze gif-afbeelding is te groot. Hij kan niet op schaal gebracht worden en "
-#~ "wordt dus niet geaccepteerd"
+#~ "Deze gif-afbeelding is te groot. Hij kan niet op schaal gebracht worden "
+#~ "en wordt dus niet geaccepteerd"
 
 #~ msgid ""
 #~ "Unable fetch the number of elements in this Folder. Context %1$d Folder "
@@ -19978,8 +20180,8 @@ msgstr "Zoeloe"
 #~ "%1$d Map %2$d Gebruiker %3$d"
 
 #~ msgid ""
-#~ "Unable to create a link between these two objects. Insufficient rights. 1. "
-#~ "Object %1$d 2. Object %2$d Context %3$d"
+#~ "Unable to create a link between these two objects. Insufficient rights. "
+#~ "1. Object %1$d 2. Object %2$d Context %3$d"
 #~ msgstr ""
 #~ "Niet in staat om een koppeling te maken tussen deze twee objecten. "
 #~ "Onvoldoende rechten. 1. Object %1$d 2. Object %2$d Context %3$d"
@@ -20013,16 +20215,16 @@ msgstr "Zoeloe"
 #~ "Object %1$d Context %2$d"
 
 #~ msgid ""
-#~ "Unable to delete contact object. Context %1$d Folder %2$d User %3$d Object "
-#~ "%4$d"
+#~ "Unable to delete contact object. Context %1$d Folder %2$d User %3$d "
+#~ "Object %4$d"
 #~ msgstr ""
 #~ "Niet in staat om contactobject te verwijderen. Context %1$d Map %2$d "
 #~ "Gebruiker %3$d Object %4$d"
 
 #~ msgid "Unable to delete contacts from this folder. Context %1$d Folder %2$d"
 #~ msgstr ""
-#~ "Niet in staat om contactpersonen te verwijderen uit deze map. Context %1$d "
-#~ "Map %2$d"
+#~ "Niet in staat om contactpersonen te verwijderen uit deze map. Context "
+#~ "%1$d Map %2$d"
 
 #~ msgid ""
 #~ "Unable to delete contacts from user because this is a non-contact folder. "
@@ -20036,7 +20238,8 @@ msgstr "Zoeloe"
 #~ "Niet in staat om distributielijst te verwijderen op id: Context %1$d "
 #~ "Contactpersoon %2$d"
 
-#~ msgid "Unable to delete linking between contacts : Context %1$d Contact %2$d"
+#~ msgid ""
+#~ "Unable to delete linking between contacts : Context %1$d Contact %2$d"
 #~ msgstr ""
 #~ "Niet in staat om koppeling tussen contactpersonen te verwijderen: Context "
 #~ "%1$d Contactpersoon %2$d"
@@ -20058,14 +20261,15 @@ msgstr "Zoeloe"
 #~ msgstr "Niet in staat om contactpersonen in te voegen! Context: %d"
 
 #~ msgid ""
-#~ "Unable to load all links for the object. Object %1$d Folder %2$d User %3$d "
-#~ "Context %4$d"
+#~ "Unable to load all links for the object. Object %1$d Folder %2$d User "
+#~ "%3$d Context %4$d"
 #~ msgstr ""
 #~ "Niet in staat alle verwijzingen voor het object te laden. Object %1$d Map "
 #~ "%2$d Gebruiker %3$d Context %4$d"
 
 #~ msgid ""
-#~ "Unable to load all links for the object. Object %1$d User %2$d Context %3$d"
+#~ "Unable to load all links for the object. Object %1$d User %2$d Context "
+#~ "%3$d"
 #~ msgstr ""
 #~ "Niet in staat alle verwijzingen voor het object te laden. Object %1$d "
 #~ "Gebruiker %2$d Context %4$d"
@@ -20105,8 +20309,8 @@ msgstr "Zoeloe"
 
 #~ msgid "Unable to save dristributionlist: Context %1$d Contact %2$d"
 #~ msgstr ""
-#~ "Niet in staat om distributielijst op te slaan: Context %1$d Contactpersoon "
-#~ "%2$d"
+#~ "Niet in staat om distributielijst op te slaan: Context %1$d "
+#~ "Contactpersoon %2$d"
 
 #~ msgid "Unable to trigger object Events: Context %1$d User %2$d"
 #~ msgstr ""
@@ -20119,8 +20323,8 @@ msgstr "Zoeloe"
 
 #~ msgid "Unable to update contact image: Context %1$d Contact %2$d"
 #~ msgstr ""
-#~ "Niet in staat contactafbeelding bij te werken: Context %1$d Contactpersoon "
-#~ "%2$d"
+#~ "Niet in staat contactafbeelding bij te werken: Context %1$d "
+#~ "Contactpersoon %2$d"
 
 #~ msgid "Unable to update contact. Context %1$d Object %2$d"
 #~ msgstr ""
