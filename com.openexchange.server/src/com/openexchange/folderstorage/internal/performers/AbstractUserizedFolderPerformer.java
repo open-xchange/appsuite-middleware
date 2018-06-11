@@ -721,12 +721,14 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
                 }
             }
 
-            /*
-             * check for an already existing anonymous permission if a new one should be added
-             */
-            Permission invalidPermission = containsOriginalAnonymousPermission(comparedPermissions);
-            if (invalidPermission != null) {
-                throw invalidPermissions(folder, invalidPermission);
+            if(addedAnonymousPermission != null) {
+                /*
+                 * check for an already existing anonymous permission if a new one should be added
+                 */
+                Permission invalidPermission = containsOriginalAnonymousPermission(comparedPermissions);
+                if (invalidPermission != null) {
+                    throw invalidPermissions(folder, invalidPermission);
+                }
             }
         }
         /*
