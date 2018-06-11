@@ -2915,7 +2915,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
          */
         IMAPCommandsCollection.forceSetSubscribed(imapStore, fullName, false);
         // Unsubscribe subfolders
-        ListInfo[] subSubscriptions = IMAPCommandsCollection.listSubfolders(fullName, separator, deleteMe);
+        ListInfo[] subSubscriptions = IMAPCommandsCollection.listAllSubfolders(fullName, separator, deleteMe);
         for (ListInfo info : subSubscriptions) {
             IMAPCommandsCollection.forceSetSubscribed(imapStore, info.name, false);
         }
