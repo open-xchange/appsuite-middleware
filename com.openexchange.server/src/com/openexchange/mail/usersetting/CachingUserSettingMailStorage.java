@@ -102,7 +102,7 @@ public final class CachingUserSettingMailStorage extends UserSettingMailStorage 
     }
 
     private void initCache() throws OXException {
-        m_cache = ServerServiceRegistry.getInstance().getService(CacheService.class).getCache(CACHE_REGION_NAME);
+        m_cache = ServerServiceRegistry.getInstance().getService(CacheService.class, true).getCache(CACHE_REGION_NAME);
     }
 
     private void releaseCache() throws OXException {
