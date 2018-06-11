@@ -56,6 +56,9 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
+import com.openexchange.jsieve.commands.ActionCommand.Commands;
+import com.openexchange.mail.filter.json.v2.json.fields.GeneralField;
+import com.openexchange.mail.filter.json.v2.json.fields.RedirectActionField;
 import com.openexchange.mail.filter.json.v2.mapper.ActionCommandRuleFieldMapper;
 
 /**
@@ -88,16 +91,16 @@ public class Bug58952Test {
     public void testWithKeep() throws Exception {
         JSONArray jsonArray = new JSONArray();
         JSONObject redirect = new JSONObject();
-        redirect.put("id", "redirect");
-        redirect.put("to", "foobar@ox.io");
+        redirect.put(GeneralField.id.name(), Commands.REDIRECT.getJsonName());
+        redirect.put(RedirectActionField.to.name(), "foobar@ox.io");
 
         JSONObject keep = new JSONObject();
-        keep.put("id", "keep");
+        keep.put(GeneralField.id.name(), Commands.KEEP.getJsonName());
         jsonArray.put(redirect);
         // Mix 'em up
         for (int i = 0; i < 4; i++) {
             JSONObject command = new JSONObject();
-            command.put("id", "someothercommand");
+            command.put(GeneralField.id.name(), "someothercommand");
             jsonArray.put(command);
         }
         jsonArray.put(keep);
@@ -107,8 +110,8 @@ public class Bug58952Test {
 
         assertTrue("Action commands did not merge", jsonArray.length() == oldLength - 1);
         JSONObject merged = jsonArray.getJSONObject(0);
-        assertTrue("The copy flag is not set", merged.hasAndNotNull("copy"));
-        assertTrue("The copy flag is not set", merged.optBoolean("copy", false));
+        assertTrue("The copy flag is not set", merged.hasAndNotNull(RedirectActionField.copy.name()));
+        assertTrue("The copy flag is not set", merged.optBoolean(RedirectActionField.copy.name(), false));
     }
 
     /**
@@ -118,17 +121,17 @@ public class Bug58952Test {
     public void testWithCopy() throws Exception {
         JSONArray jsonArray = new JSONArray();
         JSONObject redirect = new JSONObject();
-        redirect.put("id", "redirect");
-        redirect.put("to", "foobar@ox.io");
-        redirect.put("copy", true);
+        redirect.put(GeneralField.id.name(), Commands.REDIRECT.getJsonName());
+        redirect.put(RedirectActionField.to.name(), "foobar@ox.io");
+        redirect.put(RedirectActionField.copy.name(), true);
         jsonArray.put(redirect);
 
         invoke(ActionCommandRuleFieldMapper.class, "applyWorkaroundFor58952", JSONArray.class, mapper, jsonArray);
 
         assertTrue("Action commands did not merge", jsonArray.length() == 1);
         JSONObject merged = jsonArray.getJSONObject(0);
-        assertTrue("The copy flag is not set", merged.hasAndNotNull("copy"));
-        assertTrue("The copy flag is not set", merged.optBoolean("copy", false));
+        assertTrue("The copy flag is not set", merged.hasAndNotNull(RedirectActionField.copy.name()));
+        assertTrue("The copy flag is not set", merged.optBoolean(RedirectActionField.copy.name(), false));
     }
 
     /**
@@ -138,15 +141,15 @@ public class Bug58952Test {
     public void testRedirectOnly() throws Exception {
         JSONArray jsonArray = new JSONArray();
         JSONObject redirect = new JSONObject();
-        redirect.put("id", "redirect");
-        redirect.put("to", "foobar@ox.io");
+        redirect.put(GeneralField.id.name(), Commands.REDIRECT.getJsonName());
+        redirect.put(RedirectActionField.to.name(), "foobar@ox.io");
         jsonArray.put(redirect);
 
         invoke(ActionCommandRuleFieldMapper.class, "applyWorkaroundFor58952", JSONArray.class, mapper, jsonArray);
 
         assertTrue("Action commands did not merge", jsonArray.length() == 1);
         JSONObject merged = jsonArray.getJSONObject(0);
-        assertFalse("The copy flag is set", merged.hasAndNotNull("copy"));
+        assertFalse("The copy flag is set", merged.hasAndNotNull(RedirectActionField.copy.name()));
     }
 
     /**
