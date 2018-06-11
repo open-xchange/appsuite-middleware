@@ -118,7 +118,7 @@ public class CacheEvent implements Serializable {
     protected final ListSet<Serializable> keys;
     protected final String groupName;
     protected final String region;
-    protected final Condition condition;
+    protected final transient Condition condition;
 
     /**
      * Initializes a new {@link CacheEvent}.
