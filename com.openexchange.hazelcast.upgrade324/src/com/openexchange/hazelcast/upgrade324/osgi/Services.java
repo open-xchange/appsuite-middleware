@@ -47,41 +47,69 @@
  *
  */
 
-package com.openexchange.legacy;
+package com.openexchange.hazelcast.upgrade324.osgi;
 
+import java.util.concurrent.atomic.AtomicReference;
+import com.openexchange.server.ServiceLookup;
 
 /**
- * {@link CacheKeyService} - The service to provide cache keys.
+ * {@link Services} - The static service lookup.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface CacheKeyService {
+public final class Services {
 
     /**
-     * Creates a new instance of {@link CacheKey} consisting of specified context ID and object ID.
-     *
-     * @param contextId The context ID
-     * @param objectId The object ID
-     * @return The new instance of {@link CacheKey}
+     * Initializes a new {@link Services}.
      */
-    CacheKey newCacheKey(int contextId, int objectId);
+    private Services() {
+        super();
+    }
+
+    private static final AtomicReference<ServiceLookup> REF = new AtomicReference<ServiceLookup>();
 
     /**
-     * Creates a new instance of {@link CacheKey} consisting of specified context ID and key object.
+     * Sets the service lookup.
      *
-     * @param contextId The context ID
-     * @param obj The key object
-     * @return new instance of {@link CacheKey}
+     * @param serviceLookup The service lookup or <code>null</code>
      */
-    CacheKey newCacheKey(int contextId, String obj);
+    public static void setServiceLookup(final ServiceLookup serviceLookup) {
+        REF.set(serviceLookup);
+    }
 
     /**
-     * Creates a new instance of {@link CacheKey} consisting of specified context ID and key objects.
+     * Gets the service lookup.
      *
-     * @param contextId The context ID
-     * @param objs The key objects
-     * @return new instance of {@link CacheKey}
+     * @return The service lookup or <code>null</code>
      */
-    CacheKey newCacheKey(int contextId, String... objs);
+    public static ServiceLookup getServiceLookup() {
+        return REF.get();
+    }
+
+    /**
+     * Gets the service of specified type
+     *
+     * @param clazz The service's class
+     * @return The service
+     * @throws IllegalStateException If an error occurs while returning the demanded service
+     */
+    public static <S extends Object> S getService(final Class<? extends S> clazz) {
+        final com.openexchange.server.ServiceLookup serviceLookup = REF.get();
+        if (null == serviceLookup) {
+            throw new IllegalStateException("Missing ServiceLookup instance. Bundle \"com.openexchange.hazelcast.upgrade324\" not started?");
+        }
+        return serviceLookup.getService(clazz);
+    }
+
+    /**
+     * (Optionally) Gets the service of specified type
+     *
+     * @param clazz The service's class
+     * @return The service or <code>null</code> if absent
+     */
+    public static <S extends Object> S optService(final Class<? extends S> clazz) {
+        ServiceLookup serviceLookup = REF.get();
+        return null == serviceLookup ? null : serviceLookup.getOptionalService(clazz);
+    }
 
 }

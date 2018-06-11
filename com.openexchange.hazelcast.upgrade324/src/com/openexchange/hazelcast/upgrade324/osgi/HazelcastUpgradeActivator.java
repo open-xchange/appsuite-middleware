@@ -57,12 +57,12 @@ import com.hazelcast.nio.serialization.ClassDefinition;
 import com.openexchange.caching.events.CacheEventService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.configuration.ConfigurationExceptionCodes;
+import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.legacy.DynamicPortableFactory;
 import com.openexchange.legacy.DynamicPortableFactoryImpl;
-import com.openexchange.legacy.PortableCacheKeyFactory;
-import com.openexchange.legacy.PortableMessageFactory;
+import com.openexchange.legacy.PortableContextInvalidationCallableFactory;
 import com.openexchange.osgi.HousekeepingActivator;
 
 /**
@@ -71,10 +71,10 @@ import com.openexchange.osgi.HousekeepingActivator;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public class HazelcastUpgradeActivator extends HousekeepingActivator {
-    
+
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(HazelcastUpgradeActivator.class);
-    
-    private volatile UpgradedCacheListener cacheListener; 
+
+    private volatile UpgradedCacheListener cacheListener;
 
     /**
      * Initializes a new {@link HazelcastUpgradeActivator}.
@@ -91,14 +91,19 @@ public class HazelcastUpgradeActivator extends HousekeepingActivator {
     @Override
     protected void startBundle() throws Exception {
         LOG.info("starting bundle: \"com.openexchange.hazelcast.upgrade324\"");
+
+        Services.setServiceLookup(this);
+        trackService(ContextService.class);
+        openTrackers();
+
         ClientConfig clientConfig = getConfig(getService(ConfigurationService.class));
         if (null != clientConfig) {
             UpgradedCacheListener cacheListener = new UpgradedCacheListener(clientConfig);
             String region = UpgradedCacheListener.CACHE_REGION;
-            LOG.warn("Listening to events for cache region \"{}\". " + 
+            LOG.warn("Listening to events for cache region \"{}\". " +
                 "Please remember to uninstall this package once all nodes in the cluster have been upgraded.", region);
             getService(com.openexchange.caching.events.CacheEventService.class).addListener(region, cacheListener);
-            this.cacheListener = cacheListener;                        
+            this.cacheListener = cacheListener;
         }
     }
 
@@ -113,14 +118,15 @@ public class HazelcastUpgradeActivator extends HousekeepingActivator {
             }
             this.cacheListener = null;
         }
+        Services.setServiceLookup(null);
         super.stopBundle();
     }
-    
+
     /**
      * Gets a suitable client configuration to connect to a legacy Hazelcast cluster.
-     * 
+     *
      * @param configService The configuration service
-     * @return The 
+     * @return The
      * @throws OXException
      */
     private ClientConfig getConfig(ConfigurationService configService) throws OXException {
@@ -170,7 +176,7 @@ public class HazelcastUpgradeActivator extends HousekeepingActivator {
         String groupName = configService.getProperty("com.openexchange.hazelcast.group.name");
         if (Strings.isEmpty(groupName)) {
             throw ConfigurationExceptionCodes.PROPERTY_MISSING.create("com.openexchange.hazelcast.group.name");
-        } 
+        }
         config.getGroupConfig().setName(groupName);
         String groupPassword = configService.getProperty("com.openexchange.hazelcast.group.password");
         if (false == Strings.isEmpty(groupPassword)) {
@@ -180,13 +186,12 @@ public class HazelcastUpgradeActivator extends HousekeepingActivator {
          * Serialization config
          */
         DynamicPortableFactoryImpl dynamicPortableFactory = new DynamicPortableFactoryImpl();
-        dynamicPortableFactory.register(new PortableMessageFactory());
-        dynamicPortableFactory.register(new PortableCacheKeyFactory());
+        dynamicPortableFactory.register(new PortableContextInvalidationCallableFactory());
         config.getSerializationConfig().addPortableFactory(DynamicPortableFactory.FACTORY_ID, dynamicPortableFactory);
         for (ClassDefinition classDefinition : dynamicPortableFactory.getClassDefinitions()) {
             config.getSerializationConfig().addClassDefinition(classDefinition);
         }
-        return config;        
+        return config;
     }
 
 }
