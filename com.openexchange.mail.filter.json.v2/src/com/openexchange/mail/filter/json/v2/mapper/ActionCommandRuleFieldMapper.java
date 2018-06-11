@@ -51,6 +51,7 @@ package com.openexchange.mail.filter.json.v2.mapper;
 
 import java.util.ArrayList;
 import java.util.EnumSet;
+import java.util.Iterator;
 import java.util.List;
 import org.apache.jsieve.SieveException;
 import org.json.JSONArray;
@@ -58,9 +59,11 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.exception.OXException;
 import com.openexchange.jsieve.commands.ActionCommand;
+import com.openexchange.jsieve.commands.ActionCommand.Commands;
 import com.openexchange.jsieve.commands.IfCommand;
 import com.openexchange.jsieve.commands.Rule;
 import com.openexchange.mail.filter.json.v2.json.fields.GeneralField;
+import com.openexchange.mail.filter.json.v2.json.fields.RedirectActionField;
 import com.openexchange.mail.filter.json.v2.json.fields.RuleField;
 import com.openexchange.mail.filter.json.v2.json.mapper.parser.ActionCommandParser;
 import com.openexchange.mail.filter.json.v2.json.mapper.parser.ActionCommandParserRegistry;
@@ -114,6 +117,7 @@ public class ActionCommandRuleFieldMapper implements RuleFieldMapper {
             }
             array.put(object);
         }
+        applyWorkarounds(array);
         return array;
     }
 
@@ -214,4 +218,76 @@ public class ActionCommandRuleFieldMapper implements RuleFieldMapper {
         return MESSAGE_OPS.contains(actionCommand.getCommand());
     }
 
+    //////////////////////////// COMPATIBILIY WORK-AROUNDS ////////////////////////////////
+
+    /**
+     * Applies the different workarounds for the action commands
+     * 
+     * @param array the {@link JSONArray} with the action commands
+     * @throws JSONException if a JSON parsing error occurs
+     */
+    private void applyWorkarounds(JSONArray array) throws JSONException {
+        if (array == null || array.length() == 0) {
+            return;
+        }
+        applyWorkaroundFor58952(array);
+    }
+
+    /**
+     * Applies the work around for <a href="https://bugs.open-xchange.com/show_bug.cgi?id=58952">Bug 58952</a>,
+     * i.e. check if there is a <code>redirect</code> and <code>keep</code> action commands and if so, merge both, 
+     * apply the <code>:copy</code> tag on the <code>redirect</code> action command and remove the <code>keep</code> 
+     * action command from the response.
+     * 
+     * @param array the {@link JSONArray} with the action commands
+     * @throws JSONException if a JSON parsing error occurs
+     */
+    private void applyWorkaroundFor58952(JSONArray array) throws JSONException {
+        JSONObject redirectCommand = findActionCommand(array, Commands.REDIRECT);
+        if (redirectCommand == null) {
+            return;
+        }
+        JSONObject keepCommand = findActionCommand(array, Commands.KEEP, true);
+        if (keepCommand == null) {
+            return;
+        }
+        redirectCommand.put(RedirectActionField.copy.name(), true);
+    }
+
+    /**
+     * Finds the specified action command in the specified {@link JSONArray} of commands
+     * 
+     * @param array the {@link JSONArray} with the action commands
+     * @param command The command to find
+     * @return The action command as {@link JSONObject} or <code>null</code> if no command was found
+     * @throws JSONException if a JSON parsing error occurs
+     */
+    private JSONObject findActionCommand(JSONArray array, Commands command) throws JSONException {
+        return findActionCommand(array, command, false);
+    }
+
+    /**
+     * Finds the specified action command in the specified {@link JSONArray} of commands and removes
+     * it from the array if the <code>remove</code> flag is enabled
+     * 
+     * @param array the {@link JSONArray} with the action commands
+     * @param command The command to find
+     * @param remove whether or not to remove the found command from the array
+     * @return The action command as {@link JSONObject} or <code>null</code> if no command was found
+     * @throws JSONException if a JSON parsing error occurs
+     */
+    private JSONObject findActionCommand(JSONArray array, Commands command, boolean remove) throws JSONException {
+        Iterator<Object> it = array.iterator();
+        while (it.hasNext()) {
+            JSONObject actionCommand = (JSONObject) it.next();
+            if (false == actionCommand.getString(GeneralField.id.name()).equals(command.getJsonName())) {
+                continue;
+            }
+            if (remove) {
+                it.remove();
+            }
+            return actionCommand;
+        }
+        return null;
+    }
 }
