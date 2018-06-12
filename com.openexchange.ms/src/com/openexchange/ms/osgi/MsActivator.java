@@ -59,6 +59,7 @@ import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.HazelcastInstanceNotActiveException;
+import com.openexchange.context.ContextService;
 import com.openexchange.hazelcast.configuration.HazelcastConfigurationService;
 import com.openexchange.hazelcast.serialization.CustomPortableFactory;
 import com.openexchange.ms.MsEventConstants;
@@ -67,6 +68,7 @@ import com.openexchange.ms.PortableMsService;
 import com.openexchange.ms.internal.HzMsService;
 import com.openexchange.ms.internal.Services;
 import com.openexchange.ms.internal.Unregisterer;
+import com.openexchange.ms.internal.portable.PortableContextInvalidationCallableFactory;
 import com.openexchange.ms.internal.portable.PortableHzMsService;
 import com.openexchange.ms.internal.portable.PortableMessageFactory;
 import com.openexchange.osgi.HousekeepingActivator;
@@ -104,6 +106,7 @@ public class MsActivator extends HousekeepingActivator implements Unregisterer {
              * create & register portable message factory
              */
             registerService(CustomPortableFactory.class, new PortableMessageFactory());
+            registerService(CustomPortableFactory.class, new PortableContextInvalidationCallableFactory());
             /*
              * start ms services based on hazelcast instance's lifecycle
              */
@@ -151,6 +154,7 @@ public class MsActivator extends HousekeepingActivator implements Unregisterer {
             });
             hzTracker.open();
             this.hzTracker = hzTracker;
+            trackService(ContextService.class);
 
             // Open other
             openTrackers();

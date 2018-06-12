@@ -57,12 +57,12 @@ import com.hazelcast.nio.serialization.ClassDefinition;
 import com.openexchange.caching.events.CacheEventService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.configuration.ConfigurationExceptionCodes;
+import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.legacy.DynamicPortableFactory;
 import com.openexchange.legacy.DynamicPortableFactoryImpl;
-import com.openexchange.legacy.PortableCacheKeyFactory;
-import com.openexchange.legacy.PortableMessageFactory;
+import com.openexchange.legacy.PortableContextInvalidationCallableFactory;
 import com.openexchange.osgi.HousekeepingActivator;
 
 /**
@@ -91,6 +91,11 @@ public class HazelcastUpgradeActivator extends HousekeepingActivator {
     @Override
     protected void startBundle() throws Exception {
         LOG.info("starting bundle: \"com.openexchange.hazelcast.upgrade355\"");
+
+        Services.setServiceLookup(this);
+        trackService(ContextService.class);
+        openTrackers();
+
         ClientConfig clientConfig = getConfig(getService(ConfigurationService.class));
         if (null != clientConfig) {
             UpgradedCacheListener cacheListener = new UpgradedCacheListener(clientConfig);
@@ -180,8 +185,7 @@ public class HazelcastUpgradeActivator extends HousekeepingActivator {
          * Serialization config
          */
         DynamicPortableFactoryImpl dynamicPortableFactory = new DynamicPortableFactoryImpl();
-        dynamicPortableFactory.register(new PortableMessageFactory());
-        dynamicPortableFactory.register(new PortableCacheKeyFactory());
+        dynamicPortableFactory.register(new PortableContextInvalidationCallableFactory());
         config.getSerializationConfig().addPortableFactory(DynamicPortableFactory.FACTORY_ID, dynamicPortableFactory);
         for (ClassDefinition classDefinition : dynamicPortableFactory.getClassDefinitions()) {
             config.getSerializationConfig().addClassDefinition(classDefinition);

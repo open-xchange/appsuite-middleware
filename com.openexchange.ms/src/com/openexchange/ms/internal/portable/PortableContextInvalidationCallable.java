@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,61 +47,71 @@
  *
  */
 
-package com.openexchange.legacy;
+package com.openexchange.ms.internal.portable;
+
+import java.io.IOException;
+import java.util.concurrent.Callable;
+import com.hazelcast.nio.serialization.PortableReader;
+import com.hazelcast.nio.serialization.PortableWriter;
+import com.openexchange.context.ContextService;
+import com.openexchange.hazelcast.serialization.AbstractCustomPortable;
+import com.openexchange.ms.internal.Services;
 
 /**
- * {@link CacheOperation}
+ * {@link PortableContextInvalidationCallable}
  *
- * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.10.0
  */
-public enum CacheOperation {
+public class PortableContextInvalidationCallable extends AbstractCustomPortable implements Callable<Boolean> {
+
+    public static final int CLASS_ID = 26;
+
+    public static final String PARAMETER_CONTEXT_IDS = "contextIds";
+
+    private int[] contextIds;
 
     /**
-     * Invalidation of a cache entry, due to update or removal
+     * Initializes a new {@link PortableContextInvalidationCallable}.
      */
-    INVALIDATE("invalidate"),
-
-    /**
-     * Invalidation of a cache group
-     */
-    INVALIDATE_GROUP("invalidate_group"),
-
-    /**
-     * Clear cache
-     */
-    CLEAR("clear"),
-    ;
-
-    private final String id;
-
-    private CacheOperation(final String id) {
-        this.id = id;
+    public PortableContextInvalidationCallable() {
+        super();
     }
 
     /**
-     * Gets the identifier
+     * Initializes a new {@link PortableContextInvalidationCallable}.
      *
-     * @return The identifier
+     * @param contextIds The identifiers of the contexts, which shall be invalidated
      */
-    public String getId() {
-        return id;
+    public PortableContextInvalidationCallable(int[] contextIds) {
+        super();
+        this.contextIds = contextIds;
     }
 
-    /**
-     * Gets the cache operation for given identifier.
-     *
-     * @param id The identifier
-     * @return The cache operation or <code>null</code>
-     */
-    public static CacheOperation cacheOperationFor(final String id) {
-        if (null == id) {
-            return null;
+    @Override
+    public Boolean call() throws Exception {
+        ContextService contextService = Services.optService(ContextService.class);
+        if (null == contextService) {
+            return Boolean.FALSE;
         }
-        for (final CacheOperation cacheOperation : CacheOperation.values()) {
-            if (id.equals(cacheOperation.getId())) {
-                return cacheOperation;
-            }
-        }
-        return null;
+
+        contextService.invalidateContexts(contextIds);
+        return Boolean.TRUE;
     }
+
+    @Override
+    public int getClassId() {
+        return CLASS_ID;
+    }
+
+    @Override
+    public void writePortable(PortableWriter writer) throws IOException {
+        writer.writeIntArray(PARAMETER_CONTEXT_IDS, contextIds);
+    }
+
+    @Override
+    public void readPortable(PortableReader reader) throws IOException {
+        contextIds = reader.readIntArray(PARAMETER_CONTEXT_IDS);
+    }
+
 }

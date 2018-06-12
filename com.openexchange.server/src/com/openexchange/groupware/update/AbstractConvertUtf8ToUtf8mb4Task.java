@@ -557,17 +557,23 @@ public abstract class AbstractConvertUtf8ToUtf8mb4Task extends UpdateTaskAdapter
             }
 
             // Apply any modifications to the columns
-            if (null != modifyColumns && !modifyColumns.isEmpty()) {
-                for (Column column : modifyColumns) {
-                    String columnName = column.getName();
-                    if (modifyVarChar(schema, table, columnName, MAX_VARCHAR, connection)) {
-                        columnsToModify.put(columnName, column);
+            if (null != modifyColumns) {
+                int size = modifyColumns.size();
+                if (size > 0) {
+                    for (Column column : modifyColumns) {
+                        String columnName = column.getName();
+                        if (modifyVarChar(schema, table, columnName, MAX_VARCHAR, connection)) {
+                            if (null == columnsToModify) {
+                                columnsToModify = new LinkedHashMap<>(size);
+                            }
+                            columnsToModify.put(columnName, column);
+                        }
                     }
                 }
             }
 
             // Compile the "ALTER TABLE..." statement
-            String alterTable = alterTable(table, new ArrayList<>(columnsToModify.values()), tableCharset, tableCollation);
+            String alterTable = alterTable(table, null == columnsToModify ? null : new ArrayList<>(columnsToModify.values()), tableCharset, tableCollation);
             if (Strings.isNotEmpty(alterTable)) {
                 // Execute the "ALTER TABLE..." statement
                 alterStmt = connection.prepareStatement(alterTable);

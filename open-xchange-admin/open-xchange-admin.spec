@@ -14,7 +14,7 @@ BuildRequires: java-1_8_0-openjdk-devel
 BuildRequires: java-1.8.0-openjdk-devel
 %endif
 Version:       @OXVERSION@
-%define        ox_release 6
+%define        ox_release 7
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -180,6 +180,8 @@ ox_update_permissions "/opt/open-xchange/etc/mpasswd" root:open-xchange 640
 %doc com.openexchange.admin.rmi/javadoc
 
 %changelog
+* Mon Jun 11 2018 Marcus Klein <marcus.klein@open-xchange.com>
+First candidate for 7.10.0 release
 * Fri May 18 2018 Marcus Klein <marcus.klein@open-xchange.com>
 Sixth preview of 7.10.0 release
 * Thu Apr 19 2018 Marcus Klein <marcus.klein@open-xchange.com>
