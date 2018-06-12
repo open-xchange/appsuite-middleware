@@ -179,14 +179,19 @@ public final class UpdatePerformer extends AbstractUserizedFolderPerformer {
              * Load storage folder
              */
             final Folder storageFolder = storage.getFolder(treeId, folderId, storageParameters);
-            boolean ignoreCase = supportsCaseInsensitive(storageFolder);
-            boolean supportsAutoRename = supportsAutoRename(storageFolder);
             final String oldParentId = storageFolder.getParentID();
+            final String newParentId = folder.getParentID();
+            final boolean move = (null != newParentId && !newParentId.equals(oldParentId));
+            final Folder destinationFolder;
+            if(move){
+                destinationFolder = storage.getFolder(treeId, newParentId, storageParameters);
+            } else {
+                destinationFolder = storageFolder;
+            }
+            boolean ignoreCase = supportsCaseInsensitive(destinationFolder);
+            boolean supportsAutoRename = supportsAutoRename(destinationFolder);
 
-            final boolean move;
             {
-                final String newParentId = folder.getParentID();
-                move = (null != newParentId && !newParentId.equals(oldParentId));
                 if (move) {
                     boolean checkForReservedName = true;
                     if (null == folder.getName()) {
