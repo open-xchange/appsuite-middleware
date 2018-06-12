@@ -594,10 +594,12 @@ public class EventClient {
             return;
         }
         ImageLocation imageLocation = new ImageLocation.Builder().folder(oldContact.getParentFolderID()).timestamp(Long.toString(oldContact.getImageLastModified().getTime())).build();
-        Dictionary<String, Object> props = new Hashtable<String, Object>(2);
+        Dictionary<String, Object> props = new Hashtable<String, Object>(4);
         props.put(FileStorageEventConstants.SESSION, session);
         props.put(FileStorageEventConstants.E_TAG, first.getETag(imageLocation, session));
-
+        props.put(FileStorageEventConstants.FOLDER_ID, oldContact.getParentFolderID());
+        props.put(FileStorageEventConstants.OBJECT_ID, oldContact.getObjectID());
+        
         triggerEvent(new Event(FileStorageEventConstants.UPDATE_TOPIC, props));
     }
 
@@ -617,6 +619,7 @@ public class EventClient {
 
         final Dictionary<String, CommonEvent> ht = new Hashtable<String, CommonEvent>(1);
         ht.put(CommonEvent.EVENT_KEY, genericEvent);
+        
 
         final Event event = new Event("com/openexchange/groupware/contact/delete", ht);
         triggerEvent(event);
