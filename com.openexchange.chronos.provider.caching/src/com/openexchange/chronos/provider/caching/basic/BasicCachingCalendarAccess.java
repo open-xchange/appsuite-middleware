@@ -272,13 +272,15 @@ public abstract class BasicCachingCalendarAccess implements BasicCalendarAccess,
             update();
             return;
         }
-        JSONObject caching = internalConfiguration.optJSONObject(CachingCalendarAccessConstants.CACHING);
+        final JSONObject caching = internalConfiguration.optJSONObject(CachingCalendarAccessConstants.CACHING);
         Number lastUpdate = caching.optNumber(CachingCalendarAccessConstants.LAST_UPDATE);
         long currentTimeMillis = System.currentTimeMillis();
-        if (lastUpdate == null || lastUpdate.longValue() <= 0 || (TimeUnit.MINUTES.toMillis(getCascadedRefreshInterval()) < currentTimeMillis - lastUpdate.longValue() + TimeUnit.MINUTES.toMillis(1)) || this.parameters.contains(CalendarParameters.PARAMETER_UPDATE_CACHE) && this.parameters.get(CalendarParameters.PARAMETER_UPDATE_CACHE, Boolean.class, Boolean.FALSE).booleanValue()) {
+        long cascadedRefreshInterval = getCascadedRefreshInterval();
+        if (lastUpdate == null || lastUpdate.longValue() <= 0 || (TimeUnit.MINUTES.toMillis(cascadedRefreshInterval) < currentTimeMillis - lastUpdate.longValue() + TimeUnit.MINUTES.toMillis(1)) || this.parameters.contains(CalendarParameters.PARAMETER_UPDATE_CACHE) && this.parameters.get(CalendarParameters.PARAMETER_UPDATE_CACHE, Boolean.class, Boolean.FALSE).booleanValue()) {
             if (lastUpdate != null && lastUpdate.longValue() > 0 && lastUpdate.longValue() + TimeUnit.MINUTES.toMillis(1) > currentTimeMillis) {
                 throw BasicCachingCalendarExceptionCodes.ALREADY_UP_TO_DATE.create(I(account.getAccountId()), I(session.getUserId()), I(session.getContextId()));
             }
+            LOG.debug("Try to update cache for account {} with refresh interval {} (used server time: {}, last update: {}) and current cache configuration '{}'", I(account.getAccountId()), L(cascadedRefreshInterval), L(currentTimeMillis), lastUpdate != null ? L(lastUpdate.longValue()) : "never", caching.toString());
             update();
         }
     }
