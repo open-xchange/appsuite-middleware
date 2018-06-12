@@ -50,11 +50,17 @@
 package com.openexchange.ms.internal.portable;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.Callable;
 import com.hazelcast.nio.serialization.PortableReader;
 import com.hazelcast.nio.serialization.PortableWriter;
+import com.openexchange.caching.Cache;
+import com.openexchange.caching.CacheService;
 import com.openexchange.context.ContextService;
+import com.openexchange.context.PoolAndSchema;
 import com.openexchange.hazelcast.serialization.AbstractCustomPortable;
 import com.openexchange.java.Strings;
 import com.openexchange.ms.internal.Services;
@@ -72,6 +78,8 @@ public class PortableContextInvalidationCallable extends AbstractCustomPortable 
     public static final int CLASS_ID = 26;
 
     public static final String PARAMETER_CONTEXT_IDS = "contextIds";
+
+    private static final String CACHE_REGION_SCHEMA_STORE = "OXDBPoolCache";
 
     private int[] contextIds;
 
@@ -100,9 +108,31 @@ public class PortableContextInvalidationCallable extends AbstractCustomPortable 
             return Boolean.FALSE;
         }
 
+        CacheService cacheService = Services.optService(CacheService.class);
+        if (null != cacheService) {
+            try {
+                Cache cache = cacheService.getCache(CACHE_REGION_SCHEMA_STORE);
+                Map<PoolAndSchema, List<Integer>> schemaAssociations = contextService.getSchemaAssociationsFor(asList(contextIds));
+                for (PoolAndSchema pas : schemaAssociations.keySet()) {
+                    cache.remove(cache.newCacheKey(pas.getPoolId(), pas.getSchema()));
+                    LOGGER.info("Successfully invalidated schema {} from pool {}", pas.getSchema(), Integer.valueOf(pas.getPoolId()));
+                }
+            } catch (Exception e) {
+                LOGGER.error("Failed to invalidate schema store cache", e);
+            }
+        }
+
         contextService.invalidateContexts(contextIds);
         LOGGER.info("Successfully invalidated contexts:{}{}", Strings.getLineSeparator(), Arrays.toString(contextIds));
         return Boolean.TRUE;
+    }
+
+    private static List<Integer> asList(int[] contextIds) {
+        List<Integer> l = new ArrayList<>(contextIds.length);
+        for (int contextId : contextIds) {
+            l.add(Integer.valueOf(contextId));
+        }
+        return l;
     }
 
     @Override
