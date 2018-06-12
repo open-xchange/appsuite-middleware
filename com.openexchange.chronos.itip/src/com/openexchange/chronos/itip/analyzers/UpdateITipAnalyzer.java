@@ -272,7 +272,7 @@ public class UpdateITipAnalyzer extends AbstractITipAnalyzer {
                         analysis.recommendActions(ITipAction.UPDATE);
                     } else {
                         analysis.recommendActions(ITipAction.ACCEPT, ITipAction.DECLINE, ITipAction.TENTATIVE, ITipAction.DELEGATE, ITipAction.COUNTER);
-                        if (false == (change.getDiff().isEmpty() || change.getDiff().isAboutCertainParticipantsStateChangeOnly(String.valueOf(user.getId())))) {
+                        if (false == (change.getDiff().isEmpty() || change.getDiff().isAboutStateChangesOnly())) {
                             analysis.recommendAction(ITipAction.UPDATE);
                         }
                     }
