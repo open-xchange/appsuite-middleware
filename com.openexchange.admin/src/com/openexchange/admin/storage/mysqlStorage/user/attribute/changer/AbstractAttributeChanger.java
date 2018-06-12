@@ -159,7 +159,7 @@ public abstract class AbstractAttributeChanger {
             if (stmt == null) {
                 return false;
             }
-            int parameterIndex = 0;
+            int parameterIndex = 1;
             appendContextUser(contextId, userId, stmt, parameterIndex);
             return stmt.executeUpdate() == 1; // we expect exactly one change
         } finally {
