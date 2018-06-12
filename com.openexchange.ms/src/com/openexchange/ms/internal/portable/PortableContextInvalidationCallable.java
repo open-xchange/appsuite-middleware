@@ -50,11 +50,13 @@
 package com.openexchange.ms.internal.portable;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.concurrent.Callable;
 import com.hazelcast.nio.serialization.PortableReader;
 import com.hazelcast.nio.serialization.PortableWriter;
 import com.openexchange.context.ContextService;
 import com.openexchange.hazelcast.serialization.AbstractCustomPortable;
+import com.openexchange.java.Strings;
 import com.openexchange.ms.internal.Services;
 
 /**
@@ -64,6 +66,8 @@ import com.openexchange.ms.internal.Services;
  * @since v7.10.0
  */
 public class PortableContextInvalidationCallable extends AbstractCustomPortable implements Callable<Boolean> {
+
+    private static final org.slf4j.Logger LOGGER = org.slf4j.LoggerFactory.getLogger(PortableContextInvalidationCallable.class);
 
     public static final int CLASS_ID = 26;
 
@@ -92,10 +96,12 @@ public class PortableContextInvalidationCallable extends AbstractCustomPortable 
     public Boolean call() throws Exception {
         ContextService contextService = Services.optService(ContextService.class);
         if (null == contextService) {
+            LOGGER.warn("Failed invalidating of the following contexts due to absence of context service:{}{}", Strings.getLineSeparator(), Arrays.toString(contextIds));
             return Boolean.FALSE;
         }
 
         contextService.invalidateContexts(contextIds);
+        LOGGER.info("Successfully invalidated contexts:{}{}", Strings.getLineSeparator(), Arrays.toString(contextIds));
         return Boolean.TRUE;
     }
 
