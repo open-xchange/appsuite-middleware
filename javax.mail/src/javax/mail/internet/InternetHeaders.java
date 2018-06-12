@@ -690,7 +690,7 @@ public class InternetHeaders {
                         boolean needsFolding = false;
                         for (int k = lines.length; !needsFolding && k-- > 0;) {
                             String line = lines[k];
-                            if (line.length() + (0 == k ? used : 0) > 76) {
+                            if ((0 == k ? (used + line.length()) : line.length()) > 76) {
                                 needsFolding = true;
                             }
                         }
