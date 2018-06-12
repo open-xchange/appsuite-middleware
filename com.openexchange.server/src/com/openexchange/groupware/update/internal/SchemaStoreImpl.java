@@ -215,8 +215,6 @@ public class SchemaStoreImpl extends SchemaStore {
             // Everything went fine. Schema is marked as locked
             con.commit();
             rollback = false;
-        } catch (final OXException e) {
-            throw e;
         } catch (final SQLException e) {
             throw SchemaExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } finally {
