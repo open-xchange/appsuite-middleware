@@ -202,10 +202,10 @@ public class SchemaStoreImpl extends SchemaStore {
 
     private static void lockSchemaDB(Schema schema, boolean background) throws OXException {
         Connection con = Database.get(schema.getPoolId(), schema.getSchema());
-        boolean rollback = false;
+        int rollback = 0;
         try {
             con.setAutoCommit(false); // BEGIN
-            rollback = true;
+            rollback = 1;
             // Insert lock
             if (background) {
                 insertLock(con, schema, BACKGROUND, UUID_BACKGROUND);
@@ -214,14 +214,16 @@ public class SchemaStoreImpl extends SchemaStore {
             }
             // Everything went fine. Schema is marked as locked
             con.commit();
-            rollback = false;
+            rollback = 2;
         } catch (final SQLException e) {
             throw SchemaExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } finally {
-            if (rollback) {
-                rollback(con);
+            if (rollback > 0) {
+                if (rollback == 1) {
+                    rollback(con);
+                }
+                autocommit(con);
             }
-            autocommit(con);
             Database.back(schema.getPoolId(), con);
         }
     }
