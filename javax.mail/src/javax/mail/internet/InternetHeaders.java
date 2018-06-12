@@ -621,6 +621,107 @@ public class InternetHeaders {
     }
 
     /**
+     * Folds all header lines at linear whitespace so that each line is no
+     * longer than 76 characters, if possible.
+     * <p>
+     * If there are more than 76 non-whitespace characters consecutively,
+     * the string is folded at the first whitespace after that sequence.
+     */
+    public void foldAllHeaderLines() {
+        foldHeaderLines(null, false);
+    }
+
+    /**
+     * Folds matching header header lines at linear whitespace so that each
+     * line is no longer than 76 characters, if possible.
+     * <p>
+     * If there are more than 76 non-whitespace characters consecutively,
+     * the string is folded at the first whitespace after that sequence.
+     * 
+     * @param names The names of the headers to fold
+     */
+    public void foldMatchingHeaderLines(String[] names) {
+        foldHeaderLines(names, true);
+    }
+
+    /**
+     * Folds non-matching header header lines at linear whitespace so that
+     * each line is no longer than 76 characters, if possible.
+     * <p>
+     * If there are more than 76 non-whitespace characters consecutively,
+     * the string is folded at the first whitespace after that sequence.
+     * 
+     * @param names The names of the headers not to fold
+     */
+    public void foldNonMatchingHeaderLines(String[] names) {
+        foldHeaderLines(names, false);
+    }
+
+    private void foldHeaderLines(String[] names, boolean matching) {
+    java.util.Set<String> optNames = lowerCaseSetFor(names);
+    for (int i = 0; i < headers.size(); i++) {
+        InternetHeader h = headers.get(i);
+        int colonPos;
+        if (h.line != null && (colonPos = h.line.indexOf(':')) >= 0) {
+            int length = h.line.length();
+            if (length > 76) {
+                String name = h.getName();
+                if (null == optNames || (matching ? optNames.contains(MimeUtility.asciiLowerCase(name)) : false == optNames.contains(MimeUtility.asciiLowerCase(name)))) {                    
+                    // Determine value. Skip whitespace after ':'
+                    int j;
+                    for (j = colonPos + 1; j < length; j++) {
+                        char c = h.line.charAt(j);
+                        if (!(c == ' ' || c == '\t' || c == '\r' || c == '\n'))
+                            break;
+                    }
+                    String value = h.line.substring(j);
+                    
+                    // Already used number if characters in the first line
+                    int used = name.length() + 2;
+                    if ((j = value.indexOf('\r', 0)) < 0 && (j = value.indexOf('\n', 0)) < 0) {
+                        // Not folded
+                        if (used + value.length() > 76) {
+                            value = MimeUtility.fold(used, value);
+                            h.line = h.line.substring(0, colonPos + 1) + ' ' + value;
+                        }
+                    } else {
+                        // Folded
+                        String[] lines = value.split("\r?\n", 0);
+                        boolean needsFolding = false;
+                        for (int k = lines.length; !needsFolding && k-- > 0;) {
+                            String line = lines[k];
+                            if (line.length() + (0 == k ? used : 0) > 76) {
+                                needsFolding = true;
+                            }
+                        }
+                        if (needsFolding) {
+                            // Unfold & re-fold
+                            value = MimeUtility.unfold(value);
+                            value = MimeUtility.fold(used, value);
+                            h.line = h.line.substring(0, colonPos + 1) + ' ' + value;
+                        }
+                    }
+                }
+            }
+        }
+    }
+    }
+
+    private static java.util.Set<String> lowerCaseSetFor(String[] names) {
+        if (null == names || names.length == 0) {
+            return null;
+        }
+        
+        java.util.Set<String> set = new java.util.HashSet<>(names.length);
+        for (int i = names.length; i-- > 0;) {
+            String name = names[i];
+            if (null != name)
+                set.add(MimeUtility.asciiLowerCase(name));
+        }
+        return set;
+    }
+
+    /**
      * Change the first header line that matches name
      * to have value, adding a new header if no existing header
      * matches. Remove all matching headers but the first. <p>
@@ -633,7 +734,7 @@ public class InternetHeaders {
     public void setHeader(String name, String value) {
 	boolean found = false;
 
-	for (int i = 0, k = headers.size(); k-- > 0; i++) {
+	for (int i = 0; i < headers.size(); i++) {
 	    InternetHeader h = headers.get(i);
 	    if (name.equalsIgnoreCase(h.getName())) {
 		if (!found) {
