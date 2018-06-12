@@ -113,7 +113,7 @@ public class CachingUserSettingMailStorageTest {
         PowerMockito.mockStatic(ServerServiceRegistry.class);
         PowerMockito.when(ServerServiceRegistry.getInstance()).thenReturn(serverServiceRegistry);
         PowerMockito.when(serverServiceRegistry.getService(ConfigViewFactory.class)).thenReturn(configViewFactory);
-        PowerMockito.when(serverServiceRegistry.getService(CacheService.class)).thenReturn(cacheService);
+        PowerMockito.when(serverServiceRegistry.getService(CacheService.class, true)).thenReturn(cacheService);
         PowerMockito.when(configViewFactory.getView(Matchers.anyInt(), Matchers.anyInt())).thenReturn(configView);
         PowerMockito.when(configView.property(CachingUserSettingMailStorage.SPAM_ENABLED, Boolean.class)).thenReturn(composedConfigProperty);
         PowerMockito.when(composedConfigProperty.isDefined()).thenReturn(Boolean.FALSE);

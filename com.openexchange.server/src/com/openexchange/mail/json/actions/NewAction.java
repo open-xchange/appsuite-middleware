@@ -638,6 +638,7 @@ public final class NewAction extends AbstractMailAction implements EnqueuableAJA
             if (newMessageId) {
                 message.removeHeader("Message-ID");
             }
+            message.foldAllHeaderLines();
             String fromAddr = message.getHeader(MessageHeaders.HDR_FROM, null);
             if (isEmpty(fromAddr)) {
                 // Add from address
