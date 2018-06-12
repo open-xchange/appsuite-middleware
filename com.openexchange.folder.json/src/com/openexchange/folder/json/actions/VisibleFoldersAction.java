@@ -140,7 +140,7 @@ public final class VisibleFoldersAction extends AbstractFolderAction {
         final String sAltNames = "altNames";
         final String altNames = request.getParameter(sAltNames);
         final String sSuppressUnifiedMail = "suppressUnifiedMail";
-        final Boolean suppressUnifiedMail = isSuppressUnifiedMail(request, session);
+        final Boolean suppressUnifiedMail = isSuppressUnifiedMail(session);
         Locale optLocale = optLocale(request);
         final FolderResponse<UserizedFolder[]> privateResp =
             folderService.getVisibleFolders(
