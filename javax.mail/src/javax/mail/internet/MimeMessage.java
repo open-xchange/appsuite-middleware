@@ -2088,6 +2088,43 @@ public class MimeMessage extends Message implements MimePart {
     }
 
     /**
+     * Folds all header lines at linear whitespace so that each line is no
+     * longer than 76 characters, if possible.
+     * <p>
+     * If there are more than 76 non-whitespace characters consecutively,
+     * the string is folded at the first whitespace after that sequence.
+     */
+    public void foldAllHeaderLines() {
+    headers.foldAllHeaderLines( );
+    }
+
+    /**
+     * Folds matching header header lines at linear whitespace so that each
+     * line is no longer than 76 characters, if possible.
+     * <p>
+     * If there are more than 76 non-whitespace characters consecutively,
+     * the string is folded at the first whitespace after that sequence.
+     * 
+     * @param names The names of the headers to fold
+     */
+    public void foldMatchingHeaderLines(String[] names) {
+    headers.foldMatchingHeaderLines(names);
+    }
+
+    /**
+     * Folds non-matching header header lines at linear whitespace so that
+     * each line is no longer than 76 characters, if possible.
+     * <p>
+     * If there are more than 76 non-whitespace characters consecutively,
+     * the string is folded at the first whitespace after that sequence.
+     * 
+     * @param names The names of the headers not to fold
+     */
+    public void foldNonMatchingHeaderLines(String[] names) {
+    headers.foldNonMatchingHeaderLines(names);
+    }
+
+    /**
      * Return a <code>Flags</code> object containing the flags for 
      * this message. <p>
      *
