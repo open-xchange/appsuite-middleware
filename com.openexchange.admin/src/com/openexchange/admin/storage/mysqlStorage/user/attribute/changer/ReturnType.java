@@ -52,7 +52,6 @@ package com.openexchange.admin.storage.mysqlStorage.user.attribute.changer;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-import com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.contact.ContactUserAttributeChangers;
 
 /**
  * {@link ReturnType} enumeration - Defines all data types for the contact attributes
@@ -65,10 +64,11 @@ public enum ReturnType {
     INTEGER("Integer"),
     LONG("Long"),
     BOOLEAN("Boolean"),
-    DATE("Date");
+    DATE("Date", "java.util.");
 
     private static final String PREFIX = "java.lang.";
     private final String name;
+    private final String prefix;
 
     private static final Map<String, ReturnType> RETURN_TYPES;
     static {
@@ -80,10 +80,23 @@ public enum ReturnType {
     }
 
     /**
-     * Initialises a new {@link ContactUserAttributeChangers.ReturnType}.
+     * Initialises a new {@link ReturnType}.
+     * 
+     * @param name The name of the {@link ReturnType}
      */
     private ReturnType(String name) {
+        this(name, PREFIX);
+    }
+
+    /**
+     * Initialises a new {@link ReturnType}.
+     * 
+     * @param name The name of the {@link ReturnType}
+     * @param prefix The prefix
+     */
+    private ReturnType(String name, String prefix) {
         this.name = name;
+        this.prefix = prefix;
     }
 
     /**
@@ -101,9 +114,15 @@ public enum ReturnType {
      * @return The name with prefix
      */
     public String getWithPrefix() {
-        return PREFIX + getName();
+        return prefix + getName();
     }
-    
+
+    /**
+     * Get the specified {@link ReturnType}
+     * 
+     * @param type The specified return type
+     * @return The {@link ReturnType} or <code>null</code> if none exists
+     */
     public static ReturnType getReturnType(String type) {
         return RETURN_TYPES.get(type);
     }

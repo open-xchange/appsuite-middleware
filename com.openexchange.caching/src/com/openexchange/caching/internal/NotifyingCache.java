@@ -325,7 +325,7 @@ public class NotifyingCache extends AbstractCache implements CacheListener {
     @Override
     public void onEvent(Object sender, CacheEvent cacheEvent, boolean fromRemote) {
         if (fromRemote && sender != this && null != cacheEvent) {
-            LOG.debug("onEvent: {}", cacheEvent);
+            LOG.debug("Received remote cache event: {}", cacheEvent);
             try {
                 switch (cacheEvent.getOperation()) {
                 case INVALIDATE_GROUP:

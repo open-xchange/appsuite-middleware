@@ -49,18 +49,18 @@
 
 package com.openexchange.ajax.infostore.fileaccount.test;
 
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-import java.util.ArrayList;
-import org.json.JSONArray;
-import org.json.JSONObject;
+import java.util.List;
 import org.junit.Test;
-import com.openexchange.ajax.framework.AbstractAJAXSession;
-import com.openexchange.ajax.infostore.fileaccount.actions.AllFileaccountRequest;
-import com.openexchange.ajax.infostore.fileaccount.actions.AllFileaccountResponse;
-import com.openexchange.ajax.infostore.fileaccount.actions.GetFileaccountRequest;
-import com.openexchange.ajax.infostore.fileaccount.actions.GetFileaccountResponse;
+import com.openexchange.ajax.framework.AbstractAPIClientSession;
 import com.openexchange.file.storage.FileStorageCapability;
+import com.openexchange.testing.httpclient.models.FileAccountData;
+import com.openexchange.testing.httpclient.models.FileAccountResponse;
+import com.openexchange.testing.httpclient.models.FileAccountsResponse;
+import com.openexchange.testing.httpclient.modules.FilestorageApi;
 
 /**
  * {@link FilestorageAccountTest}
@@ -68,7 +68,7 @@ import com.openexchange.file.storage.FileStorageCapability;
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.8.1
  */
-public final class FilestorageAccountTest extends AbstractAJAXSession {
+public final class FilestorageAccountTest extends AbstractAPIClientSession {
 
     private static final String[] POSSIBLE_CAPABILITIES;
     static {
@@ -79,6 +79,8 @@ public final class FilestorageAccountTest extends AbstractAJAXSession {
         }
     }
 
+    private FilestorageApi api;
+
     /**
      * Initializes a new {@link FilestorageAccountTest}.
      *
@@ -88,19 +90,21 @@ public final class FilestorageAccountTest extends AbstractAJAXSession {
         super();
     }
 
+    @Override
+    public void setUp() throws Exception {
+        super.setUp();
+        api = new FilestorageApi(getApiClient());
+    }
+
     @Test
     public void testGetFilestorageAccountCapabilities() throws Throwable {
-        GetFileaccountResponse response = getClient().execute(new GetFileaccountRequest("infostore", "com.openexchange.infostore"));
-        assertNotNull("Response is empty!", response);
-        Object data = response.getData();
-        assertNotNull("Response is empty!", data);
-        assertTrue("Response contains unexpected data!", data instanceof JSONObject);
-        JSONObject account = ((JSONObject) data);
-        Object caps = account.asMap().get("capabilities");
+        FileAccountResponse response = api.getFileAccount(getApiClient().getSession(), "com.openexchange.infostore", "infostore");
+        assertNull(response.getError());
+        assertNotNull("Response is empty!", response.getData());
+        FileAccountData account = response.getData();
+        List<String> caps = account.getCapabilities();
         assertNotNull("Response contains no capabilities field!", caps);
-        assertTrue("The capabilities field is not a array list!", caps instanceof ArrayList);
-        @SuppressWarnings("unchecked") ArrayList<String> capStrings = (ArrayList<String>) caps;
-        for (String str : capStrings) {
+        for (String str : caps) {
             boolean contains = false;
             for (String cap : POSSIBLE_CAPABILITIES) {
                 if (cap.equals(str)) {
@@ -113,17 +117,15 @@ public final class FilestorageAccountTest extends AbstractAJAXSession {
 
     @Test
     public void testGetAllFilestorageAccountCapabilities() throws Throwable {
-        AllFileaccountResponse response = getClient().execute(new AllFileaccountRequest(null));
-        assertNotNull("Response is empty!", response);
-        Object data = response.getData();
-        assertNotNull("Response is empty!", data);
-        assertTrue("Response contains unexpected data!", data instanceof JSONArray);
-        JSONObject account = ((JSONArray) data).getJSONObject(0);
-        Object caps = account.asMap().get("capabilities");
+        FileAccountsResponse response = api.getAllFileAccounts(getApiClient().getSession(), null);
+        assertNull(response.getError());
+        assertNotNull("Response is empty!", response.getData());
+        List<FileAccountData> accounts = response.getData();
+        assertFalse(accounts.isEmpty());
+        FileAccountData account = accounts.get(0);
+        List<String> caps = account.getCapabilities();
         assertNotNull("Response contains no capabilities field!", caps);
-        assertTrue("The capabilities field is not a array list!", caps instanceof ArrayList);
-        @SuppressWarnings("unchecked") ArrayList<String> capStrings = (ArrayList<String>) caps;
-        for (String str : capStrings) {
+        for (String str : caps) {
             boolean contains = false;
             for (String cap : POSSIBLE_CAPABILITIES) {
                 if (cap.equals(str)) {
