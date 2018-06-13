@@ -54,6 +54,11 @@ import java.sql.SQLException;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.FolderObject;
@@ -82,6 +87,8 @@ import com.openexchange.user.copy.internal.user.UserCopyTask;
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */
 public class ReminderCopyTask implements CopyUserTaskService {
+	
+	private final static Logger LOGGER = LoggerFactory.getLogger(ReminderCopyTask.class);
 
     /**
      * Initializes a new {@link ReminderCopyTask}.
@@ -130,9 +137,8 @@ public class ReminderCopyTask implements CopyUserTaskService {
         writeRemindersToDatabase(dstCon, dstCtx, srcCtx, dstUser.getId(), reminders);
 
         final IntegerMapping mapping = new IntegerMapping();
-        for (final int reminderId : reminders.keySet()) {
-            final ReminderObject reminder = reminders.get(reminderId);
-            mapping.addMapping(reminderId, reminder.getObjectId());
+        for (Entry<Integer, ReminderObject> entry : reminders.entrySet()) {
+            mapping.addMapping(entry.getKey(), entry.getValue().getObjectId());
         }
 
         return mapping;
@@ -164,35 +170,38 @@ public class ReminderCopyTask implements CopyUserTaskService {
         }
     }
 
-    private void exchangeIds(final Map<Integer, ReminderObject> reminders, final ObjectMapping<Integer> taskMapping, final ObjectMapping<Integer> appointmentMapping, final ObjectMapping<FolderObject> folderMapping, final int userId, final Context ctx, final Connection con) throws OXException {
-        try {
-            for (final int reminderId : reminders.keySet()) {
-                final int newReminderId = IDGenerator.getId(ctx, com.openexchange.groupware.Types.REMINDER, con);
-                final ReminderObject reminder = reminders.get(reminderId);
-                reminder.setObjectId(newReminderId);
-                reminder.setUser(userId);
-                FolderObject dstFolder = folderMapping.getDestination(folderMapping.getSource(reminder.getFolder()));
-                reminder.setFolder(dstFolder.getObjectID());
+	private void exchangeIds(final Map<Integer, ReminderObject> reminders, final ObjectMapping<Integer> taskMapping,final ObjectMapping<Integer> appointmentMapping, final ObjectMapping<FolderObject> folderMapping,
+			final int userId, final Context ctx, final Connection con) throws OXException {
+		try {
+			for (Entry<Integer, ReminderObject> entry : reminders.entrySet()) {
+				ReminderObject reminder = entry.getValue();
+				Integer destination = null;
+				switch (reminder.getModule()) {
+				case com.openexchange.groupware.Types.APPOINTMENT: 
+					destination = appointmentMapping.getDestination(appointmentMapping.getSource(reminder.getTargetId()));
+					break;
+				case com.openexchange.groupware.Types.TASK: 
+					destination = taskMapping.getDestination(taskMapping.getSource(reminder.getTargetId()));
+					break;
+				default:
+					LOGGER.info("Unable to find suitable mapping for reminder with ID {} in module {}. Skipping this reminder.", entry.getKey(), reminder.getModule());
+					continue;
+				}
+				
+				if (null == destination) {
+					LOGGER.info("There is no new target object for reminder {} with original target ID {}. Skipping this reminder.",entry.getKey(), reminder.getTargetId());
+				} else {
+					reminder.setTargetId(destination.intValue());
 
-                final int targetId = reminder.getTargetId();
-                int newTargetId = targetId;
-                if (reminder.getModule() == com.openexchange.groupware.Types.APPOINTMENT) {
-                    for (final int copy : appointmentMapping.getSourceKeys()) {
-                        if (appointmentMapping.getDestination(copy) == targetId) {
-                            newTargetId = copy;
-                        }
-                    }
-                } else if (reminder.getModule() == com.openexchange.groupware.Types.TASK) {
-                    for (final int copy : taskMapping.getSourceKeys()) {
-                        if (taskMapping.getDestination(copy) == targetId) {
-                            newTargetId = copy;
-                        }
-                    }
-                }
-                reminder.setTargetId(newTargetId);
-            }
-        } catch (final SQLException e) {
-            throw UserCopyExceptionCodes.SQL_PROBLEM.create(e);
-        }
-    }
+					final int newReminderId = IDGenerator.getId(ctx, com.openexchange.groupware.Types.REMINDER, con);
+					reminder.setObjectId(newReminderId);
+					reminder.setUser(userId);
+					FolderObject dstFolder = folderMapping.getDestination(folderMapping.getSource(reminder.getFolder()));
+					reminder.setFolder(dstFolder.getObjectID());
+				}
+			}
+		} catch (final SQLException e) {
+			throw UserCopyExceptionCodes.SQL_PROBLEM.create(e);
+		}
+	}
 }
