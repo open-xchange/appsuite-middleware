@@ -65,7 +65,7 @@ import com.openexchange.admin.rmi.dataobjects.Database;
  */
 public class UtilDatabaseTest extends AbstractTest {
 
-    private final OXUtilInterface oxu;
+    private OXUtilInterface oxu;
 
     private Database client_db;
 
@@ -75,12 +75,13 @@ public class UtilDatabaseTest extends AbstractTest {
         return (OXUtilInterface) Naming.lookup(getRMIHostUrl() + OXUtilInterface.RMI_NAME);
     }
 
-    public UtilDatabaseTest() throws MalformedURLException, RemoteException, NotBoundException {
-        oxu = getUtilClient();
+    public UtilDatabaseTest() {
+        super();
     }
 
     @Before
     public final void setup() throws Exception {
+        oxu = getUtilClient();
         db_name = "db_" + System.currentTimeMillis();
         client_db = UtilTest.getTestDatabaseObject("localhost", db_name);
         if (null == client_db) {
@@ -98,8 +99,8 @@ public class UtilDatabaseTest extends AbstractTest {
         client_db = null;
     }
 
-     @Test
-     public void testRegisterDatabase() throws Exception {
+    @Test
+    public void testRegisterDatabase() throws Exception {
 
         Database[] srv_dbs = oxu.listDatabase("db_*", ContextTest.DummyMasterCredentials());
         boolean found_db = false;
@@ -125,8 +126,8 @@ public class UtilDatabaseTest extends AbstractTest {
 
     }
 
-     @Test
-     public void testChangeDatabase() throws Exception {
+    @Test
+    public void testChangeDatabase() throws Exception {
         Database[] srv_dbs = oxu.listDatabase("db_*", ContextTest.DummyMasterCredentials());
         boolean found_db = false;
         for (int a = 0; a < srv_dbs.length; a++) {
@@ -183,8 +184,8 @@ public class UtilDatabaseTest extends AbstractTest {
         }
     }
 
-     @Test
-     public void testUnregisterDatabase() throws Exception {
+    @Test
+    public void testUnregisterDatabase() throws Exception {
         Database[] srv_dbs = oxu.listDatabase("db_*", ContextTest.DummyMasterCredentials());
         boolean found_db = false;
         for (int a = 0; a < srv_dbs.length; a++) {
@@ -226,8 +227,8 @@ public class UtilDatabaseTest extends AbstractTest {
         client_db = null;
     }
 
-     @Test
-     public void testListDatabase() throws Exception {
+    @Test
+    public void testListDatabase() throws Exception {
         Database[] srv_dbs = oxu.listDatabase("db_*", ContextTest.DummyMasterCredentials());
         boolean found_db = false;
         for (int a = 0; a < srv_dbs.length; a++) {
@@ -235,6 +236,7 @@ public class UtilDatabaseTest extends AbstractTest {
             // we found our added db, check now the data
             if (tmp.getId().equals(client_db.getId())) {
                 // check if data is same
+                //@formatter:off
                 if (null != tmp.getName() && tmp.getName().equals(db_name) && null != tmp.getDriver() && tmp.getDriver().equals(
                     client_db.getDriver()) && null != tmp.getLogin() && tmp.getLogin().equals(client_db.getLogin()) && null != tmp.isMaster() && tmp.isMaster().equals(
                     client_db.isMaster()) && null != tmp.getMaxUnits() && tmp.getMaxUnits().equals(client_db.getMaxUnits()) && null != tmp.getPassword() && tmp.getPassword().equals(
@@ -243,6 +245,7 @@ public class UtilDatabaseTest extends AbstractTest {
                     client_db.getPoolMax()) && null != tmp.getUrl() && tmp.getUrl().equals(client_db.getUrl())) {
                     found_db = true;
                 }
+                //@formatter:on
             }
         }
 
