@@ -53,8 +53,6 @@ import java.io.IOException;
 import java.util.concurrent.Callable;
 import com.hazelcast.nio.serialization.PortableReader;
 import com.hazelcast.nio.serialization.PortableWriter;
-import com.openexchange.context.ContextService;
-import com.openexchange.hazelcast.upgrade381.osgi.Services;
 
 /**
  * {@link PortableContextInvalidationCallable}
@@ -89,12 +87,11 @@ public class PortableContextInvalidationCallable extends AbstractCustomPortable 
 
     @Override
     public Boolean call() throws Exception {
-        ContextService contextService = Services.optService(ContextService.class);
-        if (null == contextService) {
-            return Boolean.FALSE;
-        }
-
-        contextService.invalidateContexts(contextIds);
+        /*-
+         * This is just a placeholder for calling the remote 'c.o.ms.internal.portable.PortableContextInvalidationCallable'
+         *
+         * This class is never supposed to be called!
+         */
         return Boolean.TRUE;
     }
 
