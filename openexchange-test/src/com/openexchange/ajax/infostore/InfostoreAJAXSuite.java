@@ -8,7 +8,6 @@ import com.openexchange.ajax.infostore.test.AnotherCreateAndDeleteInfostoreTest;
 import com.openexchange.ajax.infostore.test.AppendDocumentTest;
 import com.openexchange.ajax.infostore.test.Bug27722Test;
 import com.openexchange.ajax.infostore.test.Bug32004Test;
-import com.openexchange.ajax.infostore.test.Bug40142Test;
 import com.openexchange.ajax.infostore.test.Bug44622Test;
 import com.openexchange.ajax.infostore.test.Bug54232Test;
 import com.openexchange.ajax.infostore.test.CheckNameActionTest;
@@ -43,7 +42,6 @@ import com.openexchange.test.concurrent.ParallelSuite;
     Bug27722Test.class,
     TrashTest.class,
     Bug32004Test.class,
-    Bug40142Test.class,
     CreateFileWithIllegalCharactersTest.class,
     CheckNameActionTest.class,
     FilestorageAccountTest.class,

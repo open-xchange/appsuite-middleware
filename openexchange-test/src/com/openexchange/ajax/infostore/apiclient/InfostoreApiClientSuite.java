@@ -8,7 +8,8 @@ import com.openexchange.test.concurrent.ParallelSuite;
 @RunWith(ParallelSuite.class)
 @Suite.SuiteClasses({
     UploadActionTest.class,
-    RestoreTest.class
+    RestoreTest.class,
+    Bug40142Test.class
 })
 public class InfostoreApiClientSuite  {
     // empty
