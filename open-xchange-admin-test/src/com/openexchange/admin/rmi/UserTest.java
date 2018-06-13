@@ -1159,7 +1159,7 @@ public class UserTest extends AbstractTest {
                 // load from server and compare the single changed value
                 final User user_single_change_loaded = oxu.getData(ctx, id(srv_loaded), cred);
 
-                // compare both string values , server and local copy must be same, else, the change was unsuccessfull
+                // compare both string values , server and local copy must be same, else, the change was unsuccessful
                 if (map_obj.getGetter().getParameterTypes().length == 0) {
                     Object expected = map_obj.getGetter().invoke(tmp_usr);
                     Object actual = map_obj.getGetter().invoke(user_single_change_loaded);

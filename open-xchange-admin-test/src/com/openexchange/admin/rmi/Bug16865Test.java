@@ -61,7 +61,7 @@ import com.openexchange.admin.rmi.dataobjects.Database;
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public final class Bug16865Test {
+public final class Bug16865Test extends AbstractTest {
 
      @Test
      public void testDefaultInitial() throws Throwable {
