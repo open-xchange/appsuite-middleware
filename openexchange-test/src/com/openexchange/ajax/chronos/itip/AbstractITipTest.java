@@ -50,15 +50,23 @@
 package com.openexchange.ajax.chronos.itip;
 
 import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Collections;
+import java.util.List;
+import javax.mail.MessagingException;
+import javax.mail.internet.AddressException;
 import com.openexchange.ajax.chronos.AbstractChronosTest;
-import com.openexchange.ajax.chronos.factory.ICalFacotry;
-import com.openexchange.ajax.chronos.factory.ITipMailFactory;
+import com.openexchange.ajax.chronos.factory.AttendeeFactory;
+import com.openexchange.configuration.AJAXConfig;
+import com.openexchange.test.pool.TestContext;
+import com.openexchange.test.pool.TestUser;
+import com.openexchange.testing.httpclient.invoker.ApiClient;
 import com.openexchange.testing.httpclient.invoker.ApiException;
 import com.openexchange.testing.httpclient.models.AnalyzeResponse;
+import com.openexchange.testing.httpclient.models.Attendee;
+import com.openexchange.testing.httpclient.models.Attendee.CuTypeEnum;
 import com.openexchange.testing.httpclient.models.ConversionDataSource;
+import com.openexchange.testing.httpclient.models.ConversionDataSourcePair;
 import com.openexchange.testing.httpclient.models.EventData;
 import com.openexchange.testing.httpclient.models.MailDestinationData;
 import com.openexchange.testing.httpclient.models.MailImportResponse;
@@ -90,19 +98,42 @@ public abstract class AbstractITipTest extends AbstractChronosTest {
         }
     }
 
-    private static final String FOLDER = "default0%2FINBOX";
+    private static final String FOLDER_HUMAN_READABLE = "default0/INBOX";
+
+    private static final String FOLDER_MACHINE_READABLE = "default0%2FINBOX";
 
     private String session;
+
+    protected TestContext testContext2;
+
+    protected TestUser user;
+
+    protected ApiClient api;
 
     @Override
     public void setUp() throws Exception {
         super.setUp();
         session = getApiClient().getSession();
+        //        testContext2 = TestContextPool.acquireContext(AbstractITipTest.class.getName());
+        //        user = testContext2.acquireUser();
+        user = testUser;
+
+        api = getApiClient();// new ApiClient();
+        //        api.login(user.getLogin(), user.getPassword());
     }
 
     @Override
     public void tearDown() throws Exception {
         super.tearDown();
+        //        if (null != api) {
+        //            api.logout();
+        //        }
+        //        if (null != testContext2) {
+        //            if (null != user) {
+        //                testContext2.backUser(user);
+        //            }
+        //            TestContextPool.backContext(testContext2);
+        //        }
     }
 
     /*
@@ -160,17 +191,48 @@ public abstract class AbstractITipTest extends AbstractChronosTest {
      * @return {@link MailDestinationData} with set mail ID and folder ID
      * @throws ApiException In case mail can't be uploaded
      * @throws IOException In case mail file can't be created
+     * @throws MessagingException In case mail can't be build
+     * @throws AddressException In case mail can't be build
      */
-    protected MailDestinationData createMailInInbox(EventData data) throws ApiException, IOException {
-        File tmpFile = File.createTempFile("test", ".eml");
-        FileWriter writer = new FileWriter(tmpFile);
-        ITipMailFactory factory = new ITipMailFactory(testUser, testUser, new ICalFacotry(Collections.singletonList(data)).build());
-        writer.write(factory.build());
-        writer.close();
+    protected MailDestinationData createMailInInbox(List<EventData> data) throws ApiException, IOException, AddressException, MessagingException {
+        //        File tmpFile = File.createTempFile("test", ".eml");
+        //        File tmpFile = new File(AJAXConfig.getProperty(AJAXConfig.Property.TEST_DIR) + "itip/", "test.eml");
+        //        String eml = new ITipMailFactory(testUser2, testUser, new ICalFacotry(data).build()).build();
+        //        FileWriter writer = new FileWriter(tmpFile);
+        //        writer.write(eml);
+        //        writer.close();
+        //        tmpFile.createNewFile();
+        File tmpFile = new File(AJAXConfig.getProperty(AJAXConfig.Property.TEST_DIR) + "itip/", "New_appointment__Subject.eml");
 
         MailApi mailApi = new MailApi(getApiClient());
-        MailImportResponse importMail = mailApi.importMail(session, FOLDER, tmpFile, null, Boolean.TRUE);
+        MailImportResponse importMail = mailApi.importMail(session, FOLDER_MACHINE_READABLE, tmpFile, null, Boolean.TRUE);
         return importMail.getData().get(0);
+    }
+
+    protected ConversionDataSource constructBody(String mailId) {
+        return constructBody(mailId, "1.3");
+    }
+
+    protected ConversionDataSource constructBody(String mailId, String sequenceId) {
+        ConversionDataSource body = new ConversionDataSource();
+        body.setIdentifier(DataSources.MAIL.getDataSource());
+
+        ConversionDataSourcePair sourcePairs = new ConversionDataSourcePair();
+        sourcePairs.setComOpenexchangeMailConversionFullname(FOLDER_HUMAN_READABLE);
+        sourcePairs.setComOpenexchangeMailConversionMailid(mailId);
+        sourcePairs.setComOpenexchangeMailConversionSequenceid(sequenceId);
+
+        body.setArgs(Collections.singletonList(sourcePairs));
+        return body;
+    }
+
+    protected Attendee createAttendee(TestUser convertee, ApiClient converteeClient) {
+        Attendee attendee = AttendeeFactory.createAttendee(converteeClient.getUserId().intValue(), CuTypeEnum.INDIVIDUAL);
+
+        attendee.cn(convertee.getLogin());
+        attendee.comment("Comment for user " + convertee.getUser());
+        attendee.email(convertee.getLogin());
+        return attendee;
     }
 
 }

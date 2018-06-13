@@ -52,6 +52,7 @@ package com.openexchange.ajax.chronos.factory;
 import java.util.List;
 import java.util.Locale;
 import java.util.TimeZone;
+import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import com.openexchange.testing.httpclient.models.Attendee;
 import com.openexchange.testing.httpclient.models.EventData;
@@ -301,7 +302,11 @@ public class ICalFacotry {
         sb.append("TRANSP:").append(null == eventData.getTransp() ? TranspEnum.OPAQUE : eventData.getTransp());
         addNewLine(sb);
 
-        sb.append("UID:").append(eventData.getUid());
+        sb.append("UID:");
+        if (null == eventData.getUid()) {
+            eventData.setUid(UUID.randomUUID().toString());
+        }
+        sb.append(eventData.getUid());
         addNewLine(sb);
 
         sb.append("X-MICROSOFT-CDO-BUSYSTATUS:BUSY");
