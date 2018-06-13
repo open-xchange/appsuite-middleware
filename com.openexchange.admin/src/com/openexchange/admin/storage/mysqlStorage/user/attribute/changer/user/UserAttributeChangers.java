@@ -148,7 +148,8 @@ public class UserAttributeChangers extends AbstractUserAttributeChangers {
                 if (passwordExpired == null) {
                     return false;
                 }
-                return setAttributes(userId, contextId, TABLE, Collections.singletonMap(UserAttribute.SHADOW_LAST_CHANGE, passwordExpired), connection);
+                int lastChange = passwordExpired.booleanValue() ? 0 : -1;
+                return setAttributes(userId, contextId, TABLE, Collections.singletonMap(UserAttribute.SHADOW_LAST_CHANGE, lastChange), connection);
             }
         });
         c.put(UserAttribute.IMAP_SERVER, new AbstractUserAttributeChanger() {

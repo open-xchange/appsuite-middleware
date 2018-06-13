@@ -78,7 +78,7 @@ public enum UserAttribute implements Attribute {
     /**
      * The 'shadowLastChange' column
      */
-    SHADOW_LAST_CHANGE("shadow-last-change", "shadowLastChange", Boolean.class),
+    SHADOW_LAST_CHANGE("shadow-last-change", "shadowLastChange", Integer.class),
     /**
      * The 'imapserver' column
      */
