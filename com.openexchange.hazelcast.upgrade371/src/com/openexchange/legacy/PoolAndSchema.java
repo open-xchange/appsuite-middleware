@@ -49,78 +49,51 @@
 
 package com.openexchange.legacy;
 
-import java.io.IOException;
-import java.util.List;
-import java.util.concurrent.Callable;
-import com.hazelcast.nio.serialization.PortableReader;
-import com.hazelcast.nio.serialization.PortableWriter;
+public class PoolAndSchema {
 
-/**
- * {@link PortableContextInvalidationCallable}
- *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since v7.10.0
- */
-public class PortableContextInvalidationCallable extends AbstractCustomPortable implements Callable<Boolean> {
-
-    public static final int CLASS_ID = 26;
-
-    public static final String PARAMETER_POOL_IDS = "poolIds";
-    public static final String PARAMETER_SCHEMAS = "schemas";
-
-    private int[] poolIds;
-    private String[] schemas;
+    public final int poolId;
+    public final String schema;
+    private int hash = 0;
 
     /**
-     * Initializes a new {@link PortableContextInvalidationCallable}.
+     * Initializes a new {@link PoolAndSchema}.
      */
-    public PortableContextInvalidationCallable() {
+    public PoolAndSchema(int poolId, String schema) {
         super();
+        this.poolId = poolId;
+        this.schema = schema;
     }
 
-    /**
-     * Initializes a new {@link PortableContextInvalidationCallable}.
-     *
-     * @param list The schemas, which shall be invalidated
-     */
-    public PortableContextInvalidationCallable(List<PoolAndSchema> list) {
-        super();
-        int size = list.size();
-        poolIds = new int[size];
-        schemas = new String[size];
-        int i = 0;
-        for (PoolAndSchema poolAndSchema : list) {
-            poolIds[i] = poolAndSchema.poolId;
-            schemas[i] = poolAndSchema.schema;
-            i++;
+    @Override
+    public int hashCode() {
+        int h = hash;
+        if (h == 0) {
+            h = 31 * 1 + poolId;
+            h = 31 * h + ((schema == null) ? 0 : schema.hashCode());
+            hash = h;
         }
+        return h;
     }
 
     @Override
-    public Boolean call() throws Exception {
-        /*-
-         * This is just a placeholder for calling the remote 'c.o.ms.internal.portable.PortableContextInvalidationCallable'
-         *
-         * This class is never supposed to be called!
-         */
-        return Boolean.TRUE;
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (!(obj instanceof PoolAndSchema)) {
+            return false;
+        }
+        PoolAndSchema other = (PoolAndSchema) obj;
+        if (poolId != other.poolId) {
+            return false;
+        }
+        if (schema == null) {
+            if (other.schema != null) {
+                return false;
+            }
+        } else if (!schema.equals(other.schema)) {
+            return false;
+        }
+        return true;
     }
-
-    @Override
-    public int getClassId() {
-        return CLASS_ID;
-    }
-
-    @Override
-    public void writePortable(PortableWriter writer) throws IOException {
-        writer.writeIntArray(PARAMETER_POOL_IDS, poolIds);
-        writer.writeUTFArray(PARAMETER_SCHEMAS, schemas);
-    }
-
-    @Override
-    public void readPortable(PortableReader reader) throws IOException {
-        poolIds = reader.readIntArray(PARAMETER_POOL_IDS);
-        schemas = reader.readUTFArray(PARAMETER_SCHEMAS);
-    }
-
 }
