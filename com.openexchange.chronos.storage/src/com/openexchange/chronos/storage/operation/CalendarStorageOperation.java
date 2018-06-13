@@ -218,15 +218,18 @@ public abstract class CalendarStorageOperation<T> {
     }
 
     private T doExecuteUpdate() throws OXException {
-        boolean committed = false;
+        int rollback = 0;
         Connection writeConnection = null;
         try {
             writeConnection = dbService.getWritable(contextId);
             writeConnection.setAutoCommit(false);
+            rollback = 1;
+
             onConnection(writeConnection);
             T result = execute(new SimpleDBProvider(writeConnection, writeConnection), DBTransactionPolicy.NO_TRANSACTIONS);
+
             writeConnection.commit();
-            committed = true;
+            rollback = 2;
             return result;
         } catch (OXException e) {
             if (CalendarExceptionCodes.DB_NOT_MODIFIED.equals(e)) {
@@ -239,13 +242,17 @@ public abstract class CalendarStorageOperation<T> {
         } finally {
             onConnection(null);
             if (null != writeConnection) {
-                if (false == committed) {
-                    rollback(writeConnection);
-                    autocommit(writeConnection);
-                    dbService.backWritableAfterReading(contextId, writeConnection);
-                } else {
+                if (2 == rollback) {
                     autocommit(writeConnection);
                     dbService.backWritable(contextId, writeConnection);
+                } else {
+                    if (rollback > 0) {
+                        if (1 == rollback) {
+                            rollback(writeConnection);
+                        }
+                        autocommit(writeConnection);
+                    }
+                    dbService.backWritableAfterReading(contextId, writeConnection);
                 }
             }
         }
