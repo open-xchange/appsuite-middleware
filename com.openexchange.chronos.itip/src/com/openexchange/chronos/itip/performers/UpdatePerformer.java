@@ -130,6 +130,7 @@ public class UpdatePerformer extends AbstractActionPerformer {
             if (original != null) {
                 ITipEventUpdate diff = change.getDiff();
                 if (null != diff && false == diff.isEmpty()) {
+                    adjusteAttendeesPartStats(action, original, event, diff, owner);
                     event = updateEvent(original, event, session);
                     if (null == event) {
                         LOGGER.warn("No event found to process.");
@@ -340,5 +341,35 @@ public class UpdatePerformer extends AbstractActionPerformer {
 
     private boolean isExceptionCreate(ITipChange change) {
         return change.isException() && CalendarUtils.isSeriesMaster(change.getMasterEvent()) && null == change.getNewEvent().getId();
+    }
+
+    private final static Collection<ITipAction> OWN_CHANGE = EnumSet.of(ITipAction.ACCEPT, ITipAction.ACCEPT_AND_IGNORE_CONFLICTS, ITipAction.ACCEPT_AND_REPLACE, ITipAction.DECLINE, ITipAction.TENTATIVE);
+
+    /**
+     * Adjusted attendees status to avoid over right.
+     * Only call for updates on existing events
+     * 
+     * @param action The {@link ITipAction}
+     * @param original The original {@link Event}
+     * @param event The updated {@link Event}
+     * @param owner The acting user
+     */
+    private void adjusteAttendeesPartStats(ITipAction action, Event original, Event event, ITipEventUpdate diff, int owner) {
+        if (OWN_CHANGE.contains(action) && diff.isAboutStateChangesOnly() && false == diff.isAboutCertainParticipantsStateChangeOnly(String.valueOf(owner))) {
+            // Changed more than one PartStat with a action that should only update the current users status?!
+            List<Attendee> attendees = event.getAttendees();
+            for (Attendee o : original.getAttendees()) {
+                if (CalendarUtils.isInternal(o) && false == ParticipationStatus.NEEDS_ACTION.equals(o.getPartStat())) {
+                    Attendee find = CalendarUtils.find(attendees, o.getEntity());
+                    if (null != find && ParticipationStatus.NEEDS_ACTION.equals(find.getPartStat())) {
+                        // Copy from DB event
+                        find.setPartStat(o.getPartStat());
+                        if (o.containsComment()) {
+                            find.setComment(o.getComment());
+                        }
+                    }
+                }
+            }
+        }
     }
 }

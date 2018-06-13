@@ -11,6 +11,7 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Import-Package: com.hazelcast.core,
  com.hazelcast.nio,
  com.hazelcast.nio.serialization,
+ com.openexchange.caching,
  com.openexchange.config,
  com.openexchange.context,
  com.openexchange.exception,

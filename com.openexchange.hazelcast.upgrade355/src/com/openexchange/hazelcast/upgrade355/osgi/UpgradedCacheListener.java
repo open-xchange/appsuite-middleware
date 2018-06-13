@@ -50,7 +50,6 @@
 package com.openexchange.hazelcast.upgrade355.osgi;
 
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
@@ -67,7 +66,6 @@ import com.hazelcast.client.config.ClientConfig;
 import com.hazelcast.core.Cluster;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.IExecutorService;
-import com.hazelcast.core.ITopic;
 import com.hazelcast.core.Member;
 import com.openexchange.legacy.PortableContextInvalidationCallable;
 
@@ -191,13 +189,8 @@ public class UpgradedCacheListener implements com.openexchange.caching.events.Ca
         // Get cluster representation
         Cluster cluster = hazelcastInstance.getCluster();
 
-        // Get local member
-        Member localMember = cluster.getLocalMember();
-
-        // Determine other cluster members
-        Set<Member> otherMembers = new LinkedHashSet<Member>(cluster.getMembers());
-        otherMembers.remove(localMember);
-        return otherMembers;
+        // Determine cluster members
+        return cluster.getMembers();
     }
 
     private static int[] parseContextIds(com.openexchange.caching.events.CacheEvent cacheEvent) {
