@@ -5,12 +5,11 @@ Bundle-SymbolicName: com.openexchange.hazelcast.upgrade381
 Bundle-Version: 7.10.0
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
-Import-Package: com.openexchange.caching.events,
+Import-Package: com.openexchange.caching,
+ com.openexchange.caching.events,
  com.openexchange.config,
  com.openexchange.configuration,
- com.openexchange.context,
  com.openexchange.exception,
- com.openexchange.groupware.contexts,
  com.openexchange.java,
  com.openexchange.osgi,
  com.openexchange.server,

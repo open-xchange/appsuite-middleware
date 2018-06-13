@@ -229,7 +229,7 @@ public class FileStoreResourceCacheImpl extends AbstractResourceCache {
 
             final Connection con = dbService.getWritable(contextId);
             ResourceCacheMetadata existingMetadata = null;
-            boolean committed = false;
+            int rollback = 0;
             boolean triggerAlignment = false;
             long start = System.currentTimeMillis();
             try {
@@ -241,6 +241,8 @@ public class FileStoreResourceCacheImpl extends AbstractResourceCache {
                  * big problem.
                  */
                 Databases.startTransaction(con);
+                rollback = 1;
+
                 if (entryExists(metadataStore, con, contextId, userId, id)) {
                     existingMetadata = loadExistingEntryForUpdate(metadataStore, con, contextId, userId, id);
                     if (existingMetadata == null) {
@@ -260,7 +262,7 @@ public class FileStoreResourceCacheImpl extends AbstractResourceCache {
                 }
 
                 con.commit();
-                committed = true;
+                rollback = 2;
                 return true;
             } catch (DataTruncation e) {
                 throw PreviewExceptionCodes.ERROR.create(e, e.getMessage());
@@ -279,7 +281,8 @@ public class FileStoreResourceCacheImpl extends AbstractResourceCache {
                     throw PreviewExceptionCodes.ERROR.create(e, e.getMessage());
                 }
             } finally {
-                if (committed) {
+                if (2 == rollback) {
+                    // Successfully committed
                     Databases.autocommit(con);
                     dbService.backWritable(contextId, con);
                     if (existingMetadata != null) {
@@ -299,22 +302,29 @@ public class FileStoreResourceCacheImpl extends AbstractResourceCache {
                         LOG.debug("Skipping scheduling of alignment task for context {}.", contextId);
                     }
                 } else {
+                    // No commit performed
                     if (con != null) {
-                        try {
-                            con.rollback();
-                        } catch (SQLException e) {
-                            LOG.warn("Could not rollback database transaction after failing to cache a resource. Consider using 'checkconsistency' to clean up the database.");
+                        if (rollback > 0) {
+                            if (rollback == 1) {
+                                try {
+                                    con.rollback();
+                                } catch (SQLException e) {
+                                    LOG.warn("Could not rollback database transaction after failing to cache a resource. Consider using 'checkconsistency' to clean up the database.");
+                                }
+                            }
+                            Databases.autocommit(con);
                         }
-                        Databases.autocommit(con);
                         dbService.backWritableAfterReading(contextId, con);
                     }
 
-                    try {
-                        if (refId != null && !fileStorage.deleteFile(refId)) {
-                            LOG.warn("Could not remove stored file '{}' during transaction rollback. Consider using 'checkconsistency' to clean up the filestore.", refId);
+                    if (refId != null) {
+                        try {
+                            if (false == fileStorage.deleteFile(refId)) {
+                                LOG.warn("Could not remove stored file '{}' during transaction rollback. Consider using 'checkconsistency' to clean up the filestore.", refId);
+                            }
+                        } catch (OXException e) {
+                            LOG.warn("Could not remove stored file '{}' during transaction rollback. Consider using 'checkconsistency' to clean up the filestore.", refId, e);
                         }
-                    } catch (OXException e) {
-                        LOG.warn("Could not remove stored file '{}' during transaction rollback. Consider using 'checkconsistency' to clean up the filestore.", refId, e);
                     }
                 }
             }

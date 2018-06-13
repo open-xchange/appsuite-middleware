@@ -50,11 +50,10 @@
 package com.openexchange.legacy;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.concurrent.Callable;
 import com.hazelcast.nio.serialization.PortableReader;
 import com.hazelcast.nio.serialization.PortableWriter;
-import com.openexchange.context.ContextService;
-import com.openexchange.hazelcast.upgrade381.osgi.Services;
 
 /**
  * {@link PortableContextInvalidationCallable}
@@ -66,9 +65,11 @@ public class PortableContextInvalidationCallable extends AbstractCustomPortable 
 
     public static final int CLASS_ID = 26;
 
-    public static final String PARAMETER_CONTEXT_IDS = "contextIds";
+    public static final String PARAMETER_POOL_IDS = "poolIds";
+    public static final String PARAMETER_SCHEMAS = "schemas";
 
-    private int[] contextIds;
+    private int[] poolIds;
+    private String[] schemas;
 
     /**
      * Initializes a new {@link PortableContextInvalidationCallable}.
@@ -80,21 +81,28 @@ public class PortableContextInvalidationCallable extends AbstractCustomPortable 
     /**
      * Initializes a new {@link PortableContextInvalidationCallable}.
      *
-     * @param contextIds The identifiers of the contexts, which shall be invalidated
+     * @param list The schemas, which shall be invalidated
      */
-    public PortableContextInvalidationCallable(int[] contextIds) {
+    public PortableContextInvalidationCallable(List<PoolAndSchema> list) {
         super();
-        this.contextIds = contextIds;
+        int size = list.size();
+        poolIds = new int[size];
+        schemas = new String[size];
+        int i = 0;
+        for (PoolAndSchema poolAndSchema : list) {
+            poolIds[i] = poolAndSchema.poolId;
+            schemas[i] = poolAndSchema.schema;
+            i++;
+        }
     }
 
     @Override
     public Boolean call() throws Exception {
-        ContextService contextService = Services.optService(ContextService.class);
-        if (null == contextService) {
-            return Boolean.FALSE;
-        }
-
-        contextService.invalidateContexts(contextIds);
+        /*-
+         * This is just a placeholder for calling the remote 'c.o.ms.internal.portable.PortableContextInvalidationCallable'
+         *
+         * This class is never supposed to be called!
+         */
         return Boolean.TRUE;
     }
 
@@ -105,12 +113,14 @@ public class PortableContextInvalidationCallable extends AbstractCustomPortable 
 
     @Override
     public void writePortable(PortableWriter writer) throws IOException {
-        writer.writeIntArray(PARAMETER_CONTEXT_IDS, contextIds);
+        writer.writeIntArray(PARAMETER_POOL_IDS, poolIds);
+        writer.writeUTFArray(PARAMETER_SCHEMAS, schemas);
     }
 
     @Override
     public void readPortable(PortableReader reader) throws IOException {
-        contextIds = reader.readIntArray(PARAMETER_CONTEXT_IDS);
+        poolIds = reader.readIntArray(PARAMETER_POOL_IDS);
+        schemas = reader.readUTFArray(PARAMETER_SCHEMAS);
     }
 
 }

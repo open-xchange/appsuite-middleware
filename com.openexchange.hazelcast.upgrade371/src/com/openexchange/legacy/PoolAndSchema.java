@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,69 +47,53 @@
  *
  */
 
-package com.openexchange.hazelcast.upgrade381.osgi;
+package com.openexchange.legacy;
 
-import java.util.concurrent.atomic.AtomicReference;
-import com.openexchange.server.ServiceLookup;
+public class PoolAndSchema {
 
-/**
- * {@link Services} - The static service lookup.
- *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- */
-public final class Services {
+    public final int poolId;
+    public final String schema;
+    private int hash = 0;
 
     /**
-     * Initializes a new {@link Services}.
+     * Initializes a new {@link PoolAndSchema}.
      */
-    private Services() {
+    public PoolAndSchema(int poolId, String schema) {
         super();
+        this.poolId = poolId;
+        this.schema = schema;
     }
 
-    private static final AtomicReference<ServiceLookup> REF = new AtomicReference<ServiceLookup>();
-
-    /**
-     * Sets the service lookup.
-     *
-     * @param serviceLookup The service lookup or <code>null</code>
-     */
-    public static void setServiceLookup(final ServiceLookup serviceLookup) {
-        REF.set(serviceLookup);
-    }
-
-    /**
-     * Gets the service lookup.
-     *
-     * @return The service lookup or <code>null</code>
-     */
-    public static ServiceLookup getServiceLookup() {
-        return REF.get();
-    }
-
-    /**
-     * Gets the service of specified type
-     *
-     * @param clazz The service's class
-     * @return The service
-     * @throws IllegalStateException If an error occurs while returning the demanded service
-     */
-    public static <S extends Object> S getService(final Class<? extends S> clazz) {
-        final com.openexchange.server.ServiceLookup serviceLookup = REF.get();
-        if (null == serviceLookup) {
-            throw new IllegalStateException("Missing ServiceLookup instance. Bundle \"com.openexchange.hazelcast.upgrade381\" not started?");
+    @Override
+    public int hashCode() {
+        int h = hash;
+        if (h == 0) {
+            h = 31 * 1 + poolId;
+            h = 31 * h + ((schema == null) ? 0 : schema.hashCode());
+            hash = h;
         }
-        return serviceLookup.getService(clazz);
+        return h;
     }
 
-    /**
-     * (Optionally) Gets the service of specified type
-     *
-     * @param clazz The service's class
-     * @return The service or <code>null</code> if absent
-     */
-    public static <S extends Object> S optService(final Class<? extends S> clazz) {
-        ServiceLookup serviceLookup = REF.get();
-        return null == serviceLookup ? null : serviceLookup.getOptionalService(clazz);
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (!(obj instanceof PoolAndSchema)) {
+            return false;
+        }
+        PoolAndSchema other = (PoolAndSchema) obj;
+        if (poolId != other.poolId) {
+            return false;
+        }
+        if (schema == null) {
+            if (other.schema != null) {
+                return false;
+            }
+        } else if (!schema.equals(other.schema)) {
+            return false;
+        }
+        return true;
     }
-
 }

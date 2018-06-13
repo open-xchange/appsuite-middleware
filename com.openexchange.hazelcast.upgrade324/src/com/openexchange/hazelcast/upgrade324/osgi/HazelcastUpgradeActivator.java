@@ -57,7 +57,6 @@ import com.hazelcast.nio.serialization.ClassDefinition;
 import com.openexchange.caching.events.CacheEventService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.configuration.ConfigurationExceptionCodes;
-import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.legacy.DynamicPortableFactory;
@@ -92,10 +91,6 @@ public class HazelcastUpgradeActivator extends HousekeepingActivator {
     protected void startBundle() throws Exception {
         LOG.info("starting bundle: \"com.openexchange.hazelcast.upgrade324\"");
 
-        Services.setServiceLookup(this);
-        trackService(ContextService.class);
-        openTrackers();
-
         ClientConfig clientConfig = getConfig(getService(ConfigurationService.class));
         if (null != clientConfig) {
             UpgradedCacheListener cacheListener = new UpgradedCacheListener(clientConfig);
@@ -118,7 +113,6 @@ public class HazelcastUpgradeActivator extends HousekeepingActivator {
             }
             this.cacheListener = null;
         }
-        Services.setServiceLookup(null);
         super.stopBundle();
     }
 

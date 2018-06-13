@@ -50,12 +50,12 @@
 package com.openexchange.hazelcast.upgrade381.osgi;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
-import java.util.UUID;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
@@ -67,6 +67,9 @@ import com.hazelcast.core.Cluster;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.IExecutorService;
 import com.hazelcast.core.Member;
+import com.openexchange.caching.CacheKey;
+import com.openexchange.java.Strings;
+import com.openexchange.legacy.PoolAndSchema;
 import com.openexchange.legacy.PortableContextInvalidationCallable;
 
 
@@ -77,13 +80,12 @@ import com.openexchange.legacy.PortableContextInvalidationCallable;
  */
 public class UpgradedCacheListener implements com.openexchange.caching.events.CacheListener {
 
-    static final String CACHE_REGION = "Context";
+    /** The cache region name for the schema cache */
+    static final String CACHE_REGION = "OXDBPoolCache";
 
-    private static final String CACHE_EVENT_TOPIC = "cacheEvents-3";
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(UpgradedCacheListener.class);
     private static final int SHUTDOWN_DELAY = 3000;
 
-    private final String senderID;
     private final ClientConfig clientConfig;
 
     /**
@@ -93,7 +95,6 @@ public class UpgradedCacheListener implements com.openexchange.caching.events.Ca
      */
     public UpgradedCacheListener(ClientConfig clientConfig) {
         super();
-        this.senderID = UUID.randomUUID().toString();
         this.clientConfig = clientConfig;
     }
 
@@ -109,61 +110,68 @@ public class UpgradedCacheListener implements com.openexchange.caching.events.Ca
         }
         LOG.info("Processing: {}", cacheEvent);
         /*
-         * reconstruct & redistribute legacy cache event
+         * Propagate cache event through calling 'c.o.ms.internal.portable.PortableContextInvalidationCallable' on each remote member using a Hazelcast client
          */
         HazelcastInstance client = HazelcastClient.newHazelcastClient(clientConfig);
         LOG.info("Successfully initialzed Hazelcast client: {}", client);
-
+        /*
+         * Determine remote members
+         */
         Set<Member> remoteMembers = getRemoteMembers(client);
         if (null != remoteMembers && false == remoteMembers.isEmpty()) {
-            Member member = remoteMembers.iterator().next();
             IExecutorService executor = client.getExecutorService("default");
-            Future<Boolean> future = executor.submitToMember(new PortableContextInvalidationCallable(parseContextIds(cacheEvent)), member);
-            LOG.info("Successfully submitted invalidation of contexts to: {}", member);
+            Map<Member, Future<Boolean>> futures = executor.submitToMembers(new PortableContextInvalidationCallable(parseSchemas(cacheEvent)), remoteMembers);
+            LOG.info("Successfully submitted invalidation of contexts to remote members:{}{}", Strings.getLineSeparator(), remoteMembers);
+            /*
+             * Check each submitted task
+             */
+            for (Map.Entry<Member, Future<Boolean>> submittedTask : futures.entrySet()) {
+                Member member = submittedTask.getKey();
+                Future<Boolean> future = submittedTask.getValue();
+                try {
+                    Boolean result = null;
+                    int retryCount = 3;
+                    while (retryCount-- > 0) {
+                        try {
+                            result = future.get();
+                            retryCount = 0;
+                        } catch (InterruptedException e) {
+                            // Interrupted - Keep interrupted state
+                            Thread.currentThread().interrupt();
+                            retryCount = 0;
+                        } catch (CancellationException e) {
+                            // Canceled
+                            retryCount = 0;
+                        } catch (ExecutionException e) {
+                            Throwable cause = e.getCause();
 
+                            // Check for Hazelcast timeout
+                            if (!(cause instanceof com.hazelcast.core.OperationTimeoutException)) {
+                                throw e;
+                            }
 
-            try {
-                Boolean result = null;
-                int retryCount = 3;
-                while (retryCount-- > 0) {
-                    try {
-                        result = future.get();
-                        retryCount = 0;
-                    } catch (InterruptedException e) {
-                        // Interrupted - Keep interrupted state
-                        Thread.currentThread().interrupt();
-                        retryCount = 0;
-                    } catch (CancellationException e) {
-                        // Canceled
-                        retryCount = 0;
-                    } catch (ExecutionException e) {
-                        Throwable cause = e.getCause();
-
-                        // Check for Hazelcast timeout
-                        if (!(cause instanceof com.hazelcast.core.OperationTimeoutException)) {
-                            throw e;
-                        }
-
-                        // Timeout while awaiting remote result
-                        if (retryCount <= 0) {
-                            // No further retry
-                            cancelFutureSafe(future);
+                            // Timeout while awaiting remote result
+                            if (retryCount <= 0) {
+                                // No further retry
+                                cancelFutureSafe(future);
+                            }
                         }
                     }
-                }
 
-                if (null != result && result.booleanValue()) {
-                    LOG.info("Successfully invalidated of contexts, shutting down client after {}ms...", Integer.valueOf(SHUTDOWN_DELAY));
-                } else {
-                    LOG.warn("Failed invalidation of contexts, shutting down client after {}ms...", Integer.valueOf(SHUTDOWN_DELAY));
+                    if (null != result && result.booleanValue()) {
+                        LOG.info("Successfully invalidated schemas on member {}", member);
+                    } else {
+                        LOG.warn("Failed invalidation of schemas on member {}", member);
+                    }
+                } catch (Exception e) {
+                    LOG.warn("Failed invalidation of schemas on member {}", member, e);
                 }
-            } catch (Exception e) {
-                LOG.warn("Failed invalidation of contexts, shutting down client after {}ms...", Integer.valueOf(SHUTDOWN_DELAY), e);
             }
         } else {
-            LOG.warn("Found no remote members in cluster, shutting down client after {}ms...", Integer.valueOf(SHUTDOWN_DELAY));
+            LOG.warn("Found no remote members in cluster");
         }
 
+        LOG.info("Shutting down client after {}ms...", Integer.valueOf(SHUTDOWN_DELAY));
         LockSupport.parkNanos(TimeUnit.MILLISECONDS.toNanos(SHUTDOWN_DELAY));
         client.shutdown();
         LOG.info("Client shutdown completed.");
@@ -193,27 +201,21 @@ public class UpgradedCacheListener implements com.openexchange.caching.events.Ca
         return cluster.getMembers();
     }
 
-    private static int[] parseContextIds(com.openexchange.caching.events.CacheEvent cacheEvent) {
+    private static List<PoolAndSchema> parseSchemas(com.openexchange.caching.events.CacheEvent cacheEvent) {
         List<Serializable> keys = cacheEvent.getKeys();
-
-        Set<Integer> ids = new LinkedHashSet<Integer>(keys.size());
+        Set<PoolAndSchema> schemas = new LinkedHashSet<PoolAndSchema>(keys.size());
         for (Serializable key : keys) {
-            if (String.class.isInstance(key)) {
-                // login info. Ignore.
-            } else if (Integer.class.isInstance(key)) {
-                // context identifier
-                ids.add((Integer) key);
+            if (CacheKey.class.isInstance(key)) {
+                // Cache key
+                CacheKey ck = (CacheKey) key;
+                int poolId = ck.getContextId();
+                String schema = ck.getKeys()[0];
+                schemas.add(new PoolAndSchema(poolId, schema));
             } else {
                 LOG.warn("Skipping unexpected cache key: {}", key);
             }
         }
-
-        int[] contextIds = new int[ids.size()];
-        Iterator<Integer> iterator = ids.iterator();
-        for (int i = 0; i < contextIds.length; i++) {
-            contextIds[i] = iterator.next().intValue();
-        }
-        return contextIds;
+        return new ArrayList<>(schemas);
     }
 
 }

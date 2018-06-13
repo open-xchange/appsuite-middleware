@@ -59,6 +59,8 @@ import java.util.Collections;
 import java.util.Map;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.junit.runner.RunWith;
+import org.junit.runners.BlockJUnit4ClassRunner;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -78,6 +80,7 @@ import com.openexchange.testing.httpclient.models.FolderDataComOpenexchangeCalen
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
+@RunWith(BlockJUnit4ClassRunner.class)
 public abstract class AbstractExternalProviderChronosTest extends AbstractChronosTest {
 
     private final String providerId;
