@@ -60,7 +60,7 @@ import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.HazelcastInstanceNotActiveException;
 import com.openexchange.caching.CacheService;
-import com.openexchange.context.ContextService;
+import com.openexchange.database.DatabaseService;
 import com.openexchange.hazelcast.configuration.HazelcastConfigurationService;
 import com.openexchange.hazelcast.serialization.CustomPortableFactory;
 import com.openexchange.ms.MsEventConstants;
@@ -155,7 +155,7 @@ public class MsActivator extends HousekeepingActivator implements Unregisterer {
             });
             hzTracker.open();
             this.hzTracker = hzTracker;
-            trackService(ContextService.class);
+            trackService(DatabaseService.class);
             trackService(CacheService.class);
 
             // Open other
