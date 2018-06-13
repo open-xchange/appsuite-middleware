@@ -542,7 +542,7 @@ public class GrizzlyConfig {
         this.contentSecurityPolicy = contentSecurityPolicy;
         this.defaultEncoding = defaultEncoding;
         this.isConsiderXForwards = isConsiderXForwards;
-        this.knownProxies = null == knownProxies || knownProxies.isEmpty() ? Collections.emptyList() : ImmutableList.copyOf(knownProxies);
+        this.knownProxies = (List<IPRange>) (null == knownProxies || knownProxies.isEmpty() ? Collections.emptyList() : ImmutableList.copyOf(knownProxies));
         this.forHeader = forHeader;
         this.protocolHeader = protocolHeader;
         this.httpsProtoValue = httpsProtoValue;
