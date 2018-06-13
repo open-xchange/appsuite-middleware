@@ -178,29 +178,6 @@ public class SchemaStoreImpl extends SchemaStore {
 
     @Override
     public void lockSchema(Schema schema, boolean background) throws OXException {
-        int poolId = schema.getPoolId();
-
-        Cache cache = this.cache;
-        CacheKey key = null;
-        if (null != cache) {
-            key = cache.newCacheKey(poolId, schema.getSchema());
-            try {
-                cache.remove(key);
-            } catch (final OXException e) {
-                LOG.error("", e);
-            }
-        }
-        lockSchemaDB(schema, background);
-        if (null != cache && null != key) {
-            try {
-                cache.remove(key);
-            } catch (final OXException e) {
-                LOG.error("", e);
-            }
-        }
-    }
-
-    private static void lockSchemaDB(Schema schema, boolean background) throws OXException {
         Connection con = Database.get(schema.getPoolId(), schema.getSchema());
         int rollback = 0;
         try {
@@ -215,6 +192,8 @@ public class SchemaStoreImpl extends SchemaStore {
             // Everything went fine. Schema is marked as locked
             con.commit();
             rollback = 2;
+            // Invalidate cache
+            invalidateCache(schema);
         } catch (final SQLException e) {
             throw SchemaExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } finally {
@@ -258,33 +237,19 @@ public class SchemaStoreImpl extends SchemaStore {
 
     @Override
     public boolean tryRefreshSchemaLock(Schema schema, boolean background) throws OXException {
-        Cache cache = this.cache;
-        CacheKey key = null;
-        if (null != cache) {
-            key = cache.newCacheKey(schema.getPoolId(), schema.getSchema());
-            try {
-                cache.remove(key);
-            } catch (final OXException e) {
-                LOG.error("", e);
-            }
-        }
-        boolean refreshed = tryRefreshLock(schema, background);
-        if (null != cache && null != key) {
-            try {
-                cache.remove(key);
-            } catch (final OXException e) {
-                LOG.error("", e);
-            }
-        }
-        return refreshed;
+        return tryRefreshLock(schema, background);
     }
 
-    private static boolean tryRefreshLock(Schema schema, boolean background) throws OXException {
+    private boolean tryRefreshLock(Schema schema, boolean background) throws OXException {
         int poolId = schema.getPoolId();
         Connection con = Database.get(poolId, schema.getSchema());
         try {
             // Refresh lock
-            return tryRefreshLock(con, background ? BACKGROUND : LOCKED);
+            boolean refreshed = tryRefreshLock(con, background ? BACKGROUND : LOCKED);
+            if (refreshed) {
+                invalidateCache(schema);
+            }
+            return refreshed;
         } finally {
             Database.back(poolId, con);
         }
@@ -307,27 +272,6 @@ public class SchemaStoreImpl extends SchemaStore {
 
     @Override
     public void unlockSchema(final Schema schema, final boolean background) throws OXException {
-        Cache cache = this.cache;
-        CacheKey key = null;
-        if (null != cache) {
-            key = cache.newCacheKey(schema.getPoolId(), schema.getSchema());
-            try {
-                cache.remove(key);
-            } catch (final OXException e) {
-                LOG.error("", e);
-            }
-        }
-        unlockSchemaDB(schema, background);
-        if (null != cache && null != key) {
-            try {
-                cache.remove(key);
-            } catch (final OXException e) {
-                LOG.error("", e);
-            }
-        }
-    }
-
-    private static void unlockSchemaDB(Schema schema, boolean background) throws OXException {
         int poolId = schema.getPoolId();
         Connection con = Database.get(poolId, schema.getSchema());
         boolean rollback = false;
@@ -340,6 +284,8 @@ public class SchemaStoreImpl extends SchemaStore {
             // Everything went fine. Schema is marked as unlocked
             con.commit();
             rollback = false;
+            // Invalidate
+            invalidateCache(schema);
         } catch (final SQLException e) {
             throw SchemaExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } catch (final OXException e) {
@@ -456,15 +402,7 @@ public class SchemaStoreImpl extends SchemaStore {
     @Override
     public void addExecutedTask(Connection con, String taskName, boolean success, int poolId, String schema) throws OXException {
         doAddExecutedTasks(con, Collections.singletonList(taskName), success, poolId, schema);
-        Cache cache = this.cache;
-        if (null != cache) {
-            final CacheKey key = cache.newCacheKey(poolId, schema);
-            try {
-                cache.remove(key);
-            } catch (final OXException e) {
-                LOG.error("", e);
-            }
-        }
+        invalidateCache(poolId, schema);
     }
 
     @Override
@@ -474,15 +412,7 @@ public class SchemaStoreImpl extends SchemaStore {
         }
 
         doAddExecutedTasks(con, taskNames, success, poolId, schema);
-        Cache cache = this.cache;
-        if (null != cache) {
-            final CacheKey key = cache.newCacheKey(poolId, schema);
-            try {
-                cache.remove(key);
-            } catch (final OXException e) {
-                LOG.error("", e);
-            }
-        }
+        invalidateCache(poolId, schema);
     }
 
     private static void doAddExecutedTasks(Connection con, Collection<String> taskNames, boolean success, int poolId, String schema) throws OXException {
@@ -608,6 +538,22 @@ public class SchemaStoreImpl extends SchemaStore {
             this.cache = null;
             try {
                 cache.clear();
+            } catch (final OXException e) {
+                LOG.error("", e);
+            }
+        }
+    }
+
+    private void invalidateCache(Schema schema) {
+        invalidateCache(schema.getPoolId(), schema.getSchema());
+    }
+
+    private void invalidateCache(int poolId, String schema) {
+        Cache cache = this.cache;
+        if (null != cache) {
+            CacheKey key = cache.newCacheKey(poolId, schema);
+            try {
+                cache.remove(key);
             } catch (final OXException e) {
                 LOG.error("", e);
             }
