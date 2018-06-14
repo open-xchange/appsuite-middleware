@@ -150,6 +150,18 @@ public abstract class AbstractHzTopic<E> extends AbstractHzResource implements T
     @Override
     public void destroy() {
         timerTask.cancel();
+
+        List<E> messages = new LinkedList<E>();
+        for (E e : publishQueue) {
+            messages.add(e);
+        }
+        publishQueue.clear();
+
+        try {
+            publishNow(messages);
+        } catch (Exception x) {
+            // Ignore
+        }
     }
 
     @Override

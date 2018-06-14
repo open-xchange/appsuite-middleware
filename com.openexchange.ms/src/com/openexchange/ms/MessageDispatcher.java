@@ -87,7 +87,7 @@ public interface MessageDispatcher<E> {
     String getSenderId();
 
     /**
-     * Destroys this instance cluster-wide.
+     * Destroys this instance.
      * <p>
      * Clears and releases all resources for this instance.
      */
