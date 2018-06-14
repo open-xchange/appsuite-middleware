@@ -24,6 +24,11 @@
           - display or
           - link
         required: true
+      - in: body
+        name: body
+        description: An optional JSON object containing additional data for the action.
+        schema:
+          type: string
     responses:  
       200:
         description: |
