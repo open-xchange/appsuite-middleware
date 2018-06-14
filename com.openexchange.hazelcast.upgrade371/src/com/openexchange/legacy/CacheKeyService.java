@@ -49,32 +49,39 @@
 
 package com.openexchange.legacy;
 
-import com.hazelcast.nio.serialization.Portable;
-
 
 /**
- * {@link PortableContextInvalidationCallableFactory}
+ * {@link CacheKeyService} - The service to provide cache keys.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since v7.10.0
  */
-public class PortableContextInvalidationCallableFactory extends AbstractCustomPortableFactory {
+public interface CacheKeyService {
 
     /**
-     * Initializes a new {@link PortableContextInvalidationCallableFactory}.
+     * Creates a new instance of {@link CacheKey} consisting of specified context ID and object ID.
+     *
+     * @param contextId The context ID
+     * @param objectId The object ID
+     * @return The new instance of {@link CacheKey}
      */
-    public PortableContextInvalidationCallableFactory() {
-        super();
-    }
+    CacheKey newCacheKey(int contextId, int objectId);
 
-    @Override
-    public Portable create() {
-        return new PortableContextInvalidationCallable();
-    }
+    /**
+     * Creates a new instance of {@link CacheKey} consisting of specified context ID and key object.
+     *
+     * @param contextId The context ID
+     * @param obj The key object
+     * @return new instance of {@link CacheKey}
+     */
+    CacheKey newCacheKey(int contextId, String obj);
 
-    @Override
-    public int getClassId() {
-        return PortableContextInvalidationCallable.CLASS_ID;
-    }
+    /**
+     * Creates a new instance of {@link CacheKey} consisting of specified context ID and key objects.
+     *
+     * @param contextId The context ID
+     * @param objs The key objects
+     * @return new instance of {@link CacheKey}
+     */
+    CacheKey newCacheKey(int contextId, String... objs);
 
 }

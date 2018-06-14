@@ -51,27 +51,22 @@ package com.openexchange.hazelcast.upgrade371.osgi;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
-import java.util.Iterator;
-import java.util.LinkedHashSet;
+import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.CancellationException;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
+import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.LockSupport;
 import com.hazelcast.client.HazelcastClient;
 import com.hazelcast.client.config.ClientConfig;
-import com.hazelcast.core.Cluster;
 import com.hazelcast.core.HazelcastInstance;
-import com.hazelcast.core.IExecutorService;
-import com.hazelcast.core.Member;
-import com.openexchange.caching.CacheKey;
-import com.openexchange.java.Strings;
-import com.openexchange.legacy.PoolAndSchema;
-import com.openexchange.legacy.PortableContextInvalidationCallable;
+import com.hazelcast.core.ITopic;
+import com.openexchange.legacy.CacheEvent;
+import com.openexchange.legacy.CacheKeyImpl;
+import com.openexchange.legacy.PortableCacheEvent;
+import com.openexchange.legacy.PortableMessage;
 
 
 /**
@@ -81,12 +76,16 @@ import com.openexchange.legacy.PortableContextInvalidationCallable;
  */
 public class UpgradedCacheListener implements com.openexchange.caching.events.CacheListener {
 
-    /** The cache region name for the schema cache */
-    static final String CACHE_REGION = "OXDBPoolCache";
+    static final String CACHE_REGION_CONTEXT = "Context";
+    static final String CACHE_REGION_SCHEMA_STORE = "OXDBPoolCache";
 
+    private static final Set<String> REGIONS = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList(CACHE_REGION_CONTEXT, CACHE_REGION_SCHEMA_STORE)));
+
+    private static final String CACHE_EVENT_TOPIC = "cacheEvents-3";
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(UpgradedCacheListener.class);
     private static final int SHUTDOWN_DELAY = 3000;
 
+    private final String senderID;
     private final ClientConfig clientConfig;
 
     /**
@@ -96,6 +95,7 @@ public class UpgradedCacheListener implements com.openexchange.caching.events.Ca
      */
     public UpgradedCacheListener(ClientConfig clientConfig) {
         super();
+        this.senderID = UUID.randomUUID().toString();
         this.clientConfig = clientConfig;
     }
 
@@ -104,119 +104,78 @@ public class UpgradedCacheListener implements com.openexchange.caching.events.Ca
         /*
          * check received event
          */
-        if (fromRemote || null == cacheEvent || false == CACHE_REGION.equals(cacheEvent.getRegion()) ||
+        if (fromRemote || null == cacheEvent || false == REGIONS.contains(cacheEvent.getRegion()) ||
             com.openexchange.caching.events.CacheOperation.INVALIDATE != cacheEvent.getOperation() || null == cacheEvent.getKeys()) {
             LOG.trace("Skipping unrelated event: {}", cacheEvent);
             return;
         }
         LOG.info("Processing: {}", cacheEvent);
         /*
-         * Propagate cache event through calling 'c.o.ms.internal.portable.PortableContextInvalidationCallable' on each remote member using a Hazelcast client
+         * reconstruct & redistribute legacy cache event
          */
         HazelcastInstance client = HazelcastClient.newHazelcastClient(clientConfig);
         LOG.info("Successfully initialzed Hazelcast client: {}", client);
-        /*
-         * Determine remote members
-         */
-        Set<Member> remoteMembers = getRemoteMembers(client);
-        if (null != remoteMembers && false == remoteMembers.isEmpty()) {
-            IExecutorService executor = client.getExecutorService("default");
-            Map<Member, Future<Boolean>> futures = executor.submitToMembers(new PortableContextInvalidationCallable(parseSchemas(cacheEvent)), remoteMembers);
-            LOG.info("Successfully submitted invalidation of contexts to remote members:{}{}", Strings.getLineSeparator(), remoteMembers);
-            /*
-             * Check each submitted task
-             */
-            for (Map.Entry<Member, Future<Boolean>> submittedTask : futures.entrySet()) {
-                Member member = submittedTask.getKey();
-                Future<Boolean> future = submittedTask.getValue();
-                try {
-                    Boolean result = null;
-                    int retryCount = 3;
-                    while (retryCount-- > 0) {
-                        try {
-                            result = future.get();
-                            retryCount = 0;
-                        } catch (InterruptedException e) {
-                            // Interrupted - Keep interrupted state
-                            Thread.currentThread().interrupt();
-                            retryCount = 0;
-                        } catch (CancellationException e) {
-                            // Canceled
-                            retryCount = 0;
-                        } catch (ExecutionException e) {
-                            Throwable cause = e.getCause();
 
-                            // Check for Hazelcast timeout
-                            if (!(cause instanceof com.hazelcast.core.OperationTimeoutException)) {
-                                throw e;
-                            }
-
-                            // Timeout while awaiting remote result
-                            if (retryCount <= 0) {
-                                // No further retry
-                                cancelFutureSafe(future);
-                            }
-                        }
-                    }
-
-                    if (null != result && result.booleanValue()) {
-                        LOG.info("Successfully invalidated schemas on member {}", member);
-                    } else {
-                        LOG.warn("Failed invalidation of schemas on member {}", member);
-                    }
-                } catch (Exception e) {
-                    LOG.warn("Failed invalidation of schemas on member {}", member, e);
-                }
-            }
+        CacheEvent legacyEvent;
+        if (CACHE_REGION_CONTEXT.equals(cacheEvent.getRegion())) {
+            legacyEvent = reconstructContextEvent(cacheEvent);
         } else {
-            LOG.warn("Found no remote members in cluster");
+            legacyEvent = reconstructSchemaEvent(cacheEvent);
         }
 
-        LOG.info("Shutting down client after {}ms...", Integer.valueOf(SHUTDOWN_DELAY));
+        PortableMessage<PortableCacheEvent> legacyMessage = new PortableMessage<PortableCacheEvent>(senderID, PortableCacheEvent.wrap(legacyEvent));
+        ITopic<Object> topic = client.getTopic(CACHE_EVENT_TOPIC);
+        LOG.info("Successfully got reference to cache event topic: {}", topic);
+        LOG.info("Publishing legacy cache event: {}", legacyEvent);
+        topic.publish(legacyMessage);
+        LOG.info("Successfully published legacy cache event, shutting down client after {}ms...", Integer.valueOf(SHUTDOWN_DELAY));
         LockSupport.parkNanos(TimeUnit.MILLISECONDS.toNanos(SHUTDOWN_DELAY));
         client.shutdown();
         LOG.info("Client shutdown completed.");
     }
 
-    private static <R> void cancelFutureSafe(Future<R> future) {
-        if (null != future) {
-            try { future.cancel(true); } catch (Exception e) {/*Ignore*/}
-        }
-    }
-
     /**
-     * Gets the remote members from specified Hazelcast instance.
+     * Reconstructs a legacy cache event from the supplied "new" cache event, ready for re-distribution in the legacy cluster.
      *
-     * @param hazelcastInstance The Hazelcast instance for the cluster
-     * @return The remote members
+     * @param cacheEvent The "new" cache event
+     * @return The corresponding legacy cache event
      */
-    private static Set<Member> getRemoteMembers(HazelcastInstance hazelcastInstance) {
-        if (null == hazelcastInstance) {
-            return Collections.emptySet();
-        }
-
-        // Get cluster representation
-        Cluster cluster = hazelcastInstance.getCluster();
-
-        // Determine cluster members
-        return cluster.getMembers();
-    }
-
-    private static List<PoolAndSchema> parseSchemas(com.openexchange.caching.events.CacheEvent cacheEvent) {
+    private static CacheEvent reconstructContextEvent(com.openexchange.caching.events.CacheEvent cacheEvent) {
         List<Serializable> keys = cacheEvent.getKeys();
-        Set<PoolAndSchema> schemas = new LinkedHashSet<PoolAndSchema>(keys.size());
+        List<Serializable> legacyKeys = new ArrayList<Serializable>(keys.size());
         for (Serializable key : keys) {
-            if (CacheKey.class.isInstance(key)) {
-                // Cache key
-                CacheKey ck = (CacheKey) key;
-                int poolId = ck.getContextId();
-                String schema = ck.getKeys()[0];
-                schemas.add(new PoolAndSchema(poolId, schema));
+            if (String.class.isInstance(key)) {
+                // login info
+                legacyKeys.add(key);
+            } else if (Integer.class.isInstance(key)) {
+                // context identifier
+                legacyKeys.add(key);
             } else {
                 LOG.warn("Skipping unexpected cache key: {}", key);
             }
         }
-        return new ArrayList<>(schemas);
+        return CacheEvent.INVALIDATE(CACHE_REGION_CONTEXT, null, legacyKeys);
+    }
+
+    /**
+     * Reconstructs a legacy cache event from the supplied "new" cache event, ready for re-distribution in the legacy cluster.
+     *
+     * @param cacheEvent The "new" cache event
+     * @return The corresponding legacy cache event
+     */
+    private static CacheEvent reconstructSchemaEvent(com.openexchange.caching.events.CacheEvent cacheEvent) {
+        List<Serializable> keys = cacheEvent.getKeys();
+        List<Serializable> legacyKeys = new ArrayList<Serializable>(keys.size());
+        for (Serializable key : keys) {
+            if (com.openexchange.caching.CacheKey.class.isInstance(key)) {
+                // Cache key
+                com.openexchange.caching.CacheKey ck = (com.openexchange.caching.CacheKey) key;
+                legacyKeys.add(new CacheKeyImpl(ck.getContextId(), ck.getKeys()));
+            } else {
+                LOG.warn("Skipping unexpected cache key: {}", key);
+            }
+        }
+        return CacheEvent.INVALIDATE(CACHE_REGION_SCHEMA_STORE, null, legacyKeys);
     }
 
 }

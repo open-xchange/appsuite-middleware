@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -50,60 +50,55 @@
 package com.openexchange.legacy;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.Callable;
+import com.hazelcast.nio.ObjectDataInput;
+import com.hazelcast.nio.ObjectDataOutput;
+import com.hazelcast.nio.serialization.Portable;
 import com.hazelcast.nio.serialization.PortableReader;
 import com.hazelcast.nio.serialization.PortableWriter;
 
 /**
- * {@link PortableContextInvalidationCallable}
+ * {@link PortableMessage}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since v7.10.0
+ * @author <a href="mailto:tobias.friedrihc@open-xchange.com">Tobias Friedrich</a>
  */
-public class PortableContextInvalidationCallable extends AbstractCustomPortable implements Callable<Boolean> {
+public class PortableMessage<P extends Portable> extends AbstractCustomPortable {
 
-    public static final int CLASS_ID = 26;
+    /** The unique portable class ID of the {@link PortableMessage} */
+    public static final int CLASS_ID = 3;
 
-    public static final String PARAMETER_POOL_IDS = "poolIds";
-    public static final String PARAMETER_SCHEMAS = "schemas";
-
-    private int[] poolIds;
-    private String[] schemas;
+    private List<P> messagePayload;
+    private String senderID;
 
     /**
-     * Initializes a new {@link PortableContextInvalidationCallable}.
-     */
-    public PortableContextInvalidationCallable() {
-        super();
-    }
-
-    /**
-     * Initializes a new {@link PortableContextInvalidationCallable}.
+     * Initializes a new {@link PortableMessage}.
      *
-     * @param list The schemas, which shall be invalidated
+     * @param senderID The identifier of the sender
+     * @param messagePayload The message payload to carry
      */
-    public PortableContextInvalidationCallable(List<PoolAndSchema> list) {
+    public PortableMessage(String senderID, List<P> messagePayload) {
         super();
-        int size = list.size();
-        poolIds = new int[size];
-        schemas = new String[size];
-        int i = 0;
-        for (PoolAndSchema poolAndSchema : list) {
-            poolIds[i] = poolAndSchema.poolId;
-            schemas[i] = poolAndSchema.schema;
-            i++;
-        }
+        this.senderID = senderID;
+        this.messagePayload = messagePayload;
     }
 
-    @Override
-    public Boolean call() throws Exception {
-        /*-
-         * This is just a placeholder for calling the remote 'c.o.ms.internal.portable.PortableContextInvalidationCallable'
-         *
-         * This class is never supposed to be called!
-         */
-        return Boolean.TRUE;
+    /**
+     * Initializes a new {@link PortableMessage}.
+     *
+     * @param senderID The identifier of the sender
+     * @param messagePayload The message payload to carry
+     */
+    public PortableMessage(String senderID, P messagePayload) {
+        this(senderID, Collections.singletonList(messagePayload));
+    }
+
+    /**
+     * Initializes a new, empty {@link PortableMessage}.
+     */
+    public PortableMessage() {
+        super();
     }
 
     @Override
@@ -113,14 +108,48 @@ public class PortableContextInvalidationCallable extends AbstractCustomPortable 
 
     @Override
     public void writePortable(PortableWriter writer) throws IOException {
-        writer.writeIntArray(PARAMETER_POOL_IDS, poolIds);
-        writer.writeUTFArray(PARAMETER_SCHEMAS, schemas);
+        ObjectDataOutput out = writer.getRawDataOutput();
+        out.writeUTF(senderID);
+        boolean hasPayload = null != messagePayload;
+        out.writeBoolean(hasPayload);
+        if (hasPayload) {
+            out.writeInt(messagePayload.size());
+            for (int i = 0; i < messagePayload.size(); i++) {
+                out.writeObject(messagePayload.get(i));
+            }
+        }
     }
 
     @Override
     public void readPortable(PortableReader reader) throws IOException {
-        poolIds = reader.readIntArray(PARAMETER_POOL_IDS);
-        schemas = reader.readUTFArray(PARAMETER_SCHEMAS);
+        ObjectDataInput in = reader.getRawDataInput();
+        senderID = in.readUTF();
+        boolean hasPayload = in.readBoolean();
+        if (hasPayload) {
+            int size = in.readInt();
+            messagePayload = new ArrayList<P>(size);
+            for (int i = 0; i < size; i++) {
+                messagePayload.add(in.<P>readObject());
+            }
+        }
+    }
+
+    /**
+     * Gets the payload of the message.
+     *
+     * @return The message payload
+     */
+    public List<P> getMessagePayload() {
+        return messagePayload;
+    }
+
+    /**
+     * Gets the sender ID.
+     *
+     * @return The sender ID
+     */
+    public String getSenderID() {
+        return senderID;
     }
 
 }
