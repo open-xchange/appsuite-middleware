@@ -55,6 +55,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.locks.Lock;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheKey;
 import com.openexchange.caching.CacheService;
@@ -62,6 +64,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.FileStorageService;
 import com.openexchange.file.storage.rdb.Services;
+import com.openexchange.folderstorage.cache.service.FolderCacheInvalidationService;
 import com.openexchange.lock.LockService;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
@@ -75,6 +78,8 @@ import com.openexchange.session.Session;
 public final class CachingFileStorageAccountStorage implements FileStorageAccountStorage {
 
     private static final CachingFileStorageAccountStorage INSTANCE = new CachingFileStorageAccountStorage();
+
+    private static final Logger LOG = LoggerFactory.getLogger(CachingFileStorageAccountStorage.class);
 
     private static final String REGION_NAME = "FileStorageAccount";
 
@@ -236,6 +241,16 @@ public final class CachingFileStorageAccountStorage implements FileStorageAccoun
     public void updateAccount(final String serviceId, final FileStorageAccount account, final Session session) throws OXException {
         delegatee.updateAccount(serviceId, account, session);
         invalidateFileStorageAccount(serviceId, Integer.parseInt(account.getId()), session.getUserId(), session.getContextId());
+        invalidateFolderCache(session, serviceId, account.getId());
+    }
+
+    private void invalidateFolderCache(Session session, String serviceId, String accountId) {
+        FolderCacheInvalidationService folderCacheInvalidationService = serviceRegistry.getService(FolderCacheInvalidationService.class);
+        try {
+            folderCacheInvalidationService.invalidateSingle(serviceId+"://"+accountId+"/", "1", session);
+        } catch (OXException e) {
+            LOG.error("Unable to invalidate folder cache.", e);
+        }
     }
 
     public boolean hasEncryptedItems(final FileStorageService service, final Session session) throws OXException {
