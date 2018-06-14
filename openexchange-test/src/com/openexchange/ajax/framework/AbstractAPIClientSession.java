@@ -75,7 +75,7 @@ public abstract class AbstractAPIClientSession extends AbstractClientSession {
     protected LoginApi loginApi;
     protected ApiClient apiClient;
 
-    private Set<ApiClient> apiClients = new ConcurrentHashSet<>(1);
+    private final Set<ApiClient> apiClients = new ConcurrentHashSet<>(1);
 
     /**
      * Default constructor.
@@ -247,5 +247,14 @@ public abstract class AbstractAPIClientSession extends AbstractClientSession {
         assertNull(errorDesc, error);
         assertNotNull(data);
         return data;
+    }
+
+    /**
+     * Returns the session id of the default session
+     *
+     * @return The session id
+     */
+    protected String getSessionId() {
+        return apiClient.getSession();
     }
 }

@@ -50,20 +50,17 @@
 package com.openexchange.ajax.onboarding.tests;
 
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
 import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
 import java.util.Map;
-import org.json.JSONObject;
 import org.junit.Test;
 import com.google.common.io.BaseEncoding;
 import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.onboarding.actions.ExecuteRequest;
-import com.openexchange.ajax.onboarding.actions.OnboardingTestResponse;
 import com.openexchange.client.onboarding.OnboardingExceptionCodes;
 import com.openexchange.sms.SMSExceptionCode;
+import com.openexchange.testing.httpclient.models.CommonResponse;
 
 /**
  * {@link PlistSMSTest}
@@ -79,65 +76,51 @@ public class PlistSMSTest extends AbstractPlistSMSTest {
     @Test
     public void testExecute() throws Exception {
         String jsonString = "{\"sms\":\"+49276183850\"}";
-        JSONObject body = new JSONObject(jsonString);
-
         for (String id : SCENARIOS) {
-            ExecuteRequest req = new ExecuteRequest(id, "sms", body, false);
-            OnboardingTestResponse response = getAjaxClient().execute(req);
-            assertNotNull("Response is empty!", response);
-            // Expecting an sipgate authorization exception
-            assertNotNull("Unexpected response from the server! Response does not contain an exception.", response.getException());
+            CommonResponse response = onboardingApi.executeClientOnboarding(getSessionId(), id, "sms", jsonString);
 
-            if (response.getException().getCode() == 10 && response.getException().getPrefix().equalsIgnoreCase("ONBRD")) {
+            // Expecting an sipgate authorization exception
+            assertNotNull("Unexpected response from the server! Response does not contain an exception.", response.getError());
+
+            if (response.getCode().equals("ONBRD-0010")) {
                 // scenario disabled
                 continue;
             }
-
-            assertTrue("Unexpected response from the server! Response does contain a wrong exception: " + response.getException().getMessage(), SMSExceptionCode.NOT_SENT.equals(response.getException()));
+            checkException(response.getCode(), SMSExceptionCode.NOT_SENT);
         }
     }
 
     @Test
     public void testExecute_missingNumber() throws Exception {
         String jsonString = "{\"sms\":\"\"}";
-        JSONObject body = new JSONObject(jsonString);
 
         String id = SCENARIOS[0];
-        ExecuteRequest req = new ExecuteRequest(id, "sms", body, false);
-        OnboardingTestResponse response = getAjaxClient().execute(req);
-        assertNotNull("Response is empty!", response);
+        CommonResponse response = onboardingApi.executeClientOnboarding(getSessionId(), id, "sms", jsonString);
+
         // Expecting an invalid number exception
-        assertNotNull("Unexpected response from the server! Response does not contain an exception.", response.getException());
-        assertTrue("Unexpected response from the server! Response does contain a wrong exception: " + response.getException().getMessage(), OnboardingExceptionCodes.INVALID_PHONE_NUMBER.equals(response.getException()));
+        checkException(response.getCode(), OnboardingExceptionCodes.INVALID_PHONE_NUMBER);
     }
 
     @Test
     public void testExecute_invalidNumber() throws Exception {
         String jsonString = "{\"sms\":\"1234\"}";
-        JSONObject body = new JSONObject(jsonString);
 
         String id = SCENARIOS[0];
-        ExecuteRequest req = new ExecuteRequest(id, "sms", body, false);
-        OnboardingTestResponse response = getAjaxClient().execute(req);
-        assertNotNull("Response is empty!", response);
+        CommonResponse response = onboardingApi.executeClientOnboarding(getSessionId(), id, "sms", jsonString);
+
         // Expecting an invalid number exception
-        assertNotNull("Unexpected response from the server! Response does not contain an exception.", response.getException());
-        assertTrue("Unexpected response from the server! Response does contain a wrong exception: " + response.getException().getMessage(), OnboardingExceptionCodes.INVALID_PHONE_NUMBER.equals(response.getException()));
+        checkException(response.getCode(), OnboardingExceptionCodes.INVALID_PHONE_NUMBER);
 
         jsonString = "{\"sms\":\"abcde\"}";
-        body = new JSONObject(jsonString);
-        req = new ExecuteRequest(id, "sms", body, false);
-        response = getAjaxClient().execute(req);
-        assertNotNull("Response is empty!", response);
+        response = onboardingApi.executeClientOnboarding(getSessionId(), id, "sms", jsonString);
         // Expecting an invalid number exception
-        assertNotNull("Unexpected response from the server! Response does not contain an exception.", response.getException());
-        assertTrue("Unexpected response from the server! Response does contain a wrong exception.", OnboardingExceptionCodes.INVALID_PHONE_NUMBER.equals(response.getException()));
+        checkException(response.getCode(), OnboardingExceptionCodes.INVALID_PHONE_NUMBER);
     }
 
     @Test
     public void testDownload() throws Exception {
         PListDownloadTestHelper helper = new PListDownloadTestHelper(PlistSMSTest.class.getName());
-        AJAXClient client = getAjaxClient();
+        AJAXClient client = getClient();
         String url = getURL(client.getValues().getUserId(), client.getValues().getContextId(), "mailsync", "apple.iphone");
         helper.testMailDownload(url, client.getProtocol()+"://"+client.getHostname());
 
@@ -147,6 +130,8 @@ public class PlistSMSTest extends AbstractPlistSMSTest {
         url = getURL(client.getValues().getUserId(), client.getValues().getContextId(), "davsync", "apple.iphone");
         helper.testDavDownload(url, client.getProtocol()+"://"+client.getHostname());
     }
+
+
 
     public String getURL(int userId, int contextId, String scenario, String device) throws NoSuchAlgorithmException, UnsupportedEncodingException {
         BaseEncoding encoder = BaseEncoding.base64().omitPadding();
@@ -199,5 +184,10 @@ public class PlistSMSTest extends AbstractPlistSMSTest {
         Map<String, String> map = new HashMap<String, String>();
         map.put("com.openexchange.sms.userlimit.enabled", String.valueOf(false));
         return map;
+    }
+
+    @Override
+    protected String getScope() {
+        return "user";
     }
 }

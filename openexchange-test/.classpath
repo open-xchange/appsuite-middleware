@@ -196,5 +196,6 @@
 	<classpathentry kind="lib" path="/org.apache.tika/lib/tika-core-1.18.jar" sourcepath="/org.apache.tika/lib/source/tika-core-1.18-sources.jar"/>
 	<classpathentry kind="lib" path="/org.apache.tika/lib/tika-parsers-1.18.jar" sourcepath="/org.apache.tika/lib/source/tika-parsers-1.18-sources.jar"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.http.client"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.sms.tools"/>
 	<classpathentry kind="output" path="build"/>
 </classpath>
