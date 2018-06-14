@@ -99,13 +99,21 @@ public class ContextManager {
      * Deletes all managed {@link Context}s
      */
     public void cleanUp() {
+        Map<Integer, Context> failed = new HashMap<>();
         for (Entry<Integer, Context> entry : registeredContexts.entrySet()) {
             try {
                 deleteContext(entry.getValue());
             } catch (Exception e) {
                 LOG.error("Context '{}' could not be deleted!", entry.getValue().getId());
+                failed.put(entry.getKey(), entry.getValue());
             }
         }
+        registeredContexts.clear();
+
+        if (failed.isEmpty()) {
+            return;
+        }
+        LOG.warn("The following contexts were not deleted: '{}'. Manual intervention might be required.", failed.toString());
     }
 
     /**
@@ -216,6 +224,7 @@ public class ContextManager {
     public void deleteContext(Context ctx) throws Exception {
         OXContextInterface contextInterface = (OXContextInterface) Naming.lookup(host + OXContextInterface.RMI_NAME);
         contextInterface.delete(ctx, masterCredentials);
+        registeredContexts.remove(ctx.getId());
     }
 
     /**
@@ -238,6 +247,18 @@ public class ContextManager {
     public void disableContext(Context context) throws Exception {
         OXContextInterface contextInterface = getContextInterface();
         contextInterface.disable(context, masterCredentials);
+    }
+
+    /**
+     * Checks whether the specified {@link Context} exists
+     * 
+     * @param context The {@link Context} to check for existence
+     * @return <code>true</code> if the context exists; <code>false</code> otherwise
+     * @throws Exception if an error is occurred
+     */
+    public boolean exists(Context context) throws Exception {
+        OXContextInterface contextInterface = getContextInterface();
+        return contextInterface.exists(context, masterCredentials);
     }
 
     /**
