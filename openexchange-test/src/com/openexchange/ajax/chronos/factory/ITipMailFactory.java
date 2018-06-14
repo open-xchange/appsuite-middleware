@@ -197,6 +197,7 @@ public class ITipMailFactory {
         sb.append("Content-Transfer-Encoding: quoted-printable");
         addNewLine(sb, 2);
         addHTML(sb);
+        addNewLine(sb, 2);
         setBoundary(sb);
         addNewLine(sb);
 
@@ -222,7 +223,7 @@ public class ITipMailFactory {
     private void addIcalAsAttachment(StringBuilder sb) {
         sb.append("------=_Part_10_470012375.1528446307462\n");
         sb.append("Content-Type: application/ics; charset=UTF-8; method=REQUEST;\n");
-        sb.append("name=invite.ics\n");
+        sb.append(" name=invite.ics\n");
         sb.append("Content-Transfer-Encoding: base64\n");
         sb.append("Content-Disposition: attachment; filename=invite.ics\n");
         addNewLine(sb);

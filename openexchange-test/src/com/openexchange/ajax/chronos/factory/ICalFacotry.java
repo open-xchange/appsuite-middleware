@@ -54,6 +54,7 @@ import java.util.Locale;
 import java.util.TimeZone;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
 import com.openexchange.testing.httpclient.models.Attendee;
 import com.openexchange.testing.httpclient.models.EventData;
 import com.openexchange.testing.httpclient.models.EventData.TranspEnum;
@@ -217,10 +218,10 @@ public class ICalFacotry {
         sb.append("BEGIN:DAYLIGHT");
         addNewLine(sb);
         long offset = TimeUnit.MILLISECONDS.toHours(timeZone.getRawOffset());
-        sb.append("TZOFFSETFROM:").append(offset);
-        addNewLine(sb);
-        sb.append("TZOFFSETTO:").append(offset + 1);
-        addNewLine(sb);
+        sb.append("TZOFFSETFROM:");
+        appendOffset(sb, offset);
+        sb.append("TZOFFSETTO:");
+        appendOffset(sb, offset + 1);
         sb.append("TZNAME:").append(timeZone.toZoneId());
         addNewLine(sb);
         // String dtstart = ???
@@ -235,15 +236,29 @@ public class ICalFacotry {
         addNewLine(sb);
     }
 
+    private void appendOffset(StringBuilder sb, long offset) {
+        if (offset < 0) {
+            sb.append("-");
+        } else {
+            sb.append("+");
+        }
+        if (Math.abs(offset) < 10) {
+            sb.append("0");
+        }
+        sb.append(offset);
+        sb.append("00");
+        addNewLine(sb);
+    }
+
     private void setStandard(StringBuilder sb, String tzid) {
         TimeZone timeZone = TimeZone.getTimeZone(tzid);
         sb.append("BEGIN:STANDARD");
         addNewLine(sb);
         long offset = TimeUnit.MILLISECONDS.toHours(timeZone.getRawOffset());
-        sb.append("TZOFFSETTO:").append(offset);
-        addNewLine(sb);
-        sb.append("TZOFFSETFROM:").append(offset + 1);
-        addNewLine(sb);
+        sb.append("TZOFFSETTO:");
+        appendOffset(sb, offset);
+        sb.append("TZOFFSETFROM:");
+        appendOffset(sb, offset + 1);
         //  sb.append("TZNAME:").append(timeZone.toZoneId());
         sb.append("TZNAME:").append("CET");
         addNewLine(sb);
@@ -271,7 +286,10 @@ public class ICalFacotry {
         sb.append("CLASS:").append(eventData.getPropertyClass());
         addNewLine(sb);
 
-        sb.append("CREATED:").append(eventData.getCreated());
+        sb.append("CREATED:");
+        nullTimestamp(sb, eventData.getCreated(), (Long created) -> {
+            eventData.setCreated(created);
+        });
         addNewLine(sb);
 
         sb.append("DESCRIPTION:").append(eventData.getDescription());
@@ -283,7 +301,10 @@ public class ICalFacotry {
         sb.append("DTSTART;TZID=").append(eventData.getStartDate().getTzid()).append(":").append(eventData.getStartDate().getValue());
         addNewLine(sb);
 
-        sb.append("LAST-MODIFIED:").append(eventData.getLastModified());
+        sb.append("LAST-MODIFIED:");
+        nullTimestamp(sb, eventData.getLastModified(), (Long mod) -> {
+            eventData.setLastModified(mod);
+        });
         addNewLine(sb);
 
         sb.append("LOCATION:").append(eventData.getLocation());
@@ -327,6 +348,14 @@ public class ICalFacotry {
             appendMailTo(sb, a.getEmail());
             addNewLine(sb);
         }
+    }
+
+    private void nullTimestamp(StringBuilder sb, Long created, Consumer<Long> f) {
+        if (null == created) {
+            created = Long.valueOf(System.currentTimeMillis());
+            f.accept(created);
+        }
+        sb.append(created);
     }
 
     private void appendMailTo(StringBuilder sb, String mail) {
