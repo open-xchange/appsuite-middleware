@@ -53,10 +53,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-import java.net.MalformedURLException;
 import java.rmi.Naming;
-import java.rmi.NotBoundException;
-import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -68,10 +65,7 @@ import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.dataobjects.Database;
 import com.openexchange.admin.rmi.dataobjects.Filestore;
 import com.openexchange.admin.rmi.dataobjects.MaintenanceReason;
-import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
-import com.openexchange.admin.rmi.exceptions.StorageException;
-import com.openexchange.admin.rmi.manager.ContextManager;
 
 /**
  * {@link ContextTest}
@@ -373,52 +367,4 @@ public class ContextTest extends AbstractTest {
         }
         assertTrue("context not found", foundctx);
     }
-
-    //////////////////////////// HELPERS ////////////////////////////
-
-    /**
-     * @deprecated Use {@link ContextManager} instead
-     */
-    public static Context[] searchContext(String pattern, String host, Credentials cred) throws MalformedURLException, RemoteException, NotBoundException, StorageException, InvalidCredentialsException, InvalidDataException {
-        OXContextInterface xres = (OXContextInterface) Naming.lookup(host + OXContextInterface.RMI_NAME);
-        return xres.list(pattern, cred);
-    }
-
-    public static int searchNextFreeContextID(int pos, Credentials cred) throws MalformedURLException, RemoteException, NotBoundException, StorageException, InvalidCredentialsException, InvalidDataException {
-        Context[] ctx = searchContext(String.valueOf(pos), getRMIHostUrl(), cred);
-        if (ctx.length == 0) {
-            return pos;
-        } else {
-            return -1;
-        }
-    }
-
-    public static Context getTestContextObject(int context_id, long quota_max_in_mb) {
-        Context ctx = getTestContextObject(context_id);
-        ctx.setMaxQuota(quota_max_in_mb);
-        ctx.setUserAttribute("com.openexchange.test", "flavor", "lemon");
-        ctx.setUserAttribute("com.openexchange.test", "texture", "squishy");
-        return ctx;
-    }
-
-    // Must be public static to override method
-    public static Context getTestContextObject(int context_id) {
-        Context ctx = new Context(context_id);
-        ctx.setName("Name-" + ctx.getId());
-        return ctx;
-    }
-
-    /**
-     * @deprecated Use {@link ContextManager} instead
-     */
-    public static int createNewContextID(Credentials cred) throws MalformedURLException, RemoteException, NotBoundException, StorageException, InvalidCredentialsException, InvalidDataException {
-        int pos = 5;
-        int ret = -1;
-        while (ret == -1) {
-            ret = searchNextFreeContextID(pos, cred);
-            pos = pos + 3;
-        }
-        return ret;
-    }
-
 }

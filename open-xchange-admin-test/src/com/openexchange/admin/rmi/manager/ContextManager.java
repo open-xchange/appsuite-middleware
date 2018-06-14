@@ -287,15 +287,13 @@ public class ContextManager {
         return contextInterface.getAdminId(context, masterCredentials);
     }
 
-    ////////////////////////////// HELPERS ///////////////////////////////
-
     /**
      * Searches and returns the next available free context identifier
      * 
      * @return The context identifier
      * @throws Exception if an error occurs
      */
-    private int getNextFreeContextId() throws Exception {
+    public int getNextFreeContextId() throws Exception {
         int pos = 5;
         int ret = -1;
         while (ret == -1) {
@@ -304,6 +302,8 @@ public class ContextManager {
         }
         return ret;
     }
+
+    ////////////////////////////// HELPERS ///////////////////////////////
 
     /**
      * Checks for the prerequisites when creating a context

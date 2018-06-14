@@ -49,9 +49,7 @@
 
 package com.openexchange.admin.rmi;
 
-import java.net.MalformedURLException;
 import java.rmi.Naming;
-import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import org.junit.After;
 import org.junit.Before;
@@ -86,11 +84,12 @@ public final class Bug27065Test extends AbstractTest {
     }
 
     @Before
-    public void setup() throws MalformedURLException, RemoteException, NotBoundException, StorageException, InvalidCredentialsException, InvalidDataException {
+    public void setup() throws Exception {
         superAdmin = getMasterAdminCredentials();
         url = getRMIHostUrl();
         contextIface = (OXContextInterface) Naming.lookup(url + OXContextInterface.RMI_NAME);
-        context = ContextTest.getTestContextObject(ContextTest.createNewContextID(superAdmin), 10l);
+        int cid = contextManager.getNextFreeContextId();
+        context = ContextFactory.createContext(cid, 10l);
         contextAdmin = UserTest.getTestUserObject("admin","secret", context);
     }
 
