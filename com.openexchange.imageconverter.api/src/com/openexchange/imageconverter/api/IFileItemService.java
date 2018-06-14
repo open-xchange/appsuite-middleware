@@ -2,6 +2,7 @@ package com.openexchange.imageconverter.api;
 
 import java.io.Closeable;
 import java.util.Properties;
+import com.openexchange.annotation.Nullable;
 import com.openexchange.osgi.annotation.SingletonService;
 
 /**
@@ -180,6 +181,16 @@ public interface IFileItemService {
      * @throws FileItemException
      */
     public String[] getSubGroups(final String groupId) throws FileItemException;
+
+    /**
+     * Getting all subgroup ids, satisfying the optionally given WHERE and/or LIMIT clauses
+     * The clauses are to be given as SQL expression without (!) the keywords WHERE and LIMIT
+
+     * @param groupId
+     * @return The array of subgroup ids
+     * @throws FileItemException
+     */
+    public String[] getSubGroupsBy(final String groupId, @Nullable final String whereClause, @Nullable final String limitClause) throws FileItemException;
 
     /**
      * Getting the number of distinct group ids.
