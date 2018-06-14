@@ -327,11 +327,15 @@ public final class UpdateExecutor {
     }
 
     private final void removeContexts() throws OXException {
+        int[] contextIds = determineContextIds();
+        ContextStorage.getInstance().invalidateContexts(contextIds);
+    }
+
+    private final int[] determineContextIds() throws OXException {
         DatabaseService databaseService = Database.getDatabaseService();
         Connection con = databaseService.getReadOnly();
         try {
-            int[] contextIds = databaseService.getContextsInSchema(con, poolId, schema);
-            ContextStorage.getInstance().invalidateContexts(contextIds);
+            return databaseService.getContextsInSchema(con, poolId, schema);
         } finally {
             databaseService.backReadOnly(con);
         }
