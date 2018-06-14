@@ -57,11 +57,13 @@ import static com.openexchange.chronos.provider.schedjoules.SchedJoulesFields.IT
 import static com.openexchange.chronos.provider.schedjoules.SchedJoulesFields.LOCALE;
 import static com.openexchange.chronos.provider.schedjoules.SchedJoulesFields.NAME;
 import static com.openexchange.chronos.provider.schedjoules.SchedJoulesFields.REFRESH_INTERVAL;
+import static com.openexchange.java.Autoboxing.B;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Collections;
 import java.util.EnumSet;
 import java.util.Locale;
+import java.util.Objects;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -216,7 +218,7 @@ public class BasicSchedJoulesCalendarProvider extends BasicCachingCalendarProvid
         }
         Boolean usedForSync = optPropertyValue(settings.getExtendedProperties(), USED_FOR_SYNC_LITERAL, Boolean.class);
         if (null != usedForSync && CachingCalendarUtils.canBeUsedForSync(PROVIDER_ID, session)) {
-            internalConfig.putSafe("usedForSync", usedForSync.booleanValue());
+            internalConfig.putSafe(USED_FOR_SYNC_LITERAL, usedForSync.booleanValue());
         }
         try {
             if (Strings.isNotEmpty(settings.getName())) {
@@ -255,14 +257,13 @@ public class BasicSchedJoulesCalendarProvider extends BasicCachingCalendarProvid
             internalConfig.putSafe(SchedJoulesFields.NAME, settings.getName());
             changed = true;
         }
-        Boolean usedForSyncValue = optPropertyValue(settings.getExtendedProperties(), USED_FOR_SYNC_LITERAL, Boolean.class);
-        if (null != usedForSyncValue) {
-            boolean usedForSync = usedForSyncValue.booleanValue();
-            if (false == internalConfig.has("usedForSync") || usedForSync != internalConfig.optBoolean("usedForSync", false)) {
-                if (usedForSync && false == CachingCalendarUtils.canBeUsedForSync(PROVIDER_ID, session)) {
+        Boolean usedForSync = optPropertyValue(settings.getExtendedProperties(), USED_FOR_SYNC_LITERAL, Boolean.class);
+        if (usedForSync != null) {
+            if (!internalConfig.has(USED_FOR_SYNC_LITERAL) || !Objects.equals(usedForSync, B(internalConfig.optBoolean(USED_FOR_SYNC_LITERAL)))) {
+                if (usedForSync.booleanValue() && false == CachingCalendarUtils.canBeUsedForSync(PROVIDER_ID, session)) {
                     throw CalendarExceptionCodes.INVALID_CONFIGURATION.create(USED_FOR_SYNC_LITERAL);
                 }
-                internalConfig.putSafe("usedForSync", usedForSync);
+                internalConfig.putSafe(USED_FOR_SYNC_LITERAL, usedForSync);
                 changed = true;
             }
         }
