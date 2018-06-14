@@ -4,6 +4,8 @@
     tags: 
       - Clientonboarding
     summary: Performs a certain client on-boarding action for a given device and scenario; e.g. download a profile or send an E-Mail/SMS
+    consumes:
+      - application/json
     parameters:
       - $ref: "#/parameters/gblQueryParamSession"
       - in: query
@@ -22,6 +24,11 @@
           - display or
           - link
         required: true
+      - in: body
+        name: body
+        description: An optional JSON object containing additional data for the action.
+        schema:
+          type: string
     responses:  
       200:
         description: |
