@@ -55,9 +55,11 @@ import java.util.Collections;
 import java.util.List;
 import javax.mail.MessagingException;
 import javax.mail.internet.AddressException;
+import org.apache.commons.io.output.FileWriterWithEncoding;
 import com.openexchange.ajax.chronos.AbstractChronosTest;
 import com.openexchange.ajax.chronos.factory.AttendeeFactory;
-import com.openexchange.configuration.AJAXConfig;
+import com.openexchange.ajax.chronos.factory.ICalFacotry;
+import com.openexchange.ajax.chronos.factory.ITipMailFactory;
 import com.openexchange.test.pool.TestContext;
 import com.openexchange.test.pool.TestUser;
 import com.openexchange.testing.httpclient.invoker.ApiClient;
@@ -200,14 +202,11 @@ public abstract class AbstractITipTest extends AbstractChronosTest {
      * @throws AddressException In case mail can't be build
      */
     protected MailDestinationData createMailInInbox(List<EventData> data) throws ApiException, IOException, AddressException, MessagingException {
-        //        File tmpFile = File.createTempFile("test", ".eml");
-        //        File tmpFile = new File(AJAXConfig.getProperty(AJAXConfig.Property.TEST_DIR) + "itip/", "test.eml");
-        //        String eml = new ITipMailFactory(testUser2, testUser, new ICalFacotry(data).build()).build();
-        //        FileWriter writer = new FileWriter(tmpFile);
-        //        writer.write(eml);
-        //        writer.close();
-        //        tmpFile.createNewFile();
-        File tmpFile = new File(AJAXConfig.getProperty(AJAXConfig.Property.TEST_DIR) + "itip/", "New_appointment__Subject.eml");
+        File tmpFile = File.createTempFile("test", ".eml");
+        String eml = new ITipMailFactory(testUser2, testUser, new ICalFacotry(data).build()).build();
+        FileWriterWithEncoding writer = new FileWriterWithEncoding(tmpFile, "ASCII");
+        writer.write(eml);
+        writer.close();
 
         MailApi mailApi = new MailApi(getApiClient());
         MailImportResponse importMail = mailApi.importMail(session, FOLDER_MACHINE_READABLE, tmpFile, null, Boolean.TRUE);
