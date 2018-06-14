@@ -50,8 +50,6 @@
 package com.openexchange.admin.rmi.manager;
 
 import java.net.URI;
-import java.rmi.Naming;
-import java.rmi.Remote;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -74,25 +72,21 @@ import com.openexchange.admin.rmi.dataobjects.Server;
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @since v7.10.1
  */
-public class ContextManager {
+public class ContextManager extends AbstractManager {
 
     private static final Logger LOG = LoggerFactory.getLogger(ContextManager.class);
 
     /** Default max quota for a {@link Context}, 5GB */
     private static final long DEFAULT_MAX_QUOTA = 5000;
 
-    private String host;
     private final Map<Integer, Context> registeredContexts;
-    private final Credentials masterCredentials;
 
     /**
      * Initialises a new {@link ContextManager}.
      */
     public ContextManager(String host, Credentials masterCredentials) {
-        super();
-        this.masterCredentials = masterCredentials;
+        super(host, masterCredentials);
         registeredContexts = new HashMap<>();
-        this.host = host;
     }
 
     /**
@@ -164,7 +158,7 @@ public class ContextManager {
             context.setId(new Integer(getNextFreeContextId()));
         }
         OXContextInterface contextInterface = getContextInterface();
-        contextInterface.create(context, UserTest.getTestUserObject(contextAdminCredentials.getLogin(), contextAdminCredentials.getPassword(), context), masterCredentials);
+        contextInterface.create(context, UserTest.getTestUserObject(contextAdminCredentials.getLogin(), contextAdminCredentials.getPassword(), context), getMasterCredentials());
         registeredContexts.put(context.getId(), context);
         return context;
     }
@@ -177,7 +171,7 @@ public class ContextManager {
      */
     public void changeContext(Context context) throws Exception {
         OXContextInterface contextInterface = getContextInterface();
-        contextInterface.change(context, masterCredentials);
+        contextInterface.change(context, getMasterCredentials());
     }
 
     /**
@@ -189,7 +183,7 @@ public class ContextManager {
      */
     public Context getData(Context context) throws Exception {
         OXContextInterface contextInterface = getContextInterface();
-        return contextInterface.getData(context, masterCredentials);
+        return contextInterface.getData(context, getMasterCredentials());
     }
 
     /**
@@ -201,7 +195,7 @@ public class ContextManager {
      */
     public Context[] searchContext(String pattern) throws Exception {
         OXContextInterface xres = getContextInterface();
-        return xres.list(pattern, masterCredentials);
+        return xres.list(pattern, getMasterCredentials());
     }
 
     /**
@@ -213,7 +207,7 @@ public class ContextManager {
      */
     public Context[] searchContext(Database database) throws Exception {
         OXContextInterface xres = getContextInterface();
-        return xres.listByDatabase(database, masterCredentials);
+        return xres.listByDatabase(database, getMasterCredentials());
     }
 
     /**
@@ -225,19 +219,19 @@ public class ContextManager {
      */
     public Context[] searchContext(Filestore filestore) throws Exception {
         OXContextInterface xres = getContextInterface();
-        return xres.listByFilestore(filestore, masterCredentials);
+        return xres.listByFilestore(filestore, getMasterCredentials());
     }
 
     /**
      * Delete the specified {@link Context}
      * 
      * @param ctx The {@link Context} to delete
-     * @param masterCredentials The master {@link Credentials}
+     * @param getMasterCredentials() The master {@link Credentials}
      * @throws Exception if the context cannot be deleted or any other error occurs
      */
     public void deleteContext(Context ctx) throws Exception {
-        OXContextInterface contextInterface = (OXContextInterface) Naming.lookup(host + OXContextInterface.RMI_NAME);
-        contextInterface.delete(ctx, masterCredentials);
+        OXContextInterface contextInterface = getContextInterface();
+        contextInterface.delete(ctx, getMasterCredentials());
         registeredContexts.remove(ctx.getId());
     }
 
@@ -249,7 +243,7 @@ public class ContextManager {
      */
     public void enableContext(Context context) throws Exception {
         OXContextInterface contextInterface = getContextInterface();
-        contextInterface.enable(context, masterCredentials);
+        contextInterface.enable(context, getMasterCredentials());
     }
 
     /**
@@ -260,7 +254,7 @@ public class ContextManager {
      */
     public void disableContext(Context context) throws Exception {
         OXContextInterface contextInterface = getContextInterface();
-        contextInterface.disable(context, masterCredentials);
+        contextInterface.disable(context, getMasterCredentials());
     }
 
     /**
@@ -272,7 +266,7 @@ public class ContextManager {
      */
     public boolean exists(Context context) throws Exception {
         OXContextInterface contextInterface = getContextInterface();
-        return contextInterface.exists(context, masterCredentials);
+        return contextInterface.exists(context, getMasterCredentials());
     }
 
     /**
@@ -284,7 +278,7 @@ public class ContextManager {
      */
     public int getAdminId(Context context) throws Exception {
         OXContextInterface contextInterface = getContextInterface();
-        return contextInterface.getAdminId(context, masterCredentials);
+        return contextInterface.getAdminId(context, getMasterCredentials());
     }
 
     /**
@@ -322,12 +316,12 @@ public class ContextManager {
      */
     private void registerServer() throws Exception {
         OXUtilInterface utilInterface = getUtilInterface();
-        if (utilInterface.listServer("local", masterCredentials).length == 1) {
+        if (utilInterface.listServer("local", getMasterCredentials()).length == 1) {
             return;
         }
         Server srv = new Server();
         srv.setName("local");
-        utilInterface.registerServer(srv, masterCredentials);
+        utilInterface.registerServer(srv, getMasterCredentials());
     }
 
     /**
@@ -337,11 +331,11 @@ public class ContextManager {
      */
     private void registerDatabase() throws Exception {
         OXUtilInterface utilInterface = getUtilInterface();
-        if (utilInterface.listDatabase("test-ox-db", masterCredentials).length != 0) {
+        if (utilInterface.listDatabase("test-ox-db", getMasterCredentials()).length != 0) {
             return;
         }
         Database database = UtilTest.getTestDatabaseObject("localhost", "test-ox-db");
-        utilInterface.registerDatabase(database, Boolean.FALSE, Integer.valueOf(0), masterCredentials);
+        utilInterface.registerDatabase(database, Boolean.FALSE, Integer.valueOf(0), getMasterCredentials());
     }
 
     /**
@@ -351,7 +345,7 @@ public class ContextManager {
      */
     private void registerFilestore() throws Exception {
         OXUtilInterface utilInterface = getUtilInterface();
-        if (utilInterface.listFilestore("*", masterCredentials).length != 0) {
+        if (utilInterface.listFilestore("*", getMasterCredentials()).length != 0) {
             return;
         }
         Filestore filestore = new Filestore();
@@ -362,7 +356,7 @@ public class ContextManager {
         filestore.setUrl(uri.toString());
 
         new java.io.File(uri.getPath()).mkdir();
-        utilInterface.registerFilestore(filestore, masterCredentials);
+        utilInterface.registerFilestore(filestore, getMasterCredentials());
     }
 
     //////////////////////////// RMI LOOK-UPS //////////////////////////////
@@ -385,16 +379,5 @@ public class ContextManager {
      */
     private OXUtilInterface getUtilInterface() throws Exception {
         return (OXUtilInterface) getRemoteInterface(OXUtilInterface.RMI_NAME, OXUtilInterface.class);
-    }
-
-    /**
-     * Returns the {@link Remote} interface with the specified rmi name
-     * 
-     * @param rmiName The rmi name of the {@link Remote} interface
-     * @return The {@link Remote} interface
-     * @throws Exception if an error is occurred during RMI look-up
-     */
-    private <T extends Remote> T getRemoteInterface(String rmiName, Class<T> clazz) throws Exception {
-        return clazz.cast(Naming.lookup(host + rmiName));
     }
 }
