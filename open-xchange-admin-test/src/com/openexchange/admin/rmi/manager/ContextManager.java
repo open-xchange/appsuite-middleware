@@ -51,6 +51,7 @@ package com.openexchange.admin.rmi.manager;
 
 import java.net.URI;
 import java.rmi.Naming;
+import java.rmi.Remote;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -130,8 +131,7 @@ public class ContextManager {
     }
 
     /**
-     * Creates a new {@link Context}. Goes through the process and registers a server, a filestore and/or
-     * a database if any of those are absent
+     * Creates a new {@link Context}.
      * 
      * @param contextId The context identifier
      * @param contextAdminCredentials The context admin credentials
@@ -139,34 +139,20 @@ public class ContextManager {
      * @throws Exception if the context cannot be created or any other error is occurred
      */
     public Context createContext(int contextId, long maxQuota, Credentials contextAdminCredentials) throws Exception {
-        OXUtilInterface oxu = (OXUtilInterface) Naming.lookup(host + OXUtilInterface.RMI_NAME);
+        return createContext(ContextFactory.createContext(contextId, maxQuota), contextAdminCredentials);
+    }
 
-        // Register server if none exists
-        if (oxu.listServer("local", masterCredentials).length != 1) {
-            Server srv = new Server();
-            srv.setName("local");
-            oxu.registerServer(srv, masterCredentials);
-        }
-
-        // Register a filestore if none exists
-        if (oxu.listFilestore("*", masterCredentials).length == 0) {
-            Filestore filestore = new Filestore();
-            filestore.setMaxContexts(10000);
-            filestore.setSize(8796093022208L);
-            URI uri = new URI("file:/tmp/disc_" + System.currentTimeMillis());
-            filestore.setUrl(uri.toString());
-            new java.io.File(uri.getPath()).mkdir();
-            oxu.registerFilestore(filestore, masterCredentials);
-        }
-
-        // Register a database if none exists
-        if (oxu.listDatabase("test-ox-db", masterCredentials).length == 0) {
-            Database database = UtilTest.getTestDatabaseObject("localhost", "test-ox-db");
-            oxu.registerDatabase(database, Boolean.FALSE, Integer.valueOf(0), masterCredentials);
-        }
-
+    /**
+     * Creates a new {@link Context}.
+     * 
+     * @param context The {@link Context} to create
+     * @param contextAdminCredentials The context admin credentials
+     * @return The created context
+     * @throws Exception if the context cannot be created or any other error is occurred
+     */
+    public Context createContext(Context context, Credentials contextAdminCredentials) throws Exception {
+        prerequisites();
         OXContextInterface contextInterface = getContextInterface();
-        Context context = ContextFactory.createContext(contextId, maxQuota);
         contextInterface.create(context, UserTest.getTestUserObject(contextAdminCredentials.getLogin(), contextAdminCredentials.getPassword(), context), masterCredentials);
         registeredContexts.put(context.getId(), context);
         return context;
@@ -285,12 +271,95 @@ public class ContextManager {
     }
 
     /**
+     * Checks for the prerequisites when creating a context
+     */
+    private void prerequisites() throws Exception {
+        // TODO: perform checks during initialisation instead on performing them on every create operation
+        registerServer();
+        registerFilestore();
+        registerDatabase();
+    }
+
+    /**
+     * Registers a server if none exists
+     * 
+     * @throws Exception if an error is occurred during registration
+     */
+    private void registerServer() throws Exception {
+        OXUtilInterface utilInterface = getUtilInterface();
+        if (utilInterface.listServer("local", masterCredentials).length == 1) {
+            return;
+        }
+        Server srv = new Server();
+        srv.setName("local");
+        utilInterface.registerServer(srv, masterCredentials);
+    }
+
+    /**
+     * Registers a database if none exists
+     * 
+     * @throws Exception if an error is occurred during registration
+     */
+    private void registerDatabase() throws Exception {
+        OXUtilInterface utilInterface = getUtilInterface();
+        if (utilInterface.listDatabase("test-ox-db", masterCredentials).length != 0) {
+            return;
+        }
+        Database database = UtilTest.getTestDatabaseObject("localhost", "test-ox-db");
+        utilInterface.registerDatabase(database, Boolean.FALSE, Integer.valueOf(0), masterCredentials);
+    }
+
+    /**
+     * Registers a filestore if none exists
+     * 
+     * @throws Exception if an error is occurred during registration
+     */
+    private void registerFilestore() throws Exception {
+        OXUtilInterface utilInterface = getUtilInterface();
+        if (utilInterface.listFilestore("*", masterCredentials).length != 0) {
+            return;
+        }
+        Filestore filestore = new Filestore();
+        filestore.setMaxContexts(10000);
+        filestore.setSize(8796093022208L);
+
+        URI uri = new URI("file:/tmp/disc_" + System.currentTimeMillis());
+        filestore.setUrl(uri.toString());
+
+        new java.io.File(uri.getPath()).mkdir();
+        utilInterface.registerFilestore(filestore, masterCredentials);
+    }
+
+    //////////////////////////// RMI LOOK-UPS //////////////////////////////
+
+    /**
      * Returns the {@link OXContextInterface}
      * 
      * @return The {@link OXContextInterface}
      * @throws Exception if an error is occurred during RMI look-up
      */
     private OXContextInterface getContextInterface() throws Exception {
-        return (OXContextInterface) Naming.lookup(host + OXContextInterface.RMI_NAME);
+        return (OXContextInterface) getRemoteInterface(OXContextInterface.RMI_NAME, OXContextInterface.class);
+    }
+
+    /**
+     * Returns the {@link OXUtilInterface}
+     * 
+     * @return The {@link OXUtilInterface}
+     * @throws Exception if an error is occurred during RMI look-up
+     */
+    private OXUtilInterface getUtilInterface() throws Exception {
+        return (OXUtilInterface) getRemoteInterface(OXUtilInterface.RMI_NAME, OXUtilInterface.class);
+    }
+
+    /**
+     * Returns the {@link Remote} interface with the specified rmi name
+     * 
+     * @param rmiName The rmi name of the {@link Remote} interface
+     * @return The {@link Remote} interface
+     * @throws Exception if an error is occurred during RMI look-up
+     */
+    private <T extends Remote> T getRemoteInterface(String rmiName, Class<T> clazz) throws Exception {
+        return clazz.cast(Naming.lookup(host + rmiName));
     }
 }
