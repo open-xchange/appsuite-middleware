@@ -77,6 +77,9 @@ public class ContextManager {
 
     private static final Logger LOG = LoggerFactory.getLogger(ContextManager.class);
 
+    /** Default max quota for a {@link Context}, 5GB */
+    private static final long DEFAULT_MAX_QUOTA = 5000;
+
     private String host;
     private final Map<Integer, Context> registeredContexts;
     private final Credentials masterCredentials;
@@ -105,14 +108,25 @@ public class ContextManager {
     }
 
     /**
-     * Creates a new {@link Context}
+     * Creates a new {@link Context} with default max quota
      * 
-     * @param contextAdminCredentials
-     * @return
+     * @param contextAdminCredentials The context admin credentials
+     * @return The newly created {@link Context}
      * @throws Exception
      */
     public Context createContext(Credentials contextAdminCredentials) throws Exception {
-        return createContext(getNextFreeContextId(), contextAdminCredentials);
+        return createContext(contextAdminCredentials, DEFAULT_MAX_QUOTA);
+    }
+
+    /**
+     * Creates a new {@link Context}
+     * 
+     * @param contextAdminCredentials The context admin credentials
+     * @return The newly created {@link Context}
+     * @throws Exception if the context cannot be created or any other error is occurred
+     */
+    public Context createContext(Credentials contextAdminCredentials, long maxQuota) throws Exception {
+        return createContext(getNextFreeContextId(), maxQuota, contextAdminCredentials);
     }
 
     /**
@@ -124,7 +138,7 @@ public class ContextManager {
      * @return The created context
      * @throws Exception if the context cannot be created or any other error is occurred
      */
-    public Context createContext(int contextId, Credentials contextAdminCredentials) throws Exception {
+    public Context createContext(int contextId, long maxQuota, Credentials contextAdminCredentials) throws Exception {
         OXUtilInterface oxu = (OXUtilInterface) Naming.lookup(host + OXUtilInterface.RMI_NAME);
 
         // Register server if none exists
@@ -152,9 +166,22 @@ public class ContextManager {
         }
 
         OXContextInterface contextInterface = getContextInterface();
-        Context context = ContextFactory.createContext(contextId);
+        Context context = ContextFactory.createContext(contextId, maxQuota);
         contextInterface.create(context, UserTest.getTestUserObject(contextAdminCredentials.getLogin(), contextAdminCredentials.getPassword(), context), masterCredentials);
+        registeredContexts.put(context.getId(), context);
         return context;
+    }
+
+    /**
+     * Loads the data for the specified {@link Context}
+     * 
+     * @param context The context for which the data should be loaded
+     * @return The {@link Context} with the loaded data
+     * @throws Exception if an error is occurred
+     */
+    public Context getData(Context context) throws Exception {
+        OXContextInterface contextInterface = getContextInterface();
+        return contextInterface.getData(context, masterCredentials);
     }
 
     /**
@@ -225,6 +252,18 @@ public class ContextManager {
     public void disableContext(Context context) throws Exception {
         OXContextInterface contextInterface = getContextInterface();
         contextInterface.disable(context, masterCredentials);
+    }
+
+    /**
+     * Retrieves the context admin identifier for the specified {@link Context}
+     * 
+     * @param context The {@link Context} for which to retrieve the admin identifier
+     * @return The context admin identifier
+     * @throws Exception if an error is occurred
+     */
+    public int getAdminId(Context context) throws Exception {
+        OXContextInterface contextInterface = getContextInterface();
+        return contextInterface.getAdminId(context, masterCredentials);
     }
 
     ////////////////////////////// HELPERS ///////////////////////////////
