@@ -57,19 +57,39 @@ import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.configuration.AJAXConfig.Property;
 
 /**
+ * {@link AbstractTest}
  *
  * @author cutmasta
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 public abstract class AbstractTest {
 
     protected static String TEST_DOMAIN = "example.org";
     protected static String change_suffix = "-changed";
 
+    /**
+     * Initialises a new {@link AbstractTest}.
+     */
+    public AbstractTest() {
+        super();
+    }
+
+    /**
+     * Initialises the test configuration. Inheriting classes that override this method
+     * must invoke it first.
+     * 
+     * @throws Exception if an error occurs during initialisation of the configuration
+     */
     @Before
     public void setUp() throws Exception {
         AJAXConfig.init();
     }
 
+    /**
+     * Returns the RMI host URL
+     * 
+     * @return the RMI host URL
+     */
     protected static String getRMIHostUrl() {
         String host = getRMIHost();
 
@@ -77,11 +97,17 @@ public abstract class AbstractTest {
             host = "rmi://" + host;
         }
         if (!host.endsWith("/")) {
-            host = host + "/";
+            host += "/";
         }
         return host;
     }
 
+    /**
+     * Returns the RMI host name. It first looks up the <code>rmi_test_host</code>
+     * system property and then the {@link Property#RMI_HOST} via the {@link AJAXConfig}
+     * 
+     * @return The RMI host name.
+     */
     protected static String getRMIHost() {
         String host = "localhost";
 
@@ -94,9 +120,33 @@ public abstract class AbstractTest {
         return host;
     }
 
-    public static Credentials DummyCredentials() {
-        return new Credentials("oxadmin", "secret");
+    /**
+     * Returns the master <code>oxadminmaster</code> {@link Credentials}.
+     * Looks up the password through the system property <code>rmi_test_masterpw</code>
+     * i
+     * 
+     * @return The <code>oxadminmaster</code> {@link Credentials}
+     */
+    public static Credentials getMasterAdminCredentials() {
+        String mpw = "secret";
+        if (System.getProperty("rmi_test_masterpw") != null) {
+            mpw = System.getProperty("rmi_test_masterpw");
+        }
+        return new Credentials("oxadminmaster", mpw);
     }
+
+    /**
+     * Returns the context admin's {@link Credentials}
+     * 
+     * @return the context admin's {@link Credentials}
+     */
+    public static Credentials getContextAdminCredentials() {
+        String oxadmin = AJAXConfig.getProperty(Property.OXADMIN, "oxadmin");
+        String contextPassword = AJAXConfig.getProperty(Property.PASSWORD, "secret");
+        return new Credentials(oxadmin, contextPassword);
+    }
+
+    //TODO: reference a created context and not some hard-coded id.... 
 
     // The throwing of the exception is necessary to be able to let methods which override
     // this one throw exceptions. So don't remove this
@@ -120,11 +170,4 @@ public abstract class AbstractTest {
         return address.replaceFirst("@", changed + "@");
     }
 
-    public static Credentials DummyMasterCredentials() {
-        String mpw = "secret";
-        if (System.getProperty("rmi_test_masterpw") != null) {
-            mpw = System.getProperty("rmi_test_masterpw");
-        }
-        return new Credentials("oxadminmaster", mpw);
-    }
 }

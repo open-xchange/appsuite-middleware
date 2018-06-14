@@ -88,7 +88,7 @@ public class OXResellerUserTest extends OXResellerAbstractTest {
 
     @Test
     public void testCreateTooManyOverallUser() throws MalformedURLException, RemoteException, NotBoundException, InvalidDataException, StorageException, InvalidCredentialsException, OXResellerException, ContextExistsException, NoSuchContextException, DatabaseUpdateException {
-        final Credentials creds = DummyMasterCredentials();
+        final Credentials creds = getMasterAdminCredentials();
 
         ResellerAdmin adm = RandomAdmin();
         adm.setRestrictions(new Restriction[] { MaxOverallUserRestriction(6) });
@@ -121,7 +121,7 @@ public class OXResellerUserTest extends OXResellerAbstractTest {
                 }
             }
         } finally {
-            oxresell.delete(adm, DummyMasterCredentials());
+            oxresell.delete(adm, getMasterAdminCredentials());
         }
     }
 
@@ -130,7 +130,7 @@ public class OXResellerUserTest extends OXResellerAbstractTest {
         ResellerAdmin adm = RandomAdmin();
         final Credentials creds = ResellerRandomCredentials(adm.getName());
 
-        oxresell.create(adm, DummyMasterCredentials());
+        oxresell.create(adm, getMasterAdminCredentials());
         try {
             Context ctx = createContext(creds);
             try {
@@ -161,7 +161,7 @@ public class OXResellerUserTest extends OXResellerAbstractTest {
                 deleteContext(ctx, creds);
             }
         } finally {
-            oxresell.delete(adm, DummyMasterCredentials());
+            oxresell.delete(adm, getMasterAdminCredentials());
         }
     }
 
@@ -174,7 +174,7 @@ public class OXResellerUserTest extends OXResellerAbstractTest {
         ResellerAdmin adm = RandomAdmin();
         final Credentials creds = ResellerRandomCredentials(adm.getName());
 
-        oxresell.create(adm, DummyMasterCredentials());
+        oxresell.create(adm, getMasterAdminCredentials());
         try {
             Context ctx = createContext(creds);
             try {
@@ -243,7 +243,7 @@ public class OXResellerUserTest extends OXResellerAbstractTest {
                 deleteContext(ctx, creds);
             }
         } finally {
-            oxresell.delete(adm, DummyMasterCredentials());
+            oxresell.delete(adm, getMasterAdminCredentials());
         }
     }
 }

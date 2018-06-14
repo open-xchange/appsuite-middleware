@@ -53,7 +53,6 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
 
-
 /**
  * RMI tests for core admin rmi
  *
@@ -62,6 +61,7 @@ import org.junit.runners.Suite.SuiteClasses;
  */
 @RunWith(Suite.class)
 @SuiteClasses({
+    //@formatter:off
     AdditionalRMITests.class,
     Bug16865Test.class,
     Bug19379Test.class,
@@ -73,6 +73,7 @@ import org.junit.runners.Suite.SuiteClasses;
     UserTest.class,
     UtilTest.class,
     UtilDatabaseTest.class
+    //@formatter:on
 })
 public class AdminRmiTestSuite {
 

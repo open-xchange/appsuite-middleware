@@ -79,7 +79,7 @@ import com.openexchange.admin.user.copy.rmi.TestTool;
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  */
 public class AdditionalRMITests extends AbstractRMITest {
-
+    
     public String myUserName = "thorben.betten";
 
     public String myDisplayName = "Thorben Betten";
@@ -97,8 +97,7 @@ public class AdditionalRMITests extends AbstractRMITest {
     @Before
     public void setUp() throws Exception {
         super.setUp();
-
-        admin = newUser("oxadmin", "secret", "Admin User", "Admin", "User", "oxadmin@example.com");
+        admin = newUser("oxadmin", "q1w2e3r4", "Admin User", "Admin", "User", "oxadmin@example.com");
         ci = getContextInterface();
         ui = getUserInterface();
 
@@ -113,14 +112,14 @@ public class AdditionalRMITests extends AbstractRMITest {
         user.setImapLogin("oxuser");
         user.setSmtpServer("example.com");
 
-        user = ui.create(context, user, getCredentials());
+        user = ui.create(context, user, getContextAdminCredentials());
     }
 
     @After
     public void tearDown() throws Exception {
         try {
             if (ui != null && context != null) {
-                ui.delete(context, user, null, getCredentials());
+                ui.delete(context, user, null, getContextAdminCredentials());
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -184,7 +183,7 @@ public class AdditionalRMITests extends AbstractRMITest {
      */
      @Test
      public void testGetAllUsers() throws Exception {
-        final Credentials credentials = DummyCredentials();
+        final Credentials credentials = getContextAdminCredentials();
         User[] allUsers = ui.listAll(context, credentials);// required line for test
         User[] queriedUsers = ui.getData(context, allUsers, credentials);// required line for test
         assertIDsAreEqual(allUsers, queriedUsers);
@@ -407,7 +406,7 @@ public class AdditionalRMITests extends AbstractRMITest {
 
      @Test
      public void testGetUserAccessModules() throws Exception {
-        final Credentials credentials = DummyCredentials();
+        final Credentials credentials = getContextAdminCredentials();
 
         User knownUser = new User();
         knownUser.setName(this.myUserName);
@@ -449,7 +448,7 @@ public class AdditionalRMITests extends AbstractRMITest {
 
      @Test
      public void testUpdateModuleAccess() throws Exception {
-        final Credentials credentials = DummyCredentials();
+        final Credentials credentials = getContextAdminCredentials();
 
         User knownUser = new User();
         knownUser.setName("oxadmin");

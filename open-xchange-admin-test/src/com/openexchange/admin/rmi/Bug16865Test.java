@@ -65,7 +65,7 @@ public final class Bug16865Test extends AbstractTest {
 
      @Test
      public void testDefaultInitial() throws Throwable {
-        Credentials cred = ContextTest.DummyMasterCredentials();
+        Credentials cred = ContextTest.getMasterAdminCredentials();
         String host = AbstractRMITest.getRMIHostUrl();
         OXUtilInterface util = (OXUtilInterface) Naming.lookup(host + OXUtilInterface.RMI_NAME);
         Database db = new Database();

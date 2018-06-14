@@ -87,7 +87,7 @@ public class GroupTest extends UserTest {
     public void testCreateGroup() throws Exception {
         final int context_id = getContextID();
         final Context ctx = new Context(context_id);
-        final Credentials cred = DummyCredentials();
+        final Credentials cred = getContextAdminCredentials();
         final int id = createGroup(ctx, getTestGroupObject(cred), getRMIHostUrl(), cred).getId();
         assertTrue("group id > 0 expected", id > 0);
     }
@@ -96,7 +96,7 @@ public class GroupTest extends UserTest {
     public void testSearchGroup() throws Exception {
         final int context_id = getContextID();
         final Context ctx = new Context(context_id);
-        final Credentials cred = DummyCredentials();
+        final Credentials cred = getContextAdminCredentials();
         final String hosturl = getRMIHostUrl();
         String grpname = VALID_CHAR_TESTGROUP + System.currentTimeMillis();
         createGroup(ctx, getTestGroupObject(grpname, ctx, cred), hosturl, cred);
@@ -108,7 +108,7 @@ public class GroupTest extends UserTest {
     public void testDeleteGroup() throws Exception {
         final int context_id = getContextID();
         final Context ctx = new Context(context_id);
-        final Credentials cred = DummyCredentials();
+        final Credentials cred = getContextAdminCredentials();
         final String hosturl = getRMIHostUrl();
         final Group grp = createGroup(ctx, getTestGroupObject(VALID_CHAR_TESTGROUP + System.currentTimeMillis(), ctx, cred), hosturl, cred);
         deleteGroup(ctx, grp, hosturl, cred);
@@ -128,7 +128,7 @@ public class GroupTest extends UserTest {
     public void testCreateDeleteCreate() throws Exception {
         final int context_id = getContextID();
         final Context ctx = new Context(context_id);
-        final Credentials cred = DummyCredentials();
+        final Credentials cred = getContextAdminCredentials();
         final String hosturl = getRMIHostUrl();
         Group tmp = getTestGroupObject(VALID_CHAR_TESTGROUP + System.currentTimeMillis(), ctx, cred);
         final Group grp = createGroup(ctx, tmp, hosturl, cred);
@@ -155,7 +155,7 @@ public class GroupTest extends UserTest {
 
         final int context_id = getContextID();
         final Context ctx = new Context(context_id);
-        final Credentials cred = DummyCredentials();
+        final Credentials cred = getContextAdminCredentials();
         final String hosturl = getRMIHostUrl();
         final Group grp = createGroup(ctx, getTestGroupObject(VALID_CHAR_TESTGROUP + System.currentTimeMillis(), ctx, cred), hosturl, cred);
 
@@ -181,7 +181,7 @@ public class GroupTest extends UserTest {
 
         final int context_id = getContextID();
         final Context ctx = new Context(context_id);
-        final Credentials cred = DummyCredentials();
+        final Credentials cred = getContextAdminCredentials();
         final String hosturl = getRMIHostUrl();
         final Group grp = createGroup(ctx, getTestGroupObject(VALID_CHAR_TESTGROUP + System.currentTimeMillis(), ctx, cred), hosturl, cred);
 
@@ -204,7 +204,7 @@ public class GroupTest extends UserTest {
 
         final int context_id = getContextID();
         final Context ctx = new Context(context_id);
-        final Credentials cred = DummyCredentials();
+        final Credentials cred = getContextAdminCredentials();
         final Group addgroup = getTestGroupObject(cred);
         final String hosturl = getRMIHostUrl();
         final Group createdgroup = createGroup(ctx, addgroup, hosturl, cred);
@@ -224,7 +224,7 @@ public class GroupTest extends UserTest {
 
         final int context_id = getContextID();
         final Context ctx = new Context(context_id);
-        final Credentials cred = DummyCredentials();
+        final Credentials cred = getContextAdminCredentials();
         final Group addgroup = getTestGroupObject(cred);
         final String hosturl = getRMIHostUrl();
         final Group createdgroup = createGroup(ctx, addgroup, hosturl, cred);
@@ -246,7 +246,7 @@ public class GroupTest extends UserTest {
 
         final int context_id = getContextID();
         final Context ctx = new Context(context_id);
-        final Credentials cred = DummyCredentials();
+        final Credentials cred = getContextAdminCredentials();
         final Group addgroup = getTestGroupObject(cred);
         final String hosturl = getRMIHostUrl();
         final Group createdgroup = createGroup(ctx, addgroup, hosturl, cred);
@@ -266,7 +266,7 @@ public class GroupTest extends UserTest {
     public void testAddMemberToGroup() throws Exception {
         final int context_id = getContextID();
         final Context ctx = new Context(context_id);
-        final Credentials cred = DummyCredentials();
+        final Credentials cred = getContextAdminCredentials();
         final String hosturl = getRMIHostUrl();
         final Group addgroup = getTestGroupObject("memberaddgroup" + VALID_CHAR_TESTGROUP + System.currentTimeMillis(), ctx, cred);
         final Group createdgroup = createGroup(ctx, addgroup, hosturl, cred);
@@ -295,7 +295,7 @@ public class GroupTest extends UserTest {
     public void testAddMemberToGroupIdentifiedByName() throws Exception {
         final int context_id = getContextID();
         final Context ctx = new Context(context_id);
-        final Credentials cred = DummyCredentials();
+        final Credentials cred = getContextAdminCredentials();
         final String hosturl = getRMIHostUrl();
         final Group addgroup = getTestGroupObject("memberaddgroup" + VALID_CHAR_TESTGROUP + System.currentTimeMillis(), ctx, cred);
         final Group createdgroup = createGroup(ctx, addgroup, hosturl, cred);
@@ -326,7 +326,7 @@ public class GroupTest extends UserTest {
     public void testAddMemberToGroupIdentifiedByID() throws Exception {
         final int context_id = getContextID();
         final Context ctx = new Context(context_id);
-        final Credentials cred = DummyCredentials();
+        final Credentials cred = getContextAdminCredentials();
         final String hosturl = getRMIHostUrl();
         final Group addgroup = getTestGroupObject("memberaddgroup" + VALID_CHAR_TESTGROUP + System.currentTimeMillis(), ctx, cred);
         final Group createdgroup = createGroup(ctx, addgroup, hosturl, cred);
@@ -356,7 +356,7 @@ public class GroupTest extends UserTest {
     public void testRemoveMemberFromGroup() throws Exception {
         final int context_id = getContextID();
         final Context ctx = new Context(context_id);
-        final Credentials cred = DummyCredentials();
+        final Credentials cred = getContextAdminCredentials();
         final String hosturl = getRMIHostUrl();
         final Group addgroup = getTestGroupObject("memberaddgroup" + VALID_CHAR_TESTGROUP + System.currentTimeMillis(), ctx, cred);
         final Group createdgroup = createGroup(ctx, addgroup, hosturl, cred);
@@ -399,7 +399,7 @@ public class GroupTest extends UserTest {
     public void testRemoveMemberFromGroupIdentifiedByName() throws Exception {
         final int context_id = getContextID();
         final Context ctx = new Context(context_id);
-        final Credentials cred = DummyCredentials();
+        final Credentials cred = getContextAdminCredentials();
         final String hosturl = getRMIHostUrl();
         final Group addgroup = getTestGroupObject("memberaddgroup" + VALID_CHAR_TESTGROUP + System.currentTimeMillis(), ctx, cred);
         final Group createdgroup = createGroup(ctx, addgroup, hosturl, cred);
@@ -445,7 +445,7 @@ public class GroupTest extends UserTest {
     public void testRemoveMemberFromGroupIdentifiedByID() throws Exception {
         final int context_id = getContextID();
         final Context ctx = new Context(context_id);
-        final Credentials cred = DummyCredentials();
+        final Credentials cred = getContextAdminCredentials();
         final String hosturl = getRMIHostUrl();
         final Group addgroup = getTestGroupObject("memberaddgroup" + VALID_CHAR_TESTGROUP + System.currentTimeMillis(), ctx, cred);
         final Group createdgroup = createGroup(ctx, addgroup, hosturl, cred);
@@ -490,7 +490,7 @@ public class GroupTest extends UserTest {
     public void testChangeGroup() throws Exception {
         final int context_id = getContextID();
         final Context ctx = new Context(context_id);
-        final Credentials cred = DummyCredentials();
+        final Credentials cred = getContextAdminCredentials();
         final String hosturl = getRMIHostUrl();
         final Group addgroup = getTestGroupObject("changed_this_group" + System.currentTimeMillis(), ctx, cred);
         final Group createdgroup = createGroup(ctx, addgroup, hosturl, cred);
@@ -524,7 +524,7 @@ public class GroupTest extends UserTest {
 
         final int context_id = getContextID();
         final Context ctx = new Context(context_id);
-        final Credentials cred = DummyCredentials();
+        final Credentials cred = getContextAdminCredentials();
         final String hosturl = getRMIHostUrl();
         final Group addgroup = getTestGroupObject("changed_this_group" + System.currentTimeMillis(), ctx, cred);
         final Group createdgroup = createGroup(ctx, addgroup, hosturl, cred);
@@ -559,7 +559,7 @@ public class GroupTest extends UserTest {
 
         final int context_id = getContextID();
         final Context ctx = new Context(context_id);
-        final Credentials cred = DummyCredentials();
+        final Credentials cred = getContextAdminCredentials();
         final String hosturl = getRMIHostUrl();
         final Group addgroup = getTestGroupObject("changed_this_group" + System.currentTimeMillis(), ctx, cred);
         final Group createdgroup = createGroup(ctx, addgroup, hosturl, cred);
@@ -587,7 +587,7 @@ public class GroupTest extends UserTest {
         // change group displayname and name to null, this must fail
         final int context_id = getContextID();
         final Context ctx = new Context(context_id);
-        final Credentials cred = DummyCredentials();
+        final Credentials cred = getContextAdminCredentials();
         final String hosturl = getRMIHostUrl();
         final Group addgroup = getTestGroupObject("changed_this_group" + System.currentTimeMillis(), ctx, cred);
         final Group createdgroup = createGroup(ctx, addgroup, hosturl, cred);
@@ -620,7 +620,7 @@ public class GroupTest extends UserTest {
 
         final int context_id = getContextID();
         final Context ctx = new Context(context_id);
-        final Credentials cred = DummyCredentials();
+        final Credentials cred = getContextAdminCredentials();
         final String hosturl = getRMIHostUrl();
         final Group addgroup = getTestGroupObject("changed_this_group" + System.currentTimeMillis(), ctx, cred);
         final Group createdgroup = createGroup(ctx, addgroup, hosturl, cred);
@@ -651,7 +651,7 @@ public class GroupTest extends UserTest {
     public void testGetMembers() throws Exception {
         final int context_id = getContextID();
         final Context ctx = new Context(context_id);
-        final Credentials cred = DummyCredentials();
+        final Credentials cred = getContextAdminCredentials();
         final String hosturl = getRMIHostUrl();
         final Group addgroup = getTestGroupObject("memberaddgroup" + VALID_CHAR_TESTGROUP + System.currentTimeMillis(), ctx, cred);
         final Group createdgroup = createGroup(ctx, addgroup, hosturl, cred);
@@ -674,7 +674,7 @@ public class GroupTest extends UserTest {
     public void testGetMembersByName() throws Exception {
         final int context_id = getContextID();
         final Context ctx = new Context(context_id);
-        final Credentials cred = DummyCredentials();
+        final Credentials cred = getContextAdminCredentials();
         final String hosturl = getRMIHostUrl();
         final Group addgroup = getTestGroupObject("memberaddgroup" + VALID_CHAR_TESTGROUP + System.currentTimeMillis(), ctx, cred);
         final Group createdgroup = createGroup(ctx, addgroup, hosturl, cred);
@@ -700,7 +700,7 @@ public class GroupTest extends UserTest {
     public void testlistGroupsForUser() throws Exception {
         final int context_id = getContextID();
         final Context ctx = new Context(context_id);
-        final Credentials cred = DummyCredentials();
+        final Credentials cred = getContextAdminCredentials();
         final String hosturl = getRMIHostUrl();
         final Group addgroup = getTestGroupObject("memberaddgroup" + VALID_CHAR_TESTGROUP + System.currentTimeMillis(), ctx, cred);
         final Group createdgroup = createGroup(ctx, addgroup, hosturl, cred);
@@ -731,7 +731,7 @@ public class GroupTest extends UserTest {
     public void testlistGroupsForUserByName() throws Exception {
         final int context_id = getContextID();
         final Context ctx = new Context(context_id);
-        final Credentials cred = DummyCredentials();
+        final Credentials cred = getContextAdminCredentials();
         final String hosturl = getRMIHostUrl();
         final Group addgroup = getTestGroupObject("memberaddgroup" + VALID_CHAR_TESTGROUP + System.currentTimeMillis(), ctx, cred);
         final Group createdgroup = createGroup(ctx, addgroup, hosturl, cred);
@@ -816,7 +816,7 @@ public class GroupTest extends UserTest {
     }
 
     private int getContextID() throws Exception {
-        return 1;
+        return 31145;
     }
 
     private void createChangeGroupData(final Group group) {

@@ -87,7 +87,7 @@ public final class Bug27065Test extends AbstractTest {
 
     @Before
     public void setup() throws MalformedURLException, RemoteException, NotBoundException, StorageException, InvalidCredentialsException, InvalidDataException {
-        superAdmin = DummyMasterCredentials();
+        superAdmin = getMasterAdminCredentials();
         url = getRMIHostUrl();
         contextIface = (OXContextInterface) Naming.lookup(url + OXContextInterface.RMI_NAME);
         context = ContextTest.getTestContextObject(ContextTest.createNewContextID(superAdmin), 10l);

@@ -114,7 +114,7 @@ public class MailAttachmentFolderTest extends AbstractRMITest {
         ci = getContextInterface();
         ui = getUserInterface();
 
-        superAdminCredentials = AbstractTest.DummyMasterCredentials();
+        superAdminCredentials = AbstractTest.getMasterAdminCredentials();
         Context[] contexts = ci.list("UserMove*", superAdminCredentials);
         for (Context ctx : contexts) {
             System.out.println("Deleting context " + ctx.getName() + " in schema " + ctx.getReadDatabase().getScheme());
@@ -133,13 +133,13 @@ public class MailAttachmentFolderTest extends AbstractRMITest {
         srcUser.setImapServer("example.com");
         srcUser.setImapLogin("oxuser");
         srcUser.setSmtpServer("example.com");
-        srcUser = ui.create(srcCtx, srcUser, getCredentials());
+        srcUser = ui.create(srcCtx, srcUser, getContextAdminCredentials());
 
         User dummy = newUser("dummy", "secret", "Dummy User", "Dummy", "User", "oxuser2@example.com");
         dummy.setImapServer("example.com");
         dummy.setImapLogin("oxuser");
         dummy.setSmtpServer("example.com");
-        dummy = ui.create(dstCtx, dummy, getCredentials());
+        dummy = ui.create(dstCtx, dummy, getContextAdminCredentials());
 
         AJAXSession dummySession = performLogin(dummy.getName() + '@' + dstCtx.getName(), "secret");
         AJAXClient dummyClient = new AJAXClient(dummySession, false);
@@ -213,7 +213,7 @@ public class MailAttachmentFolderTest extends AbstractRMITest {
      public void testCopyWrongMailAttachments() throws Exception {
         OXUserCopyInterface umi = getUserCopyClient();
         User dstUser = umi.copyUser(srcUser, srcCtx, dstCtx, superAdminCredentials);
-        dstUser = ui.getData(dstCtx, dstUser, getCredentials());
+        dstUser = ui.getData(dstCtx, dstUser, getContextAdminCredentials());
         System.err.println("DstUser: " + dstUser.getId() + "(" + dstCtx.getIdAsString() + ")");
 
         AJAXSession session = performLogin(dstUser.getName() + '@' + dstCtx.getName(), "secret");
@@ -252,7 +252,7 @@ public class MailAttachmentFolderTest extends AbstractRMITest {
  throws Exception {
         try {
             if (ui != null && srcCtx != null) {
-                ui.delete(srcCtx, srcUser, null, getCredentials());
+                ui.delete(srcCtx, srcUser, null, getContextAdminCredentials());
             }
         } catch (Exception e) {
             e.printStackTrace();

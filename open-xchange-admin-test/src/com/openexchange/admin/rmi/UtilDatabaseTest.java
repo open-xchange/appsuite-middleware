@@ -87,13 +87,13 @@ public class UtilDatabaseTest extends AbstractTest {
         if (null == client_db) {
             throw new NullPointerException("Database object is null");
         }
-        client_db.setId(oxu.registerDatabase(client_db, Boolean.FALSE, Integer.valueOf(0), ContextTest.DummyMasterCredentials()).getId());
+        client_db.setId(oxu.registerDatabase(client_db, Boolean.FALSE, Integer.valueOf(0), ContextTest.getMasterAdminCredentials()).getId());
     }
 
     @After
     public final void tearDown() throws Exception {
         if (client_db != null) {
-            oxu.unregisterDatabase(new Database(client_db.getId()), ContextTest.DummyMasterCredentials());
+            oxu.unregisterDatabase(new Database(client_db.getId()), ContextTest.getMasterAdminCredentials());
         }
         db_name = null;
         client_db = null;
@@ -102,7 +102,7 @@ public class UtilDatabaseTest extends AbstractTest {
     @Test
     public void testRegisterDatabase() throws Exception {
 
-        Database[] srv_dbs = oxu.listDatabase("db_*", ContextTest.DummyMasterCredentials());
+        Database[] srv_dbs = oxu.listDatabase("db_*", ContextTest.getMasterAdminCredentials());
         boolean found_db = false;
         for (int a = 0; a < srv_dbs.length; a++) {
             Database tmp = srv_dbs[a];
@@ -128,7 +128,7 @@ public class UtilDatabaseTest extends AbstractTest {
 
     @Test
     public void testChangeDatabase() throws Exception {
-        Database[] srv_dbs = oxu.listDatabase("db_*", ContextTest.DummyMasterCredentials());
+        Database[] srv_dbs = oxu.listDatabase("db_*", ContextTest.getMasterAdminCredentials());
         boolean found_db = false;
         for (int a = 0; a < srv_dbs.length; a++) {
             Database tmp = srv_dbs[a];
@@ -162,9 +162,9 @@ public class UtilDatabaseTest extends AbstractTest {
         client_db.setUrl(client_db.getUrl() + change_suffix);
 
         // change db data
-        oxu.changeDatabase(client_db, ContextTest.DummyMasterCredentials());
+        oxu.changeDatabase(client_db, ContextTest.getMasterAdminCredentials());
 
-        srv_dbs = oxu.listDatabase("db_*", ContextTest.DummyMasterCredentials());
+        srv_dbs = oxu.listDatabase("db_*", ContextTest.getMasterAdminCredentials());
 
         for (int a = 0; a < srv_dbs.length; a++) {
             Database tmp = srv_dbs[a];
@@ -186,7 +186,7 @@ public class UtilDatabaseTest extends AbstractTest {
 
     @Test
     public void testUnregisterDatabase() throws Exception {
-        Database[] srv_dbs = oxu.listDatabase("db_*", ContextTest.DummyMasterCredentials());
+        Database[] srv_dbs = oxu.listDatabase("db_*", ContextTest.getMasterAdminCredentials());
         boolean found_db = false;
         for (int a = 0; a < srv_dbs.length; a++) {
             Database tmp = srv_dbs[a];
@@ -209,9 +209,9 @@ public class UtilDatabaseTest extends AbstractTest {
         assertTrue("Expected to find registered db with data", found_db);
 
         // now unregister database
-        oxu.unregisterDatabase(new Database(client_db.getId()), ContextTest.DummyMasterCredentials());
+        oxu.unregisterDatabase(new Database(client_db.getId()), ContextTest.getMasterAdminCredentials());
 
-        srv_dbs = oxu.listDatabase("db_*", ContextTest.DummyMasterCredentials());
+        srv_dbs = oxu.listDatabase("db_*", ContextTest.getMasterAdminCredentials());
         found_db = false;
         for (int a = 0; a < srv_dbs.length; a++) {
             Database tmp = srv_dbs[a];
@@ -229,7 +229,7 @@ public class UtilDatabaseTest extends AbstractTest {
 
     @Test
     public void testListDatabase() throws Exception {
-        Database[] srv_dbs = oxu.listDatabase("db_*", ContextTest.DummyMasterCredentials());
+        Database[] srv_dbs = oxu.listDatabase("db_*", ContextTest.getMasterAdminCredentials());
         boolean found_db = false;
         for (int a = 0; a < srv_dbs.length; a++) {
             Database tmp = srv_dbs[a];

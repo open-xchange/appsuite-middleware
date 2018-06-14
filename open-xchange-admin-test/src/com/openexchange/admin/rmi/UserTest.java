@@ -110,7 +110,7 @@ public class UserTest extends AbstractTest {
     @After
     public void tearDown() throws Exception {
         final OXUserInterface oxu = getUserClient();
-        final Credentials cred = DummyCredentials();
+        final Credentials cred = getContextAdminCredentials();
         final Context ctx = getTestContextObject(cred);
         User[] userArray = new User[toDeleteUsers.size()];
         userArray = toDeleteUsers.toArray(userArray);
@@ -152,7 +152,7 @@ public class UserTest extends AbstractTest {
     public void testCreate() throws Exception {
 
         // get context to create an user
-        final Credentials cred = DummyCredentials();
+        final Credentials cred = getContextAdminCredentials();
         final Context ctx = getTestContextObject(cred);
 
         // create new user
@@ -181,7 +181,7 @@ public class UserTest extends AbstractTest {
     public void testCreateWithContextModuleAccessRights() throws Exception {
 
         // get context to create an user
-        final Credentials cred = DummyCredentials();
+        final Credentials cred = getContextAdminCredentials();
         final Context ctx = getTestContextObject(cred);
 
         // create new user
@@ -203,7 +203,7 @@ public class UserTest extends AbstractTest {
     public void testCreateWithNamedModuleAccessRights() throws Exception {
 
         // get context to create an user
-        final Credentials cred = DummyCredentials();
+        final Credentials cred = getContextAdminCredentials();
         final Context ctx = getTestContextObject(cred);
 
         // create new user
@@ -225,7 +225,7 @@ public class UserTest extends AbstractTest {
     public void testCreateMandatory() throws Exception {
         // this creates an user ONLY with mandatory fields set
 
-        final Credentials cred = DummyCredentials();
+        final Credentials cred = getContextAdminCredentials();
         final Context ctx = getTestContextObject(cred);
 
         // create new user
@@ -260,7 +260,7 @@ public class UserTest extends AbstractTest {
 
     @Test
     public void testCreateUserWithWrongDriveFoldersMode() throws Exception {
-        final Credentials cred = DummyCredentials();
+        final Credentials cred = getContextAdminCredentials();
         final Context ctx = getTestContextObject(cred);
 
         final OXUserInterface oxu = getUserClient();
@@ -281,7 +281,7 @@ public class UserTest extends AbstractTest {
     public void testDelete() throws Exception {
 
         // get context to create an user
-        final Credentials cred = DummyCredentials();
+        final Credentials cred = getContextAdminCredentials();
         final Context ctx = getTestContextObject(cred);
 
         // create new user
@@ -307,7 +307,7 @@ public class UserTest extends AbstractTest {
         // Details: http://bugs.open-xchange.com/cgi-bin/bugzilla/show_bug.cgi?id=9027
 
         // get context to create an user
-        final Credentials cred = DummyCredentials();
+        final Credentials cred = getContextAdminCredentials();
         final Context ctx = getTestContextObject(cred);
 
         // create new user
@@ -328,7 +328,7 @@ public class UserTest extends AbstractTest {
     public void testDeleteEmptyUserList() throws Exception {
 
         // get context to create an user
-        final Credentials cred = DummyCredentials();
+        final Credentials cred = getContextAdminCredentials();
         final Context ctx = getTestContextObject(cred);
 
         // create new user
@@ -350,7 +350,7 @@ public class UserTest extends AbstractTest {
     public void testGetData() throws Exception {
 
         // get context to create an user
-        final Credentials cred = DummyCredentials();
+        final Credentials cred = getContextAdminCredentials();
         final Context ctx = getTestContextObject(cred);
 
         // create new user
@@ -373,7 +373,7 @@ public class UserTest extends AbstractTest {
     @Test
     public void testGetDataByName() throws Exception {
         // get context to create an user
-        final Credentials cred = DummyCredentials();
+        final Credentials cred = getContextAdminCredentials();
         final Context ctx = getTestContextObject(cred);
 
         // create new user
@@ -402,7 +402,7 @@ public class UserTest extends AbstractTest {
     @Test
     public void testPublicFolderEditableForUser() throws Exception {
         // get context to create an user
-        final Credentials cred = DummyCredentials();
+        final Credentials cred = getContextAdminCredentials();
         final Context ctx = getTestContextObject(cred);
 
         // create new user
@@ -439,7 +439,7 @@ public class UserTest extends AbstractTest {
      */
     @Test
     public void testPublicFolderEditableForAdmin() throws Exception {
-        final Credentials cred = DummyCredentials();
+        final Credentials cred = getContextAdminCredentials();
         final Context ctx = getTestContextObject(cred);
 
         // create new user
@@ -464,7 +464,7 @@ public class UserTest extends AbstractTest {
     @Test
     public void testGetDataByNameWithUserAuth() throws Exception {
         // get context to create an user
-        final Credentials cred = DummyCredentials();
+        final Credentials cred = getContextAdminCredentials();
         final Context ctx = getTestContextObject(cred);
 
         // create new user
@@ -491,7 +491,7 @@ public class UserTest extends AbstractTest {
     @Test
     public void testGetDataByID() throws Exception {
         // get context to create an user
-        final Credentials cred = DummyCredentials();
+        final Credentials cred = getContextAdminCredentials();
         final Context ctx = getTestContextObject(cred);
 
         // create new user
@@ -518,7 +518,7 @@ public class UserTest extends AbstractTest {
     public void testGetModuleAccess() throws Exception {
 
         // get context to create an user
-        final Credentials cred = DummyCredentials();
+        final Credentials cred = getContextAdminCredentials();
         final Context ctx = getTestContextObject(cred);
 
         // create new user
@@ -539,7 +539,7 @@ public class UserTest extends AbstractTest {
     public void testChangeModuleAccess() throws Exception {
 
         // get context to create an user
-        final Credentials cred = DummyCredentials();
+        final Credentials cred = getContextAdminCredentials();
         final Context ctx = getTestContextObject(cred);
 
         // create new user
@@ -584,7 +584,7 @@ public class UserTest extends AbstractTest {
     public void testList() throws Exception {
 
         // get context to create an user
-        final Credentials cred = DummyCredentials();
+        final Credentials cred = getContextAdminCredentials();
         final Context ctx = getTestContextObject(cred);
 
         // create new user
@@ -611,10 +611,10 @@ public class UserTest extends AbstractTest {
     public void testListUsersWithOwnFilestore() throws Exception {
 
         // get context to create an user
-        final Credentials cred = DummyCredentials();
+        final Credentials cred = getContextAdminCredentials();
         final Context ctx = getTestContextObject(cred);
         Filestore fs = null;
-        Credentials master = DummyMasterCredentials();
+        Credentials master = getMasterAdminCredentials();
 
         // create new user
         final OXUserInterface oxu = getUserClient();
@@ -674,7 +674,7 @@ public class UserTest extends AbstractTest {
     public void testListAll() throws Exception {
 
         // get context to create an user
-        final Credentials cred = DummyCredentials();
+        final Credentials cred = getContextAdminCredentials();
         final Context ctx = getTestContextObject(cred);
 
         // create new user
@@ -701,7 +701,7 @@ public class UserTest extends AbstractTest {
     public void testChange() throws Exception {
 
         // get context to create an user
-        final Credentials cred = DummyCredentials();
+        final Credentials cred = getContextAdminCredentials();
         final Context ctx = getTestContextObject(cred);
 
         // create new user
@@ -743,7 +743,7 @@ public class UserTest extends AbstractTest {
         // change alias
 
         // get context to create an user
-        final Credentials cred = DummyCredentials();
+        final Credentials cred = getContextAdminCredentials();
         final Context ctx = getTestContextObject(cred);
 
         // create new user
@@ -786,7 +786,7 @@ public class UserTest extends AbstractTest {
         // Try to change alias with too long name (Bug 52763)
 
         // get context to create an user
-        final Credentials cred = DummyCredentials();
+        final Credentials cred = getContextAdminCredentials();
         final Context ctx = getTestContextObject(cred);
 
         // create new user
@@ -850,7 +850,7 @@ public class UserTest extends AbstractTest {
         // set single values to null in the user object and then call change, what happens?
 
         //      get context to create an user
-        final Credentials cred = DummyCredentials();
+        final Credentials cred = getContextAdminCredentials();
         final Context ctx = getTestContextObject(cred);
 
         // create new user
@@ -928,7 +928,7 @@ public class UserTest extends AbstractTest {
         // happens?
 
         // get context to create an user
-        final Credentials cred = DummyCredentials();
+        final Credentials cred = getContextAdminCredentials();
         final Context ctx = getTestContextObject(cred);
 
         // create new user
@@ -981,7 +981,7 @@ public class UserTest extends AbstractTest {
         // happens?
 
         // get context to create an user
-        final Credentials cred = DummyCredentials();
+        final Credentials cred = getContextAdminCredentials();
         final Context ctx = getTestContextObject(cred);
 
         // create new user
@@ -1071,7 +1071,7 @@ public class UserTest extends AbstractTest {
         // change only 1 attribute of user object per call
 
         //      get context to create an user
-        final Credentials cred = DummyCredentials();
+        final Credentials cred = getContextAdminCredentials();
         final Context ctx = getTestContextObject(cred);
 
         // create new user
@@ -1287,7 +1287,7 @@ public class UserTest extends AbstractTest {
 
         // STEP 1
         // get context to create an user
-        final Credentials cred = DummyCredentials();
+        final Credentials cred = getContextAdminCredentials();
         final Context ctx = getTestContextObject(cred);
 
         // create new user
@@ -1328,7 +1328,7 @@ public class UserTest extends AbstractTest {
 
         // STEP 1
         // get context to create an user
-        final Credentials cred = DummyCredentials();
+        final Credentials cred = getContextAdminCredentials();
         final Context ctx = getTestContextObject(cred);
 
         // create new user
@@ -1370,7 +1370,7 @@ public class UserTest extends AbstractTest {
 
         // STEP 1
         // get context to create an user
-        final Credentials cred = DummyCredentials();
+        final Credentials cred = getContextAdminCredentials();
         final Context ctx = getTestContextObject(cred);
 
         // create new user
@@ -1413,7 +1413,7 @@ public class UserTest extends AbstractTest {
 
         // STEP 1
         // get context to create an user
-        final Credentials cred = DummyCredentials();
+        final Credentials cred = getContextAdminCredentials();
         final Context ctx = getTestContextObject(cred);
 
         // create new user
@@ -1457,7 +1457,7 @@ public class UserTest extends AbstractTest {
     public void testChangeWithoutIdAndName() throws Exception {
 
         // get context to create an user
-        final Credentials cred = DummyCredentials();
+        final Credentials cred = getContextAdminCredentials();
         final Context ctx = getTestContextObject(cred);
 
         // create new user
@@ -1486,7 +1486,7 @@ public class UserTest extends AbstractTest {
     // This test is used to check how the change method deals with changing values which are null before changing
     @Test
     public void testChangeNullFields() throws MalformedURLException, RemoteException, NotBoundException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException, NoSuchUserException, Exception {
-        final Credentials cred = DummyCredentials();
+        final Credentials cred = getContextAdminCredentials();
         final Context ctx = getTestContextObject(cred);
         final OXLoginInterface oxl = (OXLoginInterface) Naming.lookup(getRMIHostUrl() + OXLoginInterface.RMI_NAME);
         // Here we get the user object of the admin from the database
@@ -1851,7 +1851,7 @@ public class UserTest extends AbstractTest {
     public User addUser(final Context ctx, final User usr, final UserModuleAccess access) throws Exception {
         // create new user
         final OXUserInterface oxu = getUserClient();
-        return oxu.create(ctx, usr, access, DummyCredentials());
+        return oxu.create(ctx, usr, access, getContextAdminCredentials());
     }
 
     private String generateRandomAlias(long length) {
@@ -2019,7 +2019,7 @@ public class UserTest extends AbstractTest {
     public void testExists() throws Exception {
 
         // get context to create an user
-        final Credentials cred = DummyCredentials();
+        final Credentials cred = getContextAdminCredentials();
         final Context ctx = getTestContextObject(cred);
 
         // create new user

@@ -81,7 +81,7 @@ public class ContextTest extends AbstractTest {
 
     @Test
     public void testGetAdminId() throws Exception {
-        final Credentials cred = DummyMasterCredentials();
+        final Credentials cred = getMasterAdminCredentials();
         final String hosturl = getRMIHostUrl();
         Context ctx = addSystemContext(getTestContextObject(cred), getRMIHostUrl(), cred);
 
@@ -92,7 +92,7 @@ public class ContextTest extends AbstractTest {
 
     @Test
     public void testGetAndChangeContext() throws Exception {
-        final Credentials cred = DummyMasterCredentials();
+        final Credentials cred = getMasterAdminCredentials();
         final String hosturl = getRMIHostUrl();
         Context ctx = addSystemContext(getTestContextObject(cred), getRMIHostUrl(), cred);
 
@@ -138,7 +138,7 @@ public class ContextTest extends AbstractTest {
 
     @Test
     public void testGetByName() throws Exception {
-        final Credentials cred = DummyMasterCredentials();
+        final Credentials cred = getMasterAdminCredentials();
         final String hosturl = getRMIHostUrl();
         final Context ctx = addSystemContext(getTestContextObject(cred), getRMIHostUrl(), cred);
 
@@ -156,7 +156,7 @@ public class ContextTest extends AbstractTest {
 
     @Test
     public void testListContextByDatabase() throws Exception {
-        final Credentials cred = DummyMasterCredentials();
+        final Credentials cred = getMasterAdminCredentials();
         final Context ctx = getTestContextObject(cred);
         final String hosturl = getRMIHostUrl();
         addContext(ctx, hosturl, cred);
@@ -172,7 +172,7 @@ public class ContextTest extends AbstractTest {
 
     @Test
     public void testListContextByFilestore() throws Exception {
-        final Credentials cred = DummyMasterCredentials();
+        final Credentials cred = getMasterAdminCredentials();
         final Context ctx = getTestContextObject(cred);
         final String hosturl = getRMIHostUrl();
         addContext(ctx, hosturl, cred);
@@ -194,7 +194,7 @@ public class ContextTest extends AbstractTest {
 
     @Test
     public void testDisableContext() throws Exception {
-        final Credentials cred = DummyMasterCredentials();
+        final Credentials cred = getMasterAdminCredentials();
         final Context ctx = getTestContextObject(cred);
         final String hosturl = getRMIHostUrl();
         addContext(ctx, hosturl, cred);
@@ -224,7 +224,7 @@ public class ContextTest extends AbstractTest {
 
     @Test
     public void testEnableContext() throws Exception {
-        final Credentials cred = DummyMasterCredentials();
+        final Credentials cred = getMasterAdminCredentials();
         final Context ctx = getTestContextObject(cred);
         final String hosturl = getRMIHostUrl();
 
@@ -265,14 +265,14 @@ public class ContextTest extends AbstractTest {
 
     @Test
     public void testCreateContext() throws Exception {
-        final Credentials cred = DummyMasterCredentials();
+        final Credentials cred = getMasterAdminCredentials();
         Context ctxset = getTestContextObject(cred);
         addContext(ctxset, getRMIHostUrl(), cred);
     }
 
     @Test(expected = InvalidDataException.class)
     public void testCreateContextNoQuota() throws Exception {
-        final Credentials cred = DummyMasterCredentials();
+        final Credentials cred = getMasterAdminCredentials();
         Context ctxset = getTestContextObjectNoQuota(cred);
         addContext(ctxset, getRMIHostUrl(), cred);
         deleteContext(ctxset, getRMIHostUrl(), cred);
@@ -280,7 +280,7 @@ public class ContextTest extends AbstractTest {
 
     @Test
     public void testCreateDeleteCreateContext() throws Exception {
-        final Credentials cred = DummyMasterCredentials();
+        final Credentials cred = getMasterAdminCredentials();
         int ctxid = createNewContextID(cred);
         final String hosturl = getRMIHostUrl();
         final Context ctx = getTestContextObject(ctxid, 50);
@@ -291,7 +291,7 @@ public class ContextTest extends AbstractTest {
 
     @Test
     public void testDuplicateLoginMappingsThrowReadableError() throws Exception {
-        final Credentials cred = DummyMasterCredentials();
+        final Credentials cred = getMasterAdminCredentials();
 
         List<Context> clean = new ArrayList<Context>();
 
@@ -317,7 +317,7 @@ public class ContextTest extends AbstractTest {
 
     @Test
     public void testDeleteContext() throws Exception {
-        final Credentials cred = DummyMasterCredentials();
+        final Credentials cred = getMasterAdminCredentials();
         int ctxid = createNewContextID(cred);
         final String hosturl = getRMIHostUrl();
         final Context ctx = getTestContextObject(ctxid, 50);
@@ -327,7 +327,7 @@ public class ContextTest extends AbstractTest {
 
     @Test
     public void testListContext() throws Exception {
-        final Credentials cred = DummyMasterCredentials();
+        final Credentials cred = getMasterAdminCredentials();
         int ctxid = createNewContextID(cred);
         final String hosturl = getRMIHostUrl();
         final Context ctxset = getTestContextObject(ctxid, 50);
@@ -458,7 +458,7 @@ public class ContextTest extends AbstractTest {
     public void testExistsContext() throws Exception {
         OXContextInterface ctxstub = (OXContextInterface) Naming.lookup(getRMIHostUrl() + OXContextInterface.RMI_NAME);
 
-        final Credentials cred = DummyMasterCredentials();
+        final Credentials cred = getMasterAdminCredentials();
         Context ctxexists = getTestContextObject(cred);
         addContext(ctxexists, getRMIHostUrl(), cred);
         Context ctxnotexists = new Context();

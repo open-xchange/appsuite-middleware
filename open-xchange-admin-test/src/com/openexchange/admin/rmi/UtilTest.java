@@ -107,14 +107,14 @@ public class UtilTest extends AbstractTest {
             MaintenanceReason mr = new MaintenanceReason();
             mr.setText("testcase-get-all-reasons-" + a + "-" + System.currentTimeMillis());
             // add reason to system
-            int[] srv_id = { oxu.createMaintenanceReason(mr, ContextTest.DummyMasterCredentials()).getId().intValue() };
+            int[] srv_id = { oxu.createMaintenanceReason(mr, ContextTest.getMasterAdminCredentials()).getId().intValue() };
             mr.setId(srv_id[0]);
             c_reasons.add(mr);
         }
 
         // now fetch all reasons, and look if my added reasons are within this data set
         int resp = 0;
-        MaintenanceReason[] srv_reasons = oxu.listMaintenanceReason("*", ContextTest.DummyMasterCredentials());
+        MaintenanceReason[] srv_reasons = oxu.listMaintenanceReason("*", ContextTest.getMasterAdminCredentials());
         for (int c = 0; c < c_reasons.size(); c++) {
 
             MaintenanceReason tmp = c_reasons.get(c);
@@ -138,9 +138,9 @@ public class UtilTest extends AbstractTest {
         Server reg_srv = new Server();
         reg_srv.setName("testcase-register-server-" + System.currentTimeMillis());
 
-        reg_srv.setId(oxu.registerServer(reg_srv, ContextTest.DummyMasterCredentials()).getId());
+        reg_srv.setId(oxu.registerServer(reg_srv, ContextTest.getMasterAdminCredentials()).getId());
 
-        Server[] srv_resp = oxu.listServer("testcase-register-server-*", ContextTest.DummyMasterCredentials());
+        Server[] srv_resp = oxu.listServer("testcase-register-server-*", ContextTest.getMasterAdminCredentials());
         int resp = 0;
         for (Server server : srv_resp) {
             if (server.getName().equals(reg_srv.getName()) && server.getId().intValue() == reg_srv.getId().intValue()) {
@@ -161,9 +161,9 @@ public class UtilTest extends AbstractTest {
         Server reg_srv = new Server();
         reg_srv.setName("testcase-register-server-" + System.currentTimeMillis());
 
-        reg_srv.setId(oxu.registerServer(reg_srv, ContextTest.DummyMasterCredentials()).getId());
+        reg_srv.setId(oxu.registerServer(reg_srv, ContextTest.getMasterAdminCredentials()).getId());
 
-        Server[] srv_resp = oxu.listServer("testcase-register-server-*", ContextTest.DummyMasterCredentials());
+        Server[] srv_resp = oxu.listServer("testcase-register-server-*", ContextTest.getMasterAdminCredentials());
         int resp = 0;
         for (int a = 0; a < srv_resp.length; a++) {
             if (srv_resp[a].getName().equals(reg_srv.getName()) && srv_resp[a].getId().intValue() == reg_srv.getId().intValue()) {
@@ -177,9 +177,9 @@ public class UtilTest extends AbstractTest {
         sv.setId(reg_srv.getId());
 
         // here the server was added correctly to the server, now delete it
-        oxu.unregisterServer(sv, ContextTest.DummyMasterCredentials());
+        oxu.unregisterServer(sv, ContextTest.getMasterAdminCredentials());
 
-        srv_resp = oxu.listServer("testcase-register-server-*", ContextTest.DummyMasterCredentials());
+        srv_resp = oxu.listServer("testcase-register-server-*", ContextTest.getMasterAdminCredentials());
         resp = 0;
         for (int a = 0; a < srv_resp.length; a++) {
             if (srv_resp[a].getName().equals(reg_srv.getName()) && srv_resp[a].getId().intValue() == reg_srv.getId().intValue()) {
@@ -195,9 +195,9 @@ public class UtilTest extends AbstractTest {
 
         Server client_srv = new Server();
         client_srv.setName("testcase-search-server-" + System.currentTimeMillis());
-        client_srv.setId(oxu.registerServer(client_srv, ContextTest.DummyMasterCredentials()).getId());
+        client_srv.setId(oxu.registerServer(client_srv, ContextTest.getMasterAdminCredentials()).getId());
 
-        Server[] srv_response = oxu.listServer("testcase-search-server-*", ContextTest.DummyMasterCredentials());
+        Server[] srv_response = oxu.listServer("testcase-search-server-*", ContextTest.getMasterAdminCredentials());
         boolean found_srv = false;
         for (int a = 0; a < srv_response.length; a++) {
             Server tmp = srv_response[a];

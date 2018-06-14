@@ -81,7 +81,7 @@ public class Bug19379Test extends AbstractTest {
 
     @Before
     public void setup() throws MalformedURLException, RemoteException, NotBoundException {
-        superAdmin = DummyMasterCredentials();
+        superAdmin = getMasterAdminCredentials();
         url = getRMIHostUrl();
         contextIface = (OXContextInterface) Naming.lookup(url + OXContextInterface.RMI_NAME);
     }
