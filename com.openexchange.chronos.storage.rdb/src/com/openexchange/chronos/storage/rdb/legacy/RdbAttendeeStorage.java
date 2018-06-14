@@ -277,7 +277,7 @@ public class RdbAttendeeStorage extends RdbStorage implements AttendeeStorage {
     }
 
     @Override
-    public void deleteAllAttendees() throws OXException {
+    public boolean deleteAllAttendees() throws OXException {
         throw new UnsupportedOperationException();
     }
 

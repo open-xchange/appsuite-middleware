@@ -123,9 +123,10 @@ public interface AttendeeStorage {
     /**
      * Deletes all existing attendees for an account.
      *
+     * @return <code>true</code> if something was actually deleted, <code>false</code>, otherwise
      * @throws OXException
      */
-    void deleteAllAttendees() throws OXException;
+    boolean deleteAllAttendees() throws OXException;
 
     /**
      * Inserts attendees for a specific event.
