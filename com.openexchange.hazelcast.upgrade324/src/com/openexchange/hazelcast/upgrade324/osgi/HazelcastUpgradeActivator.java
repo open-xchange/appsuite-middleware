@@ -71,10 +71,10 @@ import com.openexchange.osgi.HousekeepingActivator;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public class HazelcastUpgradeActivator extends HousekeepingActivator {
-    
+
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(HazelcastUpgradeActivator.class);
-    
-    private volatile UpgradedCacheListener cacheListener; 
+
+    private volatile UpgradedCacheListener cacheListener;
 
     /**
      * Initializes a new {@link HazelcastUpgradeActivator}.
@@ -94,11 +94,14 @@ public class HazelcastUpgradeActivator extends HousekeepingActivator {
         ClientConfig clientConfig = getConfig(getService(ConfigurationService.class));
         if (null != clientConfig) {
             UpgradedCacheListener cacheListener = new UpgradedCacheListener(clientConfig);
-            String region = UpgradedCacheListener.CACHE_REGION;
-            LOG.warn("Listening to events for cache region \"{}\". " + 
-                "Please remember to uninstall this package once all nodes in the cluster have been upgraded.", region);
-            getService(com.openexchange.caching.events.CacheEventService.class).addListener(region, cacheListener);
-            this.cacheListener = cacheListener;                        
+            String region1 = UpgradedCacheListener.CACHE_REGION_CONTEXT;
+            String region2 = UpgradedCacheListener.CACHE_REGION_SCHEMA_STORE;
+            LOG.warn("Listening to events for cache regions \"{}\" and \"{}\". " +
+                "Please remember to uninstall this package once all nodes in the cluster have been upgraded.", region1, region2);
+            CacheEventService cacheEventService = getService(com.openexchange.caching.events.CacheEventService.class);
+            cacheEventService.addListener(region1, cacheListener);
+            cacheEventService.addListener(region2, cacheListener);
+            this.cacheListener = cacheListener;
         }
     }
 
@@ -109,18 +112,21 @@ public class HazelcastUpgradeActivator extends HousekeepingActivator {
         if (null != cacheListener) {
             CacheEventService cacheEventService = getService(com.openexchange.caching.events.CacheEventService.class);
             if (null != cacheEventService) {
-                cacheEventService.removeListener(cacheListener);
+                String region1 = UpgradedCacheListener.CACHE_REGION_CONTEXT;
+                String region2 = UpgradedCacheListener.CACHE_REGION_SCHEMA_STORE;
+                cacheEventService.removeListener(region1, cacheListener);
+                cacheEventService.removeListener(region2, cacheListener);
             }
             this.cacheListener = null;
         }
         super.stopBundle();
     }
-    
+
     /**
      * Gets a suitable client configuration to connect to a legacy Hazelcast cluster.
-     * 
+     *
      * @param configService The configuration service
-     * @return The 
+     * @return The
      * @throws OXException
      */
     private ClientConfig getConfig(ConfigurationService configService) throws OXException {
@@ -170,7 +176,7 @@ public class HazelcastUpgradeActivator extends HousekeepingActivator {
         String groupName = configService.getProperty("com.openexchange.hazelcast.group.name");
         if (Strings.isEmpty(groupName)) {
             throw ConfigurationExceptionCodes.PROPERTY_MISSING.create("com.openexchange.hazelcast.group.name");
-        } 
+        }
         config.getGroupConfig().setName(groupName);
         String groupPassword = configService.getProperty("com.openexchange.hazelcast.group.password");
         if (false == Strings.isEmpty(groupPassword)) {
@@ -186,7 +192,7 @@ public class HazelcastUpgradeActivator extends HousekeepingActivator {
         for (ClassDefinition classDefinition : dynamicPortableFactory.getClassDefinitions()) {
             config.getSerializationConfig().addClassDefinition(classDefinition);
         }
-        return config;        
+        return config;
     }
 
 }
