@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -49,39 +49,51 @@
 
 package com.openexchange.legacy;
 
+public class PoolAndSchema {
 
-/**
- * {@link CacheKeyService} - The service to provide cache keys.
- *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- */
-public interface CacheKeyService {
+    public final int poolId;
+    public final String schema;
+    private int hash = 0;
 
     /**
-     * Creates a new instance of {@link CacheKey} consisting of specified context ID and object ID.
-     *
-     * @param contextId The context ID
-     * @param objectId The object ID
-     * @return The new instance of {@link CacheKey}
+     * Initializes a new {@link PoolAndSchema}.
      */
-    CacheKey newCacheKey(int contextId, int objectId);
+    public PoolAndSchema(int poolId, String schema) {
+        super();
+        this.poolId = poolId;
+        this.schema = schema;
+    }
 
-    /**
-     * Creates a new instance of {@link CacheKey} consisting of specified context ID and key object.
-     *
-     * @param contextId The context ID
-     * @param obj The key object
-     * @return new instance of {@link CacheKey}
-     */
-    CacheKey newCacheKey(int contextId, String obj);
+    @Override
+    public int hashCode() {
+        int h = hash;
+        if (h == 0) {
+            h = 31 * 1 + poolId;
+            h = 31 * h + ((schema == null) ? 0 : schema.hashCode());
+            hash = h;
+        }
+        return h;
+    }
 
-    /**
-     * Creates a new instance of {@link CacheKey} consisting of specified context ID and key objects.
-     *
-     * @param contextId The context ID
-     * @param objs The key objects
-     * @return new instance of {@link CacheKey}
-     */
-    CacheKey newCacheKey(int contextId, String... objs);
-
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (!(obj instanceof PoolAndSchema)) {
+            return false;
+        }
+        PoolAndSchema other = (PoolAndSchema) obj;
+        if (poolId != other.poolId) {
+            return false;
+        }
+        if (schema == null) {
+            if (other.schema != null) {
+                return false;
+            }
+        } else if (!schema.equals(other.schema)) {
+            return false;
+        }
+        return true;
+    }
 }

@@ -49,25 +49,32 @@
 
 package com.openexchange.legacy;
 
-import java.io.Serializable;
+import com.hazelcast.nio.serialization.Portable;
+
 
 /**
- * {@link CacheKey} - A cache key that consists of a context ID and an unique (serializable) identifier of any object.
+ * {@link PortableContextInvalidationCallableFactory}
+ *
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.10.0
  */
-public interface CacheKey extends Serializable {
+public class PortableContextInvalidationCallableFactory extends AbstractCustomPortableFactory {
 
     /**
-     * Gets the context ID
-     *
-     * @return The context ID
+     * Initializes a new {@link PortableContextInvalidationCallableFactory}.
      */
-    int getContextId();
+    public PortableContextInvalidationCallableFactory() {
+        super();
+    }
 
-    /**
-     * Gets the key objects
-     *
-     * @return The key objects
-     */
-    String[] getKeys();
+    @Override
+    public Portable create() {
+        return new PortableContextInvalidationCallable();
+    }
+
+    @Override
+    public int getClassId() {
+        return PortableContextInvalidationCallable.CLASS_ID;
+    }
 
 }
