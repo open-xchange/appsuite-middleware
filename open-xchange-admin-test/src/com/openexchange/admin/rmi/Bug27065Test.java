@@ -51,8 +51,6 @@ package com.openexchange.admin.rmi;
 
 import java.rmi.Naming;
 import java.rmi.RemoteException;
-import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
@@ -63,6 +61,7 @@ import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 import com.openexchange.admin.rmi.exceptions.NoSuchContextException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
+import com.openexchange.admin.rmi.manager.ContextManager;
 
 /**
  * Tries to reproduce the log messages described in bug 27065. This test does not really test or assert something. Therefore the logs must
@@ -83,19 +82,18 @@ public final class Bug27065Test extends AbstractTest {
         super();
     }
 
-    @Before
-    public void setup() throws Exception {
+    @Override
+    public void setUp() throws Exception {
         superAdmin = getMasterAdminCredentials();
         url = getRMIHostUrl();
         contextIface = (OXContextInterface) Naming.lookup(url + OXContextInterface.RMI_NAME);
-        int cid = contextManager.getNextFreeContextId();
+        int cid = ContextManager.getInstance(getRMIHostUrl(), getMasterAdminCredentials()).getNextFreeContextId();
         context = ContextFactory.createContext(cid, 10l);
-        contextAdmin = UserTest.getTestUserObject("admin","secret", context);
+        contextAdmin = UserTest.getTestUserObject("admin", "secret", context);
     }
 
-    @After
-    public void tearDown()
- throws RemoteException, InvalidDataException, StorageException, InvalidCredentialsException, NoSuchContextException, DatabaseUpdateException {
+    @Override
+    public void tearDown() throws Exception {
         if (contextIface.exists(new Context(context.getId()), superAdmin)) {
             contextIface.delete(context, superAdmin);
         }

@@ -66,6 +66,14 @@ import com.openexchange.admin.rmi.dataobjects.Server;
  * @author cutmasta
  */
 public class UtilTest extends AbstractTest {
+    
+    
+    /**
+     * Initialises a new {@link UtilTest}.
+     */
+    public UtilTest() {
+        super();
+    }
 
     private OXUtilInterface getUtilClient() throws NotBoundException, MalformedURLException, RemoteException {
         return (OXUtilInterface) Naming.lookup(getRMIHostUrl() + OXUtilInterface.RMI_NAME);

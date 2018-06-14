@@ -54,7 +54,6 @@ import org.junit.Before;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.dataobjects.Filestore;
-import com.openexchange.admin.rmi.manager.ContextManager;
 import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.configuration.AJAXConfig.Property;
 
@@ -69,8 +68,6 @@ public abstract class AbstractTest {
     protected static String TEST_DOMAIN = "example.org";
     protected static String change_suffix = "-changed";
 
-    protected ContextManager contextManager;
-
     /**
      * Initialises a new {@link AbstractTest}.
      */
@@ -84,17 +81,16 @@ public abstract class AbstractTest {
      * @throws Exception if an error occurs during initialisation of the configuration
      */
     @Before
-    public void setUpEnvironment() throws Exception {
+    public void setUp() throws Exception {
         AJAXConfig.init();
-        contextManager = new ContextManager(getRMIHostUrl(), getMasterAdminCredentials());
     }
 
     /**
-     * Clean-up procedures
+     * tear down test
      */
     @After
-    public void tearDownEnvironment() {
-        contextManager.cleanUp();
+    public void tearDown() throws Exception {
+        // perform any clean-ups here
     }
 
     /**

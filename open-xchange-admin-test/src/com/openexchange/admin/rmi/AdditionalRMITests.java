@@ -55,9 +55,7 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import java.util.Arrays;
 import java.util.List;
-import org.junit.After;
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
@@ -79,7 +77,7 @@ import com.openexchange.admin.user.copy.rmi.TestTool;
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  */
 public class AdditionalRMITests extends AbstractRMITest {
-    
+
     public String myUserName = "thorben.betten";
 
     public String myDisplayName = "Thorben Betten";
@@ -94,7 +92,7 @@ public class AdditionalRMITests extends AbstractRMITest {
 
     private User user;
 
-    @Before
+    @Override
     public void setUp() throws Exception {
         super.setUp();
         admin = newUser("oxadmin", "q1w2e3r4", "Admin User", "Admin", "User", "oxadmin@example.com");
@@ -115,7 +113,7 @@ public class AdditionalRMITests extends AbstractRMITest {
         user = ui.create(context, user, getContextAdminCredentials());
     }
 
-    @After
+    @Override
     public void tearDown() throws Exception {
         try {
             if (ui != null && context != null) {
@@ -132,14 +130,15 @@ public class AdditionalRMITests extends AbstractRMITest {
         } catch (Exception e) {
             e.printStackTrace();
         }
+        super.tearDown();
     }
 
     /**
      * Test the #any method. This explains how it is used, too, in case you either have never seen first-order-functions or seen the
      * monstrosity that is necessary to model them in Java.
      */
-     @Test
-     public void testAnyHelper() {
+    @Test
+    public void testAnyHelper() {
         Integer[] myArray = new Integer[] { Integer.valueOf(1), Integer.valueOf(2), Integer.valueOf(3), };
         Integer inThere = Integer.valueOf(1);
         Integer notInThereInteger = Integer.valueOf(0);
@@ -164,8 +163,8 @@ public class AdditionalRMITests extends AbstractRMITest {
     /**
      * Looking up users by User#name by checking whether display_name is updated
      */
-     @Test
-     public void testGetOxAccount() throws Exception {
+    @Test
+    public void testGetOxAccount() throws Exception {
 
         User knownUser = new User();
         knownUser.setName(myUserName);
@@ -181,8 +180,8 @@ public class AdditionalRMITests extends AbstractRMITest {
     /**
      * Tests #listAll by comparing it with the result of #getData for all users
      */
-     @Test
-     public void testGetAllUsers() throws Exception {
+    @Test
+    public void testGetAllUsers() throws Exception {
         final Credentials credentials = getContextAdminCredentials();
         User[] allUsers = ui.listAll(context, credentials);// required line for test
         User[] queriedUsers = ui.getData(context, allUsers, credentials);// required line for test
@@ -192,8 +191,8 @@ public class AdditionalRMITests extends AbstractRMITest {
     /*
      * Gets all groups and checks whether our test user is in one ore more
      */
-     @Test
-     public void testGetOxGroups() throws Exception {
+    @Test
+    public void testGetOxGroups() throws Exception {
         Context updatedContext = ci.getData(context, superAdminCredentials);
 
         OXUserInterface userInterface = getUserInterface();
@@ -218,8 +217,8 @@ public class AdditionalRMITests extends AbstractRMITest {
     /**
      * Creates a resource and checks whether it is found
      */
-     @Test
-     public void testGetOxResources() throws Exception {
+    @Test
+    public void testGetOxResources() throws Exception {
         Resource res = getTestResource();
 
         OXResourceInterface resInterface = getResourceInterface();
@@ -248,8 +247,8 @@ public class AdditionalRMITests extends AbstractRMITest {
      * Tests creating a context, setting the access level and creating a first user for that context. The first user in a context is usually
      * the admin. Do not test creation of the first normal user, #testCreateOxUser() does that already
      */
-     @Test
-     public void testCreateFirstUser() throws Exception {
+    @Test
+    public void testCreateFirstUser() throws Exception {
         OXContextInterface conInterface = getContextInterface();
 
         Context newContext = newContext("newContext", ((int) (Math.random() * 1000)));
@@ -268,8 +267,8 @@ public class AdditionalRMITests extends AbstractRMITest {
         }
     }
 
-     @Test
-     public void testCreateOxUser() throws Exception {
+    @Test
+    public void testCreateOxUser() throws Exception {
         User myNewUser = newUser("new_user", "secret", "New User", "New", "User", "newuser@ox.invalid");
         UserModuleAccess access = new UserModuleAccess();
 
@@ -289,8 +288,8 @@ public class AdditionalRMITests extends AbstractRMITest {
     /**
      * Test the creation of a group
      */
-     @Test
-     public void testCreateOxGroup() throws Exception {
+    @Test
+    public void testCreateOxGroup() throws Exception {
         OXGroupInterface groupInterface = getGroupInterface();
         boolean groupCreated = false;
         Group group = newGroup("groupdisplayname", "groupname");
@@ -305,8 +304,8 @@ public class AdditionalRMITests extends AbstractRMITest {
         }
     }
 
-     @Test
-     public void testCreateOxResource() throws Exception {
+    @Test
+    public void testCreateOxResource() throws Exception {
         OXResourceInterface resInterface = getResourceInterface();
         boolean resourceCreated = false;
         Resource res = newResource("resourceName", "resourceDisplayname", "resource@email.invalid");
@@ -321,8 +320,8 @@ public class AdditionalRMITests extends AbstractRMITest {
         }
     }
 
-     @Test
-     public void testUpdateOxAdmin_updateOxUser() throws Exception {
+    @Test
+    public void testUpdateOxAdmin_updateOxUser() throws Exception {
         boolean valueChanged = false;
         admin = ui.getData(context, admin, adminCredentials);
         String originalValue = admin.getAssistant_name();
@@ -345,8 +344,8 @@ public class AdditionalRMITests extends AbstractRMITest {
         }
     }
 
-     @Test
-     public void testUpdateOxGroup() throws Exception {
+    @Test
+    public void testUpdateOxGroup() throws Exception {
         OXGroupInterface groupInterface = getGroupInterface();
         boolean groupCreated = false;
         Group group = newGroup("groupdisplayname", "groupname");
@@ -367,8 +366,8 @@ public class AdditionalRMITests extends AbstractRMITest {
         }
     }
 
-     @Test
-     public void testUpdateOxResource() throws Exception {
+    @Test
+    public void testUpdateOxResource() throws Exception {
         OXResourceInterface resInterface = getResourceInterface();
         boolean resourceCreated = false;
         Resource res = newResource("resourceName", "resourceDisplayname", "resource@email.invalid");
@@ -388,8 +387,8 @@ public class AdditionalRMITests extends AbstractRMITest {
         }
     }
 
-     @Test
-     public void testDeleteOxUsers() throws Exception {
+    @Test
+    public void testDeleteOxUsers() throws Exception {
         OXResourceInterface resInterface = getResourceInterface();
         boolean resourceDeleted = false;
         Resource res = newResource("resourceName", "resourceDisplayname", "resource@email.invalid");
@@ -404,8 +403,8 @@ public class AdditionalRMITests extends AbstractRMITest {
         }
     }
 
-     @Test
-     public void testGetUserAccessModules() throws Exception {
+    @Test
+    public void testGetUserAccessModules() throws Exception {
         final Credentials credentials = getContextAdminCredentials();
 
         User knownUser = new User();
@@ -421,8 +420,8 @@ public class AdditionalRMITests extends AbstractRMITest {
         assertTrue("Information for module access should be available", access != null);
     }
 
-     @Test
-     public void testUpdateMaxCollapQuota() throws Exception {
+    @Test
+    public void testUpdateMaxCollapQuota() throws Exception {
         Context contextTmp = ci.getData(context, superAdminCredentials);
         Long updatedMaxQuota = new Long(1024);
         contextTmp.setMaxQuota(updatedMaxQuota);
@@ -431,8 +430,8 @@ public class AdditionalRMITests extends AbstractRMITest {
         assertEquals("MaxCollapQuota should have the new value", newContext.getMaxQuota(), updatedMaxQuota);
     }
 
-     @Test
-     public void testGetUser() throws Exception {
+    @Test
+    public void testGetUser() throws Exception {
         User knownUser = new User();
         knownUser.setName(this.myUserName);
         User[] mailboxNames = new User[] { knownUser };// users with only their mailbox name (User#name) - the rest is going to be
@@ -446,8 +445,8 @@ public class AdditionalRMITests extends AbstractRMITest {
         assertEquals("Should have looked up display name", myDisplayName, queriedUser.getDisplay_name());
     }
 
-     @Test
-     public void testUpdateModuleAccess() throws Exception {
+    @Test
+    public void testUpdateModuleAccess() throws Exception {
         final Credentials credentials = getContextAdminCredentials();
 
         User knownUser = new User();
@@ -472,8 +471,8 @@ public class AdditionalRMITests extends AbstractRMITest {
         assertEquals("Calendar access should be granted again", true, access.getCalendar());
     }
 
-     @Test
-     public void testContextExistsException() throws Exception {
+    @Test
+    public void testContextExistsException() throws Exception {
         OXContextInterface conInterface = getContextInterface();
         boolean contextCreated = false;
         Context newContext = newContext("newContext", 666);
@@ -494,8 +493,8 @@ public class AdditionalRMITests extends AbstractRMITest {
         }
     }
 
-     @Test
-     public void testNoSuchContextException() throws Exception {
+    @Test
+    public void testNoSuchContextException() throws Exception {
         OXContextInterface conInterface = getContextInterface();
         Context missingContext = newContext("missing", Integer.MAX_VALUE);
         try {
@@ -506,8 +505,8 @@ public class AdditionalRMITests extends AbstractRMITest {
         }
     }
 
-     @Test
-     public void testNoSuchGroupException() throws Exception {
+    @Test
+    public void testNoSuchGroupException() throws Exception {
         OXGroupInterface groupInterface = getGroupInterface();
         Group missingGroup = new Group();
         missingGroup.setId(Integer.valueOf(Integer.MAX_VALUE));
@@ -519,8 +518,8 @@ public class AdditionalRMITests extends AbstractRMITest {
         }
     }
 
-     @Test
-     public void testNoSuchResourceException() throws Exception {
+    @Test
+    public void testNoSuchResourceException() throws Exception {
         OXResourceInterface resInterface = getResourceInterface();
         Resource missingResource = new Resource();
         missingResource.setId(Integer.valueOf(Integer.MAX_VALUE));
@@ -532,8 +531,8 @@ public class AdditionalRMITests extends AbstractRMITest {
         }
     }
 
-     @Test
-     public void testNoSuchUserException() throws Exception {
+    @Test
+    public void testNoSuchUserException() throws Exception {
         User missingUser = new User();
         missingUser.setId(Integer.valueOf(Integer.MAX_VALUE));
         try {

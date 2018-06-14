@@ -74,6 +74,22 @@ import com.openexchange.admin.rmi.dataobjects.Server;
  */
 public class ContextManager extends AbstractManager {
 
+    private static ContextManager INSTANCE;
+
+    /**
+     * Gets the instance of the {@link ContextManager}
+     * 
+     * @param host
+     * @param masterCredentials
+     * @return
+     */
+    public static ContextManager getInstance(String host, Credentials masterCredentials) {
+        if (INSTANCE == null) {
+            INSTANCE = new ContextManager(host, masterCredentials);
+        }
+        return INSTANCE;
+    }
+
     private static final Logger LOG = LoggerFactory.getLogger(ContextManager.class);
 
     /** Default max quota for a {@link Context}, 5GB */
@@ -84,7 +100,7 @@ public class ContextManager extends AbstractManager {
     /**
      * Initialises a new {@link ContextManager}.
      */
-    public ContextManager(String host, Credentials masterCredentials) {
+    private ContextManager(String host, Credentials masterCredentials) {
         super(host, masterCredentials);
         registeredContexts = new HashMap<>();
     }

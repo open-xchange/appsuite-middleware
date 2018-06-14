@@ -66,6 +66,7 @@ import com.openexchange.admin.rmi.dataobjects.Database;
 import com.openexchange.admin.rmi.dataobjects.Filestore;
 import com.openexchange.admin.rmi.dataobjects.MaintenanceReason;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
+import com.openexchange.admin.rmi.manager.ContextManager;
 
 /**
  * {@link ContextTest}
@@ -76,11 +77,28 @@ import com.openexchange.admin.rmi.exceptions.InvalidDataException;
  */
 public class ContextTest extends AbstractTest {
 
+    private ContextManager contextManager;
+
     /**
      * Initialises a new {@link ContextTest}.
      */
     public ContextTest() {
         super();
+    }
+
+    @Override
+    public void setUp() throws Exception {
+        super.setUp();
+        contextManager = ContextManager.getInstance(getRMIHostUrl(), getMasterAdminCredentials());
+    }
+
+    /**
+     * Clean-up procedures
+     */
+    @Override
+    public void tearDown() throws Exception {
+        contextManager.cleanUp();
+        super.tearDown();
     }
 
     /**
