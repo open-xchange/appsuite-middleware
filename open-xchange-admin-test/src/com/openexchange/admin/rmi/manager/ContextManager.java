@@ -160,10 +160,24 @@ public class ContextManager {
      */
     public Context createContext(Context context, Credentials contextAdminCredentials) throws Exception {
         prerequisites();
+        if (context.getId() == null || context.getId().intValue() <= 0) {
+            context.setId(new Integer(getNextFreeContextId()));
+        }
         OXContextInterface contextInterface = getContextInterface();
         contextInterface.create(context, UserTest.getTestUserObject(contextAdminCredentials.getLogin(), contextAdminCredentials.getPassword(), context), masterCredentials);
         registeredContexts.put(context.getId(), context);
         return context;
+    }
+
+    /**
+     * Changes/Updates the specified {@link Context}
+     * 
+     * @param context The {@link Context} to change
+     * @throws Exception if an error is occurred
+     */
+    public void changeContext(Context context) throws Exception {
+        OXContextInterface contextInterface = getContextInterface();
+        contextInterface.change(context, masterCredentials);
     }
 
     /**

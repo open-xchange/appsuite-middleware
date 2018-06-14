@@ -49,6 +49,7 @@
 
 package com.openexchange.admin.rmi;
 
+import java.util.UUID;
 import com.openexchange.admin.rmi.dataobjects.Context;
 
 /**
@@ -59,9 +60,15 @@ import com.openexchange.admin.rmi.dataobjects.Context;
  */
 public class ContextFactory {
 
+    public static Context createContext(long maxQuota) {
+        Context context = new Context();
+        context.setName("Name-" + UUID.randomUUID().toString());
+        context.setMaxQuota(maxQuota);
+        return context;
+    }
+
     public static Context createContext(int contextId, long maxQuota) {
-        Context context = new Context(contextId);
-        context.setName("Name-" + contextId);
+        Context context = createContext(maxQuota);
         context.setMaxQuota(maxQuota);
         return context;
     }
