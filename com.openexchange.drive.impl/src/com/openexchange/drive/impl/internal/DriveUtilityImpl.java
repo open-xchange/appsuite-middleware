@@ -181,8 +181,8 @@ public class DriveUtilityImpl implements DriveUtility {
         if (null == subfolders || 0 == subfolders.size()) {
             return Collections.emptyList();
         }
-        List<JSONObject> metadata = new ArrayList<JSONObject>();
-        List<FileStorageFolder> folders = new ArrayList<FileStorageFolder>(subfolders.values());
+        List<JSONObject> metadata = new ArrayList<>();
+        List<FileStorageFolder> folders = new ArrayList<>(subfolders.values());
         if (1 < folders.size()) {
             Collections.sort(folders, new FolderComparator(session.getLocale()));
         }
@@ -272,7 +272,7 @@ public class DriveUtilityImpl implements DriveUtility {
 
     @Override
     public void updateFile(DriveSession session, final String path, final FileVersion fileVersion, JSONObject jsonObject, NotificationParameters parameters) throws OXException {
-        List<Field> fields = new ArrayList<Field>();
+        List<Field> fields = new ArrayList<>();
         final File metadata = FileMetadataParser.parse(jsonObject, fields);
         if (fields.isEmpty()) {
             return;
@@ -288,7 +288,7 @@ public class DriveUtilityImpl implements DriveUtility {
                 /*
                  * get the original file
                  */
-                List<Field> fields = new ArrayList<Field>();
+                List<Field> fields = new ArrayList<>();
                 fields.addAll(DriveConstants.FILE_FIELDS);
                 fields.add(Field.OBJECT_PERMISSIONS);
                 File file = syncSession.getStorage().getFileByName(path, fileVersion.getName(), fields, true);
@@ -330,7 +330,7 @@ public class DriveUtilityImpl implements DriveUtility {
         final SyncSession syncSession = new SyncSession(session);
         syncSession.trace("About to update metadata for directory [" + directoryVersion + "]: " + jsonObject);
         final boolean notify = null != parameters.getNotificationTransport();
-        final Reference<ShareTarget> targetReference = new Reference<ShareTarget>();
+        final Reference<ShareTarget> targetReference = new Reference<>();
         Entities entities = syncSession.getStorage().wrapInTransaction(new StorageOperation<Entities>() {
 
             @Override
@@ -447,17 +447,18 @@ public class DriveUtilityImpl implements DriveUtility {
                 if (DriveUtils.isIgnoredPath(syncSession, newPath)) {
                     throw DriveExceptionCodes.IGNORED_PATH.create(newPath);
                 }
-                String lastExistingPath = ROOT_PATH;
                 String firstNewName = null;
+                StringBuilder strBuilder = new StringBuilder(ROOT_PATH);
                 for (String name : DriveUtils.split(newPath)) {
                     firstNewName = name;
                     String normalizedName = PathNormalizer.normalize(name);
-                    FileStorageFolder existingFolder = syncSession.getStorage().optFolder(lastExistingPath + normalizedName);
+                    FileStorageFolder existingFolder = syncSession.getStorage().optFolder(strBuilder.toString() + normalizedName);
                     if (null == existingFolder) {
                         break;
                     }
-                    lastExistingPath += name + DriveConstants.PATH_SEPARATOR;
+                    strBuilder.append(name).append(DriveConstants.PATH_SEPARATOR);
                 }
+                String lastExistingPath = strBuilder.toString();
                 if (null != syncSession.getStorage().getFileByName(lastExistingPath, firstNewName, true)) {
                     throw DriveExceptionCodes.LEVEL_CONFLICTING_PATH.create(newPath, lastExistingPath);
                 }
@@ -472,7 +473,7 @@ public class DriveUtilityImpl implements DriveUtility {
     }
 
     JSONArray getFileSharesMetadata(SyncSession session) throws OXException, JSONException {
-        List<FileStorageCapability> specialCapabilites = new ArrayList<FileStorageCapability>();
+        List<FileStorageCapability> specialCapabilites = new ArrayList<>();
         List<Field> fields = new ArrayList<File.Field>();
         fields.addAll(DriveConstants.FILE_FIELDS);
         fields.add(Field.CREATED_BY);
@@ -496,10 +497,10 @@ public class DriveUtilityImpl implements DriveUtility {
 
     JSONArray getDirectorySharesMetadata(SyncSession session) throws OXException, JSONException {
         List<FileStorageFolder> folders = session.getStorage().getSharedFolders();
-        if (null == folders || 0 == folders.size()) {
+        if (null == folders || folders.isEmpty()) {
             return new JSONArray(0);
         }
-        List<String> folderIDs = new ArrayList<String>(folders.size());
+        List<String> folderIDs = new ArrayList<>(folders.size());
         for (FileStorageFolder folder : folders) {
             folderIDs.add(folder.getId());
         }
@@ -749,7 +750,6 @@ public class DriveUtilityImpl implements DriveUtility {
                                 if (folderName.equals(subfolder.getName())) {
                                     found = true;
                                     sb.append("/").append(subfolder.getLocalizedName(locale));
-                                    folder = subfolder;
                                 }
                             }
                         }

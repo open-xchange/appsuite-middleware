@@ -258,9 +258,9 @@ public class DirectoryActionExecutor extends BatchActionExecutor<DirectoryVersio
                     /*
                      * no permissions to move whole directory, try and preserve at least each file separately
                      */
-                    List<FileChecksum> checksumsToUpdate = new ArrayList<FileChecksum>();
-                    List<FileChecksum> checksumsToRemove = new ArrayList<FileChecksum>();
-                    List<File> filesToRemove = new ArrayList<File>();
+                    List<FileChecksum> checksumsToUpdate = new ArrayList<>();
+                    List<FileChecksum> checksumsToRemove = new ArrayList<>();
+                    List<File> filesToRemove = new ArrayList<>();
                     for (ServerFileVersion versionToRemove : session.getServerFiles(action.getVersion().getPath())) {
                         FileChecksum fileChecksum = versionToRemove.getFileChecksum();
                         File removedFile = session.getStorage().moveFile(
@@ -315,8 +315,8 @@ public class DirectoryActionExecutor extends BatchActionExecutor<DirectoryVersio
     }
 
     private void batchRemove(List<AbstractAction<DirectoryVersion>> removeActions) throws OXException {
-        List<FolderID> removedFolderIDs = new ArrayList<FolderID>();
-        List<FolderID[]> updatedFolderIDs = new ArrayList<FolderID[]>();
+        List<FolderID> removedFolderIDs = new ArrayList<>();
+        List<FolderID[]> updatedFolderIDs = new ArrayList<>();
         for (AbstractAction<DirectoryVersion> action : removeActions) {
             /*
              * check action
