@@ -59,7 +59,10 @@ import com.openexchange.admin.rmi.dataobjects.Context;
  */
 public class ContextFactory {
 
-    public static Context createContext(int contextId) {
-        return new Context(contextId);
+    public static Context createContext(int contextId, long maxQuota) {
+        Context context = new Context(contextId);
+        context.setName("Name-" + contextId);
+        context.setMaxQuota(maxQuota);
+        return context;
     }
 }
