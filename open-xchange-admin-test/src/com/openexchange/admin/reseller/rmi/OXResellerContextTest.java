@@ -56,6 +56,7 @@ import java.rmi.Naming;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.admin.reseller.rmi.dataobjects.ResellerAdmin;
 import com.openexchange.admin.reseller.rmi.dataobjects.Restriction;
@@ -80,10 +81,8 @@ public class OXResellerContextTest extends OXResellerAbstractTest {
 
     private ResellerAdmin randomAdmin;
 
-    @Override
+    @Before
     public final void setUp() throws Exception {
-        super.setUp();
-
         oxresell = (OXResellerInterface) Naming.lookup(getRMIHostUrl() + OXResellerInterface.RMI_NAME);
         oxctx = (OXContextInterface) Naming.lookup(getRMIHostUrl() + OXContextInterface.RMI_NAME);
         randomAdmin = RandomAdmin();
@@ -156,7 +155,7 @@ public class OXResellerContextTest extends OXResellerAbstractTest {
 
         randomAdmin.setRestrictions(new Restriction[] { MaxOverallUserRestriction(2) });
         oxresell.create(randomAdmin, creds);
-       
+
         Credentials contextAdmin = ResellerRandomCredentials(randomAdmin.getName());
 
         Context ctx1 = null;

@@ -58,6 +58,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
+import org.junit.Before;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.dataobjects.Filestore;
@@ -87,9 +88,8 @@ public abstract class AbstractRMITest extends AbstractTest {
     public User testUser;
     protected Resource testResource;
 
-    @Override
+    @Before
     public void setUp() throws Exception {
-        super.setUp();
         adminCredentials = getContextAdminCredentials();
         adminContext = getTestContextObject(adminCredentials);
 
@@ -132,7 +132,7 @@ public abstract class AbstractRMITest extends AbstractTest {
         assertEquals("Given name should match", expected.getGiven_name(), actual.getGiven_name());
         assertEquals("Surname should match", expected.getSur_name(), actual.getSur_name());
         assertEquals("Primary E-Mail should match", expected.getPrimaryEmail(), actual.getPrimaryEmail());
-        assertEquals("E-Mail #1 should match", expected.getEmail1(), actual.getEmail1());
+        assertEquals("E-Ma0il #1 should match", expected.getEmail1(), actual.getEmail1());
     }
 
     public void assertGroupEquals(Group expected, Group actual) {

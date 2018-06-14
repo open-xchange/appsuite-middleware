@@ -60,6 +60,7 @@ import java.rmi.RemoteException;
 import java.sql.SQLException;
 import java.util.Stack;
 import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.admin.reseller.rmi.dataobjects.ResellerAdmin;
 import com.openexchange.admin.reseller.rmi.dataobjects.Restriction;
@@ -86,9 +87,8 @@ public class OXResellerInterfaceTest extends OXResellerAbstractTest {
 
     private OXContextInterface oxctx = null;
 
-    @Override
+    @Before
     public void setUp() throws Exception {
-        super.setUp();
         oxresell = (OXResellerInterface) Naming.lookup(getRMIHostUrl() + OXResellerInterface.RMI_NAME);
         oxctx = (OXContextInterface) Naming.lookup(getRMIHostUrl() + OXContextInterface.RMI_NAME);
     }

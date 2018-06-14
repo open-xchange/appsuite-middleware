@@ -49,10 +49,12 @@
 
 package com.openexchange.admin.rmi;
 
-import org.junit.Before;
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.dataobjects.Filestore;
+import com.openexchange.admin.rmi.manager.ContextManager;
 import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.configuration.AJAXConfig.Property;
 
@@ -67,6 +69,8 @@ public abstract class AbstractTest {
     protected static String TEST_DOMAIN = "example.org";
     protected static String change_suffix = "-changed";
 
+    private static ContextManager contextManager;
+
     /**
      * Initialises a new {@link AbstractTest}.
      */
@@ -75,14 +79,23 @@ public abstract class AbstractTest {
     }
 
     /**
-     * Initialises the test configuration. Inheriting classes that override this method
-     * must invoke it first.
+     * Initialises the test configuration and creates one context for the tests
      * 
      * @throws Exception if an error occurs during initialisation of the configuration
      */
-    @Before
-    public void setUp() throws Exception {
+    @BeforeClass
+    public static void setUpEnvironment() throws Exception {
         AJAXConfig.init();
+        contextManager = new ContextManager(getRMIHost(), getMasterAdminCredentials());
+        contextManager.createContext(getContextAdminCredentials());
+    }
+
+    /**
+     * Clean-up procedures
+     */
+    @AfterClass
+    public void tearDownEnvironment() {
+        contextManager.cleanUp();
     }
 
     /**
@@ -169,5 +182,4 @@ public abstract class AbstractTest {
     public static String getChangedEmailAddress(String address, String changed) {
         return address.replaceFirst("@", changed + "@");
     }
-
 }

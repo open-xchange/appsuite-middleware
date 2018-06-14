@@ -71,6 +71,7 @@ import com.openexchange.admin.rmi.dataobjects.Server;
 import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
+import com.openexchange.admin.rmi.manager.ContextManager;
 
 /**
  *
@@ -78,6 +79,13 @@ import com.openexchange.admin.rmi.exceptions.StorageException;
  * @author d7
  */
 public class ContextTest extends AbstractTest {
+
+    /**
+     * Initialises a new {@link ContextTest}.
+     */
+    public ContextTest() {
+        super();
+    }
 
     @Test
     public void testGetAdminId() throws Exception {
@@ -343,26 +351,41 @@ public class ContextTest extends AbstractTest {
         assertTrue("context not found", foundctx);
     }
 
+    /**
+     * @deprecated Use {@link ContextManager} instead
+     */
     private Context[] searchContextByDatabase(Database db, String host, Credentials cred) throws Exception {
         OXContextInterface xres = (OXContextInterface) Naming.lookup(host + OXContextInterface.RMI_NAME);
         return xres.listByDatabase(db, cred);
     }
 
+    /**
+     * @deprecated Use {@link ContextManager} instead
+     */
     private Context[] searchContextByFilestore(Filestore fis, String host, Credentials cred) throws Exception {
         OXContextInterface xres = (OXContextInterface) Naming.lookup(host + OXContextInterface.RMI_NAME);
         return xres.listByFilestore(fis, cred);
     }
 
+    /**
+     * @deprecated Use {@link ContextManager} instead
+     */
     public static Context[] searchContext(String pattern, String host, Credentials cred) throws MalformedURLException, RemoteException, NotBoundException, StorageException, InvalidCredentialsException, InvalidDataException {
         OXContextInterface xres = (OXContextInterface) Naming.lookup(host + OXContextInterface.RMI_NAME);
         return xres.list(pattern, cred);
     }
 
+    /**
+     * @deprecated Use {@link ContextManager} instead
+     */
     private void deleteContext(Context ctx, String host, Credentials cred) throws Exception {
         OXContextInterface xres = (OXContextInterface) Naming.lookup(host + OXContextInterface.RMI_NAME);
         xres.delete(ctx, cred);
     }
 
+    /**
+     * @deprecated Use the {@link ContextManager} instead.
+     */
     private Context addSystemContext(Context ctx, String host, Credentials cred) throws Exception {
         OXUtilInterface oxu = (OXUtilInterface) Naming.lookup(host + OXUtilInterface.RMI_NAME);
         // first check if the needed server entry is in db, if not, add server
@@ -397,16 +420,25 @@ public class ContextTest extends AbstractTest {
         return ctx;
     }
 
+    /**
+     * @deprecated Use {@link ContextManager} instead
+     */
     private int addContext(Context ctx, String host, Credentials cred) throws Exception {
         return addSystemContext(ctx, host, cred).getId().intValue();
     }
 
+    /**
+     * @deprecated Use {@link ContextManager} instead
+     */
     private void disableContext(Context ctx, String host, Credentials cred) throws Exception {
         OXContextInterface xres = (OXContextInterface) Naming.lookup(host + OXContextInterface.RMI_NAME);
         //xres.disable(ctx, mr, cred);
         xres.disable(ctx, cred);
     }
 
+    /**
+     * @deprecated Use {@link ContextManager} instead
+     */
     private void enableContext(Context ctx, String host, Credentials cred) throws Exception {
         OXContextInterface xres = (OXContextInterface) Naming.lookup(host + OXContextInterface.RMI_NAME);
         xres.enable(ctx, cred);
@@ -444,6 +476,9 @@ public class ContextTest extends AbstractTest {
         return ctx;
     }
 
+    /**
+     * @deprecated Use {@link ContextManager} instead
+     */
     public static int createNewContextID(Credentials cred) throws MalformedURLException, RemoteException, NotBoundException, StorageException, InvalidCredentialsException, InvalidDataException {
         int pos = 5;
         int ret = -1;
