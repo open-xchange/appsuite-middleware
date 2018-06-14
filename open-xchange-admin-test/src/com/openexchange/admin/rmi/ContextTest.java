@@ -77,8 +77,6 @@ import com.openexchange.admin.rmi.manager.ContextManager;
  */
 public class ContextTest extends AbstractTest {
 
-    private ContextManager contextManager;
-
     /**
      * Initialises a new {@link ContextTest}.
      */
@@ -89,7 +87,6 @@ public class ContextTest extends AbstractTest {
     @Override
     public void setUp() throws Exception {
         super.setUp();
-        contextManager = ContextManager.getInstance(getRMIHostUrl(), getMasterAdminCredentials());
     }
 
     /**
@@ -97,7 +94,7 @@ public class ContextTest extends AbstractTest {
      */
     @Override
     public void tearDown() throws Exception {
-        contextManager.cleanUp();
+        getContextManager().cleanUp();
         super.tearDown();
     }
 
@@ -107,8 +104,8 @@ public class ContextTest extends AbstractTest {
     @Test
     public void testGetAdminId() throws Exception {
         // The context admin's id is always '2'
-        Context testContext = contextManager.createContext(getContextAdminCredentials());
-        assertEquals(2, contextManager.getAdminId(testContext));
+        Context testContext = getContextManager().createContext(getContextAdminCredentials());
+        assertEquals(2, getContextManager().getAdminId(testContext));
     }
 
     /**
@@ -116,10 +113,10 @@ public class ContextTest extends AbstractTest {
      */
     @Test
     public void testGetByName() throws Exception {
-        Context testContext = contextManager.createContext(getContextAdminCredentials());
+        Context testContext = getContextManager().createContext(getContextAdminCredentials());
         Integer idAsInt = testContext.getId();
         testContext.setId(null);
-        final Context srv_loaded = contextManager.getData(testContext);
+        final Context srv_loaded = getContextManager().getData(testContext);
 
         // Reset for compare
         testContext.setId(idAsInt);
@@ -135,7 +132,7 @@ public class ContextTest extends AbstractTest {
         OXUtilInterface oxu = (OXUtilInterface) Naming.lookup(getRMIHostUrl() + OXUtilInterface.RMI_NAME);
         Database[] dbs = oxu.listDatabase("*", getMasterAdminCredentials());
         if (dbs.length > 0) {
-            Context[] ids = contextManager.searchContext(dbs[0]);
+            Context[] ids = getContextManager().searchContext(dbs[0]);
             assertTrue("No contexts found in database " + dbs[0].getUrl(), ids.length > 0);
         } else {
             fail("No databases found.");
@@ -154,7 +151,7 @@ public class ContextTest extends AbstractTest {
         }
         boolean foundContextViaFilestore = false;
         for (int a = 0; a < fiss.length; a++) {
-            Context[] ids = contextManager.searchContext(fiss[a]);
+            Context[] ids = getContextManager().searchContext(fiss[a]);
             if (ids.length > 0) {
                 foundContextViaFilestore = true;
             }
@@ -167,7 +164,7 @@ public class ContextTest extends AbstractTest {
      */
     @Test
     public void testCreateContext() throws Exception {
-        contextManager.createContext(getMasterAdminCredentials());
+        getContextManager().createContext(getMasterAdminCredentials());
     }
 
     /**
@@ -177,7 +174,7 @@ public class ContextTest extends AbstractTest {
     public void testCreateContextNoQuota() throws Exception {
         Context c = new Context();
         c.setName("Name-" + UUID.randomUUID().toString());
-        contextManager.createContext(c, getContextAdminCredentials());
+        getContextManager().createContext(c, getContextAdminCredentials());
     }
 
     /**
@@ -185,10 +182,10 @@ public class ContextTest extends AbstractTest {
      */
     @Test
     public void testCreateDeleteCreateContext() throws Exception {
-        Context context = contextManager.createContext(getContextAdminCredentials());
+        Context context = getContextManager().createContext(getContextAdminCredentials());
         int ctxId = context.getId().intValue();
-        contextManager.deleteContext(context);
-        contextManager.createContext(ctxId, 5000, getContextAdminCredentials());
+        getContextManager().deleteContext(context);
+        getContextManager().createContext(ctxId, 5000, getContextAdminCredentials());
     }
 
     /**
@@ -196,8 +193,8 @@ public class ContextTest extends AbstractTest {
      */
     @Test
     public void testDeleteContext() throws Exception {
-        Context context = contextManager.createContext(getMasterAdminCredentials());
-        contextManager.deleteContext(context);
+        Context context = getContextManager().createContext(getMasterAdminCredentials());
+        getContextManager().deleteContext(context);
     }
 
     /**
@@ -205,12 +202,12 @@ public class ContextTest extends AbstractTest {
      */
     @Test
     public void testExistsContext() throws Exception {
-        Context testContext = contextManager.createContext(getContextAdminCredentials());
+        Context testContext = getContextManager().createContext(getContextAdminCredentials());
         Context nonExistent = new Context();
         nonExistent.setName("notexists.com");
 
-        assertFalse("Context must not exist", contextManager.exists(nonExistent));
-        assertTrue("Context must exist", contextManager.exists(testContext));
+        assertFalse("Context must not exist", getContextManager().exists(nonExistent));
+        assertTrue("Context must exist", getContextManager().exists(testContext));
     }
 
     /**
@@ -218,7 +215,7 @@ public class ContextTest extends AbstractTest {
      */
     @Test
     public void testEnableContext() throws Exception {
-        Context testContext = contextManager.createContext(getContextAdminCredentials());
+        Context testContext = getContextManager().createContext(getContextAdminCredentials());
 
         Credentials cred = getMasterAdminCredentials();
         String hosturl = getRMIHostUrl();
@@ -235,8 +232,8 @@ public class ContextTest extends AbstractTest {
             mr.setId(mrs[0].getId());
         }
 
-        contextManager.disableContext(testContext);
-        Context[] ctxs = contextManager.searchContext(testContext.getIdAsString());
+        getContextManager().disableContext(testContext);
+        Context[] ctxs = getContextManager().searchContext(testContext.getIdAsString());
         boolean ctx_disabled = false;
         for (final Context elem : ctxs) {
             if (elem.getId().intValue() == testContext.getId().intValue() && !elem.isEnabled()) {
@@ -246,8 +243,8 @@ public class ContextTest extends AbstractTest {
         assertTrue("Context could be not disabled", ctx_disabled);
 
         // now enable context again
-        contextManager.enableContext(testContext);
-        ctxs = contextManager.searchContext(testContext.getIdAsString());
+        getContextManager().enableContext(testContext);
+        ctxs = getContextManager().searchContext(testContext.getIdAsString());
         boolean ctx_ensabled = false;
         for (final Context elem : ctxs) {
             if ((elem.getId().intValue() == testContext.getId().intValue()) && elem.isEnabled()) {
@@ -262,7 +259,7 @@ public class ContextTest extends AbstractTest {
      */
     @Test
     public void testDisableContext() throws Exception {
-        Context testContext = contextManager.createContext(getContextAdminCredentials());
+        Context testContext = getContextManager().createContext(getContextAdminCredentials());
 
         Credentials cred = getMasterAdminCredentials();
         String hosturl = getRMIHostUrl();
@@ -278,8 +275,8 @@ public class ContextTest extends AbstractTest {
         } else {
             mr.setId(mrs[0].getId());
         }
-        contextManager.disableContext(testContext);
-        Context[] ctxs = contextManager.searchContext(testContext.getIdAsString());
+        getContextManager().disableContext(testContext);
+        Context[] ctxs = getContextManager().searchContext(testContext.getIdAsString());
         boolean ctx_disabled = false;
 
         for (final Context elem : ctxs) {
@@ -301,8 +298,8 @@ public class ContextTest extends AbstractTest {
         context.setUserAttribute("com.openexchange.test", "flavor", "lemon");
         context.setUserAttribute("com.openexchange.test", "texture", "squishy");
 
-        contextManager.createContext(context, getContextAdminCredentials());
-        Context srv_loaded = contextManager.getData(context);
+        getContextManager().createContext(context, getContextAdminCredentials());
+        Context srv_loaded = getContextManager().getData(context);
 
         assertEquals("lemon", srv_loaded.getUserAttribute("com.openexchange.test", "flavor"));
         assertEquals("squishy", srv_loaded.getUserAttribute("com.openexchange.test", "texture"));
@@ -322,9 +319,9 @@ public class ContextTest extends AbstractTest {
         srv_loaded.setUserAttribute("com.openexchange.test", "texture", null);
 
         // change context and load again
-        contextManager.changeContext(srv_loaded);
+        getContextManager().changeContext(srv_loaded);
 
-        Context edited_ctx = contextManager.getData(context);
+        Context edited_ctx = getContextManager().getData(context);
 
         assertEquals("pistaccio", srv_loaded.getUserAttribute("com.openexchange.test", "flavor"));
         assertEquals("green", srv_loaded.getUserAttribute("com.openexchange.test", "color"));
@@ -350,19 +347,19 @@ public class ContextTest extends AbstractTest {
         Context ctx1 = ContextFactory.createContext(5000);
         ctx1.setLoginMappings(new HashSet<String>(Arrays.asList("foo")));
 
-        contextManager.createContext(ctx1, getContextAdminCredentials());
+        getContextManager().createContext(ctx1, getContextAdminCredentials());
         clean.add(ctx1);
         try {
             Context ctx2 = ContextFactory.createContext(5000);
             ctx2.setLoginMappings(new HashSet<String>(Arrays.asList("foo")));
-            contextManager.createContext(ctx2, getContextAdminCredentials());
+            getContextManager().createContext(ctx2, getContextAdminCredentials());
             clean.add(ctx2);
             fail("Could add Context");
         } catch (Exception x) {
             assertEquals("Cannot map 'foo' to the newly created context. This mapping is already in use.", x.getMessage());
         } finally {
             for (Context context : clean) {
-                contextManager.deleteContext(context);
+                getContextManager().deleteContext(context);
             }
         }
 
@@ -373,10 +370,10 @@ public class ContextTest extends AbstractTest {
      */
     @Test
     public void testListContext() throws Exception {
-        Context testContext = contextManager.createContext(getContextAdminCredentials());
+        Context testContext = getContextManager().createContext(getContextAdminCredentials());
         int ctxid = testContext.getId().intValue();
         // now search exactly for the added context
-        Context[] ctxs = contextManager.searchContext(Integer.toString(ctxid));
+        Context[] ctxs = getContextManager().searchContext(Integer.toString(ctxid));
         boolean foundctx = false;
         for (final Context elem : ctxs) {
             if (elem.getId().intValue() == ctxid) {
@@ -384,5 +381,14 @@ public class ContextTest extends AbstractTest {
             }
         }
         assertTrue("context not found", foundctx);
+    }
+
+    /**
+     * Gets the {@link ContextManager}
+     * 
+     * @return The {@link ContextManager}
+     */
+    private ContextManager getContextManager() {
+        return ContextManager.getInstance(getRMIHostUrl(), getMasterAdminCredentials());
     }
 }

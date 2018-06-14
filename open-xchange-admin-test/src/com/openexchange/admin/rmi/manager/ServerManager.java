@@ -61,13 +61,29 @@ import com.openexchange.admin.rmi.dataobjects.Server;
  */
 public class ServerManager extends AbstractManager {
 
+    private static ServerManager INSTANCE;
+
+    /**
+     * Gets the instance of the {@link ServerManager}
+     * 
+     * @param host
+     * @param masterCredentials
+     * @return
+     */
+    public static ServerManager getInstance(String host, Credentials masterCredentials) {
+        if (INSTANCE == null) {
+            INSTANCE = new ServerManager(host, masterCredentials);
+        }
+        return INSTANCE;
+    }
+
     /**
      * Initialises a new {@link ServerManager}.
      * 
      * @param rmiEndPointURL
      * @param masterCredentials
      */
-    public ServerManager(String rmiEndPointURL, Credentials masterCredentials) {
+    private ServerManager(String rmiEndPointURL, Credentials masterCredentials) {
         super(rmiEndPointURL, masterCredentials);
     }
 

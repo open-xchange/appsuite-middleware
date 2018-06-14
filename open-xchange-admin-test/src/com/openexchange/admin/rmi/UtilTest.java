@@ -60,14 +60,14 @@ import org.junit.Test;
 import com.openexchange.admin.rmi.dataobjects.Database;
 import com.openexchange.admin.rmi.dataobjects.MaintenanceReason;
 import com.openexchange.admin.rmi.dataobjects.Server;
+import com.openexchange.admin.rmi.manager.ServerManager;
 
 /**
  *
  * @author cutmasta
  */
 public class UtilTest extends AbstractTest {
-    
-    
+
     /**
      * Initialises a new {@link UtilTest}.
      */
@@ -141,24 +141,17 @@ public class UtilTest extends AbstractTest {
 
     @Test
     public void testRegisterServer() throws Exception {
-        OXUtilInterface oxu = getUtilClient();
-
         Server reg_srv = new Server();
         reg_srv.setName("testcase-register-server-" + System.currentTimeMillis());
+        reg_srv.setId(getServerManager().registerServer(reg_srv).getId());
 
-        reg_srv.setId(oxu.registerServer(reg_srv, ContextTest.getMasterAdminCredentials()).getId());
-
-        Server[] srv_resp = oxu.listServer("testcase-register-server-*", ContextTest.getMasterAdminCredentials());
+        Server[] srv_resp = getServerManager().listServers("testcase-register-server-*");
         int resp = 0;
         for (Server server : srv_resp) {
             if (server.getName().equals(reg_srv.getName()) && server.getId().intValue() == reg_srv.getId().intValue()) {
                 resp++;
             }
         }
-        //        for(int a = 0;a<=srv_resp.length;a++){
-        //
-        //        }
-        // resp muss 1 sein , ansonsten gibts 2 server mit selber id und name
         assertTrue("Expected 1 server", resp == 1);
     }
 
@@ -216,5 +209,14 @@ public class UtilTest extends AbstractTest {
 
         assertTrue("Expected to find registered server with data", found_srv);
 
+    }
+
+    /**
+     * Gets the {@link ServerManager}
+     * 
+     * @return the {@link ServerManager}
+     */
+    private ServerManager getServerManager() {
+        return ServerManager.getInstance(getRMIHostUrl(), getMasterAdminCredentials());
     }
 }

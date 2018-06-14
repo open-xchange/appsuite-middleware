@@ -95,6 +95,7 @@ public class ContextManager extends AbstractManager {
     /** Default max quota for a {@link Context}, 5GB */
     private static final long DEFAULT_MAX_QUOTA = 5000;
 
+    private final ServerManager serverManager;
     private final Map<Integer, Context> registeredContexts;
 
     /**
@@ -103,6 +104,7 @@ public class ContextManager extends AbstractManager {
     private ContextManager(String host, Credentials masterCredentials) {
         super(host, masterCredentials);
         registeredContexts = new HashMap<>();
+        serverManager = ServerManager.getInstance(host, masterCredentials);
     }
 
     /**
@@ -331,13 +333,13 @@ public class ContextManager extends AbstractManager {
      * @throws Exception if an error is occurred during registration
      */
     private void registerServer() throws Exception {
-        OXUtilInterface utilInterface = getUtilInterface();
-        if (utilInterface.listServer("local", getMasterCredentials()).length == 1) {
+        if (serverManager.listServers("local").length == 1) {
             return;
         }
-        Server srv = new Server();
-        srv.setName("local");
-        utilInterface.registerServer(srv, getMasterCredentials());
+
+        Server server = new Server();
+        server.setName("local");
+        serverManager.registerServer(server);
     }
 
     /**
