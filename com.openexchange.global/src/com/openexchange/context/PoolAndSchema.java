@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,69 +47,79 @@
  *
  */
 
-package com.openexchange.ms.internal;
-
-import java.util.concurrent.atomic.AtomicReference;
-import com.openexchange.server.ServiceLookup;
+package com.openexchange.context;
 
 /**
- * {@link Services} - The static service lookup.
+ * {@link PoolAndSchema} - A pair of a database (write) pool identifier and a schema name.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.10.0
  */
-public final class Services {
+public class PoolAndSchema {
+
+    private final int poolId;
+    private final String schema;
+    private final int hash;
 
     /**
-     * Initializes a new {@link Services}.
+     * Initializes a new {@link PoolAndSchema}.
+     *
+     * @param poolId The pool identifier
+     * @param schema The name of the associated database schema
      */
-    private Services() {
+    public PoolAndSchema(int poolId, String schema) {
         super();
-    }
+        this.poolId = poolId;
+        this.schema = schema;
 
-    private static final AtomicReference<ServiceLookup> REF = new AtomicReference<ServiceLookup>();
-
-    /**
-     * Sets the service lookup.
-     *
-     * @param serviceLookup The service lookup or <code>null</code>
-     */
-    public static void setServiceLookup(final ServiceLookup serviceLookup) {
-        REF.set(serviceLookup);
+        int result = 31 * 1 + poolId;
+        result = 31 * result + ((schema == null) ? 0 : schema.hashCode());
+        this.hash = result;
     }
 
     /**
-     * Gets the service lookup.
+     * Gets the name of the associated database schema
      *
-     * @return The service lookup or <code>null</code>
+     * @return The name of the associated database schema
      */
-    public static ServiceLookup getServiceLookup() {
-        return REF.get();
+    public String getSchema() {
+        return schema;
     }
 
     /**
-     * Gets the service of specified type
+     * Gets the pool identifier
      *
-     * @param clazz The service's class
-     * @return The service
-     * @throws IllegalStateException If an error occurs while returning the demanded service
+     * @return The pool identifier
      */
-    public static <S extends Object> S getService(final Class<? extends S> clazz) {
-        final com.openexchange.server.ServiceLookup serviceLookup = REF.get();
-        if (null == serviceLookup) {
-            throw new IllegalStateException("Missing ServiceLookup instance. Bundle \"com.openexchange.ms\" not started?");
+    public int getPoolId() {
+        return poolId;
+    }
+
+    @Override
+    public int hashCode() {
+        return hash;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
         }
-        return serviceLookup.getService(clazz);
-    }
-
-    /**
-     * (Optionally) Gets the service of specified type
-     *
-     * @param clazz The service's class
-     * @return The service or <code>null</code> if absent
-     */
-    public static <S extends Object> S optService(final Class<? extends S> clazz) {
-        ServiceLookup serviceLookup = REF.get();
-        return null == serviceLookup ? null : serviceLookup.getOptionalService(clazz);
+        if (!(obj instanceof PoolAndSchema)) {
+            return false;
+        }
+        PoolAndSchema other = (PoolAndSchema) obj;
+        if (poolId != other.poolId) {
+            return false;
+        }
+        if (schema == null) {
+            if (other.schema != null) {
+                return false;
+            }
+        } else if (!schema.equals(other.schema)) {
+            return false;
+        }
+        return true;
     }
 
 }
