@@ -50,8 +50,6 @@
 package com.openexchange.admin.rmi.manager;
 
 import java.net.URI;
-import java.util.HashMap;
-import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.admin.rmi.ContextFactory;
@@ -95,14 +93,12 @@ public class ContextManager extends AbstractManager {
     private static final long DEFAULT_MAX_QUOTA = 5000;
 
     private final ServerManager serverManager;
-    private final Map<Integer, Context> registeredContexts;
 
     /**
      * Initialises a new {@link ContextManager}.
      */
     private ContextManager(String host, Credentials masterCredentials) {
         super(host, masterCredentials);
-        registeredContexts = new HashMap<>();
         serverManager = ServerManager.getInstance(host, masterCredentials);
     }
 
@@ -177,7 +173,7 @@ public class ContextManager extends AbstractManager {
         }
         OXContextInterface contextInterface = getContextInterface();
         contextInterface.create(context, UserTest.getTestUserObject(contextAdminCredentials.getLogin(), contextAdminCredentials.getPassword(), context), getMasterCredentials());
-        registeredContexts.put(context.getId(), context);
+        managedObjects.put(context.getId(), context);
         return context;
     }
 
@@ -250,7 +246,7 @@ public class ContextManager extends AbstractManager {
     public void deleteContext(Context ctx) throws Exception {
         OXContextInterface contextInterface = getContextInterface();
         contextInterface.delete(ctx, getMasterCredentials());
-        registeredContexts.remove(ctx.getId());
+        managedObjects.remove(ctx.getId());
     }
 
     /**

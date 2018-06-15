@@ -72,7 +72,7 @@ abstract class AbstractManager {
     private final String rmiEndPointURL;
     private final Credentials masterCredentials;
 
-    private final Map<Integer, Object> managedObjects;
+    final Map<Integer, Object> managedObjects;
 
     /**
      * Initialises a new {@link AbstractManager}.

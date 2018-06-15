@@ -53,80 +53,80 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.admin.rmi.OXUtilInterface;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
-import com.openexchange.admin.rmi.dataobjects.Server;
+import com.openexchange.admin.rmi.dataobjects.Database;
 
 /**
- * {@link ServerManager}
+ * {@link DatabaseManager}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @since v7.10.1
  */
-public class ServerManager extends AbstractManager {
+public class DatabaseManager extends AbstractManager {
 
-    private static ServerManager INSTANCE;
+    private static DatabaseManager INSTANCE;
 
     /**
-     * Gets the instance of the {@link ServerManager}
+     * Gets the instance of the {@link DatabaseManager}
      * 
      * @param host
      * @param masterCredentials
      * @return
      */
-    public static ServerManager getInstance(String host, Credentials masterCredentials) {
+    public static DatabaseManager getInstance(String host, Credentials masterCredentials) {
         if (INSTANCE == null) {
-            INSTANCE = new ServerManager(host, masterCredentials);
+            INSTANCE = new DatabaseManager(host, masterCredentials);
         }
         return INSTANCE;
     }
 
-    private static final Logger LOG = LoggerFactory.getLogger(ServerManager.class);
+    private static final Logger LOG = LoggerFactory.getLogger(DatabaseManager.class);
 
     /**
-     * Initialises a new {@link ServerManager}.
+     * Initialises a new {@link DatabaseManager}.
      * 
      * @param rmiEndPointURL
      * @param masterCredentials
      */
-    private ServerManager(String rmiEndPointURL, Credentials masterCredentials) {
+    private DatabaseManager(String rmiEndPointURL, Credentials masterCredentials) {
         super(rmiEndPointURL, masterCredentials);
     }
 
     /**
-     * Registers the specified server
+     * Registers the specified Database
      * 
-     * @param server The {@link Server} to register
-     * @return The registered server
+     * @param database The {@link Database} to register
+     * @return The registered Database
      * @throws Exception if an error occurs during registration
      */
-    public Server registerServer(Server server) throws Exception {
+    public Database registerDatabase(Database database, boolean createSchemata, Integer numberOfSchemata) throws Exception {
         OXUtilInterface utilInterface = getUtilInterface();
-        Server srv = utilInterface.registerServer(server, getMasterCredentials());
-        managedObjects.put(server.getId(), srv);
-        return srv;
+        Database db = utilInterface.registerDatabase(database, createSchemata, numberOfSchemata, getMasterCredentials());
+        managedObjects.put(db.getId(), db);
+        return database;
     }
 
     /**
-     * Unregisters the specified {@link Server}
+     * Unregisters the specified {@link Database}
      * 
-     * @param server The {@link Server} to unregister
+     * @param database The {@link Database} to unregister
      * @throws Exception if an error occurs
      */
-    public void unregisterServer(Server server) throws Exception {
+    public void unregisterDatabase(Database database) throws Exception {
         OXUtilInterface utilInterface = getUtilInterface();
-        utilInterface.unregisterServer(server, getMasterCredentials());
-        managedObjects.remove(server.getId());
+        utilInterface.unregisterDatabase(database, getMasterCredentials());
+        managedObjects.remove(database.getId());
     }
 
     /**
-     * Searches for servers with the specified search pattern
+     * Searches for databases with the specified search pattern
      * 
      * @param searchPattern The search pattern
-     * @return An array with all found {@link Server}s
+     * @return An array with all found {@link Database}s
      * @throws Exception if an error is occurred
      */
-    public Server[] listServers(String searchPattern) throws Exception {
+    public Database[] listDatabases(String searchPattern) throws Exception {
         OXUtilInterface utilInterface = getUtilInterface();
-        return utilInterface.listServer(searchPattern, getMasterCredentials());
+        return utilInterface.listDatabase(searchPattern, getMasterCredentials());
     }
 
     /*
@@ -136,16 +136,16 @@ public class ServerManager extends AbstractManager {
      */
     @Override
     boolean clean(Object object) {
-        if (!(object instanceof Server)) {
-            LOG.error("The specified object is not of type Server", object.toString());
+        if (!(object instanceof Database)) {
+            LOG.error("The specified object is not of type Database", object.toString());
             return false;
         }
-        Server server = (Server) object;
+        Database database = (Database) object;
         try {
-            unregisterServer(server);
+            unregisterDatabase(database);
             return true;
         } catch (Exception e) {
-            LOG.error("The server '{}' could not be unregistered!, obj", server.getId());
+            LOG.error("The database '{}' could not be unregistered!, obj", database.getId());
             return false;
         }
     }
