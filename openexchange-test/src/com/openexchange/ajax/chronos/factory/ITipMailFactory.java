@@ -52,7 +52,6 @@ package com.openexchange.ajax.chronos.factory;
 import java.text.SimpleDateFormat;
 import java.util.Base64;
 import java.util.Date;
-import com.openexchange.test.pool.TestUser;
 
 /**
  * {@link ITipMailFactory}
@@ -62,8 +61,8 @@ import com.openexchange.test.pool.TestUser;
  */
 public class ITipMailFactory {
 
-    private TestUser from;
-    private TestUser to;
+    private String from;
+    private String to;
 
     private String iCal;
     private String subject;
@@ -76,7 +75,7 @@ public class ITipMailFactory {
      * @param iCal The iCal file as {@link String}
      * 
      */
-    public ITipMailFactory(TestUser from, TestUser to, String iCal) {
+    public ITipMailFactory(String from, String to, String iCal) {
         this(from, to, iCal, "Test invitation for iTIP");
     }
 
@@ -89,7 +88,7 @@ public class ITipMailFactory {
      * @param subject The mail subject
      * 
      */
-    public ITipMailFactory(TestUser from, TestUser to, String iCal, String subject) {
+    public ITipMailFactory(String from, String to, String iCal, String subject) {
         super();
         this.from = from;
         this.to = to;
@@ -97,12 +96,12 @@ public class ITipMailFactory {
         this.subject = subject;
     }
 
-    public ITipMailFactory setFrom(TestUser from) {
+    public ITipMailFactory setFrom(String from) {
         this.from = from;
         return this;
     }
 
-    public ITipMailFactory setTo(TestUser to) {
+    public ITipMailFactory setTo(String to) {
         this.to = to;
         return this;
     }
@@ -134,15 +133,15 @@ public class ITipMailFactory {
         addDateTime(sb, 0);
         addNewLine(sb);
 
-        sb.append("From: \"").append(from.getUser()).append("\"");
+        sb.append("From: \"").append(from).append("\"");
         setUser(sb, from);
         addNewLine(sb);
 
-        sb.append("Reply-To: \"").append(from.getUser()).append("\"");
+        sb.append("Reply-To: \"").append(from).append("\"");
         setUser(sb, from);
         addNewLine(sb);
 
-        sb.append("To: ").append(to.getUser());
+        sb.append("To: ").append(to);
         setUser(sb, to);
         addNewLine(sb);
 
@@ -555,8 +554,8 @@ public class ITipMailFactory {
         sb.append(new SimpleDateFormat("EEE, d MMM yyyy HH:mm:ss z").format(new Date(System.currentTimeMillis() - minus)));
     }
 
-    private void setUser(StringBuilder sb, TestUser user) {
-        sb.append(" <").append(user.getLogin()).append(">");
+    private void setUser(StringBuilder sb, String user) {
+        sb.append(" <").append(user).append(">");
     }
 
     private void addNewLine(StringBuilder sb) {
