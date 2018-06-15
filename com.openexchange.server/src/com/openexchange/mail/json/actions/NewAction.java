@@ -520,14 +520,8 @@ public final class NewAction extends AbstractMailAction implements EnqueuableAJA
                 if (setting.isContactCollectOnMailTransport(session.getContextId(), session.getUserId()).booleanValue()) {
                     triggerContactCollector(session, composedMails, true);
                 }
-            } catch (final Exception e) {
+            } catch (Exception e) {
                 LOG.warn("Contact collector could not be triggered.", e);
-            }
-
-            try {
-                triggerUseCountIncrementForGAB(session, sentMessage.getAllRecipients());
-            } catch (OXException e) {
-                LOG.warn("Use count could not be incremented.", e);
             }
 
             if (msgIdentifier == null) {
