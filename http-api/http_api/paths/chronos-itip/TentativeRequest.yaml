@@ -23,4 +23,4 @@
       200:
         description: An array of Events that were newly created or changed.
         schema:
-          $ref: "#/definitions/EventData"
+          $ref: "#/definitions/ActionResponse"

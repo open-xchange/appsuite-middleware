@@ -1,0 +1,12 @@
+type: object
+properties:
+  data:
+    type: array
+    items:
+      $ref: "#/definitions/EventData"
+    description: The created or updated event.
+  timestamp:
+    type: integer
+    format: int64
+    description: The timestamp of the event.
+    readOnly: true
