@@ -50,6 +50,7 @@
 package com.openexchange.ajax.chronos.itip;
 
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.notNullValue;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
@@ -57,6 +58,7 @@ import org.junit.Test;
 import com.openexchange.ajax.chronos.factory.EventFactory;
 import com.openexchange.ajax.chronos.factory.ICalFacotry;
 import com.openexchange.junit.Assert;
+import com.openexchange.testing.httpclient.models.ActionResponse;
 import com.openexchange.testing.httpclient.models.Attendee;
 import com.openexchange.testing.httpclient.models.CalendarUser;
 import com.openexchange.testing.httpclient.models.EventData;
@@ -69,6 +71,24 @@ import com.openexchange.testing.httpclient.models.MailDestinationData;
  * @since v7.10.0
  */
 public class ITipRequestTests extends AbstractITipTest {
+
+    private MailDestinationData mailData;
+
+    private EventData updatedEvent;
+
+    @Override
+    public void tearDown() throws Exception {
+        try {
+            if (null != mailData) {
+                removeMail(mailData);
+            }
+            if (null != updatedEvent) {
+                deleteEvent(updatedEvent);
+            }
+        } finally {
+            super.tearDown();
+        }
+    }
 
     @Test
     public void testAcceptRequest() throws Exception {
@@ -87,10 +107,12 @@ public class ITipRequestTests extends AbstractITipTest {
         c.entity(Integer.valueOf(userResponseC2.getData().getId()));
         event.setOrganizer(c);
 
-        MailDestinationData mailData = createMailInInbox(Collections.singletonList(event));
+        mailData = createMailInInbox(Collections.singletonList(event));
+        Assert.assertThat("No mail created.", mailData.getId(), notNullValue());
 
-        EventData accept = accept(constructBody(mailData.getId()));
-        Assert.assertThat("Should be the same start date", accept.getStartDate(), is(event.getStartDate()));
+        ActionResponse accept = accept(constructBody(mailData.getId()));
+        updatedEvent = accept.getData().get(0);
+        Assert.assertThat("Should be the same start date", updatedEvent.getStartDate(), is(event.getStartDate()));
     }
 
 }
