@@ -7,7 +7,7 @@ Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ClassPath: .,
  lib/vinnie-2.0.0.jar,
- lib/lib-recur-0.10.1.jar
+ lib/lib-recur-0.10.jar
 Import-Package: com.openexchange.chronos,
  com.openexchange.chronos.exception,
  com.openexchange.chronos.service,
