@@ -448,8 +448,6 @@ MailFilterDeletionBody:
 MailFilterScriptResponse:
   $ref: ./mailfilter/MailFilterScriptResponse.yaml
 # Module: conversion
-ConversionDataSourcePair:
-  $ref: ./conversion/ConversionDataSourcePair.yaml
 ConversionDataSource:
   $ref: ./conversion/ConversionDataSource.yaml
 ConversionDataHandlerPair:
