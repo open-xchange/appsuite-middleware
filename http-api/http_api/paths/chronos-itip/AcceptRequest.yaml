@@ -13,6 +13,12 @@
         type: string
         description: The identifier of the data source. Currently only "com.openexchange.mail.ical" is valid.
         required: true
+      - in: query
+        name: descriptionFormat
+        type: string
+        description: The desired output fromat. Currently only "html" is valid.
+        default: html
+        required: true
       - in: body
         name: body
         description: The data source object.
