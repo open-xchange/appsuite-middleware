@@ -51,11 +51,14 @@ package com.openexchange.admin.rmi;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import java.net.MalformedURLException;
+import java.rmi.Naming;
+import java.rmi.NotBoundException;
+import java.rmi.RemoteException;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.admin.rmi.dataobjects.Database;
-import com.openexchange.admin.rmi.manager.DatabaseManager;
 
 /**
  * @author cutmasta
@@ -68,31 +71,37 @@ public class UtilDatabaseTest extends AbstractTest {
 
     private String db_name;
 
+    private OXUtilInterface getUtilClient() throws NotBoundException, MalformedURLException, RemoteException {
+        return (OXUtilInterface) Naming.lookup(getRMIHostUrl() + OXUtilInterface.RMI_NAME);
+    }
+
     public UtilDatabaseTest() {
         super();
     }
 
-    @Override
-    public final void setUp() throws Exception {
-        super.setUp();
+    @Before
+    public final void setup() throws Exception {
+        oxu = getUtilClient();
         db_name = "db_" + System.currentTimeMillis();
         client_db = UtilTest.getTestDatabaseObject("localhost", db_name);
         if (null == client_db) {
             throw new NullPointerException("Database object is null");
         }
-        client_db.setId(getDatabaseManager().registerDatabase(client_db, Boolean.FALSE, Integer.valueOf(0)).getId());
+        client_db.setId(oxu.registerDatabase(client_db, Boolean.FALSE, Integer.valueOf(0), ContextTest.getMasterAdminCredentials()).getId());
     }
 
-    @Override
+    @After
     public final void tearDown() throws Exception {
-        getDatabaseManager().cleanUp();
+        if (client_db != null) {
+            oxu.unregisterDatabase(new Database(client_db.getId()), ContextTest.getMasterAdminCredentials());
+        }
         db_name = null;
         client_db = null;
-        super.tearDown();
     }
 
     @Test
     public void testRegisterDatabase() throws Exception {
+
         Database[] srv_dbs = oxu.listDatabase("db_*", ContextTest.getMasterAdminCredentials());
         boolean found_db = false;
         for (int a = 0; a < srv_dbs.length; a++) {
@@ -119,7 +128,7 @@ public class UtilDatabaseTest extends AbstractTest {
 
     @Test
     public void testChangeDatabase() throws Exception {
-        Database[] srv_dbs = getDatabaseManager().listDatabases("db_*");
+        Database[] srv_dbs = oxu.listDatabase("db_*", ContextTest.getMasterAdminCredentials());
         boolean found_db = false;
         for (int a = 0; a < srv_dbs.length; a++) {
             Database tmp = srv_dbs[a];
@@ -130,10 +139,7 @@ public class UtilDatabaseTest extends AbstractTest {
                 assertEquals(client_db.getDriver(), tmp.getDriver());
                 assertEquals(client_db.getLogin(), tmp.getLogin());
                 assertEquals(client_db.getMaxUnits(), tmp.getMaxUnits());
-                assertEquals(client_db.getPassword(), tmp.getP    private OXUtilInterface getUtilClient() throws NotBoundException, MalformedURLException, RemoteException {
-                    return (OXUtilInterface) Naming.lookup(getRMIHostUrl() + OXUtilInterface.RMI_NAME);
-                }
-assword());
+                assertEquals(client_db.getPassword(), tmp.getPassword());
                 assertEquals(client_db.getPoolHardLimit(), tmp.getPoolHardLimit());
                 assertEquals(client_db.getPoolInitial(), tmp.getPoolInitial());
                 assertEquals(client_db.getPoolMax(), tmp.getPoolMax());
@@ -156,9 +162,9 @@ assword());
         client_db.setUrl(client_db.getUrl() + change_suffix);
 
         // change db data
-        getDatabaseManager().changeDatabase(client_db);
+        oxu.changeDatabase(client_db, ContextTest.getMasterAdminCredentials());
 
-        srv_dbs = getDatabaseManager().listDatabases("db_*");
+        srv_dbs = oxu.listDatabase("db_*", ContextTest.getMasterAdminCredentials());
 
         for (int a = 0; a < srv_dbs.length; a++) {
             Database tmp = srv_dbs[a];
@@ -180,7 +186,7 @@ assword());
 
     @Test
     public void testUnregisterDatabase() throws Exception {
-        Database[] srv_dbs = getDatabaseManager().listDatabases("db_*");
+        Database[] srv_dbs = oxu.listDatabase("db_*", ContextTest.getMasterAdminCredentials());
         boolean found_db = false;
         for (int a = 0; a < srv_dbs.length; a++) {
             Database tmp = srv_dbs[a];
@@ -203,9 +209,9 @@ assword());
         assertTrue("Expected to find registered db with data", found_db);
 
         // now unregister database
-        getDatabaseManager().unregisterDatabase(new Database(client_db.getId()));
+        oxu.unregisterDatabase(new Database(client_db.getId()), ContextTest.getMasterAdminCredentials());
 
-        srv_dbs = getDatabaseManager().listDatabases("db_*");
+        srv_dbs = oxu.listDatabase("db_*", ContextTest.getMasterAdminCredentials());
         found_db = false;
         for (int a = 0; a < srv_dbs.length; a++) {
             Database tmp = srv_dbs[a];
@@ -223,7 +229,7 @@ assword());
 
     @Test
     public void testListDatabase() throws Exception {
-        Database[] srv_dbs = getDatabaseManager().listDatabases("db_*");
+        Database[] srv_dbs = oxu.listDatabase("db_*", ContextTest.getMasterAdminCredentials());
         boolean found_db = false;
         for (int a = 0; a < srv_dbs.length; a++) {
             Database tmp = srv_dbs[a];
@@ -244,14 +250,5 @@ assword());
         }
 
         assertTrue("Expected to find registered db with data", found_db);
-    }
-
-    /**
-     * Gets the {@link DatabaseManager}
-     * 
-     * @return the {@link DatabaseManager}
-     */
-    private DatabaseManager getDatabaseManager() {
-        return DatabaseManager.getInstance(getRMIHostUrl(), getMasterAdminCredentials());
     }
 }
