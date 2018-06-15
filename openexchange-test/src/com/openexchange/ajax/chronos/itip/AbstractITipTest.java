@@ -53,6 +53,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Collections;
+import java.util.List;
 import com.openexchange.ajax.chronos.AbstractChronosTest;
 import com.openexchange.ajax.chronos.factory.ICalFacotry;
 import com.openexchange.ajax.chronos.factory.ITipMailFactory;
@@ -115,35 +116,40 @@ public abstract class AbstractITipTest extends AbstractChronosTest {
      * @See {@link ChronosApi#accept(String, String, ConversionDataSource)}
      */
     protected EventData accept(ConversionDataSource body) throws ApiException {
-        return chronosApi.accept(session, DataSources.MAIL.getDataSource(), body);
+        List<EventData> data = chronosApi.accept(session, DataSources.MAIL.getDataSource(), body).getData();
+        return null == data || data.isEmpty() ? null : data.get(0);
     }
 
     /**
      * @See {@link ChronosApi#acceptAndIgnoreConflicts(String, String, ConversionDataSource)}
      */
     protected EventData acceptAndIgnoreConflicts(ConversionDataSource body) throws ApiException {
-        return chronosApi.acceptAndIgnoreConflicts(session, DataSources.MAIL.getDataSource(), body);
+        List<EventData> data = chronosApi.acceptAndIgnoreConflicts(session, DataSources.MAIL.getDataSource(), body).getData();
+        return null == data || data.isEmpty() ? null : data.get(0);
     }
 
     /**
      * @See {@link ChronosApi#tentative(String, String, ConversionDataSource)}
      */
     protected EventData tentative(ConversionDataSource body) throws ApiException {
-        return chronosApi.tentative(session, DataSources.MAIL.getDataSource(), body);
+        List<EventData> data = chronosApi.tentative(session, DataSources.MAIL.getDataSource(), body).getData();
+        return null == data || data.isEmpty() ? null : data.get(0);
     }
 
     /**
      * @See {@link ChronosApi#decline(String, String, ConversionDataSource)}
      */
     protected EventData decline(ConversionDataSource body) throws ApiException {
-        return chronosApi.decline(session, DataSources.MAIL.getDataSource(), body);
+        List<EventData> data = chronosApi.decline(session, DataSources.MAIL.getDataSource(), body).getData();
+        return null == data || data.isEmpty() ? null : data.get(0);
     }
 
     /**
      * @See {@link ChronosApi#update(String, String, ConversionDataSource)}
      */
     protected EventData update(ConversionDataSource body) throws ApiException {
-        return chronosApi.update(session, DataSources.MAIL.getDataSource(), body);
+        List<EventData> data = chronosApi.update(session, DataSources.MAIL.getDataSource(), body).getData();
+        return null == data || data.isEmpty() ? null : data.get(0);
     }
 
     /**
@@ -155,7 +161,7 @@ public abstract class AbstractITipTest extends AbstractChronosTest {
 
     /**
      * Uploads a mail to the INBOX
-     * 
+     *
      * @param data The event to send iTip mail for
      * @return {@link MailDestinationData} with set mail ID and folder ID
      * @throws ApiException In case mail can't be uploaded
