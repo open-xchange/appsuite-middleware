@@ -366,8 +366,6 @@ public abstract class AbstractMailAction implements AJAXActionService, MailActio
         if (incrementUseCount) {
             ObjectUseCountService useCountService = ServerServiceRegistry.getInstance().getService(ObjectUseCountService.class);
             if (null != useCountService) {
-
-
                 if (null == addrs) {
                     for (MailMessage mail : mails) {
                         if (null != mail) {
