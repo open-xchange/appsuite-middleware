@@ -50,6 +50,8 @@
 package com.openexchange.chronos.provider.composition.impl;
 
 import static com.openexchange.chronos.provider.CalendarAccount.DEFAULT_ACCOUNT;
+import static com.openexchange.chronos.provider.CalendarFolderProperty.SCHEDULE_TRANSP;
+import static com.openexchange.chronos.provider.CalendarFolderProperty.USED_FOR_SYNC;
 import static com.openexchange.chronos.provider.composition.impl.idmangling.IDMangling.getAccountId;
 import static com.openexchange.chronos.provider.composition.impl.idmangling.IDMangling.getRelativeFolderId;
 import static com.openexchange.chronos.provider.composition.impl.idmangling.IDMangling.getRelativeId;
@@ -81,8 +83,10 @@ import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.AlarmTrigger;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.Event;
+import com.openexchange.chronos.ExtendedProperties;
 import com.openexchange.chronos.ParticipationStatus;
 import com.openexchange.chronos.RecurrenceId;
+import com.openexchange.chronos.TimeTransparency;
 import com.openexchange.chronos.common.Check;
 import com.openexchange.chronos.common.DefaultCalendarResult;
 import com.openexchange.chronos.common.DefaultErrorAwareCalendarResult;
@@ -1042,6 +1046,10 @@ public class CompositingIDBasedCalendarAccess extends AbstractCompositingIDBased
             CalendarPermission.NO_PERMISSIONS, true, false, 0)));
         folder.setAccountError(accountError);
         folder.setName(getAccountName(account));
+        ExtendedProperties extendedProperties = new ExtendedProperties();
+        extendedProperties.add(USED_FOR_SYNC(Boolean.FALSE, true));
+        extendedProperties.add(SCHEDULE_TRANSP(TimeTransparency.TRANSPARENT, true));
+        folder.setExtendedProperties(extendedProperties);
         return folder;
     }
 
