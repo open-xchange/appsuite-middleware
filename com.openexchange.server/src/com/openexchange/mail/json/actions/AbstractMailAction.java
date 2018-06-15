@@ -97,7 +97,6 @@ import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.mailaccount.TransportAccount;
 import com.openexchange.objectusecount.IncrementArguments;
 import com.openexchange.objectusecount.ObjectUseCountService;
-import com.openexchange.preferences.ServerUserSetting;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
@@ -312,11 +311,14 @@ public abstract class AbstractMailAction implements AJAXActionService, MailActio
      *
      * @param session The session
      * @param mail The mail
+     * @param memorizeAddresses Whether contact-collector is supposed to be triggered
      * @param incrementUseCount Whether the associated contacts' use-count is supposed to be incremented
      * @throws OXException
      */
-    public static void triggerContactCollector(ServerSession session, MailMessage mail, boolean incrementUseCount) throws OXException {
-        triggerContactCollector(session, Collections.singletonList(mail), incrementUseCount);
+    public static void triggerContactCollector(ServerSession session, MailMessage mail, boolean memorizeAddresses, boolean incrementUseCount) throws OXException {
+        if (null != mail) {
+            triggerContactCollector(session, Collections.singletonList(mail), memorizeAddresses, incrementUseCount);
+        }
     }
 
     /** The prefix for puny-code encoded mail addresses */
@@ -327,17 +329,17 @@ public abstract class AbstractMailAction implements AJAXActionService, MailActio
      *
      * @param session The session
      * @param mails The mails
+     * @param memorizeAddresses Whether contact-collector is supposed to be triggered
      * @param incrementUseCount Whether the associated contacts' use-count is supposed to be incremented
      * @throws OXException
      */
-    public static void triggerContactCollector(ServerSession session, Collection<? extends MailMessage> mails, boolean incrementUseCount) throws OXException {
+    public static void triggerContactCollector(ServerSession session, Collection<? extends MailMessage> mails, boolean memorizeAddresses, boolean incrementUseCount) throws OXException {
         // Sets to store user's alias addresses (which should not be considered) and cumulative addresses of specified mail collection
         Set<InternetAddress> addrs = null;
         Set<InternetAddress> aliases = null;
 
         // Check whether contact-collector is supposed to be triggered
-        ServerUserSetting setting = ServerUserSetting.getInstance();
-        if (setting.isContactCollectOnMailTransport(session.getContextId(), session.getUserId()).booleanValue()) {
+        if (memorizeAddresses) {
             ContactCollectorService ccs = ServerServiceRegistry.getInstance().getService(ContactCollectorService.class);
             if (null != ccs) {
                 for (MailMessage mail : mails) {
@@ -360,6 +362,7 @@ public abstract class AbstractMailAction implements AJAXActionService, MailActio
             }
         }
 
+        // Check whether to increment use-count
         if (incrementUseCount) {
             ObjectUseCountService useCountService = ServerServiceRegistry.getInstance().getService(ObjectUseCountService.class);
             if (null != useCountService) {

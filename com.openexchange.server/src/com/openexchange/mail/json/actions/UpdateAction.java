@@ -217,17 +217,13 @@ public final class UpdateAction extends AbstractMailAction {
             if (collectAddresses && null != uid) {
                 // Trigger contact collector
                 try {
-                    ServerUserSetting setting = ServerUserSetting.getInstance();
                     ServerSession session = req.getSession();
-                    int contextId = session.getContextId();
-                    int userId = session.getUserId();
-                    if (setting.isContactCollectOnMailAccess(contextId, userId).booleanValue()) {
+                    boolean memorizeAddresses = ServerUserSetting.getInstance().isContactCollectOnMailAccess(session.getContextId(), session.getUserId()).booleanValue();
+                    if (memorizeAddresses) {
                         MailMessage mail = mailInterface.getMessage(sourceFolder, mailId, false);
-                        if (null != mail) {
-                            triggerContactCollector(session, mail, false);
-                        }
+                        triggerContactCollector(session, mail, true, false);
                     }
-                } catch (final OXException e) {
+                } catch (final Exception e) {
                     LOG.warn("Contact collector could not be triggered.", e);
                 }
             }

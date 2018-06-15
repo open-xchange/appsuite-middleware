@@ -156,13 +156,9 @@ public final class TransportMailAction extends AbstractMailAction {
              * Trigger contact collector
              */
             try {
-                final ServerUserSetting setting = ServerUserSetting.getInstance();
-                final int contextId = session.getContextId();
-                final int userId = session.getUserId();
-                if (setting.isContactCollectOnMailTransport(contextId, userId).booleanValue()) {
-                    triggerContactCollector(session, composedMail, true);
-                }
-            } catch (final OXException e) {
+                boolean memorizeAddresses = ServerUserSetting.getInstance().isContactCollectOnMailTransport(session.getContextId(), session.getUserId()).booleanValue();
+                triggerContactCollector(session, composedMail, memorizeAddresses, true);
+            } catch (final Exception e) {
                 LOG.warn("Contact collector could not be triggered.", e);
             }
             return new AJAXRequestResult(responseObj, "json");
