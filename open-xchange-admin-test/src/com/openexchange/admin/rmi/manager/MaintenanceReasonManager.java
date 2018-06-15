@@ -108,4 +108,13 @@ public class MaintenanceReasonManager extends AbstractManager {
         OXUtilInterface utilInterface = getUtilInterface();
         return utilInterface.listMaintenanceReason(pattern, getMasterCredentials());
     }
+
+    /* (non-Javadoc)
+     * @see com.openexchange.admin.rmi.manager.AbstractManager#clean(java.lang.Object)
+     */
+    @Override
+    boolean clean(Object object) {
+        // TODO Auto-generated method stub
+        return false;
+    }
 }

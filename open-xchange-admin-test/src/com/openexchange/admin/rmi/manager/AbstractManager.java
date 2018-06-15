@@ -51,6 +51,11 @@ package com.openexchange.admin.rmi.manager;
 
 import java.rmi.Naming;
 import java.rmi.Remote;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Map.Entry;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.openexchange.admin.rmi.OXUtilInterface;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 
@@ -62,8 +67,12 @@ import com.openexchange.admin.rmi.dataobjects.Credentials;
  */
 abstract class AbstractManager {
 
+    private static final Logger LOG = LoggerFactory.getLogger(AbstractManager.class);
+
     private final String rmiEndPointURL;
     private final Credentials masterCredentials;
+
+    private final Map<Integer, Object> managedObjects;
 
     /**
      * Initialises a new {@link AbstractManager}.
@@ -75,7 +84,37 @@ abstract class AbstractManager {
         super();
         this.masterCredentials = masterCredentials;
         this.rmiEndPointURL = rmiEndPointURL;
+        managedObjects = new HashMap<>();
     }
+
+    /**
+     * Cleans up all managed objects
+     */
+    public void cleanUp() {
+        Map<Integer, Object> failed = new HashMap<>();
+        for (Entry<Integer, Object> entry : managedObjects.entrySet()) {
+            try {
+                clean(entry.getValue());
+            } catch (Exception e) {
+                LOG.error("Object '{}' could not be removed!", entry.getValue().toString());
+                failed.put(entry.getKey(), entry.getValue());
+            }
+        }
+        managedObjects.clear();
+
+        if (failed.isEmpty()) {
+            return;
+        }
+        LOG.warn("The following '{}' objects were removed: '{}'. Manual intervention might be required.", failed.toString());
+    }
+
+    /**
+     * Part of the clean-up procedure. Cleans the specified object.
+     * 
+     * @param object The object to clean
+     * @return <code>true</code> if clean was successful; <code>false</code> otherwise
+     */
+    abstract boolean clean(Object object);
 
     /**
      * Gets the masterCredentials
@@ -96,7 +135,7 @@ abstract class AbstractManager {
     <T extends Remote> T getRemoteInterface(String rmiName, Class<T> clazz) throws Exception {
         return clazz.cast(Naming.lookup(rmiEndPointURL + rmiName));
     }
-    
+
     /**
      * Returns the {@link OXUtilInterface}
      * 

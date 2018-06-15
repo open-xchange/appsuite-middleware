@@ -52,7 +52,6 @@ package com.openexchange.admin.rmi.manager;
 import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Map.Entry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.admin.rmi.ContextFactory;
@@ -107,25 +106,29 @@ public class ContextManager extends AbstractManager {
         serverManager = ServerManager.getInstance(host, masterCredentials);
     }
 
-    /**
-     * Deletes all managed {@link Context}s
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.admin.rmi.manager.AbstractManager#clean(java.lang.Object)
      */
-    public void cleanUp() {
-        Map<Integer, Context> failed = new HashMap<>();
-        for (Entry<Integer, Context> entry : registeredContexts.entrySet()) {
-            try {
-                deleteContext(entry.getValue());
-            } catch (Exception e) {
-                LOG.error("Context '{}' could not be deleted!", entry.getValue().getId());
-                failed.put(entry.getKey(), entry.getValue());
-            }
+    @Override
+    boolean clean(Object object) {
+        if (object == null) {
+            return true;
         }
-        registeredContexts.clear();
+        if (!(object instanceof Context)) {
+            LOG.error("The specified object is not of type Context", object.toString());
+            return false;
+        }
 
-        if (failed.isEmpty()) {
-            return;
+        Context ctx = (Context) object;
+        try {
+            deleteContext(ctx);
+            return true;
+        } catch (Exception e) {
+            LOG.error("The context '{}' could not be deleted!, obj", ctx.getId());
+            return false;
         }
-        LOG.warn("The following contexts were not deleted: '{}'. Manual intervention might be required.", failed.toString());
     }
 
     /**

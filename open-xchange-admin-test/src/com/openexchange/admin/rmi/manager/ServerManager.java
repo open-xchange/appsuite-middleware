@@ -49,7 +49,13 @@
 
 package com.openexchange.admin.rmi.manager;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Map.Entry;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.openexchange.admin.rmi.OXUtilInterface;
+import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.dataobjects.Server;
 
@@ -76,6 +82,10 @@ public class ServerManager extends AbstractManager {
         }
         return INSTANCE;
     }
+    
+    private static final Logger LOG = LoggerFactory.getLogger(ServerManager.class);
+    
+    private final Map<Integer, Server> managedServers;
 
     /**
      * Initialises a new {@link ServerManager}.
@@ -85,6 +95,28 @@ public class ServerManager extends AbstractManager {
      */
     private ServerManager(String rmiEndPointURL, Credentials masterCredentials) {
         super(rmiEndPointURL, masterCredentials);
+        managedServers = new HashMap<>();
+    }
+    
+    /**
+     * Unregisters all managed {@link Server}s
+     */
+    public void cleanUp() {
+        Map<Integer, Server> failed = new HashMap<>();
+        for (Entry<Integer, Server> entry : managedServers.entrySet()) {
+            try {
+                unregisterServer(entry.getValue());
+            } catch (Exception e) {
+                LOG.error("Server '{}' could not be unregistered!", entry.getValue().getId());
+                failed.put(entry.getKey(), entry.getValue());
+            }
+        }
+        managedServers.clear();
+
+        if (failed.isEmpty()) {
+            return;
+        }
+        LOG.warn("The following server were not unregistered: '{}'. Manual intervention might be required.", failed.toString());
     }
 
     /**
@@ -120,5 +152,14 @@ public class ServerManager extends AbstractManager {
     public Server[] listServers(String searchPattern) throws Exception {
         OXUtilInterface utilInterface = getUtilInterface();
         return utilInterface.listServer(searchPattern, getMasterCredentials());
+    }
+
+    /* (non-Javadoc)
+     * @see com.openexchange.admin.rmi.manager.AbstractManager#clean(java.lang.Object)
+     */
+    @Override
+    boolean clean(Object object) {
+        // TODO Auto-generated method stub
+        return false;
     }
 }
