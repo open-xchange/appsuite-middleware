@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2018-2020 OX Software GmbH
+ *     Copyright (C) 2016-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,61 +49,63 @@
 
 package com.openexchange.admin.rmi.manager;
 
-import java.rmi.Naming;
-import java.rmi.Remote;
 import com.openexchange.admin.rmi.OXUtilInterface;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
+import com.openexchange.admin.rmi.dataobjects.MaintenanceReason;
 
 /**
- * {@link AbstractManager}
+ * {@link MaintenanceReasonManager}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
- * @since v7.10.1
  */
-abstract class AbstractManager {
+public class MaintenanceReasonManager extends AbstractManager {
 
-    private final String rmiEndPointURL;
-    private final Credentials masterCredentials;
+    private static MaintenanceReasonManager INSTANCE;
 
     /**
-     * Initialises a new {@link AbstractManager}.
+     * Gets the instance of the {@link MaintenanceReasonManager}
      * 
-     * @param rmiEndPointURL the RMI endpoint url
-     * @param masterCredentials The master {@link Credentials}
+     * @param host The rmi host
+     * @param masterCredentials the master {@link Credentials}
+     * @return The {@link MaintenanceReasonManager} instance
      */
-    public AbstractManager(String rmiEndPointURL, Credentials masterCredentials) {
-        super();
-        this.masterCredentials = masterCredentials;
-        this.rmiEndPointURL = rmiEndPointURL;
+    public static MaintenanceReasonManager getInstance(String host, Credentials masterCredentials) {
+        if (INSTANCE == null) {
+            INSTANCE = new MaintenanceReasonManager(host, masterCredentials);
+        }
+        return INSTANCE;
     }
 
     /**
-     * Gets the masterCredentials
-     *
-     * @return The masterCredentials
+     * Initialises a new {@link MaintenanceReasonManager}.
+     * 
+     * @param rmiEndPointURL
+     * @param masterCredentials
      */
-    public Credentials getMasterCredentials() {
-        return masterCredentials;
+    public MaintenanceReasonManager(String rmiEndPointURL, Credentials masterCredentials) {
+        super(rmiEndPointURL, masterCredentials);
     }
 
     /**
-     * Returns the {@link Remote} interface with the specified rmi name
+     * Creates a maintenance reason
      * 
-     * @param rmiName The rmi name of the {@link Remote} interface
-     * @return The {@link Remote} interface
-     * @throws Exception if an error is occurred during RMI look-up
+     * @param maintenanceReason The {@link MaintenanceReason} to create
+     * @return The created {@link MaintenanceReason}
+     * @throws Exception if an error is occurred
      */
-    <T extends Remote> T getRemoteInterface(String rmiName, Class<T> clazz) throws Exception {
-        return clazz.cast(Naming.lookup(rmiEndPointURL + rmiName));
+    public MaintenanceReason createMaintenanceReason(MaintenanceReason maintenanceReason) throws Exception {
+        OXUtilInterface utilInterface = getUtilInterface();
+        return utilInterface.createMaintenanceReason(maintenanceReason, getMasterCredentials());
     }
-    
+
     /**
-     * Returns the {@link OXUtilInterface}
+     * Lists all maintenance reasons that match the specified pattern
      * 
-     * @return The {@link OXUtilInterface}
-     * @throws Exception if an error is occurred during RMI look-up
+     * @return An array with all maintenance reasons that match the specified pattern
+     * @throws Exception if an error is occurred
      */
-    OXUtilInterface getUtilInterface() throws Exception {
-        return (OXUtilInterface) getRemoteInterface(OXUtilInterface.RMI_NAME, OXUtilInterface.class);
+    public MaintenanceReason[] listMaintenanceReasons(String pattern) throws Exception {
+        OXUtilInterface utilInterface = getUtilInterface();
+        return utilInterface.listMaintenanceReason(pattern, getMasterCredentials());
     }
 }

@@ -388,14 +388,4 @@ public class ContextManager extends AbstractManager {
     private OXContextInterface getContextInterface() throws Exception {
         return (OXContextInterface) getRemoteInterface(OXContextInterface.RMI_NAME, OXContextInterface.class);
     }
-
-    /**
-     * Returns the {@link OXUtilInterface}
-     * 
-     * @return The {@link OXUtilInterface}
-     * @throws Exception if an error is occurred during RMI look-up
-     */
-    private OXUtilInterface getUtilInterface() throws Exception {
-        return (OXUtilInterface) getRemoteInterface(OXUtilInterface.RMI_NAME, OXUtilInterface.class);
-    }
 }

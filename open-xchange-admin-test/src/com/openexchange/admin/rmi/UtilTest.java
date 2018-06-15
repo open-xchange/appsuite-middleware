@@ -51,20 +51,19 @@ package com.openexchange.admin.rmi;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import java.net.MalformedURLException;
-import java.rmi.Naming;
-import java.rmi.NotBoundException;
-import java.rmi.RemoteException;
 import java.util.Vector;
 import org.junit.Test;
 import com.openexchange.admin.rmi.dataobjects.Database;
 import com.openexchange.admin.rmi.dataobjects.MaintenanceReason;
 import com.openexchange.admin.rmi.dataobjects.Server;
+import com.openexchange.admin.rmi.manager.MaintenanceReasonManager;
 import com.openexchange.admin.rmi.manager.ServerManager;
 
 /**
- *
+ * {@link UtilTest}
+ * 
  * @author cutmasta
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 public class UtilTest extends AbstractTest {
 
@@ -75,10 +74,137 @@ public class UtilTest extends AbstractTest {
         super();
     }
 
-    private OXUtilInterface getUtilClient() throws NotBoundException, MalformedURLException, RemoteException {
-        return (OXUtilInterface) Naming.lookup(getRMIHostUrl() + OXUtilInterface.RMI_NAME);
+    /**
+     * Tests listing maintenance reasons
+     */
+    @Test
+    public void testListMaintenanceReasons() throws Exception {
+        Vector<MaintenanceReason> c_reasons = new Vector<MaintenanceReason>();
+        // add some reasons
+        for (int a = 0; a < 10; a++) {
+            MaintenanceReason mr = new MaintenanceReason();
+            mr.setText("testcase-get-all-reasons-" + a + "-" + System.currentTimeMillis());
+            // add reason to system
+            int[] srv_id = { getMaintenanceReasonManager().createMaintenanceReason(mr).getId().intValue() };
+            mr.setId(srv_id[0]);
+            c_reasons.add(mr);
+        }
+
+        // now fetch all reasons, and look if my added reasons are within this data set
+        int resp = 0;
+        MaintenanceReason[] srv_reasons = getMaintenanceReasonManager().listMaintenanceReasons("*");
+        for (int c = 0; c < c_reasons.size(); c++) {
+
+            MaintenanceReason tmp = c_reasons.get(c);
+
+            for (int b = 0; b < srv_reasons.length; b++) {
+                if (srv_reasons[b].getId().intValue() == tmp.getId().intValue() && srv_reasons[b].getText().equals(tmp.getText())) {
+                    resp++;
+                }
+            }
+        }
+
+        // check if size is same, then all added reasons were found also in the data from server
+        assertEquals(resp, c_reasons.size());
+
     }
 
+    /**
+     * Tests server registration
+     */
+    @Test
+    public void testRegisterServer() throws Exception {
+        Server reg_srv = new Server();
+        reg_srv.setName("testcase-register-server-" + System.currentTimeMillis());
+        reg_srv.setId(getServerManager().registerServer(reg_srv).getId());
+
+        Server[] srv_resp = getServerManager().listServers("testcase-register-server-*");
+        int resp = 0;
+        for (Server server : srv_resp) {
+            if (server.getName().equals(reg_srv.getName()) && server.getId().intValue() == reg_srv.getId().intValue()) {
+                resp++;
+            }
+        }
+        assertTrue("Expected 1 server", resp == 1);
+    }
+
+    /**
+     * Tests server unregistration
+     */
+    @Test
+    public void testUnregisterServer() throws Exception {
+        Server reg_srv = new Server();
+        reg_srv.setName("testcase-register-server-" + System.currentTimeMillis());
+
+        reg_srv.setId(getServerManager().registerServer(reg_srv).getId());
+
+        Server[] srv_resp = getServerManager().listServers("testcase-register-server-*");
+        int resp = 0;
+        for (int a = 0; a < srv_resp.length; a++) {
+            if (srv_resp[a].getName().equals(reg_srv.getName()) && srv_resp[a].getId().intValue() == reg_srv.getId().intValue()) {
+                resp++;
+            }
+        }
+        // resp muss 1 sein , ansonsten gibts 2 server mit selber id und name
+        assertTrue("Expected 1 server", resp == 1);
+
+        Server sv = new Server();
+        sv.setId(reg_srv.getId());
+
+        // here the server was added correctly to the server, now delete it
+        getServerManager().unregisterServer(sv);
+
+        srv_resp = getServerManager().listServers("testcase-register-server-*");
+        resp = 0;
+        for (int a = 0; a < srv_resp.length; a++) {
+            if (srv_resp[a].getName().equals(reg_srv.getName()) && srv_resp[a].getId().intValue() == reg_srv.getId().intValue()) {
+                resp++;
+            }
+        }
+        assertTrue("Expected that server is not found", resp == 0);
+    }
+
+    /**
+     * Tests list servers
+     */
+    @Test
+    public void testListServer() throws Exception {
+        Server client_srv = new Server();
+        client_srv.setName("testcase-search-server-" + System.currentTimeMillis());
+        client_srv.setId(getServerManager().registerServer(client_srv).getId());
+
+        Server[] srv_response = getServerManager().listServers("testcase-search-server-*");
+        boolean found_srv = false;
+        for (int a = 0; a < srv_response.length; a++) {
+            Server tmp = srv_response[a];
+            if (tmp.getId().intValue() == client_srv.getId().intValue() && tmp.getName().equals(client_srv.getName())) {
+                found_srv = true;
+            }
+        }
+
+        assertTrue("Expected to find registered server with data", found_srv);
+
+    }
+
+    /**
+     * Gets the {@link ServerManager}
+     * 
+     * @return the {@link ServerManager}
+     */
+    private ServerManager getServerManager() {
+        return ServerManager.getInstance(getRMIHostUrl(), getMasterAdminCredentials());
+    }
+
+    /**
+     * Gets the {@link MaintenanceReasonManager}
+     * 
+     * @return the {@link MaintenanceReasonManager}
+     */
+    private MaintenanceReasonManager getMaintenanceReasonManager() {
+        return MaintenanceReasonManager.getInstance(getRMIHostUrl(), getMasterAdminCredentials());
+    }
+
+    /////////////////// TODO: move to database factory ///////////////
     public static Database getTestDatabaseObject(String hostname, String name) {
 
         if (System.getProperty("rmi_test_dbhost") != null) {
@@ -102,121 +228,5 @@ public class UtilTest extends AbstractTest {
         client_db.setUrl("jdbc:mysql://" + hostname + "/?useUnicode=true&characterEncoding=UTF-8&" + "autoReconnect=true&useUnicode=true&useServerPrepStmts=false&useTimezone=true&" + "serverTimezone=UTC&connectTimeout=15000&socketTimeout=15000");
         client_db.setMasterId(0);
         return client_db;
-    }
-
-    @Test
-    public void testListMaintenanceReasons() throws Exception {
-
-        OXUtilInterface oxu = getUtilClient();
-
-        Vector<MaintenanceReason> c_reasons = new Vector<MaintenanceReason>();
-        // add some reasons
-        for (int a = 0; a < 10; a++) {
-            MaintenanceReason mr = new MaintenanceReason();
-            mr.setText("testcase-get-all-reasons-" + a + "-" + System.currentTimeMillis());
-            // add reason to system
-            int[] srv_id = { oxu.createMaintenanceReason(mr, ContextTest.getMasterAdminCredentials()).getId().intValue() };
-            mr.setId(srv_id[0]);
-            c_reasons.add(mr);
-        }
-
-        // now fetch all reasons, and look if my added reasons are within this data set
-        int resp = 0;
-        MaintenanceReason[] srv_reasons = oxu.listMaintenanceReason("*", ContextTest.getMasterAdminCredentials());
-        for (int c = 0; c < c_reasons.size(); c++) {
-
-            MaintenanceReason tmp = c_reasons.get(c);
-
-            for (int b = 0; b < srv_reasons.length; b++) {
-                if (srv_reasons[b].getId().intValue() == tmp.getId().intValue() && srv_reasons[b].getText().equals(tmp.getText())) {
-                    resp++;
-                }
-            }
-        }
-
-        // check if size is same, then all added reasons were found also in the data from server
-        assertEquals(resp, c_reasons.size());
-
-    }
-
-    @Test
-    public void testRegisterServer() throws Exception {
-        Server reg_srv = new Server();
-        reg_srv.setName("testcase-register-server-" + System.currentTimeMillis());
-        reg_srv.setId(getServerManager().registerServer(reg_srv).getId());
-
-        Server[] srv_resp = getServerManager().listServers("testcase-register-server-*");
-        int resp = 0;
-        for (Server server : srv_resp) {
-            if (server.getName().equals(reg_srv.getName()) && server.getId().intValue() == reg_srv.getId().intValue()) {
-                resp++;
-            }
-        }
-        assertTrue("Expected 1 server", resp == 1);
-    }
-
-    @Test
-    public void testUnregisterServer() throws Exception {
-        OXUtilInterface oxu = getUtilClient();
-
-        Server reg_srv = new Server();
-        reg_srv.setName("testcase-register-server-" + System.currentTimeMillis());
-
-        reg_srv.setId(oxu.registerServer(reg_srv, ContextTest.getMasterAdminCredentials()).getId());
-
-        Server[] srv_resp = oxu.listServer("testcase-register-server-*", ContextTest.getMasterAdminCredentials());
-        int resp = 0;
-        for (int a = 0; a < srv_resp.length; a++) {
-            if (srv_resp[a].getName().equals(reg_srv.getName()) && srv_resp[a].getId().intValue() == reg_srv.getId().intValue()) {
-                resp++;
-            }
-        }
-        // resp muss 1 sein , ansonsten gibts 2 server mit selber id und name
-        assertTrue("Expected 1 server", resp == 1);
-
-        Server sv = new Server();
-        sv.setId(reg_srv.getId());
-
-        // here the server was added correctly to the server, now delete it
-        oxu.unregisterServer(sv, ContextTest.getMasterAdminCredentials());
-
-        srv_resp = oxu.listServer("testcase-register-server-*", ContextTest.getMasterAdminCredentials());
-        resp = 0;
-        for (int a = 0; a < srv_resp.length; a++) {
-            if (srv_resp[a].getName().equals(reg_srv.getName()) && srv_resp[a].getId().intValue() == reg_srv.getId().intValue()) {
-                resp++;
-            }
-        }
-        assertTrue("Expected that server is not found", resp == 0);
-    }
-
-    @Test
-    public void testListServer() throws Exception {
-        OXUtilInterface oxu = getUtilClient();
-
-        Server client_srv = new Server();
-        client_srv.setName("testcase-search-server-" + System.currentTimeMillis());
-        client_srv.setId(oxu.registerServer(client_srv, ContextTest.getMasterAdminCredentials()).getId());
-
-        Server[] srv_response = oxu.listServer("testcase-search-server-*", ContextTest.getMasterAdminCredentials());
-        boolean found_srv = false;
-        for (int a = 0; a < srv_response.length; a++) {
-            Server tmp = srv_response[a];
-            if (tmp.getId().intValue() == client_srv.getId().intValue() && tmp.getName().equals(client_srv.getName())) {
-                found_srv = true;
-            }
-        }
-
-        assertTrue("Expected to find registered server with data", found_srv);
-
-    }
-
-    /**
-     * Gets the {@link ServerManager}
-     * 
-     * @return the {@link ServerManager}
-     */
-    private ServerManager getServerManager() {
-        return ServerManager.getInstance(getRMIHostUrl(), getMasterAdminCredentials());
     }
 }

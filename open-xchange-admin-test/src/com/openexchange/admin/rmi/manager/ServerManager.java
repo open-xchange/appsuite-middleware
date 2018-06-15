@@ -121,15 +121,4 @@ public class ServerManager extends AbstractManager {
         OXUtilInterface utilInterface = getUtilInterface();
         return utilInterface.listServer(searchPattern, getMasterCredentials());
     }
-
-    /**
-     * Returns the {@link OXUtilInterface}
-     * 
-     * @return The {@link OXUtilInterface}
-     * @throws Exception if an error is occurred during RMI look-up
-     */
-    private OXUtilInterface getUtilInterface() throws Exception {
-        return (OXUtilInterface) getRemoteInterface(OXUtilInterface.RMI_NAME, OXUtilInterface.class);
-    }
-
 }
