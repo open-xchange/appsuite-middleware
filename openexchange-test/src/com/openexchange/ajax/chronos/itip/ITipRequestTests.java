@@ -55,6 +55,7 @@ import java.util.LinkedList;
 import java.util.List;
 import org.junit.Test;
 import com.openexchange.ajax.chronos.factory.EventFactory;
+import com.openexchange.ajax.chronos.factory.ICalFacotry;
 import com.openexchange.junit.Assert;
 import com.openexchange.testing.httpclient.models.Attendee;
 import com.openexchange.testing.httpclient.models.CalendarUser;
@@ -75,13 +76,15 @@ public class ITipRequestTests extends AbstractITipTest {
         List<Attendee> attendees = new LinkedList<>();
 
         attendees.add(createAttendee(testUser, getApiClient()));
-        //        attendees.add(createAttendee(user, api));
+        Attendee organizer = createAttendee(testUserC2, apiClientC2);
+        organizer.setPartStat(ICalFacotry.PartStat.ACCEPTED.toString());
+        attendees.add(organizer);
 
         event.setAttendees(attendees);
         CalendarUser c = new CalendarUser();
-        c.cn(user.getUser());
-        c.email(user.getLogin());
-        c.entity(api.getUserId());
+        c.cn(userResponseC2.getData().getDisplayName());
+        c.email(userResponseC2.getData().getEmail1());
+        c.entity(Integer.valueOf(userResponseC2.getData().getId()));
         event.setOrganizer(c);
 
         MailDestinationData mailData = createMailInInbox(Collections.singletonList(event));
