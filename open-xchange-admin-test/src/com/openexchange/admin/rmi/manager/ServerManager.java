@@ -55,7 +55,6 @@ import java.util.Map.Entry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.admin.rmi.OXUtilInterface;
-import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.dataobjects.Server;
 
@@ -82,9 +81,9 @@ public class ServerManager extends AbstractManager {
         }
         return INSTANCE;
     }
-    
+
     private static final Logger LOG = LoggerFactory.getLogger(ServerManager.class);
-    
+
     private final Map<Integer, Server> managedServers;
 
     /**
@@ -97,7 +96,7 @@ public class ServerManager extends AbstractManager {
         super(rmiEndPointURL, masterCredentials);
         managedServers = new HashMap<>();
     }
-    
+
     /**
      * Unregisters all managed {@link Server}s
      */
@@ -154,12 +153,24 @@ public class ServerManager extends AbstractManager {
         return utilInterface.listServer(searchPattern, getMasterCredentials());
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.openexchange.admin.rmi.manager.AbstractManager#clean(java.lang.Object)
      */
     @Override
     boolean clean(Object object) {
-        // TODO Auto-generated method stub
-        return false;
+        if (!(object instanceof Server)) {
+            LOG.error("The specified object is not of type Server", object.toString());
+            return false;
+        }
+        Server server = (Server) object;
+        try {
+            unregisterServer(server);
+            return true;
+        } catch (Exception e) {
+            LOG.error("The server '{}' could not be unregistered!, obj", server.getId());
+            return false;
+        }
     }
 }

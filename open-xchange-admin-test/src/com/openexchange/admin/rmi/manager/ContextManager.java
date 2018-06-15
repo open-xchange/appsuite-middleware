@@ -113,9 +113,6 @@ public class ContextManager extends AbstractManager {
      */
     @Override
     boolean clean(Object object) {
-        if (object == null) {
-            return true;
-        }
         if (!(object instanceof Context)) {
             LOG.error("The specified object is not of type Context", object.toString());
             return false;

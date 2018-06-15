@@ -93,10 +93,10 @@ abstract class AbstractManager {
     public void cleanUp() {
         Map<Integer, Object> failed = new HashMap<>();
         for (Entry<Integer, Object> entry : managedObjects.entrySet()) {
-            try {
-                clean(entry.getValue());
-            } catch (Exception e) {
-                LOG.error("Object '{}' could not be removed!", entry.getValue().toString());
+            if (entry.getValue() == null) {
+                continue;
+            }
+            if (!clean(entry.getValue())) {
                 failed.put(entry.getKey(), entry.getValue());
             }
         }
