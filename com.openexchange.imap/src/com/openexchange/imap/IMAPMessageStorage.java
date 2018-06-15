@@ -177,6 +177,7 @@ import com.openexchange.mail.utils.MessageUtility;
 import com.openexchange.mail.uuencode.UUEncodedMultiPart;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountStorageService;
+import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.session.Session;
 import com.openexchange.spamhandler.SpamHandler;
 import com.openexchange.spamhandler.SpamHandlerRegistry;
@@ -442,6 +443,9 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
         if (mailAccount == null) {
             try {
                 final MailAccountStorageService storageService = Services.getService(MailAccountStorageService.class);
+                if (storageService == null) {
+                    throw ServiceExceptionCode.absentService(MailAccountStorageService.class);
+                }
                 mailAccount = storageService.getMailAccount(accountId, session.getUserId(), session.getContextId());
             } catch (final RuntimeException e) {
                 throw handleRuntimeException(e);
