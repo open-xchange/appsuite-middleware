@@ -118,6 +118,17 @@ public class DatabaseManager extends AbstractManager {
     }
 
     /**
+     * Changes the specified {@link Database}
+     * 
+     * @param database The database to change
+     * @throws Exception if an error occurs
+     */
+    public void changeDatabase(Database database) throws Exception {
+        OXUtilInterface utilInterface = getUtilInterface();
+        utilInterface.changeDatabase(database, getMasterCredentials());
+    }
+
+    /**
      * Searches for databases with the specified search pattern
      * 
      * @param searchPattern The search pattern
