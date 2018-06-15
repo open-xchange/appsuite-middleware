@@ -86,20 +86,24 @@ public class AddressUtility {
             return Collections.emptySet();
         }
 
-        Set<InternetAddress> addrs = new HashSet<InternetAddress>();
-        addrs.addAll(Arrays.asList(mail.getFrom()));
-        addrs.addAll(Arrays.asList(mail.getTo()));
-        addrs.addAll(Arrays.asList(mail.getCc()));
-        addrs.addAll(Arrays.asList(mail.getBcc()));
+        return getFilteredAddresses(mail, getAliases(session));
+    }
 
-        // Strip by aliases
+    /**
+     * Gets user's alias addresses
+     *
+     * @param session The user-associated session
+     * @return The user's alias addresses
+     * @throws OXException If user's alias addresses cannot be returned
+     */
+    public static Set<InternetAddress> getAliases(ServerSession session) throws OXException {
+        if (session == null) {
+            return Collections.emptySet();
+        }
+
         try {
-            if (session == null) {
-                return addrs;
-            }
-
-            final Set<InternetAddress> knownAddresses = new HashSet<InternetAddress>(4);
-            final UserSettingMail usm = session.getUserSettingMail();
+            Set<InternetAddress> knownAddresses = new HashSet<InternetAddress>(4);
+            UserSettingMail usm = session.getUserSettingMail();
             if (usm.getSendAddr() != null && usm.getSendAddr().length() > 0) {
                 knownAddresses.add(new QuotedInternetAddress(usm.getSendAddr()));
             }
@@ -109,12 +113,35 @@ public class AddressUtility {
             for (final String alias : aliases) {
                 knownAddresses.add(new QuotedInternetAddress(alias));
             }
-
-            addrs.removeAll(knownAddresses);
-
-        } catch (final AddressException e) {
-            LOG.warn("Collected contacts could not be stripped by user's email aliases", e);
+            return knownAddresses;
+        } catch (AddressException e) {
+            LOG.warn("User's email aliases could not be loaded", e);
+            return Collections.emptySet();
         }
+    }
+
+    /**
+     * Grabs the addresses from specified message (filtered by given alias addresses).
+     *
+     * @param mail The mail message to get addresses from
+     * @param aliases The user's alias addresses, which should not be contained in returned set
+     * @return The addresses
+     */
+    public static Set<InternetAddress> getFilteredAddresses(MailMessage mail, Set<InternetAddress> aliases) {
+        if (mail == null) {
+            return Collections.emptySet();
+        }
+
+        Set<InternetAddress> addrs = new HashSet<InternetAddress>();
+        addrs.addAll(Arrays.asList(mail.getFrom()));
+        addrs.addAll(Arrays.asList(mail.getTo()));
+        addrs.addAll(Arrays.asList(mail.getCc()));
+        addrs.addAll(Arrays.asList(mail.getBcc()));
+
+        if (null != aliases) {
+            addrs.removeAll(aliases);
+        }
+
         return addrs;
     }
 }
