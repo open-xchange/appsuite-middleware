@@ -9,7 +9,7 @@
     parameters:
       - $ref: "#/parameters/gblQueryParamSession"
       - in: query
-        name: dataSoure
+        name: dataSource
         type: string
         description: The identifier of the data source. Currently only "com.openexchange.mail.ical" is valid.
         required: true
