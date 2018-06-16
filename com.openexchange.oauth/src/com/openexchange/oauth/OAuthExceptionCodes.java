@@ -80,9 +80,9 @@ public enum OAuthExceptionCodes implements DisplayableOXExceptionCode {
      */
     UNKNOWN_OAUTH_SERVICE_META_DATA("Unknown OAuth service meta data: %1$s", CATEGORY_ERROR, 4, null),
     /**
-     * A SQL error occurred: %1$s
+     * An SQL error occurred: %1$s
      */
-    SQL_ERROR("A SQL error occurred: %1$s", CATEGORY_ERROR, 5, OXExceptionStrings.SQL_ERROR_MSG),
+    SQL_ERROR("An SQL error occurred: %1$s", CATEGORY_ERROR, 5, OXExceptionStrings.SQL_ERROR_MSG),
     /**
      * Account not found with identifier %1$s for user %2$s in context %3$s.
      */
