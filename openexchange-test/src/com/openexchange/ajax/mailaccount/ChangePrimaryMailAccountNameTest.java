@@ -50,20 +50,18 @@
 package com.openexchange.ajax.mailaccount;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.fail;
-import java.io.IOException;
-import java.util.EnumSet;
-import java.util.List;
-import org.json.JSONException;
+import java.util.ArrayList;
 import org.junit.Test;
-import com.openexchange.ajax.mailaccount.actions.MailAccountAllRequest;
-import com.openexchange.ajax.mailaccount.actions.MailAccountAllResponse;
-import com.openexchange.ajax.mailaccount.actions.MailAccountUpdateRequest;
-import com.openexchange.ajax.mailaccount.actions.MailAccountUpdateResponse;
-import com.openexchange.exception.OXException;
+import com.openexchange.ajax.framework.AbstractAPIClientSession;
 import com.openexchange.mailaccount.Attribute;
-import com.openexchange.mailaccount.MailAccountDescription;
+import com.openexchange.testing.httpclient.invoker.ApiException;
+import com.openexchange.testing.httpclient.models.MailAccountData;
+import com.openexchange.testing.httpclient.models.MailAccountUpdateResponse;
+import com.openexchange.testing.httpclient.models.MailAccountsResponse;
+import com.openexchange.testing.httpclient.modules.MailaccountApi;
 
 /**
  * {@link ChangePrimaryMailAccountNameTest}
@@ -71,47 +69,58 @@ import com.openexchange.mailaccount.MailAccountDescription;
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.8.4
  */
-public class ChangePrimaryMailAccountNameTest extends AbstractMailAccountTest{
+public class ChangePrimaryMailAccountNameTest extends AbstractAPIClientSession {
+
+    private MailaccountApi accountApi;
+
+    @Override
+    public void setUp() throws Exception {
+        super.setUp();
+        accountApi = new MailaccountApi(getApiClient());
+    }
 
     /**
      * Tests that the primary mail account name is changeable.
      *
-     * @throws OXException
-     * @throws IOException
-     * @throws JSONException
+     * @throws ApiException
      */
     @Test
-    public void testUpdateOfPrimaryMailAccountName() throws OXException, IOException, JSONException{
-        MailAccountDescription description = getPrimaryAccount();
-        String oldName = description.getName();
+    public void testUpdateOfPrimaryMailAccountName() throws ApiException {
+        MailAccountData primAccount = getPrimaryAccount();
+        String oldName = primAccount.getName();
         String newName = "name_"+System.currentTimeMillis();
-        updateMailAccount(description, newName);
-        description = getPrimaryAccount();
-        assertEquals("The name didn't change but should have!", newName, description.getName());
+        updateMailAccount(primAccount, newName);
+        primAccount = getPrimaryAccount();
+        assertEquals("The name didn't change but should have!", newName, primAccount.getName());
         // undo change
-        updateMailAccount(description, oldName);
+        updateMailAccount(primAccount, oldName);
     }
 
-    private MailAccountDescription getPrimaryAccount() throws OXException, IOException, JSONException {
-        final int[] fields = new int[]{Attribute.ID_LITERAL.getId(), Attribute.NAME_LITERAL.getId()};
-        final MailAccountAllResponse response = getClient().execute(new MailAccountAllRequest(fields));
+    private MailAccountData getPrimaryAccount() throws ApiException {
+        final String columns = Attribute.ID_LITERAL.getId()+","+Attribute.NAME_LITERAL.getId();
+        MailAccountsResponse response = accountApi.getAllAccounts(getSessionId(), columns);
 
-        final List<MailAccountDescription> descriptions = response.getDescriptions();
-        assertFalse(descriptions.isEmpty());
+        assertNull(response.getErrorDesc(), response.getError());
+        assertNotNull(response.getData());
+        @SuppressWarnings("unchecked") ArrayList<ArrayList<Object>> data = (ArrayList<ArrayList<Object>>) response.getData();
 
-        for (final MailAccountDescription description : descriptions) {
-            if (description.getId() == 0) {
-                return description;
+        for (final ArrayList<Object> account : data) {
+            if (account.size()>0 && account.get(0).equals(0)) {
+                MailAccountData result = new MailAccountData();
+                result.setId((Integer) account.get(0));
+                result.setName((String) account.get(1));
+                return result;
             }
         }
         fail("Did not find the primary mail account in response");
         return null;
     }
 
-    private void updateMailAccount(MailAccountDescription mailAccountDescription, String newName) throws OXException, IOException, JSONException {
-        mailAccountDescription.setName(newName);
-        MailAccountUpdateResponse response = getClient().execute(new MailAccountUpdateRequest(mailAccountDescription, EnumSet.of(Attribute.NAME_LITERAL)));
-        assertFalse("The update operation failed. Message: "+response.getErrorMessage(), response.hasError());
+    private void updateMailAccount(MailAccountData account, String newName) throws ApiException {
+        account.setName(newName);
+        MailAccountUpdateResponse updateAccount = accountApi.updateAccount(getSessionId(), account);
+        assertNull(updateAccount.getErrorDesc(), updateAccount.getError());
+        assertNotNull(updateAccount.getData());
     }
 
 }
