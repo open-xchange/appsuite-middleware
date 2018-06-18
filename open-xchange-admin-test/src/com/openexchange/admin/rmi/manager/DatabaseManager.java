@@ -102,7 +102,7 @@ public class DatabaseManager extends AbstractManager {
         OXUtilInterface utilInterface = getUtilInterface();
         Database db = utilInterface.registerDatabase(database, createSchemata, numberOfSchemata, getMasterCredentials());
         managedObjects.put(db.getId(), db);
-        return database;
+        return db;
     }
 
     /**

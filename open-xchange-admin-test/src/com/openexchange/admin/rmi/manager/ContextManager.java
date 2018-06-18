@@ -174,9 +174,9 @@ public class ContextManager extends AbstractManager {
             context.setId(new Integer(getNextFreeContextId()));
         }
         OXContextInterface contextInterface = getContextInterface();
-        contextInterface.create(context, UserTest.getTestUserObject(contextAdminCredentials.getLogin(), contextAdminCredentials.getPassword(), context), getMasterCredentials());
-        managedObjects.put(context.getId(), context);
-        return context;
+        Context ctx = contextInterface.create(context, UserTest.getTestUserObject(contextAdminCredentials.getLogin(), contextAdminCredentials.getPassword(), context), getMasterCredentials());
+        managedObjects.put(ctx.getId(), ctx);
+        return ctx;
     }
 
     /**

@@ -99,7 +99,9 @@ public class MaintenanceReasonManager extends AbstractManager {
      */
     public MaintenanceReason createMaintenanceReason(MaintenanceReason maintenanceReason) throws Exception {
         OXUtilInterface utilInterface = getUtilInterface();
-        return utilInterface.createMaintenanceReason(maintenanceReason, getMasterCredentials());
+        MaintenanceReason mr = utilInterface.createMaintenanceReason(maintenanceReason, getMasterCredentials());
+        managedObjects.put(mr.getId(), mr);
+        return mr;
     }
 
     /**
@@ -116,6 +118,7 @@ public class MaintenanceReasonManager extends AbstractManager {
     public void deleteMaintenanceReason(MaintenanceReason maintenanceReason) throws Exception {
         OXUtilInterface utilInterface = getUtilInterface();
         utilInterface.deleteMaintenanceReason(new MaintenanceReason[] { maintenanceReason }, getMasterCredentials());
+        managedObjects.remove(maintenanceReason.getId());
     }
 
     /*
