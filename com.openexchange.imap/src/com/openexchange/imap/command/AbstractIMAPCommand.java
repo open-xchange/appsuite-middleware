@@ -53,7 +53,6 @@ import static com.openexchange.imap.IMAPCommandsCollection.performCommand;
 import static com.openexchange.imap.util.ImapUtility.prepareImapCommandForLogging;
 import static com.openexchange.mail.MailServletInterface.mailInterfaceMonitor;
 import javax.mail.MessagingException;
-import com.openexchange.imap.IMAPException;
 import com.openexchange.imap.util.ImapUtility;
 import com.openexchange.log.LogProperties;
 import com.openexchange.mail.mime.MimeMailException;
@@ -156,10 +155,10 @@ public abstract class AbstractIMAPCommand<T> {
                         return abstractIMAPCommand.getDefaultValue();
                     }
                     LogProperties.putProperty(LogProperties.Name.MAIL_COMMAND, prepareImapCommandForLogging(imapCmd));
-                    throw new BadCommandException(IMAPException.getFormattedMessage(
-                        IMAPException.Code.PROTOCOL_ERROR,
-                        imapCmd,
-                        ImapUtility.appendCommandInfo(response.toString(), imapFolder)));
+                    if (null != imapFolder) {
+                        LogProperties.putProperty(LogProperties.Name.MAIL_FULL_NAME, imapFolder.getFullName());
+                    }
+                    throw new BadCommandException(response);
                 } else if (response.isNO()) {
                     final String error = com.openexchange.java.Strings.toLowerCase(response.toString());
                     if (MimeMailException.isOverQuotaException(error)) {
@@ -175,10 +174,10 @@ public abstract class AbstractIMAPCommand<T> {
                         return abstractIMAPCommand.getDefaultValue();
                     }
                     LogProperties.putProperty(LogProperties.Name.MAIL_COMMAND, prepareImapCommandForLogging(imapCmd));
-                    throw new CommandFailedException(IMAPException.getFormattedMessage(
-                        IMAPException.Code.PROTOCOL_ERROR,
-                        imapCmd,
-                        ImapUtility.appendCommandInfo(response.toString(), imapFolder)));
+                    if (null != imapFolder) {
+                        LogProperties.putProperty(LogProperties.Name.MAIL_FULL_NAME, imapFolder.getFullName());
+                    }
+                    throw new CommandFailedException(response);
                 } else {
                     LogProperties.putProperty(LogProperties.Name.MAIL_COMMAND, prepareImapCommandForLogging(imapCmd));
                     protocol.handleResult(response);
