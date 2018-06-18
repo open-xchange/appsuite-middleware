@@ -146,6 +146,20 @@ public class AccessControlImpl implements AccessControl {
         }
     }
 
+    @Override
+    public boolean tryAcquireGrant() {
+        lock.lock();
+        try {
+            if (grants >= maxAccess) {
+                return false;
+            }
+            grants++;
+            return true;
+        } finally {
+            lock.unlock();
+        }
+    }
+
     /**
      * Checks if this access control is not alive
      *
@@ -174,20 +188,19 @@ public class AccessControlImpl implements AccessControl {
         }
     }
 
-    /**
-     * Releases this access control.
-     * <p>
-     * <div style="margin-left: 0.1in; margin-right: 0.5in; background-color:#FFDDDD;">May only be invoked one time per thread!</div>
-     * <p>
-     *
-     * @return <code>true</code> if released; otherwise <code>false</code>
-     */
     @Override
     public boolean release() {
+        return release(true);
+    }
+
+    @Override
+    public boolean release(boolean acquired) {
         lock.lock();
         try {
             inUse--;
-            grants--;
+            if (acquired) {
+                grants--;
+            }
 
             if (inUse == 0) {
                 // The last one to release

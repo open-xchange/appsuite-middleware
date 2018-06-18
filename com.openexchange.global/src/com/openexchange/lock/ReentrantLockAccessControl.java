@@ -93,8 +93,20 @@ public class ReentrantLockAccessControl implements AccessControl {
     }
 
     @Override
+    public boolean tryAcquireGrant() {
+        return lock.tryLock();
+    }
+
+    @Override
     public boolean release() {
-        lock.unlock();
+        return release(true);
+    }
+
+    @Override
+    public boolean release(boolean acquired) {
+        if (acquired) {
+            lock.unlock();
+        }
         return true;
     }
 
