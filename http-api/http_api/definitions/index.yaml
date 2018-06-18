@@ -206,6 +206,8 @@ AnalyzeResponse:
   $ref: ./chronos-itip/AnalyzeResponse.yaml
 AnalysisChange:
   $ref: ./chronos-itip/AnalysisChange.yaml
+ActionResponse:
+  $ref: ./chronos-itip/ActionResponse.yaml
 # Module: chronos-schedjoules
 CountryData:
   $ref: ./chronos-schedjoules/CountryData.yaml
@@ -446,8 +448,6 @@ MailFilterDeletionBody:
 MailFilterScriptResponse:
   $ref: ./mailfilter/MailFilterScriptResponse.yaml
 # Module: conversion
-ConversionDataSourcePair:
-  $ref: ./conversion/ConversionDataSourcePair.yaml
 ConversionDataSource:
   $ref: ./conversion/ConversionDataSource.yaml
 ConversionDataHandlerPair:

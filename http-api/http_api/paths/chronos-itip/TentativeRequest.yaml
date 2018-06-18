@@ -9,9 +9,15 @@
     parameters:
       - $ref: "#/parameters/gblQueryParamSession"
       - in: query
-        name: dataSoure
+        name: dataSource
         type: string
         description: The identifier of the data source. Currently only "com.openexchange.mail.ical" is valid.
+        required: true
+      - in: query
+        name: descriptionFormat
+        type: string
+        description: The desired output fromat. Currently only "html" is valid.
+        default: html
         required: true
       - in: body
         name: body
@@ -23,4 +29,4 @@
       200:
         description: An array of Events that were newly created or changed.
         schema:
-          $ref: "#/definitions/EventData"
+          $ref: "#/definitions/ActionResponse"
