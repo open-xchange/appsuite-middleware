@@ -93,6 +93,7 @@ public class ContextManager extends AbstractManager {
     private static final long DEFAULT_MAX_QUOTA = 5000;
 
     private final ServerManager serverManager;
+    private final DatabaseManager databaseManager;
 
     /**
      * Initialises a new {@link ContextManager}.
@@ -100,6 +101,7 @@ public class ContextManager extends AbstractManager {
     private ContextManager(String host, Credentials masterCredentials) {
         super(host, masterCredentials);
         serverManager = ServerManager.getInstance(host, masterCredentials);
+        databaseManager = DatabaseManager.getInstance(host, masterCredentials);
     }
 
     /*
@@ -344,12 +346,11 @@ public class ContextManager extends AbstractManager {
      * @throws Exception if an error is occurred during registration
      */
     private void registerDatabase() throws Exception {
-        OXUtilInterface utilInterface = getUtilInterface();
-        if (utilInterface.listDatabase("test-ox-db", getMasterCredentials()).length != 0) {
+        if (databaseManager.listDatabases("test-ox-db").length != 0) {
             return;
         }
         Database database = UtilTest.getTestDatabaseObject("localhost", "test-ox-db");
-        utilInterface.registerDatabase(database, Boolean.FALSE, Integer.valueOf(0), getMasterCredentials());
+        databaseManager.registerDatabase(database, Boolean.FALSE, Integer.valueOf(0));
     }
 
     /**
