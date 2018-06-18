@@ -124,8 +124,8 @@ public class RdbAttendeeStorage implements AttendeeStorage {
     }
 
     @Override
-    public void deleteAllAttendees() throws OXException {
-        delegate.deleteAllAttendees();
+    public boolean deleteAllAttendees() throws OXException {
+        return delegate.deleteAllAttendees();
     }
 
     @Override

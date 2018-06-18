@@ -269,6 +269,9 @@ public class ContextSetConfigProvider extends AbstractContextBasedConfigProvider
             try {
                 @SuppressWarnings("unchecked")
                 Map<Object, Map<String, Object>> content = (Map<Object, Map<String, Object>>) file.getValue();
+                if (content == null) {
+                    continue;
+                }
                 for (Map.Entry<Object, Map<String, Object>> configData : content.entrySet()) {
                     Object configName = configData.getKey();
 

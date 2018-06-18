@@ -124,7 +124,7 @@ public class AddressUtility {
      * Grabs the addresses from specified message (filtered by given alias addresses).
      *
      * @param mail The mail message to get addresses from
-     * @param aliases user's alias addresses
+     * @param aliases The user's alias addresses, which should not be contained in returned set
      * @return The addresses
      */
     public static Set<InternetAddress> getFilteredAddresses(MailMessage mail, Set<InternetAddress> aliases) {

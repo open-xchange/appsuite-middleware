@@ -50,6 +50,7 @@
 package com.openexchange.chronos.itip.analyzers;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -123,11 +124,12 @@ public class UpdateITipAnalyzerTest {
     @Test // bug 57785
     public void testAddResourcesToUpdate_attendeesInOriginalButNoCU_doNothing() {
         Mockito.when(original.getAttendees()).thenReturn(Arrays.asList(new Attendee()));
+        Event lUpdate = new Event();
 
-        updateITipAnalyzer.addResourcesToUpdate(original, update);
+        updateITipAnalyzer.addResourcesToUpdate(original, lUpdate);
 
         Mockito.verify(original, Mockito.atLeast(1)).getAttendees();
-        Mockito.verify(update, Mockito.times(1)).getAttendees();
+        assertNull(lUpdate.getAttendees());
     }
 
     @Test
@@ -135,11 +137,12 @@ public class UpdateITipAnalyzerTest {
         Attendee attendee = new Attendee();
         attendee.setCuType(CalendarUserType.ROOM);
         Mockito.when(original.getAttendees()).thenReturn(Arrays.asList(attendee));
+        Event lUpdate = new Event();
 
-        updateITipAnalyzer.addResourcesToUpdate(original, update);
+        updateITipAnalyzer.addResourcesToUpdate(original, lUpdate);
 
         Mockito.verify(original, Mockito.atLeast(1)).getAttendees();
-        Mockito.verify(update, Mockito.times(1)).getAttendees();
+        assertNull(lUpdate.getAttendees());
     }
 
     @Test
@@ -154,6 +157,33 @@ public class UpdateITipAnalyzerTest {
 
         Mockito.verify(original, Mockito.atLeast(1)).getAttendees();
         assertEquals(1, emptyList.size());
+    }
+
+    @Test
+    public void testAddResourcesToUpdate_attendeesFromUpdateNull() {
+        Attendee attendee = Mockito.mock(Attendee.class);
+        Mockito.when(attendee.getCuType()).thenReturn(CalendarUserType.RESOURCE);
+        Mockito.when(original.getAttendees()).thenReturn(Arrays.asList(attendee));
+        Event lUpdate = new Event();
+
+        updateITipAnalyzer.addResourcesToUpdate(original, lUpdate);
+
+        Mockito.verify(original, Mockito.atLeast(1)).getAttendees();
+        assertEquals(1, lUpdate.getAttendees().size());
+    }
+
+    @Test
+    public void testAddResourcesToUpdate_attendeesFromUpdateEmpty() {
+        Attendee attendee = Mockito.mock(Attendee.class);
+        Mockito.when(attendee.getCuType()).thenReturn(CalendarUserType.RESOURCE);
+        Mockito.when(original.getAttendees()).thenReturn(Arrays.asList(attendee));
+        Event lUpdate = new Event();
+        lUpdate.setAttendees(new ArrayList<>());
+
+        updateITipAnalyzer.addResourcesToUpdate(original, lUpdate);
+
+        Mockito.verify(original, Mockito.atLeast(1)).getAttendees();
+        assertEquals(1, lUpdate.getAttendees().size());
     }
 
 }

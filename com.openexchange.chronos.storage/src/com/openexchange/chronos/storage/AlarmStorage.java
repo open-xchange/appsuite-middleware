@@ -169,8 +169,10 @@ public interface AlarmStorage {
 
     /**
      * Deletes all alarms for an account.
+     *
+     * @return <code>true</code> if something was actually deleted, <code>false</code>, otherwise
      */
-    void deleteAllAlarms() throws OXException;
+    boolean deleteAllAlarms() throws OXException;
 
     /**
      * Deletes all alarms of a user stored for a specific event.

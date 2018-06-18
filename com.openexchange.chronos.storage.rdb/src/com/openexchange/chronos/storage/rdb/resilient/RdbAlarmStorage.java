@@ -145,8 +145,8 @@ public class RdbAlarmStorage extends RdbResilientStorage implements AlarmStorage
     }
 
     @Override
-    public void deleteAllAlarms() throws OXException {
-        delegate.deleteAllAlarms();
+    public boolean deleteAllAlarms() throws OXException {
+        return delegate.deleteAllAlarms();
     }
 
     @Override

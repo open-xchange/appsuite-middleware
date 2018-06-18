@@ -72,7 +72,7 @@ public class MigrationConfig {
     private final int maxTombstoneAgeInMonths;
     private final Set<String> nonSevereSeverities;
     private final boolean uncommitted;
-
+    private final boolean intermediateCommits;
 
     /**
      * Initializes a new {@link MigrationConfig}.
@@ -85,8 +85,9 @@ public class MigrationConfig {
         ConfigurationService configService = services.getService(ConfigurationService.class);
         batchSize = configService.getIntProperty("com.openexchange.calendar.migration.batchSize", 500);
         maxTombstoneAgeInMonths = configService.getIntProperty("com.openexchange.calendar.migration.maxTombstoneAgeInMonths", 12);
-        nonSevereSeverities = getNoneSevereSeverities(ProblemSeverity.MAJOR);
+        nonSevereSeverities = getNonSevereSeverities(ProblemSeverity.MAJOR);
         uncommitted = configService.getBoolProperty("com.openexchange.calendar.migration.uncommitted", false);
+        intermediateCommits = configService.getBoolProperty("com.openexchange.calendar.migration.intermediateCommits", false);
     }
 
     /**
@@ -120,6 +121,10 @@ public class MigrationConfig {
         return uncommitted;
     }
 
+    public boolean isIntermediateCommits() {
+        return intermediateCommits;
+    }
+
     protected ServiceLookup getServiceLookup() {
         return services;
     }
@@ -145,7 +150,7 @@ public class MigrationConfig {
         return true;
     }
 
-    private static Set<String> getNoneSevereSeverities(ProblemSeverity severityThreshold) {
+    private static Set<String> getNonSevereSeverities(ProblemSeverity severityThreshold) {
         Set<String> allowedSeverities = new TreeSet<String>(String.CASE_INSENSITIVE_ORDER);
         for (ProblemSeverity severity : ProblemSeverity.values()) {
             if (severity.equals(severityThreshold)) {

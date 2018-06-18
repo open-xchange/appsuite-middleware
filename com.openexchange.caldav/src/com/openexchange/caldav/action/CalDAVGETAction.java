@@ -47,34 +47,38 @@
  *
  */
 
-package com.openexchange.legacy;
+package com.openexchange.caldav.action;
 
-import com.hazelcast.nio.serialization.Portable;
-
+import com.openexchange.caldav.GroupwareCaldavFactory;
+import com.openexchange.caldav.resources.EventResource;
+import com.openexchange.dav.actions.GETAction;
+import com.openexchange.webdav.action.WebdavResponse;
+import com.openexchange.webdav.protocol.WebdavProtocolException;
+import com.openexchange.webdav.protocol.WebdavResource;
 
 /**
- * {@link PortableContextInvalidationCallableFactory}
+ * {@link CalDAVGETAction}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public class PortableContextInvalidationCallableFactory extends AbstractCustomPortableFactory {
+public class CalDAVGETAction extends GETAction {
 
     /**
-     * Initializes a new {@link PortableContextInvalidationCallableFactory}.
+     * Initializes a new {@link CalDAVGETAction}.
+     *
+     * @param factory The underlying factory
      */
-    public PortableContextInvalidationCallableFactory() {
-        super();
+    public CalDAVGETAction(GroupwareCaldavFactory factory) {
+        super(factory.getProtocol());
     }
 
     @Override
-    public Portable create() {
-        return new PortableContextInvalidationCallable();
-    }
-
-    @Override
-    public int getClassId() {
-        return PortableContextInvalidationCallable.CLASS_ID;
+    protected void setResponseHeaders(WebdavResource resource, WebdavResponse response) throws WebdavProtocolException {
+        super.setResponseHeaders(resource, response);
+        if (EventResource.class.isInstance(resource)) {
+            setHeaderOpt("Schedule-Tag", ((EventResource) resource).getScheduleTag(), response);
+        }
     }
 
 }

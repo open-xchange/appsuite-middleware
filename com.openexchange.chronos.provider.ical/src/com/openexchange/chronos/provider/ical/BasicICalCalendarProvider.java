@@ -249,7 +249,7 @@ public class BasicICalCalendarProvider extends BasicCachingCalendarProvider {
         if (config.hasAndNotNull(ICalCalendarConstants.REFRESH_INTERVAL)) {
             Object opt = config.opt(ICalCalendarConstants.REFRESH_INTERVAL);
 
-            if(opt!=null && !(opt instanceof Number)){
+            if (opt != null && !(opt instanceof Number)) {
                 throw ICalProviderExceptionCodes.BAD_PARAMETER.create(ICalCalendarConstants.REFRESH_INTERVAL, opt);
             }
         }
@@ -270,11 +270,11 @@ public class BasicICalCalendarProvider extends BasicCachingCalendarProvider {
         Boolean usedForSyncValue = optPropertyValue(settings.getExtendedProperties(), USED_FOR_SYNC_LITERAL, Boolean.class);
         if (null != usedForSyncValue) {
             boolean usedForSync = usedForSyncValue.booleanValue();
-            if (false == internalConfig.has("usedForSync") || usedForSync != internalConfig.optBoolean("usedForSync", false)) {
+            if (false == internalConfig.has(USED_FOR_SYNC_LITERAL) || usedForSync != internalConfig.optBoolean(USED_FOR_SYNC_LITERAL, false)) {
                 if (usedForSync && false == CachingCalendarUtils.canBeUsedForSync(PROVIDER_ID, session)) {
                     throw CalendarExceptionCodes.INVALID_CONFIGURATION.create(USED_FOR_SYNC_LITERAL);
                 }
-                internalConfig.putSafe("usedForSync", usedForSync);
+                internalConfig.putSafe(USED_FOR_SYNC_LITERAL, usedForSync);
             }
         }
         return internalConfig;
@@ -316,13 +316,15 @@ public class BasicICalCalendarProvider extends BasicCachingCalendarProvider {
                 internalConfig.putSafe("description", description);
                 changed = true;
             }
-            Boolean usedForSync = Boolean.valueOf(optPropertyValue(settings.getExtendedProperties(), USED_FOR_SYNC_LITERAL, String.class));
-            if (false == Objects.equals(usedForSync, internalConfig.has("usedForSync") ? B(internalConfig.optBoolean("usedForSync")) : null)) {
-                if (false == CachingCalendarUtils.canBeUsedForSync(PROVIDER_ID, session)) {
-                    throw CalendarExceptionCodes.INVALID_CONFIGURATION.create(USED_FOR_SYNC_LITERAL);
+            Boolean usedForSync = optPropertyValue(settings.getExtendedProperties(), USED_FOR_SYNC_LITERAL, Boolean.class);
+            if (usedForSync != null) {
+                if (!internalConfig.has(USED_FOR_SYNC_LITERAL) || !Objects.equals(usedForSync, B(internalConfig.optBoolean(USED_FOR_SYNC_LITERAL)))) {
+                    if (usedForSync.booleanValue() && false == CachingCalendarUtils.canBeUsedForSync(PROVIDER_ID, session)) {
+                        throw CalendarExceptionCodes.INVALID_CONFIGURATION.create(USED_FOR_SYNC_LITERAL);
+                    }
+                    internalConfig.putSafe(USED_FOR_SYNC_LITERAL, usedForSync);
+                    changed = true;
                 }
-                internalConfig.putSafe("usedForSync", usedForSync);
-                changed = true;
             }
         }
         if (settings.containsName() && false == Objects.equals(settings.getName(), internalConfig.optString("name", null))) {

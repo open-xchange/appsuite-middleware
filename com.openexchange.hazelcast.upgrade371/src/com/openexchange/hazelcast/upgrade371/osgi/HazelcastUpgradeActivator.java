@@ -90,7 +90,6 @@ public class HazelcastUpgradeActivator extends HousekeepingActivator {
     @Override
     protected void startBundle() throws Exception {
         LOG.info("starting bundle: \"com.openexchange.hazelcast.upgrade371\"");
-
         ClientConfig clientConfig = getConfig(getService(ConfigurationService.class));
         if (null != clientConfig) {
             UpgradedCacheListener cacheListener = new UpgradedCacheListener(clientConfig);

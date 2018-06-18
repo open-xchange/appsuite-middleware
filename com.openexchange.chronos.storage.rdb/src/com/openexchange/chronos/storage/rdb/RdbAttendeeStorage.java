@@ -207,7 +207,7 @@ public class RdbAttendeeStorage extends RdbStorage implements AttendeeStorage {
     }
 
     @Override
-    public void deleteAllAttendees() throws OXException {
+    public boolean deleteAllAttendees() throws OXException {
         int updated = 0;
         Connection connection = null;
         try {
@@ -221,6 +221,7 @@ public class RdbAttendeeStorage extends RdbStorage implements AttendeeStorage {
         } finally {
             release(connection, updated);
         }
+        return 0 < updated;
     }
 
     private int deleteAttendees(Connection connection) throws SQLException {

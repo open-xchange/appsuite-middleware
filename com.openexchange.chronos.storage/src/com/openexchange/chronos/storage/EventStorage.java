@@ -237,9 +237,11 @@ public interface EventStorage {
     void deleteEvents(List<String> eventIds) throws OXException;
 
     /**
-     * Deletes all existing events.
+     * Deletes all existing events, including any <i>tombstone</i> records.
+     *
+     * @return <code>true</code> if something was actually deleted, <code>false</code>, otherwise
      */
-    void deleteAllEvents() throws OXException;
+    boolean deleteAllEvents() throws OXException;
 
     /**
      * Inserts a new (or overwrites a previously existing) <i>tombstone</i> record for a specific event into the database.

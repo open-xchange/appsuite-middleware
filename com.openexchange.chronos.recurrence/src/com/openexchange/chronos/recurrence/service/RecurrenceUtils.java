@@ -49,15 +49,10 @@
 
 package com.openexchange.chronos.recurrence.service;
 
-import static com.openexchange.chronos.common.CalendarUtils.initCalendar;
 import static com.openexchange.chronos.common.CalendarUtils.initRecurrenceRule;
-import java.util.Calendar;
-import java.util.List;
 import org.dmfs.rfc5545.DateTime;
 import org.dmfs.rfc5545.recur.RecurrenceRule;
-import org.dmfs.rfc5545.recur.RecurrenceRule.Part;
-import org.dmfs.rfc5545.recur.RecurrenceRule.WeekdayNum;
-import org.dmfs.rfc5545.recur.RecurrenceRuleIterator;
+import org.dmfs.rfc5545.recurrenceset.ForwardingRecurrenceSet;
 import org.dmfs.rfc5545.recurrenceset.RecurrenceList;
 import org.dmfs.rfc5545.recurrenceset.RecurrenceRuleAdapter;
 import org.dmfs.rfc5545.recurrenceset.RecurrenceSet;
@@ -65,7 +60,6 @@ import org.dmfs.rfc5545.recurrenceset.RecurrenceSetIterator;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.service.RecurrenceData;
 import com.openexchange.exception.OXException;
-import com.openexchange.java.util.TimeZones;
 
 /**
  * {@link RecurrenceUtils}
@@ -114,209 +108,25 @@ public class RecurrenceUtils {
      * @throws OXException {@link CalendarExceptionCodes#INVALID_RRULE}
      */
     private static RecurrenceSetIterator getRecurrenceIterator(RecurrenceRule rule, DateTime seriesStart, long[] recurrenceDates, boolean forwardToOccurrence) throws OXException {
-        DateTime start = seriesStart;
         try {
-            if (forwardToOccurrence && false == isPotentialOccurrence(start, rule)) {
-                /*
-                 * supplied start does not match recurrence rule, forward to first "real" occurrence
-                 */
-                DateTime firstOccurrence = null;
-                Integer originalCount = rule.getCount();
-                try {
-                    if (null != originalCount) {
-                        rule.setUntil(null);
-                    }
-                    for (RecurrenceRuleIterator iterator = rule.iterator(start); null == firstOccurrence && iterator.hasNext(); iterator.nextMillis()) {
-                        // TODO: max_recurrences guard?
-
-                        DateTime peekedDateTime = iterator.peekDateTime();
-                        if (peekedDateTime.after(seriesStart)) {
-                            firstOccurrence = peekedDateTime;
-                        }
-                    }
-                    if (null != firstOccurrence) {
-                        start = firstOccurrence;
-                    }
-                } finally {
-                    if (null != originalCount) {
-                        rule.setCount(originalCount.intValue());
-                    }
+            if (forwardToOccurrence) {
+                ForwardingRecurrenceSet recurrenceSet = new ForwardingRecurrenceSet();
+                recurrenceSet.addInstances(new RecurrenceRuleAdapter(rule));
+                if (null != recurrenceDates && 0 < recurrenceDates.length) {
+                    recurrenceSet.addInstances(new RecurrenceList(recurrenceDates));
                 }
+                return recurrenceSet.iterator(seriesStart.getTimeZone(), seriesStart.getTimestamp());
+            } else {
+                RecurrenceSet recurrenceSet = new RecurrenceSet();
+                recurrenceSet.addInstances(new RecurrenceRuleAdapter(rule));
+                if (null != recurrenceDates && 0 < recurrenceDates.length) {
+                    recurrenceSet.addInstances(new RecurrenceList(recurrenceDates));
+                }
+                return recurrenceSet.iterator(seriesStart.getTimeZone(), seriesStart.getTimestamp());
             }
-            RecurrenceSet recurrenceSet = new RecurrenceSet();
-            recurrenceSet.addInstances(new RecurrenceRuleAdapter(rule));
-            if (null != recurrenceDates && 0 < recurrenceDates.length) {
-                recurrenceSet.addInstances(new RecurrenceList(recurrenceDates));
-            }
-            return recurrenceSet.iterator(start.getTimeZone(), start.getTimestamp());
         } catch (IllegalArgumentException e) {
             throw CalendarExceptionCodes.INVALID_RRULE.create(e, rule);
         }
     }
-
-    /**
-     * Gets a value indicating whether a specific date-time is (or could be) part of a recurrence rule or not.
-     * <p/>
-     * This is always <code>true</code> for <i>relative</i> recurrences that can usually begin on any date and the continue with a
-     * specific interval, e.g. as in a simple <code>FREQ=DAILY</code> rule.
-     * <p/>
-     * Otherwise, the occurrences are derived from the rule directly, and a specific date is not necessarily part of the rule, e.g. a
-     * <code>FREQ=WEEKLY;BYDAY=WE</code> or a <code>FREQ=YEARLY;BYMONTH=10;BYMONTHDAY=8</code> event series.
-     *
-     * @param dateTime The date-time to check
-     * @param recurrenceRule The recurrence rule to match against
-     * @return <code>true</code> if the date-time is (or could be) an actual occurrence of the recurrence rule, <code>false</code>, otherwise
-     */
-    private static boolean isPotentialOccurrence(DateTime dateTime, RecurrenceRule recurrenceRule) {
-        List<WeekdayNum> byDayPart = recurrenceRule.getByDayPart();
-        List<Integer> byMonthPart = recurrenceRule.getByPart(Part.BYMONTH);
-        List<Integer> byMonthDayPart = recurrenceRule.getByPart(Part.BYMONTHDAY);
-        List<Integer> bySetPosPart = recurrenceRule.getByPart(Part.BYSETPOS);
-        switch (recurrenceRule.getFreq()) {
-            case SECONDLY:
-            case MINUTELY:
-            case HOURLY:
-            case DAILY:
-                return true;
-            case WEEKLY:
-                if (null != byDayPart && 0 < byDayPart.size()) {
-                    return matchesDayOfWeek(dateTime, byDayPart);
-                }
-                return true;
-            case MONTHLY:
-                if (null != byMonthDayPart && 0 < byMonthDayPart.size()) {
-                    /*
-                     * ~ "monthly 1"
-                     */
-                    return matchesDayOfMonth(dateTime, byMonthDayPart);
-                }
-                if (null != byDayPart && 0 < byDayPart.size() && null != bySetPosPart && 0 < bySetPosPart.size()) {
-                    /*
-                     * ~ "monthly 2"
-                     */
-                    return matchesDayOfWeekInMonth(dateTime, byDayPart, bySetPosPart);
-                }
-                break;
-            case YEARLY:
-                if (null != byMonthDayPart && 0 < byMonthDayPart.size() && null != byMonthPart && 0 < byMonthPart.size()) {
-                    /*
-                     * ~ "yearly 1"
-                     */
-                    return matchesMonth(dateTime, byMonthPart) && matchesDayOfMonth(dateTime, byMonthDayPart);
-                }
-                if (null != byMonthPart && 0 < byMonthPart.size() && null != byDayPart && 0 < byDayPart.size() && null != bySetPosPart && 0 < bySetPosPart.size()) {
-                    /*
-                     * ~ "yearly 2"
-                     */
-                    return matchesMonth(dateTime, byMonthPart) && matchesDayOfWeekInMonth(dateTime, byDayPart, bySetPosPart);
-                }
-                return true;
-            default:
-                return false;
-        }
-        return false;
-    }
-
-    /**
-     * Gets a value indicating whether a specific date matches a certain weekday in the month as given through the supplied recurrence
-     * rule fragments.
-     *
-     * @param dateTime The date-time to check
-     * @param byDayPart The possible weekday numbers to match
-     * @param bySetPosPart The possible <i>set</i> positions of the week in the month to match
-     * @return <code>true</code> if the date-time matches the day of week in month, <code>false</code>, otherwise
-     */
-    private static boolean matchesDayOfWeekInMonth(DateTime dateTime, List<WeekdayNum> byDayPart, List<Integer> bySetPosPart) {
-        for (Integer bySetPos : bySetPosPart) {
-            Calendar calendar = initCalendar(null != dateTime.getTimeZone() ? dateTime.getTimeZone() : TimeZones.UTC, dateTime.getTimestamp());
-            if (0 < bySetPos.intValue()) {
-                calendar.set(Calendar.DAY_OF_MONTH, 1);
-                for (int matched = 0; dateTime.getMonth() == calendar.get(Calendar.MONTH); calendar.add(Calendar.DAY_OF_MONTH, 1)) {
-                    if (matchesDayOfWeek(calendar, byDayPart) && ++matched == bySetPos.intValue() && dateTime.getTimestamp() == calendar.getTimeInMillis()) {
-                        return true;
-                    }
-                }
-            } else if (0 > bySetPos.intValue()) {
-                calendar.set(Calendar.DAY_OF_MONTH, calendar.getActualMaximum(Calendar.DAY_OF_MONTH));
-                for (int matched = 0; dateTime.getMonth() == calendar.get(Calendar.MONTH); calendar.add(Calendar.DAY_OF_MONTH, -1)) {
-                    if (matchesDayOfWeek(calendar, byDayPart) && ++matched == -1 * bySetPos.intValue() && dateTime.getTimestamp() == calendar.getTimeInMillis()) {
-                        return true;
-                    }
-                }
-            }
-        }
-        return false;
-    }
-
-    /**
-     * Gets a value indicating whether a specific date matches a certain weekday as given through the supplied recurrence rule fragments.
-     *
-     * @param dateTime The date-time to check
-     * @param byDayPart The possible weekdays to match
-     * @return <code>true</code> if the date-time matches the weekday, <code>false</code>, otherwise
-     */
-    private static boolean matchesDayOfWeek(DateTime dateTime, List<WeekdayNum> byDayPart) {
-        for (WeekdayNum weekdayNum : byDayPart) {
-            if (weekdayNum.weekday.ordinal() == dateTime.getDayOfWeek()) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    /**
-     * Gets a value indicating whether the {@link Calendar#DAY_OF_WEEK} field of a specific calendar instance matches a certain weekday as
-     * given through the supplied recurrence rule fragments.
-     *
-     * @param calendar The calendar to check
-     * @param byDayPart The possible weekdays to match
-     * @return <code>true</code> if the date-time matches the weekday, <code>false</code>, otherwise
-     */
-    private static boolean matchesDayOfWeek(Calendar calendar, List<WeekdayNum> byDayPart) {
-        int weekDayOrdinal = calendar.get(Calendar.DAY_OF_WEEK) - 1;
-        for (WeekdayNum weekdayNum : byDayPart) {
-            if (weekdayNum.weekday.ordinal() == weekDayOrdinal) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    /**
-     * Gets a value indicating whether a specific date matches a certain day of the month as given through the supplied recurrence rule
-     * fragments.
-     *
-     * @param dateTime The date-time to check
-     * @param byMonthDayPart The possible month days to match
-     * @return <code>true</code> if the date-time matches the day of month, <code>false</code>, otherwise
-     */
-    private static boolean matchesDayOfMonth(DateTime dateTime, List<Integer> byMonthDayPart) {
-        Calendar calendar = initCalendar(null != dateTime.getTimeZone() ? dateTime.getTimeZone() : TimeZones.UTC, dateTime.getTimestamp());
-        int dayMonth = dateTime.getDayOfMonth();
-        int maximumDayOfMonth = calendar.getActualMaximum(Calendar.DAY_OF_MONTH);
-        for (Integer byMonthDay : byMonthDayPart) {
-            if (byMonthDay.intValue() == dayMonth || dayMonth - maximumDayOfMonth - 1 == byMonthDay.intValue()) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    /**
-     * Gets a value indicating whether a specific date matches a certain month as given through the supplied recurrence rule fragments.
-     *
-     * @param dateTime The date-time to check
-     * @param byMonthPart The possible months to match
-     * @return <code>true</code> if the date-time matches the month, <code>false</code>, otherwise
-     */
-    private static boolean matchesMonth(DateTime dateTime, List<Integer> byMonthPart) {
-        for (Integer byMonth : byMonthPart) {
-            if (byMonth.intValue() == dateTime.getMonth()) {
-                return true;
-            }
-        }
-        return false;
-    }
-
 
 }

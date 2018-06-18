@@ -47,34 +47,67 @@
  *
  */
 
-package com.openexchange.legacy;
+package com.openexchange.dav.actions;
 
-import com.hazelcast.nio.serialization.Portable;
-
+import static com.openexchange.dav.DAVProtocol.protocolException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import javax.servlet.http.HttpServletResponse;
+import com.openexchange.java.Streams;
+import com.openexchange.tools.io.IOUtils;
+import com.openexchange.webdav.action.WebdavRequest;
+import com.openexchange.webdav.action.WebdavResponse;
+import com.openexchange.webdav.protocol.Protocol;
+import com.openexchange.webdav.protocol.WebdavProtocolException;
+import com.openexchange.webdav.protocol.WebdavResource;
 
 /**
- * {@link PortableContextInvalidationCallableFactory}
+ * {@link GETAction}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public class PortableContextInvalidationCallableFactory extends AbstractCustomPortableFactory {
+public class GETAction extends HEADAction {
 
     /**
-     * Initializes a new {@link PortableContextInvalidationCallableFactory}.
+     * Initializes a new {@link GETAction}.
+     *
+     * @param protocol The underlying protocol
      */
-    public PortableContextInvalidationCallableFactory() {
-        super();
+    public GETAction(Protocol protocol) {
+        super(protocol);
     }
 
     @Override
-    public Portable create() {
-        return new PortableContextInvalidationCallable();
-    }
-
-    @Override
-    public int getClassId() {
-        return PortableContextInvalidationCallable.CLASS_ID;
+    public void perform(WebdavRequest request, WebdavResponse response) throws WebdavProtocolException {
+        /*
+         * get targeted resource, set response headers & status
+         */
+        WebdavResource resource = request.getResource();
+        if (null == resource || false == resource.exists()) {
+            throw protocolException(request.getUrl(), HttpServletResponse.SC_NOT_FOUND);
+        }
+        setResponseHeaders(resource, response);
+        response.setStatus(HttpServletResponse.SC_OK);
+        /*
+         * write response body
+         */
+        InputStream inputStream = null;
+        OutputStream outputStream = null;
+        try {
+            outputStream = Streams.bufferedOutputStreamFor(response.getOutputStream());
+            inputStream = resource.getBody();
+            if (null == inputStream) {
+                throw protocolException(resource.getUrl(), new Exception("no resource body"));
+            }
+            IOUtils.transfer(inputStream, outputStream);
+        } catch (IOException e) {
+            throw protocolException(resource.getUrl(), e);
+        } finally {
+            Streams.flush(outputStream);
+            Streams.close(inputStream);
+        }
     }
 
 }

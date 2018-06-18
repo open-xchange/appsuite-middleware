@@ -116,9 +116,10 @@ public interface AlarmTriggerStorage {
     /**
      * Deletes all existing alarm triggers for an account.
      *
+     * @return <code>true</code> if something was actually deleted, <code>false</code>, otherwise
      * @throws OXException
      */
-    void deleteAllTriggers() throws OXException;
+    boolean deleteAllTriggers() throws OXException;
 
     /**
      * Retrieves all not acknowledged alarm triggers for the given user with a trigger time earlier than the given limit.
