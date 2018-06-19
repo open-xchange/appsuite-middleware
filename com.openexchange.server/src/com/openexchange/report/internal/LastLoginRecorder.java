@@ -57,10 +57,14 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserExceptionCode;
+import com.openexchange.java.Streams;
+import com.openexchange.lock.AccessControl;
+import com.openexchange.lock.LockService;
 import com.openexchange.login.Interface;
 import com.openexchange.login.LoginHandlerService;
 import com.openexchange.login.LoginRequest;
 import com.openexchange.login.LoginResult;
+import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.user.UserService;
 
 /**
@@ -149,9 +153,33 @@ public class LastLoginRecorder implements LoginHandlerService {
             return;
         }
 
+        LockService lockService = ServerServiceRegistry.getInstance().getService(LockService.class);
+        if (null == lockService) {
+            doUpdateLastLogin(userService, client, origUser, context);
+            return;
+        }
+
+        boolean acquired = false;
+        AccessControl accessControl = lockService.getAccessControlFor("lastloginrecorder", 1, origUser.getId(), context.getContextId());
+        try {
+            acquired = accessControl.tryAcquireGrant();
+            if (false == acquired) {
+                // Release manually and null'ify
+                accessControl.release(false);
+                accessControl = null;
+            } else {
+                // Grant acquired...
+                doUpdateLastLogin(userService, client, origUser, context);
+            }
+        } finally {
+            Streams.close(accessControl);
+        }
+    }
+
+    private static void doUpdateLastLogin(UserService userService, String client, User origUser, Context context) throws OXException {
         // Set attribute and add current time stamp
         try {
-            userService.setAttribute(null, "client:" + client, String.valueOf(System.currentTimeMillis()), origUser.getId(), context, false);
+            userService.setAttribute(null, new StringBuilder("client:").append(client).toString(), Long.toString(System.currentTimeMillis()), origUser.getId(), context, false);
         } catch (OXException e) {
             if (!UserExceptionCode.CONCURRENT_ATTRIBUTES_UPDATE.equals(e)) {
                 throw e;

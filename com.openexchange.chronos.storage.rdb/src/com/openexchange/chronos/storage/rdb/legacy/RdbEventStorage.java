@@ -391,7 +391,7 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
     }
 
     @Override
-    public void deleteAllEvents() throws OXException {
+    public boolean deleteAllEvents() throws OXException {
         throw new UnsupportedOperationException();
     }
 

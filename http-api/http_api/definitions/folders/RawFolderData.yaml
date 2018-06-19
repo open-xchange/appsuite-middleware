@@ -169,6 +169,9 @@ com.openexchange.calendar.config:
     color:
       type: string
       description: Defines the account color.
+    usedForSync:
+      type: boolean
+      description: Defines if the account should be synced via CalDAV.
     uri:
       type: string
       description: (ical provider only) The URI of the ICal feed that should be subscribed.

@@ -57,7 +57,6 @@ import org.json.JSONException;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.xml.sax.SAXException;
 import com.openexchange.ajax.mailaccount.actions.MailAccountAllRequest;
 import com.openexchange.ajax.mailaccount.actions.MailAccountAllResponse;
 import com.openexchange.exception.OXException;
@@ -71,12 +70,14 @@ import com.openexchange.mailaccount.MailAccountDescription;
  */
 public class MailAccountAllTest extends AbstractMailAccountTest {
 
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
         createMailAccount();
     }
 
+    @Override
     @After
     public void tearDown() throws Exception {
         try {
@@ -89,7 +90,7 @@ public class MailAccountAllTest extends AbstractMailAccountTest {
     }
 
     @Test
-    public void testAllShouldNotIncludePassword() throws OXException, IOException, SAXException, JSONException {
+    public void testAllShouldNotIncludePassword() throws OXException, IOException, JSONException {
         int[] fields = new int[] { Attribute.ID_LITERAL.getId(), Attribute.PASSWORD_LITERAL.getId() };
         MailAccountAllResponse response = getClient().execute(new MailAccountAllRequest(fields));
 

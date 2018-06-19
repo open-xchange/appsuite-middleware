@@ -75,7 +75,7 @@ public class TargetFolderSession implements Session {
         super();
         contextId = target.getContext().getContextId();
         userId = target.getUserId();
-        
+
         // Initialize
         final SessiondService service = SessiondService.SERVICE_REFERENCE.get();
         Session ses = null;
@@ -195,7 +195,9 @@ public class TargetFolderSession implements Session {
                 params.put(name, value);
             }
         } else {
-            session.setParameter(name, value);
+            if (null != session) {
+                session.setParameter(name, value);
+            }
         }
     }
 
@@ -248,7 +250,9 @@ public class TargetFolderSession implements Session {
         if (null != params) {
             retval.addAll(params.keySet());
         } else {
-            retval.addAll(session.getParameterNames());
+            if (null != session) {
+                retval.addAll(session.getParameterNames());
+            }
         }
         return retval;
     }

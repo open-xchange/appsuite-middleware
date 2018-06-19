@@ -309,7 +309,7 @@ public class RdbAlarmTriggerStorage extends RdbStorage implements AlarmTriggerSt
     }
 
     @Override
-    public void deleteAllTriggers() throws OXException {
+    public boolean deleteAllTriggers() throws OXException {
         int updated = 0;
         Connection connection = null;
         try {
@@ -322,6 +322,7 @@ public class RdbAlarmTriggerStorage extends RdbStorage implements AlarmTriggerSt
         } finally {
             release(connection, updated);
         }
+        return 0 < updated;
     }
 
     @Override

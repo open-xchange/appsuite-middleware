@@ -52,7 +52,6 @@ package com.openexchange.hazelcast.upgrade371.osgi;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -118,11 +117,11 @@ public class UpgradedCacheListener implements com.openexchange.caching.events.Ca
         /*
          * Determine remote members
          */
-        Set<Member> remoteMembers = getRemoteMembers(client);
+        final Set<Member> remoteMembers = getRemoteMembers(client);
         if (null != remoteMembers && false == remoteMembers.isEmpty()) {
             IExecutorService executor = client.getExecutorService("default");
             Map<Member, Future<Boolean>> futures = executor.submitToMembers(new PortableContextInvalidationCallable(parseSchemas(cacheEvent)), remoteMembers);
-            LOG.info("Successfully submitted invalidation of contexts to remote members:{}{}", Strings.getLineSeparator(), remoteMembers);
+            LOG.info("Successfully submitted invalidation of schemas to remote members:{}{}", Strings.getLineSeparator(), getMembersString(remoteMembers));
             /*
              * Check each submitted task
              */
@@ -217,6 +216,25 @@ public class UpgradedCacheListener implements com.openexchange.caching.events.Ca
             }
         }
         return new ArrayList<>(schemas);
+    }
+
+    private static Object getMembersString(final Set<Member> remoteMembers) {
+        return new Object() {
+            @Override
+            public String toString() {
+                StringBuilder sb = new StringBuilder(remoteMembers.size() << 2);
+                boolean first = true;
+                for (Member member : remoteMembers) {
+                    if (first) {
+                        first = false;
+                    } else {
+                        sb.append(", ");
+                    }
+                    sb.append(member.getAddress().getHost());
+                }
+                return sb.toString();
+            }
+        };
     }
 
 }

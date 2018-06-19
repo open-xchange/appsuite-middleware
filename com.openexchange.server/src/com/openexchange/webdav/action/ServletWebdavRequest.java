@@ -54,7 +54,7 @@ import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.List;
 import javax.servlet.http.HttpServletRequest;
@@ -99,14 +99,8 @@ public class ServletWebdavRequest extends AbstractWebdavRequest implements Webda
 
 	@Override
     public List<String> getHeaderNames() {
-        List<String> headers = new ArrayList<String>();
-		Enumeration<?> headerNames = req.getHeaderNames();
-		if (null != headerNames) {
-		    for (String header : headers) {
-		        headers.add(header);
-            }
-		}
-		return headers;
+        Enumeration<String> headerNames = req.getHeaderNames();
+        return null == headerNames ? Collections.emptyList() : Collections.list(headerNames);
 	}
 
 	@Override

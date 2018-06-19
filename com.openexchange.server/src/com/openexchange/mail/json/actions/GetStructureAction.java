@@ -144,13 +144,11 @@ public final class GetStructureAction extends AbstractMailAction {
             final boolean wasUnseen = (unseen ? !mail.isSeen() : mail.containsPrevSeen() && !mail.isPrevSeen());
             if (wasUnseen) {
                 try {
-                    final ServerUserSetting setting = ServerUserSetting.getInstance();
-                    final int contextId = session.getContextId();
-                    final int userId = session.getUserId();
-                    if (setting.isContactCollectOnMailAccess(contextId, userId).booleanValue()) {
-                        triggerContactCollector(session, mail, false);
+                    boolean memorizeAddresses = ServerUserSetting.getInstance().isContactCollectOnMailAccess(session.getContextId(), session.getUserId()).booleanValue();
+                    if (memorizeAddresses) {
+                        triggerContactCollector(session, mail, true, false);
                     }
-                } catch (final OXException e) {
+                } catch (final Exception e) {
                     LOG.warn("Contact collector could not be triggered.", e);
                 }
             }

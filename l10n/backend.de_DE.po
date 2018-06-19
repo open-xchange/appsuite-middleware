@@ -19,7 +19,7 @@ msgstr ""
 "Project-Id-Version: errors.de_DE\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2018-05-04 13:47+0200\n"
+"PO-Revision-Date: 2018-06-15 12:05+0200\n"
 "Last-Translator: \n"
 "Language-Team: German <kde-i18n-de@kde.org>\n"
 "Language: de_DE\n"
@@ -160,7 +160,7 @@ msgid "Comments"
 msgstr "Kommentare"
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.calendar.printing/src/com/openexchange/calendar/printing/CalendarPrintingStrings.java:75
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:274
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:275
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.printing/src/com/openexchange/printing/Messages.java:62
 msgid "The entire day"
 msgstr "Der gesamte Tag."
@@ -185,7 +185,7 @@ msgid "Undecided"
 msgstr "Unschlüssig"
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.calendar.printing/src/com/openexchange/calendar/printing/templating/Strings.java:66
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:272
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:273
 msgid "Resources"
 msgstr "Ressourcen"
 
@@ -500,13 +500,21 @@ msgstr ""
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:73
 msgid ""
+"An attendee wanted to change his/her participant state in an appointment "
+"that was already deleted."
+msgstr ""
+"Ein Teilnehmer wollte seinen Teilnehmerstatus in einem Termin ändern, der "
+"bereits gelöscht wurde."
+
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:74
+msgid ""
 "This is an update to an appointment that has been changed in the meantime. "
 "Best ignore it."
 msgstr ""
 "Dies ist eine Aktualisierung eines Termins, der zwischenzeitlich geändert "
 "wurde. Am besten, Sie ignorieren diese. "
 
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:74
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:75
 msgid ""
 "An attendee wants to change an appointment that could not be found. Probably "
 "the appointment was deleted. Best ignore it."
@@ -515,11 +523,11 @@ msgstr ""
 "Möglicherweise wurde der Termin zwischenzeitlich gelöscht. Am besten, Sie "
 "ignorieren diese Aktualisierung."
 
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:75
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:76
 msgid "The organizer declined your counter proposal for the appointment."
 msgstr "Der Organisator hat Ihren Gegenvorschlag zu diesem Termin abgelehnt."
 
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:76
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:77
 msgid ""
 "The organizer declined your counter proposal for an appointment that could "
 "not be found. It was probably deleted in the meantime."
@@ -528,7 +536,7 @@ msgstr ""
 "ist jedoch nicht vorhanden. Er wurde möglicherweise zwischenzeitlich "
 "gelöscht. "
 
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:77
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:78
 msgid ""
 "An attendee wants to be brought up to date about an appointment that could "
 "not be found. It was probably deleted at some point. Best ignore this "
@@ -538,7 +546,7 @@ msgstr ""
 "werden, der anscheinend nicht existiert. Er wurde möglicherweise "
 "zwischenzeitlich gelöscht. Am besten, Sie ignorieren diese Meldung. "
 
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:78
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:79
 msgid ""
 "This message contains appointment updates that were already accepted by "
 "another user. Best ignore this message."
@@ -546,13 +554,13 @@ msgstr ""
 "Diese Nachricht enthält Terminaktualisierungen, die bereits von einem "
 "anderen Benutzer akzeptiert wurden. Sie können diese Nachricht ignorieren."
 
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:79
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:80
 msgid "This message comes from an internal user. Best ignore it."
 msgstr ""
 "Diese Nachricht stammt von einem internen Benutzer. Sie können die Nachricht "
 "ignorieren."
 
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:80
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:81
 msgid ""
 "This invitation was sent to someone else, not you. This appointment would "
 "have to be created in a user's private folder to which you do not have write "
@@ -562,35 +570,35 @@ msgstr ""
 "Benutzer. Dieser Termin hätte in einem privaten Benutzerordner erstellt "
 "werden müssen, für den Sie keine Schreibberechtigung besitzen."
 
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:82
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:83
 msgid "The appointment's attachments have been changed"
 msgstr "Die Anhänge zu dem Termin wurden geändert."
 
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:84
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:85
 msgid "One or more other fields have been updated"
 msgstr "Ein oder mehrere andere Felder wurden aktualisiert"
 
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:86
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:87
 msgid "Reserved"
 msgstr "Gebucht"
 
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:88
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:89
 msgid "Temporary"
 msgstr "Mit Vorbehalt"
 
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:90
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:91
 msgid "Absent"
 msgstr "Abwesend"
 
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:92
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:93
 msgid "Free"
 msgstr "Frei"
 
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:94
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:95
 msgid "%1$s has declined your proposed changes for the appointment %2$s."
 msgstr "%1$s hat Ihre vorgeschlagenen Änderungen zum Termin %2$s abgelehnt."
 
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:96
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:97
 msgid ""
 "%1$s has declined your proposed changes on behalf of %2$s for the "
 "appointment %3$s."
@@ -598,7 +606,7 @@ msgstr ""
 "%1$s hat Ihre vorgeschlagenen Änderungen zum Termin %3$s im Auftrag von %2$s "
 "abgelehnt."
 
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:98
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:99
 msgid ""
 "%1$s would like to be brought up to date about the appointment %2$s. Please "
 "send another invitation."
@@ -612,7 +620,7 @@ msgstr ""
 #. * <p>"UserXY has declined the invitation"
 #. * <p>"UserXY has tentatively accepted the invitation"
 #.
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:106
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:107
 msgid "%1$s has %2$s the invitation:"
 msgstr "%1$s hat die Einladung %2$s:"
 
@@ -625,9 +633,9 @@ msgstr "%1$s hat die Einladung %2$s:"
 #. *
 #. * Example: "UserXY has tentatively accepted the invitation on behalf of UserAB"
 #.
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:111
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:121
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:131
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:112
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:122
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:132
 msgid "%1$s has %2$s the invitation on behalf of %3$s:"
 msgstr "%1$s hat die Einladung im Auftrag von %3$s %2$s:"
 
@@ -640,102 +648,102 @@ msgstr "%1$s hat die Einladung im Auftrag von %3$s %2$s:"
 #. *
 #. * Example: "UserXY has tentatively accepted the invitation on your behalf"
 #.
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:116
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:126
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:136
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:117
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:127
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:137
 msgid "%1$s has %2$s the invitation on your behalf:"
 msgstr "%1$s hat die Einladung in Ihrem Namen %2$s:"
 
 #. public static final String TENTATIVELY_ACCEPTED = "tentatively accepted";
 #. Used if a participant changed it status to either 'Accepted', 'Denied', or 'Tentatively accepted'
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:141
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:142
 msgid "%1$s sets the status to %2$s for this appointment:"
 msgstr "%1$s setzt den Status für diesen Termin auf %2$s:"
 
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:143
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:144
 msgid "On behalf of %3$s, %1$s sets the status for this appointment to %2$s:"
 msgstr "%1$s setzt im Auftrag von %3$s den Status für diesen Termin auf %2$s:"
 
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:145
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:146
 msgid "On your behalf, %1$s sets your status for this appointment to %2$s:"
 msgstr ""
 "%1$s hat Ihren Status für diesen Termin in Ihrem Namen auf %2$s gesetzt:"
 
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:147
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:148
 msgid "none"
 msgstr "Keine"
 
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:149
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:150
 msgid "%1$s would like you to change the appointment:"
 msgstr "%1$s möchte, dass Sie den Termin ändern:"
 
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:151
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:152
 msgid "%1$s has asked %2$s to change the event:"
 msgstr "%1$s hat %2$s gebeten, das Ereignis zu ändern:"
 
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:153
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:154
 msgid "You have been invited to an event by %1$s:"
 msgstr "Sie wurden von %1$s zu einem Ereignis eingeladen:"
 
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:155
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:156
 msgid "You have been invited to an event organized by %1$s on behalf of %2$s"
 msgstr ""
 "Sie wurden im Auftrag von %2$s zu einem von %1$s organisierten Ereignis "
 "eingeladen:"
 
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:157
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:158
 msgid "%1$s is organizing an event on your behalf."
 msgstr "%1$s organisiert in Ihrem Namen ein Ereignis."
 
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:159
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:160
 msgid "%1$s created a recurrence exception. Original date: %2$s:"
 msgstr "%1$s hat eine Serienausnahme erstellt. Ursprüngliches Datum: %2$s:"
 
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:161
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:162
 msgid "%1$s has changed an event:"
 msgstr "%1$s hat ein Ereignis geändert:"
 
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:163
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:164
 msgid "%1$s has changed an event on behalf of %2$s:"
 msgstr "%1$s hat im Auftrag von %2$s ein Ereignis geändert:"
 
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:165
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:166
 msgid "%1$s has changed an event on your behalf:"
 msgstr "%1$s hat in Ihrem Auftrag ein Ereignis geändert:"
 
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:167
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:168
 msgid "When:"
 msgstr "Wann:"
 
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:169
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:170
 msgid "Direct link:"
 msgstr "Direkter Link:"
 
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:171
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:172
 msgid "Where:"
 msgstr "Wo:"
 
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:173
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:174
 msgid "Participants:"
 msgstr "Teilnehmer"
 
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:175
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:176
 msgid "Details:"
 msgstr "Details:"
 
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:177
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:178
 msgid "Show as:"
 msgstr "Anzeigen als:"
 
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:179
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:180
 msgid "Created:"
 msgstr "Angelegt:"
 
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:181
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:182
 msgid "Modified:"
 msgstr "Geändert:"
 
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:183
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:184
 msgid ""
 "%1$s has deleted an appointment on behalf of %2$s, or you have been removed "
 "as a participant:"
@@ -743,76 +751,76 @@ msgstr ""
 "%1$s hat im Auftrag von %2$s einen Termin gelöscht, oder Sie wurden als "
 "Teilnehmer entfernt:"
 
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:185
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:186
 msgid "%1$s has deleted an appointment on your behalf:"
 msgstr "%1$s hat in Ihrem Auftrag einen Termin gelöscht:"
 
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:187
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:188
 msgid ""
 "%1$s has deleted an appointment, or you have been removed as a participant:"
 msgstr ""
 "%1$s hat einen Termin gelöscht, oder Sie wurden als Teilnehmer entfernt:"
 
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:189
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:191
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:190
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:192
 msgid "Change the subject to %1$s."
 msgstr "Ersetzen Sie den Betreff durch: %1$s"
 
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:193
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:194
 msgid "The appointment has a new subject: %1$s."
 msgstr "Der Termin hat einen neuen Betreff: %1$s."
 
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:195
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:196
 msgid "The appointment will now be shown as: \"%1$s\"."
 msgstr "Der Termin wird nun folgendermaßen angezeigt: \"%1$s\"."
 
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:197
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:198
 msgid "The appointment timezone was changed to: %1$s"
 msgstr "Die Zeitzone des Termins wurde geändert zu: %1$s"
 
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:199
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:201
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:200
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:202
 msgid "Change the location to %1$s."
 msgstr "Ersetzen Sie den Ort durch: %1$s"
 
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:203
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:204
 msgid "The appointment takes place in a new location: %1$s."
 msgstr "Der Termin findet an einem neuen Ort statt: %1$s."
 
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:205
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:207
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:206
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:208
 msgid "Use the appointment description below."
 msgstr "Verwenden Sie die unten genannte Terminbeschreibung."
 
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:209
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:210
 msgid "The appointment description has changed."
 msgstr "Die Terminbeschreibung wurde geändert."
 
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:211
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:212
 msgid "Please invite %1$s to the appointment."
 msgstr "Bitte laden Sie %1$s zu dem Termin ein."
 
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:213
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:214
 msgid "Add %1$s to the appointment."
 msgstr "Fügen Sie %1$s zum Termin hinzu."
 
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:215
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:216
 msgid "%1$s has been invited to the appointment."
 msgstr "%1$s wurde zu dem Termin eingeladen."
 
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:217
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:219
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:218
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:220
 msgid "Remove %1$s from the appointment."
 msgstr "Entfernen Sie %1$s aus dem Termin."
 
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:221
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:222
 msgid "%1$s has been removed from the appointment."
 msgstr "%1$s wurde aus dem Termin entfernt."
 
 #. *
 #. * Example: "UserXY has accepted the appointment."
 #.
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:226
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:227
 msgid "%1$s has %2$s the appointment."
 msgstr "%1$s hat den Termin %2$s."
 
@@ -824,61 +832,61 @@ msgstr "%1$s hat den Termin %2$s."
 #. * Confirmation statuses
 #.
 #. waiting
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:232
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:233
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:696
 msgid "waiting"
 msgstr "Wartestatus"
 
 #.
 #. public static final String TENTATIVELY_ACCEPT = "tentatively accept";
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:236
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:238
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:237
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:239
 msgid "Invite the group %1$s to the appointment."
 msgstr "Laden Sie die Gruppe %1$s zu dem Termin ein."
 
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:240
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:241
 msgid "The group %1$s has been invited to the appointment"
 msgstr "Die Gruppe %1$s wurde zu dem Termin eingeladen"
 
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:242
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:244
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:243
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:245
 msgid "Remove the group %1$s from the appointment."
 msgstr "Entfernen Sie die Gruppe %1$s aus dem Termin."
 
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:246
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:247
 msgid "The group %1$s has been removed from the appointment"
 msgstr "Die Gruppe %1$s wurde aus dem Termin entfernt"
 
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:248
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:249
 msgid "Reserve the resource %1$s for the appointment"
 msgstr "Buchen Sie die Ressource %1$s für den Termin"
 
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:250
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:251
 msgid "Reserve the resource %1$s for the appointment."
 msgstr "Buchen Sie die Ressource %1$s für den Termin."
 
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:252
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:253
 msgid "The resource %1$s has been reserved for the appointment"
 msgstr "Die Ressource %1$s wurde für den Termin gebucht"
 
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:254
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:255
 msgid "Remove the resource %1$s from the appointment"
 msgstr "Entfernen Sie die Ressource %1$s aus dem Termin."
 
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:256
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:257
 msgid "Remove the resource %1$s from the appointment."
 msgstr "Entfernen Sie die Ressource %1$s aus dem Termin."
 
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:258
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:259
 msgid "The resource %1$s is no longer reserved for the appointment"
 msgstr "Die Ressource %1$s ist nicht mehr für den Termin gebucht"
 
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:260
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:261
 msgid "The appointment was rescheduled. Original date: %1$s. New date: %2$s"
 msgstr ""
 "Der Termin wurde verschoben. Ursprüngliches Datum: %1$s. Neues Datum: %2$s"
 
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:262
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:263
 msgid ""
 "The timezone of the appointment was changed. Original timezone: %1$s. New "
 "timezone: %2$s"
@@ -886,7 +894,7 @@ msgstr ""
 "Die Zeitzone des Termins wurde geändert. Ursprüngliche Zeitzone: %1$s. Neue "
 "Zeitzone: %2$s"
 
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:264
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:265
 msgid ""
 "The timezone of the appointments start date was changed. Original timezone: "
 "%1$s. New timezone: %2$s"
@@ -894,7 +902,7 @@ msgstr ""
 "Die Zeitzone für das Startdatum des Termins wurde geändert. Ursprüngliche "
 "Zeitzone: %1$s. Neue Zeitzone: %2$s"
 
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:266
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:267
 msgid ""
 "The timezone of the appointments end date was changed. Original timezone: "
 "%1$s. New timezone: %2$s"
@@ -902,75 +910,75 @@ msgstr ""
 "Die Zeitzone für das Enddatum des Termins wurde geändert. Ursprüngliche "
 "Zeitzone: %1$s. Neue Zeitzone: %2$s"
 
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:268
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:269
 msgid "Reschedule the event. Original date: %1$s. New date: %2$s"
 msgstr ""
 "Verschieben Sie das Ereignis. Ursprüngliches Datum: %1$s. Neues Datum: %2$s"
 
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:270
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:271
 msgid "Reschedule the event. Original date/time: %1$s. New date/time: %2$s"
 msgstr ""
 "Verschieben Sie das Ereignis. Ursprüngliches Datum: %1$s. Neues Datum: %2$s"
 
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:276
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:277
 msgid "New appointment: %1$s"
 msgstr "Neuer Termin: %1$s"
 
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:278
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:279
 msgid "Appointment changed: %1$s"
 msgstr "Termin geändert: %1$s"
 
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:280
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:281
 msgid "Appointment canceled: %1$s"
 msgstr "Termin verworfen: %1$s"
 
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:282
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:283
 msgid "Proposed changes for appointment: %1$s"
 msgstr "Vorgeschlagene Änderungen für Termin: %1$s"
 
 #. Used to indicate that a participant resetted his status to 'Waiting'; neither 'Accepted, 'Denied' nor 'Tentatively accepted'
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:285
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:286
 msgid "%1$s sets the status to 'none' for: %1$s"
 msgstr "%1$s setzt den Status auf 'keine' für: %1$s"
 
 #. Example: Subject: Doe, Jane accepted the invitation: My Appointment with Jane
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:288
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:289
 msgid "%1$s %2$s the invitation: %3$s"
 msgstr "%1$s hat folgende Einladung %2$s: %3$s"
 
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:290
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:291
 msgid "Resend the invitation for: %1$s"
 msgstr "Senden Sie die Einladung erneut für: %1$s"
 
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:292
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:293
 msgid "Change not accepted for: %1$s"
 msgstr "Änderung nicht akzeptiert für: %1$s"
 
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:294
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:295
 msgid "All times will be shown in the timezone %1$s"
 msgstr "Alle Zeiten werden in dieser Zeitzone angezeigt: %1$s"
 
 #. E.g. "Jane has accepted the appointment, but would like to make a counter proposal: "
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:297
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:298
 msgid ""
 "%1$s has %2$s the appointment, but would like to make a counter proposal: "
 msgstr "%1$s hat den Termin %2$s, möchte jedoch einen Gegenvorschlag machen: "
 
 #. TODO: Mah/Cisco, please describe what is meant with the wording 'chair'
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:300
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:301
 msgid ""
 "You have received this E-Mail because you are the chair for this appointment."
 msgstr ""
 "Sie haben diese E-Mail erhalten, da Sie der Leiter für diesen Termin sind."
 
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:302
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:303
 msgid ""
 "You have received this E-Mail because you are the organizer of this "
 "appointment."
 msgstr ""
 "Sie haben diese E-Mail erhalten, da Sie der Organisator dieses Termins sind."
 
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:304
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:305
 msgid ""
 "You have received this E-Mail because this appointment contains the resource "
 "%1$s which is managed by you."
@@ -1317,11 +1325,15 @@ msgid ""
 msgstr "Diese Änderung kann nur durch den Organisator des Termins erfolgen."
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:82
+msgid "Organizer must also be an attendee."
+msgstr "Der Organisator muss auch ein Teilnehmer sein."
+
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:84
 msgid "The operation could not be completed due to missing capabilities."
 msgstr ""
 "Der Vorgang konnte aufgrund fehlender Ressourcen nicht abgeschlossen werden."
 
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:84
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:86
 msgid ""
 "The supplied folder is not supported. Please select a valid folder and try "
 "again."
@@ -1329,7 +1341,7 @@ msgstr ""
 "Der angegebene Ordner wird nicht unterstützt. Bitte wählen Sie einen "
 "gültigen Ordner und versuchen Sie es erneut."
 
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:86
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:88
 msgid ""
 "The operation could not be completed due to a concurrent modification. "
 "Please reload the data and try again."
@@ -1337,7 +1349,7 @@ msgstr ""
 "Der Vorgang konnte wegen einer gleichzeitigen Änderung nicht abgeschlossen "
 "werden. Laden Sie die Daten neu und versuchen Sie es erneut."
 
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:88
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:90
 msgid ""
 "The appointment could not be created due to another conflicting appointment "
 "with the same unique identifier."
@@ -1345,19 +1357,19 @@ msgstr ""
 "Der Termin kann nicht erstellt werden. Es trat ein Konflikt mit einem Termin "
 "mit der gleichen eindeutigen ID auf."
 
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:90
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:92
 msgid "The appointment conflicts with one or more other appointments."
 msgstr ""
 "Für den Termin trat ein Konflikt mit mindestens einem anderen Termin auf."
 
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:92
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:94
 msgid ""
 "The field \"%1$s\" is mandatory. Please supply a valid value and try again."
 msgstr ""
 "\"%1$s\" ist ein Pflichtfeld. Bitte geben Sie einen gültigen Wert an und "
 "versuchen Sie es erneut."
 
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:94
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:96
 msgid ""
 "The end date lies before the start date. Please correct the appointment "
 "times and try again."
@@ -1365,7 +1377,7 @@ msgstr ""
 "Das Enddatum liegt vor dem Startdatum. Bitte korrigieren Sie die "
 "Terminzeiten und versuchen Sie es erneut."
 
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:96
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:98
 msgid ""
 "Appointments in non-personal folders must not be classified as \"private\" "
 "or \"secret\"."
@@ -1373,12 +1385,12 @@ msgstr ""
 "Termine können nur in persönlichen Ordnern als  \"privat\" oder \"vertraulich"
 "\" markiert werden."
 
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:98
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:100
 msgid "Appointments with resources must not be classified as \"secret\"."
 msgstr ""
 "Termine mit Ressourcen dürfen nicht als \"geheim\" klassifiziert werden."
 
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:100
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:102
 msgid ""
 "Appointments classified as \"private\" or \"secret\" cannot be moved to this "
 "type of folder."
@@ -1386,13 +1398,13 @@ msgstr ""
 "Als \"privat\" oder \"geheim\" markierte Termine können nicht in diesen "
 "Ordnertyp verschoben werden."
 
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:102
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:104
 msgid "Occurrences of appointment series must not be classified differently."
 msgstr ""
 "Einzeltermine eines Serientermins dürfen nicht unterschiedlich klassifiziert "
 "werden."
 
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:104
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:106
 msgid ""
 "The supplied recurrence rule is invalid. Please correct the rule and try "
 "again."
@@ -1400,14 +1412,14 @@ msgstr ""
 "Die angegebene Wiederholungsregel ist ungültig. Bitte korrigieren Sie die "
 "Regel und versuchen Sie es erneut."
 
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:106
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:108
 msgid ""
 "The supplied reminder is invalid. Please correct the reminder and try again."
 msgstr ""
 "Die angegebene Erinnerung ist ungültig. Bitte korrigieren Sie die Erinnerung "
 "und versuchen Sie es erneut."
 
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:108
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:110
 msgid ""
 "The supplied timezone is invalid. Please select a valid timezone and try "
 "again."
@@ -1415,7 +1427,7 @@ msgstr ""
 "Die angegebene Zeitzone ist ungültig. Bitte wählen Sie eine gültige Zeitzone "
 "und versuchen Sie es erneut."
 
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:110
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:112
 msgid ""
 "The supplied geographical location is invalid. Please select valid "
 "coordinates and try again."
@@ -1423,7 +1435,7 @@ msgstr ""
 "Die angegebene geographische Position ist ungültig. Bitte wählen Sie gültige "
 "Koordinaten und versuchen Sie es erneut."
 
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:112
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:114
 msgid ""
 "The supplied types of start and end date are incompatible. Please correct "
 "the appointment times and try again."
@@ -1431,7 +1443,7 @@ msgstr ""
 "Die angegebenen Start- und Enddaten sind nicht kompatibel. Bitte korrigieren "
 "Sie die Terminzeiten und versuchen Sie es erneut. "
 
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:114
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:116
 msgid ""
 "The supplied recurrence rule is not supported. Please use adjust the rule "
 "and try again."
@@ -1439,7 +1451,7 @@ msgstr ""
 "Die angegebene Wiederholungsregel wird nicht unterstützt. Bitte passen Sie "
 "die Regel an und versuchen Sie es erneut."
 
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:116
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:118
 msgid ""
 "The targeted occurrence is not part of the appointment series. Please select "
 "a valid recurrence identifier and try again."
@@ -1447,7 +1459,7 @@ msgstr ""
 "Der angezielte Einzeltermin ist nicht Teil des Serientermins. Bitte wählen "
 "sie eine gültige Serien-ID und versuchen  Sie es erneut."
 
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:118
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:120
 msgid ""
 "The split of the appointment series cannot be performed. Please select a "
 "valid split point and try again."
@@ -1455,11 +1467,11 @@ msgstr ""
 "Die Terminserie kann nicht getrennt werden. Bitte wählen Sie eine gültige "
 "Trennung und versuchen Sie es erneut."
 
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:120
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:122
 msgid "Moving an appointment series into another folder is not supported."
 msgstr "Ein Serientermin darf nicht in einen anderen Ordner verschoben werden."
 
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:122
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:124
 msgid ""
 "Moving an occurrence of an appointment series into another folder is not "
 "supported."
@@ -1467,11 +1479,11 @@ msgstr ""
 "Ein Einzeltermin eines Serientermins darf nicht in einen anderen Ordner "
 "verschoben werden."
 
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:124
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:126
 msgid "The calendar user \"%1$s\" is invalid."
 msgstr "Der Kalender-Benutzer \"%1$s\" ist ungültig."
 
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:126
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:128
 msgid ""
 "The supplied configuration is invalid. Please correct the configuration and "
 "try again."
@@ -1480,7 +1492,7 @@ msgstr ""
 "Konfiguration und versuchen Sie es erneut."
 
 #. In order to accomplish the search, %1$d or more characters are required.
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:128
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:130
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:80
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/FindExceptionMessages.java:84
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:135
@@ -1490,7 +1502,7 @@ msgid ""
 "In order to accomplish the search, %1$d or more characters are required."
 msgstr "Um die Suche durchzuführen, sind mindestens %1$d Zeichen erforderlich."
 
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:130
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:132
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:137
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:130
 msgid ""
@@ -1500,7 +1512,7 @@ msgstr ""
 "Das Zeichen \"%1$s\" im Feld \"%2$s\" kann nicht gespeichert werden.  Bitte "
 "entfernen Sie das Zeichen und versuchen Sie es erneut."
 
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:132
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:134
 msgid ""
 "Some data entered exceeded the field limit. Please shorten the value for "
 "\"%1$s\" (limit: %2$d, current: %3$d) and try again."
@@ -1509,28 +1521,28 @@ msgstr ""
 "den Eintrag für \"%1$s\" (Limit: %2$s, aktuell: %3$s) und versuchen Sie es "
 "erneut."
 
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:134
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:136
 msgid "The maximum number of calendar subscriptions is exceeded."
 msgstr "Die maximale Anzahl von Kalenderabonnements wurde überschritten."
 
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:136
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:138
 msgid "The value for \"%2$s\" is invalid and wasn't applied."
 msgstr "Der Wert für \"%2$s\" ist ungültig und wurde nicht angewendet."
 
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:138
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:140
 msgid "The value for \"%2$s\" is not supported and wasn't applied."
 msgstr ""
 "Der Wert für \"%2$s\" wird nicht unterstützt und wurde nicht angewendet."
 
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:140
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:142
 msgid "The '%1$s' is either not an internal user or does not exist."
 msgstr "'%1$s' ist entweder kein interner Benutzer oder existiert nicht."
 
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:142
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:144
 msgid "Authentication failed."
 msgstr "Die Authentifizierung ist fehlgeschlagen."
 
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:144
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:146
 msgid ""
 "Unable to create account. There have been issues with the provided "
 "authentication."
@@ -1538,27 +1550,27 @@ msgstr ""
 "Der Account konnte nicht angelegt werden. Es gab Probleme mit der "
 "Authentifizierung."
 
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:146
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:148
 msgid "The quota for account '%1$s' in context '%2$s' exceeded the limit."
 msgstr ""
 "Das Quota-Limit für den Account \"%1$s\" im Kontext \"%2$s\" wurde "
 "überschritten."
 
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:148
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:150
 msgid "The requested attachment was not found."
 msgstr "Der angeforderte Anhang wurde nicht gefunden."
 
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:150
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:152
 msgid "Too many appointments are queried. Please choose a shorter timeframe."
 msgstr ""
 "Es wurden zu viele Termine angefragt. Bitte wählen Sie einen kürzeren "
 "Zeitraum."
 
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:152
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:154
 msgid "The appointment contains too many participants."
 msgstr "Der Termin enthält zu viele Teilnehmer."
 
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:154
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:156
 msgid "The appointment contains too many reminders."
 msgstr "Der Termin enthält zu viele Erinnerungen."
 
@@ -2413,6 +2425,20 @@ msgid "No global database for context group \"%1$s\" found."
 msgstr ""
 "Es konnte keine globale Datenbank für die Kontextgruppe \"%1$s\" gefunden "
 "werden."
+
+#. Problem with reading from or writing to database
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.database/src/com/openexchange/database/DatabaseExceptionStrings.java:63
+msgid "Problem with reading from or writing to database"
+msgstr "Problem beim Lesen oder Schreiben aus bzw. in die Datenbank"
+
+#. User specified an input text that contains certain characters, which are not supported by database. E.g. cannot be stored or cannot be queried by.
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.database/src/com/openexchange/database/DatabaseExceptionStrings.java:66
+msgid ""
+"The specified input contains unsupported characters. Please remove the "
+"unsupported characters and try again."
+msgstr ""
+"Die angegebene Eingabe enthält nicht unterstützte Zeichen. Bitte entfernen "
+"Sie die nicht unterstützten Zeichen und versuchen Sie es erneut."
 
 #. A DoveAdm error occurred: %1$s
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.dovecot.doveadm.client/src/com/openexchange/dovecot/doveadm/client/DoveAdmClientExceptionMessages.java:62
@@ -4924,7 +4950,6 @@ msgstr "Zulassen"
 
 #. label of username input field
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.oauth.provider.impl/src/com/openexchange/oauth/provider/impl/servlets/OAuthProviderStrings.java:87
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.subscribe.crawler/src/com/openexchange/subscribe/crawler/internal/FormStrings.java:63
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.subscribe.dav/src/com/openexchange/subscribe/dav/FormStrings.java:63
 msgid "Password"
 msgstr "Passwort"
@@ -6845,10 +6870,8 @@ msgstr "%1$s %2$s (%3$s)"
 msgid "System"
 msgstr "System"
 
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/FolderStrings.java:70
-msgid "Shared address book"
-msgstr "Freigegebenes Adressbuch"
-
+#. public static final String SYSTEM_GLOBAL_FOLDER_NAME = "Shared address book";
+#. finally dropped
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/FolderStrings.java:72
 msgid "Global address book"
 msgstr "Globales Adressbuch"
@@ -9861,7 +9884,7 @@ msgstr "Mail-Ordner \"%1$s\" konnte nicht gefunden werden"
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:85
 msgid "Mail folder \"%1$s\" could not be found on mail server %2$s."
 msgstr ""
-"Der E-Mail-Ordner \"%1$s\" konnte nicht im auf dem Mailserver %2$s gefunden "
+"Der E-Mail-Ordner \"%1$s\" konnte nicht auf dem Mailserver %2$s gefunden "
 "werden."
 
 #. *
@@ -11792,7 +11815,6 @@ msgstr ""
 msgid "You are not allowed to modify the signature"
 msgstr "Sie haben keine Berechtigung, die Signatur zu ändern"
 
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.subscribe.crawler/src/com/openexchange/subscribe/crawler/internal/FormStrings.java:61
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.subscribe.dav/src/com/openexchange/subscribe/dav/FormStrings.java:61
 msgid "Login"
 msgstr "Login"
@@ -11842,6 +11864,11 @@ msgstr ""
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.subscribe.microformats/src/com/openexchange/subscribe/microformats/OXMFErrorStrings.java:72
 msgid "You provided an invalid URL."
 msgstr "Sie haben eine ungültige URL eingegeben."
+
+#. No URL was provided.
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.subscribe.microformats/src/com/openexchange/subscribe/microformats/OXMFErrorStrings.java:75
+msgid "You provided no URL."
+msgstr "Sie haben keine URL angegeben."
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.subscribe.xing/src/com/openexchange/subscribe/xing/FormStrings.java:62
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.subscribe.yahoo/src/com/openexchange/subscribe/yahoo/FormStrings.java:62
@@ -14365,6 +14392,9 @@ msgstr "UTC"
 #: /home/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:534
 msgid "Zulu"
 msgstr "Zulu"
+
+#~ msgid "Shared address book"
+#~ msgstr "Freigegebenes Adressbuch"
 
 #~ msgid "The feed URI does not match the standard."
 #~ msgstr "Der Feed-URI entspricht nicht dem Standard."

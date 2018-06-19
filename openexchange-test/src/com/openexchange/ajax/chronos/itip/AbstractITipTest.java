@@ -207,7 +207,7 @@ public abstract class AbstractITipTest extends AbstractChronosTest {
 
     /**
      * Uploads a mail to the INBOX
-     * 
+     *
      * @param data The event to send iTip mail for
      * @return {@link MailDestinationData} with set mail ID and folder ID
      * @throws Exception In case of error

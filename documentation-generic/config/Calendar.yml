@@ -145,6 +145,22 @@ properties:
       file: calendar.properties
       packageName: open-xchange-core
       tags: ["Calendar","Database"]
+    - key: com.openexchange.calendar.migration.intermediateCommits
+      description: |
+        Controls whether to perform intermediate database COMMITs after each batch during the update task
+        com.openexchange.chronos.storage.rdb.migration.ChronosStorageMigrationTask or to have a big database transaction for
+        the whole update task.
+        
+        The reason for this is that big transactions are not handled well by MySQL Galera setups, therefore it is more safe to
+        have smaller chunk-wise COMMITS to ensure correctness. However, chunk-wise COMMITS come with a higher duration. 
+      defaultValue: true
+      version: 7.10.0
+      reloadable: true
+      configcascadeAware: false
+      related: com.openexchange.calendar.migration.batchSize
+      file: calendar.properties
+      packageName: open-xchange-core
+      tags: ["Calendar","Database"]
     - key: com.openexchange.calendar.useLegacyStorage
       description: |
         Forcibly re-enables usage of the 'legacy' tables for the calendar storage. 

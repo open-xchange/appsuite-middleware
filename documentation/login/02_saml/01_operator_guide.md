@@ -6,9 +6,6 @@ title: Operator Guide
 
 After development of the SAML backend is done you can setup OX App Suite as usual. Additionally you need to install `open-xchange-saml-core` and a package that provides `open-xchange-saml-backend` and contains your custom SAML backend. It is also necessary that a package providing `open-xchange-authentication` is installed. For your convenience you can install the metapackage `open-xchange-saml` which depends on a core and backend package. Finally the package for SAML support within App Suite UI is needed: `open-xchange-appsuite-saml`.
 
-    $ apt-get install open-xchange-saml open-xchange-appsuite-saml
-
-
 # Configuration
 
 ## Backend Configuration

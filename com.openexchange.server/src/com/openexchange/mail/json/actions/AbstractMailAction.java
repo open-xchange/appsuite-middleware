@@ -74,13 +74,9 @@ import com.openexchange.ajax.requesthandler.AJAXState;
 import com.openexchange.ajax.requesthandler.crypto.CryptographicServiceAuthenticationFactory;
 import com.openexchange.ajax.requesthandler.oauth.OAuthConstants;
 import com.openexchange.annotation.NonNull;
-import com.openexchange.contact.ContactService;
 import com.openexchange.contactcollector.ContactCollectorService;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.container.Contact;
-import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.search.ContactSearchObject;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.MailListField;
@@ -101,10 +97,8 @@ import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.mailaccount.TransportAccount;
 import com.openexchange.objectusecount.IncrementArguments;
 import com.openexchange.objectusecount.ObjectUseCountService;
-import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.server.services.ServerServiceRegistry;
-import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
@@ -317,75 +311,89 @@ public abstract class AbstractMailAction implements AJAXActionService, MailActio
      *
      * @param session The session
      * @param mail The mail
+     * @param memorizeAddresses Whether contact-collector is supposed to be triggered
      * @param incrementUseCount Whether the associated contacts' use-count is supposed to be incremented
      * @throws OXException
      */
-    public static void triggerContactCollector(ServerSession session, MailMessage mail, boolean incrementUseCount) throws OXException {
-        triggerContactCollector(session, Collections.singletonList(mail), incrementUseCount);
+    public static void triggerContactCollector(ServerSession session, MailMessage mail, boolean memorizeAddresses, boolean incrementUseCount) throws OXException {
+        if (null != mail) {
+            triggerContactCollector(session, Collections.singletonList(mail), memorizeAddresses, incrementUseCount);
+        }
     }
+
+    /** The prefix for puny-code encoded mail addresses */
+    private final static String ACE_PREFIX = "xn--";
 
     /**
      * Triggers the contact collector for specified mail's addresses.
      *
      * @param session The session
      * @param mails The mails
+     * @param memorizeAddresses Whether contact-collector is supposed to be triggered
      * @param incrementUseCount Whether the associated contacts' use-count is supposed to be incremented
      * @throws OXException
      */
-    public static void triggerContactCollector(ServerSession session, Collection<? extends MailMessage> mails, boolean incrementUseCount) throws OXException {
-        final ContactCollectorService ccs = ServerServiceRegistry.getInstance().getService(ContactCollectorService.class);
-        if (null != ccs) {
-            Set<InternetAddress> addrs = null;
-            Set<InternetAddress> aliases = null;
-            for (MailMessage mail : mails) {
-                if (null != mail) {
-                    if (null == aliases) {
-                        aliases = AddressUtility.getAliases(session);
-                    }
+    public static void triggerContactCollector(ServerSession session, Collection<? extends MailMessage> mails, boolean memorizeAddresses, boolean incrementUseCount) throws OXException {
+        // Sets to store user's alias addresses (which should not be considered) and cumulative addresses of specified mail collection
+        Set<InternetAddress> addrs = null;
+        Set<InternetAddress> aliases = null;
 
-                    if (null == addrs) {
-                        addrs = AddressUtility.getFilteredAddresses(mail, aliases);
-                    } else {
-                        addrs.addAll(AddressUtility.getFilteredAddresses(mail, aliases));
+        // Check whether contact-collector is supposed to be triggered
+        if (memorizeAddresses) {
+            ContactCollectorService ccs = ServerServiceRegistry.getInstance().getService(ContactCollectorService.class);
+            if (null != ccs) {
+                for (MailMessage mail : mails) {
+                    if (null != mail) {
+                        if (null == aliases) {
+                            aliases = AddressUtility.getAliases(session);
+                        }
+
+                        if (null == addrs) {
+                            addrs = AddressUtility.getFilteredAddresses(mail, aliases);
+                        } else {
+                            addrs.addAll(AddressUtility.getFilteredAddresses(mail, aliases));
+                        }
                     }
                 }
-            }
 
-            if (null != addrs && !addrs.isEmpty()) {
-                ccs.memorizeAddresses(new ArrayList<InternetAddress>(addrs), incrementUseCount, session);
+                if (null != addrs && !addrs.isEmpty()) {
+                    ccs.memorizeAddresses(new ArrayList<InternetAddress>(addrs), false, session);
+                }
             }
         }
-    }
 
-    /**
-     * Triggers the object use count increment for specified addresses in global address book.
-     *
-     * @param session The session
-     * @param addresses The mail addresses
-     * @throws OXException
-     */
-    public static void triggerUseCountIncrementForGAB(ServerSession session, InternetAddress[] addresses) throws OXException {
-        ObjectUseCountService service = ServerServiceRegistry.getInstance().getService(ObjectUseCountService.class);
-        ContactService cService = ServerServiceRegistry.getInstance().getService(ContactService.class);
-        if (null != service) {
-            for (InternetAddress address : addresses) {
-                String mailAddress = address.getAddress();
-                if (null != cService) {
-                    ContactSearchObject cso = new ContactSearchObject();
-                    cso.setEmail1(mailAddress);
-                    cso.setEmail2(mailAddress);
-                    cso.setEmail3(mailAddress);
-                    cso.setOrSearch(true);
-                    SearchIterator<Contact> it = cService.searchContacts(session, cso);
-                    if (it.hasNext()) {
-                        Contact c = it.next();
-                        if (FolderObject.SYSTEM_LDAP_FOLDER_ID == c.getParentFolderID()) {
-                            IncrementArguments.Builder builder = new IncrementArguments.Builder(mailAddress);
-                            service.incrementObjectUseCount(session, builder.build());
+        // Check whether to increment use-count
+        if (incrementUseCount) {
+            ObjectUseCountService useCountService = ServerServiceRegistry.getInstance().getService(ObjectUseCountService.class);
+            if (null != useCountService) {
+                if (null == addrs) {
+                    for (MailMessage mail : mails) {
+                        if (null != mail) {
+                            if (null == aliases) {
+                                aliases = AddressUtility.getAliases(session);
+                            }
+
+                            if (null == addrs) {
+                                addrs = AddressUtility.getFilteredAddresses(mail, aliases);
+                            } else {
+                                addrs.addAll(AddressUtility.getFilteredAddresses(mail, aliases));
+                            }
                         }
-                    } 
-                } else {
-                    throw ServiceExceptionCode.absentService(ContactService.class);
+                    }
+                }
+
+                if (null != addrs && !addrs.isEmpty()) {
+                    Set<String> addressesToIncrementBy = new HashSet<>(addrs.size());
+                    for (InternetAddress addr : addrs) {
+                        String address = addr.getAddress();
+                        addressesToIncrementBy.add(address);
+                        if (address.indexOf(ACE_PREFIX) >= 0) {
+                            addressesToIncrementBy.add(QuotedInternetAddress.toIDN(address));
+                        }
+                    }
+
+                    IncrementArguments.Builder builder = new IncrementArguments.Builder(addressesToIncrementBy);
+                    useCountService.incrementObjectUseCount(session, builder.build());
                 }
             }
         }

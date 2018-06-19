@@ -83,9 +83,11 @@ import com.openexchange.userconf.UserPermissionService;
  */
 public class ContextSetConfigProvider extends AbstractContextBasedConfigProvider implements ReinitializableConfigProviderService {
 
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ContextSetConfigProvider.class);
+
     private static final String TAXONOMY_TYPES = "taxonomy/types";
 
-    public static final String SCOPE = "contextSets";
+    private static final String SCOPE = "contextSets";
 
     private static final String TYPE_PROPERTY = "com.openexchange.config.cascade.types";
 
@@ -267,8 +269,11 @@ public class ContextSetConfigProvider extends AbstractContextBasedConfigProvider
             String filename = file.getKey();
 
             try {
-                @SuppressWarnings("unchecked")
-                Map<Object, Map<String, Object>> content = (Map<Object, Map<String, Object>>) file.getValue();
+                @SuppressWarnings("unchecked") Map<Object, Map<String, Object>> content = (Map<Object, Map<String, Object>>) file.getValue();
+                if (content == null) {
+                    LOG.info("File {} is empty and will be ignored for contextSet configuration.", filename);
+                    continue;
+                }
                 for (Map.Entry<Object, Map<String, Object>> configData : content.entrySet()) {
                     Object configName = configData.getKey();
 

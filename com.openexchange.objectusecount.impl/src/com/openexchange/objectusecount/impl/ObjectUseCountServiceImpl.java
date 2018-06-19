@@ -54,19 +54,12 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Collection;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
-import com.openexchange.contact.ContactService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.container.Contact;
-import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.search.ContactSearchObject;
 import com.openexchange.objectusecount.AbstractArguments;
-import com.openexchange.objectusecount.BatchIncrementArguments;
 import com.openexchange.objectusecount.BatchIncrementArguments.ObjectAndFolder;
 import com.openexchange.objectusecount.IncrementArguments;
 import com.openexchange.objectusecount.ObjectUseCountService;
@@ -78,12 +71,8 @@ import com.openexchange.session.Session;
 import com.openexchange.threadpool.AbstractTask;
 import com.openexchange.threadpool.Task;
 import com.openexchange.threadpool.ThreadPools;
-import com.openexchange.tools.iterator.SearchIterator;
-import com.openexchange.tools.iterator.SearchIterators;
-import com.openexchange.user.UserService;
 import gnu.trove.iterator.TIntIntIterator;
 import gnu.trove.map.TIntIntMap;
-import gnu.trove.map.hash.TIntIntHashMap;
 
 /**
  * {@link ObjectUseCountServiceImpl}
@@ -161,69 +150,7 @@ public class ObjectUseCountServiceImpl implements ObjectUseCountService {
     @Override
     public void incrementObjectUseCount(final Session session, final IncrementArguments arguments) throws OXException {
         try {
-            Task<Void> task = new AbstractTask<Void>() {
-
-                @Override
-                public Void call() throws OXException {
-                    int userId = arguments.getUserId();
-                    if (userId > 0) {
-                        // By user identifier
-                        UserService userService = services.getService(UserService.class);
-                        if (null == userService) {
-                            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(UserService.class);
-                        }
-                        User user = userService.getUser(userId, session.getContextId());
-                        TIntIntMap object2folder = new TIntIntHashMap(2);
-                        object2folder.put(user.getContactId(), FolderObject.SYSTEM_LDAP_FOLDER_ID);
-                        incrementObjectUseCount(object2folder, session.getUserId(), session.getContextId(), arguments.getCon());
-                    }
-
-                    Collection<String> mailAddresses = arguments.getMailAddresses();
-                    if (null != mailAddresses && !mailAddresses.isEmpty()) {
-                        // By mail address(es)
-                        ContactService contactService = services.getService(ContactService.class);
-                        if (null == contactService) {
-                            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(ContactService.class);
-                        }
-
-                        TIntIntMap object2folder = new TIntIntHashMap(mailAddresses.size());
-                        for (String mail : mailAddresses) {
-                            ContactSearchObject search = new ContactSearchObject();
-                            search.setEmail1(mail);
-                            search.setEmail2(mail);
-                            search.setEmail3(mail);
-                            search.setOrSearch(true);
-                            SearchIterator<Contact> it = contactService.searchContacts(session, search);
-                            try {
-                                while (it.hasNext()) {
-                                    Contact c = it.next();
-                                    object2folder.put(c.getObjectID(), c.getParentFolderID());
-                                }
-                            } finally {
-                                SearchIterators.close(it);
-                            }
-                        }
-                        incrementObjectUseCount(object2folder, session.getUserId(), session.getContextId(), arguments.getCon());
-                    }
-
-                    if (arguments instanceof BatchIncrementArguments) {
-                        BatchIncrementArguments batchArguments = (BatchIncrementArguments) arguments;
-                        batchIncrementObjectUseCount(batchArguments.getCounts(), session.getUserId(), session.getContextId(), arguments.getCon());
-                    } else {
-                        int objectId = arguments.getObjectId();
-                        int folderId = arguments.getFolderId();
-                        if (objectId > 0 && folderId > 0) {
-                            // By object/folder identifier
-                            TIntIntMap object2folder = new TIntIntHashMap(2);
-                            object2folder.put(objectId, folderId);
-                            incrementObjectUseCount(object2folder, session.getUserId(), session.getContextId(), arguments.getCon());
-                        }
-                    }
-
-                    return null;
-                }
-            };
-
+            Task<Void> task = new IncrementObjectUseCountTask(arguments, session, this);
             if (doPerformAsynchronously(arguments)) {
                 // Execute asynchronously; as a new connection is supposed to be fetched and no error should be signaled; thus "fire & forget"
                 ThreadPools.submitElseExecute(task);

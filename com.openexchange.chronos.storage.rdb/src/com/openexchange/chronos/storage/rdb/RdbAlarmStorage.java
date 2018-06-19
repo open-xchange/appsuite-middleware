@@ -347,7 +347,7 @@ public class RdbAlarmStorage extends RdbStorage implements AlarmStorage {
     }
 
     @Override
-    public void deleteAllAlarms() throws OXException {
+    public boolean deleteAllAlarms() throws OXException {
         int updated = 0;
         Connection connection = null;
         try {
@@ -360,6 +360,7 @@ public class RdbAlarmStorage extends RdbStorage implements AlarmStorage {
         } finally {
             release(connection, updated);
         }
+        return 0 < updated;
     }
 
     private int insertAlarm(Connection connection, int cid, int account, String eventId, int userId, Alarm alarm) throws OXException {
