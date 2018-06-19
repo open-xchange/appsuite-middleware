@@ -280,20 +280,24 @@ public class ObjectUseCountServiceImpl implements ObjectUseCountService {
             if (size > 1) {
                 for (int i = size; i-- > 0;) {
                     iterator.advance();
-                    stmt.setInt(3, iterator.value());
-                    stmt.setInt(4, iterator.key());
+                    int folderId = iterator.value();
+                    int objectId = iterator.key();
+                    stmt.setInt(3, folderId);
+                    stmt.setInt(4, objectId);
                     stmt.setInt(5, 1);
                     stmt.addBatch();
-                    LOG.debug("Incremented object use count for user {}, folder {}, object {} in context {}.", userId, iterator.value(), iterator.key(), contextId);
+                    LOG.debug("Incremented object use count for user {}, folder {}, object {} in context {}.", userId, folderId, objectId, contextId);
                 }
                 stmt.executeBatch();
             } else {
                 iterator.advance();
-                stmt.setInt(3, iterator.value());
-                stmt.setInt(4, iterator.key());
+                int folderId = iterator.value();
+                int objectId = iterator.key();
+                stmt.setInt(3, folderId);
+                stmt.setInt(4, objectId);
                 stmt.setInt(5, 1);
                 stmt.executeUpdate();
-                LOG.debug("Incremented object use count for user {}, folder {}, object {} in context {}.", userId, iterator.value(), iterator.key(), contextId);
+                LOG.debug("Incremented object use count for user {}, folder {}, object {} in context {}.", userId, folderId, objectId, contextId);
             }
         } catch (SQLException e) {
             throw ObjectUseCountExceptionCode.SQL_ERROR.create(e, e.getMessage());
