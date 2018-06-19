@@ -1185,23 +1185,23 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
             Collection<ListLsubEntry> entries = null;
             entries = ListLsubCache.getSentEntry(-1, imapFolder, session, imapAccess.getIMAPConfig().getIMAPProperties().isIgnoreSubscription());
             if (!entries.isEmpty()) {
-                retval.put(SENT, entries.toArray(new ListLsubEntry[entries.size()])[0].getName());
+                retval.put(SENT, entries.toArray(new ListLsubEntry[entries.size()])[0].getFullName());
             }
             entries = ListLsubCache.getDraftsEntry(-1, imapFolder, session, imapAccess.getIMAPConfig().getIMAPProperties().isIgnoreSubscription());
             if (!entries.isEmpty()) {
-                retval.put(DRAFTS, entries.toArray(new ListLsubEntry[entries.size()])[0].getName());
+                retval.put(DRAFTS, entries.toArray(new ListLsubEntry[entries.size()])[0].getFullName());
             }
             entries = ListLsubCache.getJunkEntry(-1, imapFolder, session, imapAccess.getIMAPConfig().getIMAPProperties().isIgnoreSubscription());
             if (!entries.isEmpty()) {
-                retval.put(SPAM, entries.toArray(new ListLsubEntry[entries.size()])[0].getName());
+                retval.put(SPAM, entries.toArray(new ListLsubEntry[entries.size()])[0].getFullName());
             }
             entries = ListLsubCache.getTrashEntry(-1, imapFolder, session, imapAccess.getIMAPConfig().getIMAPProperties().isIgnoreSubscription());
             if (!entries.isEmpty()) {
-                retval.put(TRASH, entries.toArray(new ListLsubEntry[entries.size()])[0].getName());
+                retval.put(TRASH, entries.toArray(new ListLsubEntry[entries.size()])[0].getFullName());
             }
             entries = ListLsubCache.getArchiveEntry(-1, imapFolder, session, imapAccess.getIMAPConfig().getIMAPProperties().isIgnoreSubscription());
             if (!entries.isEmpty()) {
-                retval.put(ARCHIVE, entries.toArray(new ListLsubEntry[entries.size()])[0].getName());
+                retval.put(ARCHIVE, entries.toArray(new ListLsubEntry[entries.size()])[0].getFullName());
             }
             return retval;
         } catch (MessagingException e) {
@@ -1977,15 +1977,15 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                  */
                 final IMAPDefaultFolderChecker checker = getChecker();
                 boolean defaultFolder = false;
-                if ("INBOX".equals(fullName) 
+                if ("INBOX".equals(fullName)
                     || fullName.equals(checker.getDefaultFolder(StorageUtility.INDEX_TRASH))
                     || fullName.equals(checker.getDefaultFolder(StorageUtility.INDEX_DRAFTS))
                     || fullName.equals(checker.getDefaultFolder(StorageUtility.INDEX_SENT))
                     || fullName.equals(checker.getDefaultFolder(StorageUtility.INDEX_SPAM))) {
-                    
+
                     defaultFolder = true;
                 }
-                
+
                 boolean performSubscription = getImapConfig().getIMAPProperties().isIgnoreSubscription() && defaultFolder ? false : performSubscribe(toUpdate, updateMeEntry);
                 if (performSubscription && defaultFolder && !toUpdate.isSubscribed()) {
                     OXException warning = IMAPException.create(IMAPException.Code.NO_DEFAULT_FOLDER_UNSUBSCRIBE, imapConfig, session, fullName);
