@@ -70,7 +70,6 @@ import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Random;
-import org.junit.After;
 import org.junit.Test;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
@@ -84,6 +83,7 @@ import com.openexchange.admin.rmi.exceptions.NoSuchContextException;
 import com.openexchange.admin.rmi.exceptions.NoSuchUserException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.rmi.extensions.OXCommonExtensionInterface;
+import com.openexchange.admin.rmi.manager.ContextManager;
 import com.openexchange.admin.rmi.manager.UserManager;
 import com.openexchange.java.util.TimeZones;
 
@@ -98,43 +98,49 @@ public class UserTest extends AbstractTest {
 
     public final String NAMED_ACCESS_COMBINATION_BASIC = "all";
     // list of chars that must be valid
-    //    protected static final String VALID_CHAR_TESTUSER = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-+.%$@";
+    //    protected static  String VALID_CHAR_TESTUSER = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-+.%$@";
     protected final String VALID_CHAR_TESTUSER = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
 
     // global setting for stored password
     protected final String pass = "foo-user-pass";
 
-    private final List<User> toDeleteUsers = new ArrayList<User>();
+    private Context context;
 
-    @After
-    public void tearDown() throws Exception {
-
-        final Credentials cred = getContextAdminCredentials();
-        final Context ctx = getTestContextObject(cred);
-        User[] userArray = new User[toDeleteUsers.size()];
-        userArray = toDeleteUsers.toArray(userArray);
-        if (userArray.length > 0) {
-            getUserManager().deleteUser(ctx, userArray, cred);
-        }
+    /**
+     * Initialises a new {@link UserTest}.
+     */
+    public UserTest() {
+        super();
     }
 
-    private void rememberToDeleteUser(User createduser) {
-        if (toDeleteUsers != null) {
-            toDeleteUsers.add(createduser);
-        }
+    @Override
+    public void setUp() throws Exception {
+        super.setUp();
+        ContextManager cm = getContextManager();
+        context = cm.createContext(getContextAdminCredentials());
+
+    }
+
+    @Override
+    public void tearDown() throws Exception {
+        getUserManager().cleanUp();
+
+        ContextManager cm = getContextManager();
+        cm.cleanUp();
+        super.tearDown();
     }
 
     @Test
     public void testDefaultModuleAccess() throws Exception {
         // check whether all new options have been cleared in disableAll()
-        final UserModuleAccess ret = new UserModuleAccess();
+        UserModuleAccess ret = new UserModuleAccess();
         ret.disableAll();
         ret.setWebmail(true);
         ret.setContacts(true);
 
-        final Class clazz = ret.getClass();
-        for (final Method m : clazz.getMethods()) {
-            final String name = m.getName();
+        Class clazz = ret.getClass();
+        for (Method m : clazz.getMethods()) {
+            String name = m.getName();
             if (!name.equals("getClass") && !name.equals("getPermissionBits") && !name.equals("getProperties") && !name.equals("getProperty") && (name.startsWith("is") || name.startsWith("get"))) {
                 //System.out.println("*******" + name);
                 boolean res = (Boolean) m.invoke(ret, null);
@@ -149,19 +155,16 @@ public class UserTest extends AbstractTest {
 
     @Test
     public void testCreate() throws Exception {
-
         // get context to create an user
-        final Credentials cred = getContextAdminCredentials();
-        final Context ctx = getTestContextObject(cred);
+        Credentials cred = getContextAdminCredentials();
 
         // create new user
+        UserModuleAccess access = new UserModuleAccess();
+        User usr = getTestUserObject(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, context);
+        User createduser = getUserManager().createUser(context, usr, access, cred);
 
-        final UserModuleAccess access = new UserModuleAccess();
-        final User usr = getTestUserObject(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, ctx);
-        final User createduser = getUserManager().createUser(ctx, usr, access, cred);
-        rememberToDeleteUser(createduser);
         // now load user from server and check if data is correct, else fail
-        final User srv_loaded = getUserManager().getData(ctx, id(createduser), cred);
+        User srv_loaded = getUserManager().getData(context, id(createduser), cred);
         if (createduser.getId().equals(srv_loaded.getId())) {
             //verify data
             compareUser(createduser, srv_loaded);
@@ -180,16 +183,15 @@ public class UserTest extends AbstractTest {
     public void testCreateWithContextModuleAccessRights() throws Exception {
 
         // get context to create an user
-        final Credentials cred = getContextAdminCredentials();
-        final Context ctx = getTestContextObject(cred);
+        Credentials cred = getContextAdminCredentials();
 
         // create new user
 
-        final User usr = getTestUserObject(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, ctx);
-        final User createduser = getUserManager().createUser(ctx, usr, cred);
-        rememberToDeleteUser(createduser);
+        User usr = getTestUserObject(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, context);
+        User createduser = getUserManager().createUser(context, usr, cred);
+
         // now load user from server and check if data is correct, else fail
-        final User srv_loaded = getUserManager().getData(ctx, id(createduser), cred);
+        User srv_loaded = getUserManager().getData(context, id(createduser), cred);
         if (createduser.getId().equals(srv_loaded.getId())) {
             //verify data
             compareUser(createduser, srv_loaded);
@@ -202,16 +204,15 @@ public class UserTest extends AbstractTest {
     public void testCreateWithNamedModuleAccessRights() throws Exception {
 
         // get context to create an user
-        final Credentials cred = getContextAdminCredentials();
-        final Context ctx = getTestContextObject(cred);
+        Credentials cred = getContextAdminCredentials();
 
         // create new user
 
-        final User usr = getTestUserObject(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, ctx);
-        final User createduser = getUserManager().createUser(ctx, usr, NAMED_ACCESS_COMBINATION_BASIC, cred);
-        rememberToDeleteUser(createduser);
+        User usr = getTestUserObject(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, context);
+        User createduser = getUserManager().createUser(context, usr, NAMED_ACCESS_COMBINATION_BASIC, cred);
+
         // now load user from server and check if data is correct, else fail
-        final User srv_loaded = getUserManager().getData(ctx, id(createduser), cred);
+        User srv_loaded = getUserManager().getData(context, id(createduser), cred);
         if (createduser.getId().equals(srv_loaded.getId())) {
             //verify data
             compareUser(createduser, srv_loaded);
@@ -224,17 +225,16 @@ public class UserTest extends AbstractTest {
     public void testCreateMandatory() throws Exception {
         // this creates an user ONLY with mandatory fields set
 
-        final Credentials cred = getContextAdminCredentials();
-        final Context ctx = getTestContextObject(cred);
+        Credentials cred = getContextAdminCredentials();
 
         // create new user
 
-        final UserModuleAccess access = new UserModuleAccess();
-        final User usr = getTestUserMandatoryFieldsObject(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass);
-        final User createduser = getUserManager().createUser(ctx, usr, access, cred);
-        rememberToDeleteUser(createduser);
+        UserModuleAccess access = new UserModuleAccess();
+        User usr = getTestUserMandatoryFieldsObject(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass);
+        User createduser = getUserManager().createUser(context, usr, access, cred);
+
         // now load user from server and check if data is correct, else fail
-        final User srv_loaded = getUserManager().getData(ctx, id(createduser), cred);
+        User srv_loaded = getUserManager().getData(context, id(createduser), cred);
         if (createduser.getId().equals(srv_loaded.getId())) {
             //verify data
             compareUserMandatory(createduser, srv_loaded);
@@ -259,16 +259,14 @@ public class UserTest extends AbstractTest {
 
     @Test
     public void testCreateUserWithWrongDriveFoldersMode() throws Exception {
-        final Credentials cred = getContextAdminCredentials();
-        final Context ctx = getTestContextObject(cred);
+        Credentials cred = getContextAdminCredentials();
 
-        final UserModuleAccess access = new UserModuleAccess();
-        final User user = getTestUserMandatoryFieldsObject(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass);
+        UserModuleAccess access = new UserModuleAccess();
+        User user = getTestUserMandatoryFieldsObject(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass);
         user.setDriveFolderMode("wrong");
         User createdUser = null;
         try {
-            createdUser = getUserManager().createUser(ctx, user, access, cred);
-            rememberToDeleteUser(createdUser);
+            createdUser = getUserManager().createUser(context, user, access, cred);
         } catch (InvalidDataException e) {
             // Do nothing, we expect that
         }
@@ -279,21 +277,20 @@ public class UserTest extends AbstractTest {
     public void testDelete() throws Exception {
 
         // get context to create an user
-        final Credentials cred = getContextAdminCredentials();
-        final Context ctx = getTestContextObject(cred);
+        Credentials cred = getContextAdminCredentials();
 
         // create new user
 
-        final UserModuleAccess access = new UserModuleAccess();
+        UserModuleAccess access = new UserModuleAccess();
 
-        final User usr = getTestUserObject(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, ctx);
-        final User createduser = getUserManager().createUser(ctx, usr, access, cred);
+        User usr = getTestUserObject(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, context);
+        User createduser = getUserManager().createUser(context, usr, access, cred);
 
         // delete user
-        getUserManager().deleteUser(ctx, id(createduser), cred);
+        getUserManager().deleteUser(context, id(createduser), cred);
 
         // try to load user, this MUST fail
-        getUserManager().getData(ctx, createduser, cred);
+        getUserManager().getData(context, createduser, cred);
         fail("user not exists expected");
     }
 
@@ -305,42 +302,40 @@ public class UserTest extends AbstractTest {
         // Details: http://bugs.open-xchange.com/cgi-bin/bugzilla/show_bug.cgi?id=9027
 
         // get context to create an user
-        final Credentials cred = getContextAdminCredentials();
-        final Context ctx = getTestContextObject(cred);
+        Credentials cred = getContextAdminCredentials();
 
         // create new user
 
-        final UserModuleAccess access = new UserModuleAccess();
+        UserModuleAccess access = new UserModuleAccess();
 
-        final User usr = getTestUserObject(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, ctx);
-        User createduser = getUserManager().createUser(ctx, usr, access, cred);
+        User usr = getTestUserObject(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, context);
+        User createduser = getUserManager().createUser(context, usr, access, cred);
 
         // delete user
-        getUserManager().deleteUser(ctx, createduser, cred);
+        getUserManager().deleteUser(context, createduser, cred);
 
         // create same user again, this failes as described in the bug
-        createduser = getUserManager().createUser(ctx, usr, access, cred);
+        createduser = getUserManager().createUser(context, usr, access, cred);
     }
 
     @Test(expected = InvalidDataException.class)
     public void testDeleteEmptyUserList() throws Exception {
 
         // get context to create an user
-        final Credentials cred = getContextAdminCredentials();
-        final Context ctx = getTestContextObject(cred);
+        Credentials cred = getContextAdminCredentials();
 
         // create new user
 
-        final UserModuleAccess access = new UserModuleAccess();
+        UserModuleAccess access = new UserModuleAccess();
 
-        final User usr = getTestUserObject(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, ctx);
-        final User createduser = getUserManager().createUser(ctx, usr, access, cred);
-        rememberToDeleteUser(createduser);
+        User usr = getTestUserObject(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, context);
+        User createduser = getUserManager().createUser(context, usr, access, cred);
+
         // delete user
-        getUserManager().deleteUser(ctx, new User[0], cred);
+        getUserManager().deleteUser(context, new User[0], cred);
 
         // try to load user, this MUST fail
-        getUserManager().getData(ctx, createduser, cred);
+        getUserManager().getData(context, createduser, cred);
         fail("user not exists expected");
     }
 
@@ -348,18 +343,17 @@ public class UserTest extends AbstractTest {
     public void testGetData() throws Exception {
 
         // get context to create an user
-        final Credentials cred = getContextAdminCredentials();
-        final Context ctx = getTestContextObject(cred);
+        Credentials cred = getContextAdminCredentials();
 
         // create new user
 
-        final UserModuleAccess access = new UserModuleAccess();
+        UserModuleAccess access = new UserModuleAccess();
 
-        final User usr = getTestUserObject(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, ctx);
-        final User createduser = getUserManager().createUser(ctx, usr, access, cred);
-        rememberToDeleteUser(createduser);
+        User usr = getTestUserObject(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, context);
+        User createduser = getUserManager().createUser(context, usr, access, cred);
+
         // now load user from server and check if data is correct, else fail
-        final User srv_loaded = getUserManager().getData(ctx, createduser, cred);
+        User srv_loaded = getUserManager().getData(context, createduser, cred);
         if (createduser.getId().equals(srv_loaded.getId())) {
             //verify data
             compareUser(createduser, srv_loaded);
@@ -371,21 +365,20 @@ public class UserTest extends AbstractTest {
     @Test
     public void testGetDataByName() throws Exception {
         // get context to create an user
-        final Credentials cred = getContextAdminCredentials();
-        final Context ctx = getTestContextObject(cred);
+        Credentials cred = getContextAdminCredentials();
 
         // create new user
 
-        final UserModuleAccess access = new UserModuleAccess();
+        UserModuleAccess access = new UserModuleAccess();
 
-        final User usr = getTestUserObject(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, ctx);
-        final User createduser = getUserManager().createUser(ctx, usr, access, cred);
-        rememberToDeleteUser(createduser);
-        final User usernameuser = new User();
+        User usr = getTestUserObject(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, context);
+        User createduser = getUserManager().createUser(context, usr, access, cred);
+
+        User usernameuser = new User();
         usernameuser.setName(createduser.getName());
 
         // now load user from server and check if data is correct, else fail
-        final User srv_loaded = getUserManager().getData(ctx, usernameuser, cred);
+        User srv_loaded = getUserManager().getData(context, usernameuser, cred);
         if (createduser.getId().equals(srv_loaded.getId())) {
             //verify data
             compareUser(createduser, srv_loaded);
@@ -400,34 +393,32 @@ public class UserTest extends AbstractTest {
     @Test
     public void testPublicFolderEditableForUser() throws Exception {
         // get context to create an user
-        final Credentials cred = getContextAdminCredentials();
-        final Context ctx = getTestContextObject(cred);
+        Credentials cred = getContextAdminCredentials();
 
         // create new user
-
-        final UserModuleAccess access = new UserModuleAccess();
+        UserModuleAccess access = new UserModuleAccess();
         access.setPublicFolderEditable(true);
-        final User usr = getTestUserObject(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, ctx);
+        User usr = getTestUserObject(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, context);
         User createduser;
         try {
-            createduser = getUserManager().createUser(ctx, usr, access, cred);
+            createduser = getUserManager().createUser(context, usr, access, cred);
             fail("Creating a user with permission to edit public folder permissions should be denied.");
-        } catch (final StorageException e) {
+        } catch (StorageException e) {
             // Everything is fine. Setting publicFolderEditable should be denied. See bugs 18866, 20369, 20635.
             access.setPublicFolderEditable(false);
-            createduser = getUserManager().createUser(ctx, usr, access, cred);
+            createduser = getUserManager().createUser(context, usr, access, cred);
 
         }
-        rememberToDeleteUser(createduser);
+
         // now load user from server and check if data is correct, else fail
-        UserModuleAccess moduleAccess = getUserManager().getModuleAccess(ctx, createduser, cred);
+        UserModuleAccess moduleAccess = getUserManager().getModuleAccess(context, createduser, cred);
         assertFalse("Editing public folder was allowed for a normal user.", moduleAccess.isPublicFolderEditable());
 
         moduleAccess.setPublicFolderEditable(true);
         try {
-            getUserManager().changeModuleAccess(ctx, usr, moduleAccess, cred);
+            getUserManager().changeModuleAccess(context, usr, moduleAccess, cred);
             fail("Setting publicfoldereditable to true was not denied by admin.");
-        } catch (final StorageException e) {
+        } catch (StorageException e) {
             // This is expected.
         }
     }
@@ -437,47 +428,45 @@ public class UserTest extends AbstractTest {
      */
     @Test
     public void testPublicFolderEditableForAdmin() throws Exception {
-        final Credentials cred = getContextAdminCredentials();
-        final Context ctx = getTestContextObject(cred);
+        Credentials cred = getContextAdminCredentials();
 
         // create new user
 
-        final User usr = new User();
+        User usr = new User();
         // Administrator gets always principal identifier 2. The group users gets principal identifier 1.
         usr.setId(Integer.valueOf(2));
 
         // enable and test it.
-        UserModuleAccess access = getUserManager().getModuleAccess(ctx, usr, cred);
+        UserModuleAccess access = getUserManager().getModuleAccess(context, usr, cred);
         access.setPublicFolderEditable(true);
-        getUserManager().changeModuleAccess(ctx, usr, access, cred);
-        access = getUserManager().getModuleAccess(ctx, usr, cred);
+        getUserManager().changeModuleAccess(context, usr, access, cred);
+        access = getUserManager().getModuleAccess(context, usr, cred);
         assertTrue("Flag publicfoldereditable does not survice roundtrip for context administrator.", access.isPublicFolderEditable());
 
         access.setPublicFolderEditable(false);
-        getUserManager().changeModuleAccess(ctx, usr, access, cred);
-        access = getUserManager().getModuleAccess(ctx, usr, cred);
+        getUserManager().changeModuleAccess(context, usr, access, cred);
+        access = getUserManager().getModuleAccess(context, usr, cred);
         assertFalse("Flag publicfoldereditable does not survice roundtrip for context administrator.", access.isPublicFolderEditable());
     }
 
     @Test
     public void testGetDataByNameWithUserAuth() throws Exception {
         // get context to create an user
-        final Credentials cred = getContextAdminCredentials();
-        final Context ctx = getTestContextObject(cred);
+        Credentials cred = getContextAdminCredentials();
 
         // create new user
 
-        final UserModuleAccess access = new UserModuleAccess();
+        UserModuleAccess access = new UserModuleAccess();
 
-        final User usr = getTestUserObject(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, ctx);
-        final User createduser = getUserManager().createUser(ctx, usr, access, cred);
-        rememberToDeleteUser(createduser);
-        final User usernameuser = new User();
+        User usr = getTestUserObject(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, context);
+        User createduser = getUserManager().createUser(context, usr, access, cred);
+
+        User usernameuser = new User();
         usernameuser.setName(createduser.getName());
 
-        final Credentials usercred = new Credentials(usr.getName(), usr.getPassword());
+        Credentials usercred = new Credentials(usr.getName(), usr.getPassword());
         // now load user from server and check if data is correct, else fail
-        final User srv_loaded = getUserManager().getData(ctx, usernameuser, usercred);
+        User srv_loaded = getUserManager().getData(context, usernameuser, usercred);
         if (createduser.getId().equals(srv_loaded.getId())) {
             //verify data
             compareUser(createduser, srv_loaded);
@@ -489,21 +478,20 @@ public class UserTest extends AbstractTest {
     @Test
     public void testGetDataByID() throws Exception {
         // get context to create an user
-        final Credentials cred = getContextAdminCredentials();
-        final Context ctx = getTestContextObject(cred);
+        Credentials cred = getContextAdminCredentials();
 
         // create new user
 
-        final UserModuleAccess access = new UserModuleAccess();
+        UserModuleAccess access = new UserModuleAccess();
 
-        final User usr = getTestUserObject(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, ctx);
-        final User createduser = getUserManager().createUser(ctx, usr, access, cred);
-        rememberToDeleteUser(createduser);
-        final User iduser = new User();
+        User usr = getTestUserObject(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, context);
+        User createduser = getUserManager().createUser(context, usr, access, cred);
+
+        User iduser = new User();
         iduser.setId(createduser.getId());
 
         // now load user from server and check if data is correct, else fail
-        final User srv_loaded = getUserManager().getData(ctx, iduser, cred);
+        User srv_loaded = getUserManager().getData(context, iduser, cred);
         if (createduser.getId().equals(srv_loaded.getId())) {
             //verify data
             compareUser(createduser, srv_loaded);
@@ -516,17 +504,16 @@ public class UserTest extends AbstractTest {
     public void testGetModuleAccess() throws Exception {
 
         // get context to create an user
-        final Credentials cred = getContextAdminCredentials();
-        final Context ctx = getTestContextObject(cred);
+        Credentials cred = getContextAdminCredentials();
 
         // create new user
 
-        final UserModuleAccess client_access = new UserModuleAccess();
-        final User usr = getTestUserObject(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, ctx);
-        final User createduser = getUserManager().createUser(ctx, usr, client_access, cred);
-        rememberToDeleteUser(createduser);
+        UserModuleAccess client_access = new UserModuleAccess();
+        User usr = getTestUserObject(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, context);
+        User createduser = getUserManager().createUser(context, usr, client_access, cred);
+
         // get module access
-        final UserModuleAccess srv_response = getUserManager().getModuleAccess(ctx, createduser, cred);
+        UserModuleAccess srv_response = getUserManager().getModuleAccess(context, createduser, cred);
 
         // test if module access was set correctly
         compareUserAccess(client_access, srv_response);
@@ -537,17 +524,16 @@ public class UserTest extends AbstractTest {
     public void testChangeModuleAccess() throws Exception {
 
         // get context to create an user
-        final Credentials cred = getContextAdminCredentials();
-        final Context ctx = getTestContextObject(cred);
+        Credentials cred = getContextAdminCredentials();
 
         // create new user
 
-        final UserModuleAccess client_access = new UserModuleAccess();
-        final User usr = getTestUserObject(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, ctx);
-        final User createduser = getUserManager().createUser(ctx, usr, client_access, cred);
-        rememberToDeleteUser(createduser);
+        UserModuleAccess client_access = new UserModuleAccess();
+        User usr = getTestUserObject(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, context);
+        User createduser = getUserManager().createUser(context, usr, client_access, cred);
+
         // get module access
-        final UserModuleAccess srv_response = getUserManager().getModuleAccess(ctx, createduser, cred);
+        UserModuleAccess srv_response = getUserManager().getModuleAccess(context, createduser, cred);
 
         // test if module access was set correctly
         compareUserAccess(client_access, srv_response);
@@ -568,10 +554,10 @@ public class UserTest extends AbstractTest {
         srv_response.setWebmail(!srv_response.getWebmail());
 
         // submit changes
-        getUserManager().changeModuleAccess(ctx, createduser, srv_response, cred);
+        getUserManager().changeModuleAccess(context, createduser, srv_response, cred);
 
         // load again and verify
-        final UserModuleAccess srv_response_changed = getUserManager().getModuleAccess(ctx, createduser, cred);
+        UserModuleAccess srv_response_changed = getUserManager().getModuleAccess(context, createduser, cred);
 
         // test if module access was set correctly
         compareUserAccess(srv_response, srv_response_changed);
@@ -582,21 +568,20 @@ public class UserTest extends AbstractTest {
     public void testList() throws Exception {
 
         // get context to create an user
-        final Credentials cred = getContextAdminCredentials();
-        final Context ctx = getTestContextObject(cred);
+        Credentials cred = getContextAdminCredentials();
 
         // create new user
 
-        final UserModuleAccess client_access = new UserModuleAccess();
-        final User usr = getTestUserObject(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, ctx);
-        final User createduser = getUserManager().createUser(ctx, usr, client_access, cred);
-        rememberToDeleteUser(createduser);
-        final User[] srv_response = getUserManager().listUsers(ctx, "*", cred);
+        UserModuleAccess client_access = new UserModuleAccess();
+        User usr = getTestUserObject(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, context);
+        User createduser = getUserManager().createUser(context, usr, client_access, cred);
+
+        User[] srv_response = getUserManager().listUsers(context, "*", cred);
 
         assertTrue("Expected list size > 0 ", srv_response.length > 0);
 
         boolean founduser = false;
-        for (final User element : srv_response) {
+        for (User element : srv_response) {
             if (element.getId().intValue() == createduser.getId().intValue()) {
                 founduser = true;
             }
@@ -609,18 +594,18 @@ public class UserTest extends AbstractTest {
     public void testListUsersWithOwnFilestore() throws Exception {
 
         // get context to create an user
-        final Credentials cred = getContextAdminCredentials();
-        final Context ctx = getTestContextObject(cred);
+        Credentials cred = getContextAdminCredentials();
+
         Filestore fs = null;
         Credentials master = getMasterAdminCredentials();
 
         // create new user
 
-        final UserModuleAccess client_access = new UserModuleAccess();
-        final User usr = getTestUserObject(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, ctx);
+        UserModuleAccess client_access = new UserModuleAccess();
+        User usr = getTestUserObject(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, context);
         OXUtilInterface oxutil = (OXUtilInterface) Naming.lookup(getRMIHostUrl() + OXUtilInterface.RMI_NAME);
         try {
-            final User createduser = getUserManager().createUser(ctx, usr, client_access, cred);
+            User createduser = getUserManager().createUser(context, usr, client_access, cred);
             //test if filestore already exists
             Filestore[] filestores = oxutil.listFilestore("file:///", master, true);
             if (filestores != null && filestores.length != 0) {
@@ -641,15 +626,15 @@ public class UserTest extends AbstractTest {
                 fs = oxutil.registerFilestore(fs, master);
             }
             //move user to new filestore
-            getUserManager().moveFromContextToUserFilestore(ctx, usr, fs, 10, cred);
+            getUserManager().moveFromContextToUserFilestore(context, usr, fs, 10, cred);
             Thread.sleep(500); //wait for move
 
-            final User[] srv_response = getUserManager().listUsersWithOwnFilestore(ctx, fs.getId(), cred);
+            User[] srv_response = getUserManager().listUsersWithOwnFilestore(context, fs.getId(), cred);
 
             assertTrue("Expected list size > 0 ", srv_response.length > 0);
 
             boolean founduser = false;
-            for (final User element : srv_response) {
+            for (User element : srv_response) {
                 if (element.getId().intValue() == createduser.getId().intValue()) {
                     founduser = true;
                 }
@@ -657,7 +642,7 @@ public class UserTest extends AbstractTest {
 
             assertTrue("Expected to find added user in user list", founduser);
         } finally {
-            getUserManager().deleteUser(ctx, usr, cred);
+            getUserManager().deleteUser(context, usr, cred);
             if (fs != null) {
                 oxutil.unregisterFilestore(fs, master);
             }
@@ -672,21 +657,20 @@ public class UserTest extends AbstractTest {
     public void testListAll() throws Exception {
 
         // get context to create an user
-        final Credentials cred = getContextAdminCredentials();
-        final Context ctx = getTestContextObject(cred);
+        Credentials cred = getContextAdminCredentials();
 
         // create new user
 
-        final UserModuleAccess client_access = new UserModuleAccess();
-        final User usr = getTestUserObject(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, ctx);
-        final User createduser = getUserManager().createUser(ctx, usr, client_access, cred);
-        rememberToDeleteUser(createduser);
-        final User[] srv_response = getUserManager().listAllUsers(ctx, cred);
+        UserModuleAccess client_access = new UserModuleAccess();
+        User usr = getTestUserObject(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, context);
+        User createduser = getUserManager().createUser(context, usr, client_access, cred);
+
+        User[] srv_response = getUserManager().listAllUsers(context, cred);
 
         assertTrue("Expected list size > 0 ", srv_response.length > 0);
 
         boolean founduser = false;
-        for (final User element : srv_response) {
+        for (User element : srv_response) {
             if (element.getId().intValue() == createduser.getId().intValue()) {
                 founduser = true;
             }
@@ -699,17 +683,16 @@ public class UserTest extends AbstractTest {
     public void testChange() throws Exception {
 
         // get context to create an user
-        final Credentials cred = getContextAdminCredentials();
-        final Context ctx = getTestContextObject(cred);
+        Credentials cred = getContextAdminCredentials();
 
         // create new user
 
-        final UserModuleAccess access = new UserModuleAccess();
-        final User usr = getTestUserObject(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, ctx);
-        final User createduser = getUserManager().createUser(ctx, usr, access, cred);
-        rememberToDeleteUser(createduser);
+        UserModuleAccess access = new UserModuleAccess();
+        User usr = getTestUserObject(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, context);
+        User createduser = getUserManager().createUser(context, usr, access, cred);
+
         // now load user from server and check if data is correct, else fail
-        User srv_loaded = getUserManager().getData(ctx, id(createduser), cred);
+        User srv_loaded = getUserManager().getData(context, id(createduser), cred);
         if (createduser.getId().equals(srv_loaded.getId())) {
             //verify data
             compareUser(createduser, srv_loaded);
@@ -720,10 +703,10 @@ public class UserTest extends AbstractTest {
         // now change data
         srv_loaded = createChangeUserData(srv_loaded);
         // submit changes
-        getUserManager().changeUser(ctx, srv_loaded, cred);
+        getUserManager().changeUser(context, srv_loaded, cred);
 
         // load again
-        final User user_changed_loaded = getUserManager().getData(ctx, id(srv_loaded), cred);
+        User user_changed_loaded = getUserManager().getData(context, id(srv_loaded), cred);
         // set Username to old value for verification
         srv_loaded.setName(createduser.getName());
         // remove deleted dynamic attribute for verification
@@ -741,17 +724,16 @@ public class UserTest extends AbstractTest {
         // change alias
 
         // get context to create an user
-        final Credentials cred = getContextAdminCredentials();
-        final Context ctx = getTestContextObject(cred);
+        Credentials cred = getContextAdminCredentials();
 
         // create new user
 
-        final UserModuleAccess access = new UserModuleAccess();
-        final User usr = getTestUserObject(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, ctx);
-        final User createduser = getUserManager().createUser(ctx, usr, access, cred);
-        rememberToDeleteUser(createduser);
+        UserModuleAccess access = new UserModuleAccess();
+        User usr = getTestUserObject(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, context);
+        User createduser = getUserManager().createUser(context, usr, access, cred);
+
         // now load user from server and check if data is correct, else fail
-        User srv_loaded = getUserManager().getData(ctx, id(createduser), cred);
+        User srv_loaded = getUserManager().getData(context, id(createduser), cred);
         if (createduser.getId().equals(srv_loaded.getId())) {
             //verify data
             compareUser(createduser, srv_loaded);
@@ -764,10 +746,10 @@ public class UserTest extends AbstractTest {
         srv_loaded = changeUserAlias(srv_loaded, alias);
 
         // submit changes
-        getUserManager().changeUser(ctx, srv_loaded, cred);
+        getUserManager().changeUser(context, srv_loaded, cred);
 
         // load again
-        final User user_changed_loaded = getUserManager().getData(ctx, id(srv_loaded), cred);
+        User user_changed_loaded = getUserManager().getData(context, id(srv_loaded), cred);
 
         // remove deleted dynamic attribute for verification
         srv_loaded.getUserAttributes().get("com.openexchange.test").remove("deleteMe");
@@ -784,17 +766,16 @@ public class UserTest extends AbstractTest {
         // Try to change alias with too long name (Bug 52763)
 
         // get context to create an user
-        final Credentials cred = getContextAdminCredentials();
-        final Context ctx = getTestContextObject(cred);
+        Credentials cred = getContextAdminCredentials();
 
         // create new user
 
-        final UserModuleAccess access = new UserModuleAccess();
-        final User usr = getTestUserObject(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, ctx);
-        final User createduser = getUserManager().createUser(ctx, usr, access, cred);
-        rememberToDeleteUser(createduser);
+        UserModuleAccess access = new UserModuleAccess();
+        User usr = getTestUserObject(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, context);
+        User createduser = getUserManager().createUser(context, usr, access, cred);
+
         // now load user from server and check if data is correct, else fail
-        User srv_loaded = getUserManager().getData(ctx, id(createduser), cred);
+        User srv_loaded = getUserManager().getData(context, id(createduser), cred);
         if (createduser.getId().equals(srv_loaded.getId())) {
             //verify data
             compareUser(createduser, srv_loaded);
@@ -809,7 +790,7 @@ public class UserTest extends AbstractTest {
         // submit changes, should throw StorageException
         boolean canary = true;
         try {
-            getUserManager().changeUser(ctx, srv_loaded, cred);
+            getUserManager().changeUser(context, srv_loaded, cred);
         } catch (StorageException e) {
             canary = false;
         }
@@ -828,10 +809,10 @@ public class UserTest extends AbstractTest {
         srv_loaded = changeUserAlias(srv_loaded, alias);
 
         // submit changes
-        getUserManager().changeUser(ctx, srv_loaded, cred);
+        getUserManager().changeUser(context, srv_loaded, cred);
 
         // load again
-        final User user_changed_loaded = getUserManager().getData(ctx, id(srv_loaded), cred);
+        User user_changed_loaded = getUserManager().getData(context, id(srv_loaded), cred);
 
         // remove deleted dynamic attribute for verification
         srv_loaded.getUserAttributes().get("com.openexchange.test").remove("deleteMe");
@@ -848,17 +829,16 @@ public class UserTest extends AbstractTest {
         // set single values to null in the user object and then call change, what happens?
 
         //      get context to create an user
-        final Credentials cred = getContextAdminCredentials();
-        final Context ctx = getTestContextObject(cred);
+        Credentials cred = getContextAdminCredentials();
 
         // create new user
 
-        final UserModuleAccess access = new UserModuleAccess();
-        final User usr = getTestUserObject(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, ctx);
-        final User createduser = getUserManager().createUser(ctx, usr, access, cred);
-        rememberToDeleteUser(createduser);
+        UserModuleAccess access = new UserModuleAccess();
+        User usr = getTestUserObject(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, context);
+        User createduser = getUserManager().createUser(context, usr, access, cred);
+
         // now load user from server and check if data is correct, else fail
-        User srv_loaded = getUserManager().getData(ctx, id(createduser), cred);
+        User srv_loaded = getUserManager().getData(context, id(createduser), cred);
         if (createduser.getId().equals(srv_loaded.getId())) {
             //verify data
             compareUser(createduser, srv_loaded);
@@ -899,10 +879,10 @@ public class UserTest extends AbstractTest {
             }
 
             // submit changes
-            getUserManager().changeUser(ctx, tmp_usr, cred);
+            getUserManager().changeUser(context, tmp_usr, cred);
 
             // load from server and compare the single changed value
-            final User user_single_change_loaded = getUserManager().getData(ctx, id(srv_loaded), cred);
+            User user_single_change_loaded = getUserManager().getData(context, id(srv_loaded), cred);
 
             if (!notallowed.contains(map_obj.getMethodName())) {
                 // local and remote must be null
@@ -926,17 +906,16 @@ public class UserTest extends AbstractTest {
         // happens?
 
         // get context to create an user
-        final Credentials cred = getContextAdminCredentials();
-        final Context ctx = getTestContextObject(cred);
+        Credentials cred = getContextAdminCredentials();
 
         // create new user
 
-        final UserModuleAccess access = new UserModuleAccess();
-        final User usr = getTestUserObject(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, ctx);
-        final User createduser = getUserManager().createUser(ctx, usr, access, cred);
-        rememberToDeleteUser(createduser);
+        UserModuleAccess access = new UserModuleAccess();
+        User usr = getTestUserObject(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, context);
+        User createduser = getUserManager().createUser(context, usr, access, cred);
+
         // now load user from server and check if data is correct, else fail
-        User srv_loaded = getUserManager().getData(ctx, id(createduser), cred);
+        User srv_loaded = getUserManager().getData(context, id(createduser), cred);
         if (createduser.getId().equals(srv_loaded.getId())) {
             //verify data
             compareUser(createduser, srv_loaded);
@@ -963,10 +942,10 @@ public class UserTest extends AbstractTest {
         }
 
         // submit changes
-        getUserManager().changeUser(ctx, tmp_usr, cred);
+        getUserManager().changeUser(context, tmp_usr, cred);
 
         // load from server and compare the single changed value
-        final User user_single_change_loaded = getUserManager().getData(ctx, id(srv_loaded), cred);
+        User user_single_change_loaded = getUserManager().getData(context, id(srv_loaded), cred);
 
         // TODO
         // special compare must be written that checks for special attributes like username etc which cannot be null
@@ -979,17 +958,16 @@ public class UserTest extends AbstractTest {
         // happens?
 
         // get context to create an user
-        final Credentials cred = getContextAdminCredentials();
-        final Context ctx = getTestContextObject(cred);
+        Credentials cred = getContextAdminCredentials();
 
         // create new user
 
-        final UserModuleAccess access = new UserModuleAccess();
-        final User usr = getTestUserObject(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, ctx);
-        final User createduser = getUserManager().createUser(ctx, usr, access, cred);
-        rememberToDeleteUser(createduser);
+        UserModuleAccess access = new UserModuleAccess();
+        User usr = getTestUserObject(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, context);
+        User createduser = getUserManager().createUser(context, usr, access, cred);
+
         // now load user from server and check if data is correct, else fail
-        User srv_loaded = getUserManager().getData(ctx, id(createduser), cred);
+        User srv_loaded = getUserManager().getData(context, id(createduser), cred);
         if (createduser.getId().equals(srv_loaded.getId())) {
             //verify data
             compareUser(createduser, srv_loaded);
@@ -1020,10 +998,10 @@ public class UserTest extends AbstractTest {
         }
 
         // submit changes
-        getUserManager().changeUser(ctx, tmp_usr, cred);
+        getUserManager().changeUser(context, tmp_usr, cred);
 
         // load from server and compare the single changed value
-        final User user_single_change_loaded = getUserManager().getData(ctx, id(srv_loaded), cred);
+        User user_single_change_loaded = getUserManager().getData(context, id(srv_loaded), cred);
 
         // TODO
         // special compare must be written that checks for special attributes like username etc which cannot be null
@@ -1031,14 +1009,14 @@ public class UserTest extends AbstractTest {
     }
 
     private HashSet<String> getNotNullableFields() {
-        final HashSet<String> notallowed = new HashSet<String>();
+        HashSet<String> notallowed = new HashSet<String>();
         notallowed.add("setEmail1");
         notallowed.add("setFolderTree");
         notallowed.add("setDefaultSenderAddress");
         notallowed.add("setId");
-        final String[] mandatoryMembersCreate = new User().getMandatoryMembersCreate();
-        for (final String name : mandatoryMembersCreate) {
-            final StringBuilder sb = new StringBuilder("set");
+        String[] mandatoryMembersCreate = new User().getMandatoryMembersCreate();
+        for (String name : mandatoryMembersCreate) {
+            StringBuilder sb = new StringBuilder("set");
             sb.append(name.substring(0, 1).toUpperCase());
             sb.append(name.substring(1));
             notallowed.add(sb.toString());
@@ -1069,17 +1047,16 @@ public class UserTest extends AbstractTest {
         // change only 1 attribute of user object per call
 
         //      get context to create an user
-        final Credentials cred = getContextAdminCredentials();
-        final Context ctx = getTestContextObject(cred);
+        Credentials cred = getContextAdminCredentials();
 
         // create new user
 
-        final UserModuleAccess access = new UserModuleAccess();
-        final User usr = getTestUserObject(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, ctx);
-        final User createduser = getUserManager().createUser(ctx, usr, access, cred);
-        rememberToDeleteUser(createduser);
+        UserModuleAccess access = new UserModuleAccess();
+        User usr = getTestUserObject(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, context);
+        User createduser = getUserManager().createUser(context, usr, access, cred);
+
         // now load user from server and check if data is correct, else fail
-        User srv_loaded = getUserManager().getData(ctx, id(createduser), cred);
+        User srv_loaded = getUserManager().getData(context, id(createduser), cred);
         if (createduser.getId().equals(srv_loaded.getId())) {
             //verify data
             compareUser(createduser, srv_loaded);
@@ -1152,9 +1129,9 @@ public class UserTest extends AbstractTest {
                 }
 
                 //  submit changes
-                getUserManager().changeUser(ctx, tmp_usr, cred);
+                getUserManager().changeUser(context, tmp_usr, cred);
                 // load from server and compare the single changed value
-                final User user_single_change_loaded = getUserManager().getData(ctx, id(srv_loaded), cred);
+                User user_single_change_loaded = getUserManager().getData(context, id(srv_loaded), cred);
 
                 // compare both string values , server and local copy must be same, else, the change was unsuccessful
                 if (map_obj.getGetter().getParameterTypes().length == 0) {
@@ -1166,7 +1143,7 @@ public class UserTest extends AbstractTest {
         }
     }
 
-    public MethodMapObject[] getSetableAttributeMethods(final Class clazz) {
+    public MethodMapObject[] getSetableAttributeMethods(Class clazz) {
 
         Method[] theMethods = clazz.getMethods();
         List<MethodMapObject> tmplist = new ArrayList<MethodMapObject>();
@@ -1254,7 +1231,7 @@ public class UserTest extends AbstractTest {
          * @param methodType the methodType to set
          */
         public void setMethodParameterType(String methodType) {
-            this.methodParameterType = methodType;
+            methodParameterType = methodType;
         }
 
         /**
@@ -1284,18 +1261,17 @@ public class UserTest extends AbstractTest {
 
         // STEP 1
         // get context to create an user
-        final Credentials cred = getContextAdminCredentials();
-        final Context ctx = getTestContextObject(cred);
+        Credentials cred = getContextAdminCredentials();
 
         // create new user
 
-        final UserModuleAccess access = new UserModuleAccess();
-        final User usr = getTestUserObject(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, ctx);
-        final User createduser = getUserManager().createUser(ctx, usr, access, cred);
-        rememberToDeleteUser(createduser);
+        UserModuleAccess access = new UserModuleAccess();
+        User usr = getTestUserObject(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, context);
+        User createduser = getUserManager().createUser(context, usr, access, cred);
+
         // STEP 2
         // now load user from server and check if data is correct, else fail
-        final User srv_loaded = getUserManager().getData(ctx, id(createduser), cred);
+        User srv_loaded = getUserManager().getData(context, id(createduser), cred);
         if (createduser.getId().equals(srv_loaded.getId())) {
             //verify data
             compareUser(createduser, srv_loaded);
@@ -1305,11 +1281,11 @@ public class UserTest extends AbstractTest {
 
         // STEP 3
         User emptyusr = new User(srv_loaded.getId());
-        getUserManager().changeUser(ctx, emptyusr, cred);
+        getUserManager().changeUser(context, emptyusr, cred);
 
         // STEP 4
         // now load user from server and check if data is correct, else fail
-        final User srv_loaded2 = getUserManager().getData(ctx, id(createduser), cred);
+        User srv_loaded2 = getUserManager().getData(context, id(createduser), cred);
         if (createduser.getId().equals(srv_loaded2.getId())) {
             //verify data
             compareUser(createduser, srv_loaded);
@@ -1325,18 +1301,17 @@ public class UserTest extends AbstractTest {
 
         // STEP 1
         // get context to create an user
-        final Credentials cred = getContextAdminCredentials();
-        final Context ctx = getTestContextObject(cred);
+        Credentials cred = getContextAdminCredentials();
 
         // create new user
 
-        final UserModuleAccess access = new UserModuleAccess();
-        final User usr = getTestUserObject(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, ctx);
-        final User createduser = getUserManager().createUser(ctx, usr, access, cred);
-        rememberToDeleteUser(createduser);
+        UserModuleAccess access = new UserModuleAccess();
+        User usr = getTestUserObject(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, context);
+        User createduser = getUserManager().createUser(context, usr, access, cred);
+
         // STEP 2
         // now load user from server and check if data is correct, else fail
-        final User srv_loaded = getUserManager().getData(ctx, id(createduser), cred);
+        User srv_loaded = getUserManager().getData(context, id(createduser), cred);
         if (createduser.getId().equals(srv_loaded.getId())) {
             //verify data
             compareUser(createduser, srv_loaded);
@@ -1347,11 +1322,11 @@ public class UserTest extends AbstractTest {
         // STEP 3
         User emptyusr = new User();
         emptyusr.setName(srv_loaded.getName());
-        getUserManager().changeUser(ctx, emptyusr, cred);
+        getUserManager().changeUser(context, emptyusr, cred);
 
         // STEP 4
         // now load user from server and check if data is correct, else fail
-        final User srv_loaded2 = getUserManager().getData(ctx, id(createduser), cred);
+        User srv_loaded2 = getUserManager().getData(context, id(createduser), cred);
         if (createduser.getId().equals(srv_loaded2.getId())) {
             //verify data
             compareUser(createduser, srv_loaded);
@@ -1367,18 +1342,17 @@ public class UserTest extends AbstractTest {
 
         // STEP 1
         // get context to create an user
-        final Credentials cred = getContextAdminCredentials();
-        final Context ctx = getTestContextObject(cred);
+        Credentials cred = getContextAdminCredentials();
 
         // create new user
 
-        final UserModuleAccess access = new UserModuleAccess();
-        final User usr = getTestUserObject(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, ctx);
-        final User createduser = getUserManager().createUser(ctx, usr, access, cred);
-        rememberToDeleteUser(createduser);
+        UserModuleAccess access = new UserModuleAccess();
+        User usr = getTestUserObject(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, context);
+        User createduser = getUserManager().createUser(context, usr, access, cred);
+
         // STEP 2
         // now load user from server and check if data is correct, else fail
-        final User srv_loaded = getUserManager().getData(ctx, id(createduser), cred);
+        User srv_loaded = getUserManager().getData(context, id(createduser), cred);
         if (createduser.getId().equals(srv_loaded.getId())) {
             //verify data
             compareUser(createduser, srv_loaded);
@@ -1390,11 +1364,11 @@ public class UserTest extends AbstractTest {
 
         User emptyusr = createChangeUserData(srv_loaded);
         emptyusr.setId(null);// reset id, server must ident the user by username
-        getUserManager().changeUser(ctx, emptyusr, cred);
+        getUserManager().changeUser(context, emptyusr, cred);
 
         // STEP 4
         // now load user from server and check if data is correct, else fail
-        final User srv_loaded2 = getUserManager().getData(ctx, id(createduser), cred);
+        User srv_loaded2 = getUserManager().getData(context, id(createduser), cred);
         if (createduser.getId().equals(srv_loaded2.getId())) {
             //verify data
             compareUser(createduser, srv_loaded);
@@ -1410,18 +1384,17 @@ public class UserTest extends AbstractTest {
 
         // STEP 1
         // get context to create an user
-        final Credentials cred = getContextAdminCredentials();
-        final Context ctx = getTestContextObject(cred);
+        Credentials cred = getContextAdminCredentials();
 
         // create new user
 
-        final UserModuleAccess access = new UserModuleAccess();
-        final User usr = getTestUserObject(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, ctx);
-        final User createduser = getUserManager().createUser(ctx, usr, access, cred);
-        rememberToDeleteUser(createduser);
+        UserModuleAccess access = new UserModuleAccess();
+        User usr = getTestUserObject(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, context);
+        User createduser = getUserManager().createUser(context, usr, access, cred);
+
         // STEP 2
         // now load user from server and check if data is correct, else fail
-        final User srv_loaded = getUserManager().getData(ctx, id(createduser), cred);
+        User srv_loaded = getUserManager().getData(context, id(createduser), cred);
         if (createduser.getId().equals(srv_loaded.getId())) {
             //verify data
             compareUser(createduser, srv_loaded);
@@ -1433,14 +1406,14 @@ public class UserTest extends AbstractTest {
         User emptyusr = createChangeUserData(srv_loaded);
         // reset username, server must ident the user by id
         // This is a dirty trick to circumvent the setter method. Don't do this at home ;-)
-        final Field field = emptyusr.getClass().getDeclaredField("name");
+        Field field = emptyusr.getClass().getDeclaredField("name");
         field.setAccessible(true);
         field.set(emptyusr, null);
-        getUserManager().changeUser(ctx, emptyusr, cred);
+        getUserManager().changeUser(context, emptyusr, cred);
 
         // STEP 4
         // now load user from server and check if data is correct, else fail
-        final User srv_loaded2 = getUserManager().getData(ctx, id(createduser), cred);
+        User srv_loaded2 = getUserManager().getData(context, id(createduser), cred);
         if (createduser.getId().equals(srv_loaded2.getId())) {
             //verify data
             compareUser(createduser, srv_loaded);
@@ -1454,17 +1427,16 @@ public class UserTest extends AbstractTest {
     public void testChangeWithoutIdAndName() throws Exception {
 
         // get context to create an user
-        final Credentials cred = getContextAdminCredentials();
-        final Context ctx = getTestContextObject(cred);
+        Credentials cred = getContextAdminCredentials();
 
         // create new user
 
-        final UserModuleAccess access = new UserModuleAccess();
-        final User usr = getTestUserObject(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, ctx);
-        final User createduser = getUserManager().createUser(ctx, usr, access, cred);
-        rememberToDeleteUser(createduser);
+        UserModuleAccess access = new UserModuleAccess();
+        User usr = getTestUserObject(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, context);
+        User createduser = getUserManager().createUser(context, usr, access, cred);
+
         // now load user from server and check if data is correct, else fail
-        User srv_loaded = getUserManager().getData(ctx, id(createduser), cred);
+        User srv_loaded = getUserManager().getData(context, id(createduser), cred);
         if (createduser.getId().equals(srv_loaded.getId())) {
             //verify data
             compareUser(createduser, srv_loaded);
@@ -1477,45 +1449,45 @@ public class UserTest extends AbstractTest {
         srv_loaded.setId(null);
         srv_loaded.setName(null);
         // submit changes
-        getUserManager().changeUser(ctx, srv_loaded, cred);
+        getUserManager().changeUser(context, srv_loaded, cred);
     }
 
     // This test is used to check how the change method deals with changing values which are null before changing
     @Test
     public void testChangeNullFields() throws MalformedURLException, RemoteException, NotBoundException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException, NoSuchUserException, Exception {
-        final Credentials cred = getContextAdminCredentials();
-        final Context ctx = getTestContextObject(cred);
-        final OXLoginInterface oxl = (OXLoginInterface) Naming.lookup(getRMIHostUrl() + OXLoginInterface.RMI_NAME);
+        Credentials cred = getContextAdminCredentials();
+
+        OXLoginInterface oxl = (OXLoginInterface) Naming.lookup(getRMIHostUrl() + OXLoginInterface.RMI_NAME);
         // Here we get the user object of the admin from the database
         // The admin has no company set by default, so we can test here, how a change work on field's which
         // aren't set by default
-        final User usr = oxl.login2User(ctx, cred);
+        User usr = oxl.login2User(context, cred);
         // passwordmech is set by login2user so we need to null it here for the change test
         // not to fail
         usr.setPasswordMech(null);
-        final OXUserInterface user = (OXUserInterface) Naming.lookup(getRMIHostUrl() + OXUserInterface.RMI_NAME);
+        OXUserInterface user = (OXUserInterface) Naming.lookup(getRMIHostUrl() + OXUserInterface.RMI_NAME);
         usr.setNickname("test");
 
         usr.setCompany("test");
         usr.setSur_name("test");
         usr.setEmail1(usr.getPrimaryEmail());
         // Store username to be able to restore it after change
-        final String username = usr.getName();
+        String username = usr.getName();
         // This is a dirty trick to circumvent the setter method. Don't do this at home ;-)
-        final Field field = usr.getClass().getDeclaredField("name");
+        Field field = usr.getClass().getDeclaredField("name");
         field.setAccessible(true);
         field.set(usr, null);
         System.out.println(usr.isCompanyset());
         usr.setFilestoreId(null);
         usr.setMaxQuota(null);
-        user.change(ctx, usr, cred);
+        user.change(context, usr, cred);
         usr.setName(username);
-        final User usr2 = oxl.login2User(ctx, cred);
+        User usr2 = oxl.login2User(context, cred);
         compareUser(usr, usr2);
     }
 
-    public static User getTestUserMandatoryFieldsObject(final String ident, final String password) {
-        final User usr = new User();
+    public static User getTestUserMandatoryFieldsObject(String ident, String password) {
+        User usr = new User();
 
         usr.setName(ident);
         usr.setPassword(password);
@@ -1531,8 +1503,8 @@ public class UserTest extends AbstractTest {
         return usr;
     }
 
-    public static User getTestUserObject(final String ident, final String password, final Context context) {
-        final User usr = new User();
+    public static User getTestUserObject(String ident, String password, Context context) {
+        User usr = new User();
         usr.setName(ident);
         usr.setPassword(password);
         usr.setMailenabled(true);
@@ -1552,7 +1524,7 @@ public class UserTest extends AbstractTest {
             usr.setFilestore_name(context.getFilestore_name());
         }
 
-        final HashSet<String> aliase = new HashSet<String>();
+        HashSet<String> aliase = new HashSet<String>();
         aliase.add("alias1-" + ident + "@" + AbstractTest.TEST_DOMAIN);
         aliase.add("alias2-" + ident + "@" + AbstractTest.TEST_DOMAIN);
         aliase.add("alias3-" + ident + "@" + AbstractTest.TEST_DOMAIN);
@@ -1561,7 +1533,7 @@ public class UserTest extends AbstractTest {
         aliase.add("primaryemail-" + ident + "@" + AbstractTest.TEST_DOMAIN);
         usr.setAliases(aliase);
 
-        final Calendar cal = Calendar.getInstance(TimeZones.UTC);
+        Calendar cal = Calendar.getInstance(TimeZones.UTC);
         cal.set(Calendar.HOUR_OF_DAY, 0);
         cal.set(Calendar.MINUTE, 0);
         cal.set(Calendar.SECOND, 0);
@@ -1674,7 +1646,7 @@ public class UserTest extends AbstractTest {
         return getTestUserObject(VALID_CHAR_TESTUSER, "open-xchange", null);
     }
 
-    public static void compareUser(final User a, final User b) {
+    public static void compareUser(User a, User b) {
         System.out.println("USERA" + a.toString());
         System.out.println("USERB" + b.toString());
 
@@ -1691,7 +1663,7 @@ public class UserTest extends AbstractTest {
 
     }
 
-    private static void compareUserSpecialForNulledAttributes(final User a, final User b) {
+    private static void compareUserSpecialForNulledAttributes(User a, User b) {
         System.out.println("USERA" + a.toString());
         System.out.println("USERB" + b.toString());
 
@@ -1721,7 +1693,7 @@ public class UserTest extends AbstractTest {
         }
     }
 
-    private static void compareNonCriticFields(final User a, final User b) {
+    private static void compareNonCriticFields(User a, User b) {
         assertDatesAreEqualsAtYMD("aniversary not equal", a.getAnniversary(), b.getAnniversary());
         assertEquals("assistants name not equal", a.getAssistant_name(), b.getAssistant_name());
         assertDatesAreEqualsAtYMD("birthday not equal", a.getBirthday(), b.getBirthday());
@@ -1815,13 +1787,13 @@ public class UserTest extends AbstractTest {
         assertEquals("Userfield18 not equal", a.getUserfield18(), b.getUserfield18());
         assertEquals("Userfield19 not equal", a.getUserfield19(), b.getUserfield19());
         assertEquals("Userfield20 not equal", a.getUserfield20(), b.getUserfield20());
-        final Hashtable<String, OXCommonExtensionInterface> aexts = a.getAllExtensionsAsHash();
-        final Hashtable<String, OXCommonExtensionInterface> bexts = b.getAllExtensionsAsHash();
+        Hashtable<String, OXCommonExtensionInterface> aexts = a.getAllExtensionsAsHash();
+        Hashtable<String, OXCommonExtensionInterface> bexts = b.getAllExtensionsAsHash();
         if (aexts.size() == bexts.size()) {
             assertTrue("Extensions not equal: " + aexts.toString() + ",\n" + bexts.toString(), aexts.values().containsAll(bexts.values()));
             for (int i = 0; i < aexts.size(); i++) {
-                final OXCommonExtensionInterface aext = aexts.get(i);
-                final OXCommonExtensionInterface bext = bexts.get(i);
+                OXCommonExtensionInterface aext = aexts.get(i);
+                OXCommonExtensionInterface bext = bexts.get(i);
                 assertTrue("Extensions not equal: " + aext.toString() + ",\n" + bext.toString(), aext.equals(bext));
             }
         }
@@ -1829,7 +1801,7 @@ public class UserTest extends AbstractTest {
         assertEquals("User Attributes not equal", a.getUserAttributes(), b.getUserAttributes());
     }
 
-    private void compareUserAccess(final UserModuleAccess a, final UserModuleAccess b) {
+    private void compareUserAccess(UserModuleAccess a, UserModuleAccess b) {
         assertEquals("access calendar not equal", a.getCalendar(), b.getCalendar());
         assertEquals("access contacts not equal", a.getContacts(), b.getContacts());
         assertEquals("access delegatetasks not equal", a.getDelegateTask(), b.getDelegateTask());
@@ -1845,7 +1817,7 @@ public class UserTest extends AbstractTest {
         assertEquals("access webmail not equal", a.getWebmail(), b.getWebmail());
     }
 
-    public User addUser(final Context ctx, final User usr, final UserModuleAccess access) throws Exception {
+    public User addUser(Context ctx, User usr, UserModuleAccess access) throws Exception {
         // create new user
 
         return getUserManager().createUser(ctx, usr, access, getContextAdminCredentials());
@@ -1862,8 +1834,8 @@ public class UserTest extends AbstractTest {
         return buf.toString();
     }
 
-    private User changeUserAlias(final User usr, String alias) throws CloneNotSupportedException {
-        final User retval = (User) usr.clone();
+    private User changeUserAlias(User usr, String alias) throws CloneNotSupportedException {
+        User retval = (User) usr.clone();
 
         // Change alias and remove attributes to meet later compare action
         retval.addAlias(alias);
@@ -1876,11 +1848,11 @@ public class UserTest extends AbstractTest {
         return retval;
     }
 
-    private User createChangeUserData(final User usr) throws CloneNotSupportedException, URISyntaxException {
+    private User createChangeUserData(User usr) throws CloneNotSupportedException, URISyntaxException {
 
         // change all fields of the user
 
-        final User retval = (User) usr.clone();
+        User retval = (User) usr.clone();
         retval.setFilestoreId(null);
         //retval.setName(null); // INFO: Commented because the server does not throw any exception if username is sent!
         retval.setPasswordMech(null);
@@ -1900,9 +1872,9 @@ public class UserTest extends AbstractTest {
         retval.setLanguage("en_US");
         // new for testing
 
-        final HashSet<String> aliases = usr.getAliases();
-        final HashSet<String> lAliases = new HashSet<String>();
-        for (final String element : aliases) {
+        HashSet<String> aliases = usr.getAliases();
+        HashSet<String> lAliases = new HashSet<String>();
+        for (String element : aliases) {
             lAliases.add(getChangedEmailAddress(element, change_suffix));
         }
         lAliases.add(usr.getPrimaryEmail());
@@ -2016,27 +1988,26 @@ public class UserTest extends AbstractTest {
     public void testExists() throws Exception {
 
         // get context to create an user
-        final Credentials cred = getContextAdminCredentials();
-        final Context ctx = getTestContextObject(cred);
+        Credentials cred = getContextAdminCredentials();
 
         // create new user
 
-        final User exists = getTestUserObject(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, ctx);
+        User exists = getTestUserObject(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, context);
         User notexists = new User();
         notexists.setName("Rumpelstilz");
-        final User createduser = getUserManager().createUser(ctx, exists, cred);
+        User createduser = getUserManager().createUser(context, exists, cred);
 
         boolean existingexists = false;
         try {
-            existingexists = getUserManager().existsUser(ctx, exists, cred);
+            existingexists = getUserManager().existsUser(context, exists, cred);
         } catch (Exception e) {
             e.printStackTrace();
         }
         // delete user
-        getUserManager().deleteUser(ctx, createduser, cred);
+        getUserManager().deleteUser(context, createduser, cred);
 
         try {
-            assertFalse("nonexisting user must not exist", getUserManager().existsUser(ctx, notexists, cred));
+            assertFalse("nonexisting user must not exist", getUserManager().existsUser(context, notexists, cred));
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -2051,5 +2022,14 @@ public class UserTest extends AbstractTest {
      */
     private UserManager getUserManager() {
         return UserManager.getInstance(getRMIHostUrl(), getMasterAdminCredentials());
+    }
+
+    /**
+     * Returns the {@link ContextManager} instance
+     * 
+     * @return the {@link ContextManager} instance
+     */
+    private ContextManager getContextManager() {
+        return ContextManager.getInstance(getRMIHostUrl(), getMasterAdminCredentials());
     }
 }

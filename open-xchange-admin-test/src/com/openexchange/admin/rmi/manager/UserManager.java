@@ -145,9 +145,9 @@ public class UserManager extends AbstractManager {
      * @return The {@link User} with all its data loaded
      * @throws Exception if an error is occurred
      */
-    public User getData(Context context, User User, Credentials contextAdminCredentials) throws Exception {
+    public User getData(Context context, User user, Credentials contextAdminCredentials) throws Exception {
         OXUserInterface userInterface = getUserInterface();
-        return userInterface.getData(context, User, contextAdminCredentials);
+        return userInterface.getData(context, user, contextAdminCredentials);
     }
 
     /**
@@ -187,9 +187,9 @@ public class UserManager extends AbstractManager {
      * 
      * @throws Exception if an error is occurred
      */
-    public void changeUser(Context context, User User, Credentials contextAdminCredentials) throws Exception {
+    public void changeUser(Context context, User user, Credentials contextAdminCredentials) throws Exception {
         OXUserInterface userInterface = getUserInterface();
-        userInterface.change(context, User, contextAdminCredentials);
+        userInterface.change(context, user, contextAdminCredentials);
     }
 
     /**
