@@ -87,7 +87,7 @@ public class MigrationConfig {
         maxTombstoneAgeInMonths = configService.getIntProperty("com.openexchange.calendar.migration.maxTombstoneAgeInMonths", 12);
         nonSevereSeverities = getNonSevereSeverities(ProblemSeverity.MAJOR);
         uncommitted = configService.getBoolProperty("com.openexchange.calendar.migration.uncommitted", false);
-        intermediateCommits = configService.getBoolProperty("com.openexchange.calendar.migration.intermediateCommits", false);
+        intermediateCommits = configService.getBoolProperty("com.openexchange.calendar.migration.intermediateCommits", true);
     }
 
     /**

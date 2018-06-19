@@ -132,8 +132,8 @@ public abstract class AbstractICalEventExporter extends AbstractICalExporter {
 
     /**
      * Strips all other attendees from the event <b>if</b> the current user is an attendee.
-     * In case the user don't participate in the event neither attendees nor organizer will be set.
-     * 
+     * In case the user doesn't participate in the event neither attendees nor organizer will be set.
+     *
      * @param event The event
      * @param session The session
      * @return The stripped {@link Event}
@@ -147,8 +147,12 @@ public abstract class AbstractICalEventExporter extends AbstractICalExporter {
         } else if (CalendarUtils.isOrganizer(event, session.getUserId())) {
             event.removeAttendees();
         } else {
-            event.removeAttendees();
-            event.removeOrganizer();
+            if (event.containsAttendees()) {
+                event.removeAttendees();
+            }
+            if (event.containsOrganizer()) {
+                event.removeOrganizer();
+            }
         }
         return event;
     }

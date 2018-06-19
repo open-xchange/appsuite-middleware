@@ -65,7 +65,6 @@ import com.openexchange.imap.IMAPException;
 import com.openexchange.imap.IMAPException.Code;
 import com.openexchange.imap.config.IMAPConfig;
 import com.openexchange.imap.search.IMAPSearch;
-import com.openexchange.imap.util.ImapUtility;
 import com.openexchange.imap.util.WrappingProtocolException;
 import com.openexchange.java.Strings;
 import com.openexchange.log.LogProperties;
@@ -761,10 +760,16 @@ public final class IMAPSort {
                 p.notifyResponseHandlers(r);
             } else if (response.isBAD()) {
                 LogProperties.putProperty(LogProperties.Name.MAIL_COMMAND, prepareImapCommandForLogging(command));
-                throw new BadCommandException(IMAPException.getFormattedMessage(IMAPException.Code.PROTOCOL_ERROR, command, ImapUtility.appendCommandInfo(response.toString(), imapFolder)));
+                if (null != imapFolder) {
+                    LogProperties.putProperty(LogProperties.Name.MAIL_FULL_NAME, imapFolder.getFullName());
+                }
+                throw new BadCommandException(response);
             } else if (response.isNO()) {
                 LogProperties.putProperty(LogProperties.Name.MAIL_COMMAND, prepareImapCommandForLogging(command));
-                throw new CommandFailedException(IMAPException.getFormattedMessage(IMAPException.Code.PROTOCOL_ERROR, command, ImapUtility.appendCommandInfo(response.toString(), imapFolder)));
+                if (null != imapFolder) {
+                    LogProperties.putProperty(LogProperties.Name.MAIL_FULL_NAME, imapFolder.getFullName());
+                }
+                throw new CommandFailedException(response);
             } else {
                 LogProperties.putProperty(LogProperties.Name.MAIL_COMMAND, prepareImapCommandForLogging(command));
                 p.handleResult(response);

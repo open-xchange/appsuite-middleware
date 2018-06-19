@@ -415,7 +415,7 @@ public final class UpdatePerformer extends AbstractUserizedFolderPerformer {
     }
 
     private void doPermissionChange(String treeId, String folderId, Folder folder, ComparedFolderPermissions comparedPermissions, String oldParentId, Folder storageFolder, FolderStorage storage, Boolean isRecursion, boolean cascadePermissions, FolderServiceDecorator decorator,TransactionManager transactionManager, Collection<FolderStorage> openedStorages) throws OXException {
-        ObjectUseCountService useCountService = FolderStorageServices.requireService(ObjectUseCountService.class);
+        ObjectUseCountService useCountService = FolderStorageServices.getService(ObjectUseCountService.class);
         List<Integer> addedUsers = comparedPermissions.getAddedUsers();
         if (null != useCountService && null != addedUsers && !addedUsers.isEmpty()) {
             for (Integer i : addedUsers) {
