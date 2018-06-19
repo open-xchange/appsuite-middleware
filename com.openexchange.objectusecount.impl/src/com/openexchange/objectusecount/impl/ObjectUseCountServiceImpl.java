@@ -260,12 +260,12 @@ public class ObjectUseCountServiceImpl implements ObjectUseCountService {
     }
 
     void incrementObjectUseCount(TIntIntMap contact2folder, int userId, int contextId, Connection con) throws OXException {
-        if (null == con) {
-            incrementObjectUseCount(contact2folder, userId, contextId);
+        if (null == contact2folder || contact2folder.isEmpty()) {
             return;
         }
 
-        if (null == contact2folder || contact2folder.isEmpty()) {
+        if (null == con) {
+            incrementObjectUseCount(contact2folder, userId, contextId);
             return;
         }
 
@@ -284,9 +284,7 @@ public class ObjectUseCountServiceImpl implements ObjectUseCountService {
                     stmt.setInt(4, iterator.key());
                     stmt.setInt(5, 1);
                     stmt.addBatch();
-                    if (LOG.isDebugEnabled()) {
-                        LOG.debug("Incremented object use count for user {}, folder {}, object {} in context {}.", userId, iterator.value(), iterator.key(), contextId, new Throwable("use-count-trace"));
-                    }
+                    LOG.debug("Incremented object use count for user {}, folder {}, object {} in context {}.", userId, iterator.value(), iterator.key(), contextId);
                 }
                 stmt.executeBatch();
             } else {
@@ -295,9 +293,7 @@ public class ObjectUseCountServiceImpl implements ObjectUseCountService {
                 stmt.setInt(4, iterator.key());
                 stmt.setInt(5, 1);
                 stmt.executeUpdate();
-                if (LOG.isDebugEnabled()) {
-                    LOG.debug("Incremented object use count for user {}, folder {}, object {} in context {}.", userId, iterator.value(), iterator.key(), contextId, new Throwable("use-count-trace"));
-                }
+                LOG.debug("Incremented object use count for user {}, folder {}, object {} in context {}.", userId, iterator.value(), iterator.key(), contextId);
             }
         } catch (SQLException e) {
             throw ObjectUseCountExceptionCode.SQL_ERROR.create(e, e.getMessage());
