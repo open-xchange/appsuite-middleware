@@ -119,7 +119,7 @@ public class ContactTablesUtf8Mb4UpdateTask extends SimpleConvertUtf8ToUtf8mb4Up
     private void resetZeroedTimestampColumn(Connection connection, String columnName) throws SQLException {
         PreparedStatement ps = null;
         try {
-            ps = connection.prepareStatement("UPDATE prg_contacts SET " + columnName + "=NULL WHERE " + columnName + "='0000-00-00'");
+            ps = connection.prepareStatement("UPDATE IGNORE prg_contacts SET " + columnName + "=NULL WHERE " + columnName + "='0000-00-00'");
             LOG.info("Reset {} rows for column '{}' that contained invalid timestamps", ps.executeUpdate(), columnName);
         } finally {
             Databases.closeSQLStuff(ps);
