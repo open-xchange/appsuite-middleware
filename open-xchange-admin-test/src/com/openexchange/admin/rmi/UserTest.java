@@ -57,12 +57,9 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.rmi.Naming;
-import java.rmi.NotBoundException;
-import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -76,10 +73,7 @@ import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.dataobjects.Filestore;
 import com.openexchange.admin.rmi.dataobjects.User;
 import com.openexchange.admin.rmi.dataobjects.UserModuleAccess;
-import com.openexchange.admin.rmi.exceptions.DatabaseUpdateException;
-import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
-import com.openexchange.admin.rmi.exceptions.NoSuchContextException;
 import com.openexchange.admin.rmi.exceptions.NoSuchUserException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.rmi.extensions.OXCommonExtensionInterface;
@@ -97,8 +91,8 @@ import com.openexchange.java.util.TimeZones;
 public class UserTest extends AbstractTest {
 
     public final String NAMED_ACCESS_COMBINATION_BASIC = "all";
+
     // list of chars that must be valid
-    //    protected static  String VALID_CHAR_TESTUSER = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-+.%$@";
     protected final String VALID_CHAR_TESTUSER = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
 
     // global setting for stored password
@@ -113,6 +107,11 @@ public class UserTest extends AbstractTest {
         super();
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.admin.rmi.AbstractTest#setUp()
+     */
     @Override
     public void setUp() throws Exception {
         super.setUp();
@@ -121,6 +120,11 @@ public class UserTest extends AbstractTest {
 
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.admin.rmi.AbstractTest#tearDown()
+     */
     @Override
     public void tearDown() throws Exception {
         getUserManager().cleanUp();
@@ -130,20 +134,23 @@ public class UserTest extends AbstractTest {
         super.tearDown();
     }
 
+    /**
+     * Tests whether the default module access is set
+     */
     @Test
     public void testDefaultModuleAccess() throws Exception {
-        // check whether all new options have been cleared in disableAll()
+        // Check whether all new options have been cleared in disableAll()
         UserModuleAccess ret = new UserModuleAccess();
         ret.disableAll();
         ret.setWebmail(true);
         ret.setContacts(true);
 
-        Class clazz = ret.getClass();
+        Class<?> clazz = ret.getClass();
         for (Method m : clazz.getMethods()) {
             String name = m.getName();
             if (!name.equals("getClass") && !name.equals("getPermissionBits") && !name.equals("getProperties") && !name.equals("getProperty") && (name.startsWith("is") || name.startsWith("get"))) {
                 //System.out.println("*******" + name);
-                boolean res = (Boolean) m.invoke(ret, null);
+                boolean res = (Boolean) m.invoke(ret, (Object[]) null);
                 if (name.endsWith("Webmail") || name.endsWith("Contacts") || name.endsWith("GlobalAddressBookDisabled")) {
                     assertTrue(name + " must return true", res);
                 } else {
@@ -153,9 +160,11 @@ public class UserTest extends AbstractTest {
         }
     }
 
+    /**
+     * Tests the user creation
+     */
     @Test
     public void testCreate() throws Exception {
-        // get context to create an user
         Credentials cred = getContextAdminCredentials();
 
         // create new user
@@ -173,20 +182,14 @@ public class UserTest extends AbstractTest {
         }
     }
 
-    private User id(User createduser) {
-        User user = new User();
-        user.setId(createduser.getId());
-        return user;
-    }
-
+    /**
+     * Tests the user creation with context module access rights
+     */
     @Test
     public void testCreateWithContextModuleAccessRights() throws Exception {
-
-        // get context to create an user
         Credentials cred = getContextAdminCredentials();
 
         // create new user
-
         User usr = getTestUserObject(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, context);
         User createduser = getUserManager().createUser(context, usr, cred);
 
@@ -200,14 +203,14 @@ public class UserTest extends AbstractTest {
         }
     }
 
+    /**
+     * Tests the user creation with a named module access
+     */
     @Test
     public void testCreateWithNamedModuleAccessRights() throws Exception {
-
-        // get context to create an user
         Credentials cred = getContextAdminCredentials();
 
         // create new user
-
         User usr = getTestUserObject(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, context);
         User createduser = getUserManager().createUser(context, usr, NAMED_ACCESS_COMBINATION_BASIC, cred);
 
@@ -221,14 +224,14 @@ public class UserTest extends AbstractTest {
         }
     }
 
+    /**
+     * Test the user creation with only the mandatory fields set
+     */
     @Test
     public void testCreateMandatory() throws Exception {
-        // this creates an user ONLY with mandatory fields set
-
         Credentials cred = getContextAdminCredentials();
 
         // create new user
-
         UserModuleAccess access = new UserModuleAccess();
         User usr = getTestUserMandatoryFieldsObject(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass);
         User createduser = getUserManager().createUser(context, usr, access, cred);
@@ -241,22 +244,11 @@ public class UserTest extends AbstractTest {
         } else {
             fail("Expected to get user data for added user");
         }
-
     }
 
-    private void compareUserMandatory(User a, User b) {
-
-        System.out.println("USERA" + a.toString());
-        System.out.println("USERB" + b.toString());
-
-        assertEquals("username not equal", a.getName(), b.getName());
-        assertEquals("enabled not equal", a.getMailenabled(), b.getMailenabled());
-        assertEquals("primaryemail not equal", a.getPrimaryEmail(), b.getPrimaryEmail());
-        assertEquals("display name not equal", a.getDisplay_name(), b.getDisplay_name());
-        assertEquals("firtname not equal", a.getGiven_name(), b.getGiven_name());
-
-    }
-
+    /**
+     * Test user creation with erroneous drive folder mode
+     */
     @Test
     public void testCreateUserWithWrongDriveFoldersMode() throws Exception {
         Credentials cred = getContextAdminCredentials();
@@ -267,20 +259,21 @@ public class UserTest extends AbstractTest {
         User createdUser = null;
         try {
             createdUser = getUserManager().createUser(context, user, access, cred);
+            fail("No exception was thrown");
         } catch (InvalidDataException e) {
             // Do nothing, we expect that
         }
         assertNull("User was created although an unsupported folder mode was set", createdUser);
     }
 
+    /**
+     * Tests user deletion
+     */
     @Test(expected = NoSuchUserException.class)
     public void testDelete() throws Exception {
-
-        // get context to create an user
         Credentials cred = getContextAdminCredentials();
 
         // create new user
-
         UserModuleAccess access = new UserModuleAccess();
 
         User usr = getTestUserObject(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, context);
@@ -318,14 +311,12 @@ public class UserTest extends AbstractTest {
         createduser = getUserManager().createUser(context, usr, access, cred);
     }
 
+    /**
+     * Tests providing an empty array to the remote interface when deleting users
+     */
     @Test(expected = InvalidDataException.class)
     public void testDeleteEmptyUserList() throws Exception {
-
-        // get context to create an user
         Credentials cred = getContextAdminCredentials();
-
-        // create new user
-
         UserModuleAccess access = new UserModuleAccess();
 
         User usr = getTestUserObject(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, context);
@@ -339,14 +330,12 @@ public class UserTest extends AbstractTest {
         fail("user not exists expected");
     }
 
+    /**
+     * Tests getting all data for a user
+     */
     @Test
     public void testGetData() throws Exception {
-
-        // get context to create an user
         Credentials cred = getContextAdminCredentials();
-
-        // create new user
-
         UserModuleAccess access = new UserModuleAccess();
 
         User usr = getTestUserObject(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, context);
@@ -364,11 +353,7 @@ public class UserTest extends AbstractTest {
 
     @Test
     public void testGetDataByName() throws Exception {
-        // get context to create an user
         Credentials cred = getContextAdminCredentials();
-
-        // create new user
-
         UserModuleAccess access = new UserModuleAccess();
 
         User usr = getTestUserObject(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, context);
@@ -392,10 +377,7 @@ public class UserTest extends AbstractTest {
      */
     @Test
     public void testPublicFolderEditableForUser() throws Exception {
-        // get context to create an user
         Credentials cred = getContextAdminCredentials();
-
-        // create new user
         UserModuleAccess access = new UserModuleAccess();
         access.setPublicFolderEditable(true);
         User usr = getTestUserObject(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, context);
@@ -429,9 +411,6 @@ public class UserTest extends AbstractTest {
     @Test
     public void testPublicFolderEditableForAdmin() throws Exception {
         Credentials cred = getContextAdminCredentials();
-
-        // create new user
-
         User usr = new User();
         // Administrator gets always principal identifier 2. The group users gets principal identifier 1.
         usr.setId(Integer.valueOf(2));
@@ -449,13 +428,12 @@ public class UserTest extends AbstractTest {
         assertFalse("Flag publicfoldereditable does not survice roundtrip for context administrator.", access.isPublicFolderEditable());
     }
 
+    /**
+     * Tests getting the user data via the user name and user credentials
+     */
     @Test
     public void testGetDataByNameWithUserAuth() throws Exception {
-        // get context to create an user
         Credentials cred = getContextAdminCredentials();
-
-        // create new user
-
         UserModuleAccess access = new UserModuleAccess();
 
         User usr = getTestUserObject(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, context);
@@ -475,13 +453,12 @@ public class UserTest extends AbstractTest {
         }
     }
 
+    /**
+     * Tests getting the data by user id
+     */
     @Test
     public void testGetDataByID() throws Exception {
-        // get context to create an user
         Credentials cred = getContextAdminCredentials();
-
-        // create new user
-
         UserModuleAccess access = new UserModuleAccess();
 
         User usr = getTestUserObject(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, context);
@@ -500,14 +477,12 @@ public class UserTest extends AbstractTest {
         }
     }
 
+    /**
+     * Tests getting the module access of a user
+     */
     @Test
     public void testGetModuleAccess() throws Exception {
-
-        // get context to create an user
         Credentials cred = getContextAdminCredentials();
-
-        // create new user
-
         UserModuleAccess client_access = new UserModuleAccess();
         User usr = getTestUserObject(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, context);
         User createduser = getUserManager().createUser(context, usr, client_access, cred);
@@ -517,17 +492,14 @@ public class UserTest extends AbstractTest {
 
         // test if module access was set correctly
         compareUserAccess(client_access, srv_response);
-
     }
 
+    /**
+     * Tests changing the user module access
+     */
     @Test
     public void testChangeModuleAccess() throws Exception {
-
-        // get context to create an user
         Credentials cred = getContextAdminCredentials();
-
-        // create new user
-
         UserModuleAccess client_access = new UserModuleAccess();
         User usr = getTestUserObject(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, context);
         User createduser = getUserManager().createUser(context, usr, client_access, cred);
@@ -564,14 +536,12 @@ public class UserTest extends AbstractTest {
 
     }
 
+    /**
+     * Tests getting a list of users in a context
+     */
     @Test
     public void testList() throws Exception {
-
-        // get context to create an user
         Credentials cred = getContextAdminCredentials();
-
-        // create new user
-
         UserModuleAccess client_access = new UserModuleAccess();
         User usr = getTestUserObject(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, context);
         User createduser = getUserManager().createUser(context, usr, client_access, cred);
@@ -590,16 +560,15 @@ public class UserTest extends AbstractTest {
         assertTrue("Expected to find added user in user list", founduser);
     }
 
+    /**
+     * Tests listing users that have a dedicated filestore
+     */
     @Test
     public void testListUsersWithOwnFilestore() throws Exception {
-
-        // get context to create an user
         Credentials cred = getContextAdminCredentials();
 
         Filestore fs = null;
         Credentials master = getMasterAdminCredentials();
-
-        // create new user
 
         UserModuleAccess client_access = new UserModuleAccess();
         User usr = getTestUserObject(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, context);
@@ -649,18 +618,12 @@ public class UserTest extends AbstractTest {
         }
     }
 
-    public OXTaskMgmtInterface getTaskInterface() throws MalformedURLException, RemoteException, NotBoundException {
-        return (OXTaskMgmtInterface) Naming.lookup(getRMIHostUrl() + OXTaskMgmtInterface.RMI_NAME);
-    }
-
+    /**
+     * Tests listing all users in a context
+     */
     @Test
     public void testListAll() throws Exception {
-
-        // get context to create an user
         Credentials cred = getContextAdminCredentials();
-
-        // create new user
-
         UserModuleAccess client_access = new UserModuleAccess();
         User usr = getTestUserObject(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, context);
         User createduser = getUserManager().createUser(context, usr, client_access, cred);
@@ -679,14 +642,12 @@ public class UserTest extends AbstractTest {
         assertTrue("Expected to find added user in user list", founduser);
     }
 
+    /**
+     * Tests changing/updating a user
+     */
     @Test
     public void testChange() throws Exception {
-
-        // get context to create an user
         Credentials cred = getContextAdminCredentials();
-
-        // create new user
-
         UserModuleAccess access = new UserModuleAccess();
         User usr = getTestUserObject(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, context);
         User createduser = getUserManager().createUser(context, usr, access, cred);
@@ -719,15 +680,12 @@ public class UserTest extends AbstractTest {
         }
     }
 
+    /**
+     * Tests changing the alias of a user
+     */
     @Test
     public void testChangeAlias() throws Exception {
-        // change alias
-
-        // get context to create an user
         Credentials cred = getContextAdminCredentials();
-
-        // create new user
-
         UserModuleAccess access = new UserModuleAccess();
         User usr = getTestUserObject(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, context);
         User createduser = getUserManager().createUser(context, usr, access, cred);
@@ -761,6 +719,9 @@ public class UserTest extends AbstractTest {
         }
     }
 
+    /**
+     * Tests changing the alias of a user to one with a very long name
+     */
     @Test
     public void testChangeAliasTooLong() throws Exception {
         // Try to change alias with too long name (Bug 52763)
@@ -824,15 +785,13 @@ public class UserTest extends AbstractTest {
         }
     }
 
+    /**
+     * Tests setting a single user attribute to <code>null</code>
+     */
     @Test
     public void testChangeSingleAttributeNull() throws Exception {
         // set single values to null in the user object and then call change, what happens?
-
-        //      get context to create an user
         Credentials cred = getContextAdminCredentials();
-
-        // create new user
-
         UserModuleAccess access = new UserModuleAccess();
         User usr = getTestUserObject(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, context);
         User createduser = getUserManager().createUser(context, usr, access, cred);
@@ -896,20 +855,13 @@ public class UserTest extends AbstractTest {
     }
 
     /**
-     * This test should fail
-     *
-     * @throws Exception
+     * Tests changing all user attributes to <code>null</code>
      */
     @Test(expected = InvalidDataException.class)
     public void testChangeAllAttributesNull() throws Exception {
         // set all values to null in the user object and then call change, what
         // happens?
-
-        // get context to create an user
         Credentials cred = getContextAdminCredentials();
-
-        // create new user
-
         UserModuleAccess access = new UserModuleAccess();
         User usr = getTestUserObject(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, context);
         User createduser = getUserManager().createUser(context, usr, access, cred);
@@ -952,16 +904,14 @@ public class UserTest extends AbstractTest {
         compareUserSpecialForNulledAttributes(tmp_usr, user_single_change_loaded);
     }
 
+    /**
+     * Tests changing all allowed user attributes to <code>null</code>
+     */
     @Test
     public void testChangeAllAllowedAttributesNull() throws Exception {
         // set all values to null in the user object and then call change, what
         // happens?
-
-        // get context to create an user
         Credentials cred = getContextAdminCredentials();
-
-        // create new user
-
         UserModuleAccess access = new UserModuleAccess();
         User usr = getTestUserObject(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, context);
         User createduser = getUserManager().createUser(context, usr, access, cred);
@@ -1008,49 +958,13 @@ public class UserTest extends AbstractTest {
         compareUserSpecialForNulledAttributes(tmp_usr, user_single_change_loaded);
     }
 
-    private HashSet<String> getNotNullableFields() {
-        HashSet<String> notallowed = new HashSet<String>();
-        notallowed.add("setEmail1");
-        notallowed.add("setFolderTree");
-        notallowed.add("setDefaultSenderAddress");
-        notallowed.add("setId");
-        String[] mandatoryMembersCreate = new User().getMandatoryMembersCreate();
-        for (String name : mandatoryMembersCreate) {
-            StringBuilder sb = new StringBuilder("set");
-            sb.append(name.substring(0, 1).toUpperCase());
-            sb.append(name.substring(1));
-            notallowed.add(sb.toString());
-        }
-        notallowed.add("setMail_folder_drafts_name");
-        notallowed.add("setMail_folder_sent_name");
-        notallowed.add("setMail_folder_spam_name");
-        notallowed.add("setMail_folder_trash_name");
-        notallowed.add("setMail_folder_confirmed_ham_name");
-        notallowed.add("setMail_folder_confirmed_spam_name");
-        notallowed.add("setMail_folder_archive_full_name");
-        notallowed.add("setGUI_Spam_filter_capabilities_enabled");
-        notallowed.add("setPassword_expired");
-        notallowed.add("setMailenabled");
-        notallowed.add("setLanguage");
-        notallowed.add("setTimezone");
-        notallowed.add("setPasswordMech");
-        notallowed.add("setUserAttribute");
-        notallowed.add("setFilestoreId");
-        notallowed.add("setFilestore_name");
-        notallowed.add("setFilestoreOwner");
-        notallowed.add("setPrimaryAccountName");
-        return notallowed;
-    }
-
+    /**
+     * Tests changing one user attribute per call
+     */
     @Test
     public void testChangeSingleAttribute() throws Exception {
         // change only 1 attribute of user object per call
-
-        //      get context to create an user
         Credentials cred = getContextAdminCredentials();
-
-        // create new user
-
         UserModuleAccess access = new UserModuleAccess();
         User usr = getTestUserObject(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, context);
         User createduser = getUserManager().createUser(context, usr, access, cred);
@@ -1143,128 +1057,21 @@ public class UserTest extends AbstractTest {
         }
     }
 
-    public MethodMapObject[] getSetableAttributeMethods(Class clazz) {
-
-        Method[] theMethods = clazz.getMethods();
-        List<MethodMapObject> tmplist = new ArrayList<MethodMapObject>();
-
-        MethodMapObject map_obj = null;
-
-        // first fill setter and other infos in map object
-        for (Method method : theMethods) {
-            String method_name = method.getName();
-            if (method_name.startsWith("set")) {
-                // check if it is a type we support
-                if (method.getParameterTypes()[0].getName().equalsIgnoreCase("java.lang.String") || method.getParameterTypes()[0].getName().equalsIgnoreCase("java.lang.Integer") || method.getParameterTypes()[0].getName().equalsIgnoreCase("java.util.Date") || method.getParameterTypes()[0].getName().equalsIgnoreCase("java.lang.Boolean")) {
-
-                    map_obj = new MethodMapObject();
-                    map_obj.setMethodName(method_name);
-                    map_obj.setMethodParameterType(method.getParameterTypes()[0].getName());
-                    map_obj.setSetter(method);
-
-                    tmplist.add(map_obj);
-                }
-            }
-        }
-
-        for (MethodMapObject obj_map : tmplist) {
-            String obj_method_name = obj_map.getMethodName();
-            for (Method method : theMethods) {
-                String meth_name = method.getName();
-                if (meth_name.startsWith("get")) {
-                    if (meth_name.substring(3).equalsIgnoreCase(obj_method_name.substring(3))) {
-                        obj_map.setGetter(method);
-                        break;
-                    }
-                }
-            }
-        }
-
-        // now fill the getter in the map obj
-
-        return tmplist.toArray(new MethodMapObject[tmplist.size()]);
-    }
-
-    private class MethodMapObject {
-
-        private Method getter = null;
-        private Method setter = null;
-        private String methodParameterType = null;
-        private String methodName = null;
-
-        /**
-         * @return the getter
-         */
-        public Method getGetter() {
-            return getter;
-        }
-
-        /**
-         * @param getter the getter to set
-         */
-        public void setGetter(Method getter) {
-            this.getter = getter;
-        }
-
-        /**
-         * @return the methodName
-         */
-        public String getMethodName() {
-            return methodName;
-        }
-
-        /**
-         * @param methodName the methodName to set
-         */
-        public void setMethodName(String methodName) {
-            this.methodName = methodName;
-        }
-
-        /**
-         * @return the methodType
-         */
-        public String getMethodParameterType() {
-            return methodParameterType;
-        }
-
-        /**
-         * @param methodType the methodType to set
-         */
-        public void setMethodParameterType(String methodType) {
-            methodParameterType = methodType;
-        }
-
-        /**
-         * @return the setter
-         */
-        public Method getSetter() {
-            return setter;
-        }
-
-        /**
-         * @param setter the setter to set
-         */
-        public void setSetter(Method setter) {
-            this.setter = setter;
-        }
-    }
-
+    /**
+     * Tests the following scenario:
+     * <ol>
+     * <li>create user</li>
+     * <li>check if user was created correctly</li>
+     * <li>change user data but send NO data</li>
+     * <li>load user again from server and compare with 1st created user</li>
+     * </ol>
+     * Then tests a change with no data set only id set and compare the data afterwards.
+     */
     @Test
     public void testChangeWithEmptyUserIdentifiedByID() throws Exception {
-        // test a change with no data set only id set and compare the data aftewards
-
-        // 1. create user
-        // 2. check if user was created correctly
-        // 3. change user data but send NO data
-        // 4. load user again from server and compare with 1st created user
-        //     must be equal, because we changed nothing
-
         // STEP 1
-        // get context to create an user
-        Credentials cred = getContextAdminCredentials();
-
         // create new user
-
+        Credentials cred = getContextAdminCredentials();
         UserModuleAccess access = new UserModuleAccess();
         User usr = getTestUserObject(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, context);
         User createduser = getUserManager().createUser(context, usr, access, cred);
@@ -1295,16 +1102,13 @@ public class UserTest extends AbstractTest {
 
     }
 
+    /**
+     * Tests a change with no data set ONLY username set and compare the data afterwards
+     */
     @Test
     public void testChangeWithEmptyUserIdentifiedByName() throws Exception {
-        // test a change with no data set ONLY username set and compare the data aftewards
-
         // STEP 1
-        // get context to create an user
         Credentials cred = getContextAdminCredentials();
-
-        // create new user
-
         UserModuleAccess access = new UserModuleAccess();
         User usr = getTestUserObject(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, context);
         User createduser = getUserManager().createUser(context, usr, access, cred);
@@ -1336,16 +1140,13 @@ public class UserTest extends AbstractTest {
 
     }
 
+    /**
+     * Tests a change with data set but identified by username and compare the data afterwards
+     */
     @Test
     public void testChangeIdentifiedByName() throws Exception {
-        // test a change with data set  but identified by username and compare the data aftewards
-
         // STEP 1
-        // get context to create an user
         Credentials cred = getContextAdminCredentials();
-
-        // create new user
-
         UserModuleAccess access = new UserModuleAccess();
         User usr = getTestUserObject(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, context);
         User createduser = getUserManager().createUser(context, usr, access, cred);
@@ -1361,7 +1162,6 @@ public class UserTest extends AbstractTest {
         }
 
         // STEP 3
-
         User emptyusr = createChangeUserData(srv_loaded);
         emptyusr.setId(null);// reset id, server must ident the user by username
         getUserManager().changeUser(context, emptyusr, cred);
@@ -1378,16 +1178,13 @@ public class UserTest extends AbstractTest {
 
     }
 
+    /**
+     * Tests a change with data set but identified by id and compare the data afterwards
+     */
     @Test
     public void testChangeIdentifiedByID() throws Exception {
-        // test a change with data set but identified by id and compare the data afterwards
-
         // STEP 1
-        // get context to create an user
         Credentials cred = getContextAdminCredentials();
-
-        // create new user
-
         UserModuleAccess access = new UserModuleAccess();
         User usr = getTestUserObject(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, context);
         User createduser = getUserManager().createUser(context, usr, access, cred);
@@ -1423,14 +1220,12 @@ public class UserTest extends AbstractTest {
 
     }
 
+    /**
+     * Tests a change without identifier and name
+     */
     @Test(expected = InvalidDataException.class)
     public void testChangeWithoutIdAndName() throws Exception {
-
-        // get context to create an user
         Credentials cred = getContextAdminCredentials();
-
-        // create new user
-
         UserModuleAccess access = new UserModuleAccess();
         User usr = getTestUserObject(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, context);
         User createduser = getUserManager().createUser(context, usr, access, cred);
@@ -1452,9 +1247,11 @@ public class UserTest extends AbstractTest {
         getUserManager().changeUser(context, srv_loaded, cred);
     }
 
-    // This test is used to check how the change method deals with changing values which are null before changing
+    /**
+     * This test is used to check how the change method deals with changing values which are null before changing
+     */
     @Test
-    public void testChangeNullFields() throws MalformedURLException, RemoteException, NotBoundException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException, NoSuchUserException, Exception {
+    public void testChangeNullFields() throws Exception {
         Credentials cred = getContextAdminCredentials();
 
         OXLoginInterface oxl = (OXLoginInterface) Naming.lookup(getRMIHostUrl() + OXLoginInterface.RMI_NAME);
@@ -1486,6 +1283,13 @@ public class UserTest extends AbstractTest {
         compareUser(usr, usr2);
     }
 
+    ///////////////////////////// HELPERS TO MOVE ////////////////////////////
+
+    /**
+     * TODO: Move to factory
+     * 
+     * @deprecated
+     */
     public static User getTestUserMandatoryFieldsObject(String ident, String password) {
         User usr = new User();
 
@@ -1503,6 +1307,11 @@ public class UserTest extends AbstractTest {
         return usr;
     }
 
+    /**
+     * TODO: Move to factory
+     * 
+     * @deprecated
+     */
     public static User getTestUserObject(String ident, String password, Context context) {
         User usr = new User();
         usr.setName(ident);
@@ -1642,11 +1451,22 @@ public class UserTest extends AbstractTest {
         return usr;
     }
 
+    /**
+     * TODO: Move to factory
+     * 
+     * @deprecated
+     */
     public User getTestUserObject() {
         return getTestUserObject(VALID_CHAR_TESTUSER, "open-xchange", null);
     }
 
-    public static void compareUser(User a, User b) {
+    /**
+     * Compares the {@link User} A with {@link User} B
+     * 
+     * @param a The {@link User} A
+     * @param b The {@link User} B
+     */
+    private void compareUser(User a, User b) {
         System.out.println("USERA" + a.toString());
         System.out.println("USERB" + b.toString());
 
@@ -1663,7 +1483,7 @@ public class UserTest extends AbstractTest {
 
     }
 
-    private static void compareUserSpecialForNulledAttributes(User a, User b) {
+    private void compareUserSpecialForNulledAttributes(User a, User b) {
         System.out.println("USERA" + a.toString());
         System.out.println("USERB" + b.toString());
 
@@ -1681,7 +1501,7 @@ public class UserTest extends AbstractTest {
         compareNonCriticFields(a, b);
     }
 
-    private static void assertDatesAreEqualsAtYMD(String message, Date date1, Date date2) {
+    private void assertDatesAreEqualsAtYMD(String message, Date date1, Date date2) {
         Calendar cal1 = Calendar.getInstance(TimeZones.UTC);
         Calendar cal2 = Calendar.getInstance(TimeZones.UTC);
         if (date1 != null && date2 != null) {
@@ -1693,7 +1513,7 @@ public class UserTest extends AbstractTest {
         }
     }
 
-    private static void compareNonCriticFields(User a, User b) {
+    private void compareNonCriticFields(User a, User b) {
         assertDatesAreEqualsAtYMD("aniversary not equal", a.getAnniversary(), b.getAnniversary());
         assertEquals("assistants name not equal", a.getAssistant_name(), b.getAssistant_name());
         assertDatesAreEqualsAtYMD("birthday not equal", a.getBirthday(), b.getBirthday());
@@ -2015,6 +1835,124 @@ public class UserTest extends AbstractTest {
         assertTrue("created user does not exist", existingexists);
     }
 
+    ////////////////////////////// HELPERS //////////////////////////////////
+
+    /**
+     * Helper method to create a new {@link User} and set the id
+     * 
+     * @param createdUser The created user from which to copy the id
+     * @return The newly created user
+     */
+    private User id(User createdUser) {
+        User user = new User();
+        user.setId(createdUser.getId());
+        return user;
+    }
+
+    /**
+     * Compares mandatory fields of {@link User} A with {@link User} B
+     * 
+     * @param a {@link User} A
+     * @param b {@link User} B
+     */
+    private void compareUserMandatory(User a, User b) {
+        System.out.println("USERA" + a.toString());
+        System.out.println("USERB" + b.toString());
+
+        assertEquals("username not equal", a.getName(), b.getName());
+        assertEquals("enabled not equal", a.getMailenabled(), b.getMailenabled());
+        assertEquals("primaryemail not equal", a.getPrimaryEmail(), b.getPrimaryEmail());
+        assertEquals("display name not equal", a.getDisplay_name(), b.getDisplay_name());
+        assertEquals("firtname not equal", a.getGiven_name(), b.getGiven_name());
+    }
+
+    /**
+     * Returns a {@link HashSet} with all non-nullable user fields
+     * 
+     * @return A {@link HashSet} with the fields
+     */
+    private HashSet<String> getNotNullableFields() {
+        // TODO: Convert to enum
+        HashSet<String> notallowed = new HashSet<String>();
+        notallowed.add("setEmail1");
+        notallowed.add("setFolderTree");
+        notallowed.add("setDefaultSenderAddress");
+        notallowed.add("setId");
+        String[] mandatoryMembersCreate = new User().getMandatoryMembersCreate();
+        for (String name : mandatoryMembersCreate) {
+            StringBuilder sb = new StringBuilder("set");
+            sb.append(name.substring(0, 1).toUpperCase());
+            sb.append(name.substring(1));
+            notallowed.add(sb.toString());
+        }
+        notallowed.add("setMail_folder_drafts_name");
+        notallowed.add("setMail_folder_sent_name");
+        notallowed.add("setMail_folder_spam_name");
+        notallowed.add("setMail_folder_trash_name");
+        notallowed.add("setMail_folder_confirmed_ham_name");
+        notallowed.add("setMail_folder_confirmed_spam_name");
+        notallowed.add("setMail_folder_archive_full_name");
+        notallowed.add("setGUI_Spam_filter_capabilities_enabled");
+        notallowed.add("setPassword_expired");
+        notallowed.add("setMailenabled");
+        notallowed.add("setLanguage");
+        notallowed.add("setTimezone");
+        notallowed.add("setPasswordMech");
+        notallowed.add("setUserAttribute");
+        notallowed.add("setFilestoreId");
+        notallowed.add("setFilestore_name");
+        notallowed.add("setFilestoreOwner");
+        notallowed.add("setPrimaryAccountName");
+        return notallowed;
+    }
+
+    /**
+     * Returns all setters of the specified {@link Class}
+     * 
+     * @param clazz The {@link Class}
+     * @return A {@link MethodMapObject} with all setters
+     */
+    private MethodMapObject[] getSetableAttributeMethods(Class<?> clazz) {
+        Method[] theMethods = clazz.getMethods();
+        List<MethodMapObject> tmplist = new ArrayList<MethodMapObject>();
+
+        MethodMapObject map_obj = null;
+
+        // first fill setter and other infos in map object
+        for (Method method : theMethods) {
+            String method_name = method.getName();
+            if (method_name.startsWith("set")) {
+                // check if it is a type we support
+                if (method.getParameterTypes()[0].getName().equalsIgnoreCase("java.lang.String") || method.getParameterTypes()[0].getName().equalsIgnoreCase("java.lang.Integer") || method.getParameterTypes()[0].getName().equalsIgnoreCase("java.util.Date") || method.getParameterTypes()[0].getName().equalsIgnoreCase("java.lang.Boolean")) {
+
+                    map_obj = new MethodMapObject();
+                    map_obj.setMethodName(method_name);
+                    map_obj.setMethodParameterType(method.getParameterTypes()[0].getName());
+                    map_obj.setSetter(method);
+
+                    tmplist.add(map_obj);
+                }
+            }
+        }
+
+        for (MethodMapObject obj_map : tmplist) {
+            String obj_method_name = obj_map.getMethodName();
+            for (Method method : theMethods) {
+                String meth_name = method.getName();
+                if (meth_name.startsWith("get")) {
+                    if (meth_name.substring(3).equalsIgnoreCase(obj_method_name.substring(3))) {
+                        obj_map.setGetter(method);
+                        break;
+                    }
+                }
+            }
+        }
+
+        // now fill the getter in the map obj
+
+        return tmplist.toArray(new MethodMapObject[tmplist.size()]);
+    }
+
     /**
      * Returns the {@link UserManager} instance
      * 
@@ -2031,5 +1969,74 @@ public class UserTest extends AbstractTest {
      */
     private ContextManager getContextManager() {
         return ContextManager.getInstance(getRMIHostUrl(), getMasterAdminCredentials());
+    }
+
+    /////////////////////// NESTED CLASSES ////////////////////////
+
+    /**
+     * {@link MethodMapObject}
+     */
+    private class MethodMapObject {
+
+        private Method getter = null;
+        private Method setter = null;
+        private String methodParameterType = null;
+        private String methodName = null;
+
+        /**
+         * @return the getter
+         */
+        public Method getGetter() {
+            return getter;
+        }
+
+        /**
+         * @param getter the getter to set
+         */
+        public void setGetter(Method getter) {
+            this.getter = getter;
+        }
+
+        /**
+         * @return the methodName
+         */
+        public String getMethodName() {
+            return methodName;
+        }
+
+        /**
+         * @param methodName the methodName to set
+         */
+        public void setMethodName(String methodName) {
+            this.methodName = methodName;
+        }
+
+        /**
+         * @return the methodType
+         */
+        public String getMethodParameterType() {
+            return methodParameterType;
+        }
+
+        /**
+         * @param methodType the methodType to set
+         */
+        public void setMethodParameterType(String methodType) {
+            methodParameterType = methodType;
+        }
+
+        /**
+         * @return the setter
+         */
+        public Method getSetter() {
+            return setter;
+        }
+
+        /**
+         * @param setter the setter to set
+         */
+        public void setSetter(Method setter) {
+            this.setter = setter;
+        }
     }
 }
