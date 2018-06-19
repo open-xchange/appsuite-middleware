@@ -186,24 +186,6 @@ public class UtilTest extends AbstractTest {
 
     }
 
-    /**
-     * Gets the {@link ServerManager}
-     * 
-     * @return the {@link ServerManager}
-     */
-    private ServerManager getServerManager() {
-        return ServerManager.getInstance(getRMIHostUrl(), getMasterAdminCredentials());
-    }
-
-    /**
-     * Gets the {@link MaintenanceReasonManager}
-     * 
-     * @return the {@link MaintenanceReasonManager}
-     */
-    private MaintenanceReasonManager getMaintenanceReasonManager() {
-        return MaintenanceReasonManager.getInstance(getRMIHostUrl(), getMasterAdminCredentials());
-    }
-
     /////////////////// TODO: move to database factory ///////////////
     public static Database getTestDatabaseObject(String hostname, String name) {
 

@@ -51,11 +51,18 @@ package com.openexchange.admin.rmi;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.dataobjects.Filestore;
+import com.openexchange.admin.rmi.manager.ContextManager;
+import com.openexchange.admin.rmi.manager.DatabaseManager;
+import com.openexchange.admin.rmi.manager.MaintenanceReasonManager;
+import com.openexchange.admin.rmi.manager.ServerManager;
+import com.openexchange.admin.rmi.manager.UserManager;
 import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.configuration.AJAXConfig.Property;
+import com.openexchange.exception.OXException;
 
 /**
  * {@link AbstractTest}
@@ -80,18 +87,28 @@ public abstract class AbstractTest {
      * 
      * @throws Exception if an error occurs during initialisation of the configuration
      */
-    @Before
-    public void setUp() throws Exception {
+    @BeforeClass
+    public static void setUpEnvironment() throws OXException {
         AJAXConfig.init();
     }
 
     /**
-     * tear down test
+     * Set-up unit test
+     * 
+     * @throws Exception
+     */
+    @Before
+    public void setUp() throws Exception {
+        // perform set-ups here
+    }
+
+    /**
+     * Tear down unit test
      */
     @After
     public void tearDown() throws Exception {
         // perform any clean-ups here
-        
+
     }
 
     /**
@@ -153,6 +170,53 @@ public abstract class AbstractTest {
         String oxadmin = AJAXConfig.getProperty(Property.OXADMIN, "oxadmin");
         String contextPassword = AJAXConfig.getProperty(Property.PASSWORD, "secret");
         return new Credentials(oxadmin, contextPassword);
+    }
+
+    /////////////////////////// MANAGERS ///////////////////////////////
+
+    /**
+     * Gets the {@link ContextManager}
+     * 
+     * @return The {@link ContextManager}
+     */
+    protected ContextManager getContextManager() {
+        return ContextManager.getInstance(getRMIHostUrl(), getMasterAdminCredentials());
+    }
+
+    /**
+     * Returns the {@link UserManager} instance
+     * 
+     * @return the {@link UserManager} instance
+     */
+    protected UserManager getUserManager() {
+        return UserManager.getInstance(getRMIHostUrl(), getMasterAdminCredentials());
+    }
+
+    /**
+     * Gets the {@link DatabaseManager}
+     * 
+     * @return the {@link DatabaseManager}
+     */
+    protected DatabaseManager getDatabaseManager() {
+        return DatabaseManager.getInstance(getRMIHostUrl(), getMasterAdminCredentials());
+    }
+
+    /**
+     * Gets the {@link ServerManager}
+     * 
+     * @return the {@link ServerManager}
+     */
+    protected ServerManager getServerManager() {
+        return ServerManager.getInstance(getRMIHostUrl(), getMasterAdminCredentials());
+    }
+
+    /**
+     * Gets the {@link MaintenanceReasonManager}
+     * 
+     * @return the {@link MaintenanceReasonManager}
+     */
+    protected MaintenanceReasonManager getMaintenanceReasonManager() {
+        return MaintenanceReasonManager.getInstance(getRMIHostUrl(), getMasterAdminCredentials());
     }
 
     //TODO: reference a created context and not some hard-coded id.... 

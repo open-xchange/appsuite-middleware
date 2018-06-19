@@ -105,7 +105,7 @@ abstract class AbstractManager {
         if (failed.isEmpty()) {
             return;
         }
-        LOG.warn("The following '{}' objects were removed: '{}'. Manual intervention might be required.", failed.toString());
+        LOG.warn("The following '{}' objects were not removed: '{}'. Manual intervention might be required.", failed.toString());
     }
 
     /**

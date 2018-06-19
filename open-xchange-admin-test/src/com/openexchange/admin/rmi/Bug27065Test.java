@@ -51,7 +51,6 @@ package com.openexchange.admin.rmi;
 
 import org.junit.Test;
 import com.openexchange.admin.rmi.dataobjects.Context;
-import com.openexchange.admin.rmi.manager.ContextManager;
 
 /**
  * Tries to reproduce the log messages described in bug 27065. This test does not really test or assert something. Therefore the logs must
@@ -91,14 +90,5 @@ public final class Bug27065Test extends AbstractTest {
         Thread.sleep(400); // Only necessary if the replication from master to slave becomes a little bit slow.
         getContextManager().changeModuleAccess(new Context(context.getId()), "webmail");
         getContextManager().downgrade(new Context(context.getId()));
-    }
-
-    /**
-     * Retrieves the {@link ContextManager} instance
-     * 
-     * @return the {@link ContextManager} instance
-     */
-    private ContextManager getContextManager() {
-        return ContextManager.getInstance(getRMIHostUrl(), getMasterAdminCredentials());
     }
 }

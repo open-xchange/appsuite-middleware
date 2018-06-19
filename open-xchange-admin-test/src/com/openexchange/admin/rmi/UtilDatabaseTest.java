@@ -242,13 +242,4 @@ public class UtilDatabaseTest extends AbstractTest {
 
         assertTrue("Expected to find registered db with data", found_db);
     }
-
-    /**
-     * Gets the {@link DatabaseManager}
-     * 
-     * @return the {@link DatabaseManager}
-     */
-    private DatabaseManager getDatabaseManager() {
-        return DatabaseManager.getInstance(getRMIHostUrl(), getMasterAdminCredentials());
-    }
 }

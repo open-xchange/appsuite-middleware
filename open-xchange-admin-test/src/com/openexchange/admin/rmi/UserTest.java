@@ -116,9 +116,7 @@ public class UserTest extends AbstractTest {
     @Override
     public void setUp() throws Exception {
         super.setUp();
-        ContextManager cm = getContextManager();
-        context = cm.createContext(getContextAdminCredentials());
-
+        context = getContextManager().createContext(getContextAdminCredentials());
     }
 
     /*
@@ -129,9 +127,7 @@ public class UserTest extends AbstractTest {
     @Override
     public void tearDown() throws Exception {
         getUserManager().cleanUp();
-
-        ContextManager cm = getContextManager();
-        cm.cleanUp();
+        getContextManager().cleanUp();
         super.tearDown();
     }
 
@@ -1806,24 +1802,6 @@ public class UserTest extends AbstractTest {
         // now fill the getter in the map obj
 
         return tmplist.toArray(new MethodMapObject[tmplist.size()]);
-    }
-
-    /**
-     * Returns the {@link UserManager} instance
-     * 
-     * @return the {@link UserManager} instance
-     */
-    private UserManager getUserManager() {
-        return UserManager.getInstance(getRMIHostUrl(), getMasterAdminCredentials());
-    }
-
-    /**
-     * Returns the {@link ContextManager} instance
-     * 
-     * @return the {@link ContextManager} instance
-     */
-    private ContextManager getContextManager() {
-        return ContextManager.getInstance(getRMIHostUrl(), getMasterAdminCredentials());
     }
 
     /////////////////////// NESTED CLASSES ////////////////////////

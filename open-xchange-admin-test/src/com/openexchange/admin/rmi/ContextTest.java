@@ -61,13 +61,11 @@ import java.util.List;
 import java.util.UUID;
 import org.junit.Test;
 import com.openexchange.admin.rmi.dataobjects.Context;
-import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.dataobjects.Database;
 import com.openexchange.admin.rmi.dataobjects.Filestore;
 import com.openexchange.admin.rmi.dataobjects.MaintenanceReason;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 import com.openexchange.admin.rmi.factory.ContextFactory;
-import com.openexchange.admin.rmi.manager.ContextManager;
 
 /**
  * {@link ContextTest}
@@ -85,11 +83,6 @@ public class ContextTest extends AbstractTest {
         super();
     }
 
-    @Override
-    public void setUp() throws Exception {
-        super.setUp();
-    }
-
     /**
      * Clean-up procedures
      */
@@ -105,8 +98,9 @@ public class ContextTest extends AbstractTest {
     @Test
     public void testGetAdminId() throws Exception {
         // The context admin's id is always '2'
-        Context testContext = getContextManager().createContext(getContextAdminCredentials());
-        assertEquals(2, getContextManager().getAdminId(testContext));
+        Context context = ContextFactory.createContext(10L);
+        getContextManager().createContext(context, getContextAdminCredentials());
+        assertEquals(2, getContextManager().getAdminId(context));
     }
 
     /**
@@ -130,8 +124,7 @@ public class ContextTest extends AbstractTest {
      */
     @Test
     public void testListContextByDatabase() throws Exception {
-        OXUtilInterface oxu = (OXUtilInterface) Naming.lookup(getRMIHostUrl() + OXUtilInterface.RMI_NAME);
-        Database[] dbs = oxu.listDatabase("*", getMasterAdminCredentials());
+        Database[] dbs = getDatabaseManager().listDatabases("*");
         if (dbs.length > 0) {
             Context[] ids = getContextManager().searchContext(dbs[0]);
             assertTrue("No contexts found in database " + dbs[0].getUrl(), ids.length > 0);
@@ -218,16 +211,12 @@ public class ContextTest extends AbstractTest {
     public void testEnableContext() throws Exception {
         Context testContext = getContextManager().createContext(getContextAdminCredentials());
 
-        Credentials cred = getMasterAdminCredentials();
-        String hosturl = getRMIHostUrl();
-
-        OXUtilInterface oxu = (OXUtilInterface) Naming.lookup(hosturl + OXUtilInterface.RMI_NAME);
-        MaintenanceReason[] mrs = oxu.listMaintenanceReason("*", cred);
+        MaintenanceReason[] mrs = getMaintenanceReasonManager().listMaintenanceReasons("*");
         MaintenanceReason mr = new MaintenanceReason();
         if (mrs.length == 0) {
             // add reason , and then use this reason to disable the context
             mr.setText("Context disabled " + System.currentTimeMillis());
-            int mr_id = oxu.createMaintenanceReason(mr, cred).getId().intValue();
+            int mr_id = getMaintenanceReasonManager().createMaintenanceReason(mr).getId().intValue();
             mr.setId(mr_id);
         } else {
             mr.setId(mrs[0].getId());
@@ -262,16 +251,12 @@ public class ContextTest extends AbstractTest {
     public void testDisableContext() throws Exception {
         Context testContext = getContextManager().createContext(getContextAdminCredentials());
 
-        Credentials cred = getMasterAdminCredentials();
-        String hosturl = getRMIHostUrl();
-
-        OXUtilInterface oxu = (OXUtilInterface) Naming.lookup(hosturl + OXUtilInterface.RMI_NAME);
-        MaintenanceReason[] mrs = oxu.listMaintenanceReason("*", cred);
+        MaintenanceReason[] mrs = getMaintenanceReasonManager().listMaintenanceReasons("*");
         MaintenanceReason mr = new MaintenanceReason();
         if (mrs.length == 0) {
             // add reason , and then use this reason to disable the context
             mr.setText("Context disabled " + System.currentTimeMillis());
-            int mr_id = oxu.createMaintenanceReason(mr, cred).getId().intValue();
+            int mr_id = getMaintenanceReasonManager().createMaintenanceReason(mr).getId().intValue();
             mr.setId(mr_id);
         } else {
             mr.setId(mrs[0].getId());
@@ -363,7 +348,6 @@ public class ContextTest extends AbstractTest {
                 getContextManager().deleteContext(context);
             }
         }
-
     }
 
     /**
@@ -382,14 +366,5 @@ public class ContextTest extends AbstractTest {
             }
         }
         assertTrue("context not found", foundctx);
-    }
-
-    /**
-     * Gets the {@link ContextManager}
-     * 
-     * @return The {@link ContextManager}
-     */
-    private ContextManager getContextManager() {
-        return ContextManager.getInstance(getRMIHostUrl(), getMasterAdminCredentials());
     }
 }

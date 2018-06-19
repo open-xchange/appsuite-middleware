@@ -60,6 +60,7 @@ import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.dataobjects.Database;
 import com.openexchange.admin.rmi.dataobjects.Filestore;
 import com.openexchange.admin.rmi.dataobjects.Server;
+import com.openexchange.admin.rmi.dataobjects.User;
 import com.openexchange.admin.rmi.factory.ContextFactory;
 import com.openexchange.admin.rmi.factory.UserFactory;
 
@@ -169,12 +170,24 @@ public class ContextManager extends AbstractManager {
      * @throws Exception if the context cannot be created or any other error is occurred
      */
     public Context createContext(Context context, Credentials contextAdminCredentials) throws Exception {
+        return createContext(context, UserFactory.createUser(contextAdminCredentials.getLogin(), contextAdminCredentials.getPassword(), "example.org", context));
+    }
+
+    /**
+     * Creates a new {@link Context}
+     * 
+     * @param context The {@link Context} to create
+     * @param contextAdmin The {@link Context} admin
+     * @return The newly created context
+     * @throws Exception if an error is occurred
+     */
+    public Context createContext(Context context, User contextAdmin) throws Exception {
         prerequisites();
         if (context.getId() == null || context.getId().intValue() <= 0) {
             context.setId(new Integer(getNextFreeContextId()));
         }
         OXContextInterface contextInterface = getContextInterface();
-        Context ctx = contextInterface.create(context, UserFactory.createUser(contextAdminCredentials.getLogin(), contextAdminCredentials.getPassword(), "example.org", context), getMasterCredentials());
+        Context ctx = contextInterface.create(context, contextAdmin, getMasterCredentials());
         managedObjects.put(ctx.getId(), ctx);
         return ctx;
     }

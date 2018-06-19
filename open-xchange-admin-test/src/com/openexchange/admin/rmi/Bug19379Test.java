@@ -54,16 +54,9 @@ import static com.openexchange.java.Autoboxing.L;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-import java.net.MalformedURLException;
-import java.rmi.Naming;
-import java.rmi.NotBoundException;
-import java.rmi.RemoteException;
 import java.util.HashSet;
-import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.admin.rmi.dataobjects.Context;
-import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.dataobjects.User;
 import com.openexchange.admin.rmi.exceptions.NoSuchContextException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
@@ -75,41 +68,23 @@ import com.openexchange.admin.rmi.exceptions.StorageException;
  */
 public class Bug19379Test extends AbstractTest {
 
-    private Credentials superAdmin;
-    private String url;
-    private OXContextInterface contextIface;
-
-    @Before
-    public void setup() throws MalformedURLException, RemoteException, NotBoundException {
-        superAdmin = getMasterAdminCredentials();
-        url = getRMIHostUrl();
-        contextIface = (OXContextInterface) Naming.lookup(url + OXContextInterface.RMI_NAME);
-    }
-
-    @After
-    public void tearDown() {
-        contextIface = null;
-        url = null;
-        superAdmin = null;
-    }
-
     @Test
     public void testAddSingleMapping() throws Exception {
         try {
             Context c300 = createContext(300, createMappings("m1", "m2"));
 
             // check mappings
-            c300 = contextIface.getData(new Context(I(300)), superAdmin);
+            c300 = getContextManager().getData(new Context(I(300)));
             assertTrue(c300.getLoginMappings().equals(createMappings(getContextName(300), "m1", "m2")));
 
             // add some mappings...
             c300 = new Context(I(300));
             // ALWAYS use contextID + mappings!
             c300.setLoginMappings(createMappings("m1", "m2", "m4"));
-            contextIface.change(c300, superAdmin);
+            getContextManager().changeContext(c300);
 
             // check mappings
-            c300 = contextIface.getData(new Context(I(300)), superAdmin);
+            c300 = getContextManager().getData(new Context(I(300)));
             assertTrue(c300.getLoginMappings().equals(createMappings(getContextName(300), "m1", "m2", "m4")));
         } finally {
             deleteContext(300);
@@ -122,7 +97,7 @@ public class Bug19379Test extends AbstractTest {
             Context c300 = createContext(300, createMappings("m2"));
 
             // check context name and mappings...
-            c300 = contextIface.getData(new Context(I(300)), superAdmin);
+            c300 = getContextManager().getData(new Context(I(300)));
             assertEquals(c300.getName(), "300_test300.it");
             assertTrue(c300.getLoginMappings().equals(createMappings(getContextName(300), "m2")));
 
@@ -130,10 +105,10 @@ public class Bug19379Test extends AbstractTest {
             c300 = new Context(I(300));
             c300.setName("300_test333.it");
             c300.setLoginMappings(createMappings("m1"));
-            contextIface.change(c300, superAdmin);
+            getContextManager().changeContext(c300);
 
             // check context name and mappings
-            c300 = contextIface.getData(new Context(I(300)), superAdmin);
+            c300 = getContextManager().getData(new Context(I(300)));
             assertTrue(c300.getLoginMappings().equals(createMappings("300_test333.it", "m1")));
         } finally {
             deleteContext(300);
@@ -147,11 +122,11 @@ public class Bug19379Test extends AbstractTest {
             Context c500 = createContext(500, createMappings("m3"));
 
             // check context names and mappings...
-            c300 = contextIface.getData(new Context(I(300)), superAdmin);
+            c300 = getContextManager().getData(new Context(I(300)));
             assertEquals(c300.getName(), "300_test300.it");
             assertTrue(c300.getLoginMappings().equals(createMappings(getContextName(300), "m1", "m2")));
 
-            c500 = contextIface.getData(new Context(I(500)), superAdmin);
+            c500 = getContextManager().getData(new Context(I(500)));
             assertEquals(c500.getName(), "500_test500.it");
             assertTrue(c500.getLoginMappings().equals(createMappings(getContextName(500), "m3")));
 
@@ -160,14 +135,14 @@ public class Bug19379Test extends AbstractTest {
             // use same c500 contextName!
             c300.setLoginMappings(createMappings("300", "m1", "m2", "m3"));
             try {
-                contextIface.change(c300, superAdmin);
+                getContextManager().changeContext(c300);
                 fail("A StorageException must be thrown!");
             } catch (final StorageException e) {
                 // Found the duplicate login mapping
                 e.printStackTrace();
             }
             // check previous mappings
-            c300 = contextIface.getData(new Context(I(300)), superAdmin);
+            c300 = getContextManager().getData(new Context(I(300)));
             assertTrue(c300.getLoginMappings().equals(createMappings(getContextName(300), "m1", "m2")));
         } finally {
             deleteContext(300);
@@ -205,13 +180,13 @@ public class Bug19379Test extends AbstractTest {
         admin.setEmail1(admin.getName());
         admin.setDisplay_name(admin.getGiven_name() + " " + admin.getSur_name());
 
-        return contextIface.create(context, admin, superAdmin);
+        return getContextManager().createContext(context, admin);
     }
 
     private void deleteContext(final int contextID) throws Exception {
         Context context = new Context(I(contextID));
         try {
-            contextIface.delete(context, superAdmin);
+            getContextManager().deleteContext(context);
         } catch (final NoSuchContextException e) {
             // Ignore
         }
