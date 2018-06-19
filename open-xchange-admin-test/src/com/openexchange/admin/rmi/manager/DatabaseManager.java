@@ -114,7 +114,6 @@ public class DatabaseManager extends AbstractManager {
     public void unregisterDatabase(Database database) throws Exception {
         OXUtilInterface utilInterface = getUtilInterface();
         utilInterface.unregisterDatabase(database, getMasterCredentials());
-        managedObjects.remove(database.getId());
     }
 
     /**

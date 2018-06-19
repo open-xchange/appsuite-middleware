@@ -63,6 +63,7 @@ import com.openexchange.admin.rmi.dataobjects.User;
 import com.openexchange.admin.rmi.dataobjects.UserModuleAccess;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 import com.openexchange.admin.rmi.extensions.OXCommonExtensionInterface;
+import com.openexchange.admin.rmi.factory.UserFactory;
 import com.openexchange.admin.rmi.manager.ContextManager;
 import com.openexchange.admin.rmi.manager.GroupManager;
 
@@ -262,7 +263,7 @@ public class GroupTest extends UserTest {
         assertTrue("group id > 0 expected", createdgroup.getId() > 0);
 
         // create user to add
-        User usr = UserTest.getTestUserObject("groupmemberadduser" + System.currentTimeMillis(), "netline", context);
+        User usr = UserFactory.createUser("groupmemberadduser" + System.currentTimeMillis(), "netline", TEST_DOMAIN, context);
         UserModuleAccess access = new UserModuleAccess();
         User createduser = addUser(context, usr, access);
 
@@ -288,7 +289,7 @@ public class GroupTest extends UserTest {
         assertTrue("group id > 0 expected", createdgroup.getId() > 0);
 
         // create user to add
-        User usr = UserTest.getTestUserObject("groupmemberadduser" + System.currentTimeMillis(), "netline", context);
+        User usr = UserFactory.createUser("groupmemberadduser" + System.currentTimeMillis(), "netline", TEST_DOMAIN, context);
         UserModuleAccess access = new UserModuleAccess();
         User createduser = addUser(context, usr, access);
 
@@ -316,7 +317,7 @@ public class GroupTest extends UserTest {
         assertTrue("group id > 0 expected", createdgroup.getId() > 0);
 
         // create user to add
-        User usr = UserTest.getTestUserObject("groupmemberadduser" + System.currentTimeMillis(), "netline", context);
+        User usr = UserFactory.createUser("groupmemberadduser" + System.currentTimeMillis(), "netline", TEST_DOMAIN, context);
         UserModuleAccess access = new UserModuleAccess();
         User createduser = addUser(context, usr, access);
 
@@ -344,7 +345,7 @@ public class GroupTest extends UserTest {
 
         // create user to add
 
-        User usr = UserTest.getTestUserObject("groupmemberadduser" + System.currentTimeMillis(), "netline", context);
+        User usr = UserFactory.createUser("groupmemberadduser" + System.currentTimeMillis(), "netline", TEST_DOMAIN, context);
         UserModuleAccess access = new UserModuleAccess();
         User createduser = addUser(context, usr, access);
 
@@ -384,7 +385,7 @@ public class GroupTest extends UserTest {
 
         // create user to add
 
-        User usr = UserTest.getTestUserObject("groupmemberadduser" + System.currentTimeMillis(), "netline", context);
+        User usr = UserFactory.createUser("groupmemberadduser" + System.currentTimeMillis(), "netline", TEST_DOMAIN, context);
         UserModuleAccess access = new UserModuleAccess();
         User createduser = addUser(context, usr, access);
 
@@ -427,7 +428,7 @@ public class GroupTest extends UserTest {
 
         // create user to add
 
-        User usr = UserTest.getTestUserObject("groupmemberadduser" + System.currentTimeMillis(), "netline", context);
+        User usr = UserFactory.createUser("groupmemberadduser" + System.currentTimeMillis(), "netline", TEST_DOMAIN, context);
         UserModuleAccess access = new UserModuleAccess();
         User createduser = addUser(context, usr, access);
 
@@ -612,7 +613,7 @@ public class GroupTest extends UserTest {
         assertTrue("group id > 0 expected", createdgroup.getId() > 0);
 
         // create user to add
-        User usr = UserTest.getTestUserObject("groupmemberadduser" + System.currentTimeMillis(), "netline", context);
+        User usr = UserFactory.createUser("groupmemberadduser" + System.currentTimeMillis(), "netline", TEST_DOMAIN, context);
         UserModuleAccess access = new UserModuleAccess();
         User createduser = addUser(context, usr, access);
 
@@ -632,7 +633,7 @@ public class GroupTest extends UserTest {
         assertTrue("group id > 0 expected", createdgroup.getId() > 0);
 
         // create user to add
-        User usr = UserTest.getTestUserObject("groupmemberadduser" + System.currentTimeMillis(), "netline", context);
+        User usr = UserFactory.createUser("groupmemberadduser" + System.currentTimeMillis(), "netline", TEST_DOMAIN, context);
         UserModuleAccess access = new UserModuleAccess();
         User createduser = addUser(context, usr, access);
 
@@ -655,7 +656,7 @@ public class GroupTest extends UserTest {
         assertTrue("group id > 0 expected", createdgroup.getId() > 0);
 
         // create user to add
-        User usr = UserTest.getTestUserObject("groupmemberadduser" + System.currentTimeMillis(), "netline", context);
+        User usr = UserFactory.createUser("groupmemberadduser" + System.currentTimeMillis(), "netline", TEST_DOMAIN, context);
         UserModuleAccess access = new UserModuleAccess();
         User createduser = addUser(context, usr, access);
 
@@ -683,7 +684,7 @@ public class GroupTest extends UserTest {
         assertTrue("group id > 0 expected", createdgroup.getId() > 0);
 
         // create user to add
-        User usr = UserTest.getTestUserObject("groupmemberadduser" + System.currentTimeMillis(), "netline", context);
+        User usr = UserFactory.createUser("groupmemberadduser" + System.currentTimeMillis(), "netline", TEST_DOMAIN, context);
         UserModuleAccess access = new UserModuleAccess();
         User createduser = addUser(context, usr, access);
 

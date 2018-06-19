@@ -77,6 +77,7 @@ import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 import com.openexchange.admin.rmi.exceptions.NoSuchUserException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.rmi.extensions.OXCommonExtensionInterface;
+import com.openexchange.admin.rmi.factory.UserFactory;
 import com.openexchange.admin.rmi.manager.ContextManager;
 import com.openexchange.admin.rmi.manager.UserManager;
 import com.openexchange.java.util.TimeZones;
@@ -169,7 +170,7 @@ public class UserTest extends AbstractTest {
 
         // create new user
         UserModuleAccess access = new UserModuleAccess();
-        User usr = getTestUserObject(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, context);
+        User usr = UserFactory.createUser(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, TEST_DOMAIN, context);
         User createduser = getUserManager().createUser(context, usr, access, cred);
 
         // now load user from server and check if data is correct, else fail
@@ -190,7 +191,7 @@ public class UserTest extends AbstractTest {
         Credentials cred = getContextAdminCredentials();
 
         // create new user
-        User usr = getTestUserObject(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, context);
+        User usr = UserFactory.createUser(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, TEST_DOMAIN, context);
         User createduser = getUserManager().createUser(context, usr, cred);
 
         // now load user from server and check if data is correct, else fail
@@ -211,7 +212,7 @@ public class UserTest extends AbstractTest {
         Credentials cred = getContextAdminCredentials();
 
         // create new user
-        User usr = getTestUserObject(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, context);
+        User usr = UserFactory.createUser(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, TEST_DOMAIN, context);
         User createduser = getUserManager().createUser(context, usr, NAMED_ACCESS_COMBINATION_BASIC, cred);
 
         // now load user from server and check if data is correct, else fail
@@ -276,7 +277,7 @@ public class UserTest extends AbstractTest {
         // create new user
         UserModuleAccess access = new UserModuleAccess();
 
-        User usr = getTestUserObject(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, context);
+        User usr = UserFactory.createUser(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, TEST_DOMAIN, context);
         User createduser = getUserManager().createUser(context, usr, access, cred);
 
         // delete user
@@ -301,7 +302,7 @@ public class UserTest extends AbstractTest {
 
         UserModuleAccess access = new UserModuleAccess();
 
-        User usr = getTestUserObject(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, context);
+        User usr = UserFactory.createUser(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, TEST_DOMAIN, context);
         User createduser = getUserManager().createUser(context, usr, access, cred);
 
         // delete user
@@ -319,7 +320,7 @@ public class UserTest extends AbstractTest {
         Credentials cred = getContextAdminCredentials();
         UserModuleAccess access = new UserModuleAccess();
 
-        User usr = getTestUserObject(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, context);
+        User usr = UserFactory.createUser(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, TEST_DOMAIN, context);
         User createduser = getUserManager().createUser(context, usr, access, cred);
 
         // delete user
@@ -338,7 +339,7 @@ public class UserTest extends AbstractTest {
         Credentials cred = getContextAdminCredentials();
         UserModuleAccess access = new UserModuleAccess();
 
-        User usr = getTestUserObject(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, context);
+        User usr = UserFactory.createUser(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, TEST_DOMAIN, context);
         User createduser = getUserManager().createUser(context, usr, access, cred);
 
         // now load user from server and check if data is correct, else fail
@@ -356,7 +357,7 @@ public class UserTest extends AbstractTest {
         Credentials cred = getContextAdminCredentials();
         UserModuleAccess access = new UserModuleAccess();
 
-        User usr = getTestUserObject(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, context);
+        User usr = UserFactory.createUser(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, TEST_DOMAIN, context);
         User createduser = getUserManager().createUser(context, usr, access, cred);
 
         User usernameuser = new User();
@@ -380,7 +381,7 @@ public class UserTest extends AbstractTest {
         Credentials cred = getContextAdminCredentials();
         UserModuleAccess access = new UserModuleAccess();
         access.setPublicFolderEditable(true);
-        User usr = getTestUserObject(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, context);
+        User usr = UserFactory.createUser(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, TEST_DOMAIN, context);
         User createduser;
         try {
             createduser = getUserManager().createUser(context, usr, access, cred);
@@ -436,7 +437,7 @@ public class UserTest extends AbstractTest {
         Credentials cred = getContextAdminCredentials();
         UserModuleAccess access = new UserModuleAccess();
 
-        User usr = getTestUserObject(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, context);
+        User usr = UserFactory.createUser(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, TEST_DOMAIN, context);
         User createduser = getUserManager().createUser(context, usr, access, cred);
 
         User usernameuser = new User();
@@ -461,7 +462,7 @@ public class UserTest extends AbstractTest {
         Credentials cred = getContextAdminCredentials();
         UserModuleAccess access = new UserModuleAccess();
 
-        User usr = getTestUserObject(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, context);
+        User usr = UserFactory.createUser(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, TEST_DOMAIN, context);
         User createduser = getUserManager().createUser(context, usr, access, cred);
 
         User iduser = new User();
@@ -484,7 +485,7 @@ public class UserTest extends AbstractTest {
     public void testGetModuleAccess() throws Exception {
         Credentials cred = getContextAdminCredentials();
         UserModuleAccess client_access = new UserModuleAccess();
-        User usr = getTestUserObject(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, context);
+        User usr = UserFactory.createUser(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, TEST_DOMAIN, context);
         User createduser = getUserManager().createUser(context, usr, client_access, cred);
 
         // get module access
@@ -501,7 +502,7 @@ public class UserTest extends AbstractTest {
     public void testChangeModuleAccess() throws Exception {
         Credentials cred = getContextAdminCredentials();
         UserModuleAccess client_access = new UserModuleAccess();
-        User usr = getTestUserObject(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, context);
+        User usr = UserFactory.createUser(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, TEST_DOMAIN, context);
         User createduser = getUserManager().createUser(context, usr, client_access, cred);
 
         // get module access
@@ -543,7 +544,7 @@ public class UserTest extends AbstractTest {
     public void testList() throws Exception {
         Credentials cred = getContextAdminCredentials();
         UserModuleAccess client_access = new UserModuleAccess();
-        User usr = getTestUserObject(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, context);
+        User usr = UserFactory.createUser(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, TEST_DOMAIN, context);
         User createduser = getUserManager().createUser(context, usr, client_access, cred);
 
         User[] srv_response = getUserManager().listUsers(context, "*", cred);
@@ -571,7 +572,7 @@ public class UserTest extends AbstractTest {
         Credentials master = getMasterAdminCredentials();
 
         UserModuleAccess client_access = new UserModuleAccess();
-        User usr = getTestUserObject(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, context);
+        User usr = UserFactory.createUser(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, TEST_DOMAIN, context);
         OXUtilInterface oxutil = (OXUtilInterface) Naming.lookup(getRMIHostUrl() + OXUtilInterface.RMI_NAME);
         try {
             User createduser = getUserManager().createUser(context, usr, client_access, cred);
@@ -625,7 +626,7 @@ public class UserTest extends AbstractTest {
     public void testListAll() throws Exception {
         Credentials cred = getContextAdminCredentials();
         UserModuleAccess client_access = new UserModuleAccess();
-        User usr = getTestUserObject(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, context);
+        User usr = UserFactory.createUser(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, TEST_DOMAIN, context);
         User createduser = getUserManager().createUser(context, usr, client_access, cred);
 
         User[] srv_response = getUserManager().listAllUsers(context, cred);
@@ -649,7 +650,7 @@ public class UserTest extends AbstractTest {
     public void testChange() throws Exception {
         Credentials cred = getContextAdminCredentials();
         UserModuleAccess access = new UserModuleAccess();
-        User usr = getTestUserObject(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, context);
+        User usr = UserFactory.createUser(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, TEST_DOMAIN, context);
         User createduser = getUserManager().createUser(context, usr, access, cred);
 
         // now load user from server and check if data is correct, else fail
@@ -687,7 +688,7 @@ public class UserTest extends AbstractTest {
     public void testChangeAlias() throws Exception {
         Credentials cred = getContextAdminCredentials();
         UserModuleAccess access = new UserModuleAccess();
-        User usr = getTestUserObject(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, context);
+        User usr = UserFactory.createUser(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, TEST_DOMAIN, context);
         User createduser = getUserManager().createUser(context, usr, access, cred);
 
         // now load user from server and check if data is correct, else fail
@@ -732,7 +733,7 @@ public class UserTest extends AbstractTest {
         // create new user
 
         UserModuleAccess access = new UserModuleAccess();
-        User usr = getTestUserObject(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, context);
+        User usr = UserFactory.createUser(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, TEST_DOMAIN, context);
         User createduser = getUserManager().createUser(context, usr, access, cred);
 
         // now load user from server and check if data is correct, else fail
@@ -793,7 +794,7 @@ public class UserTest extends AbstractTest {
         // set single values to null in the user object and then call change, what happens?
         Credentials cred = getContextAdminCredentials();
         UserModuleAccess access = new UserModuleAccess();
-        User usr = getTestUserObject(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, context);
+        User usr = UserFactory.createUser(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, TEST_DOMAIN, context);
         User createduser = getUserManager().createUser(context, usr, access, cred);
 
         // now load user from server and check if data is correct, else fail
@@ -863,7 +864,7 @@ public class UserTest extends AbstractTest {
         // happens?
         Credentials cred = getContextAdminCredentials();
         UserModuleAccess access = new UserModuleAccess();
-        User usr = getTestUserObject(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, context);
+        User usr = UserFactory.createUser(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, TEST_DOMAIN, context);
         User createduser = getUserManager().createUser(context, usr, access, cred);
 
         // now load user from server and check if data is correct, else fail
@@ -913,7 +914,7 @@ public class UserTest extends AbstractTest {
         // happens?
         Credentials cred = getContextAdminCredentials();
         UserModuleAccess access = new UserModuleAccess();
-        User usr = getTestUserObject(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, context);
+        User usr = UserFactory.createUser(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, TEST_DOMAIN, context);
         User createduser = getUserManager().createUser(context, usr, access, cred);
 
         // now load user from server and check if data is correct, else fail
@@ -966,7 +967,7 @@ public class UserTest extends AbstractTest {
         // change only 1 attribute of user object per call
         Credentials cred = getContextAdminCredentials();
         UserModuleAccess access = new UserModuleAccess();
-        User usr = getTestUserObject(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, context);
+        User usr = UserFactory.createUser(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, TEST_DOMAIN, context);
         User createduser = getUserManager().createUser(context, usr, access, cred);
 
         // now load user from server and check if data is correct, else fail
@@ -1073,7 +1074,7 @@ public class UserTest extends AbstractTest {
         // create new user
         Credentials cred = getContextAdminCredentials();
         UserModuleAccess access = new UserModuleAccess();
-        User usr = getTestUserObject(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, context);
+        User usr = UserFactory.createUser(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, TEST_DOMAIN, context);
         User createduser = getUserManager().createUser(context, usr, access, cred);
 
         // STEP 2
@@ -1110,7 +1111,7 @@ public class UserTest extends AbstractTest {
         // STEP 1
         Credentials cred = getContextAdminCredentials();
         UserModuleAccess access = new UserModuleAccess();
-        User usr = getTestUserObject(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, context);
+        User usr = UserFactory.createUser(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, TEST_DOMAIN, context);
         User createduser = getUserManager().createUser(context, usr, access, cred);
 
         // STEP 2
@@ -1148,7 +1149,7 @@ public class UserTest extends AbstractTest {
         // STEP 1
         Credentials cred = getContextAdminCredentials();
         UserModuleAccess access = new UserModuleAccess();
-        User usr = getTestUserObject(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, context);
+        User usr = UserFactory.createUser(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, TEST_DOMAIN, context);
         User createduser = getUserManager().createUser(context, usr, access, cred);
 
         // STEP 2
@@ -1186,7 +1187,7 @@ public class UserTest extends AbstractTest {
         // STEP 1
         Credentials cred = getContextAdminCredentials();
         UserModuleAccess access = new UserModuleAccess();
-        User usr = getTestUserObject(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, context);
+        User usr = UserFactory.createUser(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, TEST_DOMAIN, context);
         User createduser = getUserManager().createUser(context, usr, access, cred);
 
         // STEP 2
@@ -1227,7 +1228,7 @@ public class UserTest extends AbstractTest {
     public void testChangeWithoutIdAndName() throws Exception {
         Credentials cred = getContextAdminCredentials();
         UserModuleAccess access = new UserModuleAccess();
-        User usr = getTestUserObject(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, context);
+        User usr = UserFactory.createUser(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, TEST_DOMAIN, context);
         User createduser = getUserManager().createUser(context, usr, access, cred);
 
         // now load user from server and check if data is correct, else fail
@@ -1283,6 +1284,35 @@ public class UserTest extends AbstractTest {
         compareUser(usr, usr2);
     }
 
+    /**
+     * Tests whether a user exists
+     */
+    @Test
+    public void testExists() throws Exception {
+        Credentials cred = getContextAdminCredentials();
+        User exists = UserFactory.createUser(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, TEST_DOMAIN, context);
+        User notexists = new User();
+        notexists.setName("Rumpelstilz");
+        User createduser = getUserManager().createUser(context, exists, cred);
+
+        boolean existingexists = false;
+        try {
+            existingexists = getUserManager().existsUser(context, exists, cred);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        // delete user
+        getUserManager().deleteUser(context, createduser, cred);
+
+        try {
+            assertFalse("nonexisting user must not exist", getUserManager().existsUser(context, notexists, cred));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        assertTrue("created user does not exist", existingexists);
+    }
+
     ///////////////////////////// HELPERS TO MOVE ////////////////////////////
 
     /**
@@ -1312,152 +1342,8 @@ public class UserTest extends AbstractTest {
      * 
      * @deprecated
      */
-    public static User getTestUserObject(String ident, String password, Context context) {
-        User usr = new User();
-        usr.setName(ident);
-        usr.setPassword(password);
-        usr.setMailenabled(true);
-        usr.setPrimaryEmail("primaryemail-" + ident + "@" + AbstractTest.TEST_DOMAIN);
-        usr.setDisplay_name("Displayname " + ident);
-        usr.setGiven_name(ident);
-        usr.setSur_name("Lastname " + ident);
-        usr.setLanguage("de_DE");
-        // new for testing
-
-        usr.setEmail1("primaryemail-" + ident + "@" + AbstractTest.TEST_DOMAIN);
-        usr.setEmail2("email2-" + ident + "@" + AbstractTest.TEST_DOMAIN);
-        usr.setEmail3("email3-" + ident + "@" + AbstractTest.TEST_DOMAIN);
-
-        if (context != null) {
-            usr.setFilestoreId(context.getFilestoreId());
-            usr.setFilestore_name(context.getFilestore_name());
-        }
-
-        HashSet<String> aliase = new HashSet<String>();
-        aliase.add("alias1-" + ident + "@" + AbstractTest.TEST_DOMAIN);
-        aliase.add("alias2-" + ident + "@" + AbstractTest.TEST_DOMAIN);
-        aliase.add("alias3-" + ident + "@" + AbstractTest.TEST_DOMAIN);
-        aliase.add("email2-" + ident + "@" + AbstractTest.TEST_DOMAIN);
-        aliase.add("email3-" + ident + "@" + AbstractTest.TEST_DOMAIN);
-        aliase.add("primaryemail-" + ident + "@" + AbstractTest.TEST_DOMAIN);
-        usr.setAliases(aliase);
-
-        Calendar cal = Calendar.getInstance(TimeZones.UTC);
-        cal.set(Calendar.HOUR_OF_DAY, 0);
-        cal.set(Calendar.MINUTE, 0);
-        cal.set(Calendar.SECOND, 0);
-        cal.set(Calendar.MILLISECOND, 0);
-        usr.setBirthday(cal.getTime());
-        usr.setAnniversary(cal.getTime());
-
-        usr.setAssistant_name("assistants name");
-
-        usr.setBranches("Branches");
-        usr.setBusiness_category("Business Category");
-        usr.setCity_business("Business City");
-        usr.setCountry_business("Business Country");
-        usr.setPostal_code_business("BusinessPostalCode");
-        usr.setState_business("BusinessState");
-        usr.setStreet_business("BusinessStreet");
-        usr.setTelephone_callback("callback");
-        usr.setCity_home("City");
-        usr.setCommercial_register("CommercialRegister");
-        usr.setCompany("Company");
-        usr.setCountry_home("Country");
-        usr.setDepartment("Department");
-        usr.setEmployeeType("EmployeeType");
-        usr.setFax_business("FaxBusiness");
-        usr.setFax_home("FaxHome");
-        usr.setFax_other("FaxOther");
-        usr.setImapServer("imap://localhost:143");
-        usr.setInstant_messenger1("InstantMessenger");
-        usr.setInstant_messenger2("InstantMessenger2");
-        usr.setTelephone_ip("IpPhone");
-        usr.setTelephone_isdn("Isdn");
-        usr.setMail_folder_drafts_name("MailFolderDrafts");
-        usr.setMail_folder_sent_name("MailFolderSent");
-        usr.setMail_folder_spam_name("MailFolderSpam");
-        usr.setMail_folder_trash_name("MailFolderTrash");
-        usr.setMail_folder_archive_full_name("MailFolderArchive");
-        usr.setManager_name("ManagersName");
-        usr.setMarital_status("MaritalStatus");
-        usr.setCellular_telephone1("Mobile1");
-        usr.setCellular_telephone2("Mobile2");
-        usr.setInfo("MoreInfo");
-        usr.setNickname("NickName");
-        usr.setNote("Note");
-        usr.setNumber_of_children("NumberOfChildren");
-        usr.setNumber_of_employee("NumberOfEmployee");
-        usr.setTelephone_pager("Pager");
-        usr.setPassword_expired(false);
-        usr.setTelephone_assistant("PhoneAssistant");
-        usr.setTelephone_business1("PhoneBusiness");
-        usr.setTelephone_business2("PhoneBusiness2");
-        usr.setTelephone_car("PhoneCar");
-        usr.setTelephone_company("PhoneCompany");
-        usr.setTelephone_home1("PhoneHome");
-        usr.setTelephone_home2("PhoneHome2");
-        usr.setTelephone_other("PhoneOther");
-        usr.setPosition("Position");
-        usr.setPostal_code_home("PostalCode");
-        usr.setEmail2("Privateemail2-" + ident + "@" + AbstractTest.TEST_DOMAIN);
-        usr.setEmail3("Privateemail3-" + ident + "@" + AbstractTest.TEST_DOMAIN);
-        usr.setProfession("Profession");
-        usr.setTelephone_radio("Radio");
-        usr.setRoom_number("1337");
-        usr.setSales_volume("SalesVolume");
-        usr.setCity_other("SecondCity");
-        usr.setCountry_other("SecondCountry");
-        usr.setMiddle_name("SecondName");
-        usr.setPostal_code_other("SecondPostalCode");
-        usr.setState_other("SecondState");
-        usr.setStreet_other("SecondStreet");
-        usr.setSmtpServer("smtp://localhost:25");
-        usr.setSpouse_name("SpouseName");
-        usr.setState_home("State");
-        usr.setStreet_home("Street");
-        usr.setSuffix("Suffix");
-        usr.setTax_id("TaxId");
-        usr.setTelephone_telex("Telex");
-        usr.setTimezone("Europe/Berlin");
-        usr.setTitle("Title");
-        usr.setTelephone_ttytdd("TtyTdd");
-        usr.setUrl("url");
-        usr.setUserfield01("Userfield01");
-        usr.setUserfield02("Userfield02");
-        usr.setUserfield03("Userfield03");
-        usr.setUserfield04("Userfield04");
-        usr.setUserfield05("Userfield05");
-        usr.setUserfield06("Userfield06");
-        usr.setUserfield07("Userfield07");
-        usr.setUserfield08("Userfield08");
-        usr.setUserfield09("Userfield09");
-        usr.setUserfield10("Userfield10");
-        usr.setUserfield11("Userfield11");
-        usr.setUserfield12("Userfield12");
-        usr.setUserfield13("Userfield13");
-        usr.setUserfield14("Userfield14");
-        usr.setUserfield15("Userfield15");
-        usr.setUserfield16("Userfield16");
-        usr.setUserfield17("Userfield17");
-        usr.setUserfield18("Userfield18");
-        usr.setUserfield19("Userfield19");
-        usr.setUserfield20("Userfield20");
-
-        usr.setUserAttribute("com.openexchange.test", "simpleValue", "12");
-        usr.setUserAttribute("com.openexchange.test", "staticValue", "42");
-        usr.setUserAttribute("com.openexchange.test", "deleteMe", "23");
-
-        return usr;
-    }
-
-    /**
-     * TODO: Move to factory
-     * 
-     * @deprecated
-     */
     public User getTestUserObject() {
-        return getTestUserObject(VALID_CHAR_TESTUSER, "open-xchange", null);
+        return UserFactory.createUser(VALID_CHAR_TESTUSER, "open-xchange", TEST_DOMAIN, null);
     }
 
     /**
@@ -1802,37 +1688,6 @@ public class UserTest extends AbstractTest {
         retval.setUserAttribute("com.openexchange.test", "deleteMe", null);
         // Remove value
         return retval;
-    }
-
-    @Test
-    public void testExists() throws Exception {
-
-        // get context to create an user
-        Credentials cred = getContextAdminCredentials();
-
-        // create new user
-
-        User exists = getTestUserObject(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, context);
-        User notexists = new User();
-        notexists.setName("Rumpelstilz");
-        User createduser = getUserManager().createUser(context, exists, cred);
-
-        boolean existingexists = false;
-        try {
-            existingexists = getUserManager().existsUser(context, exists, cred);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        // delete user
-        getUserManager().deleteUser(context, createduser, cred);
-
-        try {
-            assertFalse("nonexisting user must not exist", getUserManager().existsUser(context, notexists, cred));
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        assertTrue("created user does not exist", existingexists);
     }
 
     ////////////////////////////// HELPERS //////////////////////////////////

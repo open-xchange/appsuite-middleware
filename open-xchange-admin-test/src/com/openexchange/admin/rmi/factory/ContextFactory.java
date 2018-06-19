@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.admin.rmi;
+package com.openexchange.admin.rmi.factory;
 
 import java.util.UUID;
 import com.openexchange.admin.rmi.dataobjects.Context;

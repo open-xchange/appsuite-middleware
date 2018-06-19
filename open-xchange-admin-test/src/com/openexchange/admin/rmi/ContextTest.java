@@ -66,6 +66,7 @@ import com.openexchange.admin.rmi.dataobjects.Database;
 import com.openexchange.admin.rmi.dataobjects.Filestore;
 import com.openexchange.admin.rmi.dataobjects.MaintenanceReason;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
+import com.openexchange.admin.rmi.factory.ContextFactory;
 import com.openexchange.admin.rmi.manager.ContextManager;
 
 /**

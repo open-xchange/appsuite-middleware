@@ -49,18 +49,8 @@
 
 package com.openexchange.admin.rmi;
 
-import java.rmi.Naming;
-import java.rmi.RemoteException;
 import org.junit.Test;
 import com.openexchange.admin.rmi.dataobjects.Context;
-import com.openexchange.admin.rmi.dataobjects.Credentials;
-import com.openexchange.admin.rmi.dataobjects.User;
-import com.openexchange.admin.rmi.exceptions.ContextExistsException;
-import com.openexchange.admin.rmi.exceptions.DatabaseUpdateException;
-import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
-import com.openexchange.admin.rmi.exceptions.InvalidDataException;
-import com.openexchange.admin.rmi.exceptions.NoSuchContextException;
-import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.rmi.manager.ContextManager;
 
 /**
@@ -72,38 +62,43 @@ import com.openexchange.admin.rmi.manager.ContextManager;
  */
 public final class Bug27065Test extends AbstractTest {
 
-    private Credentials superAdmin;
-    private String url;
-    private OXContextInterface contextIface;
-    private User contextAdmin;
     private Context context;
 
+    /**
+     * Initialises a new {@link Bug27065Test}.
+     */
     public Bug27065Test() {
         super();
     }
 
-    @Override
-    public void setUp() throws Exception {
-        superAdmin = getMasterAdminCredentials();
-        url = getRMIHostUrl();
-        contextIface = (OXContextInterface) Naming.lookup(url + OXContextInterface.RMI_NAME);
-        int cid = ContextManager.getInstance(getRMIHostUrl(), getMasterAdminCredentials()).getNextFreeContextId();
-        context = ContextFactory.createContext(cid, 10l);
-        contextAdmin = UserTest.getTestUserObject("admin", "secret", context);
-    }
-
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.admin.rmi.AbstractTest#tearDown()
+     */
     @Override
     public void tearDown() throws Exception {
-        if (contextIface.exists(new Context(context.getId()), superAdmin)) {
-            contextIface.delete(context, superAdmin);
-        }
+        getContextManager().cleanUp();
+        super.tearDown();
     }
 
+    /**
+     * Reproduce the log message
+     */
     @Test
-    public void reproduceMessages() throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException, ContextExistsException, NoSuchContextException, DatabaseUpdateException, InterruptedException {
-        context = contextIface.create(context, contextAdmin, superAdmin);
+    public void reproduceMessages() throws Exception {
+        context = getContextManager().createContext(getContextAdminCredentials());
         Thread.sleep(400); // Only necessary if the replication from master to slave becomes a little bit slow.
-        contextIface.changeModuleAccess(new Context(context.getId()), "webmail", superAdmin);
-        contextIface.downgrade(new Context(context.getId()), superAdmin);
+        getContextManager().changeModuleAccess(new Context(context.getId()), "webmail");
+        getContextManager().downgrade(new Context(context.getId()));
+    }
+
+    /**
+     * Retrieves the {@link ContextManager} instance
+     * 
+     * @return the {@link ContextManager} instance
+     */
+    private ContextManager getContextManager() {
+        return ContextManager.getInstance(getRMIHostUrl(), getMasterAdminCredentials());
     }
 }

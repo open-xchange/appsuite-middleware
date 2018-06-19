@@ -114,7 +114,6 @@ public class ServerManager extends AbstractManager {
     public void unregisterServer(Server server) throws Exception {
         OXUtilInterface utilInterface = getUtilInterface();
         utilInterface.unregisterServer(server, getMasterCredentials());
-        managedObjects.remove(server.getId());
     }
 
     /**

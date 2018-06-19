@@ -52,16 +52,16 @@ package com.openexchange.admin.rmi.manager;
 import java.net.URI;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import com.openexchange.admin.rmi.ContextFactory;
 import com.openexchange.admin.rmi.OXContextInterface;
 import com.openexchange.admin.rmi.OXUtilInterface;
-import com.openexchange.admin.rmi.UserTest;
 import com.openexchange.admin.rmi.UtilTest;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.dataobjects.Database;
 import com.openexchange.admin.rmi.dataobjects.Filestore;
 import com.openexchange.admin.rmi.dataobjects.Server;
+import com.openexchange.admin.rmi.factory.ContextFactory;
+import com.openexchange.admin.rmi.factory.UserFactory;
 
 /**
  * {@link ContextManager}
@@ -174,7 +174,7 @@ public class ContextManager extends AbstractManager {
             context.setId(new Integer(getNextFreeContextId()));
         }
         OXContextInterface contextInterface = getContextInterface();
-        Context ctx = contextInterface.create(context, UserTest.getTestUserObject(contextAdminCredentials.getLogin(), contextAdminCredentials.getPassword(), context), getMasterCredentials());
+        Context ctx = contextInterface.create(context, UserFactory.createUser(contextAdminCredentials.getLogin(), contextAdminCredentials.getPassword(), "example.org", context), getMasterCredentials());
         managedObjects.put(ctx.getId(), ctx);
         return ctx;
     }
@@ -248,7 +248,6 @@ public class ContextManager extends AbstractManager {
     public void deleteContext(Context ctx) throws Exception {
         OXContextInterface contextInterface = getContextInterface();
         contextInterface.delete(ctx, getMasterCredentials());
-        managedObjects.remove(ctx.getId());
     }
 
     /**
@@ -311,6 +310,30 @@ public class ContextManager extends AbstractManager {
             pos = pos + 3;
         }
         return ret;
+    }
+
+    /**
+     * If context was changed, call this method to flush data which is no longer needed due to access permission changes!
+     * 
+     * @param context The {@link Context} to flush its data
+     * @param contextAdminCredentials the context admin credentials
+     * @throws Exception if an error is occurred
+     */
+    public void downgrade(Context context) throws Exception {
+        OXContextInterface contextInteface = getContextInterface();
+        contextInteface.downgrade(context, getMasterCredentials());
+    }
+
+    /**
+     * Changes the context's module access combination
+     * 
+     * @param context The context
+     * @param moduleAccessName The module access combination name
+     * @throws Exception if an error is occurred
+     */
+    public void changeModuleAccess(Context context, String moduleAccessName) throws Exception {
+        OXContextInterface contextInterface = getContextInterface();
+        contextInterface.changeModuleAccess(context, moduleAccessName, getMasterCredentials());
     }
 
     ////////////////////////////// HELPERS ///////////////////////////////
