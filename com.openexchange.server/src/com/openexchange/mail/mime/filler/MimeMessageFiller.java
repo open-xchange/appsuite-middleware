@@ -1476,7 +1476,7 @@ public class MimeMessageFiller {
                 }
             } else {
                 sink.write(mailPart.getInputStream());
-            }            
+            }
 
             final String fn;
             if (null == mailPart.getFileName()) {
@@ -1690,7 +1690,6 @@ public class MimeMessageFiller {
     }
 
     private static final Pattern PATTERN_SRC = MimeMessageUtility.PATTERN_SRC;
-    private static final Pattern PATTERN_AMP = Pattern.compile(Pattern.quote("&amp;"));
 
     private static String blankSrc(final String imageTag) {
         return MimeMessageUtility.blankSrc(imageTag);
@@ -1776,7 +1775,7 @@ public class MimeMessageFiller {
                             if (srcMatcher.find()) {
                                 ImageLocation il;
                                 try {
-                                    il = ImageUtility.parseImageLocationFrom(PATTERN_AMP.matcher(srcMatcher.group(1)).replaceAll("&"));
+                                    il = ImageUtility.parseImageLocationFrom(Strings.replaceSequenceWith(srcMatcher.group(1), "&amp;", '&'));
                                     SecuritySettings securitySettings = mail.getSecuritySettings();
                                     if (null != securitySettings) {
                                         il.setAuth(securitySettings.getAuthentication());
