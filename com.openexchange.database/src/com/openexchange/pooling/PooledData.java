@@ -73,13 +73,16 @@ public class PooledData<T> {
      */
     private final long createTime;
 
-    private long timestamp;
-
+    /**
+     * The poolable object.
+     */
     private final T pooled;
 
-    private Thread thread;
+    private volatile long timestamp;
 
-    private StackTraceElement[] trace;
+    private volatile Thread thread;
+
+    private volatile StackTraceElement[] trace;
 
     /**
      * Default constructor.
@@ -128,14 +131,14 @@ public class PooledData<T> {
     }
 
     /**
-     * @return the timestamp when this pooled object is last used.
+     * @return the time stamp when this pooled object is last used.
      */
     public long getTimestamp() {
         return timestamp;
     }
 
     /**
-     * @return the number of milli seconds since this pooled object was last
+     * @return the number of milliseconds since this pooled object was last
      * touched by the pool.
      */
     public long getTimeDiff() {

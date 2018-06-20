@@ -260,12 +260,12 @@ public class ObjectUseCountServiceImpl implements ObjectUseCountService {
     }
 
     void incrementObjectUseCount(TIntIntMap contact2folder, int userId, int contextId, Connection con) throws OXException {
-        if (null == con) {
-            incrementObjectUseCount(contact2folder, userId, contextId);
+        if (null == contact2folder || contact2folder.isEmpty()) {
             return;
         }
 
-        if (null == contact2folder || contact2folder.isEmpty()) {
+        if (null == con) {
+            incrementObjectUseCount(contact2folder, userId, contextId);
             return;
         }
 
@@ -280,24 +280,24 @@ public class ObjectUseCountServiceImpl implements ObjectUseCountService {
             if (size > 1) {
                 for (int i = size; i-- > 0;) {
                     iterator.advance();
-                    stmt.setInt(3, iterator.value());
-                    stmt.setInt(4, iterator.key());
+                    int folderId = iterator.value();
+                    int objectId = iterator.key();
+                    stmt.setInt(3, folderId);
+                    stmt.setInt(4, objectId);
                     stmt.setInt(5, 1);
                     stmt.addBatch();
-                    if (LOG.isDebugEnabled()) {
-                        LOG.debug("Incremented object use count for user {}, folder {}, object {} in context {}.", userId, iterator.value(), iterator.key(), contextId, new Throwable("use-count-trace"));
-                    }
+                    LOG.debug("Incremented object use count for user {}, folder {}, object {} in context {}.", userId, folderId, objectId, contextId);
                 }
                 stmt.executeBatch();
             } else {
                 iterator.advance();
-                stmt.setInt(3, iterator.value());
-                stmt.setInt(4, iterator.key());
+                int folderId = iterator.value();
+                int objectId = iterator.key();
+                stmt.setInt(3, folderId);
+                stmt.setInt(4, objectId);
                 stmt.setInt(5, 1);
                 stmt.executeUpdate();
-                if (LOG.isDebugEnabled()) {
-                    LOG.debug("Incremented object use count for user {}, folder {}, object {} in context {}.", userId, iterator.value(), iterator.key(), contextId, new Throwable("use-count-trace"));
-                }
+                LOG.debug("Incremented object use count for user {}, folder {}, object {} in context {}.", userId, folderId, objectId, contextId);
             }
         } catch (SQLException e) {
             throw ObjectUseCountExceptionCode.SQL_ERROR.create(e, e.getMessage());

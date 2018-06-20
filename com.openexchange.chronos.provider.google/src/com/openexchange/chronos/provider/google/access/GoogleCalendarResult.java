@@ -87,6 +87,7 @@ public class GoogleCalendarResult extends ExternalCalendarResult implements Diff
 
     private final GoogleCalendarAccess access;
     private final GoogleEventsPage currentResult;
+    private String folderId;
 
     /**
      * Initializes a new {@link GoogleCalendarResult}.
@@ -108,7 +109,6 @@ public class GoogleCalendarResult extends ExternalCalendarResult implements Diff
                 throw CalendarExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
             }
         }
-        String folderId;
         try {
             folderId = internalConfiguration.getString(GoogleCalendarConfigField.FOLDER);
             if (folderId == null) {
@@ -121,10 +121,31 @@ public class GoogleCalendarResult extends ExternalCalendarResult implements Diff
         currentResult = access.getEventsInFolder(folderId, token, true);
     }
 
+    private String getFolder() throws OXException {
+        if(folderId !=null) {
+            return folderId;
+        }
+        JSONObject internalConfiguration = access.getAccount().getInternalConfiguration();
+        try {
+            folderId = internalConfiguration.getString(GoogleCalendarConfigField.FOLDER);
+            if (folderId == null) {
+                throw CalendarExceptionCodes.UNEXPECTED_ERROR.create("Google calendar account is invalid. Please delete and recreate it.");
+            }
+        } catch (JSONException e) {
+            throw CalendarExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        }
+        return folderId;
+    }
+
     @Override
     public EventUpdates calculateDiff(List<Event> existingEvents) throws OXException {
 
         List<Event> updates = currentResult.getEvents();
+        GoogleEventsPage page = currentResult;
+        while(page.getToken() != null) {
+            page = access.getEventsInFolder(getFolder(), page.getToken(), false);
+            updates.addAll(page.getEvents());
+        }
 
         final List<Event> removed = new ArrayList<>();
         final List<Event> added = new ArrayList<>();
