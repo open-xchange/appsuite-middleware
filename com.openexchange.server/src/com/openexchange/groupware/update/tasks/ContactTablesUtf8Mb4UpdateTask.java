@@ -50,9 +50,13 @@
 package com.openexchange.groupware.update.tasks;
 
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.Collections;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import com.openexchange.database.Databases;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.SimpleConvertUtf8ToUtf8mb4UpdateTask;
 import com.openexchange.tools.update.Column;
@@ -63,6 +67,8 @@ import com.openexchange.tools.update.Column;
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 public class ContactTablesUtf8Mb4UpdateTask extends SimpleConvertUtf8ToUtf8mb4UpdateTask {
+
+    private static final Logger LOG = LoggerFactory.getLogger(ContactTablesUtf8Mb4UpdateTask.class);
 
     /**
      * Initialises a new {@link ContactTablesUtf8Mb4UpdateTask}.
@@ -94,7 +100,29 @@ public class ContactTablesUtf8Mb4UpdateTask extends SimpleConvertUtf8ToUtf8mb4Up
         Column column = new Column("field17", "TEXT COLLATE utf8mb4_unicode_ci NULL");
         String schema = params.getSchema().getSchema();
 
+        resetZeroedTimestampColumn(connection, "timestampfield01");
+        resetZeroedTimestampColumn(connection, "timestampfield02");
+
+        LOG.info("");
+
         changeTable(connection, schema, "prg_contacts", Collections.emptyMap(), Collections.singletonList(column), Collections.emptyList());
         changeTable(connection, schema, "del_contacts", Collections.emptyMap(), Collections.singletonList(column), Collections.emptyList());
+    }
+
+    /**
+     * Resets the value of the column with the specified name to <code>NULL</code> if the timestamp is '0000-00-00'
+     * 
+     * @param connection The {@link Connection}
+     * @param columnName The column name
+     * @throws SQLException if an SQL error is occurred
+     */
+    private void resetZeroedTimestampColumn(Connection connection, String columnName) throws SQLException {
+        PreparedStatement ps = null;
+        try {
+            ps = connection.prepareStatement("UPDATE IGNORE prg_contacts SET " + columnName + "=NULL WHERE " + columnName + "='0000-00-00'");
+            LOG.info("Reset {} rows for column '{}' that contained invalid timestamps", ps.executeUpdate(), columnName);
+        } finally {
+            Databases.closeSQLStuff(ps);
+        }
     }
 }
