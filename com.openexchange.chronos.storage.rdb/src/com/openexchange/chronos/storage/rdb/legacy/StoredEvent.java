@@ -175,7 +175,12 @@ public class StoredEvent extends DelegatingEvent {
                 recurrenceData = (RecurrenceData) recurrenceId;
             } else {
                 recurrenceData = eventStorage.selectRecurrenceData(connection, asInt(delegate.getSeriesId()), false);
+                // no recurrence data found for the events series, maybe already deleted?
+                if (null == recurrenceData) {
+                    return null;
+                }
             }
+            
             int recurrencePosition = Event2Appointment.getRecurrencePosition(services.getService(RecurrenceService.class), recurrenceData, recurrenceId);
             return new StoredRecurrenceId(recurrencePosition);
         } catch (OXException | SQLException e) {
