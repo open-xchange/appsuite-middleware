@@ -18,16 +18,14 @@
  */
 package org.apache.felix.eventadmin.impl.handler;
 
-import com.google.common.cache.Cache;
-import com.google.common.cache.CacheBuilder;
-import com.google.common.collect.ImmutableSet;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.TimeUnit;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.event.Event;
@@ -54,10 +52,6 @@ public class EventHandlerTracker extends ServiceTracker<EventHandler, EventHandl
 	 */
 	private final Map<String, List<EventHandlerProxy>> matchingPrefixTopic;
 
-	/**
-	 * A cache for applicable handlers for a certain event topic
-	 */
-	private final Cache<String, Collection<EventHandlerProxy>> applicabeHandlersCache;
 
 	/** The context for the proxies. */
 	private HandlerContext handlerContext;
@@ -69,9 +63,7 @@ public class EventHandlerTracker extends ServiceTracker<EventHandler, EventHandl
 		this.matchingAllEvents = new CopyOnWriteArrayList<EventHandlerProxy>();
 		this.matchingTopic = new ConcurrentHashMap<String, List<EventHandlerProxy>>();
 		this.matchingPrefixTopic = new ConcurrentHashMap<String, List<EventHandlerProxy>>();
-
-		applicabeHandlersCache = CacheBuilder.newBuilder().expireAfterAccess(30, TimeUnit.MINUTES).maximumSize(65536).build();
-    }
+	}
 
     /**
      * Update the timeout configuration.
@@ -199,7 +191,6 @@ public class EventHandlerTracker extends ServiceTracker<EventHandler, EventHandl
     			}
     		}
 		}
-		applicabeHandlersCache.invalidateAll();
 	}
 
     /**
@@ -228,7 +219,6 @@ public class EventHandlerTracker extends ServiceTracker<EventHandler, EventHandl
                 }
             }
         }
-        applicabeHandlersCache.invalidateAll();
 	}
 
 	/**
@@ -238,47 +228,36 @@ public class EventHandlerTracker extends ServiceTracker<EventHandler, EventHandl
 	 * @return All handlers for the event
 	 */
 	public Collection<EventHandlerProxy> getHandlers(final Event event) {
-	    Collection<EventHandlerProxy> handlers = applicabeHandlersCache.getIfPresent(event.getTopic());
-	    if (null != handlers) {
-            return handlers;
-        }
+		final Set<EventHandlerProxy> handlers = new HashSet<EventHandlerProxy>();
 
-	    handlers = doGetHandlers(event);
-	    applicabeHandlersCache.put(event.getTopic(), handlers);
-	    return handlers;
-	}
-
-    private Collection<EventHandlerProxy> doGetHandlers(final Event event) {
-        final ImmutableSet.Builder<EventHandlerProxy> handlers = ImmutableSet.builder();
-
-        // Add all handlers matching everything
+		// Add all handlers matching everything
         this.checkHandlerAndAdd(handlers, this.matchingAllEvents, event);
 
-        // Now check for prefix matches
+		// Now check for prefix matches
         String topic = event.getTopic();
-        if ( !this.matchingPrefixTopic.isEmpty() )
-        {
-            int pos = topic.lastIndexOf('/');
-            while (pos != -1)
-            {
-                final String prefix = topic.substring(0, pos);
-                this.checkHandlerAndAdd(handlers, this.matchingPrefixTopic.get(prefix), event);
+		if ( !this.matchingPrefixTopic.isEmpty() )
+		{
+		    int pos = topic.lastIndexOf('/');
+			while (pos != -1)
+			{
+			    final String prefix = topic.substring(0, pos);
+		        this.checkHandlerAndAdd(handlers, this.matchingPrefixTopic.get(prefix), event);
 
-                pos = prefix.lastIndexOf('/');
-            }
-        }
+				pos = prefix.lastIndexOf('/');
+			}
+		}
 
-        // Add the handlers for matching topic names
-        this.checkHandlerAndAdd(handlers, this.matchingTopic.get(topic), event);
+		// Add the handlers for matching topic names
+		this.checkHandlerAndAdd(handlers, this.matchingTopic.get(topic), event);
 
-        return handlers.build();
-    }
+		return handlers;
+	}
 
 	/**
 	 * Checks each handler from the proxy list if it can deliver the event
 	 * If the event can be delivered, the proxy is added to the handlers.
 	 */
-	private void checkHandlerAndAdd( final ImmutableSet.Builder<EventHandlerProxy> handlers,
+	private void checkHandlerAndAdd( final Set<EventHandlerProxy> handlers,
 	        final List<EventHandlerProxy> proxies,
 	        final Event event)
 	{
@@ -356,12 +335,6 @@ public class EventHandlerTracker extends ServiceTracker<EventHandler, EventHandl
     /** Match all. */
     private static final class MatcherAll implements Matcher
     {
-
-        MatcherAll()
-        {
-            super();
-        }
-
         @Override
         public boolean match(final String className)
         {

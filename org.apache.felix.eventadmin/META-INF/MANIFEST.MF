@@ -8,11 +8,7 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-Description: This bundle provides an implementation of the OSGi R4 EventAdmin service
 Bundle-DocURL: http://www.apache.org/
 Bundle-License: http://www.apache.org/licenses/LICENSE-2.0.txt
-Import-Package: com.google.common.annotations,
- com.google.common.base,
- com.google.common.cache,
- com.google.common.collect,
- javax.management,
+Import-Package: javax.management,
  org.osgi.framework,
  org.osgi.service.cm;resolution:=optional,
  org.osgi.service.event,
