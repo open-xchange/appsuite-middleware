@@ -247,7 +247,7 @@ public class AdditionalRMITests extends AbstractRMITest {
             assertUserWasCreatedProperly(myNewUser, context, adminCredentials);
         } finally {
             if (userCreated) {
-                getUserManager().deleteUser(context, myNewUser, null);
+                getUserManager().deleteUser(context, myNewUser, adminCredentials);
             }
         }
     }
@@ -265,7 +265,7 @@ public class AdditionalRMITests extends AbstractRMITest {
             assertGroupWasCreatedProperly(group, context, adminCredentials);
         } finally {
             if (groupCreated) {
-                getGroupManager().createGroup(group, context, adminCredentials);
+                getGroupManager().deleteGroup(group, context, adminCredentials);
             }
         }
     }
@@ -494,7 +494,7 @@ public class AdditionalRMITests extends AbstractRMITest {
         User missingUser = new User();
         missingUser.setId(Integer.valueOf(Integer.MAX_VALUE));
         try {
-            getUserManager().deleteUser(context, missingUser, null);
+            getUserManager().deleteUser(context, missingUser, getContextAdminCredentials());
             fail("Expected NoSuchUserException");
         } catch (NoSuchUserException e) {
             assertTrue("Caught exception", true);
