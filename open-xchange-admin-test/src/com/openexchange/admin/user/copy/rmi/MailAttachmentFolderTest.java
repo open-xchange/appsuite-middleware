@@ -58,7 +58,6 @@ import org.json.JSONException;
 import org.junit.After;
 import org.junit.Test;
 import com.openexchange.admin.rmi.AbstractRMITest;
-import com.openexchange.admin.rmi.AbstractTest;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.User;
 import com.openexchange.ajax.folder.actions.EnumAPI;
@@ -106,7 +105,7 @@ public class MailAttachmentFolderTest extends AbstractRMITest {
         super.setUp();
         AJAXConfig.init();
 
-        superAdminCredentials = AbstractTest.getMasterAdminCredentials();
+        superAdminCredentials = getMasterAdminCredentials();
         Context[] contexts = getContextManager().searchContext("UserMove*");
         for (Context ctx : contexts) {
             System.out.println("Deleting context " + ctx.getName() + " in schema " + ctx.getReadDatabase().getScheme());

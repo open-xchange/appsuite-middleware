@@ -58,7 +58,9 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
+import org.junit.After;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.dataobjects.Filestore;
@@ -66,9 +68,27 @@ import com.openexchange.admin.rmi.dataobjects.Group;
 import com.openexchange.admin.rmi.dataobjects.Resource;
 import com.openexchange.admin.rmi.dataobjects.User;
 import com.openexchange.admin.rmi.exceptions.NoSuchResourceException;
+import com.openexchange.admin.rmi.manager.ContextManager;
+import com.openexchange.admin.rmi.manager.DatabaseManager;
+import com.openexchange.admin.rmi.manager.GroupManager;
+import com.openexchange.admin.rmi.manager.MaintenanceReasonManager;
+import com.openexchange.admin.rmi.manager.ResourceManager;
+import com.openexchange.admin.rmi.manager.ServerManager;
+import com.openexchange.admin.rmi.manager.UserManager;
 import com.openexchange.admin.user.copy.rmi.OXUserCopyInterface;
+import com.openexchange.configuration.AJAXConfig;
+import com.openexchange.configuration.AJAXConfig.Property;
+import com.openexchange.exception.OXException;
 
-public abstract class AbstractRMITest extends AbstractTest {
+/**
+ * {@link AbstractRMITest}
+ *
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ */
+public abstract class AbstractRMITest {
+
+    protected static String TEST_DOMAIN = "example.org";
+    protected static String change_suffix = "-changed";
 
     public static String ctxid = "666";
 
@@ -82,6 +102,42 @@ public abstract class AbstractRMITest extends AbstractTest {
     public User testUser;
     protected Resource testResource;
 
+    /**
+     * Initializes a new {@link AbstractRMITest}.
+     */
+    public AbstractRMITest() {
+        super();
+    }
+
+    /**
+     * Initialises the test configuration and creates one context for the tests
+     * 
+     * @throws Exception if an error occurs during initialisation of the configuration
+     */
+    @BeforeClass
+    public static void setUpEnvironment() throws OXException {
+        AJAXConfig.init();
+    }
+
+    //    /**
+    //     * Set-up unit test
+    //     * 
+    //     * @throws Exception
+    //     */
+    //    @Before
+    //    public void setUp() throws Exception {
+    //        // perform set-ups here
+    //    }
+
+    /**
+     * Tear down unit test
+     */
+    @After
+    public void tearDown() throws Exception {
+        // perform any clean-ups here
+
+    }
+
     @Before
     public void setUp() throws Exception {
         adminCredentials = getContextAdminCredentials();
@@ -91,7 +147,68 @@ public abstract class AbstractRMITest extends AbstractTest {
         superAdmin = newUser(superAdminCredentials.getLogin(), superAdminCredentials.getPassword(), "ContextCreatingAdmin", "Ad", "Min", "adminmaster@ox.invalid");
         superAdminContext = getTestContextObject(superAdminCredentials);
     }
-    
+
+    /**
+     * Returns the RMI host URL
+     * 
+     * @return the RMI host URL
+     */
+    protected static String getRMIHostUrl() {
+        String host = getRMIHost();
+
+        if (!host.startsWith("rmi://")) {
+            host = "rmi://" + host;
+        }
+        if (!host.endsWith("/")) {
+            host += "/";
+        }
+        return host;
+    }
+
+    /**
+     * Returns the RMI host name. It first looks up the <code>rmi_test_host</code>
+     * system property and then the {@link Property#RMI_HOST} via the {@link AJAXConfig}
+     * 
+     * @return The RMI host name.
+     */
+    protected static String getRMIHost() {
+        String host = "localhost";
+
+        if (System.getProperty("rmi_test_host") != null) {
+            host = System.getProperty("rmi_test_host");
+        } else if (AJAXConfig.getProperty(Property.RMI_HOST) != null) {
+            host = AJAXConfig.getProperty(Property.RMI_HOST);
+        }
+
+        return host;
+    }
+
+    /**
+     * Returns the master <code>oxadminmaster</code> {@link Credentials}.
+     * Looks up the password through the system property <code>rmi_test_masterpw</code>
+     * i
+     * 
+     * @return The <code>oxadminmaster</code> {@link Credentials}
+     */
+    public static Credentials getMasterAdminCredentials() {
+        String mpw = "secret";
+        if (System.getProperty("rmi_test_masterpw") != null) {
+            mpw = System.getProperty("rmi_test_masterpw");
+        }
+        return new Credentials("oxadminmaster", mpw);
+    }
+
+    /**
+     * Returns the context admin's {@link Credentials}
+     * 
+     * @return the context admin's {@link Credentials}
+     */
+    public static Credentials getContextAdminCredentials() {
+        String oxadmin = AJAXConfig.getProperty(Property.OXADMIN, "oxadmin");
+        String contextPassword = AJAXConfig.getProperty(Property.PASSWORD, "secret");
+        return new Credentials(oxadmin, contextPassword);
+    }
+
     public User getAdminData() throws Exception {
         User admin = new User();
         admin.setId(Integer.valueOf(2));
@@ -212,13 +329,6 @@ public abstract class AbstractRMITest extends AbstractTest {
         return (OXTaskMgmtInterface) Naming.lookup(getRMIHostUrl() + OXTaskMgmtInterface.RMI_NAME);
     }
 
-    /**
-     * Initializes a new {@link AbstractRMITest}.
-     */
-    public AbstractRMITest() {
-        super();
-    }
-
     /*** ANY & friends ***/
     protected interface Verifier<T, S> {
 
@@ -268,5 +378,94 @@ public abstract class AbstractRMITest extends AbstractTest {
             // don't do anything, has been removed already, right?
             System.out.println("Resource was removed already");
         }
+    }
+
+    /////////////////////////// MANAGERS ///////////////////////////////
+
+    /**
+     * Gets the {@link ContextManager}
+     * 
+     * @return The {@link ContextManager}
+     */
+    protected ContextManager getContextManager() {
+        return ContextManager.getInstance(getRMIHostUrl(), getMasterAdminCredentials());
+    }
+
+    /**
+     * Returns the {@link UserManager} instance
+     * 
+     * @return the {@link UserManager} instance
+     */
+    protected UserManager getUserManager() {
+        return UserManager.getInstance(getRMIHostUrl(), getMasterAdminCredentials());
+    }
+
+    /**
+     * Gets the {@link DatabaseManager}
+     * 
+     * @return the {@link DatabaseManager}
+     */
+    protected DatabaseManager getDatabaseManager() {
+        return DatabaseManager.getInstance(getRMIHostUrl(), getMasterAdminCredentials());
+    }
+
+    /**
+     * Gets the {@link ServerManager}
+     * 
+     * @return the {@link ServerManager}
+     */
+    protected ServerManager getServerManager() {
+        return ServerManager.getInstance(getRMIHostUrl(), getMasterAdminCredentials());
+    }
+
+    /**
+     * Gets the {@link MaintenanceReasonManager}
+     * 
+     * @return the {@link MaintenanceReasonManager}
+     */
+    protected MaintenanceReasonManager getMaintenanceReasonManager() {
+        return MaintenanceReasonManager.getInstance(getRMIHostUrl(), getMasterAdminCredentials());
+    }
+
+    /**
+     * Gets the {@link GroupManager}
+     * 
+     * @return the {@link GroupManager}
+     */
+    protected GroupManager getGroupManager() {
+        return GroupManager.getInstance(getRMIHostUrl(), getMasterAdminCredentials());
+    }
+
+    /**
+     * Gets the {@link ResourceManager}
+     * 
+     * @return the {@link ResourceManager}
+     */
+    protected ResourceManager getResourceManager() {
+        return ResourceManager.getInstance(getRMIHostUrl(), getMasterAdminCredentials());
+    }
+
+    //TODO: reference a created context and not some hard-coded id.... 
+
+    // The throwing of the exception is necessary to be able to let methods which override
+    // this one throw exceptions. So don't remove this
+    public static Context getTestContextObject(final Credentials cred) throws Exception {
+        return getTestContextObject(1, 50);
+    }
+
+    public static Context getTestContextObject(final long quota_max_in_mb) {
+        return getTestContextObject(1, quota_max_in_mb);
+    }
+
+    public static Context getTestContextObject(final int context_id, final long quota_max_in_mb) {
+        final Context ctx = new Context(context_id);
+        final Filestore filestore = new Filestore();
+        filestore.setSize(quota_max_in_mb);
+        ctx.setFilestoreId(filestore.getId());
+        return ctx;
+    }
+
+    public static String getChangedEmailAddress(String address, String changed) {
+        return address.replaceFirst("@", changed + "@");
     }
 }
