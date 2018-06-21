@@ -58,7 +58,6 @@ import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
 
-
 /**
  * {@link DropUnusedSharedAddressBookFolder} - Drops the unused "Shared address book" from database.
  *
@@ -133,7 +132,7 @@ public class DropUnusedSharedAddressBookFolder extends UpdateTaskAdapter {
 
     @Override
     public String[] getDependencies() {
-        return new String[] {AddSharedParentFolderToFolderPermissionTableUpdateTask.class.getName()};
+        return new String[] { AddSharedParentFolderToFolderPermissionTableUpdateTask.class.getName() };
     }
 
 }
