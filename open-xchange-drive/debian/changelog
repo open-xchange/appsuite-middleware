@@ -1,3 +1,9 @@
+open-xchange-drive (7.6.3-39) stable; urgency=medium
+
+  * Build for patch 2018-06-25 (4789)
+
+ -- Tobias Friedrich <tobias.friedrich@open-xchange.com>  Thu, 21 Jun 2018 11:36:49 +0200
+
 open-xchange-drive (7.6.3-38) stable; urgency=medium
 
   * Build for patch 2018-05-04 (4695)
