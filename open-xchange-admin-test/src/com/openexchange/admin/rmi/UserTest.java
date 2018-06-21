@@ -78,8 +78,6 @@ import com.openexchange.admin.rmi.exceptions.NoSuchUserException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.rmi.extensions.OXCommonExtensionInterface;
 import com.openexchange.admin.rmi.factory.UserFactory;
-import com.openexchange.admin.rmi.manager.ContextManager;
-import com.openexchange.admin.rmi.manager.UserManager;
 import com.openexchange.java.util.TimeZones;
 
 /**
@@ -230,7 +228,7 @@ public class UserTest extends AbstractTest {
 
         // create new user
         UserModuleAccess access = new UserModuleAccess();
-        User usr = getTestUserMandatoryFieldsObject(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass);
+        User usr = UserFactory.createUser(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, TEST_DOMAIN);
         User createduser = getUserManager().createUser(context, usr, access, cred);
 
         // now load user from server and check if data is correct, else fail
@@ -251,7 +249,7 @@ public class UserTest extends AbstractTest {
         Credentials cred = getContextAdminCredentials();
 
         UserModuleAccess access = new UserModuleAccess();
-        User user = getTestUserMandatoryFieldsObject(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass);
+        User user = UserFactory.createUser(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, TEST_DOMAIN);
         user.setDriveFolderMode("wrong");
         User createdUser = null;
         try {
@@ -1310,37 +1308,6 @@ public class UserTest extends AbstractTest {
     }
 
     ///////////////////////////// HELPERS TO MOVE ////////////////////////////
-
-    /**
-     * TODO: Move to factory
-     * 
-     * @deprecated
-     */
-    public static User getTestUserMandatoryFieldsObject(String ident, String password) {
-        User usr = new User();
-
-        usr.setName(ident);
-        usr.setPassword(password);
-
-        usr.setMailenabled(true);
-
-        usr.setPrimaryEmail("primaryemail-" + ident + "@" + AbstractTest.TEST_DOMAIN);
-        usr.setEmail1("primaryemail-" + ident + "@" + AbstractTest.TEST_DOMAIN);
-        usr.setDisplay_name("Displayname " + ident);
-        usr.setGiven_name(ident);
-        usr.setSur_name("Lastname " + ident);
-
-        return usr;
-    }
-
-    /**
-     * TODO: Move to factory
-     * 
-     * @deprecated
-     */
-    public User getTestUserObject() {
-        return UserFactory.createUser(VALID_CHAR_TESTUSER, "open-xchange", TEST_DOMAIN, null);
-    }
 
     /**
      * Compares the {@link User} A with {@link User} B

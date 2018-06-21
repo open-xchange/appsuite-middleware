@@ -64,17 +64,35 @@ import com.openexchange.java.util.TimeZones;
 public class UserFactory {
 
     /**
-     * Creates a new {@link User} object
+     * Creates a new {@link User} with only the mandatory fields set
+     * 
+     * @param ident The user identity
+     * @param password the password
+     * @param domain The domain
+     * @return The {@link User} object
      */
-    public static User createUser(String ident, String password, String domain, Context context) {
+    public static User createUser(String ident, String password, String domain) {
         User usr = new User();
+
         usr.setName(ident);
         usr.setPassword(password);
+
         usr.setMailenabled(true);
+
         usr.setPrimaryEmail("primaryemail-" + ident + "@" + domain);
+        usr.setEmail1("primaryemail-" + ident + "@" + domain);
         usr.setDisplay_name("Displayname " + ident);
         usr.setGiven_name(ident);
         usr.setSur_name("Lastname " + ident);
+
+        return usr;
+    }
+
+    /**
+     * Creates a new {@link User} object with all fields set
+     */
+    public static User createUser(String ident, String password, String domain, Context context) {
+        User usr = createUser(ident, password, domain);
         usr.setLanguage("de_DE");
         // new for testing
 
