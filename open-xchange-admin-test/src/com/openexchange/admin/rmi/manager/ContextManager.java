@@ -193,6 +193,39 @@ public class ContextManager extends AbstractManager {
     }
 
     /**
+     * Creates a new {@link Context}
+     * 
+     * @param context The {@link Context} to create
+     * @param contextAdmin The {@link Context} admin
+     * @param combinationName The combination access name
+     * @return The newly created context
+     * @throws Exception if an error is occurred
+     */
+    public Context createContext(Context context, User contextAdmin, String combinationName) throws Exception {
+        prerequisites();
+        if (context.getId() == null || context.getId().intValue() <= 0) {
+            context.setId(new Integer(getNextFreeContextId()));
+        }
+        OXContextInterface contextInterface = getContextInterface();
+        Context ctx = contextInterface.create(context, contextAdmin, combinationName, getMasterCredentials());
+        managedObjects.put(ctx.getId(), ctx);
+        return ctx;
+    }
+
+    /**
+     * Moves all data of a context contained in a database to another database
+     * 
+     * @param context The {@link Context}
+     * @param destinationDatabase The destination {@link Database}
+     * @return The job identifier
+     * @throws Exception if an error is occurred
+     */
+    public int moveContextDatabase(Context context, Database destinationDatabase) throws Exception {
+        OXContextInterface contextInterface = getContextInterface();
+        return contextInterface.moveContextDatabase(context, destinationDatabase, getMasterCredentials());
+    }
+
+    /**
      * Changes/Updates the specified {@link Context}
      * 
      * @param context The {@link Context} to change

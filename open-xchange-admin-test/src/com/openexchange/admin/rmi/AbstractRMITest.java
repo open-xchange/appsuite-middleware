@@ -65,13 +65,7 @@ import com.openexchange.admin.rmi.dataobjects.Filestore;
 import com.openexchange.admin.rmi.dataobjects.Group;
 import com.openexchange.admin.rmi.dataobjects.Resource;
 import com.openexchange.admin.rmi.dataobjects.User;
-import com.openexchange.admin.rmi.exceptions.DatabaseUpdateException;
-import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
-import com.openexchange.admin.rmi.exceptions.InvalidDataException;
-import com.openexchange.admin.rmi.exceptions.NoSuchContextException;
 import com.openexchange.admin.rmi.exceptions.NoSuchResourceException;
-import com.openexchange.admin.rmi.exceptions.NoSuchUserException;
-import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.user.copy.rmi.OXUserCopyInterface;
 
 public abstract class AbstractRMITest extends AbstractTest {
@@ -210,24 +204,8 @@ public abstract class AbstractRMITest extends AbstractTest {
 
     /*** Interfaces ***/
 
-    public OXUserInterface getUserInterface() throws MalformedURLException, RemoteException, NotBoundException {
-        return (OXUserInterface) Naming.lookup(getRMIHostUrl() + OXUserInterface.RMI_NAME);
-    }
-
-    public OXContextInterface getContextInterface() throws MalformedURLException, RemoteException, NotBoundException {
-        return (OXContextInterface) Naming.lookup(getRMIHostUrl() + OXContextInterface.RMI_NAME);
-    }
-
-    public OXResourceInterface getResourceInterface() throws MalformedURLException, RemoteException, NotBoundException {
-        return (OXResourceInterface) Naming.lookup(getRMIHostUrl() + OXResourceInterface.RMI_NAME);
-    }
-
     public OXUserCopyInterface getUserCopyClient() throws MalformedURLException, RemoteException, NotBoundException {
         return (OXUserCopyInterface) Naming.lookup(getRMIHostUrl() + OXUserCopyInterface.RMI_NAME);
-    }
-
-    public OXUtilInterface getUtilInterface() throws MalformedURLException, RemoteException, NotBoundException {
-        return (OXUtilInterface) Naming.lookup(getRMIHostUrl() + OXUtilInterface.RMI_NAME);
     }
 
     public OXTaskMgmtInterface getTaskInterface() throws MalformedURLException, RemoteException, NotBoundException {
@@ -275,26 +253,17 @@ public abstract class AbstractRMITest extends AbstractTest {
 
     /**
      * Create a test resource on the server. Always remove this via #removeTestResource() afterwards!
-     *
-     * @throws DatabaseUpdateException
-     * @throws InvalidDataException
-     * @throws NoSuchContextException
-     * @throws InvalidCredentialsException
-     * @throws StorageException
-     * @throws RemoteException
-     * @throws NotBoundException
-     * @throws MalformedURLException
+     * 
+     * @throws Exception
      */
-    public Resource createTestResource() throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException, MalformedURLException, NotBoundException {
-        OXResourceInterface resInterface = getResourceInterface();
-        testResource = resInterface.create(adminContext, getTestResource(), adminCredentials);
+    public Resource createTestResource() throws Exception {
+        testResource = getResourceManager().createResource(getTestResource(), adminContext, adminCredentials);
         return testResource;
     }
 
-    public void removeTestResource() throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException, MalformedURLException, NotBoundException {
-        OXResourceInterface resInterface = getResourceInterface();
+    public void removeTestResource() throws Exception {
         try {
-            resInterface.delete(adminContext, testResource, adminCredentials);
+            getResourceManager().deleteResource(testResource, adminContext, adminCredentials);
         } catch (NoSuchResourceException e) {
             // don't do anything, has been removed already, right?
             System.out.println("Resource was removed already");

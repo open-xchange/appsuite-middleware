@@ -82,10 +82,6 @@ public class AdditionalRMITests extends AbstractRMITest {
 
     public String myDisplayName = "Thorben Betten";
 
-    private OXContextInterface ci;
-
-    private OXUserInterface ui;
-
     private Context context;
 
     private User admin;
@@ -96,40 +92,25 @@ public class AdditionalRMITests extends AbstractRMITest {
     public void setUp() throws Exception {
         super.setUp();
         admin = newUser("oxadmin", "q1w2e3r4", "Admin User", "Admin", "User", "oxadmin@example.com");
-        ci = getContextInterface();
-        ui = getUserInterface();
 
         setupContexts();
     }
 
     public final void setupContexts() throws Exception {
-        context = TestTool.createContext(ci, "AdditionalCtx_", admin, "all", superAdminCredentials);
+        context = TestTool.createContext(getContextManager(), "AdditionalCtx_", admin, "all", superAdminCredentials);
 
         user = newUser("thorben.betten", "secret", myDisplayName, "Thorben", "Betten", "oxuser@example.com");
         user.setImapServer("example.com");
         user.setImapLogin("oxuser");
         user.setSmtpServer("example.com");
 
-        user = ui.create(context, user, getContextAdminCredentials());
+        user = getUserManager().createUser(context, user, getContextAdminCredentials());
     }
 
     @Override
     public void tearDown() throws Exception {
-        try {
-            if (ui != null && context != null) {
-                ui.delete(context, user, null, getContextAdminCredentials());
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        try {
-            if (ci != null && context != null && superAdminCredentials != null) {
-                ci.delete(context, superAdminCredentials);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        getUserManager().cleanUp();
+        getContextManager().cleanUp();
         super.tearDown();
     }
 
@@ -170,7 +151,7 @@ public class AdditionalRMITests extends AbstractRMITest {
         knownUser.setName(myUserName);
         User[] mailboxNames = new User[] { knownUser };// users with only their mailbox name (User#name) - the rest is going to be looked
         // up
-        User[] queriedUsers = ui.getData(context, mailboxNames, adminCredentials);// required line for test
+        User[] queriedUsers = getUserManager().getData(context, mailboxNames, adminCredentials);// required line for test
 
         assertEquals("Query should return only one user", new Integer(1), Integer.valueOf(queriedUsers.length));
         User queriedUser = queriedUsers[0];
@@ -183,8 +164,8 @@ public class AdditionalRMITests extends AbstractRMITest {
     @Test
     public void testGetAllUsers() throws Exception {
         final Credentials credentials = getContextAdminCredentials();
-        User[] allUsers = ui.listAll(context, credentials);// required line for test
-        User[] queriedUsers = ui.getData(context, allUsers, credentials);// required line for test
+        User[] allUsers = getUserManager().listAllUsers(context, credentials);// required line for test
+        User[] queriedUsers = getUserManager().getData(context, allUsers, credentials);// required line for test
         assertIDsAreEqual(allUsers, queriedUsers);
     }
 
@@ -193,7 +174,7 @@ public class AdditionalRMITests extends AbstractRMITest {
      */
     @Test
     public void testGetOxGroups() throws Exception {
-        Context updatedContext = ci.getData(context, superAdminCredentials);
+        Context updatedContext = getContextManager().getData(context);
 
         User myUser = new User();
         myUser.setName(myUserName);
@@ -245,13 +226,11 @@ public class AdditionalRMITests extends AbstractRMITest {
      */
     @Test
     public void testCreateFirstUser() throws Exception {
-        OXContextInterface conInterface = getContextInterface();
-
         Context newContext = newContext("newContext", ((int) (Math.random() * 1000)));
 
         User newAdmin = newUser("new_admin", "secret", "New Admin", "New", "Admin", "newadmin@ox.invalid");
         try {
-            newContext = conInterface.create(newContext, newAdmin, superAdminCredentials);// required line for test
+            newContext = getContextManager().createContext(newContext, newAdmin);// required line for test
             Credentials newAdminCredentials = new Credentials();
             newAdmin.setId(Integer.valueOf(2));// has to be hardcoded, because it cannot be looked up easily.
             newAdminCredentials.setLogin(newAdmin.getName());
@@ -259,7 +238,7 @@ public class AdditionalRMITests extends AbstractRMITest {
             assertUserWasCreatedProperly(newAdmin, newContext, newAdminCredentials);
         } finally {
             // no need to delete the admin account. Actually, it is not possible at all.
-            conInterface.delete(newContext, superAdminCredentials);
+            getContextManager().deleteContext(newContext);
         }
     }
 
@@ -300,16 +279,15 @@ public class AdditionalRMITests extends AbstractRMITest {
 
     @Test
     public void testCreateOxResource() throws Exception {
-        OXResourceInterface resInterface = getResourceInterface();
         boolean resourceCreated = false;
         Resource res = newResource("resourceName", "resourceDisplayname", "resource@email.invalid");
         try {
-            res = resInterface.create(context, res, adminCredentials);// required line for test
+            res = getResourceManager().createResource(res, context, adminCredentials);// required line for test
             resourceCreated = true;
             assertResourceWasCreatedProperly(res, context, adminCredentials);
         } finally {
             if (resourceCreated) {
-                resInterface.delete(context, res, adminCredentials);
+                getResourceManager().deleteResource(res, context, adminCredentials);
             }
         }
     }
@@ -317,7 +295,7 @@ public class AdditionalRMITests extends AbstractRMITest {
     @Test
     public void testUpdateOxAdmin_updateOxUser() throws Exception {
         boolean valueChanged = false;
-        admin = ui.getData(context, admin, adminCredentials);
+        admin = getUserManager().getData(context, admin, adminCredentials);
         String originalValue = admin.getAssistant_name();
         User changesToAdmin = new User();
         changesToAdmin.setId(admin.getId());
@@ -325,15 +303,15 @@ public class AdditionalRMITests extends AbstractRMITest {
         changesToAdmin.setAssistant_name(newAssistantName);
         assertFalse("Precondition: Old assistant name should differ from new assistant name", newAssistantName.equals(originalValue));
         try {
-            ui.change(context, changesToAdmin, adminCredentials);// required line for test
+            getUserManager().changeUser(context, changesToAdmin, adminCredentials);// required line for test
             valueChanged = true;
-            admin = ui.getData(context, admin, adminCredentials);
+            admin = getUserManager().getData(context, admin, adminCredentials);
             ;// refresh data
             assertEquals(changesToAdmin.getAssistant_name(), admin.getAssistant_name());
         } finally {
             if (valueChanged) {
                 changesToAdmin.setAssistant_name(originalValue);
-                ui.change(context, changesToAdmin, adminCredentials);
+                getUserManager().changeUser(context, changesToAdmin, adminCredentials);
             }
         }
     }
@@ -361,35 +339,33 @@ public class AdditionalRMITests extends AbstractRMITest {
 
     @Test
     public void testUpdateOxResource() throws Exception {
-        OXResourceInterface resInterface = getResourceInterface();
         boolean resourceCreated = false;
         Resource res = newResource("resourceName", "resourceDisplayname", "resource@email.invalid");
         try {
-            res = resInterface.create(context, res, adminCredentials);
+            res = getResourceManager().createResource(res, context, adminCredentials);
             resourceCreated = true;
             Resource resChange = new Resource();
             resChange.setId(res.getId());
             resChange.setDisplayname("changed display name");
-            resInterface.change(context, resChange, adminCredentials);// required line for test
-            res = resInterface.getData(context, res, adminCredentials);// update
+            getResourceManager().changeResource(resChange, context, adminCredentials);// required line for test
+            res = getResourceManager().getData(res, context, adminCredentials);// update
             assertEquals("Display name should have changed", resChange.getDisplayname(), res.getDisplayname());
         } finally {
             if (resourceCreated) {
-                resInterface.delete(context, res, adminCredentials);
+                getResourceManager().deleteResource(res, context, adminCredentials);
             }
         }
     }
 
     @Test
     public void testDeleteOxUsers() throws Exception {
-        OXResourceInterface resInterface = getResourceInterface();
         boolean resourceDeleted = false;
         Resource res = newResource("resourceName", "resourceDisplayname", "resource@email.invalid");
         try {
-            res = resInterface.create(context, res, adminCredentials);
+            res = getResourceManager().createResource(res, context, adminCredentials);
 
             Assert.assertNotNull("Resource id cannot be null", res.getId());
-            resInterface.delete(context, res, adminCredentials);
+            getResourceManager().deleteResource(res, context, adminCredentials);
             resourceDeleted = true;
         } catch (Exception exception) {
             Assert.assertTrue("Resource could not be deleted!", resourceDeleted);
@@ -404,22 +380,22 @@ public class AdditionalRMITests extends AbstractRMITest {
         knownUser.setName(this.myUserName);
         User[] mailboxNames = new User[] { knownUser };// users with only their mailbox name (User#name) - the rest is going to be looked
         // up
-        User[] queriedUsers = ui.getData(context, mailboxNames, credentials);// query by mailboxNames (User.name)
+        User[] queriedUsers = getUserManager().getData(context, mailboxNames, credentials);// query by mailboxNames (User.name)
 
         assertEquals("Query should return only one user", new Integer(1), Integer.valueOf(queriedUsers.length));
         User user = queriedUsers[0];
 
-        UserModuleAccess access = ui.getModuleAccess(context, user, credentials);
+        UserModuleAccess access = getUserManager().getModuleAccess(context, user, credentials);
         assertTrue("Information for module access should be available", access != null);
     }
 
     @Test
     public void testUpdateMaxCollapQuota() throws Exception {
-        Context contextTmp = ci.getData(context, superAdminCredentials);
+        Context contextTmp = getContextManager().getData(context);
         Long updatedMaxQuota = new Long(1024);
         contextTmp.setMaxQuota(updatedMaxQuota);
-        ci.change(contextTmp, superAdminCredentials);
-        Context newContext = ci.getData(context, superAdminCredentials);
+        getContextManager().changeContext(contextTmp);
+        Context newContext = getContextManager().getData(context);
         assertEquals("MaxCollapQuota should have the new value", newContext.getMaxQuota(), updatedMaxQuota);
     }
 
@@ -430,11 +406,11 @@ public class AdditionalRMITests extends AbstractRMITest {
         User[] mailboxNames = new User[] { knownUser };// users with only their mailbox name (User#name) - the rest is going to be
                                                        // looked
                                                        // up
-        User[] queriedUsers = ui.getData(context, mailboxNames, adminCredentials);// query by mailboxNames (User.name)
+        User[] queriedUsers = getUserManager().getData(context, mailboxNames, adminCredentials);// query by mailboxNames (User.name)
 
         assertEquals("Query should return only one user", new Integer(1), Integer.valueOf(queriedUsers.length));
         User receivedUser = queriedUsers[0];
-        User queriedUser = ui.getData(context, receivedUser, adminCredentials);
+        User queriedUser = getUserManager().getData(context, receivedUser, adminCredentials);
         assertEquals("Should have looked up display name", myDisplayName, queriedUser.getDisplay_name());
     }
 
@@ -446,52 +422,50 @@ public class AdditionalRMITests extends AbstractRMITest {
         knownUser.setName("oxadmin");
         User[] mailboxNames = new User[] { knownUser };// users with only their mailbox name (User#name) - the rest is going to be looked
         // up
-        User[] queriedUsers = ui.getData(context, mailboxNames, credentials);// query by mailboxNames (User.name)
+        User[] queriedUsers = getUserManager().getData(context, mailboxNames, credentials);// query by mailboxNames (User.name)
 
         assertEquals("Query should return only one user", new Integer(1), Integer.valueOf(queriedUsers.length));
         User user = queriedUsers[0];
 
-        UserModuleAccess access = ui.getModuleAccess(context, user, credentials);
+        UserModuleAccess access = getUserManager().getModuleAccess(context, user, credentials);
         assertEquals("Calendar access should be granted by default", true, access.getCalendar());
         access.setCalendar(false);
-        ui.changeModuleAccess(context, user, access, credentials);
-        access = ui.getModuleAccess(context, user, credentials);
+        getUserManager().changeModuleAccess(context, user, access, credentials);
+        access = getUserManager().getModuleAccess(context, user, credentials);
         assertEquals("Calendar access should be turned off now", false, access.getCalendar());
         // reset access and check again
         access.setCalendar(true);
-        ui.changeModuleAccess(context, user, access, credentials);
-        access = ui.getModuleAccess(context, user, credentials);
+        getUserManager().changeModuleAccess(context, user, access, credentials);
+        access = getUserManager().getModuleAccess(context, user, credentials);
         assertEquals("Calendar access should be granted again", true, access.getCalendar());
     }
 
     @Test
     public void testContextExistsException() throws Exception {
-        OXContextInterface conInterface = getContextInterface();
         boolean contextCreated = false;
         Context newContext = newContext("newContext", 666);
         User newAdmin = newUser("oxadmin", "secret", "New Admin", "New", "Admin", "newadmin@ox.invalid");
         try {
-            newContext = conInterface.create(newContext, newAdmin, superAdminCredentials);
+            newContext = getContextManager().createContext(newContext, newAdmin);
             contextCreated = true;
             try {
-                conInterface.create(newContext, newAdmin, superAdminCredentials);
+                getContextManager().createContext(newContext, newAdmin);
                 fail("Should throw ContextExistsException");
             } catch (ContextExistsException e) {
                 assertTrue("Caught exception", true);
             }
         } finally {
             if (contextCreated) {
-                conInterface.delete(newContext, superAdminCredentials);
+                getContextManager().deleteContext(newContext);
             }
         }
     }
 
     @Test
     public void testNoSuchContextException() throws Exception {
-        OXContextInterface conInterface = getContextInterface();
         Context missingContext = newContext("missing", Integer.MAX_VALUE);
         try {
-            conInterface.delete(missingContext, superAdminCredentials);
+            getContextManager().deleteContext(missingContext);
             fail("Expected NoSuchContextException");
         } catch (NoSuchContextException e) {
             assertTrue("Caught exception", true);
@@ -527,7 +501,7 @@ public class AdditionalRMITests extends AbstractRMITest {
         User missingUser = new User();
         missingUser.setId(Integer.valueOf(Integer.MAX_VALUE));
         try {
-            ui.delete(context, missingUser, null, adminCredentials);
+            getUserManager().deleteUser(context, missingUser, null);
             fail("Expected NoSuchUserException");
         } catch (NoSuchUserException e) {
             assertTrue("Caught exception", true);
