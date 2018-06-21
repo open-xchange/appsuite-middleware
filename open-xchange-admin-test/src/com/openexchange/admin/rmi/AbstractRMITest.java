@@ -58,7 +58,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
-import org.junit.After;
+import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import com.openexchange.admin.rmi.dataobjects.Context;
@@ -119,23 +119,19 @@ public abstract class AbstractRMITest {
         AJAXConfig.init();
     }
 
-    //    /**
-    //     * Set-up unit test
-    //     * 
-    //     * @throws Exception
-    //     */
-    //    @Before
-    //    public void setUp() throws Exception {
-    //        // perform set-ups here
-    //    }
-
     /**
-     * Tear down unit test
+     * Clean up managers
      */
-    @After
-    public void tearDown() throws Exception {
+    @AfterClass
+    public static void cleanUpManagers() throws Exception {
         // perform any clean-ups here
-
+        getContextManager().cleanUp();
+        getUserManager().cleanUp();
+        getGroupManager().cleanUp();
+        getResourceManager().cleanUp();
+        getDatabaseManager().cleanUp();
+        getServerManager().cleanUp();
+        getMaintenanceReasonManager().cleanUp();
     }
 
     @Before
@@ -387,7 +383,7 @@ public abstract class AbstractRMITest {
      * 
      * @return The {@link ContextManager}
      */
-    protected ContextManager getContextManager() {
+    protected static ContextManager getContextManager() {
         return ContextManager.getInstance(getRMIHostUrl(), getMasterAdminCredentials());
     }
 
@@ -396,7 +392,7 @@ public abstract class AbstractRMITest {
      * 
      * @return the {@link UserManager} instance
      */
-    protected UserManager getUserManager() {
+    protected static UserManager getUserManager() {
         return UserManager.getInstance(getRMIHostUrl(), getMasterAdminCredentials());
     }
 
@@ -405,7 +401,7 @@ public abstract class AbstractRMITest {
      * 
      * @return the {@link DatabaseManager}
      */
-    protected DatabaseManager getDatabaseManager() {
+    protected static DatabaseManager getDatabaseManager() {
         return DatabaseManager.getInstance(getRMIHostUrl(), getMasterAdminCredentials());
     }
 
@@ -414,7 +410,7 @@ public abstract class AbstractRMITest {
      * 
      * @return the {@link ServerManager}
      */
-    protected ServerManager getServerManager() {
+    protected static ServerManager getServerManager() {
         return ServerManager.getInstance(getRMIHostUrl(), getMasterAdminCredentials());
     }
 
@@ -423,7 +419,7 @@ public abstract class AbstractRMITest {
      * 
      * @return the {@link MaintenanceReasonManager}
      */
-    protected MaintenanceReasonManager getMaintenanceReasonManager() {
+    protected static MaintenanceReasonManager getMaintenanceReasonManager() {
         return MaintenanceReasonManager.getInstance(getRMIHostUrl(), getMasterAdminCredentials());
     }
 
@@ -432,7 +428,7 @@ public abstract class AbstractRMITest {
      * 
      * @return the {@link GroupManager}
      */
-    protected GroupManager getGroupManager() {
+    protected static GroupManager getGroupManager() {
         return GroupManager.getInstance(getRMIHostUrl(), getMasterAdminCredentials());
     }
 
@@ -441,7 +437,7 @@ public abstract class AbstractRMITest {
      * 
      * @return the {@link ResourceManager}
      */
-    protected ResourceManager getResourceManager() {
+    protected static ResourceManager getResourceManager() {
         return ResourceManager.getInstance(getRMIHostUrl(), getMasterAdminCredentials());
     }
 

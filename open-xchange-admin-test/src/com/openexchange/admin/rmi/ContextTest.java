@@ -84,15 +84,6 @@ public class ContextTest extends AbstractRMITest {
     }
 
     /**
-     * Clean-up procedures
-     */
-    @Override
-    public void tearDown() throws Exception {
-        getContextManager().cleanUp();
-        super.tearDown();
-    }
-
-    /**
      * Tests getting the admin id for a newly created context
      */
     @Test

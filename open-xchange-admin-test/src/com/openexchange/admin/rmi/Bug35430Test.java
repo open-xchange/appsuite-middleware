@@ -52,7 +52,6 @@ package com.openexchange.admin.rmi;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.admin.rmi.dataobjects.Context;
@@ -82,17 +81,6 @@ public final class Bug35430Test extends AbstractRMITest {
     public void setUp() throws Exception {
         super.setUp();
         createContext("bug35430context.com", 314159265);
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.admin.rmi.AbstractTest#tearDown()
-     */
-    @After
-    public void tearDown() throws Exception {
-        getContextManager().cleanUp();
-        super.tearDown();
     }
 
     @Test

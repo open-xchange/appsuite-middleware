@@ -93,17 +93,6 @@ public class GroupTest extends UserTest {
         context = getContextManager().createContext(getContextAdminCredentials());
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.admin.rmi.AbstractTest#tearDown()
-     */
-    @Override
-    public void tearDown() throws Exception {
-        getContextManager().cleanUp();
-        super.tearDown();
-    }
-
     @Test
     public void testCreateGroup() throws Exception {
         Credentials cred = getContextAdminCredentials();

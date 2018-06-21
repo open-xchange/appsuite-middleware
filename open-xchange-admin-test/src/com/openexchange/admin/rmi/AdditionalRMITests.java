@@ -107,13 +107,6 @@ public class AdditionalRMITests extends AbstractRMITest {
         user = getUserManager().createUser(context, user, getContextAdminCredentials());
     }
 
-    @Override
-    public void tearDown() throws Exception {
-        getUserManager().cleanUp();
-        getContextManager().cleanUp();
-        super.tearDown();
-    }
-
     /**
      * Test the #any method. This explains how it is used, too, in case you either have never seen first-order-functions or seen the
      * monstrosity that is necessary to model them in Java.

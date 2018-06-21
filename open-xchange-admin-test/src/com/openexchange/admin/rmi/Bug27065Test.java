@@ -70,17 +70,6 @@ public final class Bug27065Test extends AbstractRMITest {
         super();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.admin.rmi.AbstractTest#tearDown()
-     */
-    @Override
-    public void tearDown() throws Exception {
-        getContextManager().cleanUp();
-        super.tearDown();
-    }
-
     /**
      * Reproduce the log message
      */

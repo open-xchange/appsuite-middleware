@@ -51,7 +51,6 @@ package com.openexchange.admin.rmi;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.admin.rmi.dataobjects.Database;
@@ -77,17 +76,6 @@ public class UtilDatabaseTest extends AbstractRMITest {
             throw new NullPointerException("Database object is null");
         }
         client_db.setId(getDatabaseManager().registerDatabase(client_db, Boolean.FALSE, Integer.valueOf(0)).getId());
-    }
-
-    @After
-    public final void tearDown() throws Exception {
-        if (client_db != null) {
-            getDatabaseManager().unregisterDatabase(new Database(client_db.getId()));
-        }
-        db_name = null;
-        client_db = null;
-        getDatabaseManager().cleanUp();
-        super.tearDown();
     }
 
     @Test

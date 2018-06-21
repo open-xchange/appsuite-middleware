@@ -55,7 +55,6 @@ import static org.junit.Assert.fail;
 import java.io.File;
 import java.io.IOException;
 import org.json.JSONException;
-import org.junit.After;
 import org.junit.Test;
 import com.openexchange.admin.rmi.AbstractRMITest;
 import com.openexchange.admin.rmi.dataobjects.Context;
@@ -230,13 +229,6 @@ public class MailAttachmentFolderTest extends AbstractRMITest {
         } finally {
             client.logout();
         }
-    }
-
-    @After
-    public void tearDown() throws Exception {
-        getUserManager().cleanUp();
-        getContextManager().cleanUp();
-        super.tearDown();
     }
 
     private AJAXSession performLogin(final String login, final String password) throws OXException, IOException, JSONException {

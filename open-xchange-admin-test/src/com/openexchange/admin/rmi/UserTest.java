@@ -117,18 +117,6 @@ public class UserTest extends AbstractRMITest {
         context = getContextManager().createContext(getContextAdminCredentials());
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.admin.rmi.AbstractTest#tearDown()
-     */
-    @Override
-    public void tearDown() throws Exception {
-        getUserManager().cleanUp();
-        getContextManager().cleanUp();
-        super.tearDown();
-    }
-
     /**
      * Tests whether the default module access is set
      */

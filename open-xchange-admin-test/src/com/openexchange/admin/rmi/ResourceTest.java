@@ -86,17 +86,6 @@ public class ResourceTest extends AbstractRMITest {
         context = getContextManager().createContext(getContextAdminCredentials());
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.admin.rmi.AbstractTest#tearDown()
-     */
-    @Override
-    public void tearDown() throws Exception {
-        getContextManager().cleanUp();
-        super.tearDown();
-    }
-
     @Test
     public void testCreateResource() throws Exception {
         Resource res = getTestResourceObject("tescase-createResource-resource-" + System.currentTimeMillis());
