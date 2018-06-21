@@ -144,7 +144,7 @@ public class ServerManager extends AbstractManager {
             unregisterServer(server);
             return true;
         } catch (Exception e) {
-            LOG.error("The server '{}' could not be unregistered!, obj", server.getId());
+            LOG.error("The server '{}' could not be unregistered!", server.getId());
             return false;
         }
     }

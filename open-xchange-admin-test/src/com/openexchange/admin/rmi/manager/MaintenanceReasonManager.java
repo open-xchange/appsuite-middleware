@@ -137,7 +137,7 @@ public class MaintenanceReasonManager extends AbstractManager {
             deleteMaintenanceReason(mr);
             return true;
         } catch (Exception e) {
-            LOG.error("The maintenance reason '{}' could not be deleted!, obj", mr.getId());
+            LOG.error("The maintenance reason '{}' could not be deleted!", mr.getId());
             return false;
         }
     }

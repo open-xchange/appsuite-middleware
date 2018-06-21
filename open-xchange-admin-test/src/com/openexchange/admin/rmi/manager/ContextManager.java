@@ -122,7 +122,7 @@ public class ContextManager extends AbstractManager {
             deleteContext(ctx);
             return true;
         } catch (Exception e) {
-            LOG.error("The context '{}' could not be deleted!, obj", ctx.getId());
+            LOG.error("The context '{}' could not be deleted!", ctx.getId());
             return false;
         }
     }
