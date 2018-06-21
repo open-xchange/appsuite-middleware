@@ -49,12 +49,10 @@
 
 package com.openexchange.admin.rmi;
 
-import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-import java.util.Collection;
 import org.junit.Test;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
@@ -62,9 +60,8 @@ import com.openexchange.admin.rmi.dataobjects.Group;
 import com.openexchange.admin.rmi.dataobjects.User;
 import com.openexchange.admin.rmi.dataobjects.UserModuleAccess;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
-import com.openexchange.admin.rmi.extensions.OXCommonExtensionInterface;
+import com.openexchange.admin.rmi.factory.GroupFactory;
 import com.openexchange.admin.rmi.factory.UserFactory;
-import com.openexchange.admin.rmi.manager.ContextManager;
 import com.openexchange.admin.rmi.manager.GroupManager;
 
 /**
@@ -94,8 +91,7 @@ public class GroupTest extends UserTest {
     @Override
     public void setUp() throws Exception {
         super.setUp();
-        ContextManager cm = ContextManager.getInstance(getRMIHostUrl(), getMasterAdminCredentials());
-        context = cm.createContext(getContextAdminCredentials());
+        context = getContextManager().createContext(getContextAdminCredentials());
     }
 
     /*
@@ -105,14 +101,14 @@ public class GroupTest extends UserTest {
      */
     @Override
     public void tearDown() throws Exception {
-        ContextManager.getInstance(getRMIHostUrl(), getMasterAdminCredentials()).cleanUp();
+        getContextManager().cleanUp();
         super.tearDown();
     }
 
     @Test
     public void testCreateGroup() throws Exception {
         Credentials cred = getContextAdminCredentials();
-        int id = getGroupManager().createGroup(getTestGroupObject(cred), context, cred).getId();
+        int id = getGroupManager().createGroup(GroupFactory.createGroup(VALID_CHAR_TESTGROUP + System.currentTimeMillis()), context, cred).getId();
         assertTrue("group id > 0 expected", id > 0);
     }
 
@@ -120,7 +116,7 @@ public class GroupTest extends UserTest {
     public void testSearchGroup() throws Exception {
         Credentials cred = getContextAdminCredentials();
         String grpname = VALID_CHAR_TESTGROUP + System.currentTimeMillis();
-        getGroupManager().createGroup(getTestGroupObject(grpname, context, cred), context, cred);
+        getGroupManager().createGroup(GroupFactory.createGroup(grpname), context, cred);
         Group[] grps = getGroupManager().listGroups(context, grpname, cred);
         assertEquals("invalid search result", 1, grps.length);
     }
@@ -128,7 +124,7 @@ public class GroupTest extends UserTest {
     @Test
     public void testDeleteGroup() throws Exception {
         Credentials cred = getContextAdminCredentials();
-        Group grp = getGroupManager().createGroup(getTestGroupObject(VALID_CHAR_TESTGROUP + System.currentTimeMillis(), context, cred), context, cred);
+        Group grp = getGroupManager().createGroup(GroupFactory.createGroup(VALID_CHAR_TESTGROUP + System.currentTimeMillis()), context, cred);
         getGroupManager().deleteGroup(grp, context, cred);
         // now load the group again, this MUST fail
         try {
@@ -145,7 +141,7 @@ public class GroupTest extends UserTest {
     @Test
     public void testCreateDeleteCreate() throws Exception {
         Credentials cred = getContextAdminCredentials();
-        Group tmp = getTestGroupObject(VALID_CHAR_TESTGROUP + System.currentTimeMillis(), context, cred);
+        Group tmp = GroupFactory.createGroup(VALID_CHAR_TESTGROUP + System.currentTimeMillis());
         Group grp = getGroupManager().createGroup(tmp, context, cred);
         getGroupManager().deleteGroup(grp, context, cred);
         // now load the group again, this MUST fail
@@ -167,7 +163,7 @@ public class GroupTest extends UserTest {
     public void testDeleteGroupIdentifiedByName() throws Exception {
         // delete group ident by name
         Credentials cred = getContextAdminCredentials();
-        Group grp = getGroupManager().createGroup(getTestGroupObject(VALID_CHAR_TESTGROUP + System.currentTimeMillis(), context, cred), context, cred);
+        Group grp = getGroupManager().createGroup(GroupFactory.createGroup(VALID_CHAR_TESTGROUP + System.currentTimeMillis()), context, cred);
 
         Group del_grp = new Group();
         del_grp.setName(grp.getName());
@@ -188,7 +184,7 @@ public class GroupTest extends UserTest {
     public void testDeleteGroupIdentifiedByID() throws Exception {
         // delete group ident by id
         Credentials cred = getContextAdminCredentials();
-        Group grp = getGroupManager().createGroup(getTestGroupObject(VALID_CHAR_TESTGROUP + System.currentTimeMillis(), context, cred), context, cred);
+        Group grp = getGroupManager().createGroup(GroupFactory.createGroup(VALID_CHAR_TESTGROUP + System.currentTimeMillis()), context, cred);
 
         Group del_grp = new Group(grp.getId());
         getGroupManager().deleteGroup(del_grp, context, cred);
@@ -207,7 +203,7 @@ public class GroupTest extends UserTest {
     @Test
     public void testLoadGroup() throws Exception {
         Credentials cred = getContextAdminCredentials();
-        Group addgroup = getTestGroupObject(cred);
+        Group addgroup = GroupFactory.createGroup(VALID_CHAR_TESTGROUP + System.currentTimeMillis());
         Group createdgroup = getGroupManager().createGroup(addgroup, context, cred);
         assertTrue("expected id > 0", createdgroup.getId() > 0);
 
@@ -223,7 +219,7 @@ public class GroupTest extends UserTest {
     @Test
     public void testLoadGroupIdentifiedByName() throws Exception {
         Credentials cred = getContextAdminCredentials();
-        Group addgroup = getTestGroupObject(cred);
+        Group addgroup = GroupFactory.createGroup(VALID_CHAR_TESTGROUP + System.currentTimeMillis());
         Group createdgroup = getGroupManager().createGroup(addgroup, context, cred);
         assertTrue("expected id > 0", createdgroup.getId() > 0);
 
@@ -241,7 +237,7 @@ public class GroupTest extends UserTest {
     @Test
     public void testLoadGroupIdentifiedByID() throws Exception {
         Credentials cred = getContextAdminCredentials();
-        Group addgroup = getTestGroupObject(cred);
+        Group addgroup = GroupFactory.createGroup(VALID_CHAR_TESTGROUP + System.currentTimeMillis());
         Group createdgroup = getGroupManager().createGroup(addgroup, context, cred);
         assertTrue("expected id > 0", createdgroup.getId() > 0);
 
@@ -258,7 +254,7 @@ public class GroupTest extends UserTest {
     @Test
     public void testAddMemberToGroup() throws Exception {
         Credentials cred = getContextAdminCredentials();
-        Group addgroup = getTestGroupObject("memberaddgroup" + VALID_CHAR_TESTGROUP + System.currentTimeMillis(), context, cred);
+        Group addgroup = GroupFactory.createGroup("memberaddgroup" + VALID_CHAR_TESTGROUP + System.currentTimeMillis());
         Group createdgroup = getGroupManager().createGroup(addgroup, context, cred);
         assertTrue("group id > 0 expected", createdgroup.getId() > 0);
 
@@ -284,7 +280,7 @@ public class GroupTest extends UserTest {
     @Test
     public void testAddMemberToGroupIdentifiedByName() throws Exception {
         Credentials cred = getContextAdminCredentials();
-        Group addgroup = getTestGroupObject("memberaddgroup" + VALID_CHAR_TESTGROUP + System.currentTimeMillis(), context, cred);
+        Group addgroup = GroupFactory.createGroup("memberaddgroup" + VALID_CHAR_TESTGROUP + System.currentTimeMillis());
         Group createdgroup = getGroupManager().createGroup(addgroup, context, cred);
         assertTrue("group id > 0 expected", createdgroup.getId() > 0);
 
@@ -312,7 +308,7 @@ public class GroupTest extends UserTest {
     @Test
     public void testAddMemberToGroupIdentifiedByID() throws Exception {
         Credentials cred = getContextAdminCredentials();
-        Group addgroup = getTestGroupObject("memberaddgroup" + VALID_CHAR_TESTGROUP + System.currentTimeMillis(), context, cred);
+        Group addgroup = GroupFactory.createGroup("memberaddgroup" + VALID_CHAR_TESTGROUP + System.currentTimeMillis());
         Group createdgroup = getGroupManager().createGroup(addgroup, context, cred);
         assertTrue("group id > 0 expected", createdgroup.getId() > 0);
 
@@ -339,7 +335,7 @@ public class GroupTest extends UserTest {
     @Test
     public void testRemoveMemberFromGroup() throws Exception {
         Credentials cred = getContextAdminCredentials();
-        Group addgroup = getTestGroupObject("memberaddgroup" + VALID_CHAR_TESTGROUP + System.currentTimeMillis(), context, cred);
+        Group addgroup = GroupFactory.createGroup("memberaddgroup" + VALID_CHAR_TESTGROUP + System.currentTimeMillis());
         Group createdgroup = getGroupManager().createGroup(addgroup, context, cred);
         assertTrue("group id > 0 expected", createdgroup.getId() > 0);
 
@@ -379,7 +375,7 @@ public class GroupTest extends UserTest {
     @Test
     public void testRemoveMemberFromGroupIdentifiedByName() throws Exception {
         Credentials cred = getContextAdminCredentials();
-        Group addgroup = getTestGroupObject("memberaddgroup" + VALID_CHAR_TESTGROUP + System.currentTimeMillis(), context, cred);
+        Group addgroup = GroupFactory.createGroup("memberaddgroup" + VALID_CHAR_TESTGROUP + System.currentTimeMillis());
         Group createdgroup = getGroupManager().createGroup(addgroup, context, cred);
         assertTrue("group id > 0 expected", createdgroup.getId() > 0);
 
@@ -422,7 +418,7 @@ public class GroupTest extends UserTest {
     @Test
     public void testRemoveMemberFromGroupIdentifiedByID() throws Exception {
         Credentials cred = getContextAdminCredentials();
-        Group addgroup = getTestGroupObject("memberaddgroup" + VALID_CHAR_TESTGROUP + System.currentTimeMillis(), context, cred);
+        Group addgroup = GroupFactory.createGroup("memberaddgroup" + VALID_CHAR_TESTGROUP + System.currentTimeMillis());
         Group createdgroup = getGroupManager().createGroup(addgroup, context, cred);
         assertTrue("group id > 0 expected", createdgroup.getId() > 0);
 
@@ -464,7 +460,7 @@ public class GroupTest extends UserTest {
     @Test
     public void testChangeGroup() throws Exception {
         Credentials cred = getContextAdminCredentials();
-        Group addgroup = getTestGroupObject("changed_this_group" + System.currentTimeMillis(), context, cred);
+        Group addgroup = GroupFactory.createGroup("changed_this_group" + System.currentTimeMillis());
         Group createdgroup = getGroupManager().createGroup(addgroup, context, cred);
         assertTrue("expected id > 0", createdgroup.getId() > 0);
 
@@ -494,7 +490,7 @@ public class GroupTest extends UserTest {
     @Test
     public void testChangeGroupIdentifiedbyID() throws Exception {
         Credentials cred = getContextAdminCredentials();
-        Group addgroup = getTestGroupObject("changed_this_group" + System.currentTimeMillis(), context, cred);
+        Group addgroup = GroupFactory.createGroup("changed_this_group" + System.currentTimeMillis());
         Group createdgroup = getGroupManager().createGroup(addgroup, context, cred);
         assertTrue("expected id > 0", createdgroup.getId() > 0);
 
@@ -526,7 +522,7 @@ public class GroupTest extends UserTest {
         // change group displayname and name to null, this must fail
 
         Credentials cred = getContextAdminCredentials();
-        Group addgroup = getTestGroupObject("changed_this_group" + System.currentTimeMillis(), context, cred);
+        Group addgroup = GroupFactory.createGroup("changed_this_group" + System.currentTimeMillis());
         Group createdgroup = getGroupManager().createGroup(addgroup, context, cred);
         assertTrue("expected id > 0", createdgroup.getId() > 0);
 
@@ -551,7 +547,7 @@ public class GroupTest extends UserTest {
     public void testChangeAllowedNull() throws Exception {
         // change group displayname and name to null, this must fail
         Credentials cred = getContextAdminCredentials();
-        Group addgroup = getTestGroupObject("changed_this_group" + System.currentTimeMillis(), context, cred);
+        Group addgroup = GroupFactory.createGroup("changed_this_group" + System.currentTimeMillis());
         Group createdgroup = getGroupManager().createGroup(addgroup, context, cred);
         assertTrue("expected id > 0", createdgroup.getId() > 0);
 
@@ -580,7 +576,7 @@ public class GroupTest extends UserTest {
     @Test
     public void testChangeGroupIdentifiedbyName() throws Exception {
         Credentials cred = getContextAdminCredentials();
-        Group addgroup = getTestGroupObject("changed_this_group" + System.currentTimeMillis(), context, cred);
+        Group addgroup = GroupFactory.createGroup("changed_this_group" + System.currentTimeMillis());
         Group createdgroup = getGroupManager().createGroup(addgroup, context, cred);
         assertTrue("expected id > 0", createdgroup.getId() > 0);
 
@@ -608,7 +604,7 @@ public class GroupTest extends UserTest {
     @Test
     public void testGetMembers() throws Exception {
         Credentials cred = getContextAdminCredentials();
-        Group addgroup = getTestGroupObject("memberaddgroup" + VALID_CHAR_TESTGROUP + System.currentTimeMillis(), context, cred);
+        Group addgroup = GroupFactory.createGroup("memberaddgroup" + VALID_CHAR_TESTGROUP + System.currentTimeMillis());
         Group createdgroup = getGroupManager().createGroup(addgroup, context, cred);
         assertTrue("group id > 0 expected", createdgroup.getId() > 0);
 
@@ -628,7 +624,7 @@ public class GroupTest extends UserTest {
     @Test
     public void testGetMembersByName() throws Exception {
         Credentials cred = getContextAdminCredentials();
-        Group addgroup = getTestGroupObject("memberaddgroup" + VALID_CHAR_TESTGROUP + System.currentTimeMillis(), context, cred);
+        Group addgroup = GroupFactory.createGroup("memberaddgroup" + VALID_CHAR_TESTGROUP + System.currentTimeMillis());
         Group createdgroup = getGroupManager().createGroup(addgroup, context, cred);
         assertTrue("group id > 0 expected", createdgroup.getId() > 0);
 
@@ -651,7 +647,7 @@ public class GroupTest extends UserTest {
     @Test
     public void testlistGroupsForUser() throws Exception {
         Credentials cred = getContextAdminCredentials();
-        Group addgroup = getTestGroupObject("memberaddgroup" + VALID_CHAR_TESTGROUP + System.currentTimeMillis(), context, cred);
+        Group addgroup = GroupFactory.createGroup("memberaddgroup" + VALID_CHAR_TESTGROUP + System.currentTimeMillis());
         Group createdgroup = getGroupManager().createGroup(addgroup, context, cred);
         assertTrue("group id > 0 expected", createdgroup.getId() > 0);
 
@@ -679,7 +675,7 @@ public class GroupTest extends UserTest {
     @Test
     public void testlistGroupsForUserByName() throws Exception {
         Credentials cred = getContextAdminCredentials();
-        Group addgroup = getTestGroupObject("memberaddgroup" + VALID_CHAR_TESTGROUP + System.currentTimeMillis(), context, cred);
+        Group addgroup = GroupFactory.createGroup("memberaddgroup" + VALID_CHAR_TESTGROUP + System.currentTimeMillis());
         Group createdgroup = getGroupManager().createGroup(addgroup, context, cred);
         assertTrue("group id > 0 expected", createdgroup.getId() > 0);
 
@@ -704,39 +700,12 @@ public class GroupTest extends UserTest {
         assertEquals("no right group", newgroup, remote_members[1]);
     }
 
-    private Group getTestGroupObject(Credentials cred) throws Exception {
-        return getTestGroupObject(VALID_CHAR_TESTGROUP + System.currentTimeMillis(), context, cred);
-    }
-
-    public static Group getTestGroupObject(String ident, Context context, Credentials cred) throws Exception {
-        Group grp = new Group();
-        grp.setDisplayname("display name " + ident);
-        grp.setName(ident);
-        return grp;
-    }
-
     private void createChangeGroupData(Group group) {
         if (group.getDisplayname() != null) {
             group.setDisplayname(group.getDisplayname() + change_suffix);
         }
         if (group.getName() != null) {
             group.setName(group.getName() + change_suffix);
-        }
-    }
-
-    public static void compareGroup(Group a, Group b) {
-        System.out.println("GROUPA" + a.toString());
-        System.out.println("GROUPB" + b.toString());
-
-        assertEquals("displayname not equal", a.getDisplayname(), b.getDisplayname());
-        assertEquals("name not equal", a.getName(), b.getName());
-        assertArrayEquals("members not equal", a.getMembers(), b.getMembers());
-        assertEquals("id not equal", a.getId(), b.getId());
-
-        Collection<OXCommonExtensionInterface> aexts = a.getAllExtensionsAsHash().values();
-        Collection<OXCommonExtensionInterface> bexts = b.getAllExtensionsAsHash().values();
-        if (aexts.size() == bexts.size()) {
-            aexts.containsAll(bexts);
         }
     }
 

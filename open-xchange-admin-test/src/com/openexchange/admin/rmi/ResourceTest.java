@@ -57,7 +57,6 @@ import org.junit.Test;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Resource;
 import com.openexchange.admin.rmi.exceptions.NoSuchResourceException;
-import com.openexchange.admin.rmi.manager.ContextManager;
 import com.openexchange.admin.rmi.manager.ResourceManager;
 
 /**
@@ -85,8 +84,7 @@ public class ResourceTest extends AbstractTest {
     @Override
     public void setUp() throws Exception {
         super.setUp();
-        ContextManager cm = ContextManager.getInstance(getRMIHostUrl(), getMasterAdminCredentials());
-        context = cm.createContext(getContextAdminCredentials());
+        context = getContextManager().createContext(getContextAdminCredentials());
     }
 
     /*
@@ -96,7 +94,7 @@ public class ResourceTest extends AbstractTest {
      */
     @Override
     public void tearDown() throws Exception {
-        ContextManager.getInstance(getRMIHostUrl(), getMasterAdminCredentials()).cleanUp();
+        getContextManager().cleanUp();
         super.tearDown();
     }
 

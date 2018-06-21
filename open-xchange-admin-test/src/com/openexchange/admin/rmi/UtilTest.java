@@ -56,8 +56,6 @@ import org.junit.Test;
 import com.openexchange.admin.rmi.dataobjects.Database;
 import com.openexchange.admin.rmi.dataobjects.MaintenanceReason;
 import com.openexchange.admin.rmi.dataobjects.Server;
-import com.openexchange.admin.rmi.manager.MaintenanceReasonManager;
-import com.openexchange.admin.rmi.manager.ServerManager;
 
 /**
  * {@link UtilTest}
@@ -129,7 +127,7 @@ public class UtilTest extends AbstractTest {
     }
 
     /**
-     * Tests server unregistration
+     * Tests server un-registration
      */
     @Test
     public void testUnregisterServer() throws Exception {
