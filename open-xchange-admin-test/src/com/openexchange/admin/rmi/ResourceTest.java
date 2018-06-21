@@ -57,7 +57,6 @@ import org.junit.Test;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Resource;
 import com.openexchange.admin.rmi.exceptions.NoSuchResourceException;
-import com.openexchange.admin.rmi.manager.ResourceManager;
 
 /**
  * {@link ResourceTest}
@@ -391,14 +390,4 @@ public class ResourceTest extends AbstractTest {
         res.setName(name);
         return res;
     }
-
-    /**
-     * Returns the {@link ResourceManager}
-     * 
-     * @return the {@link ResourceManager}
-     */
-    private ResourceManager getResourceManager() {
-        return ResourceManager.getInstance(getRMIHostUrl(), getMasterAdminCredentials());
-    }
-
 }

@@ -195,15 +195,12 @@ public class AdditionalRMITests extends AbstractRMITest {
     public void testGetOxGroups() throws Exception {
         Context updatedContext = ci.getData(context, superAdminCredentials);
 
-        OXUserInterface userInterface = getUserInterface();
-        OXGroupInterface groupInterface = getGroupInterface();
-
         User myUser = new User();
         myUser.setName(myUserName);
-        User[] returnedUsers = userInterface.getData(updatedContext, new User[] { myUser }, adminCredentials);
+        User[] returnedUsers = getUserManager().getData(updatedContext, new User[] { myUser }, adminCredentials);
         assertEquals(Integer.valueOf(1), Integer.valueOf(returnedUsers.length));
         User myUpdatedUser = returnedUsers[0];
-        Group[] allGroups = groupInterface.listAll(context, adminCredentials);
+        Group[] allGroups = getGroupManager().listAllGroups(context, adminCredentials);
 
         assertTrue("User's ID group should be found in a group", any(allGroups, myUpdatedUser.getId(), new Verifier<Group, Integer>() {
 
@@ -221,11 +218,10 @@ public class AdditionalRMITests extends AbstractRMITest {
     public void testGetOxResources() throws Exception {
         Resource res = getTestResource();
 
-        OXResourceInterface resInterface = getResourceInterface();
-        testResource = resInterface.create(context, res, adminCredentials);
+        testResource = getResourceManager().createResource(res, context, adminCredentials);
 
         try {
-            List<Resource> allResources = Arrays.asList(resInterface.listAll(context, adminCredentials));
+            List<Resource> allResources = Arrays.asList(getResourceManager().listAllResources(context, adminCredentials));
             assertTrue("Should contain our trusty test resource", any(allResources, res, new Verifier<Resource, Resource>() {
 
                 @Override
@@ -235,7 +231,7 @@ public class AdditionalRMITests extends AbstractRMITest {
             }));
         } finally {
             try {
-                resInterface.delete(context, testResource, adminCredentials);
+                getResourceManager().deleteResource(testResource, context, adminCredentials);
             } catch (NoSuchResourceException e) {
                 // don't do anything, has been removed already, right?
                 System.out.println("Resource was removed already");
@@ -273,14 +269,13 @@ public class AdditionalRMITests extends AbstractRMITest {
         UserModuleAccess access = new UserModuleAccess();
 
         boolean userCreated = false;
-        OXUserInterface userInterface = getUserInterface();
         try {
-            myNewUser = userInterface.create(context, myNewUser, access, adminCredentials);// required line for test
+            myNewUser = getUserManager().createUser(context, myNewUser, access, adminCredentials);// required line for test
             userCreated = true;
             assertUserWasCreatedProperly(myNewUser, context, adminCredentials);
         } finally {
             if (userCreated) {
-                userInterface.delete(context, myNewUser, null, adminCredentials);
+                getUserManager().deleteUser(context, myNewUser, null);
             }
         }
     }
@@ -290,16 +285,15 @@ public class AdditionalRMITests extends AbstractRMITest {
      */
     @Test
     public void testCreateOxGroup() throws Exception {
-        OXGroupInterface groupInterface = getGroupInterface();
         boolean groupCreated = false;
         Group group = newGroup("groupdisplayname", "groupname");
         try {
-            group = groupInterface.create(context, group, adminCredentials);// required line for test
+            group = getGroupManager().createGroup(group, context, adminCredentials);// required line for test
             groupCreated = true;
             assertGroupWasCreatedProperly(group, context, adminCredentials);
         } finally {
             if (groupCreated) {
-                groupInterface.delete(context, group, adminCredentials);
+                getGroupManager().createGroup(group, context, adminCredentials);
             }
         }
     }
@@ -346,22 +340,21 @@ public class AdditionalRMITests extends AbstractRMITest {
 
     @Test
     public void testUpdateOxGroup() throws Exception {
-        OXGroupInterface groupInterface = getGroupInterface();
         boolean groupCreated = false;
         Group group = newGroup("groupdisplayname", "groupname");
         try {
-            group = groupInterface.create(context, group, adminCredentials);
+            group = getGroupManager().createGroup(group, context, adminCredentials);
             groupCreated = true;
             Group groupChange = new Group();
             groupChange.setId(group.getId());
             groupChange.setName("changed groupname");
-            groupInterface.change(context, groupChange, adminCredentials);// required line for test
-            group = groupInterface.getData(context, group, adminCredentials);// update
+            getGroupManager().changeGroup(groupChange, context, adminCredentials);// required line for test
+            group = getGroupManager().getData(group, context, adminCredentials);// update
 
             assertEquals("Name should have been changed", group.getName(), groupChange.getName());
         } finally {
             if (groupCreated) {
-                groupInterface.delete(context, group, adminCredentials);
+                getGroupManager().deleteGroup(group, context, adminCredentials);
             }
         }
     }
@@ -507,11 +500,10 @@ public class AdditionalRMITests extends AbstractRMITest {
 
     @Test
     public void testNoSuchGroupException() throws Exception {
-        OXGroupInterface groupInterface = getGroupInterface();
         Group missingGroup = new Group();
         missingGroup.setId(Integer.valueOf(Integer.MAX_VALUE));
         try {
-            groupInterface.delete(context, missingGroup, adminCredentials);
+            getGroupManager().deleteGroup(missingGroup, context, adminCredentials);
             fail("Expected NoSuchGroupException");
         } catch (NoSuchGroupException e) {
             assertTrue("Caught exception", true);
@@ -520,11 +512,10 @@ public class AdditionalRMITests extends AbstractRMITest {
 
     @Test
     public void testNoSuchResourceException() throws Exception {
-        OXResourceInterface resInterface = getResourceInterface();
         Resource missingResource = new Resource();
         missingResource.setId(Integer.valueOf(Integer.MAX_VALUE));
         try {
-            resInterface.delete(context, missingResource, adminCredentials);
+            getResourceManager().deleteResource(missingResource, context, adminCredentials);
             fail("Expected NoSuchResourceException");
         } catch (NoSuchResourceException e) {
             assertTrue("Caught exception", true);

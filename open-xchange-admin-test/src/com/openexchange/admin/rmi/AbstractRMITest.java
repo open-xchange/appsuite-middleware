@@ -98,11 +98,10 @@ public abstract class AbstractRMITest extends AbstractTest {
         superAdminContext = getTestContextObject(superAdminCredentials);
     }
 
-    public User getAdminData() throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, NoSuchUserException, DatabaseUpdateException, MalformedURLException, NotBoundException {
+    public User getAdminData() throws Exception {
         User admin = new User();
         admin.setId(Integer.valueOf(2));
-        OXUserInterface userInterface = getUserInterface();
-        admin = userInterface.getData(adminContext, admin, adminCredentials);
+        admin = getUserManager().getData(adminContext, admin, adminCredentials);
         return admin;
     }
 
@@ -149,26 +148,23 @@ public abstract class AbstractRMITest extends AbstractTest {
     /*** Asserting proper creation by comparing data in the database with given one ***/
 
     public void assertUserWasCreatedProperly(User expected, Context context, Credentials credentials) throws Exception {
-        OXUserInterface userInterface = getUserInterface();
         User lookupUser = new User();
         lookupUser.setId(expected.getId());
-        lookupUser = userInterface.getData(context, lookupUser, credentials);
+        lookupUser = getUserManager().getData(context, lookupUser, credentials);
         assertUserEquals(expected, lookupUser);
     }
 
     public void assertGroupWasCreatedProperly(Group expected, Context context, Credentials credentials) throws Exception {
-        OXGroupInterface groupInterface = getGroupInterface();
         Group lookup = new Group();
         lookup.setId(expected.getId());
-        lookup = groupInterface.getData(context, lookup, credentials);
+        lookup = getGroupManager().getData(lookup, context, credentials);
         assertGroupEquals(expected, lookup);
     }
 
     public void assertResourceWasCreatedProperly(Resource expected, Context context, Credentials credentials) throws Exception {
-        OXResourceInterface resInterface = getResourceInterface();
         Resource lookup = new Resource();
         lookup.setId(expected.getId());
-        lookup = resInterface.getData(context, lookup, credentials);
+        lookup = getResourceManager().getData(lookup, context, credentials);
         assertResourceEquals(expected, lookup);
     }
 
@@ -213,10 +209,6 @@ public abstract class AbstractRMITest extends AbstractTest {
     }
 
     /*** Interfaces ***/
-
-    public OXGroupInterface getGroupInterface() throws MalformedURLException, RemoteException, NotBoundException {
-        return (OXGroupInterface) Naming.lookup(getRMIHostUrl() + OXGroupInterface.RMI_NAME);
-    }
 
     public OXUserInterface getUserInterface() throws MalformedURLException, RemoteException, NotBoundException {
         return (OXUserInterface) Naming.lookup(getRMIHostUrl() + OXUserInterface.RMI_NAME);

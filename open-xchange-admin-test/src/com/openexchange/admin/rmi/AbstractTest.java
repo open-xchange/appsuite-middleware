@@ -57,7 +57,9 @@ import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.dataobjects.Filestore;
 import com.openexchange.admin.rmi.manager.ContextManager;
 import com.openexchange.admin.rmi.manager.DatabaseManager;
+import com.openexchange.admin.rmi.manager.GroupManager;
 import com.openexchange.admin.rmi.manager.MaintenanceReasonManager;
+import com.openexchange.admin.rmi.manager.ResourceManager;
 import com.openexchange.admin.rmi.manager.ServerManager;
 import com.openexchange.admin.rmi.manager.UserManager;
 import com.openexchange.configuration.AJAXConfig;
@@ -217,6 +219,24 @@ public abstract class AbstractTest {
      */
     protected MaintenanceReasonManager getMaintenanceReasonManager() {
         return MaintenanceReasonManager.getInstance(getRMIHostUrl(), getMasterAdminCredentials());
+    }
+
+    /**
+     * Gets the {@link GroupManager}
+     * 
+     * @return the {@link GroupManager}
+     */
+    protected GroupManager getGroupManager() {
+        return GroupManager.getInstance(getRMIHostUrl(), getMasterAdminCredentials());
+    }
+
+    /**
+     * Gets the {@link ResourceManager}
+     * 
+     * @return the {@link ResourceManager}
+     */
+    protected ResourceManager getResourceManager() {
+        return ResourceManager.getInstance(getRMIHostUrl(), getMasterAdminCredentials());
     }
 
     //TODO: reference a created context and not some hard-coded id.... 

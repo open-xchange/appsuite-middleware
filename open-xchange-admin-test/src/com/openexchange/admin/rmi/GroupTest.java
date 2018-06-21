@@ -62,7 +62,6 @@ import com.openexchange.admin.rmi.dataobjects.UserModuleAccess;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 import com.openexchange.admin.rmi.factory.GroupFactory;
 import com.openexchange.admin.rmi.factory.UserFactory;
-import com.openexchange.admin.rmi.manager.GroupManager;
 
 /**
  *
@@ -707,14 +706,5 @@ public class GroupTest extends UserTest {
         if (group.getName() != null) {
             group.setName(group.getName() + change_suffix);
         }
-    }
-
-    /**
-     * Returns the {@link GroupManager} instance
-     * 
-     * @return the {@link GroupManager} instance
-     */
-    private GroupManager getGroupManager() {
-        return GroupManager.getInstance(getRMIHostUrl(), getMasterAdminCredentials());
     }
 }
