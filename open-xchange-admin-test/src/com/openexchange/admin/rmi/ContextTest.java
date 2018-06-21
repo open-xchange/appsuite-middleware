@@ -74,7 +74,7 @@ import com.openexchange.admin.rmi.factory.ContextFactory;
  * @author d7
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class ContextTest extends AbstractTest {
+public class ContextTest extends AbstractRMITest {
 
     /**
      * Initialises a new {@link ContextTest}.

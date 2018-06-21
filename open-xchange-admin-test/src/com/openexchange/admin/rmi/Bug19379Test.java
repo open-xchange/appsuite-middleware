@@ -66,7 +66,7 @@ import com.openexchange.admin.rmi.exceptions.StorageException;
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public class Bug19379Test extends AbstractTest {
+public class Bug19379Test extends AbstractRMITest {
 
     @Test
     public void testAddSingleMapping() throws Exception {

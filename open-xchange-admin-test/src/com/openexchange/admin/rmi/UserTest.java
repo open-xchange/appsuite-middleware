@@ -87,7 +87,7 @@ import com.openexchange.java.util.TimeZones;
  * @author d7
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class UserTest extends AbstractTest {
+public class UserTest extends AbstractRMITest {
 
     public final String NAMED_ACCESS_COMBINATION_BASIC = "all";
 

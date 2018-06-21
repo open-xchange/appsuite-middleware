@@ -91,7 +91,7 @@ public abstract class AbstractRMITest extends AbstractTest {
         superAdmin = newUser(superAdminCredentials.getLogin(), superAdminCredentials.getPassword(), "ContextCreatingAdmin", "Ad", "Min", "adminmaster@ox.invalid");
         superAdminContext = getTestContextObject(superAdminCredentials);
     }
-
+    
     public User getAdminData() throws Exception {
         User admin = new User();
         admin.setId(Integer.valueOf(2));

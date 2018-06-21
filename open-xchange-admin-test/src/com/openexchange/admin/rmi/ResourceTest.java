@@ -64,7 +64,7 @@ import com.openexchange.admin.rmi.exceptions.NoSuchResourceException;
  * @author cutmasta
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class ResourceTest extends AbstractTest {
+public class ResourceTest extends AbstractRMITest {
 
     private Context context;
 

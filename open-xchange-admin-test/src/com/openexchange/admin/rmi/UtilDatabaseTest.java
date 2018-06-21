@@ -59,7 +59,7 @@ import com.openexchange.admin.rmi.dataobjects.Database;
 /**
  * @author cutmasta
  */
-public class UtilDatabaseTest extends AbstractTest {
+public class UtilDatabaseTest extends AbstractRMITest {
 
     private Database client_db;
 

@@ -59,7 +59,7 @@ import com.openexchange.admin.rmi.dataobjects.Context;
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public final class Bug27065Test extends AbstractTest {
+public final class Bug27065Test extends AbstractRMITest {
 
     private Context context;
 

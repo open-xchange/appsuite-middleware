@@ -63,7 +63,7 @@ import com.openexchange.admin.rmi.dataobjects.Server;
  * @author cutmasta
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class UtilTest extends AbstractTest {
+public class UtilTest extends AbstractRMITest {
 
     /**
      * Initialises a new {@link UtilTest}.

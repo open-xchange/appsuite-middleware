@@ -51,9 +51,7 @@ package com.openexchange.admin.rmi;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import java.rmi.Naming;
 import org.junit.Test;
-import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.dataobjects.Database;
 
 /**
@@ -61,7 +59,7 @@ import com.openexchange.admin.rmi.dataobjects.Database;
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public final class Bug16865Test extends AbstractTest {
+public final class Bug16865Test extends AbstractRMITest {
 
     /**
      * Initialises a new {@link Bug16865Test}.
@@ -72,9 +70,6 @@ public final class Bug16865Test extends AbstractTest {
 
     @Test
     public void testDefaultInitial() throws Throwable {
-        Credentials cred = ContextTest.getMasterAdminCredentials();
-        String host = AbstractRMITest.getRMIHostUrl();
-        OXUtilInterface util = (OXUtilInterface) Naming.lookup(host + OXUtilInterface.RMI_NAME);
         Database db = new Database();
         db.setName("test" + System.currentTimeMillis());
         db.setPassword("secret");
@@ -90,7 +85,7 @@ public final class Bug16865Test extends AbstractTest {
             assertNotNull("Just registered database not found.", test);
             assertEquals("Initial number of database connections must be zero by default.", Integer.valueOf(0), test.getPoolInitial());
         } finally {
-            util.unregisterDatabase(created, cred);
+            getDatabaseManager().unregisterDatabase(created);
         }
     }
 }
