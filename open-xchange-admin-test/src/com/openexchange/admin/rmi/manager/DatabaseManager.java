@@ -167,7 +167,7 @@ public class DatabaseManager extends AbstractManager {
             unregisterDatabase(database);
             return true;
         } catch (Exception e) {
-            LOG.error("The database '{}' could not be unregistered!", database.getId());
+            LOG.error("The database '{}' could not be unregistered!", database.getId(), e);
             return false;
         }
     }
