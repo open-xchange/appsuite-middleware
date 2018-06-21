@@ -346,6 +346,9 @@ public class UserTest extends AbstractTest {
         }
     }
 
+    /**
+     * Tests getting all user data for a user by searching by the user's name
+     */
     @Test
     public void testGetDataByName() throws Exception {
         Credentials cred = getContextAdminCredentials();
