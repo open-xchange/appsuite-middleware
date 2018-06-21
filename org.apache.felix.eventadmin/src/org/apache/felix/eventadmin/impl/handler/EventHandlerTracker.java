@@ -228,14 +228,13 @@ public class EventHandlerTracker extends ServiceTracker<EventHandler, EventHandl
 	 * @return All handlers for the event
 	 */
 	public Collection<EventHandlerProxy> getHandlers(final Event event) {
-	    final String topic = event.getTopic();
-
 		final Set<EventHandlerProxy> handlers = new HashSet<EventHandlerProxy>();
 
 		// Add all handlers matching everything
         this.checkHandlerAndAdd(handlers, this.matchingAllEvents, event);
 
 		// Now check for prefix matches
+        String topic = event.getTopic();
 		if ( !this.matchingPrefixTopic.isEmpty() )
 		{
 		    int pos = topic.lastIndexOf('/');
