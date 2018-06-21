@@ -118,7 +118,6 @@ public class MaintenanceReasonManager extends AbstractManager {
     public void deleteMaintenanceReason(MaintenanceReason maintenanceReason) throws Exception {
         OXUtilInterface utilInterface = getUtilInterface();
         utilInterface.deleteMaintenanceReason(new MaintenanceReason[] { maintenanceReason }, getMasterCredentials());
-        managedObjects.remove(maintenanceReason.getId());
     }
 
     /*
