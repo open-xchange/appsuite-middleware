@@ -985,6 +985,11 @@ public class RdbUserStorage extends UserStorage {
 
     @Override
     public void setAttribute(Connection con, String name, String value, int userId, Context context) throws OXException {
+        if (null == con) {
+            setAttributeAndReturnUser(name, value, userId, context, false);
+            return;
+        }
+
         if (value == null) {
             deleteAttribute(name, userId, context, con);
         } else {
