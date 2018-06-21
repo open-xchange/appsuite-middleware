@@ -63,8 +63,15 @@ import com.openexchange.admin.rmi.dataobjects.Database;
  */
 public final class Bug16865Test extends AbstractTest {
 
-     @Test
-     public void testDefaultInitial() throws Throwable {
+    /**
+     * Initialises a new {@link Bug16865Test}.
+     */
+    public Bug16865Test() {
+        super();
+    }
+
+    @Test
+    public void testDefaultInitial() throws Throwable {
         Credentials cred = ContextTest.getMasterAdminCredentials();
         String host = AbstractRMITest.getRMIHostUrl();
         OXUtilInterface util = (OXUtilInterface) Naming.lookup(host + OXUtilInterface.RMI_NAME);
@@ -72,10 +79,10 @@ public final class Bug16865Test extends AbstractTest {
         db.setName("test" + System.currentTimeMillis());
         db.setPassword("secret");
         db.setMaster(Boolean.TRUE);
-        Database created = util.registerDatabase(db, Boolean.FALSE, Integer.valueOf(0), cred);
+        Database created = getDatabaseManager().registerDatabase(db, Boolean.FALSE, Integer.valueOf(0));
         try {
             Database test = null;
-            for (Database tmpDB : util.listAllDatabase(cred)) {
+            for (Database tmpDB : getDatabaseManager().listAllDatabases()) {
                 if (tmpDB.getName().equals(db.getName())) {
                     test = tmpDB;
                 }

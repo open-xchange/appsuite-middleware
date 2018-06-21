@@ -139,6 +139,18 @@ public class DatabaseManager extends AbstractManager {
         return utilInterface.listDatabase(searchPattern, getMasterCredentials());
     }
 
+    /**
+     * Lists all databases
+     * 
+     * @param searchPattern The search pattern
+     * @return An array with all found {@link Database}s
+     * @throws Exception if an error is occurred
+     */
+    public Database[] listAllDatabases() throws Exception {
+        OXUtilInterface utilInterface = getUtilInterface();
+        return utilInterface.listAllDatabase(getMasterCredentials());
+    }
+
     /*
      * (non-Javadoc)
      * 
