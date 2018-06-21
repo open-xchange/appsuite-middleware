@@ -90,10 +90,6 @@ public abstract class AbstractRMITest {
     protected static String TEST_DOMAIN = "example.org";
     protected static String change_suffix = "-changed";
 
-    public static String ctxid = "666";
-
-    public String prefix = "/opt/open-xchange/sbin/";
-
     public Credentials adminCredentials;
     public Credentials superAdminCredentials;
     public Context adminContext;
@@ -186,7 +182,7 @@ public abstract class AbstractRMITest {
      * 
      * @return The <code>oxadminmaster</code> {@link Credentials}
      */
-    public static Credentials getMasterAdminCredentials() {
+    private static Credentials getMasterAdminCredentials() {
         String mpw = "secret";
         if (System.getProperty("rmi_test_masterpw") != null) {
             mpw = System.getProperty("rmi_test_masterpw");

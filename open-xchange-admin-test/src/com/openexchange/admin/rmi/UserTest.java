@@ -554,7 +554,6 @@ public class UserTest extends AbstractRMITest {
         Credentials cred = getContextAdminCredentials();
 
         Filestore fs = null;
-        Credentials master = getMasterAdminCredentials();
 
         UserModuleAccess client_access = new UserModuleAccess();
         User usr = UserFactory.createUser(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, TEST_DOMAIN, context);
@@ -562,7 +561,7 @@ public class UserTest extends AbstractRMITest {
         try {
             User createduser = getUserManager().createUser(context, usr, client_access, cred);
             //test if filestore already exists
-            Filestore[] filestores = oxutil.listFilestore("file:///", master, true);
+            Filestore[] filestores = oxutil.listFilestore("file:///", superAdminCredentials, true);
             if (filestores != null && filestores.length != 0) {
                 if (filestores.length != 1) {
                     fail("Unexpected failure. Multiple filestores already exists.");
@@ -578,7 +577,7 @@ public class UserTest extends AbstractRMITest {
                 fs.setSize(1024l);
                 fs.setUrl("file:///");
 
-                fs = oxutil.registerFilestore(fs, master);
+                fs = oxutil.registerFilestore(fs, superAdminCredentials);
             }
             //move user to new filestore
             getUserManager().moveFromContextToUserFilestore(context, usr, fs, 10, cred);
@@ -599,7 +598,7 @@ public class UserTest extends AbstractRMITest {
         } finally {
             getUserManager().deleteUser(context, usr, cred);
             if (fs != null) {
-                oxutil.unregisterFilestore(fs, master);
+                oxutil.unregisterFilestore(fs, superAdminCredentials);
             }
         }
     }

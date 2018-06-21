@@ -130,7 +130,7 @@ public class ContextTest extends AbstractRMITest {
     @Test
     public void testListContextByFilestore() throws Exception {
         OXUtilInterface oxu = (OXUtilInterface) Naming.lookup(getRMIHostUrl() + OXUtilInterface.RMI_NAME);
-        Filestore[] fiss = oxu.listFilestore("*", getMasterAdminCredentials());
+        Filestore[] fiss = oxu.listFilestore("*", superAdminCredentials);
         if (fiss.length <= 0) {
             fail("No databases found.");
         }
@@ -149,7 +149,7 @@ public class ContextTest extends AbstractRMITest {
      */
     @Test
     public void testCreateContext() throws Exception {
-        getContextManager().createContext(getMasterAdminCredentials());
+        getContextManager().createContext(superAdminCredentials);
     }
 
     /**
@@ -178,7 +178,7 @@ public class ContextTest extends AbstractRMITest {
      */
     @Test
     public void testDeleteContext() throws Exception {
-        Context context = getContextManager().createContext(getMasterAdminCredentials());
+        Context context = getContextManager().createContext(superAdminCredentials);
         getContextManager().deleteContext(context);
     }
 

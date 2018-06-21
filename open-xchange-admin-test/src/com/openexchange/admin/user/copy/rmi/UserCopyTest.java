@@ -174,7 +174,7 @@ public class UserCopyTest extends AbstractRMITest {
     public final void testUserExists() throws Exception {
         final OXUserCopyInterface oxu = getUserCopyClient();
         final User srcUser = createUser(srcCtx);
-        final User dstUser = createUser(dstCtx);
+        createUser(dstCtx);
         try {
             oxu.copyUser(srcUser, srcCtx, dstCtx, superAdminCredentials);
             fail("No exception thrown");

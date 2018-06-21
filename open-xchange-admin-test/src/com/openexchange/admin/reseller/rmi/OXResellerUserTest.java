@@ -88,11 +88,9 @@ public class OXResellerUserTest extends OXResellerAbstractTest {
 
     @Test
     public void testCreateTooManyOverallUser() throws MalformedURLException, RemoteException, NotBoundException, InvalidDataException, StorageException, InvalidCredentialsException, OXResellerException, ContextExistsException, NoSuchContextException, DatabaseUpdateException {
-        final Credentials creds = getMasterAdminCredentials();
-
         ResellerAdmin adm = RandomAdmin();
         adm.setRestrictions(new Restriction[] { MaxOverallUserRestriction(6) });
-        oxresell.create(adm, creds);
+        oxresell.create(adm, superAdminCredentials);
         try {
             Stack<Context> ctxstack = new Stack<Context>();
             Credentials resellerRandomCredentials = ResellerRandomCredentials(adm.getName());
@@ -121,7 +119,7 @@ public class OXResellerUserTest extends OXResellerAbstractTest {
                 }
             }
         } finally {
-            oxresell.delete(adm, getMasterAdminCredentials());
+            oxresell.delete(adm, superAdminCredentials);
         }
     }
 
@@ -130,7 +128,7 @@ public class OXResellerUserTest extends OXResellerAbstractTest {
         ResellerAdmin adm = RandomAdmin();
         final Credentials creds = ResellerRandomCredentials(adm.getName());
 
-        oxresell.create(adm, getMasterAdminCredentials());
+        oxresell.create(adm, superAdminCredentials);
         try {
             Context ctx = createContext(creds);
             try {
@@ -161,7 +159,7 @@ public class OXResellerUserTest extends OXResellerAbstractTest {
                 deleteContext(ctx, creds);
             }
         } finally {
-            oxresell.delete(adm, getMasterAdminCredentials());
+            oxresell.delete(adm, superAdminCredentials);
         }
     }
 
@@ -174,7 +172,7 @@ public class OXResellerUserTest extends OXResellerAbstractTest {
         ResellerAdmin adm = RandomAdmin();
         final Credentials creds = ResellerRandomCredentials(adm.getName());
 
-        oxresell.create(adm, getMasterAdminCredentials());
+        oxresell.create(adm, superAdminCredentials);
         try {
             Context ctx = createContext(creds);
             try {
@@ -243,7 +241,7 @@ public class OXResellerUserTest extends OXResellerAbstractTest {
                 deleteContext(ctx, creds);
             }
         } finally {
-            oxresell.delete(adm, getMasterAdminCredentials());
+            oxresell.delete(adm, superAdminCredentials);
         }
     }
 }
