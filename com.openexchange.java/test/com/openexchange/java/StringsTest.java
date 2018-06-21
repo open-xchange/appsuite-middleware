@@ -49,6 +49,7 @@
 
 package com.openexchange.java;
 
+import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 
 
@@ -58,6 +59,9 @@ import org.junit.Test;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class StringsTest {
+    
+    private static final String REPLACE_TEST = "/ajax/image/mail/picture?folder=default0%2FINBOX%2FDrafts&amp;id=45&amp;uid=34c8e615-fa54-45c2-973b-37b032af8bcd";
+    private static final String REPLACE_RESULT = "/ajax/image/mail/picture?folder=default0%2FINBOX%2FDrafts&id=45&uid=34c8e615-fa54-45c2-973b-37b032af8bcd";
 
     /**
      * Initializes a new {@link StringsTest}.
@@ -74,6 +78,18 @@ public class StringsTest {
 
         String[] expecteds = new String[] { "This", "is", "a", "string", "that", "\"will \\\"be\"", "highlighted", "when", "your", "\"super-'mega'-duper\"", "'regular expr\\'ession'", "matches", "something", "'really \"heavy\" cool'." };
         org.junit.Assert.assertArrayEquals("Unexpected array content", expecteds, tokens);
+    }
+    
+    @Test
+    public final void testReplaceSequenceWith_Char() {
+        String replaceSequenceWith = Strings.replaceSequenceWith(REPLACE_TEST, "&amp;", '&');
+        assertTrue("Strings do not match", replaceSequenceWith.equals(REPLACE_RESULT));
+    }
+    
+    @Test
+    public final void testReplaceSequenceWith_String() {
+        String replaceSequenceWith = Strings.replaceSequenceWith(REPLACE_TEST, "&amp;", "&");
+        assertTrue("Strings do not match", replaceSequenceWith.equals(REPLACE_RESULT));
     }
 
 }
