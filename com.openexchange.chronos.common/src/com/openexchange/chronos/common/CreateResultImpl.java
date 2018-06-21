@@ -49,6 +49,7 @@
 
 package com.openexchange.chronos.common;
 
+import java.util.Objects;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.service.CreateResult;
 
@@ -87,4 +88,17 @@ public class CreateResultImpl implements CreateResult {
         return "CreateResult [createdEvent=" + createdEvent + "]";
     }
 
+    @Override
+    public int hashCode() {
+        return Objects.hash(createdEvent);
+    }
+
+    @Override
+    public boolean equals(Object other) {
+        if (null != other && CreateResult.class.isInstance(other)) {
+            CreateResult otherCreateResult = (CreateResult) other;
+            return Objects.equals(createdEvent, otherCreateResult.getCreatedEvent());
+        }
+        return false;
+    }
 }

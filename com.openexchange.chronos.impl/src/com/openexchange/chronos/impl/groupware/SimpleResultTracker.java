@@ -53,12 +53,13 @@ import java.sql.Connection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedList;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.google.common.collect.Lists;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.common.DeleteResultImpl;
 import com.openexchange.chronos.common.UpdateResultImpl;
@@ -88,9 +89,9 @@ class SimpleResultTracker {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SimpleResultTracker.class);
 
-    private List<UpdateResult>          updateResults;
-    private List<DeleteResult>          deleteResults;
-    private Set<String>                 affectedFolders;
+    private Set<UpdateResult> updateResults;
+    private Set<DeleteResult> deleteResults;
+    private Set<String> affectedFolders;
     private Set<CalendarHandler> calendarHandlers;
 
     /**
@@ -100,8 +101,8 @@ class SimpleResultTracker {
      */
     public SimpleResultTracker(Set<CalendarHandler> calendarHandlers) {
         super();
-        this.updateResults = new LinkedList<>();
-        this.deleteResults = new LinkedList<>();
+        this.updateResults = new LinkedHashSet<>();
+        this.deleteResults = new LinkedHashSet<>();
         this.affectedFolders = new HashSet<>();
         this.calendarHandlers = calendarHandlers;
     }
@@ -118,7 +119,7 @@ class SimpleResultTracker {
     public void notifyCalenderHandlers(Connection connection, Context context, Session session, EntityResolver entityResolver, CalendarParameters parameters) {
         Map<Integer, List<String>> affectedFoldersPerUser = getAffectedFoldersPerUser(context, connection, entityResolver);
         if (false == affectedFoldersPerUser.isEmpty()) {
-            DefaultCalendarEvent calendarEvent = new DefaultCalendarEvent(context.getContextId(), CalendarAccount.DEFAULT_ACCOUNT.getAccountId(), -1, session, affectedFoldersPerUser, Collections.emptyList(), updateResults, deleteResults, parameters);
+            DefaultCalendarEvent calendarEvent = new DefaultCalendarEvent(context.getContextId(), CalendarAccount.DEFAULT_ACCOUNT.getAccountId(), -1, session, affectedFoldersPerUser, Collections.emptyList(), Lists.newArrayList(updateResults), Lists.newArrayList(deleteResults), parameters);
             for (CalendarHandler handler : calendarHandlers) {
                 handler.handle(calendarEvent);
             }

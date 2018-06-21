@@ -51,6 +51,7 @@ package com.openexchange.chronos;
 
 import java.util.EnumSet;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * {@link Attendee}
@@ -619,4 +620,19 @@ public class Attendee extends CalendarUser {
         return "Attendee [cuType=" + cuType + ", partStat=" + partStat + ", uri=" + uri + ", entity=" + entity + "]";
     }
 
+    @Override
+    public int hashCode() {
+        return Objects.hash(cuType, role, partStat, comment, rsvp, folderId, member, transp, extendedParameters, setFields);
+    }
+
+    @Override
+    public boolean equals(Object other) {
+        if (super.equals(other) && null != other && Attendee.class.isInstance(other)) {
+            Attendee otherAttendee = (Attendee) other;
+            return Objects.equals(cuType, otherAttendee.getCuType()) && Objects.equals(role, otherAttendee.getRole()) && Objects.equals(partStat, otherAttendee.getPartStat()) && Objects.equals(comment, otherAttendee.getComment()) && 
+                Objects.equals(rsvp, otherAttendee.getRsvp()) && Objects.equals(folderId, otherAttendee.getFolderId()) && Objects.equals(member, otherAttendee.getMember()) && Objects.equals(transp, otherAttendee.getTransp())
+                && Objects.equals(extendedParameters, otherAttendee.getExtendedParameters());
+        }
+        return false;
+    }
 }

@@ -49,6 +49,7 @@
 
 package com.openexchange.chronos.common.mapping;
 
+import java.util.Objects;
 import java.util.Set;
 import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.AlarmField;
@@ -220,12 +221,9 @@ public class DefaultEventUpdate extends DefaultItemUpdate<Event, EventField> imp
      */
     protected DefaultEventUpdate(Event originalEvent, Event updatedEvent, EventField[] ignoredEventFields, AttendeeField[] ignoredAttendeeFields, boolean considerUnset, boolean ignoreDefaults) throws OXException {
         super(originalEvent, updatedEvent, getDifferentFields(EventMapper.getInstance(), originalEvent, updatedEvent, considerUnset, ignoreDefaults, ignoredEventFields));
-        alarmUpdates = AlarmUtils.getAlarmUpdates(
-            null != originalEvent ? originalEvent.getAlarms() : null, null != updatedEvent ? updatedEvent.getAlarms() : null);
-        attendeeUpdates = CalendarUtils.getAttendeeUpdates(
-            null != originalEvent ? originalEvent.getAttendees() : null, null != updatedEvent ? updatedEvent.getAttendees() : null, considerUnset, ignoredAttendeeFields);
-        attachmentUpdates = CalendarUtils.getAttachmentUpdates(
-            null != originalEvent ? originalEvent.getAttachments() : null, null != updatedEvent ? updatedEvent.getAttachments() : null);
+        alarmUpdates = AlarmUtils.getAlarmUpdates(null != originalEvent ? originalEvent.getAlarms() : null, null != updatedEvent ? updatedEvent.getAlarms() : null);
+        attendeeUpdates = CalendarUtils.getAttendeeUpdates(null != originalEvent ? originalEvent.getAttendees() : null, null != updatedEvent ? updatedEvent.getAttendees() : null, considerUnset, ignoredAttendeeFields);
+        attachmentUpdates = CalendarUtils.getAttachmentUpdates(null != originalEvent ? originalEvent.getAttachments() : null, null != updatedEvent ? updatedEvent.getAttachments() : null);
     }
 
     @Override
@@ -243,4 +241,17 @@ public class DefaultEventUpdate extends DefaultItemUpdate<Event, EventField> imp
         return attachmentUpdates;
     }
 
+    @Override
+    public int hashCode() {
+        return Objects.hash(alarmUpdates, attendeeUpdates, attachmentUpdates, super.hashCode());
+    }
+
+    @Override
+    public boolean equals(Object other) {
+        if (super.equals(other) && null != other && EventUpdate.class.isInstance(other)) {
+            EventUpdate otherEventUpdate = (EventUpdate) other;
+            return Objects.equals(attendeeUpdates, otherEventUpdate.getAttendeeUpdates()) && Objects.equals(alarmUpdates, otherEventUpdate.getAlarmUpdates()) && Objects.equals(attachmentUpdates, otherEventUpdate.getAttachmentUpdates());
+        }
+        return false;
+    }
 }

@@ -52,6 +52,7 @@ package com.openexchange.chronos;
 import java.util.Date;
 import java.util.EnumSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.SortedSet;
 import org.dmfs.rfc5545.DateTime;
 
@@ -1466,6 +1467,22 @@ public class Event {
         stringBuilder.append(", summary=").append(getSummary());
         stringBuilder.append(']');
         return stringBuilder.toString();
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, seriesId, recurrenceId, folderId, calendarUser, startDate, endDate, summary);
+    }
+
+    @Override
+    public boolean equals(Object other) {
+        if (null != other && Event.class.isInstance(other)) {
+            Event otherEvent = (Event) other;
+            return Objects.equals(id, otherEvent.getId()) && Objects.equals(seriesId, otherEvent.getSeriesId()) && Objects.equals(recurrenceId, otherEvent.getRecurrenceId()) && 
+                Objects.equals(folderId, otherEvent.getFolderId()) && Objects.equals(calendarUser, otherEvent.getCalendarUser()) && Objects.equals(startDate, otherEvent.getStartDate()) &&
+                Objects.equals(endDate, otherEvent.getEndDate()) && Objects.equals(summary, otherEvent.getSummary());
+        }
+        return false;
     }
 
 }

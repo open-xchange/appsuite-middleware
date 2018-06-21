@@ -51,6 +51,7 @@ package com.openexchange.chronos.common.mapping;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import com.openexchange.chronos.service.CollectionUpdate;
 import com.openexchange.chronos.service.ItemUpdate;
 
@@ -105,4 +106,17 @@ public class DefaultCollectionUpdate<O, E extends Enum<E>> implements Collection
         return "CollectionUpdate [" + removedItems.size() + " removed, " + addedItems.size() + " added, " + updatedItems.size() + " updated]";
     }
 
+    @Override
+    public int hashCode() {
+        return Objects.hash(addedItems, removedItems, updatedItems);
+    }
+
+    @Override
+    public boolean equals(Object other) {
+        if (null != other && CollectionUpdate.class.isInstance(other)) {
+            CollectionUpdate otherCollectionUpdate = (CollectionUpdate) other;
+            return Objects.equals(removedItems, otherCollectionUpdate.getRemovedItems()) && Objects.equals(addedItems, otherCollectionUpdate.getAddedItems()) && Objects.equals(updatedItems, otherCollectionUpdate.getUpdatedItems());
+        }
+        return false;
+    }
 }

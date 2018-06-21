@@ -52,6 +52,7 @@ package com.openexchange.chronos;
 import java.util.Date;
 import java.util.EnumSet;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * {@link Alarm}
@@ -544,4 +545,19 @@ public class Alarm {
         return "Alarm [action=" + action + ", trigger=" + trigger + "]";
     }
 
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, uid, relatedTo, trigger, acknowledged, action, repeat, extendedProperties, attachments, description, summary, attendees);
+    }
+
+    @Override
+    public boolean equals(Object other) {
+        if (null != other && Alarm.class.isInstance(other)) {
+            Alarm otherAlarm = (Alarm) other;
+            return Objects.equals(id, otherAlarm.getId()) && Objects.equals(uid, otherAlarm.getUid()) && Objects.equals(relatedTo, otherAlarm.getRelatedTo()) && Objects.equals(trigger, otherAlarm.getTrigger()) && 
+                Objects.equals(acknowledged, otherAlarm.getAcknowledged()) && Objects.equals(action, otherAlarm.getAction()) && Objects.equals(repeat, otherAlarm.getRepeat()) && Objects.equals(extendedProperties, otherAlarm.getExtendedProperties()) && 
+                Objects.equals(attachments, otherAlarm.getAttachments()) && Objects.equals(description, otherAlarm.getDescription()) && Objects.equals(summary, otherAlarm.getSummary()) && Objects.equals(attendees, otherAlarm.getAttendees());
+        }
+        return false;
+    }
 }
