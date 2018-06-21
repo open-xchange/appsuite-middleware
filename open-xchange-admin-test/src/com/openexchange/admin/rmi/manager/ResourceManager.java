@@ -132,6 +132,19 @@ public class ResourceManager extends AbstractManager {
     }
 
     /**
+     * Retrieves an array with all {@link Resource}s in the specified {@link Context}
+     * 
+     * @param context The {@link Context}
+     * @param contextAdminCredentials The context admin {@link Credentials}
+     * @return An array with all {@link Resource}s
+     * @throws Exception if an error is occurred
+     */
+    public Resource[] listAllResources(Context context, Credentials contextAdminCredentials) throws Exception {
+        OXResourceInterface resourceInterface = getResourceInterface();
+        return resourceInterface.listAll(context, contextAdminCredentials);
+    }
+
+    /**
      * Changes the specified {@link Resource} in the specified {@link Context}
      * 
      * @param resource The {@link Resource} to change

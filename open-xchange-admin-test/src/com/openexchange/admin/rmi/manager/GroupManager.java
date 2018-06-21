@@ -134,6 +134,19 @@ public class GroupManager extends AbstractManager {
     }
 
     /**
+     * Retrieves an array with all {@link Group}s in the specified {@link Context}
+     * 
+     * @param context The {@link Context}
+     * @param contextAdminCredentials The context admin {@link Credentials}
+     * @return An array with all found {@link Group}s
+     * @throws Exception if an error is occurred
+     */
+    public Group[] listAllGroups(Context context, Credentials contextAdminCredentials) throws Exception {
+        OXGroupInterface groupInterface = getGroupInterface();
+        return groupInterface.listAll(context, contextAdminCredentials);
+    }
+
+    /**
      * Changes the specified {@link Group} in the specified {@link Context}
      * 
      * @param Group The {@link Group} to change

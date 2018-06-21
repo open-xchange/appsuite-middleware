@@ -151,6 +151,21 @@ public class UserManager extends AbstractManager {
     }
 
     /**
+     * Retrieves all data of the specified {@link User}s in the specified {@link Context}
+     * 
+     * @param context The {@link Context}
+     * @param User The {@link User}s
+     * @param contextAdminCredentials The context admin {@link Credentials}
+     * 
+     * @return The {@link User}s with all its data loaded
+     * @throws Exception if an error is occurred
+     */
+    public User[] getData(Context context, User[] user, Credentials contextAdminCredentials) throws Exception {
+        OXUserInterface userInterface = getUserInterface();
+        return userInterface.getData(context, user, contextAdminCredentials);
+    }
+
+    /**
      * Retrieves an array with all found {@link User} in the specified {@link Context}
      * that match the specified search pattern.
      * 
