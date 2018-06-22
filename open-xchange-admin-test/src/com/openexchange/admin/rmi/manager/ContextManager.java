@@ -193,6 +193,27 @@ public class ContextManager extends AbstractManager {
     }
 
     /**
+     * Creates a new {@link Context} with the specified context admin. It uses
+     * the specified authCredentials to authenticate against the server
+     * 
+     * @param context The {@link Context} to create
+     * @param contextAdmin The {@link Context} admin
+     * @param authCredentials the authentication credentials to authenicate against the server
+     * @return The newly created context
+     * @throws Exception if an error is occurred
+     */
+    public Context createContext(Context context, User contextAdmin, Credentials authCredentials) throws Exception {
+        prerequisites();
+        if (context.getId() == null || context.getId().intValue() <= 0) {
+            context.setId(new Integer(getNextFreeContextId()));
+        }
+        OXContextInterface contextInterface = getContextInterface();
+        Context ctx = contextInterface.create(context, contextAdmin, authCredentials);
+        managedObjects.put(ctx.getId(), ctx);
+        return ctx;
+    }
+
+    /**
      * Creates a new {@link Context}
      * 
      * @param context The {@link Context} to create
