@@ -100,7 +100,7 @@ public class AdditionalRMITests extends AbstractRMITest {
         user.setImapLogin("oxuser");
         user.setSmtpServer("example.com");
 
-        user = getUserManager().createUser(context, user, getContextAdminCredentials());
+        user = getUserManager().createUser(context, user, adminCredentials);
     }
 
     /**
@@ -152,7 +152,7 @@ public class AdditionalRMITests extends AbstractRMITest {
      */
     @Test
     public void testGetAllUsers() throws Exception {
-        final Credentials credentials = getContextAdminCredentials();
+        final Credentials credentials = adminCredentials;
         User[] allUsers = getUserManager().listAllUsers(context, credentials);// required line for test
         User[] queriedUsers = getUserManager().getData(context, allUsers, credentials);// required line for test
         assertIDsAreEqual(allUsers, queriedUsers);
@@ -363,18 +363,16 @@ public class AdditionalRMITests extends AbstractRMITest {
 
     @Test
     public void testGetUserAccessModules() throws Exception {
-        final Credentials credentials = getContextAdminCredentials();
-
         User knownUser = new User();
         knownUser.setName(this.myUserName);
         User[] mailboxNames = new User[] { knownUser };// users with only their mailbox name (User#name) - the rest is going to be looked
         // up
-        User[] queriedUsers = getUserManager().getData(context, mailboxNames, credentials);// query by mailboxNames (User.name)
+        User[] queriedUsers = getUserManager().getData(context, mailboxNames, adminCredentials);// query by mailboxNames (User.name)
 
         assertEquals("Query should return only one user", new Integer(1), Integer.valueOf(queriedUsers.length));
         User user = queriedUsers[0];
 
-        UserModuleAccess access = getUserManager().getModuleAccess(context, user, credentials);
+        UserModuleAccess access = getUserManager().getModuleAccess(context, user, adminCredentials);
         assertTrue("Information for module access should be available", access != null);
     }
 
@@ -405,27 +403,25 @@ public class AdditionalRMITests extends AbstractRMITest {
 
     @Test
     public void testUpdateModuleAccess() throws Exception {
-        final Credentials credentials = getContextAdminCredentials();
-
         User knownUser = new User();
         knownUser.setName("oxadmin");
         User[] mailboxNames = new User[] { knownUser };// users with only their mailbox name (User#name) - the rest is going to be looked
         // up
-        User[] queriedUsers = getUserManager().getData(context, mailboxNames, credentials);// query by mailboxNames (User.name)
+        User[] queriedUsers = getUserManager().getData(context, mailboxNames, adminCredentials);// query by mailboxNames (User.name)
 
         assertEquals("Query should return only one user", new Integer(1), Integer.valueOf(queriedUsers.length));
         User user = queriedUsers[0];
 
-        UserModuleAccess access = getUserManager().getModuleAccess(context, user, credentials);
+        UserModuleAccess access = getUserManager().getModuleAccess(context, user, adminCredentials);
         assertEquals("Calendar access should be granted by default", true, access.getCalendar());
         access.setCalendar(false);
-        getUserManager().changeModuleAccess(context, user, access, credentials);
-        access = getUserManager().getModuleAccess(context, user, credentials);
+        getUserManager().changeModuleAccess(context, user, access, adminCredentials);
+        access = getUserManager().getModuleAccess(context, user, adminCredentials);
         assertEquals("Calendar access should be turned off now", false, access.getCalendar());
         // reset access and check again
         access.setCalendar(true);
-        getUserManager().changeModuleAccess(context, user, access, credentials);
-        access = getUserManager().getModuleAccess(context, user, credentials);
+        getUserManager().changeModuleAccess(context, user, access, adminCredentials);
+        access = getUserManager().getModuleAccess(context, user, adminCredentials);
         assertEquals("Calendar access should be granted again", true, access.getCalendar());
     }
 
@@ -490,7 +486,7 @@ public class AdditionalRMITests extends AbstractRMITest {
         User missingUser = new User();
         missingUser.setId(Integer.valueOf(Integer.MAX_VALUE));
         try {
-            getUserManager().deleteUser(context, missingUser, getContextAdminCredentials());
+            getUserManager().deleteUser(context, missingUser, adminCredentials);
             fail("Expected NoSuchUserException");
         } catch (NoSuchUserException e) {
             assertTrue("Caught exception", true);

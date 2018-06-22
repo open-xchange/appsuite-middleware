@@ -83,15 +83,15 @@ public class ResourceTest extends AbstractRMITest {
     @Override
     public void setUp() throws Exception {
         super.setUp();
-        context = getContextManager().createContext(getContextAdminCredentials());
+        context = getContextManager().createContext(adminCredentials);
     }
 
     @Test
     public void testCreateResource() throws Exception {
         Resource res = getTestResourceObject("tescase-createResource-resource-" + System.currentTimeMillis());
-        final Resource createResourcedresource = getResourceManager().createResource(res, context, getContextAdminCredentials());
+        final Resource createResourcedresource = getResourceManager().createResource(res, context, adminCredentials);
 
-        Resource[] srv_response = getResourceManager().listResources(context, "*", getContextAdminCredentials());
+        Resource[] srv_response = getResourceManager().listResources(context, "*", adminCredentials);
         if (srv_response == null) {
             fail("server response is null");
             return;
@@ -113,9 +113,9 @@ public class ResourceTest extends AbstractRMITest {
     @Test
     public void testChange() throws Exception {
         Resource res = getTestResourceObject("tescase-createResource-resource-" + System.currentTimeMillis());
-        final Resource createResourcedresource = getResourceManager().createResource(res, context, getContextAdminCredentials());
+        final Resource createResourcedresource = getResourceManager().createResource(res, context, adminCredentials);
 
-        Resource[] srv_response = getResourceManager().listResources(context, "*", getContextAdminCredentials());
+        Resource[] srv_response = getResourceManager().listResources(context, "*", adminCredentials);
         if (srv_response == null) {
             fail("server response is null");
             return;
@@ -146,10 +146,10 @@ public class ResourceTest extends AbstractRMITest {
         createResourcedresource.setName(createResourcedresource.getName() + change_suffix);
 
         // change on server
-        getResourceManager().changeResource(createResourcedresource, context, getContextAdminCredentials());
+        getResourceManager().changeResource(createResourcedresource, context, adminCredentials);
 
         // get resource from server and verify changed data
-        Resource srv_res = getResourceManager().getData(createResourcedresource, context, getContextAdminCredentials());
+        Resource srv_res = getResourceManager().getData(createResourcedresource, context, adminCredentials);
 
         assertEquals(createResourcedresource.getDescription(), srv_res.getDescription());
         assertEquals(createResourcedresource.getDisplayname(), srv_res.getDisplayname());
@@ -162,9 +162,9 @@ public class ResourceTest extends AbstractRMITest {
     public void testChangeNull() throws Exception {
         // set description attribute to null 
         Resource res = getTestResourceObject("tescase-createResource-resource-" + System.currentTimeMillis());
-        final Resource createResourcedresource = getResourceManager().createResource(res, context, getContextAdminCredentials());
+        final Resource createResourcedresource = getResourceManager().createResource(res, context, adminCredentials);
 
-        Resource[] srv_response = getResourceManager().listResources(context, "*", getContextAdminCredentials());
+        Resource[] srv_response = getResourceManager().listResources(context, "*", adminCredentials);
         if (srv_response == null) {
             fail("server response is null");
             return;
@@ -194,10 +194,10 @@ public class ResourceTest extends AbstractRMITest {
         createResourcedresource.setDescription(null);
 
         // change on server
-        getResourceManager().changeResource(createResourcedresource, context, getContextAdminCredentials());
+        getResourceManager().changeResource(createResourcedresource, context, adminCredentials);
 
         // get resource from server and verify changed data
-        Resource srv_res = getResourceManager().getData(createResourcedresource, context, getContextAdminCredentials());
+        Resource srv_res = getResourceManager().getData(createResourcedresource, context, adminCredentials);
 
         assertEquals(createResourcedresource.getDescription(), srv_res.getDescription()); // must be able to null description        
 
@@ -209,10 +209,10 @@ public class ResourceTest extends AbstractRMITest {
     @Test
     public void testGet() throws Exception {
         Resource res = getTestResourceObject("tescase-createResource-resource-" + System.currentTimeMillis());
-        final Resource createResourcedresource = getResourceManager().createResource(res, context, getContextAdminCredentials());
+        final Resource createResourcedresource = getResourceManager().createResource(res, context, adminCredentials);
 
         // get resource from server
-        Resource srv_res = getResourceManager().getData(createResourcedresource, context, getContextAdminCredentials());
+        Resource srv_res = getResourceManager().getData(createResourcedresource, context, adminCredentials);
 
         assertEquals(createResourcedresource.getDescription(), srv_res.getDescription());
         assertEquals(createResourcedresource.getDisplayname(), srv_res.getDisplayname());
@@ -223,11 +223,11 @@ public class ResourceTest extends AbstractRMITest {
     @Test
     public void testGetIdentifiedByID() throws Exception {
         Resource res = getTestResourceObject("tescase-createResource-resource-" + System.currentTimeMillis());
-        final Resource createResourcedresource = getResourceManager().createResource(res, context, getContextAdminCredentials());
+        final Resource createResourcedresource = getResourceManager().createResource(res, context, adminCredentials);
 
         // get resource from server
         Resource tmp = new Resource(createResourcedresource.getId());
-        Resource srv_res = getResourceManager().getData(tmp, context, getContextAdminCredentials());
+        Resource srv_res = getResourceManager().getData(tmp, context, adminCredentials);
 
         assertEquals(createResourcedresource.getDescription(), srv_res.getDescription());
         assertEquals(createResourcedresource.getDisplayname(), srv_res.getDisplayname());
@@ -238,12 +238,12 @@ public class ResourceTest extends AbstractRMITest {
     @Test
     public void testGetIdentifiedByName() throws Exception {
         Resource res = getTestResourceObject("tescase-createResource-resource-" + System.currentTimeMillis());
-        final Resource createResourcedresource = getResourceManager().createResource(res, context, getContextAdminCredentials());
+        final Resource createResourcedresource = getResourceManager().createResource(res, context, adminCredentials);
 
         // get resource from server
         Resource tmp = new Resource();
         tmp.setName(createResourcedresource.getName());
-        Resource srv_res = getResourceManager().getData(tmp, context, getContextAdminCredentials());
+        Resource srv_res = getResourceManager().getData(tmp, context, adminCredentials);
 
         assertEquals(createResourcedresource.getDescription(), srv_res.getDescription());
         assertEquals(createResourcedresource.getDisplayname(), srv_res.getDisplayname());
@@ -254,10 +254,10 @@ public class ResourceTest extends AbstractRMITest {
     @Test
     public void testDelete() throws Exception {
         Resource res = getTestResourceObject("tescase-createResource-resource-" + System.currentTimeMillis());
-        final Resource createResourcedresource = getResourceManager().createResource(res, context, getContextAdminCredentials());
+        final Resource createResourcedresource = getResourceManager().createResource(res, context, adminCredentials);
 
         // get resource from server
-        Resource srv_res = getResourceManager().getData(createResourcedresource, context, getContextAdminCredentials());
+        Resource srv_res = getResourceManager().getData(createResourcedresource, context, adminCredentials);
 
         assertEquals(createResourcedresource.getDescription(), srv_res.getDescription());
         assertEquals(createResourcedresource.getDisplayname(), srv_res.getDisplayname());
@@ -265,11 +265,11 @@ public class ResourceTest extends AbstractRMITest {
         assertEquals(createResourcedresource.getName(), srv_res.getName());
 
         // delete resource
-        getResourceManager().deleteResource(createResourcedresource, context, getContextAdminCredentials());
+        getResourceManager().deleteResource(createResourcedresource, context, adminCredentials);
 
         // try to get resource again, this MUST fail
         try {
-            srv_res = getResourceManager().getData(createResourcedresource, context, getContextAdminCredentials());
+            srv_res = getResourceManager().getData(createResourcedresource, context, adminCredentials);
             fail("Expected that the resource was deleted!");
         } catch (NoSuchResourceException nsr) {
         }
@@ -279,10 +279,10 @@ public class ResourceTest extends AbstractRMITest {
     @Test
     public void testcreateResourceDeletecreateResource() throws Exception {
         Resource res = getTestResourceObject("tescase-createResource-resource-" + System.currentTimeMillis());
-        Resource createResourcedresource = getResourceManager().createResource(res, context, getContextAdminCredentials());
+        Resource createResourcedresource = getResourceManager().createResource(res, context, adminCredentials);
 
         // get resource from server
-        Resource srv_res = getResourceManager().getData(createResourcedresource, context, getContextAdminCredentials());
+        Resource srv_res = getResourceManager().getData(createResourcedresource, context, adminCredentials);
 
         assertEquals(createResourcedresource.getDescription(), srv_res.getDescription());
         assertEquals(createResourcedresource.getDisplayname(), srv_res.getDisplayname());
@@ -290,27 +290,27 @@ public class ResourceTest extends AbstractRMITest {
         assertEquals(createResourcedresource.getName(), srv_res.getName());
 
         // delete resource
-        getResourceManager().deleteResource(createResourcedresource, context, getContextAdminCredentials());
+        getResourceManager().deleteResource(createResourcedresource, context, adminCredentials);
 
         // try to get resource again, this MUST fail
         try {
-            srv_res = getResourceManager().getData(createResourcedresource, context, getContextAdminCredentials());
+            srv_res = getResourceManager().getData(createResourcedresource, context, adminCredentials);
             fail("Expected that the resource was deleted!");
         } catch (NoSuchResourceException nsr) {
         }
 
         // createResource again
-        getResourceManager().createResource(res, context, getContextAdminCredentials());
+        getResourceManager().createResource(res, context, adminCredentials);
 
     }
 
     @Test
     public void testDeleteIdentifiedByName() throws Exception {
         Resource res = getTestResourceObject("tescase-createResource-resource-" + System.currentTimeMillis());
-        final Resource createResourcedresource = getResourceManager().createResource(res, context, getContextAdminCredentials());
+        final Resource createResourcedresource = getResourceManager().createResource(res, context, adminCredentials);
 
         // get resource from server
-        Resource srv_res = getResourceManager().getData(createResourcedresource, context, getContextAdminCredentials());
+        Resource srv_res = getResourceManager().getData(createResourcedresource, context, adminCredentials);
 
         assertEquals(createResourcedresource.getDescription(), srv_res.getDescription());
         assertEquals(createResourcedresource.getDisplayname(), srv_res.getDisplayname());
@@ -320,11 +320,11 @@ public class ResourceTest extends AbstractRMITest {
         // delete resource
         Resource tmp = new Resource();
         tmp.setName(createResourcedresource.getName());
-        getResourceManager().deleteResource(tmp, context, getContextAdminCredentials());
+        getResourceManager().deleteResource(tmp, context, adminCredentials);
 
         // try to get resource again, this MUST fail
         try {
-            srv_res = getResourceManager().getData(createResourcedresource, context, getContextAdminCredentials());
+            srv_res = getResourceManager().getData(createResourcedresource, context, adminCredentials);
             fail("Expected that the resource was deleted!");
         } catch (NoSuchResourceException nsr) {
         }
@@ -334,10 +334,10 @@ public class ResourceTest extends AbstractRMITest {
     @Test
     public void testDeleteIdentifiedByID() throws Exception {
         Resource res = getTestResourceObject("tescase-createResource-resource-" + System.currentTimeMillis());
-        final Resource createResourcedresource = getResourceManager().createResource(res, context, getContextAdminCredentials());
+        final Resource createResourcedresource = getResourceManager().createResource(res, context, adminCredentials);
 
         // get resource from server
-        Resource srv_res = getResourceManager().getData(createResourcedresource, context, getContextAdminCredentials());
+        Resource srv_res = getResourceManager().getData(createResourcedresource, context, adminCredentials);
 
         assertEquals(createResourcedresource.getDescription(), srv_res.getDescription());
         assertEquals(createResourcedresource.getDisplayname(), srv_res.getDisplayname());
@@ -346,11 +346,11 @@ public class ResourceTest extends AbstractRMITest {
 
         // delete resource
         Resource tmp = new Resource(createResourcedresource.getId());
-        getResourceManager().deleteResource(tmp, context, getContextAdminCredentials());
+        getResourceManager().deleteResource(tmp, context, adminCredentials);
 
         // try to get resource again, this MUST fail
         try {
-            srv_res = getResourceManager().getData(createResourcedresource, context, getContextAdminCredentials());
+            srv_res = getResourceManager().getData(createResourcedresource, context, adminCredentials);
             fail("Expected that the resource was deleted!");
         } catch (NoSuchResourceException nsr) {
         }
@@ -360,9 +360,9 @@ public class ResourceTest extends AbstractRMITest {
     @Test
     public void testlistResources() throws Exception {
         Resource res = getTestResourceObject("tescase-createResource-resource-" + System.currentTimeMillis());
-        getResourceManager().createResource(res, context, getContextAdminCredentials());
+        getResourceManager().createResource(res, context, adminCredentials);
 
-        Resource[] srv_response = getResourceManager().listResources(context, "*", getContextAdminCredentials());
+        Resource[] srv_response = getResourceManager().listResources(context, "*", adminCredentials);
         if (srv_response == null) {
             fail("server response was null");
             return;

@@ -75,7 +75,7 @@ public final class Bug27065Test extends AbstractRMITest {
      */
     @Test
     public void reproduceMessages() throws Exception {
-        context = getContextManager().createContext(getContextAdminCredentials());
+        context = getContextManager().createContext(adminCredentials);
         Thread.sleep(400); // Only necessary if the replication from master to slave becomes a little bit slow.
         getContextManager().changeModuleAccess(new Context(context.getId()), "webmail");
         getContextManager().downgrade(new Context(context.getId()));
