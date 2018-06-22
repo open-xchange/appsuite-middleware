@@ -20,9 +20,10 @@ package org.apache.felix.eventadmin.impl.tasks;
 
 import java.util.Collection;
 import java.util.Map;
-import java.util.Queue;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import org.apache.felix.eventadmin.impl.handler.EventHandlerProxy;
 import org.osgi.service.event.Event;
@@ -42,10 +43,13 @@ public class AsyncDeliverTasks
      * is the sync deliver tasks as this has all the code for timeout
      * handling etc.
      */
-    final SyncDeliverTasks m_deliver_task;
+    private final SyncDeliverTasks m_deliver_task;
 
     /** A map of running threads currently delivering async events. */
     private final Map<Long, TaskExecuter> m_running_threads = new ConcurrentHashMap<Long, TaskExecuter>();
+
+    /** The max. number of events per posting thread */
+    private final AtomicInteger m_maxNumEventsPerThread;
 
     /** The counter for pending events */
     final AtomicLong postedEvents;
@@ -60,14 +64,25 @@ public class AsyncDeliverTasks
      *      dispatching threads in case of timeout or that the asynchronous event
      *      dispatching thread is used to send a synchronous event
      * @param deliverTask The deliver tasks for dispatching the event.
+     * @param maxNumEventsPerThread The max. number of events per posting thread
      */
-    public AsyncDeliverTasks(final DefaultThreadPool pool, final SyncDeliverTasks deliverTask)
+    public AsyncDeliverTasks(final DefaultThreadPool pool, final SyncDeliverTasks deliverTask, final int maxNumEventsPerThread)
     {
         super();
         m_pool = pool;
         m_deliver_task = deliverTask;
         postedEvents = new AtomicLong();
         deliveredEvents = new AtomicLong();
+        m_maxNumEventsPerThread = new AtomicInteger(maxNumEventsPerThread);
+    }
+
+    /**
+     * Updates this async. delivery
+     *
+     * @param maxNumEventsPerThread
+     */
+    public void update(final int maxNumEventsPerThread) {
+        m_maxNumEventsPerThread.set(maxNumEventsPerThread);
     }
 
     /**
@@ -113,7 +128,7 @@ public class AsyncDeliverTasks
 
             TaskExecuter executer = m_running_threads.get(currentThreadId);
             if (executer == null) {
-                executer = new TaskExecuter(m_deliver_task, m_running_threads, deliveredEvents, currentThreadId);
+                executer = new TaskExecuter(m_deliver_task, m_running_threads, deliveredEvents, currentThreadId, m_maxNumEventsPerThread.get());
             }
 
             if (postedEvents.incrementAndGet() < 0L) {
@@ -140,16 +155,16 @@ public class AsyncDeliverTasks
 
     private final static class TaskExecuter implements Runnable {
 
-        private final Queue<TaskInfo> m_infos;
+        private final BlockingQueue<TaskInfo> m_infos;
         private final SyncDeliverTasks m_deliver_task;
         private final Map<Long, TaskExecuter> m_running_threads;
         private final AtomicLong m_delivered_events;
         private final Long m_current_thread_id;
         private boolean active;
 
-        TaskExecuter(SyncDeliverTasks syncDeliverTasks, Map<Long, TaskExecuter> runningThreads, AtomicLong deliveredEvents, Long currentThreadId) {
+        TaskExecuter(SyncDeliverTasks syncDeliverTasks, Map<Long, TaskExecuter> runningThreads, AtomicLong deliveredEvents, Long currentThreadId, int maxNumEvents) {
             super();
-            m_infos = new ConcurrentLinkedQueue<>();
+            m_infos = new ArrayBlockingQueue<>(maxNumEvents <= 0 ? Integer.MAX_VALUE : maxNumEvents);
             this.m_deliver_task = syncDeliverTasks;
             m_running_threads = runningThreads;
             m_delivered_events = deliveredEvents;
@@ -165,7 +180,13 @@ public class AsyncDeliverTasks
          * @return <code>true</code> if successfully added; otherwise <code>false</code>
          */
         boolean addAndReactivate(TaskInfo info, DefaultThreadPool pool) {
-            if (false == m_infos.offer(info)) { // Always 'true' for ConcurrentLinkedQueue
+            try {
+                // Enqueues the specified task, waiting if necessary for queue space to become available
+                m_infos.put(info);
+            } catch (InterruptedException e) {
+                // Keep interrupted status
+                Thread.currentThread().interrupt();
+
                 // Unable to enqueue given task. Fall-back using current thread
                 deliverTask(info);
                 return false;
@@ -196,18 +217,24 @@ public class AsyncDeliverTasks
 
         @Override
         public void run() {
-            boolean running;
+            boolean running = true;
             do {
                 for (TaskInfo info = m_infos.poll(); info != null; info = m_infos.poll()) {
                     deliverTask(info);
                 }
 
+                TaskInfo lookedUp = null;
                 synchronized (this) {
-                    running = m_infos.peek() != null;
-                    if (!running) {
+                    lookedUp = m_infos.poll();
+                    if (null == lookedUp) {
+                        running = false;
                         active = false;
                         this.m_running_threads.remove(m_current_thread_id);
                     }
+                }
+
+                if (null != lookedUp) {
+                    deliverTask(lookedUp);
                 }
             } while (running);
         }

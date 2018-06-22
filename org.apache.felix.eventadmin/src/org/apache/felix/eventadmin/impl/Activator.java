@@ -84,6 +84,7 @@ public class Activator implements BundleActivator
         System.setProperty(Configuration.PROP_IGNORE_TIMEOUT, "");
         System.setProperty(Configuration.PROP_ASYNC_TO_SYNC_THREAD_RATIO, "0.5");
         System.setProperty(Configuration.PROP_IGNORE_TOPIC, "");
+        System.setProperty(Configuration.PROP_MAX_NUM_EVENTS_PER_THREAD, "2048");
     }
 
     /**
