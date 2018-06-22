@@ -82,6 +82,7 @@ public class OXResellerUserTest extends OXResellerAbstractTest {
 
     @Before
     public void setUp() throws Exception {
+        super.setUp();
         oxresell = (OXResellerInterface) Naming.lookup(getRMIHostUrl() + OXResellerInterface.RMI_NAME);
         oxctx = (OXContextInterface) Naming.lookup(getRMIHostUrl() + OXContextInterface.RMI_NAME);
     }

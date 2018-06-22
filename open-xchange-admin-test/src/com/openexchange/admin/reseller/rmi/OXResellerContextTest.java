@@ -83,6 +83,7 @@ public class OXResellerContextTest extends OXResellerAbstractTest {
 
     @Before
     public final void setUp() throws Exception {
+        super.setUp();
         oxresell = (OXResellerInterface) Naming.lookup(getRMIHostUrl() + OXResellerInterface.RMI_NAME);
         oxctx = (OXContextInterface) Naming.lookup(getRMIHostUrl() + OXContextInterface.RMI_NAME);
         randomAdmin = RandomAdmin();
