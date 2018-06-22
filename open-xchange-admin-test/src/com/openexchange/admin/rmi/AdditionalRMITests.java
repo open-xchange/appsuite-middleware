@@ -84,20 +84,16 @@ public class AdditionalRMITests extends AbstractRMITest {
 
     private Context context;
 
-    private User admin;
-
     private User user;
 
     @Override
     public void setUp() throws Exception {
         super.setUp();
-        admin = newUser("oxadmin", "q1w2e3r4", "Admin User", "Admin", "User", "oxadmin@example.com");
-
         setupContexts();
     }
 
     public final void setupContexts() throws Exception {
-        context = TestTool.createContext(getContextManager(), "AdditionalCtx_", admin, "all", superAdminCredentials);
+        context = TestTool.createContext(getContextManager(), "AdditionalCtx_", contextAdmin, "all", superAdminCredentials);
 
         user = newUser("thorben.betten", "secret", myDisplayName, "Thorben", "Betten", "oxuser@example.com");
         user.setImapServer("example.com");
@@ -288,19 +284,19 @@ public class AdditionalRMITests extends AbstractRMITest {
     @Test
     public void testUpdateOxAdmin_updateOxUser() throws Exception {
         boolean valueChanged = false;
-        admin = getUserManager().getData(context, admin, adminCredentials);
-        String originalValue = admin.getAssistant_name();
+        contextAdmin = getUserManager().getData(context, contextAdmin, adminCredentials);
+        String originalValue = contextAdmin.getAssistant_name();
         User changesToAdmin = new User();
-        changesToAdmin.setId(admin.getId());
+        changesToAdmin.setId(contextAdmin.getId());
         String newAssistantName = "Herbert Feuerstein";
         changesToAdmin.setAssistant_name(newAssistantName);
         assertFalse("Precondition: Old assistant name should differ from new assistant name", newAssistantName.equals(originalValue));
         try {
             getUserManager().changeUser(context, changesToAdmin, adminCredentials);// required line for test
             valueChanged = true;
-            admin = getUserManager().getData(context, admin, adminCredentials);
+            contextAdmin = getUserManager().getData(context, contextAdmin, adminCredentials);
             ;// refresh data
-            assertEquals(changesToAdmin.getAssistant_name(), admin.getAssistant_name());
+            assertEquals(changesToAdmin.getAssistant_name(), contextAdmin.getAssistant_name());
         } finally {
             if (valueChanged) {
                 changesToAdmin.setAssistant_name(originalValue);

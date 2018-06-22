@@ -94,8 +94,9 @@ public abstract class AbstractRMITest {
     public Credentials superAdminCredentials;
     public Context adminContext;
     public Context superAdminContext;
-    public User superAdmin;
-    public User testUser;
+    protected User superAdmin;
+    protected User contextAdmin;
+    protected User testUser;
     protected Resource testResource;
 
     /**
@@ -137,6 +138,7 @@ public abstract class AbstractRMITest {
 
         superAdminCredentials = getMasterAdminCredentials();
         superAdmin = newUser(superAdminCredentials.getLogin(), superAdminCredentials.getPassword(), "ContextCreatingAdmin", "Ad", "Min", "adminmaster@ox.invalid");
+        contextAdmin = newUser(adminCredentials.getLogin(), adminCredentials.getPassword(), "ContextAdmin", "Context", "Admin", "contextAdmin@ox.invalid");
         superAdminContext = getTestContextObject(superAdminCredentials);
     }
 
