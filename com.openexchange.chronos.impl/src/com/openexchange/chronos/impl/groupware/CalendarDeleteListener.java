@@ -160,10 +160,9 @@ public final class CalendarDeleteListener implements DeleteListener {
             }
         }
 
-        events.removeAll(eventsToDelete);
-        updater.removeAttendeeFrom(events);
-        updater.replaceAttendeeIn(events);
+        updater.removeUserReferences(eventsToDelete);
         updater.deleteEvent(eventsToDelete, ServerSessionAdapter.valueOf(userId, context.getContextId()));
+        events.removeAll(eventsToDelete);
 
         /*
          * Update event fields where the user might be referenced

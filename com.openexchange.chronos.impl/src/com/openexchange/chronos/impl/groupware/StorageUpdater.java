@@ -239,6 +239,76 @@ class StorageUpdater {
     }
 
     /**
+     * Removes any references to the internal user from multiple events. This includes removing the user from the list of attendees,
+     * removing his alarms and -triggers, as well as replacing him in the created-by-, modified-by-, organizer- and calendar-user-
+     * properties.
+     *
+     * @param events The events to remove the user from
+     */
+    public void removeUserReferences(List<Event> events) throws OXException {
+        if (null == events || events.isEmpty()) {
+            return;
+        }
+        /*
+         * delete any alarms and alarm triggers
+         */
+        storage.getAlarmTriggerStorage().deleteTriggers(attendeeId);
+        storage.getAlarmStorage().deleteAlarms(attendeeId);
+        /*
+         * remove user references from each event
+         */
+        for (Event event : events) {
+            removeUserReferences(event);
+        }
+    }
+
+    private void removeUserReferences(Event event) throws OXException {
+        Event eventUpdate = new Event();
+        boolean updated = false;
+        /*
+         * remove user in event metadata
+         */
+        if (CalendarUtils.matches(event.getCreatedBy(), attendeeId)) {
+            eventUpdate.setCreatedBy(replacement);
+            updated = true;
+        }
+        if (CalendarUtils.matches(event.getModifiedBy(), attendeeId)) {
+            eventUpdate.setModifiedBy(replacement);
+            updated = true;
+        }
+        if (CalendarUtils.matches(event.getCalendarUser(), attendeeId)) {
+            eventUpdate.setCalendarUser(replacement);
+            updated = true;
+        }
+        if (CalendarUtils.matches(event.getOrganizer(), attendeeId)) {
+            eventUpdate.setOrganizer(entityResolver.applyEntityData(new Organizer(), replacement.getEntity()));
+            updated = true;
+        }
+        /*
+         * remove user from attendees
+         */
+        Attendee attendee = CalendarUtils.find(event.getAttendees(), attendeeId);
+        if (null != attendee) {
+            storage.getAttendeeStorage().deleteAttendees(event.getId(), Collections.singletonList(attendee));
+            List<Attendee> updatedAttendees = new ArrayList<Attendee>(event.getAttendees());
+            updatedAttendees.remove(attendee);
+            eventUpdate.setAttendees(updatedAttendees);
+            updated = true;
+        }
+        /*
+         * update event data in storage & track update result
+         */
+        if (updated) {
+            eventUpdate.setId(event.getId());
+            Consistency.setModified(date, eventUpdate, replacement);
+            storage.getEventStorage().updateEvent(eventUpdate);
+            Event updatedEvent = EventMapper.getInstance().copy(event, null, (EventField[]) null);
+            updatedEvent = EventMapper.getInstance().copy(eventUpdate, updatedEvent, (EventField[]) null);
+            tracker.addUpdate(event, updatedEvent);
+        }
+    }
+
+    /**
      * Searches for all events in which the attendee participates in
      *
      * @return A {@link List} of {@link Event}s
