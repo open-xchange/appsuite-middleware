@@ -85,6 +85,10 @@ public class AsyncDeliverTasks
      */
     public void execute(final Collection<EventHandlerProxy> tasks, final Event event)
     {
+        if (null == tasks || tasks.isEmpty()) {
+            // Nothing to do... No one interested in given event
+            return;
+        }
         /*
         final Iterator i = tasks.iterator();
         boolean hasOrdered = false;

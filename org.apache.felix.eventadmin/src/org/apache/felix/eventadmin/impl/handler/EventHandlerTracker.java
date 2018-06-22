@@ -284,7 +284,7 @@ public class EventHandlerTracker extends ServiceTracker<EventHandler, EventHandl
             for (EventHandlerProxy p : proxies) {
                 if (p.canDeliver(event) ) {
                     if (null == hdlrs) {
-                        hdlrs = new HashSet<EventHandlerProxy>();
+                        hdlrs = new NonEmptyHashSet();
                     }
                     hdlrs.add(p);
                 }
@@ -439,6 +439,26 @@ public class EventHandlerTracker extends ServiceTracker<EventHandler, EventHandl
             this.bundleContext = bundleContext;
             this.ignoreTimeoutMatcher = ignoreTimeoutMatcher;
             this.requireTopic = requireTopic;
+        }
+    }
+
+    /**
+     * A set which is known to be non-empty.
+     */
+    private static final class NonEmptyHashSet extends HashSet<EventHandlerProxy> {
+
+        private static final long serialVersionUID = 8554533894205096641L;
+
+        /**
+         * Initializes a new {@link EventHandlerTracker.NonEmptyHashSet}.
+         */
+        NonEmptyHashSet() {
+            super();
+        }
+
+        @Override
+        public boolean isEmpty() {
+            return false;
         }
     }
 }
