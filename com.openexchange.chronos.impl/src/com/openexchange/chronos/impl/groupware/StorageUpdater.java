@@ -50,16 +50,20 @@
 package com.openexchange.chronos.impl.groupware;
 
 import java.sql.Connection;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
+import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.AttendeeField;
 import com.openexchange.chronos.CalendarUser;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.Organizer;
 import com.openexchange.chronos.common.CalendarUtils;
+import com.openexchange.chronos.common.mapping.EventMapper;
+import com.openexchange.chronos.impl.Consistency;
 import com.openexchange.chronos.provider.CalendarAccount;
 import com.openexchange.chronos.service.CalendarHandler;
 import com.openexchange.chronos.service.CalendarParameters;
@@ -128,15 +132,22 @@ class StorageUpdater {
      * @throws OXException Various
      */
     void removeAttendeeFrom(Event event) throws OXException {
-        Event updatedEvent = calendarUtilities.copyEvent(event, (EventField[]) null);
-        updatedEvent.setModifiedBy(replacement);
-        updatedEvent.setLastModified(date);
-        updatedEvent.setTimestamp(date.getTime());
-        storage.getAlarmStorage().deleteAlarms(event.getId(), attendeeId);
-        storage.getAlarmTriggerStorage().deleteTriggers(Collections.singletonList(event.getId()), attendeeId);
-        storage.getAttendeeStorage().deleteAttendees(event.getId(), Collections.singletonList(CalendarUtils.find(event.getAttendees(), attendeeId)));
-        storage.getEventStorage().updateEvent(updatedEvent);
-        tracker.addUpdate(event, updatedEvent);
+        List<Attendee> updatedAttendees = new ArrayList<Attendee>(event.getAttendees());
+        Attendee attendee = CalendarUtils.find(updatedAttendees, attendeeId);
+        if (null != attendee) {
+            Event eventUpdate = new Event();
+            eventUpdate.setId(event.getId());
+            updatedAttendees.remove(attendee);
+            eventUpdate.setAttendees(updatedAttendees);
+            Consistency.setModified(date, eventUpdate, replacement);
+            storage.getAlarmStorage().deleteAlarms(event.getId(), attendeeId);
+            storage.getAlarmTriggerStorage().deleteTriggers(Collections.singletonList(event.getId()), attendeeId);
+            storage.getAttendeeStorage().deleteAttendees(event.getId(), Collections.singletonList(attendee));
+            storage.getEventStorage().updateEvent(eventUpdate);
+            Event updatedEvent = EventMapper.getInstance().copy(event, null, (EventField[]) null);
+            updatedEvent = EventMapper.getInstance().copy(eventUpdate, updatedEvent, (EventField[]) null);
+            tracker.addUpdate(event, updatedEvent);
+        }
     }
 
     /**
@@ -187,23 +198,32 @@ class StorageUpdater {
      * @throws OXException Various
      */
     void replaceAttendeeIn(Event event) throws OXException {
-        Event updatedEvent = calendarUtilities.copyEvent(event, (EventField[]) null);
+        Event eventUpdate = new Event();
+        boolean updated = false;
         if (CalendarUtils.matches(event.getCreatedBy(), attendeeId)) {
-            updatedEvent.setCreatedBy(replacement);
+            eventUpdate.setCreatedBy(replacement);
+            updated = true;
         }
         if (CalendarUtils.matches(event.getModifiedBy(), attendeeId)) {
-            updatedEvent.setModifiedBy(replacement);
+            eventUpdate.setModifiedBy(replacement);
+            updated = true;
         }
         if (CalendarUtils.matches(event.getCalendarUser(), attendeeId)) {
-            updatedEvent.setCalendarUser(replacement);
+            eventUpdate.setCalendarUser(replacement);
+            updated = true;
         }
         if (CalendarUtils.matches(event.getOrganizer(), attendeeId)) {
-            updatedEvent.setOrganizer(entityResolver.applyEntityData(new Organizer(), replacement.getEntity()));
+            eventUpdate.setOrganizer(entityResolver.applyEntityData(new Organizer(), replacement.getEntity()));
+            updated = true;
         }
-        updatedEvent.setLastModified(date);
-        updatedEvent.setTimestamp(date.getTime());
-        storage.getEventStorage().updateEvent(updatedEvent);
-        tracker.addUpdate(event, updatedEvent);
+        if (updated) {
+            eventUpdate.setId(event.getId());
+            Consistency.setModified(date, eventUpdate, replacement);
+            storage.getEventStorage().updateEvent(eventUpdate);
+            Event updatedEvent = EventMapper.getInstance().copy(event, null, (EventField[]) null);
+            updatedEvent = EventMapper.getInstance().copy(eventUpdate, updatedEvent, (EventField[]) null);
+            tracker.addUpdate(event, updatedEvent);
+        }
     }
 
     /**
