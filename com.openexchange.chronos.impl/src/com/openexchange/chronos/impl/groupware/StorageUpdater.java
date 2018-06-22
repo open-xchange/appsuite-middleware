@@ -51,6 +51,7 @@ package com.openexchange.chronos.impl.groupware;
 
 import java.sql.Connection;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -186,8 +187,16 @@ class StorageUpdater {
      * @throws OXException Various
      */
     void deleteEvent(List<Event> events, Session session) throws OXException {
-        for (final Event event : events) {
-            deleteEvent(event, session);
+        List<String> eventIds = Arrays.asList(CalendarUtils.getObjectIDs(events));
+        for (Event event : events) {
+            storage.getAttachmentStorage().deleteAttachments(session, CalendarUtils.getFolderView(event, attendeeId), event.getId());
+        }
+        storage.getAlarmTriggerStorage().deleteTriggers(eventIds);
+        storage.getAlarmStorage().deleteAlarms(eventIds);
+        storage.getAttendeeStorage().deleteAttendees(eventIds);
+        storage.getEventStorage().deleteEvents(eventIds);
+        for (Event event : events) {
+            tracker.addDelete(event, date.getTime());
         }
     }
 
