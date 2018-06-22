@@ -181,6 +181,7 @@ public class AsyncDeliverTasks
                         active = true;
                     } else {
                         // Submit to thread pool failed...
+                        m_infos.remove(info);
                         activationFailed = true;
                     }
                 }
@@ -188,7 +189,6 @@ public class AsyncDeliverTasks
 
             if (activationFailed) {
                 // Unable to activate this executer. Fall-back using current thread
-                m_infos.remove(info);
                 deliverTask(info);
             }
 
