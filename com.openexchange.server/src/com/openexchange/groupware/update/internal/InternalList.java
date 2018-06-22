@@ -729,6 +729,7 @@ public final class InternalList {
         // Drops the unused "Shared address book" from database
         list.add(new com.openexchange.groupware.update.tasks.DropUnusedSharedAddressBookFolder());
         list.add(new com.openexchange.groupware.update.tasks.DropUnusedSharedAddressBookFolderV2());
+        list.add(new com.openexchange.groupware.update.tasks.DropUnusedSharedAddressBookFolderV3());
 
         return list.toArray(new UpdateTaskV2[list.size()]);
     }

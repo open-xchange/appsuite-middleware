@@ -107,6 +107,12 @@ public class DropUnusedSharedAddressBookFolder extends UpdateTaskAdapter {
             Databases.closeSQLStuff(stmt);
             stmt = null;
 
+            stmt = con.prepareStatement("DELETE FROM oxfolder_specialfolders WHERE fuid=?");
+            stmt.setInt(1, folderId);
+            stmt.executeUpdate();
+            Databases.closeSQLStuff(stmt);
+            stmt = null;
+
             stmt = con.prepareStatement("DELETE FROM oxfolder_tree WHERE fuid=?");
             stmt.setInt(1, folderId);
             stmt.executeUpdate();
