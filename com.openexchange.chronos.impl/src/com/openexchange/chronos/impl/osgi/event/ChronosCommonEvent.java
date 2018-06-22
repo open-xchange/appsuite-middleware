@@ -73,10 +73,10 @@ public class ChronosCommonEvent implements CommonEvent {
     /** The logger of this class */
     private final static Logger LOGGER = LoggerFactory.getLogger(ChronosCommonEvent.class);
 
-    private final CalendarEvent              event;
-    private final int                        actionID;
-    private final Event                      actionEvent;
-    private final Event                      oldEvent;
+    private final Session session;
+    private final int actionID;
+    private final Event actionEvent;
+    private final Event oldEvent;
     private final Map<Integer, Set<Integer>> affectedUsersWithFolders;
 
     /**
@@ -101,7 +101,8 @@ public class ChronosCommonEvent implements CommonEvent {
      * @param oldEvent The old {@link Event} if an update was made, else <code>null</code>
      */
     public ChronosCommonEvent(CalendarEvent event, int actionID, Event actionEvent, Event oldEvent) {
-        this.event = event;
+        super();
+        this.session = event.getSession();
         this.actionID = actionID;
         this.actionEvent = actionEvent;
         this.oldEvent = oldEvent;
@@ -110,12 +111,12 @@ public class ChronosCommonEvent implements CommonEvent {
 
     @Override
     public int getContextId() {
-        return event.getSession().getContextId();
+        return session.getContextId();
     }
 
     @Override
     public int getUserId() {
-        return event.getSession().getUserId();
+        return session.getUserId();
     }
 
     @Override
@@ -159,7 +160,7 @@ public class ChronosCommonEvent implements CommonEvent {
 
     @Override
     public Session getSession() {
-        return event.getSession();
+        return session;
     }
 
     @Override
