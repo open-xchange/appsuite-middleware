@@ -53,7 +53,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.Objects;
 import com.openexchange.chronos.service.SimpleCollectionUpdate;
 
 /**
@@ -150,17 +149,4 @@ public abstract class AbstractSimpleCollectionUpdate<O> implements SimpleCollect
         return "SimpleCollectionUpdate [" + removedItems.size() + " removed, " + addedItems.size() + " added]";
     }
 
-    @Override
-    public int hashCode() {
-        return Objects.hash(addedItems, removedItems);
-    }
-
-    @Override
-    public boolean equals(Object other) {
-        if (null != other && AbstractSimpleCollectionUpdate.class.isInstance(other)) {
-            AbstractSimpleCollectionUpdate otherAbstractSimpleCollectionUpdate = (AbstractSimpleCollectionUpdate) other;
-            return Objects.equals(removedItems, otherAbstractSimpleCollectionUpdate.getRemovedItems()) && Objects.equals(addedItems, otherAbstractSimpleCollectionUpdate.getAddedItems());
-        }
-        return false;
-    }
 }

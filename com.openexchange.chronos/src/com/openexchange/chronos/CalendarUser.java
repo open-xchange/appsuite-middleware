@@ -49,8 +49,6 @@
 
 package com.openexchange.chronos;
 
-import java.util.Objects;
-
 /**
  * {@link CalendarUser}
  *
@@ -182,17 +180,4 @@ public class CalendarUser {
         return "CalendarUser [uri=" + uri + ", entity=" + entity + "]";
     }
 
-    @Override
-    public boolean equals(Object other) {
-        if (null != other && CalendarUser.class.isInstance(other)) {
-            CalendarUser otherCalendarUser = (CalendarUser) other;
-            return Objects.equals(uri, otherCalendarUser.getUri()) && Objects.equals(cn, otherCalendarUser.getCn()) && Objects.equals(entity, otherCalendarUser.getEntity()) && Objects.equals(sentBy, otherCalendarUser.getSentBy()) && Objects.equals(email, otherCalendarUser.getEMail());
-        }
-        return false;
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(uri, cn, entity, sentBy, email);
-    }
 }

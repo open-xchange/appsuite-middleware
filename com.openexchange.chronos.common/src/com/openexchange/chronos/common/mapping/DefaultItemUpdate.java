@@ -53,7 +53,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.Objects;
 import java.util.Set;
 import com.openexchange.chronos.EnumeratedProperty;
 import com.openexchange.chronos.service.ItemUpdate;
@@ -180,17 +179,4 @@ public class DefaultItemUpdate<O, E extends Enum<E>> implements ItemUpdate<O, E>
         return false;
     }
 
-    @Override
-    public int hashCode() {
-        return Objects.hash(originalItem, updatedFields, updatedItem);
-    }
-
-    @Override
-    public boolean equals(Object other) {
-        if (null != other && DefaultItemUpdate.class.isInstance(other)) {
-            DefaultItemUpdate otherDefaultItemUpdate = (DefaultItemUpdate) other;
-            return Objects.equals(originalItem, otherDefaultItemUpdate.getOriginal()) && Objects.equals(updatedFields, otherDefaultItemUpdate.getUpdatedFields()) && Objects.equals(updatedItem, otherDefaultItemUpdate.getUpdate());
-        }
-        return false;
-    }
 }

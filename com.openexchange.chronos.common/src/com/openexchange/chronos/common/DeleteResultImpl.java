@@ -49,7 +49,6 @@
 
 package com.openexchange.chronos.common;
 
-import java.util.Objects;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.service.DeleteResult;
 import com.openexchange.chronos.service.EventID;
@@ -97,17 +96,4 @@ public class DeleteResultImpl implements DeleteResult {
         return "DeleteResult [original=" + event + "]";
     }
 
-    @Override
-    public int hashCode() {
-        return Objects.hash(event, timestamp);
-    }
-
-    @Override
-    public boolean equals(Object other) {
-        if (null != other && DeleteResult.class.isInstance(other)) {
-            DeleteResult otherDeleteResult = (DeleteResult) other;
-            return Objects.equals(event, otherDeleteResult.getOriginal()) && Objects.equals(timestamp, otherDeleteResult.getTimestamp());
-        }
-        return false;
-    }
 }

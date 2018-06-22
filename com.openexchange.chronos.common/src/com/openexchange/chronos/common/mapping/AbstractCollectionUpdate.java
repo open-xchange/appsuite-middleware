@@ -52,7 +52,6 @@ package com.openexchange.chronos.common.mapping;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Objects;
 import java.util.Set;
 import com.openexchange.chronos.service.CollectionUpdate;
 import com.openexchange.chronos.service.ItemUpdate;
@@ -151,17 +150,4 @@ public abstract class AbstractCollectionUpdate<O, E extends Enum<E>> extends Abs
         return "CollectionUpdate [" + removedItems.size() + " removed, " + addedItems.size() + " added, " + updatedItems.size() + " updated]";
     }
 
-    @Override
-    public int hashCode() {
-        return Objects.hash(updatedItems, super.hashCode());
-    }
-
-    @Override
-    public boolean equals(Object other) {
-        if (super.equals(other) && null != other && AbstractCollectionUpdate.class.isInstance(other)) {
-            AbstractCollectionUpdate otherAbstractCollectionUpdate = (AbstractCollectionUpdate) other;
-            return Objects.equals(updatedItems, otherAbstractCollectionUpdate.getUpdatedItems());
-        }
-        return false;
-    }
 }
