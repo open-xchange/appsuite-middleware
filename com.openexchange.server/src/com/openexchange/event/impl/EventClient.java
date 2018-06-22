@@ -577,7 +577,7 @@ public class EventClient {
 
     /**
      * Invalidates any contact picture that might have been cached in the {@link ResourceCache}
-     * 
+     *
      * @param oldContact The old {@link Contact} information
      * @throws OXException if an error is occurred
      */
@@ -597,9 +597,9 @@ public class EventClient {
         Dictionary<String, Object> props = new Hashtable<String, Object>(4);
         props.put(FileStorageEventConstants.SESSION, session);
         props.put(FileStorageEventConstants.E_TAG, first.getETag(imageLocation, session));
-        props.put(FileStorageEventConstants.FOLDER_ID, oldContact.getParentFolderID());
-        props.put(FileStorageEventConstants.OBJECT_ID, oldContact.getObjectID());
-        
+        props.put(FileStorageEventConstants.FOLDER_ID, String.valueOf(oldContact.getParentFolderID()));
+        props.put(FileStorageEventConstants.OBJECT_ID, String.valueOf(oldContact.getObjectID()));
+
         triggerEvent(new Event(FileStorageEventConstants.UPDATE_TOPIC, props));
     }
 
@@ -619,7 +619,7 @@ public class EventClient {
 
         final Dictionary<String, CommonEvent> ht = new Hashtable<String, CommonEvent>(1);
         ht.put(CommonEvent.EVENT_KEY, genericEvent);
-        
+
 
         final Event event = new Event("com/openexchange/groupware/contact/delete", ht);
         triggerEvent(event);
