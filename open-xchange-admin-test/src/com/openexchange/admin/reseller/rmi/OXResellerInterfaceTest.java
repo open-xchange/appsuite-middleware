@@ -59,6 +59,7 @@ import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.sql.SQLException;
 import java.util.Stack;
+import java.util.UUID;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -85,13 +86,10 @@ public class OXResellerInterfaceTest extends OXResellerAbstractTest {
 
     private OXResellerInterface oxresell = null;
 
-    private OXContextInterface oxctx = null;
-
     @Before
     public void setUp() throws Exception {
         super.setUp();
         oxresell = (OXResellerInterface) Naming.lookup(getRMIHostUrl() + OXResellerInterface.RMI_NAME);
-        oxctx = (OXContextInterface) Naming.lookup(getRMIHostUrl() + OXContextInterface.RMI_NAME);
     }
 
     @After
@@ -101,11 +99,6 @@ public class OXResellerInterfaceTest extends OXResellerAbstractTest {
         final ResellerAdmin[] adms = oxresell.list("test*", creds);
         for (final ResellerAdmin adm : adms) {
             oxresell.delete(adm, creds);
-        }
-
-        final Context[] ctxs = oxctx.list("*", creds);
-        for (final Context ctx : ctxs) {
-            oxctx.delete(ctx, creds);
         }
     }
 
@@ -266,7 +259,7 @@ public class OXResellerInterfaceTest extends OXResellerAbstractTest {
     }
 
     @Test
-    public void testRestrictionsToContext() throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException, ContextExistsException, NoSuchContextException, DatabaseUpdateException, OXResellerException, MalformedURLException, NotBoundException {
+    public void testRestrictionsToContext() throws Exception {
         oxresell.create(TestAdminUser(), superAdminCredentials);
         restrictionContexts = new Stack<Context>();
         for (final Credentials creds : new Credentials[] { superAdminCredentials, TestUserCredentials() }) {
@@ -281,7 +274,7 @@ public class OXResellerInterfaceTest extends OXResellerAbstractTest {
                 // cannot occur on a newly created context
                 e.printStackTrace();
             }
-            final Context ctx = oxctx.create(ctx1, oxadmin, creds);
+            final Context ctx = getContextManager().createContext(ctx1, oxadmin, creds);
             restrictionContexts.push(ctx);
         }
 

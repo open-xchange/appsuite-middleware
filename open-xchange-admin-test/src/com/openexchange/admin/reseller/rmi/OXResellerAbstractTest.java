@@ -69,16 +69,25 @@ import com.openexchange.admin.rmi.exceptions.NoSuchContextException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 
 /**
- * @author choeger
+ * {@link OXResellerAbstractTest}
  *
+ * @author choeger
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public abstract class OXResellerAbstractTest extends AbstractRMITest {
+abstract class OXResellerAbstractTest extends AbstractRMITest {
 
     protected static final String TESTUSER = "testuser";
     protected static final String TESTCHANGEUSER = "testchange";
     protected static final String CHANGEDNAME = "testchangedchangedagain";
     protected static final String TESTRESTRICTIONUSER = "testwithrestriction";
     protected static final String TESTRESTCHANGERICTIONUSER = "testchangewithrestriction";
+
+    /**
+     * Initialises a new {@link OXResellerAbstractTest}.
+     */
+    public OXResellerAbstractTest() {
+        super();
+    }
 
     protected static Credentials ResellerRandomCredentials(String user) {
         return new Credentials(user, "secret");
