@@ -50,28 +50,19 @@
 package com.openexchange.admin.reseller.rmi;
 
 import static org.junit.Assert.assertTrue;
-import java.net.MalformedURLException;
 import java.rmi.Naming;
-import java.rmi.NotBoundException;
-import java.rmi.RemoteException;
 import java.util.Stack;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.admin.reseller.rmi.dataobjects.ResellerAdmin;
 import com.openexchange.admin.reseller.rmi.dataobjects.Restriction;
-import com.openexchange.admin.reseller.rmi.exceptions.OXResellerException;
 import com.openexchange.admin.reseller.rmi.extensions.OXContextExtensionImpl;
 import com.openexchange.admin.rmi.OXContextInterface;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.dataobjects.User;
 import com.openexchange.admin.rmi.dataobjects.UserModuleAccess;
-import com.openexchange.admin.rmi.exceptions.ContextExistsException;
-import com.openexchange.admin.rmi.exceptions.DatabaseUpdateException;
 import com.openexchange.admin.rmi.exceptions.DuplicateExtensionException;
-import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
-import com.openexchange.admin.rmi.exceptions.InvalidDataException;
-import com.openexchange.admin.rmi.exceptions.NoSuchContextException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 
 public class OXResellerUserTest extends OXResellerAbstractTest {
@@ -88,7 +79,7 @@ public class OXResellerUserTest extends OXResellerAbstractTest {
     }
 
     @Test
-    public void testCreateTooManyOverallUser() throws MalformedURLException, RemoteException, NotBoundException, InvalidDataException, StorageException, InvalidCredentialsException, OXResellerException, ContextExistsException, NoSuchContextException, DatabaseUpdateException {
+    public void testCreateTooManyOverallUser() throws Exception {
         ResellerAdmin adm = RandomAdmin();
         adm.setRestrictions(new Restriction[] { MaxOverallUserRestriction(6) });
         oxresell.create(adm, superAdminCredentials);
@@ -125,7 +116,7 @@ public class OXResellerUserTest extends OXResellerAbstractTest {
     }
 
     @Test
-    public void testCreateTooManyPerContextUser() throws MalformedURLException, RemoteException, NotBoundException, InvalidDataException, StorageException, InvalidCredentialsException, OXResellerException, ContextExistsException, NoSuchContextException, DatabaseUpdateException {
+    public void testCreateTooManyPerContextUser() throws Exception {
         ResellerAdmin adm = RandomAdmin();
         final Credentials creds = ResellerRandomCredentials(adm.getName());
 
@@ -169,7 +160,7 @@ public class OXResellerUserTest extends OXResellerAbstractTest {
      * will be changed!
      */
     @Test
-    public void testCreateTooManyPerContextUserByModuleAccess() throws MalformedURLException, RemoteException, NotBoundException, InvalidDataException, StorageException, InvalidCredentialsException, OXResellerException, ContextExistsException, NoSuchContextException, DatabaseUpdateException {
+    public void testCreateTooManyPerContextUserByModuleAccess() throws Exception {
         ResellerAdmin adm = RandomAdmin();
         final Credentials creds = ResellerRandomCredentials(adm.getName());
 

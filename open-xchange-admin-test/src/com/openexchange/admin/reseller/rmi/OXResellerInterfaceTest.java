@@ -297,7 +297,7 @@ public class OXResellerInterfaceTest extends OXResellerAbstractTest {
     }
 
     @Test
-    public void testDeleteContextOwningSubadmin() throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException, ContextExistsException, NoSuchContextException, DatabaseUpdateException, OXResellerException, MalformedURLException, NotBoundException {
+    public void testDeleteContextOwningSubadmin() throws Exception {
         oxresell.create(TestAdminUser("owned"), superAdminCredentials);
         final Context ctx = createContext(new Credentials("owned", "secret"));
 

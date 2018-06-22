@@ -58,12 +58,10 @@ import com.openexchange.admin.reseller.rmi.dataobjects.ResellerAdmin;
 import com.openexchange.admin.reseller.rmi.dataobjects.Restriction;
 import com.openexchange.admin.rmi.AbstractRMITest;
 import com.openexchange.admin.rmi.OXContextInterface;
-import com.openexchange.admin.rmi.OXUserInterface;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.dataobjects.User;
 import com.openexchange.admin.rmi.dataobjects.UserModuleAccess;
-import com.openexchange.admin.rmi.exceptions.ContextExistsException;
 import com.openexchange.admin.rmi.exceptions.DatabaseUpdateException;
 import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
@@ -140,14 +138,12 @@ public abstract class OXResellerAbstractTest extends AbstractRMITest {
         return oxadmin;
     }
 
-    protected static Context createContext(final Credentials auth) throws MalformedURLException, RemoteException, NotBoundException, StorageException, InvalidCredentialsException, InvalidDataException, ContextExistsException {
-        final OXContextInterface oxctx = (OXContextInterface) Naming.lookup(getRMIHostUrl() + OXContextInterface.RMI_NAME);
-
+    protected static Context createContext(final Credentials auth) throws Exception {
         User oxadmin = ContextAdmin();
         Context ctx = new Context();
         ctx.setMaxQuota(100000L);
 
-        Context create = oxctx.create(ctx, oxadmin, auth);
+        Context create = getContextManager().createContext(ctx, oxadmin, auth);
         try {
             // wait to ensure the context is available for further operations
             // FIXME when master-slave setup for configdb is available remove the line below
@@ -158,13 +154,11 @@ public abstract class OXResellerAbstractTest extends AbstractRMITest {
         return create;
     }
 
-    protected static Context createContextNoQuota(final Credentials auth) throws MalformedURLException, RemoteException, NotBoundException, StorageException, InvalidCredentialsException, InvalidDataException, ContextExistsException {
-        final OXContextInterface oxctx = (OXContextInterface) Naming.lookup(getRMIHostUrl() + OXContextInterface.RMI_NAME);
-
+    protected static Context createContextNoQuota(final Credentials auth) throws Exception {
         User oxadmin = ContextAdmin();
         Context ctx = new Context();
 
-        Context create = oxctx.create(ctx, oxadmin, auth);
+        Context create = getContextManager().createContext(ctx, oxadmin, auth);
         try {
             // wait to ensure the context is available for further operations
             // FIXME when master-slave setup for configdb is available remove the line below
@@ -176,13 +170,11 @@ public abstract class OXResellerAbstractTest extends AbstractRMITest {
         return create;
     }
 
-    protected static User createUser(final Context ctx, final Credentials auth) throws MalformedURLException, RemoteException, NotBoundException, StorageException, InvalidCredentialsException, InvalidDataException, ContextExistsException, NoSuchContextException, DatabaseUpdateException {
+    protected static User createUser(final Context ctx, final Credentials auth) throws Exception {
         return createUser(ctx, null, auth);
     }
 
-    protected static User createUser(final Context ctx, final UserModuleAccess access, final Credentials auth) throws MalformedURLException, RemoteException, NotBoundException, StorageException, InvalidCredentialsException, InvalidDataException, ContextExistsException, NoSuchContextException, DatabaseUpdateException {
-        final OXUserInterface oxusr = (OXUserInterface) Naming.lookup(getRMIHostUrl() + OXUserInterface.RMI_NAME);
-
+    protected static User createUser(final Context ctx, final UserModuleAccess access, final Credentials auth) throws Exception {
         final String random = new Long(System.currentTimeMillis()).toString();
         User oxuser = new User();
         oxuser.setName("oxuser" + random);
@@ -193,9 +185,9 @@ public abstract class OXResellerAbstractTest extends AbstractRMITest {
         oxuser.setEmail1("oxuser" + random + "@example.com");
         oxuser.setPassword("secret");
         if (access == null) {
-            return oxusr.create(ctx, oxuser, auth);
+            return getUserManager().createUser(ctx, oxuser, auth);
         }
-        return oxusr.create(ctx, oxuser, access, auth);
+        return getUserManager().createUser(ctx, oxuser, access, auth);
     }
 
     protected static void deleteContext(final Context ctx, final Credentials auth) throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, DatabaseUpdateException, InvalidDataException, MalformedURLException, NotBoundException {

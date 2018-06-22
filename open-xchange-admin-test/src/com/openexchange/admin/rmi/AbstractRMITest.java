@@ -90,10 +90,10 @@ public abstract class AbstractRMITest {
     protected static String TEST_DOMAIN = "example.org";
     protected static String change_suffix = "-changed";
 
-    public Credentials adminCredentials;
-    public Credentials superAdminCredentials;
-    public Context adminContext;
-    public Context superAdminContext;
+    protected Credentials adminCredentials;
+    protected Credentials superAdminCredentials;
+    protected Context adminContext;
+    protected Context superAdminContext;
     protected User superAdmin;
     protected User contextAdmin;
     protected User testUser;

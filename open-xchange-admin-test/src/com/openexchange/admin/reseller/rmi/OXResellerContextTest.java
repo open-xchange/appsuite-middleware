@@ -51,24 +51,18 @@ package com.openexchange.admin.reseller.rmi;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import java.net.MalformedURLException;
 import java.rmi.Naming;
-import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.admin.reseller.rmi.dataobjects.ResellerAdmin;
 import com.openexchange.admin.reseller.rmi.dataobjects.Restriction;
-import com.openexchange.admin.reseller.rmi.exceptions.OXResellerException;
 import com.openexchange.admin.rmi.OXContextInterface;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
-import com.openexchange.admin.rmi.exceptions.ContextExistsException;
-import com.openexchange.admin.rmi.exceptions.DatabaseUpdateException;
 import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
-import com.openexchange.admin.rmi.exceptions.NoSuchContextException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 
 public class OXResellerContextTest extends OXResellerAbstractTest {
@@ -121,7 +115,7 @@ public class OXResellerContextTest extends OXResellerAbstractTest {
     }
 
     @Test
-    public void testCreateTooManyContexts() throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException, OXResellerException, MalformedURLException, NotBoundException, ContextExistsException, NoSuchContextException, DatabaseUpdateException {
+    public void testCreateTooManyContexts() throws Exception {
         oxresell.delete(randomAdmin, superAdminCredentials); // Delete normaly created FooAdminUser
 
         randomAdmin.setRestrictions(new Restriction[] { MaxContextRestriction() });
@@ -150,7 +144,7 @@ public class OXResellerContextTest extends OXResellerAbstractTest {
     }
 
     @Test
-    public void testCreateContextNoQuota() throws MalformedURLException, RemoteException, NotBoundException, StorageException, InvalidCredentialsException, InvalidDataException, OXResellerException, ContextExistsException, NoSuchContextException, DatabaseUpdateException {
+    public void testCreateContextNoQuota() throws Exception {
         final Credentials creds = superAdminCredentials;
         oxresell.delete(randomAdmin, creds); // Delete normaly created FooAdminUser
 
@@ -176,7 +170,7 @@ public class OXResellerContextTest extends OXResellerAbstractTest {
     }
 
     @Test
-    public void testCreateTooManyOverallUser() throws MalformedURLException, RemoteException, NotBoundException, StorageException, InvalidCredentialsException, InvalidDataException, OXResellerException, ContextExistsException, NoSuchContextException, DatabaseUpdateException {
+    public void testCreateTooManyOverallUser() throws Exception {
         oxresell.delete(randomAdmin, superAdminCredentials); // Delete normaly created FooAdminUser
 
         randomAdmin.setRestrictions(new Restriction[] { MaxOverallUserRestriction(2) });
@@ -203,7 +197,7 @@ public class OXResellerContextTest extends OXResellerAbstractTest {
     }
 
     @Test
-    public void testListContextOwnedByReseller() throws MalformedURLException, RemoteException, NotBoundException, StorageException, InvalidCredentialsException, InvalidDataException, OXResellerException, ContextExistsException, NoSuchContextException, DatabaseUpdateException {
+    public void testListContextOwnedByReseller() throws Exception {
         ResellerAdmin second = RandomAdmin();
 
         oxresell.create(second, superAdminCredentials);
@@ -226,7 +220,7 @@ public class OXResellerContextTest extends OXResellerAbstractTest {
     }
 
     @Test
-    public void testGetDataContextOwnedByReseller() throws MalformedURLException, RemoteException, NotBoundException, StorageException, InvalidCredentialsException, InvalidDataException, ContextExistsException, NoSuchContextException, DatabaseUpdateException {
+    public void testGetDataContextOwnedByReseller() throws Exception {
         Credentials resellerRandomCredentials = ResellerRandomCredentials(randomAdmin.getName());
         ownedContext = createContext(resellerRandomCredentials);
         try {
