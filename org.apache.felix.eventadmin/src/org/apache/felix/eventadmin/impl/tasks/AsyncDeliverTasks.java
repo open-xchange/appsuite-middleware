@@ -116,12 +116,10 @@ public class AsyncDeliverTasks
                 executer = new TaskExecuter(m_deliver_task, m_running_threads, deliveredEvents, currentThreadId);
             }
 
-            boolean taskAdded = executer.addAndReactivate(new TaskInfo(tasks, event), m_pool);
-            if (taskAdded) {
-                if (postedEvents.incrementAndGet() < 0L) {
-                    postedEvents.set(0L);
-                }
+            if (postedEvents.incrementAndGet() < 0L) {
+                postedEvents.set(0L);
             }
+            executer.addAndReactivate(new TaskInfo(tasks, event), m_pool);
         //}
     }
 
@@ -168,7 +166,8 @@ public class AsyncDeliverTasks
          */
         boolean addAndReactivate(TaskInfo info, DefaultThreadPool pool) {
             if (false == m_infos.offer(info)) { // Always 'true' for ConcurrentLinkedQueue
-                // Could not add
+                // Unable to enqueue given task. Fall-back using current thread
+                deliverTask(info);
                 return false;
             }
 
