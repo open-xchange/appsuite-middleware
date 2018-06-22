@@ -56,7 +56,6 @@ import java.util.Set;
 import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.ConcurrentHashSet;
-import com.openexchange.test.pool.TestContextPool;
 import com.openexchange.test.pool.TestUser;
 import com.openexchange.testing.httpclient.invoker.ApiClient;
 import com.openexchange.testing.httpclient.modules.LoginApi;
@@ -114,7 +113,7 @@ public abstract class AbstractAPIClientSession extends AbstractClientSession {
                 iterator.remove();
             }
         } finally {
-            TestContextPool.backContext(testContext);
+            super.tearDown();
         }
     }
 
