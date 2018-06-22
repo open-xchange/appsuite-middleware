@@ -253,8 +253,19 @@ public class ContextManager extends AbstractManager {
      * @throws Exception if an error is occurred
      */
     public void changeContext(Context context) throws Exception {
+        changeContext(context, getMasterCredentials());
+    }
+
+    /**
+     * Changes/Updates the specified {@link Context}
+     * 
+     * @param context The {@link Context} to change
+     * @param credentials The credentials to authenicate against the server
+     * @throws Exception if an error is occurred
+     */
+    public void changeContext(Context context, Credentials authCredentials) throws Exception {
         OXContextInterface contextInterface = getContextInterface();
-        contextInterface.change(context, getMasterCredentials());
+        contextInterface.change(context, authCredentials);
     }
 
     /**
@@ -265,8 +276,20 @@ public class ContextManager extends AbstractManager {
      * @throws Exception if an error is occurred
      */
     public Context getData(Context context) throws Exception {
+        return getData(context, getMasterCredentials());
+    }
+
+    /**
+     * Loads the data for the specified {@link Context}
+     * 
+     * @param context The context for which the data should be loaded
+     * @param authCredentials The credentials to authenticate against the server
+     * @return The {@link Context} with the loaded data
+     * @throws Exception if an error is occurred
+     */
+    public Context getData(Context context, Credentials authCredentials) throws Exception {
         OXContextInterface contextInterface = getContextInterface();
-        return contextInterface.getData(context, getMasterCredentials());
+        return contextInterface.getData(context, authCredentials);
     }
 
     /**
@@ -303,6 +326,18 @@ public class ContextManager extends AbstractManager {
     public Context[] searchContext(Filestore filestore) throws Exception {
         OXContextInterface xres = getContextInterface();
         return xres.listByFilestore(filestore, getMasterCredentials());
+    }
+
+    /**
+     * Lists all contexts
+     * 
+     * @param authCredentials The credentials to authenticate against the server
+     * @return An array with all contexts
+     * @throws Exception if an error is occurred
+     */
+    public Context[] listAllContexts(Credentials authCredentials) throws Exception {
+        OXContextInterface xres = getContextInterface();
+        return xres.listAll(authCredentials);
     }
 
     /**

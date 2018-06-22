@@ -57,7 +57,6 @@ import org.junit.Test;
 import com.openexchange.admin.reseller.rmi.dataobjects.ResellerAdmin;
 import com.openexchange.admin.reseller.rmi.dataobjects.Restriction;
 import com.openexchange.admin.reseller.rmi.extensions.OXContextExtensionImpl;
-import com.openexchange.admin.rmi.OXContextInterface;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.dataobjects.User;
@@ -69,13 +68,10 @@ public class OXResellerUserTest extends OXResellerAbstractTest {
 
     private OXResellerInterface oxresell = null;
 
-    private OXContextInterface oxctx = null;
-
     @Before
     public void setUp() throws Exception {
         super.setUp();
         oxresell = (OXResellerInterface) Naming.lookup(getRMIHostUrl() + OXResellerInterface.RMI_NAME);
-        oxctx = (OXContextInterface) Naming.lookup(getRMIHostUrl() + OXContextInterface.RMI_NAME);
     }
 
     @Test
@@ -132,7 +128,7 @@ public class OXResellerUserTest extends OXResellerAbstractTest {
                 }
                 // TODO Here we call change context to apply the restrictions if the create call is ready to handle extensions
                 // this can be done directly with the create call
-                oxctx.change(ctx, creds);
+                getContextManager().changeContext(ctx, creds);
 
                 User oxadmin = ContextAdmin();
                 Credentials ctxadmcreds = new Credentials(oxadmin.getName(), oxadmin.getPassword());
@@ -177,7 +173,7 @@ public class OXResellerUserTest extends OXResellerAbstractTest {
                 }
                 // TODO Here we call change context to apply the restrictions if the create call is ready to handle extensions
                 // this can be done directly with the create call
-                oxctx.change(ctx, creds);
+                getContextManager().changeContext(ctx, creds);
 
                 try {
                     Thread.sleep(500);

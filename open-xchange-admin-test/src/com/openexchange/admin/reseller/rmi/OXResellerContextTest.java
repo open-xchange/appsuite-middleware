@@ -52,13 +52,11 @@ package com.openexchange.admin.reseller.rmi;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import java.rmi.Naming;
-import java.rmi.RemoteException;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.admin.reseller.rmi.dataobjects.ResellerAdmin;
 import com.openexchange.admin.reseller.rmi.dataobjects.Restriction;
-import com.openexchange.admin.rmi.OXContextInterface;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
@@ -71,15 +69,12 @@ public class OXResellerContextTest extends OXResellerAbstractTest {
 
     private static OXResellerInterface oxresell = null;
 
-    private static OXContextInterface oxctx = null;
-
     private ResellerAdmin randomAdmin;
 
     @Before
     public final void setUp() throws Exception {
         super.setUp();
         oxresell = (OXResellerInterface) Naming.lookup(getRMIHostUrl() + OXResellerInterface.RMI_NAME);
-        oxctx = (OXContextInterface) Naming.lookup(getRMIHostUrl() + OXContextInterface.RMI_NAME);
         randomAdmin = RandomAdmin();
 
         oxresell.create(randomAdmin, superAdminCredentials);
@@ -96,22 +91,22 @@ public class OXResellerContextTest extends OXResellerAbstractTest {
     }
 
     @Test(expected = InvalidCredentialsException.class)
-    public void testListAllContextInvalidAuthNoUser() throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException {
+    public void testListAllContextInvalidAuthNoUser() throws Exception {
         ResellerAdmin second = RandomAdmin();
-        oxctx.listAll(ResellerRandomCredentials(second.getName()));
+        getContextManager().listAllContexts(ResellerRandomCredentials(second.getName()));
     }
 
     @Test(expected = InvalidCredentialsException.class)
-    public void testListAllContextInvalidAuthWrongpasswd() throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException {
+    public void testListAllContextInvalidAuthWrongpasswd() throws Exception {
         Credentials creds = ResellerRandomCredentials(randomAdmin.getName());
         creds.setPassword("wrongpass");
-        oxctx.listAll(creds);
+        getContextManager().listAllContexts(creds);
     }
 
     @Test
-    public void testListAllContextValidAuth() throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException {
+    public void testListAllContextValidAuth() throws Exception {
         Credentials creds = ResellerRandomCredentials(randomAdmin.getName());
-        oxctx.listAll(creds);
+        getContextManager().listAllContexts(creds);
     }
 
     @Test
@@ -205,10 +200,10 @@ public class OXResellerContextTest extends OXResellerAbstractTest {
         Credentials resellerRandomCredentials = ResellerRandomCredentials(randomAdmin.getName());
         ownedContext = createContext(resellerRandomCredentials);
         try {
-            Context[] ret = oxctx.listAll(resellerRandomCredentials);
+            Context[] ret = getContextManager().listAllContexts(resellerRandomCredentials);
             assertEquals("listAll must return one entry", 1, ret.length);
 
-            ret = oxctx.listAll(ResellerRandomCredentials(second.getName()));
+            ret = getContextManager().listAllContexts(ResellerRandomCredentials(second.getName()));
             assertEquals("listAll must return no entries", 0, ret.length);
         } finally {
             deleteContext(ownedContext, resellerRandomCredentials);
@@ -229,13 +224,13 @@ public class OXResellerContextTest extends OXResellerAbstractTest {
                 ResellerAdmin second = RandomAdmin();
                 Credentials secondCreds = ResellerRandomCredentials(second.getName());
 
-                oxctx.getData(ownedContext, secondCreds);
+                getContextManager().getData(ownedContext, secondCreds);
             } catch (Exception e) {
                 fail = true;
             }
             assertTrue("getData on an unowned context must fail", fail);
 
-            Context ctx = oxctx.getData(ownedContext, resellerRandomCredentials);
+            Context ctx = getContextManager().getData(ownedContext, resellerRandomCredentials);
             assertEquals("getData must return context with same id as ownedContext", ownedContext.getId(), ctx.getId());
         } finally {
             deleteContext(ownedContext, resellerRandomCredentials);
