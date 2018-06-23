@@ -61,6 +61,7 @@ import com.openexchange.chronos.common.RecurrenceIdComparator;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.EventID;
+import com.openexchange.chronos.service.RecurrenceData;
 import com.openexchange.chronos.service.RecurrenceService;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceLookup;
@@ -152,6 +153,11 @@ public class DefaultEventConverter extends EventConverter {
             session.set(CalendarParameters.PARAMETER_RANGE_START, oldRangeStart);
             session.set(CalendarParameters.PARAMETER_RANGE_END, oldRangeEnd);
         }
+    }
+
+    @Override
+    protected RecurrenceData loadRecurrenceData(String seriesId) throws OXException {
+        return session.getCalendarService().getUtilities().loadRecurrenceData(session, seriesId);
     }
 
 }
