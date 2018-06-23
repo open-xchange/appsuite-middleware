@@ -292,7 +292,16 @@ public class EntityProcessor {
             for (Entry<String, List<String>> parameter : parameters) {
                 String firstValue = parameter.getValue().get(0);
                 if ("SENT-BY".equals(parameter.getKey())) {
-                    organizer.setSentBy(parseResourceId(new CalendarUser(), firstValue, true));
+                    try {
+                        organizer.setSentBy(parseResourceId(new CalendarUser(), firstValue, true));
+                    } catch (OXException e) {
+                        if (CalendarExceptionCodes.INVALID_CALENDAR_USER.equals(e)) {
+                            org.slf4j.LoggerFactory.getLogger(EntityProcessor.class).debug(
+                                "Ignoring invalid proxy {} for SENT-BY property of {}.", firstValue, organizer, e);
+                        } else {
+                            throw e;
+                        }
+                    }
                 }
                 if ("CN".equals(parameter.getKey())) {
                     organizer.setCn(firstValue);

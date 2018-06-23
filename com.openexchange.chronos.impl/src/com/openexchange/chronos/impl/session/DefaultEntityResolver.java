@@ -325,8 +325,17 @@ public class DefaultEntityResolver implements EntityResolver {
         /*
          * do the same with a proxy calendar user in "sent-by"
          */
-        if(calendarUser.getSentBy() != null){
-            applyEntityData(calendarUser.getSentBy(), CalendarUserType.INDIVIDUAL);
+        if (null != calendarUser.getSentBy()) {
+            try {
+                applyEntityData(calendarUser.getSentBy(), CalendarUserType.INDIVIDUAL);
+            } catch (OXException e) {
+                if (CalendarExceptionCodes.INVALID_CALENDAR_USER.equals(e)) {
+                    LOG.debug("Ignoring invalid proxy {} for SENT-BY property of {}.", calendarUser.getSentBy(), calendarUser, e);
+                    calendarUser.setSentBy(null);
+                } else {
+                    throw e;
+                }
+            }
         }
         return calendarUser;
     }
