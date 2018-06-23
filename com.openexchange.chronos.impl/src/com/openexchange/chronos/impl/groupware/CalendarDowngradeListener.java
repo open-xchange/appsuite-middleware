@@ -57,10 +57,13 @@ import java.util.stream.Collectors;
 import com.openexchange.chronos.AttendeeField;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.common.CalendarUtils;
-import com.openexchange.chronos.common.DefaultCalendarParameters;
+import com.openexchange.chronos.impl.Utils;
 import com.openexchange.chronos.service.CalendarHandler;
-import com.openexchange.chronos.service.CalendarUtilities;
+import com.openexchange.chronos.service.CalendarService;
+import com.openexchange.chronos.service.CalendarSession;
+import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.chronos.storage.CalendarStorageFactory;
+import com.openexchange.database.provider.DBTransactionPolicy;
 import com.openexchange.database.provider.SimpleDBProvider;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.downgrade.DowngradeEvent;
@@ -79,20 +82,20 @@ import com.openexchange.tools.session.ServerSessionAdapter;
 public class CalendarDowngradeListener implements DowngradeListener {
 
     private final CalendarStorageFactory factory;
-    private final CalendarUtilities      calendarUtilities;
-    private final Set<CalendarHandler>   calendarHandlers;
+    private final CalendarService calendarService;
+    private final Set<CalendarHandler> calendarHandlers;
 
     /**
-     * Initializes a new {@link CalendarDeleteListener}.
+     * Initializes a new {@link CalendarDowngradeListener}.
      *
      * @param factory The {@link CalendarStorageFactory}
-     * @param calendarUtilities The {@link CalendarUtilities}
+     * @param calendarUtilities The calendar service
      * @param calendarHandlers The {@link CalendarHandler}s to notify
      */
-    public CalendarDowngradeListener(CalendarStorageFactory factory, CalendarUtilities calendarUtilities, Set<CalendarHandler> calendarHandlers) {
+    public CalendarDowngradeListener(CalendarStorageFactory factory, CalendarService calendarService, Set<CalendarHandler> calendarHandlers) {
         super();
         this.factory = factory;
-        this.calendarUtilities = calendarUtilities;
+        this.calendarService = calendarService;
         this.calendarHandlers = calendarHandlers;
     }
 
@@ -100,7 +103,11 @@ public class CalendarDowngradeListener implements DowngradeListener {
     public void downgradePerformed(DowngradeEvent event) throws OXException {
         if (false == event.getNewUserConfiguration().hasCalendar()) {
             int userId = event.getNewUserConfiguration().getUserId();
-            StorageUpdater updater = new StorageUpdater(event.getContext(), userId, null, calendarUtilities, factory, new SimpleDBProvider(event.getReadCon(), event.getWriteCon()), calendarHandlers);
+            SimpleDBProvider dbProvider = new SimpleDBProvider(event.getReadCon(), event.getWriteCon());
+            CalendarSession calendarSession = calendarService.init(event.getSession());
+            calendarSession.set(PARAMETER_SUPPRESS_ITIP, Boolean.TRUE);
+            CalendarStorage storage = factory.create(event.getContext(), Utils.ACCOUNT_ID, calendarSession.getEntityResolver(), dbProvider, DBTransactionPolicy.NO_TRANSACTIONS);
+            StorageUpdater updater = new StorageUpdater(calendarSession, storage, userId, event.getContext().getMailadmin());
 
             // Get all events which the user attends and that are *NOT* located in his private folders.
             CompositeSearchTerm term = new CompositeSearchTerm(CompositeOperation.AND)
@@ -124,7 +131,7 @@ public class CalendarDowngradeListener implements DowngradeListener {
             updater.deleteEvent(events, ServerSessionAdapter.valueOf(userId, event.getContext().getContextId()));
 
             // Trigger calendar events
-            updater.notifyCalendarHandlers(event.getSession(), new DefaultCalendarParameters().set(PARAMETER_SUPPRESS_ITIP, Boolean.TRUE));
+            updater.notifyCalendarHandlers(calendarHandlers);
         }
     }
 

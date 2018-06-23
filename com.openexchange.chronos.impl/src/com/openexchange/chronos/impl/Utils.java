@@ -1028,8 +1028,30 @@ public class Utils {
      * @return The identifiers of the affected folders for each user
      */
     public static Map<Integer, List<String>> getAffectedFoldersPerUser(CalendarSession session, Collection<String> folderIds) throws OXException {
+        return getAffectedFoldersPerUser(getEntityResolver(session), folderIds);
+    }
+
+    /**
+     * Calculates a map holding the identifiers of all folders a user is able to access, based on the supplied collection of folder
+     * identifiers.
+     *
+     * @param session The session
+     * @param entityResolver The entity resolver
+     * @param folderIds The identifiers of all folders to determine the users with access for
+     * @return The identifiers of the affected folders for each user
+     */
+    public static Map<Integer, List<String>> getAffectedFoldersPerUser(Session session, EntityResolver entityResolver, Collection<String> folderIds) throws OXException {
+        DefaultEntityResolver defaultEntityResolver;
+        if (DefaultEntityResolver.class.isInstance(entityResolver)) {
+            defaultEntityResolver = (DefaultEntityResolver) entityResolver;
+        } else {
+            defaultEntityResolver = new DefaultEntityResolver(ServerSessionAdapter.valueOf(session), Services.getServiceLookup());
+        }
+        return getAffectedFoldersPerUser(defaultEntityResolver, folderIds);
+    }
+
+    private static Map<Integer, List<String>> getAffectedFoldersPerUser(DefaultEntityResolver entityResolver, Collection<String> folderIds) {
         Map<Integer, List<String>> affectedFoldersPerUser = new HashMap<Integer, List<String>>();
-        DefaultEntityResolver entityResolver = getEntityResolver(session);
         for (String folderId : folderIds) {
             try {
                 FolderObject folder = entityResolver.getFolder(asInt(folderId));

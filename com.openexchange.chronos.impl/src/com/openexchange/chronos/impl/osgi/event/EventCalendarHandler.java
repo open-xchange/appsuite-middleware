@@ -59,7 +59,6 @@ import com.openexchange.chronos.service.CalendarEvent;
 import com.openexchange.chronos.service.CalendarHandler;
 import com.openexchange.chronos.service.CreateResult;
 import com.openexchange.chronos.service.DeleteResult;
-import com.openexchange.chronos.service.EventID;
 import com.openexchange.chronos.service.UpdateResult;
 import com.openexchange.event.CommonEvent;
 import com.openexchange.exception.OXException;
@@ -89,7 +88,7 @@ public class EventCalendarHandler implements CalendarHandler {
 
     /**
      * Initializes a new {@link EventCalendarHandler}.
-     * 
+     *
      * @param eventAdmin The {@link EventAdmin} to propagate events through
      */
     public EventCalendarHandler(EventAdmin eventAdmin) {
@@ -99,36 +98,28 @@ public class EventCalendarHandler implements CalendarHandler {
 
     @Override
     public void handle(CalendarEvent event) {
-        if (event == null) {
+        if (event == null || null == event.getCalendarSession()) {
             return;
         }
         try {
             // Check for new events
             if (false == event.getCreations().isEmpty()) {
                 for (CreateResult result : event.getCreations()) {
-                    triggerEvent(new ChronosCommonEvent(event, CommonEvent.INSERT, result.getCreatedEvent()), CREATED);
+                    triggerEvent(new ChronosCommonEvent(event.getCalendarSession(), CommonEvent.INSERT, result.getCreatedEvent()), CREATED);
                 }
             }
 
             // Check for updated events
             if (false == event.getUpdates().isEmpty()) {
                 for (UpdateResult result : event.getUpdates()) {
-                    triggerEvent(new ChronosCommonEvent(event, CommonEvent.UPDATE, result.getUpdate(), result.getOriginal()), UPDATED);
+                    triggerEvent(new ChronosCommonEvent(event.getCalendarSession(), CommonEvent.UPDATE, result.getUpdate(), result.getOriginal()), UPDATED);
                 }
             }
 
             // Check for deleted events
             if (false == event.getDeletions().isEmpty()) {
                 for (DeleteResult result : event.getDeletions()) {
-                    // Create an Event instance for the deleted event to propagate
-                    Event deletedEvent = new Event();
-                    EventID eventID = result.getEventID();
-                    deletedEvent.setId(eventID.getObjectID());
-                    deletedEvent.setFolderId(eventID.getFolderID());
-                    deletedEvent.setRecurrenceId(eventID.getRecurrenceID());
-                    deletedEvent.setTimestamp(result.getTimestamp());
-
-                    triggerEvent(new ChronosCommonEvent(event, CommonEvent.DELETE, deletedEvent), DELETED);
+                    triggerEvent(new ChronosCommonEvent(event.getCalendarSession(), CommonEvent.DELETE, result.getOriginal()), DELETED);
                 }
             }
         } catch (OXException e) {
@@ -138,7 +129,7 @@ public class EventCalendarHandler implements CalendarHandler {
 
     /**
      * Triggers the OSGi event with given {@link CommonEvent} under the given topic
-     * 
+     *
      * @param chronosEvent The {@link Event} to propagate
      * @param topic The topic of the event
      * @throws OXException In case of missing {@link EventAdmin} service

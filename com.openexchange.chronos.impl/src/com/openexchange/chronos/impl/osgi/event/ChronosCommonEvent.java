@@ -49,6 +49,7 @@
 
 package com.openexchange.chronos.impl.osgi.event;
 
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -57,8 +58,11 @@ import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.chronos.Event;
+import com.openexchange.chronos.impl.Utils;
 import com.openexchange.chronos.service.CalendarEvent;
+import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.event.CommonEvent;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Types;
 import com.openexchange.session.Session;
 
@@ -83,30 +87,30 @@ public class ChronosCommonEvent implements CommonEvent {
      *
      * Initializes a new {@link ChronosCommonEvent}.
      *
-     * @param event To get session, user ID and context ID from
+     * @param calendarSession The calendar session
      * @param actionID The actionID propagate by this event
      * @param actionEvent The new or updated {@link Event}
      */
-    public ChronosCommonEvent(CalendarEvent event, int actionID, Event actionEvent) {
-        this(event, actionID, actionEvent, null);
+    public ChronosCommonEvent(CalendarSession calendarSession, int actionID, Event actionEvent) {
+        this(calendarSession, actionID, actionEvent, null);
     }
 
     /**
      *
      * Initializes a new {@link ChronosCommonEvent}.
      *
-     * @param event To get session, user ID and context ID from
+     * @param calendarSession The calendar session
      * @param actionID The actionID propagate by this event
      * @param actionEvent The new or updated {@link Event}
      * @param oldEvent The old {@link Event} if an update was made, else <code>null</code>
      */
-    public ChronosCommonEvent(CalendarEvent event, int actionID, Event actionEvent, Event oldEvent) {
+    public ChronosCommonEvent(CalendarSession calendarSession, int actionID, Event actionEvent, Event oldEvent) {
         super();
-        this.session = event.getSession();
+        this.session = calendarSession.getSession();
         this.actionID = actionID;
         this.actionEvent = actionEvent;
         this.oldEvent = oldEvent;
-        this.affectedUsersWithFolders = getAffected(event.getAffectedFoldersPerUser());
+        this.affectedUsersWithFolders = getAffectedFoldersPerUser(calendarSession, actionEvent, oldEvent);
     }
 
     @Override
@@ -166,6 +170,28 @@ public class ChronosCommonEvent implements CommonEvent {
     @Override
     public Map<Integer, Set<Integer>> getAffectedUsersWithFolder() {
         return affectedUsersWithFolders;
+    }
+
+    private Map<Integer, Set<Integer>> getAffectedFoldersPerUser(CalendarSession session, Event actionEvent, Event oldEvent) {
+        Set<String> folderIds = new HashSet<String>();
+        if (null != actionEvent) {
+            folderIds.addAll(Utils.getPersonalFolderIds(actionEvent.getAttendees()));
+            if (null != actionEvent.getFolderId()) {
+                folderIds.add(actionEvent.getFolderId());
+            }
+        }
+        if (null != oldEvent) {
+            folderIds.addAll(Utils.getPersonalFolderIds(oldEvent.getAttendees()));
+            if (null != oldEvent.getFolderId()) {
+                folderIds.add(oldEvent.getFolderId());
+            }
+        }
+        try {
+            return getAffected(Utils.getAffectedFoldersPerUser(session, folderIds));
+        } catch (OXException e) {
+            LOGGER.error("Error deriving affected folders per user", e);
+            return Collections.emptyMap();
+        }
     }
 
     /**

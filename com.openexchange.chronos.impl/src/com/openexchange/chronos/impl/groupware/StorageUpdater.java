@@ -49,7 +49,6 @@
 
 package com.openexchange.chronos.impl.groupware;
 
-import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -67,15 +66,9 @@ import com.openexchange.chronos.common.mapping.EventMapper;
 import com.openexchange.chronos.impl.Consistency;
 import com.openexchange.chronos.provider.CalendarAccount;
 import com.openexchange.chronos.service.CalendarHandler;
-import com.openexchange.chronos.service.CalendarParameters;
-import com.openexchange.chronos.service.CalendarUtilities;
-import com.openexchange.chronos.service.EntityResolver;
+import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.storage.CalendarStorage;
-import com.openexchange.chronos.storage.CalendarStorageFactory;
-import com.openexchange.database.provider.DBProvider;
-import com.openexchange.database.provider.DBTransactionPolicy;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.contexts.Context;
 import com.openexchange.search.SearchTerm;
 import com.openexchange.search.SingleSearchTerm.SingleOperation;
 import com.openexchange.session.Session;
@@ -91,39 +84,29 @@ class StorageUpdater {
     private static final EventField[] SEARCH_FIELDS = { EventField.ID, EventField.SERIES_ID, EventField.RECURRENCE_ID, EventField.FOLDER_ID, EventField.CREATED_BY, EventField.MODIFIED_BY,
         EventField.CALENDAR_USER, EventField.ORGANIZER, EventField.ATTENDEES };
 
-    private final Context             context;
-    private final int                 attendeeId;
-    private final CalendarUser        replacement;
-    private final Date                date;
-    private final EntityResolver      entityResolver;
-    private final CalendarStorage     storage;
+    private final CalendarSession calendarSession;
+    private final CalendarStorage storage;
     private final SimpleResultTracker tracker;
-    private final CalendarUtilities   calendarUtilities;
-    private final DBProvider          dbProvider;
+    private final int attendeeId;
+    private final CalendarUser replacement;
+    private final Date date;
 
     /**
-     * Initializes a new {@link CalendarDeleteListener}.
+     * Initializes a new {@link StorageUpdater}.
      *
-     * @param context The {@link Context}
+     * @param calendarSession The calendar session
+     * @param storage The calendar storage
      * @param attendeeId The identifier of the attendee
-     * @param destinationUserId The identifier of the destination user. <code>null</code> to use the context admin
-     * @param calendarUtilities The {@link CalendarUtilities}
-     * @param factory The {@link CalendarStorageFactory}
-     * @param dbProvider The {@link DBProvider} holding the connections
-     * @param calendarHandlers The {@link CalendarHandler}
-     * @throws OXException In case {@link EntityResolver} or {@link CalendarStorage} can't be created
+     * @param destinationUserId The identifier of the destination user
      */
-    StorageUpdater(Context context, int attendeeId, Integer destinationUserId, CalendarUtilities calendarUtilities, CalendarStorageFactory factory, DBProvider dbProvider, Set<CalendarHandler> calendarHandlers) throws OXException {
+    public StorageUpdater(CalendarSession calendarSession, CalendarStorage storage, int attendeeId, int destinationUserId) throws OXException {
         super();
-        this.context = context;
+        this.calendarSession = calendarSession;
         this.attendeeId = attendeeId;
-        this.entityResolver = calendarUtilities.getEntityResolver(context.getContextId());
-        this.replacement = entityResolver.prepareUserAttendee(null == destinationUserId || 0 >= destinationUserId ? context.getMailadmin() : destinationUserId.intValue());
-        this.storage = factory.create(context, CalendarAccount.DEFAULT_ACCOUNT.getAccountId(), entityResolver, dbProvider, DBTransactionPolicy.NO_TRANSACTIONS);
-        this.tracker = new SimpleResultTracker(calendarHandlers);
-        this.calendarUtilities = calendarUtilities;
-        this.dbProvider = dbProvider;
+        this.replacement = calendarSession.getEntityResolver().prepareUserAttendee(destinationUserId);
+        this.tracker = new SimpleResultTracker();
         this.date = new Date();
+        this.storage = storage;
     }
 
     /**
@@ -187,6 +170,9 @@ class StorageUpdater {
      * @throws OXException Various
      */
     void deleteEvent(List<Event> events, Session session) throws OXException {
+        if (null == events || 0 == events.size()) {
+            return;
+        }
         List<String> eventIds = Arrays.asList(CalendarUtils.getObjectIDs(events));
         for (Event event : events) {
             storage.getAttachmentStorage().deleteAttachments(session, CalendarUtils.getFolderView(event, attendeeId), event.getId());
@@ -221,9 +207,16 @@ class StorageUpdater {
             eventUpdate.setCalendarUser(replacement);
             updated = true;
         }
-        if (CalendarUtils.matches(event.getOrganizer(), attendeeId)) {
-            eventUpdate.setOrganizer(entityResolver.applyEntityData(new Organizer(), replacement.getEntity()));
-            updated = true;
+        if (null != event.getOrganizer()) {
+            if (CalendarUtils.matches(event.getOrganizer(), attendeeId)) {
+                eventUpdate.setOrganizer(calendarSession.getEntityResolver().applyEntityData(new Organizer(), replacement.getEntity()));
+                updated = true;
+            } else if (CalendarUtils.matches(event.getOrganizer().getSentBy(), attendeeId)) {
+                Organizer organizer = new Organizer(event.getOrganizer());
+                organizer.setSentBy(replacement);
+                eventUpdate.setOrganizer(organizer);
+                updated = true;
+            }
         }
         if (updated) {
             eventUpdate.setId(event.getId());
@@ -290,7 +283,7 @@ class StorageUpdater {
             updated = true;
         }
         if (CalendarUtils.matches(event.getOrganizer(), attendeeId)) {
-            eventUpdate.setOrganizer(entityResolver.applyEntityData(new Organizer(), replacement.getEntity()));
+            eventUpdate.setOrganizer(calendarSession.getEntityResolver().applyEntityData(new Organizer(), replacement.getEntity()));
             updated = true;
         }
         /*
@@ -342,12 +335,10 @@ class StorageUpdater {
     /**
      * Notifies the {@link CalendarHandler}s
      *
-     * @param session The {@link Session}
-     * @param parameters Additional calendar parameters, or <code>null</code> if not set
-     * @throws OXException In case {@link Connection} can not be acquired
+     * @param calendarHandlers The handlers to notify
      */
-    void notifyCalendarHandlers(Session session, CalendarParameters parameters) throws OXException {
-        tracker.notifyCalenderHandlers(dbProvider.getWriteConnection(context), context, session, entityResolver, parameters);
+    void notifyCalendarHandlers(Set<CalendarHandler> handlers) throws OXException {
+        tracker.notifyCalenderHandlers(calendarSession, handlers);
     }
 
     /**
