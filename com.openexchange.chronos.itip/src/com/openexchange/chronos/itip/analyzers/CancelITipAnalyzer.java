@@ -81,7 +81,7 @@ public class CancelITipAnalyzer extends AbstractITipAnalyzer {
 
     /**
      * Initializes a new {@link CancelITipAnalyzer}.
-     * 
+     *
      * @param util The {@link ITipIntegrationUtility}
      */
     public CancelITipAnalyzer(final ITipIntegrationUtility util) {
@@ -113,12 +113,12 @@ public class CancelITipAnalyzer extends AbstractITipAnalyzer {
         }
         analysis.setUid(event.getUid());
         Event toDelete = getToDelete(session, event);
+        session.getUtilities().adjustTimeZones(session.getUserId(), event, toDelete);
         if (toDelete == null) {
             analysis.addAnnotation(new ITipAnnotation(Messages.CANCEL_UNKNOWN_APPOINTMENT, locale));
             analysis.recommendAction(ITipAction.IGNORE);
             return analysis;
         }
-        session.getUtilities().adjustTimeZones(session.getUserId(), toDelete, event);
         change.setCurrentEvent(toDelete);
         if (event.containsRecurrenceId()) {
             List<Event> exceptions = util.getExceptions(toDelete, session);
