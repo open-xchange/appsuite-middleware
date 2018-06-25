@@ -114,7 +114,7 @@ public class UserTest extends AbstractRMITest {
     @Override
     public void setUp() throws Exception {
         super.setUp();
-        context = getContextManager().create(adminCredentials);
+        context = getContextManager().create(contextAdminCredentials);
     }
 
     /**
@@ -152,10 +152,10 @@ public class UserTest extends AbstractRMITest {
         // create new user
         UserModuleAccess access = new UserModuleAccess();
         User usr = UserFactory.createUser(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, TEST_DOMAIN, context);
-        User createduser = getUserManager().create(context, usr, access, adminCredentials);
+        User createduser = getUserManager().create(context, usr, access, contextAdminCredentials);
 
         // now load user from server and check if data is correct, else fail
-        User srv_loaded = getUserManager().getData(context, id(createduser), adminCredentials);
+        User srv_loaded = getUserManager().getData(context, id(createduser), contextAdminCredentials);
         if (createduser.getId().equals(srv_loaded.getId())) {
             //verify data
             compareUser(createduser, srv_loaded);
@@ -172,10 +172,10 @@ public class UserTest extends AbstractRMITest {
 
         // create new user
         User usr = UserFactory.createUser(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, TEST_DOMAIN, context);
-        User createduser = getUserManager().create(context, usr, adminCredentials);
+        User createduser = getUserManager().create(context, usr, contextAdminCredentials);
 
         // now load user from server and check if data is correct, else fail
-        User srv_loaded = getUserManager().getData(context, id(createduser), adminCredentials);
+        User srv_loaded = getUserManager().getData(context, id(createduser), contextAdminCredentials);
         if (createduser.getId().equals(srv_loaded.getId())) {
             //verify data
             compareUser(createduser, srv_loaded);
@@ -192,10 +192,10 @@ public class UserTest extends AbstractRMITest {
 
         // create new user
         User usr = UserFactory.createUser(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, TEST_DOMAIN, context);
-        User createduser = getUserManager().create(context, usr, NAMED_ACCESS_COMBINATION_BASIC, adminCredentials);
+        User createduser = getUserManager().create(context, usr, NAMED_ACCESS_COMBINATION_BASIC, contextAdminCredentials);
 
         // now load user from server and check if data is correct, else fail
-        User srv_loaded = getUserManager().getData(context, id(createduser), adminCredentials);
+        User srv_loaded = getUserManager().getData(context, id(createduser), contextAdminCredentials);
         if (createduser.getId().equals(srv_loaded.getId())) {
             //verify data
             compareUser(createduser, srv_loaded);
@@ -213,10 +213,10 @@ public class UserTest extends AbstractRMITest {
         // create new user
         UserModuleAccess access = new UserModuleAccess();
         User usr = UserFactory.createUser(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, TEST_DOMAIN);
-        User createduser = getUserManager().create(context, usr, access, adminCredentials);
+        User createduser = getUserManager().create(context, usr, access, contextAdminCredentials);
 
         // now load user from server and check if data is correct, else fail
-        User srv_loaded = getUserManager().getData(context, id(createduser), adminCredentials);
+        User srv_loaded = getUserManager().getData(context, id(createduser), contextAdminCredentials);
         if (createduser.getId().equals(srv_loaded.getId())) {
             //verify data
             compareUserMandatory(createduser, srv_loaded);
@@ -236,7 +236,7 @@ public class UserTest extends AbstractRMITest {
         user.setDriveFolderMode("wrong");
         User createdUser = null;
         try {
-            createdUser = getUserManager().create(context, user, access, adminCredentials);
+            createdUser = getUserManager().create(context, user, access, contextAdminCredentials);
             fail("No exception was thrown");
         } catch (InvalidDataException e) {
             // Do nothing, we expect that
@@ -253,13 +253,13 @@ public class UserTest extends AbstractRMITest {
         UserModuleAccess access = new UserModuleAccess();
 
         User usr = UserFactory.createUser(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, TEST_DOMAIN, context, false);
-        User createduser = getUserManager().create(context, usr, access, adminCredentials);
+        User createduser = getUserManager().create(context, usr, access, contextAdminCredentials);
 
         // delete user
-        getUserManager().delete(context, id(createduser), adminCredentials);
+        getUserManager().delete(context, id(createduser), contextAdminCredentials);
 
         // try to load user, this MUST fail
-        getUserManager().getData(context, createduser, adminCredentials);
+        getUserManager().getData(context, createduser, contextAdminCredentials);
         fail("user not exists expected");
     }
 
@@ -277,13 +277,13 @@ public class UserTest extends AbstractRMITest {
         UserModuleAccess access = new UserModuleAccess();
 
         User usr = UserFactory.createUser(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, TEST_DOMAIN, context);
-        User createduser = getUserManager().create(context, usr, access, adminCredentials);
+        User createduser = getUserManager().create(context, usr, access, contextAdminCredentials);
 
         // delete user
-        getUserManager().delete(context, createduser, adminCredentials);
+        getUserManager().delete(context, createduser, contextAdminCredentials);
 
         // create same user again, this failes as described in the bug
-        createduser = getUserManager().create(context, usr, access, adminCredentials);
+        createduser = getUserManager().create(context, usr, access, contextAdminCredentials);
     }
 
     /**
@@ -295,13 +295,13 @@ public class UserTest extends AbstractRMITest {
         UserModuleAccess access = new UserModuleAccess();
 
         User usr = UserFactory.createUser(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, TEST_DOMAIN, context);
-        User createduser = getUserManager().create(context, usr, access, adminCredentials);
+        User createduser = getUserManager().create(context, usr, access, contextAdminCredentials);
 
         // delete user
-        getUserManager().delete(context, new User[0], adminCredentials);
+        getUserManager().delete(context, new User[0], contextAdminCredentials);
 
         // try to load user, this MUST fail
-        getUserManager().getData(context, createduser, adminCredentials);
+        getUserManager().getData(context, createduser, contextAdminCredentials);
         fail("user not exists expected");
     }
 
@@ -314,10 +314,10 @@ public class UserTest extends AbstractRMITest {
         UserModuleAccess access = new UserModuleAccess();
 
         User usr = UserFactory.createUser(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, TEST_DOMAIN, context);
-        User createduser = getUserManager().create(context, usr, access, adminCredentials);
+        User createduser = getUserManager().create(context, usr, access, contextAdminCredentials);
 
         // now load user from server and check if data is correct, else fail
-        User srv_loaded = getUserManager().getData(context, createduser, adminCredentials);
+        User srv_loaded = getUserManager().getData(context, createduser, contextAdminCredentials);
         if (createduser.getId().equals(srv_loaded.getId())) {
             //verify data
             compareUser(createduser, srv_loaded);
@@ -334,13 +334,13 @@ public class UserTest extends AbstractRMITest {
         UserModuleAccess access = new UserModuleAccess();
 
         User usr = UserFactory.createUser(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, TEST_DOMAIN, context);
-        User createduser = getUserManager().create(context, usr, access, adminCredentials);
+        User createduser = getUserManager().create(context, usr, access, contextAdminCredentials);
 
         User usernameuser = new User();
         usernameuser.setName(createduser.getName());
 
         // now load user from server and check if data is correct, else fail
-        User srv_loaded = getUserManager().getData(context, usernameuser, adminCredentials);
+        User srv_loaded = getUserManager().getData(context, usernameuser, contextAdminCredentials);
         if (!createduser.getId().equals(srv_loaded.getId())) {
             fail("Expected to get user data");
         }
@@ -359,22 +359,22 @@ public class UserTest extends AbstractRMITest {
         User usr = UserFactory.createUser(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, TEST_DOMAIN, context);
         User createduser;
         try {
-            createduser = getUserManager().create(context, usr, access, adminCredentials);
+            createduser = getUserManager().create(context, usr, access, contextAdminCredentials);
             fail("Creating a user with permission to edit public folder permissions should be denied.");
         } catch (StorageException e) {
             // Everything is fine. Setting publicFolderEditable should be denied. See bugs 18866, 20369, 20635.
             access.setPublicFolderEditable(false);
-            createduser = getUserManager().create(context, usr, access, adminCredentials);
+            createduser = getUserManager().create(context, usr, access, contextAdminCredentials);
 
         }
 
         // now load user from server and check if data is correct, else fail
-        UserModuleAccess moduleAccess = getUserManager().getModuleAccess(context, createduser, adminCredentials);
+        UserModuleAccess moduleAccess = getUserManager().getModuleAccess(context, createduser, contextAdminCredentials);
         assertFalse("Editing public folder was allowed for a normal user.", moduleAccess.isPublicFolderEditable());
 
         moduleAccess.setPublicFolderEditable(true);
         try {
-            getUserManager().changeModuleAccess(context, usr, moduleAccess, adminCredentials);
+            getUserManager().changeModuleAccess(context, usr, moduleAccess, contextAdminCredentials);
             fail("Setting publicfoldereditable to true was not denied by admin.");
         } catch (StorageException e) {
             // This is expected.
@@ -392,15 +392,15 @@ public class UserTest extends AbstractRMITest {
         usr.setId(Integer.valueOf(2));
 
         // enable and test it.
-        UserModuleAccess access = getUserManager().getModuleAccess(context, usr, adminCredentials);
+        UserModuleAccess access = getUserManager().getModuleAccess(context, usr, contextAdminCredentials);
         access.setPublicFolderEditable(true);
-        getUserManager().changeModuleAccess(context, usr, access, adminCredentials);
-        access = getUserManager().getModuleAccess(context, usr, adminCredentials);
+        getUserManager().changeModuleAccess(context, usr, access, contextAdminCredentials);
+        access = getUserManager().getModuleAccess(context, usr, contextAdminCredentials);
         assertTrue("Flag publicfoldereditable does not survice roundtrip for context administrator.", access.isPublicFolderEditable());
 
         access.setPublicFolderEditable(false);
-        getUserManager().changeModuleAccess(context, usr, access, adminCredentials);
-        access = getUserManager().getModuleAccess(context, usr, adminCredentials);
+        getUserManager().changeModuleAccess(context, usr, access, contextAdminCredentials);
+        access = getUserManager().getModuleAccess(context, usr, contextAdminCredentials);
         assertFalse("Flag publicfoldereditable does not survice roundtrip for context administrator.", access.isPublicFolderEditable());
     }
 
@@ -413,7 +413,7 @@ public class UserTest extends AbstractRMITest {
         UserModuleAccess access = new UserModuleAccess();
 
         User usr = UserFactory.createUser(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, TEST_DOMAIN, context);
-        User createduser = getUserManager().create(context, usr, access, adminCredentials);
+        User createduser = getUserManager().create(context, usr, access, contextAdminCredentials);
 
         User usernameuser = new User();
         usernameuser.setName(createduser.getName());
@@ -438,13 +438,13 @@ public class UserTest extends AbstractRMITest {
         UserModuleAccess access = new UserModuleAccess();
 
         User usr = UserFactory.createUser(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, TEST_DOMAIN, context);
-        User createduser = getUserManager().create(context, usr, access, adminCredentials);
+        User createduser = getUserManager().create(context, usr, access, contextAdminCredentials);
 
         User iduser = new User();
         iduser.setId(createduser.getId());
 
         // now load user from server and check if data is correct, else fail
-        User srv_loaded = getUserManager().getData(context, iduser, adminCredentials);
+        User srv_loaded = getUserManager().getData(context, iduser, contextAdminCredentials);
         if (createduser.getId().equals(srv_loaded.getId())) {
             //verify data
             compareUser(createduser, srv_loaded);
@@ -461,10 +461,10 @@ public class UserTest extends AbstractRMITest {
 
         UserModuleAccess client_access = new UserModuleAccess();
         User usr = UserFactory.createUser(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, TEST_DOMAIN, context);
-        User createduser = getUserManager().create(context, usr, client_access, adminCredentials);
+        User createduser = getUserManager().create(context, usr, client_access, contextAdminCredentials);
 
         // get module access
-        UserModuleAccess srv_response = getUserManager().getModuleAccess(context, createduser, adminCredentials);
+        UserModuleAccess srv_response = getUserManager().getModuleAccess(context, createduser, contextAdminCredentials);
 
         // test if module access was set correctly
         compareUserAccess(client_access, srv_response);
@@ -478,10 +478,10 @@ public class UserTest extends AbstractRMITest {
 
         UserModuleAccess client_access = new UserModuleAccess();
         User usr = UserFactory.createUser(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, TEST_DOMAIN, context);
-        User createduser = getUserManager().create(context, usr, client_access, adminCredentials);
+        User createduser = getUserManager().create(context, usr, client_access, contextAdminCredentials);
 
         // get module access
-        UserModuleAccess srv_response = getUserManager().getModuleAccess(context, createduser, adminCredentials);
+        UserModuleAccess srv_response = getUserManager().getModuleAccess(context, createduser, contextAdminCredentials);
 
         // test if module access was set correctly
         compareUserAccess(client_access, srv_response);
@@ -502,10 +502,10 @@ public class UserTest extends AbstractRMITest {
         srv_response.setWebmail(!srv_response.getWebmail());
 
         // submit changes
-        getUserManager().changeModuleAccess(context, createduser, srv_response, adminCredentials);
+        getUserManager().changeModuleAccess(context, createduser, srv_response, contextAdminCredentials);
 
         // load again and verify
-        UserModuleAccess srv_response_changed = getUserManager().getModuleAccess(context, createduser, adminCredentials);
+        UserModuleAccess srv_response_changed = getUserManager().getModuleAccess(context, createduser, contextAdminCredentials);
 
         // test if module access was set correctly
         compareUserAccess(srv_response, srv_response_changed);
@@ -520,9 +520,9 @@ public class UserTest extends AbstractRMITest {
 
         UserModuleAccess client_access = new UserModuleAccess();
         User usr = UserFactory.createUser(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, TEST_DOMAIN, context);
-        User createduser = getUserManager().create(context, usr, client_access, adminCredentials);
+        User createduser = getUserManager().create(context, usr, client_access, contextAdminCredentials);
 
-        User[] srv_response = getUserManager().search(context, "*", adminCredentials);
+        User[] srv_response = getUserManager().search(context, "*", contextAdminCredentials);
 
         assertTrue("Expected list size > 0 ", srv_response.length > 0);
 
@@ -545,7 +545,7 @@ public class UserTest extends AbstractRMITest {
 
         UserModuleAccess client_access = new UserModuleAccess();
         User usr = UserFactory.createUser(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, TEST_DOMAIN, context, false);
-        User createduser = getUserManager().create(context, usr, client_access, adminCredentials);
+        User createduser = getUserManager().create(context, usr, client_access, contextAdminCredentials);
         //test if filestore already exists
         Filestore[] filestores = getFilestoreManager().search("file:///", true);
         if (filestores != null && filestores.length != 0) {
@@ -566,10 +566,10 @@ public class UserTest extends AbstractRMITest {
             fs = getFilestoreManager().register(fs);
         }
         //move user to new filestore
-        getUserManager().moveFromContextToUserFilestore(context, usr, fs, 10, adminCredentials);
+        getUserManager().moveFromContextToUserFilestore(context, usr, fs, 10, contextAdminCredentials);
         Thread.sleep(500); //wait for move
 
-        User[] srv_response = getUserManager().listUsersWithOwnFilestore(context, fs.getId(), adminCredentials);
+        User[] srv_response = getUserManager().listUsersWithOwnFilestore(context, fs.getId(), contextAdminCredentials);
 
         assertTrue("Expected list size > 0 ", srv_response.length > 0);
 
@@ -591,9 +591,9 @@ public class UserTest extends AbstractRMITest {
 
         UserModuleAccess client_access = new UserModuleAccess();
         User usr = UserFactory.createUser(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, TEST_DOMAIN, context);
-        User createduser = getUserManager().create(context, usr, client_access, adminCredentials);
+        User createduser = getUserManager().create(context, usr, client_access, contextAdminCredentials);
 
-        User[] srv_response = getUserManager().listAll(context, adminCredentials);
+        User[] srv_response = getUserManager().listAll(context, contextAdminCredentials);
 
         assertTrue("Expected list size > 0 ", srv_response.length > 0);
 
@@ -615,10 +615,10 @@ public class UserTest extends AbstractRMITest {
 
         UserModuleAccess access = new UserModuleAccess();
         User usr = UserFactory.createUser(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, TEST_DOMAIN, context);
-        User createduser = getUserManager().create(context, usr, access, adminCredentials);
+        User createduser = getUserManager().create(context, usr, access, contextAdminCredentials);
 
         // now load user from server and check if data is correct, else fail
-        User srv_loaded = getUserManager().getData(context, id(createduser), adminCredentials);
+        User srv_loaded = getUserManager().getData(context, id(createduser), contextAdminCredentials);
         if (createduser.getId().equals(srv_loaded.getId())) {
             //verify data
             compareUser(createduser, srv_loaded);
@@ -629,10 +629,10 @@ public class UserTest extends AbstractRMITest {
         // now change data
         srv_loaded = createChangeUserData(srv_loaded);
         // submit changes
-        getUserManager().change(context, srv_loaded, adminCredentials);
+        getUserManager().change(context, srv_loaded, contextAdminCredentials);
 
         // load again
-        User user_changed_loaded = getUserManager().getData(context, id(srv_loaded), adminCredentials);
+        User user_changed_loaded = getUserManager().getData(context, id(srv_loaded), contextAdminCredentials);
         // set Username to old value for verification
         srv_loaded.setName(createduser.getName());
         // remove deleted dynamic attribute for verification
@@ -653,10 +653,10 @@ public class UserTest extends AbstractRMITest {
 
         UserModuleAccess access = new UserModuleAccess();
         User usr = UserFactory.createUser(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, TEST_DOMAIN, context);
-        User createduser = getUserManager().create(context, usr, access, adminCredentials);
+        User createduser = getUserManager().create(context, usr, access, contextAdminCredentials);
 
         // now load user from server and check if data is correct, else fail
-        User srv_loaded = getUserManager().getData(context, id(createduser), adminCredentials);
+        User srv_loaded = getUserManager().getData(context, id(createduser), contextAdminCredentials);
         if (createduser.getId().equals(srv_loaded.getId())) {
             //verify data
             compareUser(createduser, srv_loaded);
@@ -669,10 +669,10 @@ public class UserTest extends AbstractRMITest {
         srv_loaded = changeUserAlias(srv_loaded, alias);
 
         // submit changes
-        getUserManager().change(context, srv_loaded, adminCredentials);
+        getUserManager().change(context, srv_loaded, contextAdminCredentials);
 
         // load again
-        User user_changed_loaded = getUserManager().getData(context, id(srv_loaded), adminCredentials);
+        User user_changed_loaded = getUserManager().getData(context, id(srv_loaded), contextAdminCredentials);
 
         // remove deleted dynamic attribute for verification
         srv_loaded.getUserAttributes().get("com.openexchange.test").remove("deleteMe");
@@ -697,10 +697,10 @@ public class UserTest extends AbstractRMITest {
 
         UserModuleAccess access = new UserModuleAccess();
         User usr = UserFactory.createUser(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, TEST_DOMAIN, context);
-        User createduser = getUserManager().create(context, usr, access, adminCredentials);
+        User createduser = getUserManager().create(context, usr, access, contextAdminCredentials);
 
         // now load user from server and check if data is correct, else fail
-        User srv_loaded = getUserManager().getData(context, id(createduser), adminCredentials);
+        User srv_loaded = getUserManager().getData(context, id(createduser), contextAdminCredentials);
         if (createduser.getId().equals(srv_loaded.getId())) {
             //verify data
             compareUser(createduser, srv_loaded);
@@ -715,7 +715,7 @@ public class UserTest extends AbstractRMITest {
         // submit changes, should throw StorageException
         boolean canary = true;
         try {
-            getUserManager().change(context, srv_loaded, adminCredentials);
+            getUserManager().change(context, srv_loaded, contextAdminCredentials);
         } catch (StorageException e) {
             canary = false;
         }
@@ -734,10 +734,10 @@ public class UserTest extends AbstractRMITest {
         srv_loaded = changeUserAlias(srv_loaded, alias);
 
         // submit changes
-        getUserManager().change(context, srv_loaded, adminCredentials);
+        getUserManager().change(context, srv_loaded, contextAdminCredentials);
 
         // load again
-        User user_changed_loaded = getUserManager().getData(context, id(srv_loaded), adminCredentials);
+        User user_changed_loaded = getUserManager().getData(context, id(srv_loaded), contextAdminCredentials);
 
         // remove deleted dynamic attribute for verification
         srv_loaded.getUserAttributes().get("com.openexchange.test").remove("deleteMe");
@@ -758,10 +758,10 @@ public class UserTest extends AbstractRMITest {
 
         UserModuleAccess access = new UserModuleAccess();
         User usr = UserFactory.createUser(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, TEST_DOMAIN, context);
-        User createduser = getUserManager().create(context, usr, access, adminCredentials);
+        User createduser = getUserManager().create(context, usr, access, contextAdminCredentials);
 
         // now load user from server and check if data is correct, else fail
-        User srv_loaded = getUserManager().getData(context, id(createduser), adminCredentials);
+        User srv_loaded = getUserManager().getData(context, id(createduser), contextAdminCredentials);
         if (createduser.getId().equals(srv_loaded.getId())) {
             //verify data
             compareUser(createduser, srv_loaded);
@@ -802,10 +802,10 @@ public class UserTest extends AbstractRMITest {
             }
 
             // submit changes
-            getUserManager().change(context, tmp_usr, adminCredentials);
+            getUserManager().change(context, tmp_usr, contextAdminCredentials);
 
             // load from server and compare the single changed value
-            User user_single_change_loaded = getUserManager().getData(context, id(srv_loaded), adminCredentials);
+            User user_single_change_loaded = getUserManager().getData(context, id(srv_loaded), contextAdminCredentials);
 
             if (!notallowed.contains(map_obj.getMethodName())) {
                 // local and remote must be null
@@ -828,10 +828,10 @@ public class UserTest extends AbstractRMITest {
 
         UserModuleAccess access = new UserModuleAccess();
         User usr = UserFactory.createUser(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, TEST_DOMAIN, context);
-        User createduser = getUserManager().create(context, usr, access, adminCredentials);
+        User createduser = getUserManager().create(context, usr, access, contextAdminCredentials);
 
         // now load user from server and check if data is correct, else fail
-        User srv_loaded = getUserManager().getData(context, id(createduser), adminCredentials);
+        User srv_loaded = getUserManager().getData(context, id(createduser), contextAdminCredentials);
         if (createduser.getId().equals(srv_loaded.getId())) {
             //verify data
             compareUser(createduser, srv_loaded);
@@ -858,10 +858,10 @@ public class UserTest extends AbstractRMITest {
         }
 
         // submit changes
-        getUserManager().change(context, tmp_usr, adminCredentials);
+        getUserManager().change(context, tmp_usr, contextAdminCredentials);
 
         // load from server and compare the single changed value
-        User user_single_change_loaded = getUserManager().getData(context, id(srv_loaded), adminCredentials);
+        User user_single_change_loaded = getUserManager().getData(context, id(srv_loaded), contextAdminCredentials);
 
         // TODO
         // special compare must be written that checks for special attributes like username etc which cannot be null
@@ -878,10 +878,10 @@ public class UserTest extends AbstractRMITest {
 
         UserModuleAccess access = new UserModuleAccess();
         User usr = UserFactory.createUser(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, TEST_DOMAIN, context);
-        User createduser = getUserManager().create(context, usr, access, adminCredentials);
+        User createduser = getUserManager().create(context, usr, access, contextAdminCredentials);
 
         // now load user from server and check if data is correct, else fail
-        User srv_loaded = getUserManager().getData(context, id(createduser), adminCredentials);
+        User srv_loaded = getUserManager().getData(context, id(createduser), contextAdminCredentials);
         if (createduser.getId().equals(srv_loaded.getId())) {
             //verify data
             compareUser(createduser, srv_loaded);
@@ -912,10 +912,10 @@ public class UserTest extends AbstractRMITest {
         }
 
         // submit changes
-        getUserManager().change(context, tmp_usr, adminCredentials);
+        getUserManager().change(context, tmp_usr, contextAdminCredentials);
 
         // load from server and compare the single changed value
-        User user_single_change_loaded = getUserManager().getData(context, id(srv_loaded), adminCredentials);
+        User user_single_change_loaded = getUserManager().getData(context, id(srv_loaded), contextAdminCredentials);
 
         // TODO
         // special compare must be written that checks for special attributes like username etc which cannot be null
@@ -931,10 +931,10 @@ public class UserTest extends AbstractRMITest {
 
         UserModuleAccess access = new UserModuleAccess();
         User usr = UserFactory.createUser(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, TEST_DOMAIN, context);
-        User createduser = getUserManager().create(context, usr, access, adminCredentials);
+        User createduser = getUserManager().create(context, usr, access, contextAdminCredentials);
 
         // now load user from server and check if data is correct, else fail
-        User srv_loaded = getUserManager().getData(context, id(createduser), adminCredentials);
+        User srv_loaded = getUserManager().getData(context, id(createduser), contextAdminCredentials);
         if (createduser.getId().equals(srv_loaded.getId())) {
             //verify data
             compareUser(createduser, srv_loaded);
@@ -1007,9 +1007,9 @@ public class UserTest extends AbstractRMITest {
                 }
 
                 //  submit changes
-                getUserManager().change(context, tmp_usr, adminCredentials);
+                getUserManager().change(context, tmp_usr, contextAdminCredentials);
                 // load from server and compare the single changed value
-                User user_single_change_loaded = getUserManager().getData(context, id(srv_loaded), adminCredentials);
+                User user_single_change_loaded = getUserManager().getData(context, id(srv_loaded), contextAdminCredentials);
 
                 // compare both string values , server and local copy must be same, else, the change was unsuccessful
                 if (map_obj.getGetter().getParameterTypes().length == 0) {
@@ -1038,11 +1038,11 @@ public class UserTest extends AbstractRMITest {
 
         UserModuleAccess access = new UserModuleAccess();
         User usr = UserFactory.createUser(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, TEST_DOMAIN, context);
-        User createduser = getUserManager().create(context, usr, access, adminCredentials);
+        User createduser = getUserManager().create(context, usr, access, contextAdminCredentials);
 
         // STEP 2
         // now load user from server and check if data is correct, else fail
-        User srv_loaded = getUserManager().getData(context, id(createduser), adminCredentials);
+        User srv_loaded = getUserManager().getData(context, id(createduser), contextAdminCredentials);
         if (createduser.getId().equals(srv_loaded.getId())) {
             //verify data
             compareUser(createduser, srv_loaded);
@@ -1052,11 +1052,11 @@ public class UserTest extends AbstractRMITest {
 
         // STEP 3
         User emptyusr = new User(srv_loaded.getId());
-        getUserManager().change(context, emptyusr, adminCredentials);
+        getUserManager().change(context, emptyusr, contextAdminCredentials);
 
         // STEP 4
         // now load user from server and check if data is correct, else fail
-        User srv_loaded2 = getUserManager().getData(context, id(createduser), adminCredentials);
+        User srv_loaded2 = getUserManager().getData(context, id(createduser), contextAdminCredentials);
         if (createduser.getId().equals(srv_loaded2.getId())) {
             //verify data
             compareUser(createduser, srv_loaded);
@@ -1075,11 +1075,11 @@ public class UserTest extends AbstractRMITest {
 
         UserModuleAccess access = new UserModuleAccess();
         User usr = UserFactory.createUser(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, TEST_DOMAIN, context);
-        User createduser = getUserManager().create(context, usr, access, adminCredentials);
+        User createduser = getUserManager().create(context, usr, access, contextAdminCredentials);
 
         // STEP 2
         // now load user from server and check if data is correct, else fail
-        User srv_loaded = getUserManager().getData(context, id(createduser), adminCredentials);
+        User srv_loaded = getUserManager().getData(context, id(createduser), contextAdminCredentials);
         if (createduser.getId().equals(srv_loaded.getId())) {
             //verify data
             compareUser(createduser, srv_loaded);
@@ -1090,11 +1090,11 @@ public class UserTest extends AbstractRMITest {
         // STEP 3
         User emptyusr = new User();
         emptyusr.setName(srv_loaded.getName());
-        getUserManager().change(context, emptyusr, adminCredentials);
+        getUserManager().change(context, emptyusr, contextAdminCredentials);
 
         // STEP 4
         // now load user from server and check if data is correct, else fail
-        User srv_loaded2 = getUserManager().getData(context, id(createduser), adminCredentials);
+        User srv_loaded2 = getUserManager().getData(context, id(createduser), contextAdminCredentials);
         if (createduser.getId().equals(srv_loaded2.getId())) {
             //verify data
             compareUser(createduser, srv_loaded);
@@ -1113,11 +1113,11 @@ public class UserTest extends AbstractRMITest {
 
         UserModuleAccess access = new UserModuleAccess();
         User usr = UserFactory.createUser(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, TEST_DOMAIN, context);
-        User createduser = getUserManager().create(context, usr, access, adminCredentials);
+        User createduser = getUserManager().create(context, usr, access, contextAdminCredentials);
 
         // STEP 2
         // now load user from server and check if data is correct, else fail
-        User srv_loaded = getUserManager().getData(context, id(createduser), adminCredentials);
+        User srv_loaded = getUserManager().getData(context, id(createduser), contextAdminCredentials);
         if (createduser.getId().equals(srv_loaded.getId())) {
             //verify data
             compareUser(createduser, srv_loaded);
@@ -1128,11 +1128,11 @@ public class UserTest extends AbstractRMITest {
         // STEP 3
         User emptyusr = createChangeUserData(srv_loaded);
         emptyusr.setId(null);// reset id, server must ident the user by username
-        getUserManager().change(context, emptyusr, adminCredentials);
+        getUserManager().change(context, emptyusr, contextAdminCredentials);
 
         // STEP 4
         // now load user from server and check if data is correct, else fail
-        User srv_loaded2 = getUserManager().getData(context, id(createduser), adminCredentials);
+        User srv_loaded2 = getUserManager().getData(context, id(createduser), contextAdminCredentials);
         if (createduser.getId().equals(srv_loaded2.getId())) {
             //verify data
             compareUser(createduser, srv_loaded);
@@ -1151,11 +1151,11 @@ public class UserTest extends AbstractRMITest {
 
         UserModuleAccess access = new UserModuleAccess();
         User usr = UserFactory.createUser(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, TEST_DOMAIN, context);
-        User createduser = getUserManager().create(context, usr, access, adminCredentials);
+        User createduser = getUserManager().create(context, usr, access, contextAdminCredentials);
 
         // STEP 2
         // now load user from server and check if data is correct, else fail
-        User srv_loaded = getUserManager().getData(context, id(createduser), adminCredentials);
+        User srv_loaded = getUserManager().getData(context, id(createduser), contextAdminCredentials);
         if (createduser.getId().equals(srv_loaded.getId())) {
             //verify data
             compareUser(createduser, srv_loaded);
@@ -1170,11 +1170,11 @@ public class UserTest extends AbstractRMITest {
         Field field = emptyusr.getClass().getDeclaredField("name");
         field.setAccessible(true);
         field.set(emptyusr, null);
-        getUserManager().change(context, emptyusr, adminCredentials);
+        getUserManager().change(context, emptyusr, contextAdminCredentials);
 
         // STEP 4
         // now load user from server and check if data is correct, else fail
-        User srv_loaded2 = getUserManager().getData(context, id(createduser), adminCredentials);
+        User srv_loaded2 = getUserManager().getData(context, id(createduser), contextAdminCredentials);
         if (createduser.getId().equals(srv_loaded2.getId())) {
             //verify data
             compareUser(createduser, srv_loaded);
@@ -1192,10 +1192,10 @@ public class UserTest extends AbstractRMITest {
 
         UserModuleAccess access = new UserModuleAccess();
         User usr = UserFactory.createUser(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, TEST_DOMAIN, context);
-        User createduser = getUserManager().create(context, usr, access, adminCredentials);
+        User createduser = getUserManager().create(context, usr, access, contextAdminCredentials);
 
         // now load user from server and check if data is correct, else fail
-        User srv_loaded = getUserManager().getData(context, id(createduser), adminCredentials);
+        User srv_loaded = getUserManager().getData(context, id(createduser), contextAdminCredentials);
         if (createduser.getId().equals(srv_loaded.getId())) {
             //verify data
             compareUser(createduser, srv_loaded);
@@ -1208,7 +1208,7 @@ public class UserTest extends AbstractRMITest {
         srv_loaded.setId(null);
         srv_loaded.setName(null);
         // submit changes
-        getUserManager().change(context, srv_loaded, adminCredentials);
+        getUserManager().change(context, srv_loaded, contextAdminCredentials);
     }
 
     /**
@@ -1221,7 +1221,7 @@ public class UserTest extends AbstractRMITest {
         // Here we get the user object of the admin from the database
         // The admin has no company set by default, so we can test here, how a change work on field's which
         // aren't set by default
-        User usr = oxl.login2User(context, adminCredentials);
+        User usr = oxl.login2User(context, contextAdminCredentials);
         // passwordmech is set by login2user so we need to null it here for the change test
         // not to fail
         usr.setPasswordMech(null);
@@ -1240,9 +1240,9 @@ public class UserTest extends AbstractRMITest {
         System.out.println(usr.isCompanyset());
         usr.setFilestoreId(null);
         usr.setMaxQuota(null);
-        user.change(context, usr, adminCredentials);
+        user.change(context, usr, contextAdminCredentials);
         usr.setName(username);
-        User usr2 = oxl.login2User(context, adminCredentials);
+        User usr2 = oxl.login2User(context, contextAdminCredentials);
         compareUser(usr, usr2);
     }
 
@@ -1254,19 +1254,19 @@ public class UserTest extends AbstractRMITest {
         User exists = UserFactory.createUser(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, TEST_DOMAIN, context, false);
         User notexists = new User();
         notexists.setName("Rumpelstilz");
-        User createduser = getUserManager().create(context, exists, adminCredentials);
+        User createduser = getUserManager().create(context, exists, contextAdminCredentials);
 
         boolean existingexists = false;
         try {
-            existingexists = getUserManager().exists(context, exists, adminCredentials);
+            existingexists = getUserManager().exists(context, exists, contextAdminCredentials);
         } catch (Exception e) {
             e.printStackTrace();
         }
         // delete user
-        getUserManager().delete(context, createduser, adminCredentials);
+        getUserManager().delete(context, createduser, contextAdminCredentials);
 
         try {
-            assertFalse("nonexisting user must not exist", getUserManager().exists(context, notexists, adminCredentials));
+            assertFalse("nonexisting user must not exist", getUserManager().exists(context, notexists, contextAdminCredentials));
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -1456,7 +1456,7 @@ public class UserTest extends AbstractRMITest {
     public User addUser(Context ctx, User usr, UserModuleAccess access) throws Exception {
         // create new user
 
-        return getUserManager().create(ctx, usr, access, adminCredentials);
+        return getUserManager().create(ctx, usr, access, contextAdminCredentials);
     }
 
     private String generateRandomAlias(long length) {

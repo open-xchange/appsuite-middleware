@@ -90,30 +90,30 @@ public class GroupTest extends UserTest {
     @Override
     public void setUp() throws Exception {
         super.setUp();
-        context = getContextManager().create(adminCredentials);
+        context = getContextManager().create(contextAdminCredentials);
     }
 
     @Test
     public void testCreateGroup() throws Exception {
-        int id = getGroupManager().create(GroupFactory.createGroup(VALID_CHAR_TESTGROUP + System.currentTimeMillis()), context, adminCredentials).getId();
+        int id = getGroupManager().create(GroupFactory.createGroup(VALID_CHAR_TESTGROUP + System.currentTimeMillis()), context, contextAdminCredentials).getId();
         assertTrue("group id > 0 expected", id > 0);
     }
 
     @Test
     public void testSearchGroup() throws Exception {
         String grpname = VALID_CHAR_TESTGROUP + System.currentTimeMillis();
-        getGroupManager().create(GroupFactory.createGroup(grpname), context, adminCredentials);
-        Group[] grps = getGroupManager().search(context, grpname, adminCredentials);
+        getGroupManager().create(GroupFactory.createGroup(grpname), context, contextAdminCredentials);
+        Group[] grps = getGroupManager().search(context, grpname, contextAdminCredentials);
         assertEquals("invalid search result", 1, grps.length);
     }
 
     @Test
     public void testDeleteGroup() throws Exception {
-        Group grp = getGroupManager().create(GroupFactory.createGroup(VALID_CHAR_TESTGROUP + System.currentTimeMillis()), context, adminCredentials);
-        getGroupManager().delete(grp, context, adminCredentials);
+        Group grp = getGroupManager().create(GroupFactory.createGroup(VALID_CHAR_TESTGROUP + System.currentTimeMillis()), context, contextAdminCredentials);
+        getGroupManager().delete(grp, context, contextAdminCredentials);
         // now load the group again, this MUST fail
         try {
-            getGroupManager().getData(grp, context, adminCredentials);
+            getGroupManager().getData(grp, context, contextAdminCredentials);
             fail("group not exists expected");
         } catch (Exception ecp) {
             if (ecp.toString().toLowerCase().indexOf("group does not exist") != -1) {
@@ -126,11 +126,11 @@ public class GroupTest extends UserTest {
     @Test
     public void testCreateDeleteCreate() throws Exception {
         Group tmp = GroupFactory.createGroup(VALID_CHAR_TESTGROUP + System.currentTimeMillis());
-        Group grp = getGroupManager().create(tmp, context, adminCredentials);
-        getGroupManager().delete(grp, context, adminCredentials);
+        Group grp = getGroupManager().create(tmp, context, contextAdminCredentials);
+        getGroupManager().delete(grp, context, contextAdminCredentials);
         // now load the group again, this MUST fail
         try {
-            getGroupManager().getData(grp, context, adminCredentials);
+            getGroupManager().getData(grp, context, contextAdminCredentials);
             fail("group not exists expected");
         } catch (Exception ecp) {
             if (ecp.toString().toLowerCase().indexOf("group does not exist") != -1) {
@@ -140,20 +140,20 @@ public class GroupTest extends UserTest {
         }
 
         // create same group again
-        getGroupManager().create(tmp, context, adminCredentials);
+        getGroupManager().create(tmp, context, contextAdminCredentials);
     }
 
     @Test
     public void testDeleteGroupIdentifiedByName() throws Exception {
         // delete group ident by name
-        Group grp = getGroupManager().create(GroupFactory.createGroup(VALID_CHAR_TESTGROUP + System.currentTimeMillis()), context, adminCredentials);
+        Group grp = getGroupManager().create(GroupFactory.createGroup(VALID_CHAR_TESTGROUP + System.currentTimeMillis()), context, contextAdminCredentials);
 
         Group del_grp = new Group();
         del_grp.setName(grp.getName());
-        getGroupManager().delete(del_grp, context, adminCredentials);
+        getGroupManager().delete(del_grp, context, contextAdminCredentials);
         // now load the group again, this MUST fail
         try {
-            getGroupManager().getData(grp, context, adminCredentials);
+            getGroupManager().getData(grp, context, contextAdminCredentials);
             fail("group not exists expected");
         } catch (Exception ecp) {
             if (ecp.toString().toLowerCase().indexOf("group does not exist") != -1) {
@@ -166,7 +166,7 @@ public class GroupTest extends UserTest {
     @Test
     public void testDeleteGroupIdentifiedByID() throws Exception {
         // delete group ident by id
-        Credentials cred = adminCredentials;
+        Credentials cred = contextAdminCredentials;
         Group grp = getGroupManager().create(GroupFactory.createGroup(VALID_CHAR_TESTGROUP + System.currentTimeMillis()), context, cred);
 
         Group del_grp = new Group(grp.getId());
@@ -186,11 +186,11 @@ public class GroupTest extends UserTest {
     @Test
     public void testLoadGroup() throws Exception {
         Group addgroup = GroupFactory.createGroup(VALID_CHAR_TESTGROUP + System.currentTimeMillis());
-        Group createdgroup = getGroupManager().create(addgroup, context, adminCredentials);
+        Group createdgroup = getGroupManager().create(addgroup, context, contextAdminCredentials);
         assertTrue("expected id > 0", createdgroup.getId() > 0);
 
         // load from server
-        Group srv_group = getGroupManager().getData(createdgroup, context, adminCredentials);
+        Group srv_group = getGroupManager().getData(createdgroup, context, contextAdminCredentials);
 
         // compare group fields
         assertEquals("displayname id not equal", createdgroup.getDisplayname(), srv_group.getDisplayname());
@@ -201,13 +201,13 @@ public class GroupTest extends UserTest {
     @Test
     public void testLoadGroupIdentifiedByName() throws Exception {
         Group addgroup = GroupFactory.createGroup(VALID_CHAR_TESTGROUP + System.currentTimeMillis());
-        Group createdgroup = getGroupManager().create(addgroup, context, adminCredentials);
+        Group createdgroup = getGroupManager().create(addgroup, context, contextAdminCredentials);
         assertTrue("expected id > 0", createdgroup.getId() > 0);
 
         // load from server
         Group tmp = new Group();
         tmp.setName(createdgroup.getName());
-        Group srv_group = getGroupManager().getData(tmp, context, adminCredentials);
+        Group srv_group = getGroupManager().getData(tmp, context, contextAdminCredentials);
 
         // compare group fields
         assertEquals("displayname id not equal", createdgroup.getDisplayname(), srv_group.getDisplayname());
@@ -218,12 +218,12 @@ public class GroupTest extends UserTest {
     @Test
     public void testLoadGroupIdentifiedByID() throws Exception {
         Group addgroup = GroupFactory.createGroup(VALID_CHAR_TESTGROUP + System.currentTimeMillis());
-        Group createdgroup = getGroupManager().create(addgroup, context, adminCredentials);
+        Group createdgroup = getGroupManager().create(addgroup, context, contextAdminCredentials);
         assertTrue("expected id > 0", createdgroup.getId() > 0);
 
         // load from server
         Group tmp = new Group(createdgroup.getId());
-        Group srv_group = getGroupManager().getData(tmp, context, adminCredentials);
+        Group srv_group = getGroupManager().getData(tmp, context, contextAdminCredentials);
 
         // compare group fields
         assertEquals("displayname id not equal", createdgroup.getDisplayname(), srv_group.getDisplayname());
@@ -234,7 +234,7 @@ public class GroupTest extends UserTest {
     @Test
     public void testAddMemberToGroup() throws Exception {
         Group addgroup = GroupFactory.createGroup("memberaddgroup" + VALID_CHAR_TESTGROUP + System.currentTimeMillis());
-        Group createdgroup = getGroupManager().create(addgroup, context, adminCredentials);
+        Group createdgroup = getGroupManager().create(addgroup, context, contextAdminCredentials);
         assertTrue("group id > 0 expected", createdgroup.getId() > 0);
 
         // create user to add
@@ -243,10 +243,10 @@ public class GroupTest extends UserTest {
         User createduser = addUser(context, usr, access);
 
         // add user as groupmember
-        getGroupManager().addMember(createdgroup, context, new User[] { createduser }, adminCredentials);
+        getGroupManager().addMember(createdgroup, context, new User[] { createduser }, contextAdminCredentials);
 
         // now get all members of group, and check if user is member
-        User[] remote_members = getGroupManager().getMembers(createdgroup, context, adminCredentials);
+        User[] remote_members = getGroupManager().getMembers(createdgroup, context, contextAdminCredentials);
         boolean foundmember = false;
         for (User element : remote_members) {
             if (element.getId() == createduser.getId().intValue()) {
@@ -259,7 +259,7 @@ public class GroupTest extends UserTest {
     @Test
     public void testAddMemberToGroupIdentifiedByName() throws Exception {
         Group addgroup = GroupFactory.createGroup("memberaddgroup" + VALID_CHAR_TESTGROUP + System.currentTimeMillis());
-        Group createdgroup = getGroupManager().create(addgroup, context, adminCredentials);
+        Group createdgroup = getGroupManager().create(addgroup, context, contextAdminCredentials);
         assertTrue("group id > 0 expected", createdgroup.getId() > 0);
 
         // create user to add
@@ -270,10 +270,10 @@ public class GroupTest extends UserTest {
         // add user as groupmember
         Group tmp = new Group();
         tmp.setName(createdgroup.getName());
-        getGroupManager().addMember(tmp, context, new User[] { createduser }, adminCredentials);
+        getGroupManager().addMember(tmp, context, new User[] { createduser }, contextAdminCredentials);
 
         // now get all members of group, and check if user is member
-        User[] remote_members = getGroupManager().getMembers(createdgroup, context, adminCredentials);
+        User[] remote_members = getGroupManager().getMembers(createdgroup, context, contextAdminCredentials);
         boolean foundmember = false;
         for (User element : remote_members) {
             if (element.getId() == createduser.getId().intValue()) {
@@ -286,7 +286,7 @@ public class GroupTest extends UserTest {
     @Test
     public void testAddMemberToGroupIdentifiedByID() throws Exception {
         Group addgroup = GroupFactory.createGroup("memberaddgroup" + VALID_CHAR_TESTGROUP + System.currentTimeMillis());
-        Group createdgroup = getGroupManager().create(addgroup, context, adminCredentials);
+        Group createdgroup = getGroupManager().create(addgroup, context, contextAdminCredentials);
         assertTrue("group id > 0 expected", createdgroup.getId() > 0);
 
         // create user to add
@@ -296,10 +296,10 @@ public class GroupTest extends UserTest {
 
         // add user as groupmember
         Group tmp = new Group(createdgroup.getId());
-        getGroupManager().addMember(tmp, context, new User[] { createduser }, adminCredentials);
+        getGroupManager().addMember(tmp, context, new User[] { createduser }, contextAdminCredentials);
 
         // now get all members of group, and check if user is member
-        User[] remote_members = getGroupManager().getMembers(createdgroup, context, adminCredentials);
+        User[] remote_members = getGroupManager().getMembers(createdgroup, context, contextAdminCredentials);
         boolean foundmember = false;
         for (User element : remote_members) {
             if (element.getId() == createduser.getId().intValue()) {
@@ -312,7 +312,7 @@ public class GroupTest extends UserTest {
     @Test
     public void testRemoveMemberFromGroup() throws Exception {
         Group addgroup = GroupFactory.createGroup("memberaddgroup" + VALID_CHAR_TESTGROUP + System.currentTimeMillis());
-        Group createdgroup = getGroupManager().create(addgroup, context, adminCredentials);
+        Group createdgroup = getGroupManager().create(addgroup, context, contextAdminCredentials);
         assertTrue("group id > 0 expected", createdgroup.getId() > 0);
 
         // create user to add
@@ -322,10 +322,10 @@ public class GroupTest extends UserTest {
         User createduser = addUser(context, usr, access);
 
         // add user as groupmember
-        getGroupManager().addMember(createdgroup, context, new User[] { createduser }, adminCredentials);
+        getGroupManager().addMember(createdgroup, context, new User[] { createduser }, contextAdminCredentials);
 
         // now get all members of group, and check if user is member
-        User[] remote_members = getGroupManager().getMembers(createdgroup, context, adminCredentials);
+        User[] remote_members = getGroupManager().getMembers(createdgroup, context, contextAdminCredentials);
         boolean foundmember = false;
         for (User element : remote_members) {
             if (element.getId() == createduser.getId().intValue()) {
@@ -335,9 +335,9 @@ public class GroupTest extends UserTest {
         assertTrue("member not added to group", foundmember);
 
         // now remove user from group;
-        getGroupManager().removeMember(createdgroup, context, new User[] { createduser }, adminCredentials);
+        getGroupManager().removeMember(createdgroup, context, new User[] { createduser }, contextAdminCredentials);
         // now get all members of group, and check if user is member
-        remote_members = getGroupManager().getMembers(createdgroup, context, adminCredentials);
+        remote_members = getGroupManager().getMembers(createdgroup, context, contextAdminCredentials);
         foundmember = false;
         for (User element : remote_members) {
             if (element.getId() == createduser.getId().intValue()) {
@@ -351,7 +351,7 @@ public class GroupTest extends UserTest {
     @Test
     public void testRemoveMemberFromGroupIdentifiedByName() throws Exception {
         Group addgroup = GroupFactory.createGroup("memberaddgroup" + VALID_CHAR_TESTGROUP + System.currentTimeMillis());
-        Group createdgroup = getGroupManager().create(addgroup, context, adminCredentials);
+        Group createdgroup = getGroupManager().create(addgroup, context, contextAdminCredentials);
         assertTrue("group id > 0 expected", createdgroup.getId() > 0);
 
         // create user to add
@@ -361,10 +361,10 @@ public class GroupTest extends UserTest {
         User createduser = addUser(context, usr, access);
 
         // add user as groupmember
-        getGroupManager().addMember(createdgroup, context, new User[] { createduser }, adminCredentials);
+        getGroupManager().addMember(createdgroup, context, new User[] { createduser }, contextAdminCredentials);
 
         // now get all members of group, and check if user is member
-        User[] remote_members = getGroupManager().getMembers(createdgroup, context, adminCredentials);
+        User[] remote_members = getGroupManager().getMembers(createdgroup, context, contextAdminCredentials);
         boolean foundmember = false;
         for (User element : remote_members) {
             if (element.getId() == createduser.getId().intValue()) {
@@ -376,10 +376,10 @@ public class GroupTest extends UserTest {
         // now remove user from group;
         Group tmp = new Group();
         tmp.setName(createdgroup.getName());
-        getGroupManager().removeMember(tmp, context, new User[] { createduser }, adminCredentials);
+        getGroupManager().removeMember(tmp, context, new User[] { createduser }, contextAdminCredentials);
 
         // now get all members of group, and check if user is member
-        remote_members = getGroupManager().getMembers(createdgroup, context, adminCredentials);
+        remote_members = getGroupManager().getMembers(createdgroup, context, contextAdminCredentials);
         foundmember = false;
         for (User element : remote_members) {
             if (element.getId() == createduser.getId().intValue()) {
@@ -393,7 +393,7 @@ public class GroupTest extends UserTest {
     @Test
     public void testRemoveMemberFromGroupIdentifiedByID() throws Exception {
         Group addgroup = GroupFactory.createGroup("memberaddgroup" + VALID_CHAR_TESTGROUP + System.currentTimeMillis());
-        Group createdgroup = getGroupManager().create(addgroup, context, adminCredentials);
+        Group createdgroup = getGroupManager().create(addgroup, context, contextAdminCredentials);
         assertTrue("group id > 0 expected", createdgroup.getId() > 0);
 
         // create user to add
@@ -403,10 +403,10 @@ public class GroupTest extends UserTest {
         User createduser = addUser(context, usr, access);
 
         // add user as groupmember
-        getGroupManager().addMember(createdgroup, context, new User[] { createduser }, adminCredentials);
+        getGroupManager().addMember(createdgroup, context, new User[] { createduser }, contextAdminCredentials);
 
         // now get all members of group, and check if user is member
-        User[] remote_members = getGroupManager().getMembers(createdgroup, context, adminCredentials);
+        User[] remote_members = getGroupManager().getMembers(createdgroup, context, contextAdminCredentials);
         boolean foundmember = false;
         for (User element : remote_members) {
             if (element.getId() == createduser.getId().intValue()) {
@@ -417,10 +417,10 @@ public class GroupTest extends UserTest {
 
         // now remove user from group;
         Group tmp = new Group(createdgroup.getId());
-        getGroupManager().removeMember(tmp, context, new User[] { createduser }, adminCredentials);
+        getGroupManager().removeMember(tmp, context, new User[] { createduser }, contextAdminCredentials);
 
         // now get all members of group, and check if user is member
-        remote_members = getGroupManager().getMembers(createdgroup, context, adminCredentials);
+        remote_members = getGroupManager().getMembers(createdgroup, context, contextAdminCredentials);
         foundmember = false;
         for (User element : remote_members) {
             if (element.getId() == createduser.getId().intValue()) {
@@ -434,11 +434,11 @@ public class GroupTest extends UserTest {
     @Test
     public void testChangeGroup() throws Exception {
         Group addgroup = GroupFactory.createGroup("changed_this_group" + System.currentTimeMillis());
-        Group createdgroup = getGroupManager().create(addgroup, context, adminCredentials);
+        Group createdgroup = getGroupManager().create(addgroup, context, contextAdminCredentials);
         assertTrue("expected id > 0", createdgroup.getId() > 0);
 
         // load group from server
-        Group srv_response = getGroupManager().getData(createdgroup, context, adminCredentials);
+        Group srv_response = getGroupManager().getData(createdgroup, context, contextAdminCredentials);
 
         // check if group is created on server correct
         assertEquals("displayname not equal", createdgroup.getDisplayname(), srv_response.getDisplayname());
@@ -449,10 +449,10 @@ public class GroupTest extends UserTest {
         createChangeGroupData(createdgroup);
 
         // do the changes on the remote server for the group
-        getGroupManager().change(createdgroup, context, adminCredentials);
+        getGroupManager().change(createdgroup, context, contextAdminCredentials);
 
         // load group which was modified
-        Group remote_grp = getGroupManager().getData(createdgroup, context, adminCredentials);
+        Group remote_grp = getGroupManager().getData(createdgroup, context, contextAdminCredentials);
 
         // check if group is created on server correct
         assertEquals("displayname not equal", createdgroup.getDisplayname(), remote_grp.getDisplayname());
@@ -463,11 +463,11 @@ public class GroupTest extends UserTest {
     @Test
     public void testChangeGroupIdentifiedbyID() throws Exception {
         Group addgroup = GroupFactory.createGroup("changed_this_group" + System.currentTimeMillis());
-        Group createdgroup = getGroupManager().create(addgroup, context, adminCredentials);
+        Group createdgroup = getGroupManager().create(addgroup, context, contextAdminCredentials);
         assertTrue("expected id > 0", createdgroup.getId() > 0);
 
         // load group from server
-        Group srv_response = getGroupManager().getData(createdgroup, context, adminCredentials);
+        Group srv_response = getGroupManager().getData(createdgroup, context, contextAdminCredentials);
 
         // check if group is created on server correct
         assertEquals("displayname not equal", createdgroup.getDisplayname(), srv_response.getDisplayname());
@@ -478,10 +478,10 @@ public class GroupTest extends UserTest {
         tmp_group.setDisplayname(srv_response.getDisplayname() + "_changed");
 
         // do the changes on the remote server for the group
-        getGroupManager().change(tmp_group, context, adminCredentials);
+        getGroupManager().change(tmp_group, context, contextAdminCredentials);
 
         // load group which was modified
-        Group remote_grp = getGroupManager().getData(createdgroup, context, adminCredentials);
+        Group remote_grp = getGroupManager().getData(createdgroup, context, contextAdminCredentials);
 
         // check if group is change correctly on server
         assertEquals("displayname not equal", tmp_group.getDisplayname(), remote_grp.getDisplayname());
@@ -492,11 +492,11 @@ public class GroupTest extends UserTest {
     public void testChangeNull() throws Exception {
         // change group displayname and name to null, this must fail
         Group addgroup = GroupFactory.createGroup("changed_this_group" + System.currentTimeMillis());
-        Group createdgroup = getGroupManager().create(addgroup, context, adminCredentials);
+        Group createdgroup = getGroupManager().create(addgroup, context, contextAdminCredentials);
         assertTrue("expected id > 0", createdgroup.getId() > 0);
 
         // load group from server
-        Group srv_response = getGroupManager().getData(createdgroup, context, adminCredentials);
+        Group srv_response = getGroupManager().getData(createdgroup, context, contextAdminCredentials);
 
         // check if group is created on server correct
         assertEquals("displayname id not equal", createdgroup.getDisplayname(), srv_response.getDisplayname());
@@ -509,18 +509,18 @@ public class GroupTest extends UserTest {
         tmp_group.setName(null);
 
         // do the changes on the remote server for the group
-        getGroupManager().change(tmp_group, context, adminCredentials);
+        getGroupManager().change(tmp_group, context, contextAdminCredentials);
     }
 
     @Test
     public void testChangeAllowedNull() throws Exception {
         // change group displayname and name to null, this must fail
         Group addgroup = GroupFactory.createGroup("changed_this_group" + System.currentTimeMillis());
-        Group createdgroup = getGroupManager().create(addgroup, context, adminCredentials);
+        Group createdgroup = getGroupManager().create(addgroup, context, contextAdminCredentials);
         assertTrue("expected id > 0", createdgroup.getId() > 0);
 
         // load group from server
-        Group srv_response = getGroupManager().getData(createdgroup, context, adminCredentials);
+        Group srv_response = getGroupManager().getData(createdgroup, context, contextAdminCredentials);
 
         // check if group is created on server correct
         assertEquals("displayname id not equal", createdgroup.getDisplayname(), srv_response.getDisplayname());
@@ -532,10 +532,10 @@ public class GroupTest extends UserTest {
         tmp_group.setMembers(null);
 
         // do the changes on the remote server for the group
-        getGroupManager().change(tmp_group, context, adminCredentials);
+        getGroupManager().change(tmp_group, context, contextAdminCredentials);
 
         // load group which was modified
-        Group remote_grp = getGroupManager().getData(createdgroup, context, adminCredentials);
+        Group remote_grp = getGroupManager().getData(createdgroup, context, contextAdminCredentials);
 
         createdgroup.setMembers(new Integer[0]);
         assertEquals("Group aren't equal", createdgroup, remote_grp);
@@ -544,11 +544,11 @@ public class GroupTest extends UserTest {
     @Test
     public void testChangeGroupIdentifiedbyName() throws Exception {
         Group addgroup = GroupFactory.createGroup("changed_this_group" + System.currentTimeMillis());
-        Group createdgroup = getGroupManager().create(addgroup, context, adminCredentials);
+        Group createdgroup = getGroupManager().create(addgroup, context, contextAdminCredentials);
         assertTrue("expected id > 0", createdgroup.getId() > 0);
 
         // load group from server
-        Group srv_response = getGroupManager().getData(createdgroup, context, adminCredentials);
+        Group srv_response = getGroupManager().getData(createdgroup, context, contextAdminCredentials);
 
         // check if group is created on server correct
         assertEquals("displayname id not equal", createdgroup.getDisplayname(), srv_response.getDisplayname());
@@ -559,10 +559,10 @@ public class GroupTest extends UserTest {
         tmp_group.setDisplayname(srv_response.getDisplayname() + "_changed");
         tmp_group.setName(srv_response.getName());
         // do the changes on the remote server for the group
-        getGroupManager().change(tmp_group, context, adminCredentials);
+        getGroupManager().change(tmp_group, context, contextAdminCredentials);
 
         // load group which was modified
-        Group remote_grp = getGroupManager().getData(createdgroup, context, adminCredentials);
+        Group remote_grp = getGroupManager().getData(createdgroup, context, contextAdminCredentials);
 
         // check if group is changed correctly on server
         assertEquals("displayname id not equal", tmp_group.getDisplayname(), remote_grp.getDisplayname());
@@ -571,7 +571,7 @@ public class GroupTest extends UserTest {
     @Test
     public void testGetMembers() throws Exception {
         Group addgroup = GroupFactory.createGroup("memberaddgroup" + VALID_CHAR_TESTGROUP + System.currentTimeMillis());
-        Group createdgroup = getGroupManager().create(addgroup, context, adminCredentials);
+        Group createdgroup = getGroupManager().create(addgroup, context, contextAdminCredentials);
         assertTrue("group id > 0 expected", createdgroup.getId() > 0);
 
         // create user to add
@@ -580,17 +580,17 @@ public class GroupTest extends UserTest {
         User createduser = addUser(context, usr, access);
 
         // add user as groupmember
-        getGroupManager().addMember(createdgroup, context, new User[] { createduser }, adminCredentials);
+        getGroupManager().addMember(createdgroup, context, new User[] { createduser }, contextAdminCredentials);
 
         // now get all members of group, and check if user is member
-        User[] remote_members = getGroupManager().getMembers(createdgroup, context, adminCredentials);
+        User[] remote_members = getGroupManager().getMembers(createdgroup, context, contextAdminCredentials);
         assertTrue("members could not be loaded", remote_members.length > 0);
     }
 
     @Test
     public void testGetMembersByName() throws Exception {
         Group addgroup = GroupFactory.createGroup("memberaddgroup" + VALID_CHAR_TESTGROUP + System.currentTimeMillis());
-        Group createdgroup = getGroupManager().create(addgroup, context, adminCredentials);
+        Group createdgroup = getGroupManager().create(addgroup, context, contextAdminCredentials);
         assertTrue("group id > 0 expected", createdgroup.getId() > 0);
 
         // create user to add
@@ -602,17 +602,17 @@ public class GroupTest extends UserTest {
         createdgroup.setId(null);
         createduser.setId(null);
         // add user as groupmember
-        getGroupManager().addMember(createdgroup, context, new User[] { createduser }, adminCredentials);
+        getGroupManager().addMember(createdgroup, context, new User[] { createduser }, contextAdminCredentials);
 
         // now get all members of group, and check if user is member
-        User[] remote_members = getGroupManager().getMembers(createdgroup, context, adminCredentials);
+        User[] remote_members = getGroupManager().getMembers(createdgroup, context, contextAdminCredentials);
         assertTrue("members could not be loaded", remote_members.length > 0);
     }
 
     @Test
     public void testlistGroupsForUser() throws Exception {
         Group addgroup = GroupFactory.createGroup("memberaddgroup" + VALID_CHAR_TESTGROUP + System.currentTimeMillis());
-        Group createdgroup = getGroupManager().create(addgroup, context, adminCredentials);
+        Group createdgroup = getGroupManager().create(addgroup, context, contextAdminCredentials);
         assertTrue("group id > 0 expected", createdgroup.getId() > 0);
 
         // create user to add
@@ -623,13 +623,13 @@ public class GroupTest extends UserTest {
         // We only want to resolve by name
         createduser.setId(null);
         // add user as groupmember
-        getGroupManager().addMember(createdgroup, context, new User[] { createduser }, adminCredentials);
+        getGroupManager().addMember(createdgroup, context, new User[] { createduser }, contextAdminCredentials);
 
         // We have to fetch the Group because the create on (createdgroup) doesn't contain
         // the members.
-        Group newgroup = getGroupManager().getData(createdgroup, context, adminCredentials);
+        Group newgroup = getGroupManager().getData(createdgroup, context, contextAdminCredentials);
         // now get all members of group, and check if user is member
-        Group[] remote_members = getGroupManager().listUserGroups(usr, context, adminCredentials);
+        Group[] remote_members = getGroupManager().listUserGroups(usr, context, contextAdminCredentials);
         assertTrue("members could not be loaded", remote_members.length > 0);
         // The right group must be the second one in the array, the first one is the all
         // users group
@@ -639,7 +639,7 @@ public class GroupTest extends UserTest {
     @Test
     public void testlistGroupsForUserByName() throws Exception {
         Group addgroup = GroupFactory.createGroup("memberaddgroup" + VALID_CHAR_TESTGROUP + System.currentTimeMillis());
-        Group createdgroup = getGroupManager().create(addgroup, context, adminCredentials);
+        Group createdgroup = getGroupManager().create(addgroup, context, contextAdminCredentials);
         assertTrue("group id > 0 expected", createdgroup.getId() > 0);
 
         // create user to add
@@ -650,13 +650,13 @@ public class GroupTest extends UserTest {
         // We only want to resolve by name
         createduser.setId(null);
         // add user as groupmember
-        getGroupManager().addMember(createdgroup, context, new User[] { createduser }, adminCredentials);
+        getGroupManager().addMember(createdgroup, context, new User[] { createduser }, contextAdminCredentials);
 
         // We have to fetch the Group because the create on (createdgroup) doesn't contain
         // the members.
-        Group newgroup = getGroupManager().getData(createdgroup, context, adminCredentials);
+        Group newgroup = getGroupManager().getData(createdgroup, context, contextAdminCredentials);
         // now get all members of group, and check if user is member
-        Group[] remote_members = getGroupManager().listUserGroups(createduser, context, adminCredentials);
+        Group[] remote_members = getGroupManager().listUserGroups(createduser, context, contextAdminCredentials);
         assertTrue("members could not be loaded", remote_members.length > 0);
         // The right group must be the second one in the array, the first one is the all
         // users group

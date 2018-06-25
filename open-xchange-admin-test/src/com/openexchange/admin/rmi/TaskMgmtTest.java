@@ -107,12 +107,12 @@ public class TaskMgmtTest extends AbstractRMITest {
     public void testGetTaskResultsContextCredentialsInt() throws MalformedURLException, RemoteException, NotBoundException, Exception {
         final int jobId = getContextManager().moveContextDatabase(context, client_db);
 
-        ti.getTaskResults(context, adminCredentials, jobId);
+        ti.getTaskResults(context, contextAdminCredentials, jobId);
         int counter = 0;
         boolean running = true;
         while (running && counter < 180) {
             try {
-                ti.deleteJob(context, adminCredentials, jobId);
+                ti.deleteJob(context, contextAdminCredentials, jobId);
                 running = false;
                 System.out.println("Task moveContextDatabase finished");
             } catch (TaskManagerException e) {

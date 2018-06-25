@@ -89,7 +89,7 @@ public class ContextTest extends AbstractRMITest {
     public void testGetAdminId() throws Exception {
         // The context admin's id is always '2'
         Context context = ContextFactory.createContext(10L);
-        getContextManager().create(context, adminCredentials);
+        getContextManager().create(context, contextAdminCredentials);
         assertEquals(2, getContextManager().getAdminId(context));
     }
 
@@ -98,7 +98,7 @@ public class ContextTest extends AbstractRMITest {
      */
     @Test
     public void testGetByName() throws Exception {
-        Context testContext = getContextManager().create(adminCredentials);
+        Context testContext = getContextManager().create(contextAdminCredentials);
         Integer idAsInt = testContext.getId();
         testContext.setId(null);
         final Context srv_loaded = getContextManager().getData(testContext);
@@ -128,7 +128,7 @@ public class ContextTest extends AbstractRMITest {
      */
     @Test
     public void testListContextByFilestore() throws Exception {
-        getContextManager().create(adminCredentials);
+        getContextManager().create(contextAdminCredentials);
         Filestore[] fiss = getFilestoreManager().search("*");
         if (fiss.length <= 0) {
             fail("No filestores found.");
@@ -159,7 +159,7 @@ public class ContextTest extends AbstractRMITest {
     public void testCreateContextNoQuota() throws Exception {
         Context c = new Context();
         c.setName("Name-" + UUID.randomUUID().toString());
-        getContextManager().create(c, adminCredentials);
+        getContextManager().create(c, contextAdminCredentials);
     }
 
     /**
@@ -167,10 +167,10 @@ public class ContextTest extends AbstractRMITest {
      */
     @Test
     public void testCreateDeleteCreateContext() throws Exception {
-        Context context = getContextManager().create(adminCredentials);
+        Context context = getContextManager().create(contextAdminCredentials);
         int ctxId = context.getId().intValue();
         getContextManager().delete(context);
-        getContextManager().create(ctxId, 5000, adminCredentials);
+        getContextManager().create(ctxId, 5000, contextAdminCredentials);
     }
 
     /**
@@ -187,7 +187,7 @@ public class ContextTest extends AbstractRMITest {
      */
     @Test
     public void testExistsContext() throws Exception {
-        Context testContext = getContextManager().create(adminCredentials);
+        Context testContext = getContextManager().create(contextAdminCredentials);
         Context nonExistent = new Context();
         nonExistent.setName("notexists.com");
 
@@ -200,7 +200,7 @@ public class ContextTest extends AbstractRMITest {
      */
     @Test
     public void testEnableContext() throws Exception {
-        Context testContext = getContextManager().create(adminCredentials);
+        Context testContext = getContextManager().create(contextAdminCredentials);
 
         MaintenanceReason[] mrs = getMaintenanceReasonManager().search("*");
         MaintenanceReason mr = new MaintenanceReason();
@@ -240,7 +240,7 @@ public class ContextTest extends AbstractRMITest {
      */
     @Test
     public void testDisableContext() throws Exception {
-        Context testContext = getContextManager().create(adminCredentials);
+        Context testContext = getContextManager().create(contextAdminCredentials);
 
         MaintenanceReason[] mrs = getMaintenanceReasonManager().search("*");
         MaintenanceReason mr = new MaintenanceReason();
@@ -275,7 +275,7 @@ public class ContextTest extends AbstractRMITest {
         context.setUserAttribute("com.openexchange.test", "flavor", "lemon");
         context.setUserAttribute("com.openexchange.test", "texture", "squishy");
 
-        getContextManager().create(context, adminCredentials);
+        getContextManager().create(context, contextAdminCredentials);
         Context srv_loaded = getContextManager().getData(context);
 
         assertEquals("lemon", srv_loaded.getUserAttribute("com.openexchange.test", "flavor"));
@@ -324,12 +324,12 @@ public class ContextTest extends AbstractRMITest {
         Context ctx1 = ContextFactory.createContext(5000);
         ctx1.setLoginMappings(new HashSet<String>(Arrays.asList("foo")));
 
-        getContextManager().create(ctx1, adminCredentials);
+        getContextManager().create(ctx1, contextAdminCredentials);
         clean.add(ctx1);
         try {
             Context ctx2 = ContextFactory.createContext(5000);
             ctx2.setLoginMappings(new HashSet<String>(Arrays.asList("foo")));
-            getContextManager().create(ctx2, adminCredentials);
+            getContextManager().create(ctx2, contextAdminCredentials);
             clean.add(ctx2);
             fail("Could add Context");
         } catch (Exception x) {
@@ -346,7 +346,7 @@ public class ContextTest extends AbstractRMITest {
      */
     @Test
     public void testListContext() throws Exception {
-        Context testContext = getContextManager().create(adminCredentials);
+        Context testContext = getContextManager().create(contextAdminCredentials);
         int ctxid = testContext.getId().intValue();
         // now search exactly for the added context
         Context[] ctxs = getContextManager().search(Integer.toString(ctxid));

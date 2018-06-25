@@ -66,7 +66,6 @@ import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.dataobjects.Group;
 import com.openexchange.admin.rmi.dataobjects.Resource;
 import com.openexchange.admin.rmi.dataobjects.User;
-import com.openexchange.admin.rmi.factory.ContextFactory;
 import com.openexchange.admin.rmi.factory.UserFactory;
 import com.openexchange.admin.rmi.manager.ContextManager;
 import com.openexchange.admin.rmi.manager.DatabaseManager;
@@ -92,12 +91,10 @@ public abstract class AbstractRMITest {
     protected static String TEST_DOMAIN = "example.org";
     protected static String change_suffix = "-changed";
 
-    protected Credentials adminCredentials;
+    protected Credentials contextAdminCredentials;
     protected Credentials superAdminCredentials;
-    protected Context adminContext;
     protected User superAdmin;
     protected User contextAdmin;
-    protected User testUser;
 
     /**
      * Initializes a new {@link AbstractRMITest}.
@@ -135,12 +132,11 @@ public abstract class AbstractRMITest {
 
     @Before
     public void setUp() throws Exception {
-        adminCredentials = getContextAdminCredentials();
-        adminContext = ContextFactory.createContext(50);
-
+        contextAdminCredentials = getContextAdminCredentials();
         superAdminCredentials = getMasterAdminCredentials();
+
         superAdmin = UserFactory.createUser(superAdminCredentials.getLogin(), superAdminCredentials.getPassword(), "ContextCreatingAdmin", "Ad", "Min", "adminmaster@ox.invalid");
-        contextAdmin = UserFactory.createUser(adminCredentials.getLogin(), adminCredentials.getPassword(), "ContextAdmin", "Context", "Admin", "contextAdmin@ox.invalid");
+        contextAdmin = UserFactory.createUser(contextAdminCredentials.getLogin(), contextAdminCredentials.getPassword(), "ContextAdmin", "Context", "Admin", "contextAdmin@ox.invalid");
     }
 
     /**

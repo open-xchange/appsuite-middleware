@@ -124,13 +124,13 @@ public class MailAttachmentFolderTest extends AbstractRMITest {
         srcUser.setImapServer("example.com");
         srcUser.setImapLogin("oxuser");
         srcUser.setSmtpServer("example.com");
-        srcUser = getUserManager().create(srcCtx, srcUser, adminCredentials);
+        srcUser = getUserManager().create(srcCtx, srcUser, contextAdminCredentials);
 
         User dummy = UserFactory.createUser("dummy", "secret", "Dummy User", "Dummy", "User", "oxuser2@example.com");
         dummy.setImapServer("example.com");
         dummy.setImapLogin("oxuser");
         dummy.setSmtpServer("example.com");
-        dummy = getUserManager().create(dstCtx, dummy, adminCredentials);
+        dummy = getUserManager().create(dstCtx, dummy, contextAdminCredentials);
 
         AJAXSession dummySession = performLogin(dummy.getName() + '@' + dstCtx.getName(), "secret");
         AJAXClient dummyClient = new AJAXClient(dummySession, false);
@@ -199,7 +199,7 @@ public class MailAttachmentFolderTest extends AbstractRMITest {
     public void testCopyWrongMailAttachments() throws Exception {
         OXUserCopyInterface umi = getUserCopyClient();
         User dstUser = umi.copyUser(srcUser, srcCtx, dstCtx, superAdminCredentials);
-        dstUser = getUserManager().getData(dstCtx, dstUser, adminCredentials);
+        dstUser = getUserManager().getData(dstCtx, dstUser, contextAdminCredentials);
         System.err.println("DstUser: " + dstUser.getId() + "(" + dstCtx.getIdAsString() + ")");
 
         AJAXSession session = performLogin(dstUser.getName() + '@' + dstCtx.getName(), "secret");
