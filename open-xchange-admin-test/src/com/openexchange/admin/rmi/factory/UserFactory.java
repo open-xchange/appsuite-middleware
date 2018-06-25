@@ -64,6 +64,32 @@ import com.openexchange.java.util.TimeZones;
 public class UserFactory {
 
     /**
+     * Creates the default 'oxadmin' context admin with 'secret' as password
+     * 
+     * @return The newly created {@link User} object
+     */
+    public static User createContextAdmin() {
+        return createContextAdmin("oxadmin", "secret");
+    }
+
+    /**
+     * Creates a new {@link Context} admin {@link User} object
+     * 
+     * @return The newly created {@link User} object
+     */
+    public static User createContextAdmin(String name, String password) {
+        User oxadmin = new User();
+        oxadmin.setName(name);
+        oxadmin.setDisplay_name(name);
+        oxadmin.setGiven_name(name);
+        oxadmin.setSur_name(name);
+        oxadmin.setPrimaryEmail(name + "@example.com");
+        oxadmin.setEmail1(name + "@example.com");
+        oxadmin.setPassword(password);
+        return oxadmin;
+    }
+
+    /**
      * Creates a new {@link User} with only the mandatory fields set
      * 
      * @param ident The user identity

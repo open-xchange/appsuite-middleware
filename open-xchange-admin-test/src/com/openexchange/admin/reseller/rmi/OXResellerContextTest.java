@@ -61,17 +61,25 @@ import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
+import com.openexchange.admin.rmi.factory.ResellerAdminFactory;
 
-public class OXResellerContextTest extends OXResellerAbstractTest {
+public class OXResellerContextTest extends AbstractOXResellerTest {
 
     private static Context ownedContext = null;
 
     private ResellerAdmin randomAdmin;
 
+    /**
+     * Initialises a new {@link OXResellerContextTest}.
+     */
+    public OXResellerContextTest() {
+        super();
+    }
+
     @Before
     public final void setUp() throws Exception {
         super.setUp();
-        randomAdmin = RandomAdmin();
+        randomAdmin = ResellerAdminFactory.createRandomResellerAdmin();
         getResellerManager().create(randomAdmin);
     }
 
@@ -85,7 +93,7 @@ public class OXResellerContextTest extends OXResellerAbstractTest {
 
     @Test(expected = InvalidCredentialsException.class)
     public void testListAllContextInvalidAuthNoUser() throws Exception {
-        ResellerAdmin second = RandomAdmin();
+        ResellerAdmin second = ResellerAdminFactory.createRandomResellerAdmin();
         getContextManager().listAll(ResellerRandomCredentials(second.getName()));
     }
 
@@ -185,7 +193,7 @@ public class OXResellerContextTest extends OXResellerAbstractTest {
 
     @Test
     public void testListContextOwnedByReseller() throws Exception {
-        ResellerAdmin second = RandomAdmin();
+        ResellerAdmin second = ResellerAdminFactory.createRandomResellerAdmin();
 
         getResellerManager().create(second);
 
@@ -213,7 +221,7 @@ public class OXResellerContextTest extends OXResellerAbstractTest {
         try {
             boolean fail = false;
             try {
-                ResellerAdmin second = RandomAdmin();
+                ResellerAdmin second = ResellerAdminFactory.createRandomResellerAdmin();
                 Credentials secondCreds = ResellerRandomCredentials(second.getName());
 
                 getContextManager().getData(ownedContext, secondCreds);

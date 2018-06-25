@@ -61,8 +61,10 @@ import com.openexchange.admin.rmi.dataobjects.User;
 import com.openexchange.admin.rmi.dataobjects.UserModuleAccess;
 import com.openexchange.admin.rmi.exceptions.DuplicateExtensionException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
+import com.openexchange.admin.rmi.factory.ResellerAdminFactory;
+import com.openexchange.admin.rmi.factory.UserFactory;
 
-public class OXResellerUserTest extends OXResellerAbstractTest {
+public class OXResellerUserTest extends AbstractOXResellerTest {
 
     /**
      * Initialises a new {@link OXResellerUserTest}.
@@ -73,7 +75,7 @@ public class OXResellerUserTest extends OXResellerAbstractTest {
 
     @Test
     public void testCreateTooManyOverallUser() throws Exception {
-        ResellerAdmin adm = RandomAdmin();
+        ResellerAdmin adm = ResellerAdminFactory.createRandomResellerAdmin();
         adm.setRestrictions(new Restriction[] { MaxOverallUserRestriction(6) });
         getResellerManager().create(adm);
         try {
@@ -83,7 +85,8 @@ public class OXResellerUserTest extends OXResellerAbstractTest {
                 // create 3 contexts with 1 user -> 6 user total
                 for (final Context ctx : new Context[] { createContext(resellerRandomCredentials), createContext(resellerRandomCredentials), createContext(resellerRandomCredentials) }) {
                     ctxstack.push(ctx);
-                    Credentials ctxauth = new Credentials(ContextAdmin().getName(), ContextAdmin().getPassword());
+                    User contextAdmin = UserFactory.createContextAdmin();
+                    Credentials ctxauth = new Credentials(contextAdmin.getName(), contextAdmin.getPassword());
                     for (int i = 1; i < 2; i++) {
                         System.out.println("creating user " + i + " in Context " + ctx.getId());
                         createUser(ctx, ctxauth);
@@ -93,7 +96,8 @@ public class OXResellerUserTest extends OXResellerAbstractTest {
                 // 7th user must fail
                 boolean createFailed = false;
                 try {
-                    createUser(ctxstack.firstElement(), new Credentials(ContextAdmin().getName(), ContextAdmin().getPassword()));
+                    User contextAdmin = UserFactory.createContextAdmin();
+                    createUser(ctxstack.firstElement(), new Credentials(contextAdmin.getName(), contextAdmin.getPassword()));
                 } catch (StorageException e) {
                     createFailed = true;
                 }
@@ -110,7 +114,7 @@ public class OXResellerUserTest extends OXResellerAbstractTest {
 
     @Test
     public void testCreateTooManyPerContextUser() throws Exception {
-        ResellerAdmin adm = RandomAdmin();
+        ResellerAdmin adm = ResellerAdminFactory.createRandomResellerAdmin();
         final Credentials creds = ResellerRandomCredentials(adm.getName());
 
         getResellerManager().create(adm);
@@ -127,7 +131,7 @@ public class OXResellerUserTest extends OXResellerAbstractTest {
                 // this can be done directly with the create call
                 getContextManager().change(ctx, creds);
 
-                User oxadmin = ContextAdmin();
+                User oxadmin = UserFactory.createContextAdmin();
                 Credentials ctxadmcreds = new Credentials(oxadmin.getName(), oxadmin.getPassword());
                 createUser(ctx, ctxadmcreds);
                 createUser(ctx, ctxadmcreds);
@@ -154,7 +158,7 @@ public class OXResellerUserTest extends OXResellerAbstractTest {
      */
     @Test
     public void testCreateTooManyPerContextUserByModuleAccess() throws Exception {
-        ResellerAdmin adm = RandomAdmin();
+        ResellerAdmin adm = ResellerAdminFactory.createRandomResellerAdmin();
         final Credentials creds = ResellerRandomCredentials(adm.getName());
 
         getResellerManager().create(adm);
@@ -179,7 +183,7 @@ public class OXResellerUserTest extends OXResellerAbstractTest {
                     e1.printStackTrace();
                 }
                 // webmail test (default perms)
-                User oxadmin = ContextAdmin();
+                User oxadmin = UserFactory.createContextAdmin();
                 Credentials ctxadmcreds = new Credentials(oxadmin.getName(), oxadmin.getPassword());
                 createUser(ctx, ctxadmcreds);
 

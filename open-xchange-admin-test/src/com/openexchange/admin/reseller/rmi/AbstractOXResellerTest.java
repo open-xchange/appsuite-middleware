@@ -49,33 +49,32 @@
 
 package com.openexchange.admin.reseller.rmi;
 
-import org.apache.commons.lang3.RandomStringUtils;
-import com.openexchange.admin.reseller.rmi.dataobjects.ResellerAdmin;
 import com.openexchange.admin.reseller.rmi.dataobjects.Restriction;
 import com.openexchange.admin.rmi.AbstractRMITest;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.dataobjects.User;
 import com.openexchange.admin.rmi.dataobjects.UserModuleAccess;
+import com.openexchange.admin.rmi.factory.UserFactory;
 
 /**
- * {@link OXResellerAbstractTest}
+ * {@link AbstractOXResellerTest}
  *
  * @author choeger
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-abstract class OXResellerAbstractTest extends AbstractRMITest {
+public abstract class AbstractOXResellerTest extends AbstractRMITest {
 
-    protected static final String TESTUSER = "testuser";
+    public static final String TESTUSER = "testuser";
     protected static final String TESTCHANGEUSER = "testchange";
     protected static final String CHANGEDNAME = "testchangedchangedagain";
     protected static final String TESTRESTRICTIONUSER = "testwithrestriction";
     protected static final String TESTRESTCHANGERICTIONUSER = "testchangewithrestriction";
 
     /**
-     * Initialises a new {@link OXResellerAbstractTest}.
+     * Initialises a new {@link AbstractOXResellerTest}.
      */
-    public OXResellerAbstractTest() {
+    public AbstractOXResellerTest() {
         super();
     }
 
@@ -85,28 +84,6 @@ abstract class OXResellerAbstractTest extends AbstractRMITest {
 
     protected static Credentials TestUserCredentials() {
         return new Credentials(TESTUSER, "secret");
-    }
-
-    protected static ResellerAdmin RandomAdmin() {
-        String user = RandomStringUtils.randomAscii(10);
-        ResellerAdmin adm = TestAdminUser(user, user + " display");
-        adm.setPassword("secret");
-        return adm;
-    }
-
-    protected static ResellerAdmin TestAdminUser() {
-        return TestAdminUser(TESTUSER, "Test Reseller Admin");
-    }
-
-    protected static ResellerAdmin TestAdminUser(final String name) {
-        return TestAdminUser(name, "Test Display Name");
-    }
-
-    protected static ResellerAdmin TestAdminUser(final String name, final String displayname) {
-        ResellerAdmin adm = new ResellerAdmin(name);
-        adm.setDisplayname(displayname);
-        adm.setPassword("secret");
-        return adm;
     }
 
     protected static Restriction MaxContextRestriction() {
@@ -125,20 +102,8 @@ abstract class OXResellerAbstractTest extends AbstractRMITest {
         return new Restriction(Restriction.MAX_OVERALL_USER_PER_SUBADMIN, new Integer(count).toString());
     }
 
-    protected static User ContextAdmin() {
-        User oxadmin = new User();
-        oxadmin.setName("oxadmin");
-        oxadmin.setDisplay_name("oxadmin");
-        oxadmin.setGiven_name("oxadmin");
-        oxadmin.setSur_name("oxadmin");
-        oxadmin.setPrimaryEmail("oxadmin@example.com");
-        oxadmin.setEmail1("oxadmin@example.com");
-        oxadmin.setPassword("secret");
-        return oxadmin;
-    }
-
     protected static Context createContext(final Credentials auth) throws Exception {
-        User oxadmin = ContextAdmin();
+        User oxadmin = UserFactory.createContextAdmin();
         Context ctx = new Context();
         ctx.setMaxQuota(100000L);
 
@@ -154,7 +119,7 @@ abstract class OXResellerAbstractTest extends AbstractRMITest {
     }
 
     protected static Context createContextNoQuota(final Credentials auth) throws Exception {
-        User oxadmin = ContextAdmin();
+        User oxadmin = UserFactory.createContextAdmin();
         Context ctx = new Context();
 
         Context create = getContextManager().create(ctx, oxadmin, auth);
