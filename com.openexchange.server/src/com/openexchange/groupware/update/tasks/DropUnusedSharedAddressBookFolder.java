@@ -58,7 +58,6 @@ import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
 
-
 /**
  * {@link DropUnusedSharedAddressBookFolder} - Drops the unused "Shared address book" from database.
  *
@@ -104,22 +103,32 @@ public class DropUnusedSharedAddressBookFolder extends UpdateTaskAdapter {
         try {
             stmt = con.prepareStatement("DELETE FROM oxfolder_permissions WHERE fuid=?");
             stmt.setInt(1, folderId);
+            stmt.executeUpdate();
+            Databases.closeSQLStuff(stmt);
+            stmt = null;
+
+            stmt = con.prepareStatement("DELETE FROM oxfolder_specialfolders WHERE fuid=?");
+            stmt.setInt(1, folderId);
+            stmt.executeUpdate();
             Databases.closeSQLStuff(stmt);
             stmt = null;
 
             stmt = con.prepareStatement("DELETE FROM oxfolder_tree WHERE fuid=?");
             stmt.setInt(1, folderId);
+            stmt.executeUpdate();
             Databases.closeSQLStuff(stmt);
             stmt = null;
 
             // For the sake of completeness
             stmt = con.prepareStatement("DELETE FROM del_oxfolder_permissions WHERE fuid=?");
             stmt.setInt(1, folderId);
+            stmt.executeUpdate();
             Databases.closeSQLStuff(stmt);
             stmt = null;
 
             stmt = con.prepareStatement("DELETE FROM del_oxfolder_tree WHERE fuid=?");
             stmt.setInt(1, folderId);
+            stmt.executeUpdate();
             Databases.closeSQLStuff(stmt);
             stmt = null;
         } finally {
@@ -129,7 +138,7 @@ public class DropUnusedSharedAddressBookFolder extends UpdateTaskAdapter {
 
     @Override
     public String[] getDependencies() {
-        return new String[] {AddSharedParentFolderToFolderPermissionTableUpdateTask.class.getName()};
+        return new String[] { AddSharedParentFolderToFolderPermissionTableUpdateTask.class.getName() };
     }
 
 }

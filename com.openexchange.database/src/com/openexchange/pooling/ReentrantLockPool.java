@@ -561,14 +561,16 @@ public class ReentrantLockPool<T> implements Pool<T>, Runnable {
         for (final PooledData<T> metaData : removed) {
             lifecycle.destroy(metaData.getPooled());
         }
+        StringBuilder sb = null;
         for (final PooledData<T> metaData : notReturned) {
-            final StringBuilder sb = new StringBuilder();
-            sb.append(lifecycle.getObjectName());
-            sb.append(" object has not been returned to the pool. Check further messages to make sure the object was terminated.");
-            sb.append(" UseTime: ");
-            sb.append(metaData.getTimeDiff());
-            sb.append(" Object: ");
-            sb.append(metaData.getPooled());
+            if (null == sb) {
+                sb = new StringBuilder(64);
+            } else {
+                sb.setLength(0);
+            }
+            sb.append(lifecycle.getObjectName()).append(" object has not been returned to the pool. Check further messages to make sure the object was terminated.");
+            sb.append(" UseTime: ").append(metaData.getTimeDiff());
+            sb.append(" Object: ").append(metaData.getPooled());
             final PoolingException e = new PoolingException(sb.toString());
             if (testThreads && null != metaData.getTrace()) {
                 e.setStackTrace(metaData.getTrace());

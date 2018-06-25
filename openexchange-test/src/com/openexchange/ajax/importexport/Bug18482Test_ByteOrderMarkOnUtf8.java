@@ -61,7 +61,6 @@ import com.openexchange.ajax.framework.AbstractAJAXResponse;
 import com.openexchange.ajax.importexport.actions.CSVImportRequest;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.importexport.ContactTestData;
-import com.openexchange.java.Charsets;
 
 /**
  * This bug is concerned with data sent as UTF8 stream with a Byte Order Mark (BOM).
@@ -80,36 +79,36 @@ public class Bug18482Test_ByteOrderMarkOnUtf8 extends AbstractManagedContactTest
 
     @Test
     public void testNone() throws Exception {
-        testWithBOM(Charsets.UTF_8_NAME);
+        testWithBOM();
     }
 
     @Test
     public void testUTF8() throws Exception {
-        testWithBOM(Charsets.UTF_8_NAME, 0xEF, 0xBB, 0xBF);
+        testWithBOM(0xEF, 0xBB, 0xBF);
     }
 
     @Test
     public void testUTF16LE() throws Exception {
-        testWithBOM("UTF-16LE", 0xFF, 0xFE);
+        testWithBOM(0xFF, 0xFE);
     }
 
     @Test
     public void testUTF16BE() throws Exception {
-        testWithBOM("UTF-16BE", 0xFE, 0xFF);
+        testWithBOM(0xFE, 0xFF);
     }
 
     @Test
     public void testUTF32LE() throws Exception {
-        testWithBOM("UTF-32LE", 0xFF, 0xFE, 0x00, 0x00);
+        testWithBOM(0xFF, 0xFE, 0x00, 0x00);
     }
 
     @Test
     public void testUTF32BE() throws Exception {
-        testWithBOM("UTF-32BE", 0x00, 0x00, 0xFE, 0xFF);
+        testWithBOM(0x00, 0x00, 0xFE, 0xFF);
     }
 
-    private void testWithBOM(String charset, int... bom) throws Exception {
-        byte[] bytes = csv.getBytes(charset);
+    private void testWithBOM(int... bom) throws Exception {
+        byte[] bytes = csv.getBytes(com.openexchange.java.Charsets.UTF_8);
         byte[] streambase = new byte[bom.length + bytes.length];
         for (int i = 0; i < bom.length; i++) {
             streambase[i] = (byte) bom[i];

@@ -51,6 +51,7 @@ package com.openexchange.ajax.sessionmanagement;
 
 import com.openexchange.ajax.framework.AbstractAPIClientSession;
 import com.openexchange.testing.httpclient.invoker.ApiClient;
+import com.openexchange.testing.httpclient.models.AllSessionsResponse;
 import com.openexchange.testing.httpclient.modules.SessionmanagementApi;
 
 /**
@@ -71,7 +72,11 @@ public class AbstractSessionManagementTest extends AbstractAPIClientSession {
 
         // Remove all other sessions to make sure tests run independently
         api = new SessionmanagementApi(apiClient);
+        AllSessionsResponse all = api.all(apiClient.getSession());
+        int size = all.getData().size();
         api.clear(apiClient.getSession());
+        all = api.all(apiClient.getSession());
+        System.out.println("Cleared " + all.getData().size() + " out of " + size + " sessions for the " + this.getClass().getSimpleName() + " test.");
 
         // For the same user
         apiClient2 = generateApiClient(testUser);

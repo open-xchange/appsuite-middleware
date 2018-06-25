@@ -387,6 +387,7 @@ public class DefaultNotificationParticipantResolver implements NotificationParti
                 notificationOrganizer.setContext(ctx);
                 notificationOrganizer.setLocale(organizerUser.getLocale());
                 notificationOrganizer.setTimezone(TimeZone.getTimeZone(organizerUser.getTimeZone()));
+                notificationOrganizer.setFolderId(getFolderIdForUser(update, ctx.getContextId(), organizer.getEntity()));
             }
             notificationOrganizer.setDisplayName(organizer.getCn());
             notificationOrganizer.setConfiguration(configuration);

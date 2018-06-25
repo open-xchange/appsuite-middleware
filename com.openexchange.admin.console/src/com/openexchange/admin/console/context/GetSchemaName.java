@@ -63,7 +63,6 @@ import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 import com.openexchange.admin.rmi.exceptions.NoSuchContextException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 
-
 /**
  * {@link GetSchemaName} - Determines the name of the database schema in which a specified context is located.
  *
@@ -112,7 +111,7 @@ public class GetSchemaName extends ContextAbstraction {
             }
             Context context = maincall(ctx, auth);
 
-            System.out.println("Schema name for context " + context.getId() + ": " + context.getWriteDatabase().getScheme());
+            System.out.println("Schema name for context " + context.getId() + (context.getWriteDatabase() == null ? "" : ": " + context.getWriteDatabase().getScheme()));
         } catch (final Exception e) {
             printErrors(successtext, null, e, parser);
             sysexit(SYSEXIT_COMMUNICATION_ERROR);

@@ -20,11 +20,13 @@ package org.apache.felix.eventadmin.impl.handler;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
@@ -52,6 +54,10 @@ public class EventHandlerTracker extends ServiceTracker<EventHandler, EventHandl
 	 */
 	private final Map<String, List<EventHandlerProxy>> matchingPrefixTopic;
 
+	/**
+	 * A cache for applicable handlers for a certain event topic
+	 */
+	private final ConcurrentMap<String, Collection<EventHandlerProxy>> applicabeHandlersCache;
 
 	/** The context for the proxies. */
 	private HandlerContext handlerContext;
@@ -63,7 +69,9 @@ public class EventHandlerTracker extends ServiceTracker<EventHandler, EventHandl
 		this.matchingAllEvents = new CopyOnWriteArrayList<EventHandlerProxy>();
 		this.matchingTopic = new ConcurrentHashMap<String, List<EventHandlerProxy>>();
 		this.matchingPrefixTopic = new ConcurrentHashMap<String, List<EventHandlerProxy>>();
-	}
+
+		applicabeHandlersCache = new ConcurrentHashMap<String, Collection<EventHandlerProxy>>(256, 0.9F, 1);
+    }
 
     /**
      * Update the timeout configuration.
@@ -191,6 +199,7 @@ public class EventHandlerTracker extends ServiceTracker<EventHandler, EventHandl
     			}
     		}
 		}
+		applicabeHandlersCache.clear();
 	}
 
     /**
@@ -219,6 +228,7 @@ public class EventHandlerTracker extends ServiceTracker<EventHandler, EventHandl
                 }
             }
         }
+        applicabeHandlersCache.clear();
 	}
 
 	/**
@@ -228,50 +238,59 @@ public class EventHandlerTracker extends ServiceTracker<EventHandler, EventHandl
 	 * @return All handlers for the event
 	 */
 	public Collection<EventHandlerProxy> getHandlers(final Event event) {
-	    final String topic = event.getTopic();
+	    Collection<EventHandlerProxy> handlers = applicabeHandlersCache.get(event.getTopic());
+	    if (null != handlers) {
+            return handlers;
+        }
 
-		final Set<EventHandlerProxy> handlers = new HashSet<EventHandlerProxy>();
-
-		// Add all handlers matching everything
-        this.checkHandlerAndAdd(handlers, this.matchingAllEvents, event);
-
-		// Now check for prefix matches
-		if ( !this.matchingPrefixTopic.isEmpty() )
-		{
-		    int pos = topic.lastIndexOf('/');
-			while (pos != -1)
-			{
-			    final String prefix = topic.substring(0, pos);
-		        this.checkHandlerAndAdd(handlers, this.matchingPrefixTopic.get(prefix), event);
-
-				pos = prefix.lastIndexOf('/');
-			}
-		}
-
-		// Add the handlers for matching topic names
-		this.checkHandlerAndAdd(handlers, this.matchingTopic.get(topic), event);
-
-		return handlers;
+	    handlers = doGetHandlers(event);
+	    applicabeHandlersCache.put(event.getTopic(), handlers);
+	    return handlers;
 	}
+
+    private Collection<EventHandlerProxy> doGetHandlers(final Event event) {
+        Set<EventHandlerProxy> handlers = null;
+
+        // Add all handlers matching everything
+        handlers = this.checkHandlerAndAdd(handlers, this.matchingAllEvents, event);
+
+        // Now check for prefix matches
+        String topic = event.getTopic();
+        if ( !this.matchingPrefixTopic.isEmpty() )
+        {
+            int pos = topic.lastIndexOf('/');
+            while (pos != -1)
+            {
+                final String prefix = topic.substring(0, pos);
+                handlers = this.checkHandlerAndAdd(handlers, this.matchingPrefixTopic.get(prefix), event);
+
+                pos = prefix.lastIndexOf('/');
+            }
+        }
+
+        // Add the handlers for matching topic names
+        handlers = this.checkHandlerAndAdd(handlers, this.matchingTopic.get(topic), event);
+
+        return null == handlers ? Collections.<EventHandlerProxy> emptySet() : Collections.unmodifiableSet(handlers);
+    }
 
 	/**
 	 * Checks each handler from the proxy list if it can deliver the event
 	 * If the event can be delivered, the proxy is added to the handlers.
 	 */
-	private void checkHandlerAndAdd( final Set<EventHandlerProxy> handlers,
-	        final List<EventHandlerProxy> proxies,
-	        final Event event)
-	{
-	    if ( proxies != null )
-	    {
-            for(final EventHandlerProxy p : proxies)
-            {
-                if ( p.canDeliver(event) )
-                {
-                    handlers.add(p);
+	private Set<EventHandlerProxy> checkHandlerAndAdd(Set<EventHandlerProxy> handlers, List<EventHandlerProxy> proxies, Event event) {
+	    Set<EventHandlerProxy> hdlrs = handlers;
+	    if (proxies != null) {
+            for (EventHandlerProxy p : proxies) {
+                if (p.canDeliver(event) ) {
+                    if (null == hdlrs) {
+                        hdlrs = new NonEmptyHashSet();
+                    }
+                    hdlrs.add(p);
                 }
             }
 	    }
+	    return hdlrs;
 	}
 
 	static Matcher[] createMatchers(final String[] config)
@@ -336,6 +355,12 @@ public class EventHandlerTracker extends ServiceTracker<EventHandler, EventHandl
     /** Match all. */
     private static final class MatcherAll implements Matcher
     {
+
+        MatcherAll()
+        {
+            super();
+        }
+
         @Override
         public boolean match(final String className)
         {
@@ -414,6 +439,26 @@ public class EventHandlerTracker extends ServiceTracker<EventHandler, EventHandl
             this.bundleContext = bundleContext;
             this.ignoreTimeoutMatcher = ignoreTimeoutMatcher;
             this.requireTopic = requireTopic;
+        }
+    }
+
+    /**
+     * A set which is known to be non-empty.
+     */
+    private static final class NonEmptyHashSet extends HashSet<EventHandlerProxy> {
+
+        private static final long serialVersionUID = 8554533894205096641L;
+
+        /**
+         * Initializes a new {@link EventHandlerTracker.NonEmptyHashSet}.
+         */
+        NonEmptyHashSet() {
+            super();
+        }
+
+        @Override
+        public boolean isEmpty() {
+            return false;
         }
     }
 }

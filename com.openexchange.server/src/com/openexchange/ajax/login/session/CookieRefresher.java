@@ -142,6 +142,7 @@ public class CookieRefresher implements SessionServletInterceptor {
 
                 session.setParameter(PARAM_COOKIE_REFRESH_TIMESTAMP, createNewStamp());
                 if (conf.isSessiondAutoLogin(host, session)) {
+                    // Set marker for session cookie for the next request
                     session.setParameter(PARAM_REFRESH_SESSION_COOKIE_FLAG, Boolean.TRUE);
                 }
                 return true;
@@ -162,11 +163,6 @@ public class CookieRefresher implements SessionServletInterceptor {
         }
 
         session.setParameter(PARAM_REFRESH_SESSION_COOKIE_FLAG, null);
-        if (session instanceof PutIfAbsent) {
-            return (null == ((PutIfAbsent) session).setParameterIfAbsent(PARAM_REFRESH_SESSION_COOKIE_FLAG, Boolean.TRUE));
-        }
-
-        session.setParameter(PARAM_REFRESH_SESSION_COOKIE_FLAG, Boolean.TRUE);
         return true;
     }
 

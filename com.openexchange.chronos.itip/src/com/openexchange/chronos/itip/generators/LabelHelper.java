@@ -59,6 +59,7 @@ import org.slf4j.LoggerFactory;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.ParticipationStatus;
 import com.openexchange.chronos.Transp;
+import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.itip.ITipRole;
 import com.openexchange.chronos.itip.Messages;
 import com.openexchange.config.ConfigurationService;
@@ -248,8 +249,14 @@ public class LabelHelper {
         final String objectId = (mail.getEvent() != null) ? mail.getEvent().getId() : mail.getOriginal().getId();
         final String module = "calendar";
         String folder = mail.getRecipient().getFolderId();
+        int recipientId = mail.getRecipient().getIdentifier();
         if (folder == null) {
-            folder = mail.getEvent().getFolderId();
+            try {
+                folder = CalendarUtils.getFolderView(mail.getEvent(), recipientId);
+            } catch (OXException e) {
+                LOG.error("Unable to generate Link. Folder Id for user {} can't be found.", Integer.valueOf(recipientId), e);
+                return "";
+            }
         }
 
         String hostname = null;
@@ -257,9 +264,9 @@ public class LabelHelper {
         final HostnameService hostnameService = services.getOptionalService(HostnameService.class);
         if (hostnameService != null) {
             if (null != mail.getRecipient().getUser() && mail.getRecipient().getUser().isGuest()) {
-                hostname = hostnameService.getGuestHostname(mail.getRecipient().getIdentifier(), ctx.getContextId());
+                hostname = hostnameService.getGuestHostname(recipientId, ctx.getContextId());
             } else {
-                hostname = hostnameService.getHostname(mail.getRecipient().getIdentifier(), ctx.getContextId());
+                hostname = hostnameService.getHostname(recipientId, ctx.getContextId());
             }
         }
 
@@ -279,8 +286,7 @@ public class LabelHelper {
         if (mail.getAttachments().isEmpty() || mail.getRecipient().isExternal()) {
             return "";
         }
-        final String directLink = getDirectLink();
-        return new Sentence(Messages.HAS_ATTACHMENTS).add(directLink, ArgumentType.REFERENCE).getMessage(wrapper, locale);
+        return new Sentence(Messages.HAS_ATTACHMENTS).add(getDirectLink(), ArgumentType.REFERENCE).getMessage(wrapper, locale);
     }
 
     public String getWhenLabel() {

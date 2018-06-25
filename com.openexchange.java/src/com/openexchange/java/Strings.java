@@ -651,7 +651,9 @@ public class Strings {
 
         int length = s.length();
         StringBuilder sb = null;
-        for (int pos, prev = 0; prev < length && (pos = s.indexOf(sequence, prev)) >= 0;) {
+        int pos = 0;
+        int prev = 0;
+        while (prev < length && (pos = s.indexOf(sequence, prev)) >= 0) {
             if (null == sb) {
                 sb = new StringBuilder(length);
                 if (pos > 0) {
@@ -662,6 +664,10 @@ public class Strings {
             }
             sb.append(replacement);
             prev = pos + sequence.length();
+        }
+        
+        if (prev > 0) {
+            sb.append(s.substring(prev, s.length()));
         }
         return null == sb ? s : sb.toString();
     }
@@ -682,7 +688,9 @@ public class Strings {
 
         int length = s.length();
         StringBuilder sb = null;
-        for (int pos, prev = 0; prev < length && (pos = s.indexOf(sequence, prev)) >= 0;) {
+        int pos = 0;
+        int prev = 0;
+        while (prev < length && (pos = s.indexOf(sequence, prev)) >= 0) {
             if (null == sb) {
                 sb = new StringBuilder(length);
                 if (pos > 0) {
@@ -693,6 +701,10 @@ public class Strings {
             }
             sb.append(replacement);
             prev = pos + sequence.length();
+        }
+        
+        if (prev > 0) {
+            sb.append(s.substring(prev, s.length()));
         }
         return null == sb ? s : sb.toString();
     }

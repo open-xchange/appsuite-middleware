@@ -284,6 +284,8 @@ public abstract class EventConverter {
 
     protected abstract SortedSet<RecurrenceId> loadChangeExceptionDates(Event event) throws OXException;
 
+    protected abstract RecurrenceData loadRecurrenceData(String seriesId) throws OXException;
+
     /**
      * Gets the default timezone to use as fallback.
      *
@@ -1059,21 +1061,19 @@ public abstract class EventConverter {
     }
 
     /**
-     * Loads the recurrence data for an event.
+     * Loads the recurrence data for an event. Exception dates are excluded implicitly.
      *
      * @param event The event to get the recurrence data for
      * @return The recurrence data, or <code>null</code> if not set
      */
     protected RecurrenceData loadRecurrenceData(Event event) throws OXException {
-        EventField [] recurrenceFields = {
-            EventField.ID, EventField.SERIES_ID, EventField.RECURRENCE_RULE, EventField.START_DATE, EventField.END_DATE
-        };
         if (null != event.getId() && false == event.getId().equals(event.getSeriesId())) {
             if (null == event.getSeriesId()) {
                 // no recurrence (yet)
                 return new DefaultRecurrenceData(null, event.getStartDate(), null);
             }
-            event = getEvent(new EventID(event.getFolderId(), event.getSeriesId()), recurrenceFields);
+            RecurrenceData recurrenceData = loadRecurrenceData(event.getSeriesId());
+            return new DefaultRecurrenceData(recurrenceData.getRecurrenceRule(), recurrenceData.getSeriesStart(), null);
         }
         return new DefaultRecurrenceData(event.getRecurrenceRule(), event.getStartDate(), null);
     }
