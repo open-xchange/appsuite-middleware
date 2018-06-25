@@ -1,3 +1,9 @@
+open-xchange-advertisement (7.10.0-8) stable; urgency=medium
+
+  * Second candidate for 7.10.0 release
+
+ -- Kevin Ruthmann <kevin.ruthmann@open-xchange.com>  Mon, 25 Jun 2018 14:32:34 +0200
+
 open-xchange-advertisement (7.10.0-7) stable; urgency=medium
 
   * First candidate for 7.10.0 release
