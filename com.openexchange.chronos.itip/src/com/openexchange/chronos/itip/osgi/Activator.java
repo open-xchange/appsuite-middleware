@@ -58,7 +58,6 @@ import com.openexchange.chronos.itip.EventNotificationPool;
 import com.openexchange.chronos.itip.ITipActionPerformerFactoryService;
 import com.openexchange.chronos.itip.ITipAnalyzerService;
 import com.openexchange.chronos.itip.analyzers.DefaultITipAnalyzerService;
-import com.openexchange.chronos.itip.generators.AttachmentMemory;
 import com.openexchange.chronos.itip.generators.DefaultNotificationParticipantResolver;
 import com.openexchange.chronos.itip.generators.ITipMailGeneratorFactory;
 import com.openexchange.chronos.itip.generators.NotificationMailGeneratorFactory;
@@ -114,12 +113,11 @@ public class Activator extends HousekeepingActivator {
         boolean poolEnabled = config.getBoolProperty("com.openexchange.calendar.notify.poolenabled", true);
 
         TimerService timers = Services.getService(TimerService.class);
-        AttachmentMemory attachmentMemory = new AttachmentMemory(detailInterval * 3, timers);
         MailSenderService sender = new DefaultMailSenderService();
 
         CalendarITipIntegrationUtility util = new CalendarITipIntegrationUtility();
         DefaultNotificationParticipantResolver resolver = new DefaultNotificationParticipantResolver(util);
-        NotificationMailGeneratorFactory generatorFactory = new NotificationMailGeneratorFactory(resolver, util, this, attachmentMemory);
+        NotificationMailGeneratorFactory generatorFactory = new NotificationMailGeneratorFactory(resolver, util, this);
 
         if (poolEnabled) {
             EventNotificationPool pool = new EventNotificationPool(timers, generatorFactory, sender, detailInterval, stateChangeInterval, priorityInterval);
