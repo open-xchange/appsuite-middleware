@@ -114,6 +114,20 @@ public class ResellerManager extends AbstractManager {
         resellerInterface.delete(resellerAdmin, getMasterCredentials());
     }
 
+    /**
+     * Returns an array with all found {@link ResellerAdmin}s that match the
+     * specified search pattern
+     * 
+     * @param searchPattern The search pattern
+     * @return an array with all found {@link ResellerAdmin}s that match the
+     *         specified search pattern
+     * @throws Exception if an error is occurred
+     */
+    public ResellerAdmin[] search(String searchPattern) throws Exception {
+        OXResellerInterface resellerInterface = getResellerInterface();
+        return resellerInterface.list(searchPattern, getMasterCredentials());
+    }
+
     /*
      * (non-Javadoc)
      * 

@@ -344,12 +344,22 @@ public class ContextManager extends AbstractManager {
      * Delete the specified {@link Context}
      * 
      * @param ctx The {@link Context} to delete
-     * @param getMasterCredentials() The master {@link Credentials}
      * @throws Exception if the context cannot be deleted or any other error occurs
      */
     public void delete(Context ctx) throws Exception {
+        delete(ctx, getMasterCredentials());
+    }
+
+    /**
+     * Delete the specified {@link Context}
+     * 
+     * @param ctx The {@link Context} to delete
+     * @param credentials the credentials to use to authenticate against the server
+     * @throws Exception if the context cannot be deleted or any other error occurs
+     */
+    public void delete(Context ctx, Credentials credentials) throws Exception {
         OXContextInterface contextInterface = getContextInterface();
-        contextInterface.delete(ctx, getMasterCredentials());
+        contextInterface.delete(ctx, credentials);
     }
 
     /**

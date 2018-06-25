@@ -49,24 +49,14 @@
 
 package com.openexchange.admin.reseller.rmi;
 
-import java.net.MalformedURLException;
-import java.rmi.Naming;
-import java.rmi.NotBoundException;
-import java.rmi.RemoteException;
 import org.apache.commons.lang3.RandomStringUtils;
 import com.openexchange.admin.reseller.rmi.dataobjects.ResellerAdmin;
 import com.openexchange.admin.reseller.rmi.dataobjects.Restriction;
 import com.openexchange.admin.rmi.AbstractRMITest;
-import com.openexchange.admin.rmi.OXContextInterface;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.dataobjects.User;
 import com.openexchange.admin.rmi.dataobjects.UserModuleAccess;
-import com.openexchange.admin.rmi.exceptions.DatabaseUpdateException;
-import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
-import com.openexchange.admin.rmi.exceptions.InvalidDataException;
-import com.openexchange.admin.rmi.exceptions.NoSuchContextException;
-import com.openexchange.admin.rmi.exceptions.StorageException;
 
 /**
  * {@link OXResellerAbstractTest}
@@ -199,9 +189,8 @@ abstract class OXResellerAbstractTest extends AbstractRMITest {
         return getUserManager().create(ctx, oxuser, access, auth);
     }
 
-    protected static void deleteContext(final Context ctx, final Credentials auth) throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, DatabaseUpdateException, InvalidDataException, MalformedURLException, NotBoundException {
-        final OXContextInterface oxctx = (OXContextInterface) Naming.lookup(getRMIHostUrl() + OXContextInterface.RMI_NAME);
-        oxctx.delete(ctx, auth);
+    protected static void deleteContext(final Context ctx, final Credentials auth) throws Exception {
+        getContextManager().delete(ctx, auth);
     }
 
     protected static Restriction getRestrictionByName(final String name, final Restriction[] res) {

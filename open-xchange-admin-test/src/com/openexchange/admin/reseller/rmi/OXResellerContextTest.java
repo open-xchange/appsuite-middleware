@@ -51,7 +51,6 @@ package com.openexchange.admin.reseller.rmi;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import java.rmi.Naming;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -67,26 +66,20 @@ public class OXResellerContextTest extends OXResellerAbstractTest {
 
     private static Context ownedContext = null;
 
-    private static OXResellerInterface oxresell = null;
-
     private ResellerAdmin randomAdmin;
 
     @Before
     public final void setUp() throws Exception {
         super.setUp();
-        oxresell = (OXResellerInterface) Naming.lookup(getRMIHostUrl() + OXResellerInterface.RMI_NAME);
         randomAdmin = RandomAdmin();
-
-        oxresell.create(randomAdmin, superAdminCredentials);
+        getResellerManager().create(randomAdmin);
     }
 
     @After
     public final void tearDown() throws Exception {
-        final Credentials creds = superAdminCredentials;
-
-        final ResellerAdmin[] adms = oxresell.list(randomAdmin.getName(), creds);
+        final ResellerAdmin[] adms = getResellerManager().search(randomAdmin.getName());
         for (final ResellerAdmin adm : adms) {
-            oxresell.delete(adm, creds);
+            getResellerManager().delete(adm);
         }
     }
 
@@ -111,10 +104,10 @@ public class OXResellerContextTest extends OXResellerAbstractTest {
 
     @Test
     public void testCreateTooManyContexts() throws Exception {
-        oxresell.delete(randomAdmin, superAdminCredentials); // Delete normaly created FooAdminUser
+        getResellerManager().delete(randomAdmin); // Delete normaly created FooAdminUser
 
         randomAdmin.setRestrictions(new Restriction[] { MaxContextRestriction() });
-        oxresell.create(randomAdmin, superAdminCredentials);
+        getResellerManager().create(randomAdmin);
 
         Credentials creds = ResellerRandomCredentials(randomAdmin.getName());
         Context ctx1 = createContext(creds);
@@ -135,16 +128,15 @@ public class OXResellerContextTest extends OXResellerAbstractTest {
 
         assertTrue("creation of ctx3 must fail", failed_ctx3);
 
-        oxresell.delete(randomAdmin, superAdminCredentials);
+        getResellerManager().delete(randomAdmin);
     }
 
     @Test
     public void testCreateContextNoQuota() throws Exception {
-        final Credentials creds = superAdminCredentials;
-        oxresell.delete(randomAdmin, creds); // Delete normaly created FooAdminUser
+        getResellerManager().delete(randomAdmin); // Delete normaly created FooAdminUser
 
         randomAdmin.setRestrictions(new Restriction[] { MaxOverallUserRestriction(2) });
-        oxresell.create(randomAdmin, creds);
+        getResellerManager().create(randomAdmin);
 
         Credentials contextAdmin = ResellerRandomCredentials(randomAdmin.getName());
 
@@ -161,15 +153,15 @@ public class OXResellerContextTest extends OXResellerAbstractTest {
         }
         assertTrue("creation of ctx1 must fail", failed_ctx1);
 
-        oxresell.delete(randomAdmin, superAdminCredentials);
+        getResellerManager().delete(randomAdmin);
     }
 
     @Test
     public void testCreateTooManyOverallUser() throws Exception {
-        oxresell.delete(randomAdmin, superAdminCredentials); // Delete normaly created FooAdminUser
+        getResellerManager().delete(randomAdmin); // Delete normaly created FooAdminUser
 
         randomAdmin.setRestrictions(new Restriction[] { MaxOverallUserRestriction(2) });
-        oxresell.create(randomAdmin, superAdminCredentials);
+        getResellerManager().create(randomAdmin);
 
         Credentials resellerRandomCredentials = ResellerRandomCredentials(randomAdmin.getName());
         Context ctx1 = createContext(resellerRandomCredentials);
@@ -188,14 +180,14 @@ public class OXResellerContextTest extends OXResellerAbstractTest {
         }
         assertTrue("creation of ctx3 must fail", failed_ctx3);
 
-        oxresell.delete(randomAdmin, superAdminCredentials);
+        getResellerManager().delete(randomAdmin);
     }
 
     @Test
     public void testListContextOwnedByReseller() throws Exception {
         ResellerAdmin second = RandomAdmin();
 
-        oxresell.create(second, superAdminCredentials);
+        getResellerManager().create(second);
 
         Credentials resellerRandomCredentials = ResellerRandomCredentials(randomAdmin.getName());
         ownedContext = createContext(resellerRandomCredentials);
@@ -210,7 +202,7 @@ public class OXResellerContextTest extends OXResellerAbstractTest {
             ownedContext = null;
         }
 
-        oxresell.delete(second, superAdminCredentials);
+        getResellerManager().delete(second);
 
     }
 
