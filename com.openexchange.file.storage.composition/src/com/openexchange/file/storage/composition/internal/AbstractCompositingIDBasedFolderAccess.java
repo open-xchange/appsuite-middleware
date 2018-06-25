@@ -286,7 +286,7 @@ public abstract class AbstractCompositingIDBasedFolderAccess extends AbstractCom
             /*
              * delete folder in source storage (including all descendants)
              */
-            getFolderAccess(sourceFolderID).deleteFolder(sourceFolderID.getFolderId());
+            getFolderAccess(sourceFolderID).deleteFolder(sourceFolderID.getFolderId(), true);
             /*
              * fire appropriate events
              */

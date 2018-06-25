@@ -51,10 +51,12 @@ package com.openexchange.http.grizzly;
 
 import java.util.Collections;
 import java.util.List;
+import com.google.common.collect.ImmutableList;
 import com.openexchange.config.ConfigTools;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.http.grizzly.util.IPTools;
 import com.openexchange.java.Strings;
+import com.openexchange.net.IPRange;
 
 /**
  * {@link GrizzlyConfig} Collects and exposes configuration parameters needed by GrizzlOX
@@ -99,7 +101,7 @@ public class GrizzlyConfig {
         private String contentSecurityPolicy = null;
         private String defaultEncoding = "UTF-8";
         private boolean isConsiderXForwards = false;
-        private List<String> knownProxies = Collections.emptyList();
+        private List<IPRange> knownProxies = Collections.emptyList();
         private String forHeader = "X-Forwarded-For";
         private String protocolHeader = "X-Forwarded-Proto";
         private String httpsProtoValue = "https";
@@ -155,7 +157,7 @@ public class GrizzlyConfig {
             this.defaultEncoding = configService.getProperty("DefaultEncoding", "UTF-8");
             this.isConsiderXForwards = configService.getBoolProperty("com.openexchange.server.considerXForwards", false);
             String proxyCandidates = configService.getProperty("com.openexchange.server.knownProxies", "");
-            setKnownProxies(proxyCandidates);
+            this.knownProxies = IPTools.filterIP(proxyCandidates);
             this.forHeader = configService.getProperty("com.openexchange.server.forHeader", "X-Forwarded-For");
             this.protocolHeader = configService.getProperty("com.openexchange.server.protocolHeader", "X-Forwarded-Proto");
             this.httpsProtoValue = configService.getProperty("com.openexchange.server.httpsProtoValue", "https");
@@ -192,20 +194,6 @@ public class GrizzlyConfig {
             this.enabledCiphers = configService.getProperty("com.openexchange.http.grizzly.enabledCipherSuites", "", ",");
 
             return this;
-        }
-
-        private void setKnownProxies(String ipList) {
-            if(ipList.isEmpty()) {
-                this.knownProxies = Collections.emptyList();
-            } else {
-                List<String> proxyCandidates = IPTools.splitAndTrim(ipList, IPTools.COMMA_SEPARATOR);
-                List<String> erroneousIPs = IPTools.filterErroneousIPs(proxyCandidates);
-                if(!erroneousIPs.isEmpty()) {
-                    LOG.warn("Falling back to empty list as com.openexchange.server.knownProxies contains malformed IPs: {}", erroneousIPs);
-                } else {
-                    this.knownProxies = proxyCandidates;
-                }
-            }
         }
 
         public Builder setHttpHost(String httpHost) {
@@ -323,7 +311,7 @@ public class GrizzlyConfig {
             return this;
         }
 
-        public Builder setKnownProxies(List<String> knownProxies) {
+        public Builder setKnownProxies(List<IPRange> knownProxies) {
             this.knownProxies = knownProxies;
             return this;
         }
@@ -476,7 +464,8 @@ public class GrizzlyConfig {
     private final boolean isConsiderXForwards;
 
     /** A comma separated list of known proxies */
-    private final List<String> knownProxies;
+    private final List<IPRange> knownProxies;
+
     /**
      * The name of the protocolHeader used to identify the originating IP address of a client connecting to a web server through an HTTP
      * proxy or load balancer
@@ -526,7 +515,7 @@ public class GrizzlyConfig {
     /** Checks if the special "trackingId" parameter is supposed to be looked-up or always newly created */
     private final boolean checkTrackingIdInRequestParameters;
 
-    GrizzlyConfig(String httpHost, int httpPort, int httpsPort, boolean isJMXEnabled, boolean isWebsocketsEnabled, boolean isCometEnabled, int maxRequestParameters, String backendRoute, boolean isAbsoluteRedirect, boolean shutdownFast, int awaitShutDownSeconds, int maxHttpHeaderSize, boolean isSslEnabled, String keystorePath, String keystorePassword, int sessionExpiryCheckInterval, int maxNumberOfConcurrentRequests, boolean checkTrackingIdInRequestParameters, int cookieMaxAge, int cookieMaxInactivityInterval, boolean isForceHttps, boolean isCookieHttpOnly, String contentSecurityPolicy, String defaultEncoding, boolean isConsiderXForwards, List<String> knownProxies, String forHeader, String protocolHeader, String httpsProtoValue, int httpProtoPort, int httpsProtoPort, String echoHeader, String robotsMetaTag, int maxBodySize, int maxNumberOfHttpSessions, boolean isSessionAutologin, List<String> enabledCiphers, long wsTimeoutMillis) {
+    GrizzlyConfig(String httpHost, int httpPort, int httpsPort, boolean isJMXEnabled, boolean isWebsocketsEnabled, boolean isCometEnabled, int maxRequestParameters, String backendRoute, boolean isAbsoluteRedirect, boolean shutdownFast, int awaitShutDownSeconds, int maxHttpHeaderSize, boolean isSslEnabled, String keystorePath, String keystorePassword, int sessionExpiryCheckInterval, int maxNumberOfConcurrentRequests, boolean checkTrackingIdInRequestParameters, int cookieMaxAge, int cookieMaxInactivityInterval, boolean isForceHttps, boolean isCookieHttpOnly, String contentSecurityPolicy, String defaultEncoding, boolean isConsiderXForwards, List<IPRange> knownProxies, String forHeader, String protocolHeader, String httpsProtoValue, int httpProtoPort, int httpsProtoPort, String echoHeader, String robotsMetaTag, int maxBodySize, int maxNumberOfHttpSessions, boolean isSessionAutologin, List<String> enabledCiphers, long wsTimeoutMillis) {
         super();
         this.httpHost = httpHost;
         this.httpPort = httpPort;
@@ -553,7 +542,7 @@ public class GrizzlyConfig {
         this.contentSecurityPolicy = contentSecurityPolicy;
         this.defaultEncoding = defaultEncoding;
         this.isConsiderXForwards = isConsiderXForwards;
-        this.knownProxies = knownProxies;
+        this.knownProxies = (List<IPRange>) (null == knownProxies || knownProxies.isEmpty() ? Collections.emptyList() : ImmutableList.copyOf(knownProxies));
         this.forHeader = forHeader;
         this.protocolHeader = protocolHeader;
         this.httpsProtoValue = httpsProtoValue;
@@ -724,10 +713,11 @@ public class GrizzlyConfig {
     }
 
     /**
-     * Returns the known proxies as comma separated list of IPs
-     * @return the known proxies as comma separated list of IPs or an empty String
+     * Gets the known proxies as an immutable list of {@link IPRange}s
+     *
+     * @return The known proxies as list of {@link IPRange}s or an empty list
      */
-    public List<String> getKnownProxies() {
+    public List<IPRange> getKnownProxies() {
         return knownProxies;
     }
 

@@ -879,7 +879,11 @@ public class ContactServiceImpl extends DefaultContactService {
             queryFields = new QueryFields(fields);
         } else {
             // restrict queried fields
-            queryFields = new QueryFields(fields, LIMITED_USER_FIELDS);
+            if (Tools.getUserPermissionBits(session).hasWebMail()) {
+                queryFields = new QueryFields(fields, LIMITED_USER_FIELDS);
+            } else {
+                queryFields = new QueryFields(fields, LIMITED_USER_FIELDS_NO_MAIL);
+            }
         }
         if (null == sortOptions) {
             sortOptions = SortOptions.EMPTY;
@@ -930,7 +934,11 @@ public class ContactServiceImpl extends DefaultContactService {
             queryFields = new QueryFields(fields);
         } else {
             // restrict queried fields
-            queryFields = new QueryFields(fields, LIMITED_USER_FIELDS);
+            if (Tools.getUserPermissionBits(session).hasWebMail()) {
+                queryFields = new QueryFields(fields, LIMITED_USER_FIELDS);
+            } else {
+                queryFields = new QueryFields(fields, LIMITED_USER_FIELDS_NO_MAIL);
+            }
         }
         if (null == sortOptions) {
             sortOptions = SortOptions.EMPTY;

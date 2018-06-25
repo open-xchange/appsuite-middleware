@@ -52,8 +52,7 @@ package com.openexchange.http.grizzly.servletfilter;
 import static com.openexchange.http.grizzly.http.servlet.HttpServletRequestWrapper.HTTPS_SCHEME;
 import static com.openexchange.http.grizzly.http.servlet.HttpServletRequestWrapper.HTTP_SCHEME;
 import java.io.IOException;
-import java.util.LinkedHashSet;
-import java.util.Set;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.regex.Pattern;
 import javax.servlet.Filter;
@@ -72,6 +71,7 @@ import com.openexchange.http.grizzly.http.servlet.HttpServletResponseWrapper;
 import com.openexchange.http.grizzly.util.IPTools;
 import com.openexchange.java.Strings;
 import com.openexchange.log.LogProperties;
+import com.openexchange.net.IPRange;
 
 /**
  * {@link WrappingFilter} - Wrap the Request in {@link HttpServletResponseWrapper} and the Response in {@link HttpServletResponseWrapper}
@@ -95,7 +95,7 @@ public class WrappingFilter implements Filter {
     private final AtomicLong counter;
     private final int serverId;
     private final String forHeader;
-    private final Set<String> knownProxies;
+    private final List<IPRange> knownProxies;
     private final String protocolHeader;
     private final boolean isConsiderXForwards;
     private final String echoHeaderName;
@@ -114,7 +114,7 @@ public class WrappingFilter implements Filter {
         serverId = Math.abs(OXException.getServerId());
         counter = new AtomicLong(serverId >> 1);
         this.forHeader = config.getForHeader();
-        this.knownProxies = new LinkedHashSet<>(config.getKnownProxies());
+        this.knownProxies = config.getKnownProxies();
         this.protocolHeader = config.getProtocolHeader();
         this.isConsiderXForwards = config.isConsiderXForwards();
         this.echoHeaderName = config.getEchoHeader();

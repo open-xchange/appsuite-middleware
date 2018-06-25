@@ -49,59 +49,32 @@
 
 package com.openexchange.legacy;
 
+import com.hazelcast.nio.serialization.Portable;
+
+
 /**
- * {@link CacheOperation}
+ * {@link PortableContextInvalidationCallableFactory}
  *
- * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.10.0
  */
-public enum CacheOperation {
+public class PortableContextInvalidationCallableFactory extends AbstractCustomPortableFactory {
 
     /**
-     * Invalidation of a cache entry, due to update or removal
+     * Initializes a new {@link PortableContextInvalidationCallableFactory}.
      */
-    INVALIDATE("invalidate"),
-
-    /**
-     * Invalidation of a cache group
-     */
-    INVALIDATE_GROUP("invalidate_group"),
-
-    /**
-     * Clear cache
-     */
-    CLEAR("clear"),
-    ;
-
-    private final String id;
-
-    private CacheOperation(final String id) {
-        this.id = id;
+    public PortableContextInvalidationCallableFactory() {
+        super();
     }
 
-    /**
-     * Gets the identifier
-     *
-     * @return The identifier
-     */
-    public String getId() {
-        return id;
+    @Override
+    public Portable create() {
+        return new PortableContextInvalidationCallable();
     }
 
-    /**
-     * Gets the cache operation for given identifier.
-     *
-     * @param id The identifier
-     * @return The cache operation or <code>null</code>
-     */
-    public static CacheOperation cacheOperationFor(final String id) {
-        if (null == id) {
-            return null;
-        }
-        for (final CacheOperation cacheOperation : CacheOperation.values()) {
-            if (id.equals(cacheOperation.getId())) {
-                return cacheOperation;
-            }
-        }
-        return null;
+    @Override
+    public int getClassId() {
+        return PortableContextInvalidationCallable.CLASS_ID;
     }
+
 }

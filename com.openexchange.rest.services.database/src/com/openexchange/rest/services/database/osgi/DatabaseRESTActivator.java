@@ -64,6 +64,7 @@ import com.openexchange.rest.services.database.sql.CreateServiceSchemaLockTable;
 import com.openexchange.rest.services.database.sql.CreateServiceSchemaLockTableTask;
 import com.openexchange.rest.services.database.sql.CreateServiceSchemaVersionTable;
 import com.openexchange.rest.services.database.sql.CreateServiceSchemaVersionTableTask;
+import com.openexchange.rest.services.database.sql.SetDBEngineUpdateTask;
 import com.openexchange.rest.services.database.transactions.InMemoryTransactionKeeper;
 import com.openexchange.timer.TimerService;
 
@@ -81,6 +82,7 @@ public class DatabaseRESTActivator extends HousekeepingActivator {
 
     @Override
     protected void startBundle() throws Exception {
+        Services.setServiceLookup(this);
         final InMemoryTransactionKeeper txKeeper = new InMemoryTransactionKeeper();
         final DBVersionChecker versionChecker = new DBVersionChecker();
 
@@ -101,7 +103,7 @@ public class DatabaseRESTActivator extends HousekeepingActivator {
 
             @Override
             public Collection<? extends UpdateTaskV2> getUpdateTasks() {
-                return Arrays.asList(new CreateServiceSchemaVersionTableTask(getService(DatabaseService.class)), new CreateServiceSchemaLockTableTask(getService(DatabaseService.class)));
+                return Arrays.asList(new CreateServiceSchemaVersionTableTask(getService(DatabaseService.class)), new CreateServiceSchemaLockTableTask(getService(DatabaseService.class)), new SetDBEngineUpdateTask());
             }
         });
     }
