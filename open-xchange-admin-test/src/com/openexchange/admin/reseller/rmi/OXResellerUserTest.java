@@ -50,9 +50,7 @@
 package com.openexchange.admin.reseller.rmi;
 
 import static org.junit.Assert.assertTrue;
-import java.rmi.Naming;
 import java.util.Stack;
-import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.admin.reseller.rmi.dataobjects.ResellerAdmin;
 import com.openexchange.admin.reseller.rmi.dataobjects.Restriction;
@@ -66,19 +64,18 @@ import com.openexchange.admin.rmi.exceptions.StorageException;
 
 public class OXResellerUserTest extends OXResellerAbstractTest {
 
-    private OXResellerInterface oxresell = null;
-
-    @Before
-    public void setUp() throws Exception {
-        super.setUp();
-        oxresell = (OXResellerInterface) Naming.lookup(getRMIHostUrl() + OXResellerInterface.RMI_NAME);
+    /**
+     * Initialises a new {@link OXResellerUserTest}.
+     */
+    public OXResellerUserTest() {
+        super();
     }
 
     @Test
     public void testCreateTooManyOverallUser() throws Exception {
         ResellerAdmin adm = RandomAdmin();
         adm.setRestrictions(new Restriction[] { MaxOverallUserRestriction(6) });
-        oxresell.create(adm, superAdminCredentials);
+        getResellerManager().create(adm);
         try {
             Stack<Context> ctxstack = new Stack<Context>();
             Credentials resellerRandomCredentials = ResellerRandomCredentials(adm.getName());
@@ -107,7 +104,7 @@ public class OXResellerUserTest extends OXResellerAbstractTest {
                 }
             }
         } finally {
-            oxresell.delete(adm, superAdminCredentials);
+            getResellerManager().delete(adm);
         }
     }
 
@@ -116,7 +113,7 @@ public class OXResellerUserTest extends OXResellerAbstractTest {
         ResellerAdmin adm = RandomAdmin();
         final Credentials creds = ResellerRandomCredentials(adm.getName());
 
-        oxresell.create(adm, superAdminCredentials);
+        getResellerManager().create(adm);
         try {
             Context ctx = createContext(creds);
             try {
@@ -147,7 +144,7 @@ public class OXResellerUserTest extends OXResellerAbstractTest {
                 deleteContext(ctx, creds);
             }
         } finally {
-            oxresell.delete(adm, superAdminCredentials);
+            getResellerManager().delete(adm);
         }
     }
 
@@ -160,7 +157,7 @@ public class OXResellerUserTest extends OXResellerAbstractTest {
         ResellerAdmin adm = RandomAdmin();
         final Credentials creds = ResellerRandomCredentials(adm.getName());
 
-        oxresell.create(adm, superAdminCredentials);
+        getResellerManager().create(adm);
         try {
             Context ctx = createContext(creds);
             try {
@@ -229,7 +226,7 @@ public class OXResellerUserTest extends OXResellerAbstractTest {
                 deleteContext(ctx, creds);
             }
         } finally {
-            oxresell.delete(adm, superAdminCredentials);
+            getResellerManager().delete(adm);
         }
     }
 }

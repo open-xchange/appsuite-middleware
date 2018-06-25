@@ -73,6 +73,7 @@ import com.openexchange.admin.rmi.manager.DatabaseManager;
 import com.openexchange.admin.rmi.manager.FilestoreManager;
 import com.openexchange.admin.rmi.manager.GroupManager;
 import com.openexchange.admin.rmi.manager.MaintenanceReasonManager;
+import com.openexchange.admin.rmi.manager.ResellerManager;
 import com.openexchange.admin.rmi.manager.ResourceManager;
 import com.openexchange.admin.rmi.manager.ServerManager;
 import com.openexchange.admin.rmi.manager.UserManager;
@@ -127,6 +128,7 @@ public abstract class AbstractRMITest {
         getUserManager().cleanUp();
         getGroupManager().cleanUp();
         getResourceManager().cleanUp();
+        getResellerManager().cleanUp();
         getDatabaseManager().cleanUp();
         getServerManager().cleanUp();
         getFilestoreManager().cleanUp();
@@ -448,6 +450,15 @@ public abstract class AbstractRMITest {
      */
     protected static FilestoreManager getFilestoreManager() {
         return FilestoreManager.getInstance(getRMIHostUrl(), getMasterAdminCredentials());
+    }
+
+    /**
+     * Gets the {@link ResellerManager}
+     * 
+     * @return the {@link ResellerManager}
+     */
+    protected static ResellerManager getResellerManager() {
+        return ResellerManager.getInstance(getRMIHostUrl(), getMasterAdminCredentials());
     }
 
     //TODO: reference a created context and not some hard-coded id.... 
