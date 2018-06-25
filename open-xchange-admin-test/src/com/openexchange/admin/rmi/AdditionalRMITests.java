@@ -69,6 +69,7 @@ import com.openexchange.admin.rmi.exceptions.NoSuchGroupException;
 import com.openexchange.admin.rmi.exceptions.NoSuchResourceException;
 import com.openexchange.admin.rmi.exceptions.NoSuchUserException;
 import com.openexchange.admin.rmi.factory.ContextFactory;
+import com.openexchange.admin.rmi.factory.ResourceFactory;
 import com.openexchange.admin.rmi.factory.UserFactory;
 import com.openexchange.admin.user.copy.rmi.TestTool;
 
@@ -270,7 +271,7 @@ public class AdditionalRMITests extends AbstractRMITest {
     @Test
     public void testCreateOxResource() throws Exception {
         boolean resourceCreated = false;
-        Resource res = newResource("resourceName", "resourceDisplayname", "resource@email.invalid");
+        Resource res = ResourceFactory.createResource("resourceName", "resourceDisplayname", "resource@email.invalid");
         try {
             res = getResourceManager().create(res, context, adminCredentials);// required line for test
             resourceCreated = true;
@@ -330,7 +331,7 @@ public class AdditionalRMITests extends AbstractRMITest {
     @Test
     public void testUpdateOxResource() throws Exception {
         boolean resourceCreated = false;
-        Resource res = newResource("resourceName", "resourceDisplayname", "resource@email.invalid");
+        Resource res = ResourceFactory.createResource("resourceName", "resourceDisplayname", "resource@email.invalid");
         try {
             res = getResourceManager().create(res, context, adminCredentials);
             resourceCreated = true;
@@ -350,7 +351,7 @@ public class AdditionalRMITests extends AbstractRMITest {
     @Test
     public void testDeleteOxUsers() throws Exception {
         boolean resourceDeleted = false;
-        Resource res = newResource("resourceName", "resourceDisplayname", "resource@email.invalid");
+        Resource res = ResourceFactory.createResource("resourceName", "resourceDisplayname", "resource@email.invalid");
         try {
             res = getResourceManager().create(res, context, adminCredentials);
 

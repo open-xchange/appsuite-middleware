@@ -204,13 +204,6 @@ public abstract class AbstractRMITest {
         return new Credentials(oxadmin, contextPassword);
     }
 
-    public User getAdminData() throws Exception {
-        User admin = new User();
-        admin.setId(Integer.valueOf(2));
-        admin = getUserManager().getData(adminContext, admin, adminCredentials);
-        return admin;
-    }
-
     /**
      * compares two user arrays by retrieving all the IDs they contain
      * an checking if they match. Ignores duplicate entries, ignores
@@ -279,14 +272,6 @@ public abstract class AbstractRMITest {
         group.setDisplayname(displayName);
         group.setName(name);
         return group;
-    }
-
-    public static Resource newResource(String name, String displayName, String email) {
-        Resource res = new Resource();
-        res.setName(name);
-        res.setDisplayname(displayName);
-        res.setEmail(email);
-        return res;
     }
 
     /*** Interfaces ***/

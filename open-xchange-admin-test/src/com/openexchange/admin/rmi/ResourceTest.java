@@ -57,6 +57,7 @@ import org.junit.Test;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Resource;
 import com.openexchange.admin.rmi.exceptions.NoSuchResourceException;
+import com.openexchange.admin.rmi.factory.ResourceFactory;
 
 /**
  * {@link ResourceTest}
@@ -88,7 +89,7 @@ public class ResourceTest extends AbstractRMITest {
 
     @Test
     public void testCreateResource() throws Exception {
-        Resource res = getTestResourceObject("tescase-createResource-resource-" + System.currentTimeMillis());
+        Resource res = ResourceFactory.createResource("tescase-createResource-resource-" + System.currentTimeMillis());
         final Resource createResourcedresource = getResourceManager().create(res, context, adminCredentials);
 
         Resource[] srv_response = getResourceManager().search(context, "*", adminCredentials);
@@ -112,7 +113,7 @@ public class ResourceTest extends AbstractRMITest {
 
     @Test
     public void testChange() throws Exception {
-        Resource res = getTestResourceObject("tescase-createResource-resource-" + System.currentTimeMillis());
+        Resource res = ResourceFactory.createResource("tescase-createResource-resource-" + System.currentTimeMillis());
         final Resource createResourcedresource = getResourceManager().create(res, context, adminCredentials);
 
         Resource[] srv_response = getResourceManager().search(context, "*", adminCredentials);
@@ -161,7 +162,7 @@ public class ResourceTest extends AbstractRMITest {
     @Test
     public void testChangeNull() throws Exception {
         // set description attribute to null 
-        Resource res = getTestResourceObject("tescase-createResource-resource-" + System.currentTimeMillis());
+        Resource res = ResourceFactory.createResource("tescase-createResource-resource-" + System.currentTimeMillis());
         final Resource createResourcedresource = getResourceManager().create(res, context, adminCredentials);
 
         Resource[] srv_response = getResourceManager().search(context, "*", adminCredentials);
@@ -208,7 +209,7 @@ public class ResourceTest extends AbstractRMITest {
 
     @Test
     public void testGet() throws Exception {
-        Resource res = getTestResourceObject("tescase-createResource-resource-" + System.currentTimeMillis());
+        Resource res = ResourceFactory.createResource("tescase-createResource-resource-" + System.currentTimeMillis());
         final Resource createResourcedresource = getResourceManager().create(res, context, adminCredentials);
 
         // get resource from server
@@ -222,7 +223,7 @@ public class ResourceTest extends AbstractRMITest {
 
     @Test
     public void testGetIdentifiedByID() throws Exception {
-        Resource res = getTestResourceObject("tescase-createResource-resource-" + System.currentTimeMillis());
+        Resource res = ResourceFactory.createResource("tescase-createResource-resource-" + System.currentTimeMillis());
         final Resource createResourcedresource = getResourceManager().create(res, context, adminCredentials);
 
         // get resource from server
@@ -237,7 +238,7 @@ public class ResourceTest extends AbstractRMITest {
 
     @Test
     public void testGetIdentifiedByName() throws Exception {
-        Resource res = getTestResourceObject("tescase-createResource-resource-" + System.currentTimeMillis());
+        Resource res = ResourceFactory.createResource("tescase-createResource-resource-" + System.currentTimeMillis());
         final Resource createResourcedresource = getResourceManager().create(res, context, adminCredentials);
 
         // get resource from server
@@ -253,7 +254,7 @@ public class ResourceTest extends AbstractRMITest {
 
     @Test
     public void testDelete() throws Exception {
-        Resource res = getTestResourceObject("tescase-createResource-resource-" + System.currentTimeMillis());
+        Resource res = ResourceFactory.createResource("tescase-createResource-resource-" + System.currentTimeMillis());
         final Resource createResourcedresource = getResourceManager().create(res, context, adminCredentials);
 
         // get resource from server
@@ -278,7 +279,7 @@ public class ResourceTest extends AbstractRMITest {
 
     @Test
     public void testcreateResourceDeletecreateResource() throws Exception {
-        Resource res = getTestResourceObject("tescase-createResource-resource-" + System.currentTimeMillis());
+        Resource res = ResourceFactory.createResource("tescase-createResource-resource-" + System.currentTimeMillis());
         Resource createResourcedresource = getResourceManager().create(res, context, adminCredentials);
 
         // get resource from server
@@ -306,7 +307,7 @@ public class ResourceTest extends AbstractRMITest {
 
     @Test
     public void testDeleteIdentifiedByName() throws Exception {
-        Resource res = getTestResourceObject("tescase-createResource-resource-" + System.currentTimeMillis());
+        Resource res = ResourceFactory.createResource("tescase-createResource-resource-" + System.currentTimeMillis());
         final Resource createResourcedresource = getResourceManager().create(res, context, adminCredentials);
 
         // get resource from server
@@ -333,7 +334,7 @@ public class ResourceTest extends AbstractRMITest {
 
     @Test
     public void testDeleteIdentifiedByID() throws Exception {
-        Resource res = getTestResourceObject("tescase-createResource-resource-" + System.currentTimeMillis());
+        Resource res = ResourceFactory.createResource("tescase-createResource-resource-" + System.currentTimeMillis());
         final Resource createResourcedresource = getResourceManager().create(res, context, adminCredentials);
 
         // get resource from server
@@ -359,7 +360,7 @@ public class ResourceTest extends AbstractRMITest {
 
     @Test
     public void testlistResources() throws Exception {
-        Resource res = getTestResourceObject("tescase-createResource-resource-" + System.currentTimeMillis());
+        Resource res = ResourceFactory.createResource("tescase-createResource-resource-" + System.currentTimeMillis());
         getResourceManager().create(res, context, adminCredentials);
 
         Resource[] srv_response = getResourceManager().search(context, "*", adminCredentials);
@@ -368,15 +369,5 @@ public class ResourceTest extends AbstractRMITest {
             return;
         }
         assertTrue("Expected listResources size > 0 ", srv_response.length > 0);
-    }
-
-    public static Resource getTestResourceObject(String name) {
-        Resource res = new Resource();
-        //        res.setAvailable(true);
-        res.setDescription("description of resource " + name);
-        res.setDisplayname("displayname of resource " + name);
-        res.setEmail("resource-email-" + name + "@" + TEST_DOMAIN);
-        res.setName(name);
-        return res;
     }
 }
