@@ -91,11 +91,11 @@ public interface CalendarEvent extends TimestampedResult {
     Session getSession();
 
     /**
-     * Gets the calendar session if available.
+     * Gets the entity resolver if available.
      *
-     * @return The calendar session, or <code>null</code> if not available
+     * @return The entity resolver, or <code>null</code> if not available
      */
-    CalendarSession getCalendarSession();
+    EntityResolver getEntityResolver();
 
     /**
      * Gets a map holding the identifiers of all folders that are affected by the event, associated to the corresponding user identifier.

@@ -1035,17 +1035,17 @@ public class Utils {
      * Calculates a map holding the identifiers of all folders a user is able to access, based on the supplied collection of folder
      * identifiers.
      *
-     * @param session The session
-     * @param entityResolver The entity resolver
+     * @param contextId The context identifier
+     * @param entityResolver The entity resolver, or <code>null</code> if not available
      * @param folderIds The identifiers of all folders to determine the users with access for
      * @return The identifiers of the affected folders for each user
      */
-    public static Map<Integer, List<String>> getAffectedFoldersPerUser(Session session, EntityResolver entityResolver, Collection<String> folderIds) throws OXException {
+    public static Map<Integer, List<String>> getAffectedFoldersPerUser(int contextId, EntityResolver entityResolver, Collection<String> folderIds) throws OXException {
         DefaultEntityResolver defaultEntityResolver;
-        if (DefaultEntityResolver.class.isInstance(entityResolver)) {
+        if (null != entityResolver && contextId == entityResolver.getContextID() && DefaultEntityResolver.class.isInstance(entityResolver)) {
             defaultEntityResolver = (DefaultEntityResolver) entityResolver;
         } else {
-            defaultEntityResolver = new DefaultEntityResolver(ServerSessionAdapter.valueOf(session), Services.getServiceLookup());
+            defaultEntityResolver = new DefaultEntityResolver(contextId, Services.getServiceLookup());
         }
         return getAffectedFoldersPerUser(defaultEntityResolver, folderIds);
     }

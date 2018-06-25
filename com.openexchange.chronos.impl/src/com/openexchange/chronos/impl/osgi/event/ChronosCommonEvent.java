@@ -60,7 +60,7 @@ import org.slf4j.LoggerFactory;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.impl.Utils;
 import com.openexchange.chronos.service.CalendarEvent;
-import com.openexchange.chronos.service.CalendarSession;
+import com.openexchange.chronos.service.EntityResolver;
 import com.openexchange.event.CommonEvent;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Types;
@@ -87,30 +87,32 @@ public class ChronosCommonEvent implements CommonEvent {
      *
      * Initializes a new {@link ChronosCommonEvent}.
      *
-     * @param calendarSession The calendar session
+     * @param session The associated session
+     * @param entityResolver The entity resolver, or <code>null</code> if not available
      * @param actionID The actionID propagate by this event
      * @param actionEvent The new or updated {@link Event}
      */
-    public ChronosCommonEvent(CalendarSession calendarSession, int actionID, Event actionEvent) {
-        this(calendarSession, actionID, actionEvent, null);
+    public ChronosCommonEvent(Session session, EntityResolver entityResolver, int actionID, Event actionEvent) {
+        this(session, entityResolver, actionID, actionEvent, null);
     }
 
     /**
      *
      * Initializes a new {@link ChronosCommonEvent}.
      *
-     * @param calendarSession The calendar session
+     * @param session The associated session
+     * @param entityResolver The entity resolver, or <code>null</code> if not available
      * @param actionID The actionID propagate by this event
      * @param actionEvent The new or updated {@link Event}
      * @param oldEvent The old {@link Event} if an update was made, else <code>null</code>
      */
-    public ChronosCommonEvent(CalendarSession calendarSession, int actionID, Event actionEvent, Event oldEvent) {
+    public ChronosCommonEvent(Session session, EntityResolver entityResolver, int actionID, Event actionEvent, Event oldEvent) {
         super();
-        this.session = calendarSession.getSession();
+        this.session = session;
         this.actionID = actionID;
         this.actionEvent = actionEvent;
         this.oldEvent = oldEvent;
-        this.affectedUsersWithFolders = getAffectedFoldersPerUser(calendarSession, actionEvent, oldEvent);
+        this.affectedUsersWithFolders = getAffectedFoldersPerUser(session.getContextId(), entityResolver, actionEvent, oldEvent);
     }
 
     @Override
@@ -172,7 +174,7 @@ public class ChronosCommonEvent implements CommonEvent {
         return affectedUsersWithFolders;
     }
 
-    private Map<Integer, Set<Integer>> getAffectedFoldersPerUser(CalendarSession session, Event actionEvent, Event oldEvent) {
+    private static Map<Integer, Set<Integer>> getAffectedFoldersPerUser(int contextId, EntityResolver entityResolver, Event actionEvent, Event oldEvent) {
         Set<String> folderIds = new HashSet<String>();
         if (null != actionEvent) {
             folderIds.addAll(Utils.getPersonalFolderIds(actionEvent.getAttendees()));
@@ -187,7 +189,7 @@ public class ChronosCommonEvent implements CommonEvent {
             }
         }
         try {
-            return getAffected(Utils.getAffectedFoldersPerUser(session, folderIds));
+            return getAffected(Utils.getAffectedFoldersPerUser(contextId, entityResolver, folderIds));
         } catch (OXException e) {
             LOGGER.error("Error deriving affected folders per user", e);
             return Collections.emptyMap();
@@ -200,7 +202,7 @@ public class ChronosCommonEvent implements CommonEvent {
      * @param affectedUsersWithFolders Output from {@link CalendarEvent#getAffectedFoldersPerUser()}
      * @return A {@link Map} with converted value to a {@link Set} of {@link Integer}s
      */
-    private Map<Integer, Set<Integer>> getAffected(Map<Integer, List<String>> affectedUsersWithFolders) {
+    private static Map<Integer, Set<Integer>> getAffected(Map<Integer, List<String>> affectedUsersWithFolders) {
         Map<Integer, Set<Integer>> retval = new LinkedHashMap<Integer, Set<Integer>>(affectedUsersWithFolders.size());
         for (Map.Entry<Integer, List<String>> entry : affectedUsersWithFolders.entrySet()) {
             // Convert for each user

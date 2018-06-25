@@ -61,10 +61,12 @@ import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.ResourceId;
 import com.openexchange.chronos.common.CalendarUtils;
+import com.openexchange.chronos.common.DefaultCalendarParameters;
 import com.openexchange.chronos.impl.Utils;
+import com.openexchange.chronos.impl.osgi.Services;
 import com.openexchange.chronos.service.CalendarHandler;
-import com.openexchange.chronos.service.CalendarService;
-import com.openexchange.chronos.service.CalendarSession;
+import com.openexchange.chronos.service.CalendarUtilities;
+import com.openexchange.chronos.service.EntityResolver;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.chronos.storage.CalendarStorageFactory;
 import com.openexchange.database.provider.DBProvider;
@@ -97,22 +99,19 @@ import com.openexchange.tools.session.ServerSessionAdapter;
  */
 public final class CalendarDeleteListener implements DeleteListener {
 
-    private final CalendarStorageFactory factory;
     private final Set<CalendarHandler> calendarHandlers;
-    private final CalendarService calendarService;
+    private final CalendarUtilities calendarUtilities;
 
     /**
      * Initializes a new {@link CalendarDeleteListener}.
      *
-     * @param factory The {@link CalendarStorageFactory}
-     * @param calendarService The calendar service
+     * @param calendarUtilities A reference to the calendar utilities
      * @param calendarHandlers The {@link CalendarHandler}s to notify
      */
-    public CalendarDeleteListener(CalendarStorageFactory factory, CalendarService calendarService, Set<CalendarHandler> calendarHandlers) {
+    public CalendarDeleteListener(CalendarUtilities calendarUtilities, Set<CalendarHandler> calendarHandlers) {
         super();
-        this.factory = factory;
-        this.calendarService = calendarService;
         this.calendarHandlers = calendarHandlers;
+        this.calendarUtilities = calendarUtilities;
     }
 
     @Override
@@ -151,10 +150,9 @@ public final class CalendarDeleteListener implements DeleteListener {
      * @throws OXException In case service is unavailable or SQL error
      */
     private void purgeUserData(DBProvider dbProvider, Context context, int userId, Integer destinationUserId, Session adminSession) throws OXException {
-        CalendarSession calendarSession = calendarService.init(adminSession);
-        calendarSession.set(PARAMETER_SUPPRESS_ITIP, Boolean.TRUE);
-        CalendarStorage storage = factory.create(context, Utils.ACCOUNT_ID, calendarSession.getEntityResolver(), dbProvider, DBTransactionPolicy.NO_TRANSACTIONS);
-        StorageUpdater updater = new StorageUpdater(calendarSession, storage, userId, null == destinationUserId ? context.getMailadmin() : destinationUserId.intValue());
+        EntityResolver entityResolver = calendarUtilities.getEntityResolver(context.getContextId());
+        CalendarStorage storage = Services.getService(CalendarStorageFactory.class).create(context, Utils.ACCOUNT_ID, entityResolver, dbProvider, DBTransactionPolicy.NO_TRANSACTIONS);
+        StorageUpdater updater = new StorageUpdater(storage, entityResolver, userId, null == destinationUserId ? context.getMailadmin() : destinationUserId.intValue());
         /*
          * Get all events the user attends & distinguish between those that can be deleted completely, and those that need to be updated
          */
@@ -190,7 +188,7 @@ public final class CalendarDeleteListener implements DeleteListener {
         updater.deleteAccount();
 
         // Trigger calendar events
-        updater.notifyCalendarHandlers(calendarHandlers);
+        updater.notifyCalendarHandlers(adminSession, calendarHandlers, new DefaultCalendarParameters().set(PARAMETER_SUPPRESS_ITIP, Boolean.TRUE));
     }
 
     /**
@@ -204,12 +202,11 @@ public final class CalendarDeleteListener implements DeleteListener {
      * @throws OXException In case service is unavailable or SQL error
      */
     private void deleteAttendee(DBProvider dbProvider, Context context, int attendeeId, Session adminSession) throws OXException {
-        CalendarSession calendarSession = calendarService.init(adminSession);
-        calendarSession.set(PARAMETER_SUPPRESS_ITIP, Boolean.TRUE);
-        CalendarStorage storage = factory.create(context, Utils.ACCOUNT_ID, calendarSession.getEntityResolver(), dbProvider, DBTransactionPolicy.NO_TRANSACTIONS);
-        StorageUpdater updater = new StorageUpdater(calendarSession, storage, attendeeId, context.getMailadmin());
+        EntityResolver entityResolver = calendarUtilities.getEntityResolver(context.getContextId());
+        CalendarStorage storage = Services.getService(CalendarStorageFactory.class).create(context, Utils.ACCOUNT_ID, entityResolver, dbProvider, DBTransactionPolicy.NO_TRANSACTIONS);
+        StorageUpdater updater = new StorageUpdater(storage, entityResolver, attendeeId, context.getMailadmin());
         updater.removeAttendeeFrom(updater.searchEvents());
-        updater.notifyCalendarHandlers(calendarHandlers);
+        updater.notifyCalendarHandlers(adminSession, calendarHandlers, new DefaultCalendarParameters().set(PARAMETER_SUPPRESS_ITIP, Boolean.TRUE));
     }
 
 }

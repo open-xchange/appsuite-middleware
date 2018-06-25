@@ -62,10 +62,12 @@ import com.openexchange.chronos.impl.DefaultCalendarEvent;
 import com.openexchange.chronos.impl.Utils;
 import com.openexchange.chronos.service.CalendarEvent;
 import com.openexchange.chronos.service.CalendarHandler;
-import com.openexchange.chronos.service.CalendarSession;
+import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.DeleteResult;
+import com.openexchange.chronos.service.EntityResolver;
 import com.openexchange.chronos.service.UpdateResult;
 import com.openexchange.exception.OXException;
+import com.openexchange.session.Session;
 
 /**
  * {@link SimpleResultTracker} - Tracks update and delete operations on calendar events. This tracker
@@ -93,14 +95,16 @@ class SimpleResultTracker {
     /**
      * Creates a new {@link CalendarEvent} and calls {@link CalendarHandler#handle(CalendarEvent)}
      *
-     * @param calendarSession The underlying calendar session
+     * @param session The admin session
+     * @param entityResolver The entity resolver, or <code>null</code> if not available
      * @param calendarHandlers The handlers to notify
+     * @param parameters Additional calendar parameters, or <code>null</code> if not set
      */
-    public void notifyCalenderHandlers(CalendarSession calendarSession, Set<CalendarHandler> calendarHandlers) throws OXException {
-        Map<Integer, List<String>> affectedFoldersPerUser = Utils.getAffectedFoldersPerUser(calendarSession, affectedFolders);
+    public void notifyCalenderHandlers(Session session, EntityResolver entityResolver, Set<CalendarHandler> calendarHandlers, CalendarParameters parameters) throws OXException {
+        Map<Integer, List<String>> affectedFoldersPerUser = Utils.getAffectedFoldersPerUser(session.getContextId(), entityResolver, affectedFolders);
         if (false == affectedFoldersPerUser.isEmpty()) {
             DefaultCalendarEvent calendarEvent = new DefaultCalendarEvent(
-                calendarSession, Utils.ACCOUNT_ID, -1, affectedFoldersPerUser, Collections.emptyList(), updateResults, deleteResults);
+                session.getContextId(), Utils.ACCOUNT_ID, -1, affectedFoldersPerUser, Collections.emptyList(), updateResults, deleteResults, session, entityResolver, parameters);
             for (CalendarHandler handler : calendarHandlers) {
                 handler.handle(calendarEvent);
             }

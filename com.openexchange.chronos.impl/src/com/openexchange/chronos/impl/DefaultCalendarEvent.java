@@ -73,13 +73,13 @@ public class DefaultCalendarEvent implements CalendarEvent {
     private final int contextId;
     private final int accountId;
     private final int calendarUserId;
-    private final Session session;
-    private final CalendarSession calendarSession;
     private final Map<Integer, List<String>> affectedFoldersPerUser;
     private final List<CreateResult> creations;
     private final List<UpdateResult> updates;
     private final List<DeleteResult> deletions;
+    private final Session session;
     private final CalendarParameters calendarParameters;
+    private final EntityResolver entityResolver;
 
     /**
      * Initializes a new {@link DefaultCalendarEvent}.
@@ -87,51 +87,40 @@ public class DefaultCalendarEvent implements CalendarEvent {
      * @param contextId The context identifier
      * @param accountId The account identifier
      * @param calendarUserId The calendar user id, or <code>-1</code> if not available
-     * @param session The client session, or <code>null</code> if not available
-     * @param entityResolver The entity resolver, or <code>null</code> if not available
      * @param affectedFoldersPerUser The identifiers of the affected folders for each user
      * @param creations The create results, or <code>null</code> if there are none
      * @param deletions The delete results, or <code>null</code> if there are none
      * @param updates The update results, or <code>null</code> if there are none
+     * @param session The client session, or <code>null</code> if not available
+     * @param entityResolver The entity resolver, or <code>null</code> if not available
      * @param calendarParameters Optional {@link CalendarParameters} can be empty or <code>null</code> if there are none
      */
-    public DefaultCalendarEvent(int contextId, int accountId, int calendarUserId, Session session, EntityResolver entityResolver, Map<Integer, List<String>> affectedFoldersPerUser, List<CreateResult> creations, List<UpdateResult> updates, List<DeleteResult> deletions, CalendarParameters calendarParameters) {
+    public DefaultCalendarEvent(int contextId, int accountId, int calendarUserId, Map<Integer, List<String>> affectedFoldersPerUser, List<CreateResult> creations, List<UpdateResult> updates, List<DeleteResult> deletions, Session session, EntityResolver entityResolver, CalendarParameters calendarParameters) {
         super();
         this.contextId = contextId;
         this.accountId = accountId;
         this.calendarUserId = calendarUserId;
-        this.session = session;
-        this.calendarSession = null;
         this.affectedFoldersPerUser = affectedFoldersPerUser;
         this.creations = creations;
         this.updates = updates;
         this.deletions = deletions;
+        this.session = session;
+        this.entityResolver = entityResolver;
         this.calendarParameters = calendarParameters;
     }
 
     /**
-     * Initializes a new {@link DefaultCalendarEvent} based on a calendar session.
+     * Initializes a new {@link DefaultCalendarEvent}.
      *
-     * @param calendarSession The calendar session
-     * @param accountId The account identifier
+     * @param session The calendar session
      * @param calendarUserId The calendar user id, or <code>-1</code> if not available
      * @param affectedFoldersPerUser The identifiers of the affected folders for each user
      * @param creations The create results, or <code>null</code> if there are none
      * @param deletions The delete results, or <code>null</code> if there are none
      * @param updates The update results, or <code>null</code> if there are none
      */
-    public DefaultCalendarEvent(CalendarSession calendarSession, int accountId, int calendarUserId, Map<Integer, List<String>> affectedFoldersPerUser, List<CreateResult> creations, List<UpdateResult> updates, List<DeleteResult> deletions) {
-        super();
-        this.contextId = calendarSession.getContextId();
-        this.accountId = accountId;
-        this.calendarUserId = calendarUserId;
-        this.session = calendarSession.getSession();
-        this.calendarSession = calendarSession;
-        this.affectedFoldersPerUser = affectedFoldersPerUser;
-        this.creations = creations;
-        this.updates = updates;
-        this.deletions = deletions;
-        this.calendarParameters = calendarSession;
+    public DefaultCalendarEvent(CalendarSession session, int calendarUserId, Map<Integer, List<String>> affectedFoldersPerUser, List<CreateResult> creations, List<UpdateResult> updates, List<DeleteResult> deletions) {
+        this(session.getContextId(), Utils.ACCOUNT_ID, calendarUserId, affectedFoldersPerUser, creations, updates, deletions, session.getSession(), session.getEntityResolver(), session);
     }
 
     @Override
@@ -155,8 +144,8 @@ public class DefaultCalendarEvent implements CalendarEvent {
     }
 
     @Override
-    public CalendarSession getCalendarSession() {
-        return calendarSession;
+    public EntityResolver getEntityResolver() {
+        return entityResolver;
     }
 
     @Override

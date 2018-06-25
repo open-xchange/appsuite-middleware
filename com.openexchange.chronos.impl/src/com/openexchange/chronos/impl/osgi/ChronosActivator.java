@@ -129,18 +129,14 @@ public class ChronosActivator extends HousekeepingActivator {
             /*
              * register services
              */
-
-            CalendarService calendarService = new CalendarServiceImpl(calendarHandlers);
             DefaultCalendarUtilities calendarUtilities = new DefaultCalendarUtilities(this);
-            CalendarStorageFactory factory = getServiceSafe(CalendarStorageFactory.class);
-
-            registerService(CalendarService.class, calendarService);
+            registerService(CalendarService.class, new CalendarServiceImpl(calendarHandlers));
             registerService(FreeBusyService.class, new FreeBusyServiceImpl());
             registerService(CalendarUtilities.class, calendarUtilities);
             // Availability disabled until further notice
             //registerService(CalendarAvailabilityService.class, new CalendarAvailabilityServiceImpl());
-            registerService(DeleteListener.class, new CalendarDeleteListener(factory, calendarService, calendarHandlers));
-            DowngradeRegistry.getInstance().registerDowngradeListener(new CalendarDowngradeListener(factory, calendarService, calendarHandlers));
+            registerService(DeleteListener.class, new CalendarDeleteListener(calendarUtilities, calendarHandlers));
+            DowngradeRegistry.getInstance().registerDowngradeListener(new CalendarDowngradeListener(calendarUtilities, calendarHandlers));
             /*
              * register calendar handler to propagate OSGi events
              */

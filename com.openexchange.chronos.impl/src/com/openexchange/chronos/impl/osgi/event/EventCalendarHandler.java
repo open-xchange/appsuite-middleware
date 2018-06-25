@@ -98,28 +98,28 @@ public class EventCalendarHandler implements CalendarHandler {
 
     @Override
     public void handle(CalendarEvent event) {
-        if (event == null || null == event.getCalendarSession()) {
+        if (event == null) {
             return;
         }
         try {
             // Check for new events
             if (false == event.getCreations().isEmpty()) {
                 for (CreateResult result : event.getCreations()) {
-                    triggerEvent(new ChronosCommonEvent(event.getCalendarSession(), CommonEvent.INSERT, result.getCreatedEvent()), CREATED);
+                    triggerEvent(new ChronosCommonEvent(event.getSession(), event.getEntityResolver(), CommonEvent.INSERT, result.getCreatedEvent()), CREATED);
                 }
             }
 
             // Check for updated events
             if (false == event.getUpdates().isEmpty()) {
                 for (UpdateResult result : event.getUpdates()) {
-                    triggerEvent(new ChronosCommonEvent(event.getCalendarSession(), CommonEvent.UPDATE, result.getUpdate(), result.getOriginal()), UPDATED);
+                    triggerEvent(new ChronosCommonEvent(event.getSession(), event.getEntityResolver(), CommonEvent.UPDATE, result.getUpdate(), result.getOriginal()), UPDATED);
                 }
             }
 
             // Check for deleted events
             if (false == event.getDeletions().isEmpty()) {
                 for (DeleteResult result : event.getDeletions()) {
-                    triggerEvent(new ChronosCommonEvent(event.getCalendarSession(), CommonEvent.DELETE, result.getOriginal()), DELETED);
+                    triggerEvent(new ChronosCommonEvent(event.getSession(), event.getEntityResolver(), CommonEvent.DELETE, result.getOriginal()), DELETED);
                 }
             }
         } catch (OXException e) {

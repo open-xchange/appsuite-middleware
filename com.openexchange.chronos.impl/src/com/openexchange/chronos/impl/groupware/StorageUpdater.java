@@ -66,7 +66,8 @@ import com.openexchange.chronos.common.mapping.EventMapper;
 import com.openexchange.chronos.impl.Consistency;
 import com.openexchange.chronos.provider.CalendarAccount;
 import com.openexchange.chronos.service.CalendarHandler;
-import com.openexchange.chronos.service.CalendarSession;
+import com.openexchange.chronos.service.CalendarParameters;
+import com.openexchange.chronos.service.EntityResolver;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.exception.OXException;
 import com.openexchange.search.SearchTerm;
@@ -84,26 +85,27 @@ class StorageUpdater {
     private static final EventField[] SEARCH_FIELDS = { EventField.ID, EventField.SERIES_ID, EventField.RECURRENCE_ID, EventField.FOLDER_ID, EventField.CREATED_BY, EventField.MODIFIED_BY,
         EventField.CALENDAR_USER, EventField.ORGANIZER, EventField.ATTENDEES };
 
-    private final CalendarSession calendarSession;
     private final CalendarStorage storage;
     private final SimpleResultTracker tracker;
     private final int attendeeId;
     private final CalendarUser replacement;
     private final Date date;
+    private final EntityResolver entityResolver;
 
     /**
      * Initializes a new {@link StorageUpdater}.
      *
-     * @param calendarSession The calendar session
-     * @param storage The calendar storage
+     * @param storage The underlying calendar storage
+     * @param entityResolver The entity resolver to use
+     * @param dbProvider The database provider to use
      * @param attendeeId The identifier of the attendee
      * @param destinationUserId The identifier of the destination user
      */
-    public StorageUpdater(CalendarSession calendarSession, CalendarStorage storage, int attendeeId, int destinationUserId) throws OXException {
+    public StorageUpdater(CalendarStorage storage, EntityResolver entityResolver, int attendeeId, int destinationUserId) throws OXException {
         super();
-        this.calendarSession = calendarSession;
+        this.entityResolver = entityResolver;
         this.attendeeId = attendeeId;
-        this.replacement = calendarSession.getEntityResolver().prepareUserAttendee(destinationUserId);
+        this.replacement = entityResolver.prepareUserAttendee(destinationUserId);
         this.tracker = new SimpleResultTracker();
         this.date = new Date();
         this.storage = storage;
@@ -209,7 +211,7 @@ class StorageUpdater {
         }
         if (null != event.getOrganizer()) {
             if (CalendarUtils.matches(event.getOrganizer(), attendeeId)) {
-                eventUpdate.setOrganizer(calendarSession.getEntityResolver().applyEntityData(new Organizer(), replacement.getEntity()));
+                eventUpdate.setOrganizer(entityResolver.applyEntityData(new Organizer(), replacement.getEntity()));
                 updated = true;
             } else if (CalendarUtils.matches(event.getOrganizer().getSentBy(), attendeeId)) {
                 Organizer organizer = new Organizer(event.getOrganizer());
@@ -283,7 +285,7 @@ class StorageUpdater {
             updated = true;
         }
         if (CalendarUtils.matches(event.getOrganizer(), attendeeId)) {
-            eventUpdate.setOrganizer(calendarSession.getEntityResolver().applyEntityData(new Organizer(), replacement.getEntity()));
+            eventUpdate.setOrganizer(entityResolver.applyEntityData(new Organizer(), replacement.getEntity()));
             updated = true;
         }
         /*
@@ -335,10 +337,12 @@ class StorageUpdater {
     /**
      * Notifies the {@link CalendarHandler}s
      *
+     * @param session The admin session
      * @param calendarHandlers The handlers to notify
+     * @param parameters Additional calendar parameters, or <code>null</code> if not set
      */
-    void notifyCalendarHandlers(Set<CalendarHandler> handlers) throws OXException {
-        tracker.notifyCalenderHandlers(calendarSession, handlers);
+    void notifyCalendarHandlers(Session session, Set<CalendarHandler> handlers, CalendarParameters parameters) throws OXException {
+        tracker.notifyCalenderHandlers(session, entityResolver, handlers, parameters);
     }
 
     /**

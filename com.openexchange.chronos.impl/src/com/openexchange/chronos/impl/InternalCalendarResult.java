@@ -314,7 +314,7 @@ public class InternalCalendarResult {
      * @return The calendar event
      */
     public CalendarEvent getCalendarEvent() {
-        return new DefaultCalendarEvent(session, Utils.ACCOUNT_ID, calendarUserId, getAffectedFoldersPerUser(), creations, updates, deletions);
+        return new DefaultCalendarEvent(session, calendarUserId, getAffectedFoldersPerUser(), creations, updates, deletions);
     }
 
     /**
