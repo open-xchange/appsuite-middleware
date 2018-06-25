@@ -60,27 +60,23 @@ import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.User;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 import com.openexchange.admin.rmi.exceptions.UserExistsException;
-import com.openexchange.configuration.AJAXConfig;
 
 public class UserCopyTest extends AbstractRMITest {
 
     private Context srcCtx;
-
     private Context dstCtx;
 
-    private User admin;
-
-    @Override
-    public void setUp() throws Exception {
-        super.setUp();
-        AJAXConfig.init();
+    /**
+     * Initialises a new {@link UserCopyTest}.
+     */
+    public UserCopyTest() {
+        super();
     }
 
     @Before
     public final void setupContexts() throws Exception {
-        admin = newUser("oxadmin", "secret", "Admin User", "Admin", "User", "oxadmin@example.com");
-        srcCtx = TestTool.createContext(getContextManager(), "UserCopySourceCtx_", admin, "all", superAdminCredentials);
-        dstCtx = TestTool.createContext(getContextManager(), "UserCopyDestinationCtx_", admin, "all", superAdminCredentials);
+        srcCtx = TestTool.createContext(getContextManager(), "UserCopySourceCtx_", contextAdmin, "all", superAdminCredentials);
+        dstCtx = TestTool.createContext(getContextManager(), "UserCopyDestinationCtx_", contextAdmin, "all", superAdminCredentials);
     }
 
     @After
