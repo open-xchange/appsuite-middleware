@@ -75,12 +75,12 @@ public class UtilDatabaseTest extends AbstractRMITest {
         if (null == client_db) {
             throw new NullPointerException("Database object is null");
         }
-        client_db.setId(getDatabaseManager().registerDatabase(client_db, Boolean.FALSE, Integer.valueOf(0)).getId());
+        client_db.setId(getDatabaseManager().register(client_db, Boolean.FALSE, Integer.valueOf(0)).getId());
     }
 
     @Test
     public void testRegisterDatabase() throws Exception {
-        Database[] srv_dbs = getDatabaseManager().listDatabases("db_*");
+        Database[] srv_dbs = getDatabaseManager().search("db_*");
         boolean found_db = false;
         for (int a = 0; a < srv_dbs.length; a++) {
             Database tmp = srv_dbs[a];
@@ -106,7 +106,7 @@ public class UtilDatabaseTest extends AbstractRMITest {
 
     @Test
     public void testChangeDatabase() throws Exception {
-        Database[] srv_dbs = getDatabaseManager().listDatabases("db_*");
+        Database[] srv_dbs = getDatabaseManager().search("db_*");
         boolean found_db = false;
         for (int a = 0; a < srv_dbs.length; a++) {
             Database tmp = srv_dbs[a];
@@ -140,9 +140,9 @@ public class UtilDatabaseTest extends AbstractRMITest {
         client_db.setUrl(client_db.getUrl() + change_suffix);
 
         // change db data
-        getDatabaseManager().changeDatabase(client_db);
+        getDatabaseManager().change(client_db);
 
-        srv_dbs = getDatabaseManager().listDatabases("db_*");
+        srv_dbs = getDatabaseManager().search("db_*");
 
         for (int a = 0; a < srv_dbs.length; a++) {
             Database tmp = srv_dbs[a];
@@ -164,7 +164,7 @@ public class UtilDatabaseTest extends AbstractRMITest {
 
     @Test
     public void testUnregisterDatabase() throws Exception {
-        Database[] srv_dbs = getDatabaseManager().listDatabases("db_*");
+        Database[] srv_dbs = getDatabaseManager().search("db_*");
         boolean found_db = false;
         for (int a = 0; a < srv_dbs.length; a++) {
             Database tmp = srv_dbs[a];
@@ -187,9 +187,9 @@ public class UtilDatabaseTest extends AbstractRMITest {
         assertTrue("Expected to find registered db with data", found_db);
 
         // now unregister database
-        getDatabaseManager().unregisterDatabase(new Database(client_db.getId()));
+        getDatabaseManager().unregister(new Database(client_db.getId()));
 
-        srv_dbs = getDatabaseManager().listDatabases("db_*");
+        srv_dbs = getDatabaseManager().search("db_*");
         found_db = false;
         for (int a = 0; a < srv_dbs.length; a++) {
             Database tmp = srv_dbs[a];
@@ -207,7 +207,7 @@ public class UtilDatabaseTest extends AbstractRMITest {
 
     @Test
     public void testListDatabase() throws Exception {
-        Database[] srv_dbs = getDatabaseManager().listDatabases("db_*");
+        Database[] srv_dbs = getDatabaseManager().search("db_*");
         boolean found_db = false;
         for (int a = 0; a < srv_dbs.length; a++) {
             Database tmp = srv_dbs[a];

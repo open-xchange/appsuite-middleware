@@ -97,7 +97,7 @@ public class MaintenanceReasonManager extends AbstractManager {
      * @return The created {@link MaintenanceReason}
      * @throws Exception if an error is occurred
      */
-    public MaintenanceReason createMaintenanceReason(MaintenanceReason maintenanceReason) throws Exception {
+    public MaintenanceReason create(MaintenanceReason maintenanceReason) throws Exception {
         OXUtilInterface utilInterface = getUtilInterface();
         MaintenanceReason mr = utilInterface.createMaintenanceReason(maintenanceReason, getMasterCredentials());
         managedObjects.put(mr.getId(), mr);
@@ -110,12 +110,18 @@ public class MaintenanceReasonManager extends AbstractManager {
      * @return An array with all maintenance reasons that match the specified pattern
      * @throws Exception if an error is occurred
      */
-    public MaintenanceReason[] listMaintenanceReasons(String pattern) throws Exception {
+    public MaintenanceReason[] search(String pattern) throws Exception {
         OXUtilInterface utilInterface = getUtilInterface();
         return utilInterface.listMaintenanceReason(pattern, getMasterCredentials());
     }
 
-    public void deleteMaintenanceReason(MaintenanceReason maintenanceReason) throws Exception {
+    /**
+     * Deletes the specified {@link MaintenanceReason}
+     * 
+     * @param maintenanceReason The {@link MaintenanceReason} to delete
+     * @throws Exception if an error is occurred
+     */
+    public void delete(MaintenanceReason maintenanceReason) throws Exception {
         OXUtilInterface utilInterface = getUtilInterface();
         utilInterface.deleteMaintenanceReason(new MaintenanceReason[] { maintenanceReason }, getMasterCredentials());
     }
@@ -134,7 +140,7 @@ public class MaintenanceReasonManager extends AbstractManager {
 
         MaintenanceReason mr = (MaintenanceReason) object;
         try {
-            deleteMaintenanceReason(mr);
+            delete(mr);
             return true;
         } catch (Exception e) {
             LOG.error("The maintenance reason '{}' could not be deleted!", mr.getId(), e);

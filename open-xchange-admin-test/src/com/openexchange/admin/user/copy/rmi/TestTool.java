@@ -75,7 +75,7 @@ public class TestTool {
                 if (filestoreId > 0) {
                     newContext.setFilestoreId(filestoreId);
                 }
-                ctx = ci.createContext(newContext, admin, accessCombinationName);
+                ctx = ci.create(newContext, admin, accessCombinationName);
                 created = true;
             } catch (ContextExistsException e) {
                 ctxId = getRandomContextId();

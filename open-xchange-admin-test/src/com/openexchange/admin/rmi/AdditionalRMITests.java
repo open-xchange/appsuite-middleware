@@ -100,7 +100,7 @@ public class AdditionalRMITests extends AbstractRMITest {
         user.setImapLogin("oxuser");
         user.setSmtpServer("example.com");
 
-        user = getUserManager().createUser(context, user, adminCredentials);
+        user = getUserManager().create(context, user, adminCredentials);
     }
 
     /**
@@ -153,7 +153,7 @@ public class AdditionalRMITests extends AbstractRMITest {
     @Test
     public void testGetAllUsers() throws Exception {
         final Credentials credentials = adminCredentials;
-        User[] allUsers = getUserManager().listAllUsers(context, credentials);// required line for test
+        User[] allUsers = getUserManager().listAll(context, credentials);// required line for test
         User[] queriedUsers = getUserManager().getData(context, allUsers, credentials);// required line for test
         assertIDsAreEqual(allUsers, queriedUsers);
     }
@@ -170,7 +170,7 @@ public class AdditionalRMITests extends AbstractRMITest {
         User[] returnedUsers = getUserManager().getData(updatedContext, new User[] { myUser }, adminCredentials);
         assertEquals(Integer.valueOf(1), Integer.valueOf(returnedUsers.length));
         User myUpdatedUser = returnedUsers[0];
-        Group[] allGroups = getGroupManager().listAllGroups(context, adminCredentials);
+        Group[] allGroups = getGroupManager().listAll(context, adminCredentials);
 
         assertTrue("User's ID group should be found in a group", any(allGroups, myUpdatedUser.getId(), new Verifier<Group, Integer>() {
 
@@ -188,10 +188,10 @@ public class AdditionalRMITests extends AbstractRMITest {
     public void testGetOxResources() throws Exception {
         Resource res = getTestResource();
 
-        testResource = getResourceManager().createResource(res, context, adminCredentials);
+        testResource = getResourceManager().create(res, context, adminCredentials);
 
         try {
-            List<Resource> allResources = Arrays.asList(getResourceManager().listAllResources(context, adminCredentials));
+            List<Resource> allResources = Arrays.asList(getResourceManager().listAll(context, adminCredentials));
             assertTrue("Should contain our trusty test resource", any(allResources, res, new Verifier<Resource, Resource>() {
 
                 @Override
@@ -201,7 +201,7 @@ public class AdditionalRMITests extends AbstractRMITest {
             }));
         } finally {
             try {
-                getResourceManager().deleteResource(testResource, context, adminCredentials);
+                getResourceManager().delete(testResource, context, adminCredentials);
             } catch (NoSuchResourceException e) {
                 // don't do anything, has been removed already, right?
                 System.out.println("Resource was removed already");
@@ -219,7 +219,7 @@ public class AdditionalRMITests extends AbstractRMITest {
 
         User newAdmin = newUser("new_admin", "secret", "New Admin", "New", "Admin", "newadmin@ox.invalid");
         try {
-            newContext = getContextManager().createContext(newContext, newAdmin);// required line for test
+            newContext = getContextManager().create(newContext, newAdmin);// required line for test
             Credentials newAdminCredentials = new Credentials();
             newAdmin.setId(Integer.valueOf(2));// has to be hardcoded, because it cannot be looked up easily.
             newAdminCredentials.setLogin(newAdmin.getName());
@@ -227,7 +227,7 @@ public class AdditionalRMITests extends AbstractRMITest {
             assertUserWasCreatedProperly(newAdmin, newContext, newAdminCredentials);
         } finally {
             // no need to delete the admin account. Actually, it is not possible at all.
-            getContextManager().deleteContext(newContext);
+            getContextManager().delete(newContext);
         }
     }
 
@@ -238,12 +238,12 @@ public class AdditionalRMITests extends AbstractRMITest {
 
         boolean userCreated = false;
         try {
-            myNewUser = getUserManager().createUser(context, myNewUser, access, adminCredentials);// required line for test
+            myNewUser = getUserManager().create(context, myNewUser, access, adminCredentials);// required line for test
             userCreated = true;
             assertUserWasCreatedProperly(myNewUser, context, adminCredentials);
         } finally {
             if (userCreated) {
-                getUserManager().deleteUser(context, myNewUser, adminCredentials);
+                getUserManager().delete(context, myNewUser, adminCredentials);
             }
         }
     }
@@ -256,12 +256,12 @@ public class AdditionalRMITests extends AbstractRMITest {
         boolean groupCreated = false;
         Group group = newGroup("groupdisplayname", "groupname");
         try {
-            group = getGroupManager().createGroup(group, context, adminCredentials);// required line for test
+            group = getGroupManager().create(group, context, adminCredentials);// required line for test
             groupCreated = true;
             assertGroupWasCreatedProperly(group, context, adminCredentials);
         } finally {
             if (groupCreated) {
-                getGroupManager().deleteGroup(group, context, adminCredentials);
+                getGroupManager().delete(group, context, adminCredentials);
             }
         }
     }
@@ -271,12 +271,12 @@ public class AdditionalRMITests extends AbstractRMITest {
         boolean resourceCreated = false;
         Resource res = newResource("resourceName", "resourceDisplayname", "resource@email.invalid");
         try {
-            res = getResourceManager().createResource(res, context, adminCredentials);// required line for test
+            res = getResourceManager().create(res, context, adminCredentials);// required line for test
             resourceCreated = true;
             assertResourceWasCreatedProperly(res, context, adminCredentials);
         } finally {
             if (resourceCreated) {
-                getResourceManager().deleteResource(res, context, adminCredentials);
+                getResourceManager().delete(res, context, adminCredentials);
             }
         }
     }
@@ -292,7 +292,7 @@ public class AdditionalRMITests extends AbstractRMITest {
         changesToAdmin.setAssistant_name(newAssistantName);
         assertFalse("Precondition: Old assistant name should differ from new assistant name", newAssistantName.equals(originalValue));
         try {
-            getUserManager().changeUser(context, changesToAdmin, adminCredentials);// required line for test
+            getUserManager().change(context, changesToAdmin, adminCredentials);// required line for test
             valueChanged = true;
             contextAdmin = getUserManager().getData(context, contextAdmin, adminCredentials);
             ;// refresh data
@@ -300,7 +300,7 @@ public class AdditionalRMITests extends AbstractRMITest {
         } finally {
             if (valueChanged) {
                 changesToAdmin.setAssistant_name(originalValue);
-                getUserManager().changeUser(context, changesToAdmin, adminCredentials);
+                getUserManager().change(context, changesToAdmin, adminCredentials);
             }
         }
     }
@@ -310,18 +310,18 @@ public class AdditionalRMITests extends AbstractRMITest {
         boolean groupCreated = false;
         Group group = newGroup("groupdisplayname", "groupname");
         try {
-            group = getGroupManager().createGroup(group, context, adminCredentials);
+            group = getGroupManager().create(group, context, adminCredentials);
             groupCreated = true;
             Group groupChange = new Group();
             groupChange.setId(group.getId());
             groupChange.setName("changed groupname");
-            getGroupManager().changeGroup(groupChange, context, adminCredentials);// required line for test
+            getGroupManager().change(groupChange, context, adminCredentials);// required line for test
             group = getGroupManager().getData(group, context, adminCredentials);// update
 
             assertEquals("Name should have been changed", group.getName(), groupChange.getName());
         } finally {
             if (groupCreated) {
-                getGroupManager().deleteGroup(group, context, adminCredentials);
+                getGroupManager().delete(group, context, adminCredentials);
             }
         }
     }
@@ -331,17 +331,17 @@ public class AdditionalRMITests extends AbstractRMITest {
         boolean resourceCreated = false;
         Resource res = newResource("resourceName", "resourceDisplayname", "resource@email.invalid");
         try {
-            res = getResourceManager().createResource(res, context, adminCredentials);
+            res = getResourceManager().create(res, context, adminCredentials);
             resourceCreated = true;
             Resource resChange = new Resource();
             resChange.setId(res.getId());
             resChange.setDisplayname("changed display name");
-            getResourceManager().changeResource(resChange, context, adminCredentials);// required line for test
+            getResourceManager().change(resChange, context, adminCredentials);// required line for test
             res = getResourceManager().getData(res, context, adminCredentials);// update
             assertEquals("Display name should have changed", resChange.getDisplayname(), res.getDisplayname());
         } finally {
             if (resourceCreated) {
-                getResourceManager().deleteResource(res, context, adminCredentials);
+                getResourceManager().delete(res, context, adminCredentials);
             }
         }
     }
@@ -351,10 +351,10 @@ public class AdditionalRMITests extends AbstractRMITest {
         boolean resourceDeleted = false;
         Resource res = newResource("resourceName", "resourceDisplayname", "resource@email.invalid");
         try {
-            res = getResourceManager().createResource(res, context, adminCredentials);
+            res = getResourceManager().create(res, context, adminCredentials);
 
             Assert.assertNotNull("Resource id cannot be null", res.getId());
-            getResourceManager().deleteResource(res, context, adminCredentials);
+            getResourceManager().delete(res, context, adminCredentials);
             resourceDeleted = true;
         } catch (Exception exception) {
             Assert.assertTrue("Resource could not be deleted!", resourceDeleted);
@@ -381,7 +381,7 @@ public class AdditionalRMITests extends AbstractRMITest {
         Context contextTmp = getContextManager().getData(context);
         Long updatedMaxQuota = new Long(1024);
         contextTmp.setMaxQuota(updatedMaxQuota);
-        getContextManager().changeContext(contextTmp);
+        getContextManager().change(contextTmp);
         Context newContext = getContextManager().getData(context);
         assertEquals("MaxCollapQuota should have the new value", newContext.getMaxQuota(), updatedMaxQuota);
     }
@@ -431,17 +431,17 @@ public class AdditionalRMITests extends AbstractRMITest {
         Context newContext = newContext("newContext", 666);
         User newAdmin = newUser("oxadmin", "secret", "New Admin", "New", "Admin", "newadmin@ox.invalid");
         try {
-            newContext = getContextManager().createContext(newContext, newAdmin);
+            newContext = getContextManager().create(newContext, newAdmin);
             contextCreated = true;
             try {
-                getContextManager().createContext(newContext, newAdmin);
+                getContextManager().create(newContext, newAdmin);
                 fail("Should throw ContextExistsException");
             } catch (ContextExistsException e) {
                 assertTrue("Caught exception", true);
             }
         } finally {
             if (contextCreated) {
-                getContextManager().deleteContext(newContext);
+                getContextManager().delete(newContext);
             }
         }
     }
@@ -450,7 +450,7 @@ public class AdditionalRMITests extends AbstractRMITest {
     public void testNoSuchContextException() throws Exception {
         Context missingContext = newContext("missing", Integer.MAX_VALUE);
         try {
-            getContextManager().deleteContext(missingContext);
+            getContextManager().delete(missingContext);
             fail("Expected NoSuchContextException");
         } catch (NoSuchContextException e) {
             assertTrue("Caught exception", true);
@@ -462,7 +462,7 @@ public class AdditionalRMITests extends AbstractRMITest {
         Group missingGroup = new Group();
         missingGroup.setId(Integer.valueOf(Integer.MAX_VALUE));
         try {
-            getGroupManager().deleteGroup(missingGroup, context, adminCredentials);
+            getGroupManager().delete(missingGroup, context, adminCredentials);
             fail("Expected NoSuchGroupException");
         } catch (NoSuchGroupException e) {
             assertTrue("Caught exception", true);
@@ -474,7 +474,7 @@ public class AdditionalRMITests extends AbstractRMITest {
         Resource missingResource = new Resource();
         missingResource.setId(Integer.valueOf(Integer.MAX_VALUE));
         try {
-            getResourceManager().deleteResource(missingResource, context, adminCredentials);
+            getResourceManager().delete(missingResource, context, adminCredentials);
             fail("Expected NoSuchResourceException");
         } catch (NoSuchResourceException e) {
             assertTrue("Caught exception", true);
@@ -486,7 +486,7 @@ public class AdditionalRMITests extends AbstractRMITest {
         User missingUser = new User();
         missingUser.setId(Integer.valueOf(Integer.MAX_VALUE));
         try {
-            getUserManager().deleteUser(context, missingUser, adminCredentials);
+            getUserManager().delete(context, missingUser, adminCredentials);
             fail("Expected NoSuchUserException");
         } catch (NoSuchUserException e) {
             assertTrue("Caught exception", true);

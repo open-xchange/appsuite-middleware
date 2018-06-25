@@ -267,7 +267,7 @@ public class OXResellerInterfaceTest extends OXResellerAbstractTest {
                 // cannot occur on a newly created context
                 e.printStackTrace();
             }
-            final Context ctx = getContextManager().createContext(ctx1, oxadmin, creds);
+            final Context ctx = getContextManager().create(ctx1, oxadmin, creds);
             restrictionContexts.push(ctx);
         }
 

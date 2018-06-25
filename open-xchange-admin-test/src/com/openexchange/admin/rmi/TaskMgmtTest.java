@@ -90,14 +90,14 @@ public class TaskMgmtTest extends AbstractRMITest {
         if (null == client_db) {
             throw new NullPointerException("Database object is null");
         }
-        client_db.setId(getDatabaseManager().registerDatabase(client_db, Boolean.FALSE, Integer.valueOf(0)).getId());
+        client_db.setId(getDatabaseManager().register(client_db, Boolean.FALSE, Integer.valueOf(0)).getId());
     }
 
     @After
     public final void tearDownContexts() throws Exception {
         getContextManager().cleanUp();
         if (client_db != null) {
-            getDatabaseManager().unregisterDatabase(new Database(client_db.getId()));
+            getDatabaseManager().unregister(new Database(client_db.getId()));
         }
         db_name = null;
         client_db = null;

@@ -185,7 +185,7 @@ public class UserCopyTest extends AbstractRMITest {
         user.setImapServer("example.com");
         user.setImapLogin("oxuser");
         user.setSmtpServer("example.com");
-        getUserManager().createUser(ctx, user, adminCredentials);
+        getUserManager().create(ctx, user, adminCredentials);
         return user;
     }
 }

@@ -152,7 +152,7 @@ abstract class OXResellerAbstractTest extends AbstractRMITest {
         Context ctx = new Context();
         ctx.setMaxQuota(100000L);
 
-        Context create = getContextManager().createContext(ctx, oxadmin, auth);
+        Context create = getContextManager().create(ctx, oxadmin, auth);
         try {
             // wait to ensure the context is available for further operations
             // FIXME when master-slave setup for configdb is available remove the line below
@@ -167,7 +167,7 @@ abstract class OXResellerAbstractTest extends AbstractRMITest {
         User oxadmin = ContextAdmin();
         Context ctx = new Context();
 
-        Context create = getContextManager().createContext(ctx, oxadmin, auth);
+        Context create = getContextManager().create(ctx, oxadmin, auth);
         try {
             // wait to ensure the context is available for further operations
             // FIXME when master-slave setup for configdb is available remove the line below
@@ -194,9 +194,9 @@ abstract class OXResellerAbstractTest extends AbstractRMITest {
         oxuser.setEmail1("oxuser" + random + "@example.com");
         oxuser.setPassword("secret");
         if (access == null) {
-            return getUserManager().createUser(ctx, oxuser, auth);
+            return getUserManager().create(ctx, oxuser, auth);
         }
-        return getUserManager().createUser(ctx, oxuser, access, auth);
+        return getUserManager().create(ctx, oxuser, access, auth);
     }
 
     protected static void deleteContext(final Context ctx, final Credentials auth) throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, DatabaseUpdateException, InvalidDataException, MalformedURLException, NotBoundException {

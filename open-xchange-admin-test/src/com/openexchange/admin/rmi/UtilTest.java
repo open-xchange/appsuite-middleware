@@ -83,14 +83,14 @@ public class UtilTest extends AbstractRMITest {
             MaintenanceReason mr = new MaintenanceReason();
             mr.setText("testcase-get-all-reasons-" + a + "-" + System.currentTimeMillis());
             // add reason to system
-            int[] srv_id = { getMaintenanceReasonManager().createMaintenanceReason(mr).getId().intValue() };
+            int[] srv_id = { getMaintenanceReasonManager().create(mr).getId().intValue() };
             mr.setId(srv_id[0]);
             c_reasons.add(mr);
         }
 
         // now fetch all reasons, and look if my added reasons are within this data set
         int resp = 0;
-        MaintenanceReason[] srv_reasons = getMaintenanceReasonManager().listMaintenanceReasons("*");
+        MaintenanceReason[] srv_reasons = getMaintenanceReasonManager().search("*");
         for (int c = 0; c < c_reasons.size(); c++) {
 
             MaintenanceReason tmp = c_reasons.get(c);
@@ -114,9 +114,9 @@ public class UtilTest extends AbstractRMITest {
     public void testRegisterServer() throws Exception {
         Server reg_srv = new Server();
         reg_srv.setName("testcase-register-server-" + System.currentTimeMillis());
-        reg_srv.setId(getServerManager().registerServer(reg_srv).getId());
+        reg_srv.setId(getServerManager().register(reg_srv).getId());
 
-        Server[] srv_resp = getServerManager().listServers("testcase-register-server-*");
+        Server[] srv_resp = getServerManager().search("testcase-register-server-*");
         int resp = 0;
         for (Server server : srv_resp) {
             if (server.getName().equals(reg_srv.getName()) && server.getId().intValue() == reg_srv.getId().intValue()) {
@@ -134,9 +134,9 @@ public class UtilTest extends AbstractRMITest {
         Server reg_srv = new Server();
         reg_srv.setName("testcase-register-server-" + System.currentTimeMillis());
 
-        reg_srv.setId(getServerManager().registerServer(reg_srv).getId());
+        reg_srv.setId(getServerManager().register(reg_srv).getId());
 
-        Server[] srv_resp = getServerManager().listServers("testcase-register-server-*");
+        Server[] srv_resp = getServerManager().search("testcase-register-server-*");
         int resp = 0;
         for (int a = 0; a < srv_resp.length; a++) {
             if (srv_resp[a].getName().equals(reg_srv.getName()) && srv_resp[a].getId().intValue() == reg_srv.getId().intValue()) {
@@ -150,9 +150,9 @@ public class UtilTest extends AbstractRMITest {
         sv.setId(reg_srv.getId());
 
         // here the server was added correctly to the server, now delete it
-        getServerManager().unregisterServer(sv);
+        getServerManager().unregister(sv);
 
-        srv_resp = getServerManager().listServers("testcase-register-server-*");
+        srv_resp = getServerManager().search("testcase-register-server-*");
         resp = 0;
         for (int a = 0; a < srv_resp.length; a++) {
             if (srv_resp[a].getName().equals(reg_srv.getName()) && srv_resp[a].getId().intValue() == reg_srv.getId().intValue()) {
@@ -169,9 +169,9 @@ public class UtilTest extends AbstractRMITest {
     public void testListServer() throws Exception {
         Server client_srv = new Server();
         client_srv.setName("testcase-search-server-" + System.currentTimeMillis());
-        client_srv.setId(getServerManager().registerServer(client_srv).getId());
+        client_srv.setId(getServerManager().register(client_srv).getId());
 
-        Server[] srv_response = getServerManager().listServers("testcase-search-server-*");
+        Server[] srv_response = getServerManager().search("testcase-search-server-*");
         boolean found_srv = false;
         for (int a = 0; a < srv_response.length; a++) {
             Server tmp = srv_response[a];

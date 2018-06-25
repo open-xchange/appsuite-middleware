@@ -119,7 +119,7 @@ public class ContextManager extends AbstractManager {
 
         Context ctx = (Context) object;
         try {
-            deleteContext(ctx);
+            delete(ctx);
             return true;
         } catch (Exception e) {
             LOG.error("The context '{}' could not be deleted!", ctx.getId(), e);
@@ -134,8 +134,8 @@ public class ContextManager extends AbstractManager {
      * @return The newly created {@link Context}
      * @throws Exception
      */
-    public Context createContext(Credentials contextAdminCredentials) throws Exception {
-        return createContext(contextAdminCredentials, DEFAULT_MAX_QUOTA);
+    public Context create(Credentials contextAdminCredentials) throws Exception {
+        return create(contextAdminCredentials, DEFAULT_MAX_QUOTA);
     }
 
     /**
@@ -145,8 +145,8 @@ public class ContextManager extends AbstractManager {
      * @return The newly created {@link Context}
      * @throws Exception if the context cannot be created or any other error is occurred
      */
-    public Context createContext(Credentials contextAdminCredentials, long maxQuota) throws Exception {
-        return createContext(getNextFreeContextId(), maxQuota, contextAdminCredentials);
+    public Context create(Credentials contextAdminCredentials, long maxQuota) throws Exception {
+        return create(getNextFreeContextId(), maxQuota, contextAdminCredentials);
     }
 
     /**
@@ -157,8 +157,8 @@ public class ContextManager extends AbstractManager {
      * @return The created context
      * @throws Exception if the context cannot be created or any other error is occurred
      */
-    public Context createContext(int contextId, long maxQuota, Credentials contextAdminCredentials) throws Exception {
-        return createContext(ContextFactory.createContext(contextId, maxQuota), contextAdminCredentials);
+    public Context create(int contextId, long maxQuota, Credentials contextAdminCredentials) throws Exception {
+        return create(ContextFactory.createContext(contextId, maxQuota), contextAdminCredentials);
     }
 
     /**
@@ -169,8 +169,8 @@ public class ContextManager extends AbstractManager {
      * @return The created context
      * @throws Exception if the context cannot be created or any other error is occurred
      */
-    public Context createContext(Context context, Credentials contextAdminCredentials) throws Exception {
-        return createContext(context, UserFactory.createUser(contextAdminCredentials.getLogin(), contextAdminCredentials.getPassword(), "example.org", context));
+    public Context create(Context context, Credentials contextAdminCredentials) throws Exception {
+        return create(context, UserFactory.createUser(contextAdminCredentials.getLogin(), contextAdminCredentials.getPassword(), "example.org", context));
     }
 
     /**
@@ -181,7 +181,7 @@ public class ContextManager extends AbstractManager {
      * @return The newly created context
      * @throws Exception if an error is occurred
      */
-    public Context createContext(Context context, User contextAdmin) throws Exception {
+    public Context create(Context context, User contextAdmin) throws Exception {
         prerequisites();
         if (context.getId() == null || context.getId().intValue() <= 0) {
             context.setId(new Integer(getNextFreeContextId()));
@@ -202,7 +202,7 @@ public class ContextManager extends AbstractManager {
      * @return The newly created context
      * @throws Exception if an error is occurred
      */
-    public Context createContext(Context context, User contextAdmin, Credentials authCredentials) throws Exception {
+    public Context create(Context context, User contextAdmin, Credentials authCredentials) throws Exception {
         prerequisites();
         if (context.getId() == null || context.getId().intValue() <= 0) {
             context.setId(new Integer(getNextFreeContextId()));
@@ -222,7 +222,7 @@ public class ContextManager extends AbstractManager {
      * @return The newly created context
      * @throws Exception if an error is occurred
      */
-    public Context createContext(Context context, User contextAdmin, String combinationName) throws Exception {
+    public Context create(Context context, User contextAdmin, String combinationName) throws Exception {
         prerequisites();
         if (context.getId() == null || context.getId().intValue() <= 0) {
             context.setId(new Integer(getNextFreeContextId()));
@@ -252,8 +252,8 @@ public class ContextManager extends AbstractManager {
      * @param context The {@link Context} to change
      * @throws Exception if an error is occurred
      */
-    public void changeContext(Context context) throws Exception {
-        changeContext(context, getMasterCredentials());
+    public void change(Context context) throws Exception {
+        change(context, getMasterCredentials());
     }
 
     /**
@@ -263,7 +263,7 @@ public class ContextManager extends AbstractManager {
      * @param credentials The credentials to authenicate against the server
      * @throws Exception if an error is occurred
      */
-    public void changeContext(Context context, Credentials authCredentials) throws Exception {
+    public void change(Context context, Credentials authCredentials) throws Exception {
         OXContextInterface contextInterface = getContextInterface();
         contextInterface.change(context, authCredentials);
     }
@@ -299,7 +299,7 @@ public class ContextManager extends AbstractManager {
      * @return An array with the results
      * @throws Exception if an error is occurred
      */
-    public Context[] searchContext(String pattern) throws Exception {
+    public Context[] search(String pattern) throws Exception {
         OXContextInterface xres = getContextInterface();
         return xres.list(pattern, getMasterCredentials());
     }
@@ -311,7 +311,7 @@ public class ContextManager extends AbstractManager {
      * @return An array with the results
      * @throws Exception if an error is occurred
      */
-    public Context[] searchContext(Database database) throws Exception {
+    public Context[] search(Database database) throws Exception {
         OXContextInterface xres = getContextInterface();
         return xres.listByDatabase(database, getMasterCredentials());
     }
@@ -323,7 +323,7 @@ public class ContextManager extends AbstractManager {
      * @return An array with the results
      * @throws Exception if an error is occurred
      */
-    public Context[] searchContext(Filestore filestore) throws Exception {
+    public Context[] search(Filestore filestore) throws Exception {
         OXContextInterface xres = getContextInterface();
         return xres.listByFilestore(filestore, getMasterCredentials());
     }
@@ -335,7 +335,7 @@ public class ContextManager extends AbstractManager {
      * @return An array with all contexts
      * @throws Exception if an error is occurred
      */
-    public Context[] listAllContexts(Credentials authCredentials) throws Exception {
+    public Context[] listAll(Credentials authCredentials) throws Exception {
         OXContextInterface xres = getContextInterface();
         return xres.listAll(authCredentials);
     }
@@ -347,7 +347,7 @@ public class ContextManager extends AbstractManager {
      * @param getMasterCredentials() The master {@link Credentials}
      * @throws Exception if the context cannot be deleted or any other error occurs
      */
-    public void deleteContext(Context ctx) throws Exception {
+    public void delete(Context ctx) throws Exception {
         OXContextInterface contextInterface = getContextInterface();
         contextInterface.delete(ctx, getMasterCredentials());
     }
@@ -358,7 +358,7 @@ public class ContextManager extends AbstractManager {
      * @param context The {@link Context} to enable
      * @throws Exception if an error is occurred
      */
-    public void enableContext(Context context) throws Exception {
+    public void enable(Context context) throws Exception {
         OXContextInterface contextInterface = getContextInterface();
         contextInterface.enable(context, getMasterCredentials());
     }
@@ -369,7 +369,7 @@ public class ContextManager extends AbstractManager {
      * @param context The {@link Context} to disable
      * @throws Exception if an error is occurred
      */
-    public void disableContext(Context context) throws Exception {
+    public void disable(Context context) throws Exception {
         OXContextInterface contextInterface = getContextInterface();
         contextInterface.disable(context, getMasterCredentials());
     }
@@ -408,7 +408,7 @@ public class ContextManager extends AbstractManager {
         int pos = 5;
         int ret = -1;
         while (ret == -1) {
-            ret = searchContext(String.valueOf(pos)).length == 0 ? pos : -1;
+            ret = search(String.valueOf(pos)).length == 0 ? pos : -1;
             pos = pos + 3;
         }
         return ret;
@@ -456,13 +456,13 @@ public class ContextManager extends AbstractManager {
      * @throws Exception if an error is occurred during registration
      */
     private void registerServer() throws Exception {
-        if (serverManager.listServers("local").length == 1) {
+        if (serverManager.search("local").length == 1) {
             return;
         }
 
         Server server = new Server();
         server.setName("local");
-        serverManager.registerServer(server);
+        serverManager.register(server);
     }
 
     /**
@@ -471,11 +471,11 @@ public class ContextManager extends AbstractManager {
      * @throws Exception if an error is occurred during registration
      */
     private void registerDatabase() throws Exception {
-        if (databaseManager.listDatabases("test-ox-db").length != 0) {
+        if (databaseManager.search("test-ox-db").length != 0) {
             return;
         }
         Database database = UtilTest.getTestDatabaseObject("localhost", "test-ox-db");
-        databaseManager.registerDatabase(database, Boolean.FALSE, Integer.valueOf(0));
+        databaseManager.register(database, Boolean.FALSE, Integer.valueOf(0));
     }
 
     /**

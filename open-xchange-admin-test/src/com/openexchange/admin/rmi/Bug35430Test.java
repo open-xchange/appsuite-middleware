@@ -85,12 +85,12 @@ public final class Bug35430Test extends AbstractRMITest {
 
     @Test
     public void test() throws Throwable {
-        Context[] contexts = getContextManager().searchContext("bug35430context.com");
+        Context[] contexts = getContextManager().search("bug35430context.com");
         assertEquals(1, contexts.length);
         assertEquals(new Integer(314159265), contexts[0].getId());
         assertEquals("bug35430context.com", contexts[0].getName());
 
-        contexts = getContextManager().searchContext("00314159265.pi");
+        contexts = getContextManager().search("00314159265.pi");
         assertEquals(0, contexts.length);
     }
 
@@ -99,17 +99,17 @@ public final class Bug35430Test extends AbstractRMITest {
         User newAdmin = newUser("oxadmin", "secret", "New Admin", "New", "Admin", "newadmin@ox.invalid");
         boolean created = false;
         try {
-            newContext = getContextManager().createContext(newContext, newAdmin);
+            newContext = getContextManager().create(newContext, newAdmin);
             created = true;
             try {
-                getContextManager().createContext(newContext, newAdmin);
+                getContextManager().create(newContext, newAdmin);
                 fail("Should throw ContextExistsException");
             } catch (ContextExistsException e) {
                 assertTrue("Caught exception", true);
             }
         } catch (Exception e) {
             if (!created) {
-                Context[] ctxs = getContextManager().searchContext(name);
+                Context[] ctxs = getContextManager().search(name);
                 if (ctxs.length > 0) {
                     newContext = ctxs[0];
                 }

@@ -99,7 +99,7 @@ public class GroupManager extends AbstractManager {
      * @return The newly created {@link Group}
      * @throws Exception if an error is occurred
      */
-    public Group createGroup(Group group, Context context, Credentials contextAdminCredentials) throws Exception {
+    public Group create(Group group, Context context, Credentials contextAdminCredentials) throws Exception {
         OXGroupInterface groupInterface = getGroupInterface();
         return groupInterface.create(context, group, contextAdminCredentials);
     }
@@ -128,7 +128,7 @@ public class GroupManager extends AbstractManager {
      * @return An array with all found {@link Group}s
      * @throws Exception if an error is occurred
      */
-    public Group[] listGroups(Context context, String searchPattern, Credentials contextAdminCredentials) throws Exception {
+    public Group[] search(Context context, String searchPattern, Credentials contextAdminCredentials) throws Exception {
         OXGroupInterface groupInterface = getGroupInterface();
         return groupInterface.list(context, searchPattern, contextAdminCredentials);
     }
@@ -141,7 +141,7 @@ public class GroupManager extends AbstractManager {
      * @return An array with all found {@link Group}s
      * @throws Exception if an error is occurred
      */
-    public Group[] listAllGroups(Context context, Credentials contextAdminCredentials) throws Exception {
+    public Group[] listAll(Context context, Credentials contextAdminCredentials) throws Exception {
         OXGroupInterface groupInterface = getGroupInterface();
         return groupInterface.listAll(context, contextAdminCredentials);
     }
@@ -154,7 +154,7 @@ public class GroupManager extends AbstractManager {
      * @param contextAdminCredentials The context admin {@link Credentials}
      * @throws Exception if an error is occurred
      */
-    public void changeGroup(Group Group, Context context, Credentials contextAdminCredentials) throws Exception {
+    public void change(Group Group, Context context, Credentials contextAdminCredentials) throws Exception {
         OXGroupInterface groupInterface = getGroupInterface();
         groupInterface.change(context, Group, contextAdminCredentials);
     }
@@ -225,7 +225,7 @@ public class GroupManager extends AbstractManager {
      * @param contextAdminCredentials The context's admin {@link Credentials}
      * @throws Exception if an error is occurred
      */
-    public void deleteGroup(Group Group, Context context, Credentials contextAdminCredentials) throws Exception {
+    public void delete(Group Group, Context context, Credentials contextAdminCredentials) throws Exception {
         OXGroupInterface groupInterface = getGroupInterface();
         groupInterface.delete(context, Group, contextAdminCredentials);
     }

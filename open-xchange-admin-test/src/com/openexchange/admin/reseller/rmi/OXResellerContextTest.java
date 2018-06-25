@@ -93,20 +93,20 @@ public class OXResellerContextTest extends OXResellerAbstractTest {
     @Test(expected = InvalidCredentialsException.class)
     public void testListAllContextInvalidAuthNoUser() throws Exception {
         ResellerAdmin second = RandomAdmin();
-        getContextManager().listAllContexts(ResellerRandomCredentials(second.getName()));
+        getContextManager().listAll(ResellerRandomCredentials(second.getName()));
     }
 
     @Test(expected = InvalidCredentialsException.class)
     public void testListAllContextInvalidAuthWrongpasswd() throws Exception {
         Credentials creds = ResellerRandomCredentials(randomAdmin.getName());
         creds.setPassword("wrongpass");
-        getContextManager().listAllContexts(creds);
+        getContextManager().listAll(creds);
     }
 
     @Test
     public void testListAllContextValidAuth() throws Exception {
         Credentials creds = ResellerRandomCredentials(randomAdmin.getName());
-        getContextManager().listAllContexts(creds);
+        getContextManager().listAll(creds);
     }
 
     @Test
@@ -200,10 +200,10 @@ public class OXResellerContextTest extends OXResellerAbstractTest {
         Credentials resellerRandomCredentials = ResellerRandomCredentials(randomAdmin.getName());
         ownedContext = createContext(resellerRandomCredentials);
         try {
-            Context[] ret = getContextManager().listAllContexts(resellerRandomCredentials);
+            Context[] ret = getContextManager().listAll(resellerRandomCredentials);
             assertEquals("listAll must return one entry", 1, ret.length);
 
-            ret = getContextManager().listAllContexts(ResellerRandomCredentials(second.getName()));
+            ret = getContextManager().listAll(ResellerRandomCredentials(second.getName()));
             assertEquals("listAll must return no entries", 0, ret.length);
         } finally {
             deleteContext(ownedContext, resellerRandomCredentials);

@@ -100,7 +100,7 @@ public class UserManager extends AbstractManager {
      * @return The newly created {@link User}
      * @throws Exception if an error is occurred
      */
-    public User createUser(Context context, User user, Credentials contextAdminCredentials) throws Exception {
+    public User create(Context context, User user, Credentials contextAdminCredentials) throws Exception {
         OXUserInterface userInterface = getUserInterface();
         return userInterface.create(context, user, contextAdminCredentials);
     }
@@ -115,7 +115,7 @@ public class UserManager extends AbstractManager {
      * @return The newly created {@link User}
      * @throws Exception if an error is occurred
      */
-    public User createUser(Context context, User user, UserModuleAccess userModuleAccess, Credentials contextAdminCredentials) throws Exception {
+    public User create(Context context, User user, UserModuleAccess userModuleAccess, Credentials contextAdminCredentials) throws Exception {
         OXUserInterface userInterface = getUserInterface();
         return userInterface.create(context, user, userModuleAccess, contextAdminCredentials);
     }
@@ -130,7 +130,7 @@ public class UserManager extends AbstractManager {
      * @return The newly created {@link User}
      * @throws Exception if an error is occurred
      */
-    public User createUser(Context context, User user, String combination, Credentials contextAdminCredentials) throws Exception {
+    public User create(Context context, User user, String combination, Credentials contextAdminCredentials) throws Exception {
         OXUserInterface userInterface = getUserInterface();
         return userInterface.create(context, user, combination, contextAdminCredentials);
     }
@@ -175,7 +175,7 @@ public class UserManager extends AbstractManager {
      * @return An array with all found {@link User}s
      * @throws Exception if an error is occurred
      */
-    public User[] listUsers(Context context, String searchPattern, Credentials contextAdminCredentials) throws Exception {
+    public User[] search(Context context, String searchPattern, Credentials contextAdminCredentials) throws Exception {
         OXUserInterface userInterface = getUserInterface();
         return userInterface.list(context, searchPattern, contextAdminCredentials);
     }
@@ -188,7 +188,7 @@ public class UserManager extends AbstractManager {
      * @return An array with all {@link User}s
      * @throws Exception if an error is occurred
      */
-    public User[] listAllUsers(Context context, Credentials contextAdminCredentials) throws Exception {
+    public User[] listAll(Context context, Credentials contextAdminCredentials) throws Exception {
         OXUserInterface userInterface = getUserInterface();
         return userInterface.listAll(context, contextAdminCredentials);
     }
@@ -202,7 +202,7 @@ public class UserManager extends AbstractManager {
      * 
      * @throws Exception if an error is occurred
      */
-    public void changeUser(Context context, User user, Credentials contextAdminCredentials) throws Exception {
+    public void change(Context context, User user, Credentials contextAdminCredentials) throws Exception {
         OXUserInterface userInterface = getUserInterface();
         userInterface.change(context, user, contextAdminCredentials);
     }
@@ -217,7 +217,7 @@ public class UserManager extends AbstractManager {
      * 
      * @throws Exception if an error is occurred
      */
-    public boolean existsUser(Context context, User user, Credentials contextAdminCredentials) throws Exception {
+    public boolean exists(Context context, User user, Credentials contextAdminCredentials) throws Exception {
         OXUserInterface userInterface = getUserInterface();
         return userInterface.exists(context, user, contextAdminCredentials);
     }
@@ -293,7 +293,7 @@ public class UserManager extends AbstractManager {
      * 
      * @throws Exception if an error is occurred
      */
-    public void deleteUser(Context context, User user, Credentials contextAdminCredentials) throws Exception {
+    public void delete(Context context, User user, Credentials contextAdminCredentials) throws Exception {
         OXUserInterface userInterface = getUserInterface();
         userInterface.delete(context, user, null, contextAdminCredentials);
     }
@@ -307,7 +307,7 @@ public class UserManager extends AbstractManager {
      * 
      * @throws Exception if an error is occurred
      */
-    public void deleteUser(Context context, User[] user, Credentials contextAdminCredentials) throws Exception {
+    public void delete(Context context, User[] user, Credentials contextAdminCredentials) throws Exception {
         OXUserInterface userInterface = getUserInterface();
         userInterface.delete(context, user, null, contextAdminCredentials);
     }

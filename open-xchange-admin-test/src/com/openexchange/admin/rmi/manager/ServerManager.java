@@ -98,7 +98,7 @@ public class ServerManager extends AbstractManager {
      * @return The registered server
      * @throws Exception if an error occurs during registration
      */
-    public Server registerServer(Server server) throws Exception {
+    public Server register(Server server) throws Exception {
         OXUtilInterface utilInterface = getUtilInterface();
         Server srv = utilInterface.registerServer(server, getMasterCredentials());
         managedObjects.put(server.getId(), srv);
@@ -111,7 +111,7 @@ public class ServerManager extends AbstractManager {
      * @param server The {@link Server} to unregister
      * @throws Exception if an error occurs
      */
-    public void unregisterServer(Server server) throws Exception {
+    public void unregister(Server server) throws Exception {
         OXUtilInterface utilInterface = getUtilInterface();
         utilInterface.unregisterServer(server, getMasterCredentials());
     }
@@ -123,7 +123,7 @@ public class ServerManager extends AbstractManager {
      * @return An array with all found {@link Server}s
      * @throws Exception if an error is occurred
      */
-    public Server[] listServers(String searchPattern) throws Exception {
+    public Server[] search(String searchPattern) throws Exception {
         OXUtilInterface utilInterface = getUtilInterface();
         return utilInterface.listServer(searchPattern, getMasterCredentials());
     }
@@ -141,7 +141,7 @@ public class ServerManager extends AbstractManager {
         }
         Server server = (Server) object;
         try {
-            unregisterServer(server);
+            unregister(server);
             return true;
         } catch (Exception e) {
             LOG.error("The server '{}' could not be unregistered!", server.getId(), e);

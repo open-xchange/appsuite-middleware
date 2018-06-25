@@ -105,11 +105,11 @@ public class MailAttachmentFolderTest extends AbstractRMITest {
         AJAXConfig.init();
 
         superAdminCredentials = superAdminCredentials;
-        Context[] contexts = getContextManager().searchContext("UserMove*");
+        Context[] contexts = getContextManager().search("UserMove*");
         for (Context ctx : contexts) {
             System.out.println("Deleting context " + ctx.getName() + " in schema " + ctx.getReadDatabase().getScheme());
             try {
-                getContextManager().deleteContext(ctx);
+                getContextManager().delete(ctx);
             } catch (Exception e) {
                 System.out.println("Error during context deletion.");
             }
@@ -123,13 +123,13 @@ public class MailAttachmentFolderTest extends AbstractRMITest {
         srcUser.setImapServer("example.com");
         srcUser.setImapLogin("oxuser");
         srcUser.setSmtpServer("example.com");
-        srcUser = getUserManager().createUser(srcCtx, srcUser, adminCredentials);
+        srcUser = getUserManager().create(srcCtx, srcUser, adminCredentials);
 
         User dummy = newUser("dummy", "secret", "Dummy User", "Dummy", "User", "oxuser2@example.com");
         dummy.setImapServer("example.com");
         dummy.setImapLogin("oxuser");
         dummy.setSmtpServer("example.com");
-        dummy = getUserManager().createUser(dstCtx, dummy, adminCredentials);
+        dummy = getUserManager().create(dstCtx, dummy, adminCredentials);
 
         AJAXSession dummySession = performLogin(dummy.getName() + '@' + dstCtx.getName(), "secret");
         AJAXClient dummyClient = new AJAXClient(dummySession, false);

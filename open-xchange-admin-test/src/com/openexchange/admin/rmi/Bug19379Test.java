@@ -81,7 +81,7 @@ public class Bug19379Test extends AbstractRMITest {
             c300 = new Context(I(300));
             // ALWAYS use contextID + mappings!
             c300.setLoginMappings(createMappings("m1", "m2", "m4"));
-            getContextManager().changeContext(c300);
+            getContextManager().change(c300);
 
             // check mappings
             c300 = getContextManager().getData(new Context(I(300)));
@@ -105,7 +105,7 @@ public class Bug19379Test extends AbstractRMITest {
             c300 = new Context(I(300));
             c300.setName("300_test333.it");
             c300.setLoginMappings(createMappings("m1"));
-            getContextManager().changeContext(c300);
+            getContextManager().change(c300);
 
             // check context name and mappings
             c300 = getContextManager().getData(new Context(I(300)));
@@ -135,7 +135,7 @@ public class Bug19379Test extends AbstractRMITest {
             // use same c500 contextName!
             c300.setLoginMappings(createMappings("300", "m1", "m2", "m3"));
             try {
-                getContextManager().changeContext(c300);
+                getContextManager().change(c300);
                 fail("A StorageException must be thrown!");
             } catch (final StorageException e) {
                 // Found the duplicate login mapping
@@ -180,13 +180,13 @@ public class Bug19379Test extends AbstractRMITest {
         admin.setEmail1(admin.getName());
         admin.setDisplay_name(admin.getGiven_name() + " " + admin.getSur_name());
 
-        return getContextManager().createContext(context, admin);
+        return getContextManager().create(context, admin);
     }
 
     private void deleteContext(final int contextID) throws Exception {
         Context context = new Context(I(contextID));
         try {
-            getContextManager().deleteContext(context);
+            getContextManager().delete(context);
         } catch (final NoSuchContextException e) {
             // Ignore
         }

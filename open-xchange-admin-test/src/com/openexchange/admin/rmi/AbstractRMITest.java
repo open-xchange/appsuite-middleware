@@ -363,13 +363,13 @@ public abstract class AbstractRMITest {
      * @throws Exception
      */
     public Resource createTestResource() throws Exception {
-        testResource = getResourceManager().createResource(getTestResource(), adminContext, adminCredentials);
+        testResource = getResourceManager().create(getTestResource(), adminContext, adminCredentials);
         return testResource;
     }
 
     public void removeTestResource() throws Exception {
         try {
-            getResourceManager().deleteResource(testResource, adminContext, adminCredentials);
+            getResourceManager().delete(testResource, adminContext, adminCredentials);
         } catch (NoSuchResourceException e) {
             // don't do anything, has been removed already, right?
             System.out.println("Resource was removed already");

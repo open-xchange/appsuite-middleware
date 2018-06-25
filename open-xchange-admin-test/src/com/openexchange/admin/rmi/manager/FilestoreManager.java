@@ -98,7 +98,7 @@ public class FilestoreManager extends AbstractManager {
      * @return The registered filestore
      * @throws Exception if an error occurs during registration
      */
-    public Filestore registerFilestore(Filestore filestore) throws Exception {
+    public Filestore register(Filestore filestore) throws Exception {
         OXUtilInterface utilInterface = getUtilInterface();
         Filestore fs = utilInterface.registerFilestore(filestore, getMasterCredentials());
         managedObjects.put(filestore.getId(), fs);
@@ -111,7 +111,7 @@ public class FilestoreManager extends AbstractManager {
      * @param filestore The {@link Filestore} to unregister
      * @throws Exception if an error occurs
      */
-    public void unregisterFilestore(Filestore filestore) throws Exception {
+    public void unregister(Filestore filestore) throws Exception {
         OXUtilInterface utilInterface = getUtilInterface();
         utilInterface.unregisterFilestore(filestore, getMasterCredentials());
     }
@@ -123,7 +123,7 @@ public class FilestoreManager extends AbstractManager {
      * @return An array with all found {@link Filestore}s
      * @throws Exception if an error is occurred
      */
-    public Filestore[] listFilestores(String searchPattern) throws Exception {
+    public Filestore[] search(String searchPattern) throws Exception {
         OXUtilInterface utilInterface = getUtilInterface();
         return utilInterface.listFilestore(searchPattern, getMasterCredentials());
     }
@@ -135,7 +135,7 @@ public class FilestoreManager extends AbstractManager {
      * @return An array with all found {@link Filestore}s
      * @throws Exception if an error is occurred
      */
-    public Filestore[] listFilestores(String searchPattern, boolean omitUsage) throws Exception {
+    public Filestore[] search(String searchPattern, boolean omitUsage) throws Exception {
         OXUtilInterface utilInterface = getUtilInterface();
         return utilInterface.listFilestore(searchPattern, getMasterCredentials(), omitUsage);
     }
@@ -153,7 +153,7 @@ public class FilestoreManager extends AbstractManager {
         }
         Filestore filestore = (Filestore) object;
         try {
-            unregisterFilestore(filestore);
+            unregister(filestore);
             return true;
         } catch (Exception e) {
             LOG.error("The filestore '{}' could not be unregistered!", filestore.getId(), e);

@@ -74,10 +74,10 @@ public final class Bug16865Test extends AbstractRMITest {
         db.setName("test" + System.currentTimeMillis());
         db.setPassword("secret");
         db.setMaster(Boolean.TRUE);
-        Database created = getDatabaseManager().registerDatabase(db, Boolean.FALSE, Integer.valueOf(0));
+        Database created = getDatabaseManager().register(db, Boolean.FALSE, Integer.valueOf(0));
         try {
             Database test = null;
-            for (Database tmpDB : getDatabaseManager().listAllDatabases()) {
+            for (Database tmpDB : getDatabaseManager().listAll()) {
                 if (tmpDB.getName().equals(db.getName())) {
                     test = tmpDB;
                 }
@@ -85,7 +85,7 @@ public final class Bug16865Test extends AbstractRMITest {
             assertNotNull("Just registered database not found.", test);
             assertEquals("Initial number of database connections must be zero by default.", Integer.valueOf(0), test.getPoolInitial());
         } finally {
-            getDatabaseManager().unregisterDatabase(created);
+            getDatabaseManager().unregister(created);
         }
     }
 }

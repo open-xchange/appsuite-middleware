@@ -128,7 +128,7 @@ public class OXResellerUserTest extends OXResellerAbstractTest {
                 }
                 // TODO Here we call change context to apply the restrictions if the create call is ready to handle extensions
                 // this can be done directly with the create call
-                getContextManager().changeContext(ctx, creds);
+                getContextManager().change(ctx, creds);
 
                 User oxadmin = ContextAdmin();
                 Credentials ctxadmcreds = new Credentials(oxadmin.getName(), oxadmin.getPassword());
@@ -173,7 +173,7 @@ public class OXResellerUserTest extends OXResellerAbstractTest {
                 }
                 // TODO Here we call change context to apply the restrictions if the create call is ready to handle extensions
                 // this can be done directly with the create call
-                getContextManager().changeContext(ctx, creds);
+                getContextManager().change(ctx, creds);
 
                 try {
                     Thread.sleep(500);

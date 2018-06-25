@@ -98,7 +98,7 @@ public class DatabaseManager extends AbstractManager {
      * @return The registered Database
      * @throws Exception if an error occurs during registration
      */
-    public Database registerDatabase(Database database, boolean createSchemata, Integer numberOfSchemata) throws Exception {
+    public Database register(Database database, boolean createSchemata, Integer numberOfSchemata) throws Exception {
         OXUtilInterface utilInterface = getUtilInterface();
         Database db = utilInterface.registerDatabase(database, createSchemata, numberOfSchemata, getMasterCredentials());
         managedObjects.put(db.getId(), db);
@@ -111,7 +111,7 @@ public class DatabaseManager extends AbstractManager {
      * @param database The {@link Database} to unregister
      * @throws Exception if an error occurs
      */
-    public void unregisterDatabase(Database database) throws Exception {
+    public void unregister(Database database) throws Exception {
         OXUtilInterface utilInterface = getUtilInterface();
         utilInterface.unregisterDatabase(database, getMasterCredentials());
     }
@@ -122,7 +122,7 @@ public class DatabaseManager extends AbstractManager {
      * @param database The database to change
      * @throws Exception if an error occurs
      */
-    public void changeDatabase(Database database) throws Exception {
+    public void change(Database database) throws Exception {
         OXUtilInterface utilInterface = getUtilInterface();
         utilInterface.changeDatabase(database, getMasterCredentials());
     }
@@ -134,7 +134,7 @@ public class DatabaseManager extends AbstractManager {
      * @return An array with all found {@link Database}s
      * @throws Exception if an error is occurred
      */
-    public Database[] listDatabases(String searchPattern) throws Exception {
+    public Database[] search(String searchPattern) throws Exception {
         OXUtilInterface utilInterface = getUtilInterface();
         return utilInterface.listDatabase(searchPattern, getMasterCredentials());
     }
@@ -146,7 +146,7 @@ public class DatabaseManager extends AbstractManager {
      * @return An array with all found {@link Database}s
      * @throws Exception if an error is occurred
      */
-    public Database[] listAllDatabases() throws Exception {
+    public Database[] listAll() throws Exception {
         OXUtilInterface utilInterface = getUtilInterface();
         return utilInterface.listAllDatabase(getMasterCredentials());
     }
@@ -164,7 +164,7 @@ public class DatabaseManager extends AbstractManager {
         }
         Database database = (Database) object;
         try {
-            unregisterDatabase(database);
+            unregister(database);
             return true;
         } catch (Exception e) {
             LOG.error("The database '{}' could not be unregistered!", database.getId(), e);

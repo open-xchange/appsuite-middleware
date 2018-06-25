@@ -97,7 +97,7 @@ public class ResourceManager extends AbstractManager {
      * @return The created {@link Resource}
      * @throws Exception if an error is occurred
      */
-    public Resource createResource(Resource resource, Context context, Credentials contextAdminCredentials) throws Exception {
+    public Resource create(Resource resource, Context context, Credentials contextAdminCredentials) throws Exception {
         OXResourceInterface resourceInterface = getResourceInterface();
         return resourceInterface.create(context, resource, contextAdminCredentials);
     }
@@ -126,7 +126,7 @@ public class ResourceManager extends AbstractManager {
      * @return An array with all found {@link Resource}s
      * @throws Exception if an error is occurred
      */
-    public Resource[] listResources(Context context, String searchPattern, Credentials contextAdminCredentials) throws Exception {
+    public Resource[] search(Context context, String searchPattern, Credentials contextAdminCredentials) throws Exception {
         OXResourceInterface resourceInterface = getResourceInterface();
         return resourceInterface.list(context, searchPattern, contextAdminCredentials);
     }
@@ -139,7 +139,7 @@ public class ResourceManager extends AbstractManager {
      * @return An array with all {@link Resource}s
      * @throws Exception if an error is occurred
      */
-    public Resource[] listAllResources(Context context, Credentials contextAdminCredentials) throws Exception {
+    public Resource[] listAll(Context context, Credentials contextAdminCredentials) throws Exception {
         OXResourceInterface resourceInterface = getResourceInterface();
         return resourceInterface.listAll(context, contextAdminCredentials);
     }
@@ -152,7 +152,7 @@ public class ResourceManager extends AbstractManager {
      * @param contextAdminCredentials The context admin {@link Credentials}
      * @throws Exception if an error is occurred
      */
-    public void changeResource(Resource resource, Context context, Credentials contextAdminCredentials) throws Exception {
+    public void change(Resource resource, Context context, Credentials contextAdminCredentials) throws Exception {
         OXResourceInterface resourceInterface = getResourceInterface();
         resourceInterface.change(context, resource, contextAdminCredentials);
     }
@@ -165,7 +165,7 @@ public class ResourceManager extends AbstractManager {
      * @param contextAdminCredentials The context's admin {@link Credentials}
      * @throws Exception if an error is occurred
      */
-    public void deleteResource(Resource resource, Context context, Credentials contextAdminCredentials) throws Exception {
+    public void delete(Resource resource, Context context, Credentials contextAdminCredentials) throws Exception {
         OXResourceInterface resourceInterface = getResourceInterface();
         resourceInterface.delete(context, resource, contextAdminCredentials);
     }
