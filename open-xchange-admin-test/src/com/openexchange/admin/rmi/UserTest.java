@@ -561,7 +561,7 @@ public class UserTest extends AbstractRMITest {
         if (fs == null) {
             //create new filestore
             fs = new Filestore();
-            fs.setMaxContexts(10);
+            fs.setMaxContexts(1000);
             fs.setSize(1024l);
             fs.setUrl("file:///");
 
