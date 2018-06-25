@@ -226,5 +226,4 @@ public class UserFactory {
 
         return usr;
     }
-
 }

@@ -331,7 +331,6 @@ public class UserTest extends AbstractRMITest {
      */
     @Test
     public void testGetDataByName() throws Exception {
-
         UserModuleAccess access = new UserModuleAccess();
 
         User usr = UserFactory.createUser(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, TEST_DOMAIN, context);
@@ -342,12 +341,11 @@ public class UserTest extends AbstractRMITest {
 
         // now load user from server and check if data is correct, else fail
         User srv_loaded = getUserManager().getData(context, usernameuser, adminCredentials);
-        if (createduser.getId().equals(srv_loaded.getId())) {
-            //verify data
-            compareUser(createduser, srv_loaded);
-        } else {
+        if (!createduser.getId().equals(srv_loaded.getId())) {
             fail("Expected to get user data");
         }
+        //verify data
+        compareUser(createduser, srv_loaded);
     }
 
     /**
