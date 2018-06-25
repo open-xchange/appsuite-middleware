@@ -63,11 +63,10 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
-import com.openexchange.admin.rmi.dataobjects.Filestore;
 import com.openexchange.admin.rmi.dataobjects.Group;
 import com.openexchange.admin.rmi.dataobjects.Resource;
 import com.openexchange.admin.rmi.dataobjects.User;
-import com.openexchange.admin.rmi.exceptions.NoSuchResourceException;
+import com.openexchange.admin.rmi.factory.ContextFactory;
 import com.openexchange.admin.rmi.factory.UserFactory;
 import com.openexchange.admin.rmi.manager.ContextManager;
 import com.openexchange.admin.rmi.manager.DatabaseManager;
@@ -96,11 +95,9 @@ public abstract class AbstractRMITest {
     protected Credentials adminCredentials;
     protected Credentials superAdminCredentials;
     protected Context adminContext;
-    protected Context superAdminContext;
     protected User superAdmin;
     protected User contextAdmin;
     protected User testUser;
-    protected Resource testResource;
 
     /**
      * Initializes a new {@link AbstractRMITest}.
@@ -139,12 +136,11 @@ public abstract class AbstractRMITest {
     @Before
     public void setUp() throws Exception {
         adminCredentials = getContextAdminCredentials();
-        adminContext = getTestContextObject(adminCredentials);
+        adminContext = ContextFactory.createContext(50);
 
         superAdminCredentials = getMasterAdminCredentials();
         superAdmin = UserFactory.createUser(superAdminCredentials.getLogin(), superAdminCredentials.getPassword(), "ContextCreatingAdmin", "Ad", "Min", "adminmaster@ox.invalid");
         contextAdmin = UserFactory.createUser(adminCredentials.getLogin(), adminCredentials.getPassword(), "ContextAdmin", "Context", "Admin", "contextAdmin@ox.invalid");
-        superAdminContext = getTestContextObject(superAdminCredentials);
     }
 
     /**
@@ -322,38 +318,6 @@ public abstract class AbstractRMITest {
         return any(Arrays.asList(collection), searched, verifier);
     }
 
-    /*** Creating test objects on the server ***/
-
-    public Resource getTestResource() {
-        if (testResource != null && testResource.getId() != null) {
-            return testResource;
-        }
-        Resource res = new Resource();
-        res.setName("Testresource");
-        res.setEmail("test-resource@testsystem.invalid");
-        res.setDisplayname("The test resource");
-        return res;
-    }
-
-    /**
-     * Create a test resource on the server. Always remove this via #removeTestResource() afterwards!
-     * 
-     * @throws Exception
-     */
-    public Resource createTestResource() throws Exception {
-        testResource = getResourceManager().create(getTestResource(), adminContext, adminCredentials);
-        return testResource;
-    }
-
-    public void removeTestResource() throws Exception {
-        try {
-            getResourceManager().delete(testResource, adminContext, adminCredentials);
-        } catch (NoSuchResourceException e) {
-            // don't do anything, has been removed already, right?
-            System.out.println("Resource was removed already");
-        }
-    }
-
     /////////////////////////// MANAGERS ///////////////////////////////
 
     /**
@@ -435,26 +399,6 @@ public abstract class AbstractRMITest {
      */
     protected static ResellerManager getResellerManager() {
         return ResellerManager.getInstance(getRMIHostUrl(), getMasterAdminCredentials());
-    }
-
-    //TODO: reference a created context and not some hard-coded id.... 
-
-    // The throwing of the exception is necessary to be able to let methods which override
-    // this one throw exceptions. So don't remove this
-    public static Context getTestContextObject(final Credentials cred) throws Exception {
-        return getTestContextObject(1, 50);
-    }
-
-    public static Context getTestContextObject(final long quota_max_in_mb) {
-        return getTestContextObject(1, quota_max_in_mb);
-    }
-
-    public static Context getTestContextObject(final int context_id, final long quota_max_in_mb) {
-        final Context ctx = new Context(context_id);
-        final Filestore filestore = new Filestore();
-        filestore.setSize(quota_max_in_mb);
-        ctx.setFilestoreId(filestore.getId());
-        return ctx;
     }
 
     public static String getChangedEmailAddress(String address, String changed) {

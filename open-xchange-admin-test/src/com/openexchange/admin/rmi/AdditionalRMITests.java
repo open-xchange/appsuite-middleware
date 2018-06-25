@@ -81,12 +81,11 @@ import com.openexchange.admin.user.copy.rmi.TestTool;
 public class AdditionalRMITests extends AbstractRMITest {
 
     public String myUserName = "thorben.betten";
-
     public String myDisplayName = "Thorben Betten";
 
     private Context context;
-
     private User user;
+    private Resource testResource;
 
     @Override
     public void setUp() throws Exception {
@@ -493,5 +492,19 @@ public class AdditionalRMITests extends AbstractRMITest {
         } catch (NoSuchUserException e) {
             assertTrue("Caught exception", true);
         }
+    }
+
+    /**
+     * Get the test resource
+     */
+    private Resource getTestResource() {
+        if (testResource != null && testResource.getId() != null) {
+            return testResource;
+        }
+        Resource res = new Resource();
+        res.setName("Testresource");
+        res.setEmail("test-resource@testsystem.invalid");
+        res.setDisplayname("The test resource");
+        return res;
     }
 }
