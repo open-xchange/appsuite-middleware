@@ -128,15 +128,17 @@ public class ContextTest extends AbstractRMITest {
      */
     @Test
     public void testListContextByFilestore() throws Exception {
+        getContextManager().createContext(adminCredentials);
         Filestore[] fiss = getFilestoreManager().listFilestores("*");
         if (fiss.length <= 0) {
-            fail("No databases found.");
+            fail("No filestores found.");
         }
         boolean foundContextViaFilestore = false;
         for (int a = 0; a < fiss.length; a++) {
             Context[] ids = getContextManager().searchContext(fiss[a]);
             if (ids.length > 0) {
                 foundContextViaFilestore = true;
+                break;
             }
         }
         assertTrue("No contexts found using filestores", foundContextViaFilestore);
