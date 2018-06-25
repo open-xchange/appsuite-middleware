@@ -53,12 +53,8 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-import java.rmi.Naming;
-import java.rmi.RemoteException;
-import java.sql.SQLException;
 import java.util.Stack;
 import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.admin.reseller.rmi.dataobjects.ResellerAdmin;
 import com.openexchange.admin.reseller.rmi.dataobjects.Restriction;
@@ -68,9 +64,7 @@ import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.dataobjects.User;
 import com.openexchange.admin.rmi.exceptions.DuplicateExtensionException;
-import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
-import com.openexchange.admin.rmi.exceptions.PoolException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.rmi.factory.ResellerAdminFactory;
 import com.openexchange.admin.rmi.factory.UserFactory;
@@ -79,37 +73,30 @@ public class OXResellerInterfaceTest extends AbstractOXResellerTest {
 
     private Stack<Context> restrictionContexts = null;
 
-    private OXResellerInterface oxresell = null;
-
-    @Before
-    public void setUp() throws Exception {
-        super.setUp();
-        oxresell = (OXResellerInterface) Naming.lookup(getRMIHostUrl() + OXResellerInterface.RMI_NAME);
+    /**
+     * Initialises a new {@link OXResellerInterfaceTest}.
+     */
+    public OXResellerInterfaceTest() {
+        super();
     }
 
     @After
     public final void tearDown() throws Exception {
-        final Credentials creds = superAdminCredentials;
-
-        final ResellerAdmin[] adms = oxresell.list("test*", creds);
+        final ResellerAdmin[] adms = getResellerManager().search("test*");
         for (final ResellerAdmin adm : adms) {
-            oxresell.delete(adm, creds);
+            getResellerManager().delete(adm);
         }
     }
 
     @Test
-    public void testUpdateModuleAccessRestrictions() throws RemoteException, StorageException, InvalidCredentialsException, OXResellerException {
-        final Credentials creds = superAdminCredentials;
-
-        oxresell.updateDatabaseModuleAccessRestrictions(creds);
+    public void testUpdateModuleAccessRestrictions() throws Exception {
+        getResellerManager().updateDatabaseModuleAccessRestrictions();
     }
 
     @Test
-    public void testCreate() throws RemoteException, InvalidDataException, InvalidCredentialsException, StorageException, OXResellerException {
-        final Credentials creds = superAdminCredentials;
-
-        ResellerAdmin adm = oxresell.create(ResellerAdminFactory.createResellerAdmin(), creds);
-        ResellerAdmin admch = oxresell.create(ResellerAdminFactory.createResellerAdmin(TESTCHANGEUSER, "Test Change User"), creds);
+    public void testCreate() throws Exception {
+        ResellerAdmin adm = getResellerManager().create(ResellerAdminFactory.createResellerAdmin());
+        ResellerAdmin admch = getResellerManager().create(ResellerAdminFactory.createResellerAdmin(TESTCHANGEUSER, "Test Change User"));
 
         assertNotNull("creation of ResellerAdmin failed", adm);
         assertNotNull("creation of ResellerAdmin failed", admch);
@@ -118,34 +105,32 @@ public class OXResellerInterfaceTest extends AbstractOXResellerTest {
     }
 
     @Test(expected = InvalidDataException.class)
-    public void testCreateMissingMandatoryFields() throws RemoteException, InvalidDataException, InvalidCredentialsException, StorageException, OXResellerException {
-        final Credentials creds = superAdminCredentials;
-
+    public void testCreateMissingMandatoryFields() throws Exception {
         ResellerAdmin adm = new ResellerAdmin();
         // no displayname
         adm.setName("incomplete");
         adm.setPassword("secret");
-        oxresell.create(adm, creds);
+        getResellerManager().create(adm);
 
         // no password
         adm.setPassword(null);
         adm.setDisplayname("Test incomplete");
         adm.setName("incomplete");
-        oxresell.create(adm, creds);
+        getResellerManager().create(adm);
 
         // no name
         adm.setPassword("secret");
         adm.setDisplayname("Test incomplete");
         adm.setName(null);
-        oxresell.create(adm, creds);
+        getResellerManager().create(adm);
     }
 
     @Test
-    public void testCreateWithRestrictions() throws RemoteException, InvalidDataException, InvalidCredentialsException, StorageException, OXResellerException {
+    public void testCreateWithRestrictions() throws Exception {
         for (final String user : new String[] { TESTRESTRICTIONUSER, TESTRESTCHANGERICTIONUSER }) {
             ResellerAdmin adm = ResellerAdminFactory.createResellerAdmin(user, "Test Restriction User");
             adm.setRestrictions(new Restriction[] { MaxContextRestriction(), MaxContextQuotaRestriction() });
-            adm = oxresell.create(adm, superAdminCredentials);
+            adm = getResellerManager().create(adm);
 
             System.out.println(adm);
 
@@ -155,18 +140,18 @@ public class OXResellerInterfaceTest extends AbstractOXResellerTest {
     }
 
     @Test
-    public void testChangeWithRestrictions() throws RemoteException, InvalidDataException, InvalidCredentialsException, StorageException, OXResellerException {
+    public void testChangeWithRestrictions() throws Exception {
         ResellerAdmin adm = ResellerAdminFactory.createResellerAdmin(TESTRESTCHANGERICTIONUSER);
         adm.setRestrictions(new Restriction[] { MaxContextRestriction(), MaxContextQuotaRestriction() });
-        adm = oxresell.create(adm, superAdminCredentials);
+        adm = getResellerManager().create(adm);
 
-        adm = oxresell.getData(ResellerAdminFactory.createResellerAdmin(TESTRESTCHANGERICTIONUSER), superAdminCredentials);
+        adm = getResellerManager().getData(ResellerAdminFactory.createResellerAdmin(TESTRESTCHANGERICTIONUSER));
         Restriction r = getRestrictionByName(Restriction.MAX_OVERALL_CONTEXT_QUOTA_PER_SUBADMIN, adm.getRestrictions());
         assertNotNull("Restriction Restriction.MAX_CONTEXT_QUOTA not found", r);
         r.setValue("2000");
-        oxresell.change(adm, superAdminCredentials);
+        getResellerManager().change(adm);
 
-        adm = oxresell.getData(ResellerAdminFactory.createResellerAdmin(TESTRESTCHANGERICTIONUSER), superAdminCredentials);
+        adm = getResellerManager().getData(ResellerAdminFactory.createResellerAdmin(TESTRESTCHANGERICTIONUSER));
         r = getRestrictionByName(Restriction.MAX_OVERALL_CONTEXT_QUOTA_PER_SUBADMIN, adm.getRestrictions());
 
         assertNotNull("Restriction Restriction.MAX_CONTEXT_QUOTA not found", r);
@@ -174,72 +159,72 @@ public class OXResellerInterfaceTest extends AbstractOXResellerTest {
     }
 
     @Test
-    public void testChange() throws RemoteException, InvalidDataException, StorageException, OXResellerException, InvalidCredentialsException {
-        oxresell.create(ResellerAdminFactory.createResellerAdmin(TESTCHANGEUSER, "Test Change User"), superAdminCredentials);
+    public void testChange() throws Exception {
+        getResellerManager().create(ResellerAdminFactory.createResellerAdmin(TESTCHANGEUSER, "Test Change User"));
 
         ResellerAdmin adm = new ResellerAdmin(TESTCHANGEUSER);
         final String newdisp = "New Display name";
         adm.setDisplayname(newdisp);
 
-        oxresell.change(adm, superAdminCredentials);
+        getResellerManager().change(adm);
 
-        ResellerAdmin chadm = oxresell.getData(new ResellerAdmin(TESTCHANGEUSER), superAdminCredentials);
+        ResellerAdmin chadm = getResellerManager().getData(new ResellerAdmin(TESTCHANGEUSER));
 
         assertEquals("getData must return changed Displayname", adm.getDisplayname(), chadm.getDisplayname());
     }
 
     @Test
-    public void testChangeName() throws RemoteException, InvalidDataException, StorageException, OXResellerException, InvalidCredentialsException {
-        oxresell.create(ResellerAdminFactory.createResellerAdmin(TESTCHANGEUSER, "Test Change User"), superAdminCredentials);
+    public void testChangeName() throws Exception {
+        getResellerManager().create(ResellerAdminFactory.createResellerAdmin(TESTCHANGEUSER, "Test Change User"));
 
-        ResellerAdmin adm = oxresell.getData(new ResellerAdmin(TESTCHANGEUSER), superAdminCredentials);
+        ResellerAdmin adm = getResellerManager().getData(new ResellerAdmin(TESTCHANGEUSER));
         adm.setName(CHANGEDNAME);
-        oxresell.change(adm, superAdminCredentials);
+        getResellerManager().change(adm);
         ResellerAdmin newadm = new ResellerAdmin();
         newadm.setId(adm.getId());
-        ResellerAdmin chadm = oxresell.getData(newadm, superAdminCredentials);
+        ResellerAdmin chadm = getResellerManager().getData(newadm);
         assertEquals("getData must return changed name", adm.getName(), chadm.getName());
     }
 
     @Test(expected = StorageException.class)
-    public void testChangeNameWithoutID() throws RemoteException, InvalidDataException, StorageException, OXResellerException, InvalidCredentialsException {
+    public void testChangeNameWithoutID() throws Exception {
         ResellerAdmin adm = new ResellerAdmin();
         adm.setName(CHANGEDNAME + "new");
-        oxresell.change(adm, superAdminCredentials);
+        getResellerManager().change(adm);
     }
 
     @Test
-    public void testGetData() throws RemoteException, InvalidDataException, InvalidCredentialsException, StorageException, PoolException, SQLException, OXResellerException {
+    public void testGetData() throws Exception {
         final ResellerAdmin adm = ResellerAdminFactory.createResellerAdmin();
 
-        oxresell.create(adm, superAdminCredentials);
+        getResellerManager().create(adm);
 
-        final ResellerAdmin dbadm = oxresell.getData(new ResellerAdmin(TESTUSER), superAdminCredentials);
+        final ResellerAdmin dbadm = getResellerManager().getData(new ResellerAdmin(TESTUSER));
 
         assertEquals("getData returned wrong data", adm.getName(), dbadm.getName());
         assertEquals("getData returned wrong data", adm.getDisplayname(), dbadm.getDisplayname());
     }
 
     @Test
-    public void testGetDataBug19102() throws RemoteException, InvalidDataException, InvalidCredentialsException, StorageException, PoolException, SQLException, OXResellerException {
+    public void testGetDataBug19102() throws Exception {
         final ResellerAdmin adm = ResellerAdminFactory.createResellerAdmin();
 
-        oxresell.create(adm, superAdminCredentials);
+        getResellerManager().create(adm);
 
         // add some restrictions to adm
         adm.setRestrictions(new Restriction[] { new Restriction(Restriction.MAX_OVERALL_USER_PER_SUBADMIN, "2") });
-        final ResellerAdmin dbadm = oxresell.getData(adm, superAdminCredentials);
+        final ResellerAdmin dbadm = getResellerManager().getData(adm);
         // and check whether they are still there after getData call
         assertNull("there must be no restrictions set", dbadm.getRestrictions());
     }
 
     @Test
-    public void testGetDataWithRestrictions() throws RemoteException, InvalidDataException, InvalidCredentialsException, StorageException, PoolException, SQLException, OXResellerException {
+    public void testGetDataWithRestrictions() throws Exception {
         final ResellerAdmin adm = ResellerAdminFactory.createResellerAdmin(TESTRESTRICTIONUSER, "Test Restriction User");
         adm.setRestrictions(new Restriction[] { MaxContextRestriction(), MaxContextQuotaRestriction() });
-        oxresell.create(adm, superAdminCredentials);
+        getResellerManager().create(adm);
 
-        final ResellerAdmin dbadm = oxresell.getData(adm, superAdminCredentials);
+        final ResellerAdmin dbadm = getResellerManager().getData(adm);
 
         Restriction[] res = dbadm.getRestrictions();
         assertNotNull("ResellerAdmin must contain Restrictions", res);
@@ -255,7 +240,7 @@ public class OXResellerInterfaceTest extends AbstractOXResellerTest {
 
     @Test
     public void testRestrictionsToContext() throws Exception {
-        oxresell.create(ResellerAdminFactory.createResellerAdmin(), superAdminCredentials);
+        getResellerManager().create(ResellerAdminFactory.createResellerAdmin());
         restrictionContexts = new Stack<Context>();
         for (final Credentials creds : new Credentials[] { superAdminCredentials, TestUserCredentials() }) {
 
@@ -276,7 +261,7 @@ public class OXResellerInterfaceTest extends AbstractOXResellerTest {
         for (final Credentials creds : new Credentials[] { TestUserCredentials(), superAdminCredentials }) {
             final Context ctx = restrictionContexts.pop();
 
-            Restriction[] res = oxresell.getRestrictionsFromContext(ctx, creds);
+            Restriction[] res = getResellerManager().getContextRestrictions(ctx);
             assertNotNull("Context restrictions must not be null", res);
             assertEquals("Context restrictions must contain one restriction", 1, res.length);
             assertEquals("Restriction value does not match expected value", MaxUserPerContextRestriction().getValue(), res[0].getValue());
@@ -286,28 +271,28 @@ public class OXResellerInterfaceTest extends AbstractOXResellerTest {
 
     @Test
     public void testDeleteContextOwningSubadmin() throws Exception {
-        oxresell.create(ResellerAdminFactory.createResellerAdmin("owned"), superAdminCredentials);
+        getResellerManager().create(ResellerAdminFactory.createResellerAdmin("owned"));
         final Context ctx = createContext(new Credentials("owned", "secret"));
 
         boolean deleteFailed = false;
         try {
-            oxresell.delete(ResellerAdminFactory.createResellerAdmin("owned"), superAdminCredentials);
+            getResellerManager().delete(ResellerAdminFactory.createResellerAdmin("owned"));
         } catch (OXResellerException e) {
             deleteFailed = true;
         }
         assertTrue("deletion of ResellerAdmin must fail", deleteFailed);
 
         deleteContext(ctx, new Credentials("owned", "secret"));
-        oxresell.delete(ResellerAdminFactory.createResellerAdmin("owned"), superAdminCredentials);
+        getResellerManager().delete(ResellerAdminFactory.createResellerAdmin("owned"));
     }
 
     @Test
-    public void testDeleteByID() throws RemoteException, InvalidDataException, StorageException, OXResellerException, InvalidCredentialsException {
-        ResellerAdmin adm = oxresell.create(ResellerAdminFactory.createResellerAdmin(), superAdminCredentials);
-        adm = oxresell.getData(adm, superAdminCredentials);
+    public void testDeleteByID() throws Exception {
+        ResellerAdmin adm = getResellerManager().create(ResellerAdminFactory.createResellerAdmin());
+        adm = getResellerManager().getData(adm);
         adm.setName(null);
 
-        oxresell.delete(adm, superAdminCredentials);
+        getResellerManager().delete(adm);
     }
 
 }

@@ -53,6 +53,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.admin.reseller.rmi.OXResellerInterface;
 import com.openexchange.admin.reseller.rmi.dataobjects.ResellerAdmin;
+import com.openexchange.admin.reseller.rmi.dataobjects.Restriction;
+import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 
 /**
@@ -104,6 +106,41 @@ public class ResellerManager extends AbstractManager {
     }
 
     /**
+     * Changes/Updates the specified {@link ResellerAdmin}
+     * 
+     * @param resellerAdmin The {@link ResellerAdmin} to change
+     * @throws Exception if an error is occurred
+     */
+    public void change(ResellerAdmin resellerAdmin) throws Exception {
+        OXResellerInterface resellerInterface = getResellerInterface();
+        resellerInterface.change(resellerAdmin, getMasterCredentials());
+    }
+
+    /**
+     * Fetches all data for the specified {@link ResellerAdmin}
+     * 
+     * @param resellerAdmin The {@link ResellerAdmin} to fetch the data
+     * @return The data of the {@link ResellerAdmin}
+     * @throws Exception if an error is occurred
+     */
+    public ResellerAdmin getData(ResellerAdmin resellerAdmin) throws Exception {
+        OXResellerInterface resellerInterface = getResellerInterface();
+        return resellerInterface.getData(resellerAdmin, getMasterCredentials());
+    }
+
+    /**
+     * Retrieve a list of all restrictions applied to given {@link Context}
+     * 
+     * @param context The {@link Context} for which to retrieve the restrictions
+     * @return An array with all restrictions applied to the specified {@link Context}
+     * @throws Exception if an error is occurred
+     */
+    public Restriction[] getContextRestrictions(Context context) throws Exception {
+        OXResellerInterface resellerInterface = getResellerInterface();
+        return resellerInterface.getRestrictionsFromContext(context, getMasterCredentials());
+    }
+
+    /**
      * Deletes the specified {@link ResellerAdmin}
      * 
      * @param resellerAdmin The {@link ResellerAdmin} to delete
@@ -126,6 +163,17 @@ public class ResellerManager extends AbstractManager {
     public ResellerAdmin[] search(String searchPattern) throws Exception {
         OXResellerInterface resellerInterface = getResellerInterface();
         return resellerInterface.list(searchPattern, getMasterCredentials());
+    }
+
+    /**
+     * Update all restrictions based on module access combinations in case of changes to
+     * <code>/opt/open-xchange/etc/admindaemon/ModuleAccessDefinitions.properties</code>
+     * 
+     * @throws Exception if an error is occurred
+     */
+    public void updateDatabaseModuleAccessRestrictions() throws Exception {
+        OXResellerInterface resellerInterface = getResellerInterface();
+        resellerInterface.updateDatabaseModuleAccessRestrictions(getMasterCredentials());
     }
 
     /*

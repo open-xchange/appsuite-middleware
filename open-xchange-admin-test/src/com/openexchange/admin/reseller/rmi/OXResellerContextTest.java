@@ -112,7 +112,7 @@ public class OXResellerContextTest extends AbstractOXResellerTest {
 
     @Test
     public void testCreateTooManyContexts() throws Exception {
-        getResellerManager().delete(randomAdmin); // Delete normaly created FooAdminUser
+        getResellerManager().delete(randomAdmin); // Delete normally created FooAdminUser
 
         randomAdmin.setRestrictions(new Restriction[] { MaxContextRestriction() });
         getResellerManager().create(randomAdmin);
