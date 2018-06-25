@@ -143,7 +143,7 @@ class ConnectionLifecycle implements PoolableLifecycle<Connection> {
         ResultSet result = null;
         try {
             retval = MysqlUtils.ClosedState.OPEN == MysqlUtils.isClosed(con, true);
-            if (retval && data.getTimeDiff() > checkTime) {
+            if (retval && data.getLastPacketDiffFallbackToTimeDiff() > checkTime) {
                 stmt = con.createStatement();
                 result = stmt.executeQuery(TEST_SELECT);
                 if (result.next()) {

@@ -50,6 +50,7 @@
 package com.openexchange.database.internal;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.sql.Connection;
 import java.sql.SQLException;
 import com.mysql.jdbc.ConnectionImpl;
@@ -69,18 +70,178 @@ public class MysqlUtils {
         super();
     }
 
-    private static final Field mysqlConnectionField;
-    static {
-        Field f;
-        try {
-            f = com.mysql.jdbc.MysqlIO.class.getDeclaredField("mysqlConnection");
-            f.setAccessible(true);
-        } catch (final SecurityException e) {
-            f = null;
-        } catch (final NoSuchFieldException e) {
-            f = null;
+    // ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+    /** Simple holder to delay initialization when needed */
+    private static class LastPacketTimeMethodHolder {
+
+        static final Object[] EMPTY_ARGS = new Object[0];
+
+        static final Method getLastPacketReceivedTimeMsMethod;
+        static final Method getLastPacketSentTimeMsMethod;
+        static {
+            Method m;
+            try {
+                m = com.mysql.jdbc.MysqlIO.class.getDeclaredMethod("getLastPacketReceivedTimeMs", new Class<?>[0]);
+                m.setAccessible(true);
+            } catch (final SecurityException e) {
+                m = null;
+            } catch (NoSuchMethodException e) {
+                m = null;
+            }
+            getLastPacketReceivedTimeMsMethod = m;
+
+            try {
+                m = com.mysql.jdbc.MysqlIO.class.getDeclaredMethod("getLastPacketSentTimeMs", new Class<?>[0]);
+                m.setAccessible(true);
+            } catch (final SecurityException e) {
+                m = null;
+            } catch (NoSuchMethodException e) {
+                m = null;
+            }
+            getLastPacketSentTimeMsMethod = m;
         }
-        mysqlConnectionField = f;
+
+    }
+
+    /**
+     * Gets the time stamp (the number of milliseconds since January 1, 1970, 00:00:00 GMT) when the last packet has been received through given connection.
+     *
+     * @param con The connection to get the "last packet received" time from
+     * @return The time stamp or <code>null</code>
+     */
+    public static Long getOLastPacketReceivedTime(Object con) {
+        if (con instanceof com.mysql.jdbc.ConnectionImpl) {
+            return getLastPacketReceivedTime0((com.mysql.jdbc.ConnectionImpl) con);
+        }
+        return null;
+    }
+
+    /**
+     * Gets the time stamp (the number of milliseconds since January 1, 1970, 00:00:00 GMT) when the last packet has been received through given connection.
+     *
+     * @param con The connection to get the "last packet received" time from
+     * @return The time stamp or <code>null</code>
+     */
+    public static Long getLastPacketReceivedTime(Connection con) {
+        if (con instanceof com.mysql.jdbc.ConnectionImpl) {
+            return getLastPacketReceivedTime0((com.mysql.jdbc.ConnectionImpl) con);
+        }
+        return null;
+    }
+
+    private static Long getLastPacketReceivedTime0(com.mysql.jdbc.ConnectionImpl mysqlConnectionImpl) {
+        Method getLastPacketReceivedTimeMsMethod = LastPacketTimeMethodHolder.getLastPacketReceivedTimeMsMethod;
+        if (null != getLastPacketReceivedTimeMsMethod) {
+            try {
+                Long lastPacketReceivedTime = (Long) getLastPacketReceivedTimeMsMethod.invoke(mysqlConnectionImpl.getIO(), LastPacketTimeMethodHolder.EMPTY_ARGS);
+                return lastPacketReceivedTime.longValue() == 0 ? null : lastPacketReceivedTime;
+            } catch (Exception e) {
+                return null;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Gets the time stamp (the number of milliseconds since January 1, 1970, 00:00:00 GMT) when the last packet has been sent through given connection.
+     *
+     * @param con The connection to get the "last packet sent" time from
+     * @return The time stamp or <code>null</code>
+     */
+    public static Long getOLastPacketSentTime(Object con) {
+        if (con instanceof com.mysql.jdbc.ConnectionImpl) {
+            return getLastPacketSentTime0((com.mysql.jdbc.ConnectionImpl) con);
+        }
+        return null;
+    }
+
+    /**
+     * Gets the time stamp (the number of milliseconds since January 1, 1970, 00:00:00 GMT) when the last packet has been sent through given connection.
+     *
+     * @param con The connection to get the "last packet sent" time from
+     * @return The time stamp or <code>null</code>
+     */
+    public static Long getLastPacketSentTime(Connection con) {
+        if (con instanceof com.mysql.jdbc.ConnectionImpl) {
+            return getLastPacketSentTime0((com.mysql.jdbc.ConnectionImpl) con);
+        }
+        return null;
+    }
+
+    private static Long getLastPacketSentTime0(com.mysql.jdbc.ConnectionImpl mysqlConnectionImpl) {
+        Method getLastPacketSentTimeMsMethod = LastPacketTimeMethodHolder.getLastPacketSentTimeMsMethod;
+        if (null != getLastPacketSentTimeMsMethod) {
+            try {
+                Long lastPacketSentTime = (Long) getLastPacketSentTimeMsMethod.invoke(mysqlConnectionImpl.getIO(), LastPacketTimeMethodHolder.EMPTY_ARGS);
+                return lastPacketSentTime.longValue() == 0 ? null : lastPacketSentTime;
+            } catch (Exception e) {
+                return null;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Gets the time stamp (the number of milliseconds since January 1, 1970, 00:00:00 GMT) when the last packet has been either received or sent through given connection.
+     *
+     * @param con The connection to get the "last packet either received or sent" time from
+     * @return The time stamp or <code>null</code>
+     */
+    public static Long getOLastPacketTime(Object con) {
+        if (con instanceof com.mysql.jdbc.ConnectionImpl) {
+            return getLastPacketTime0((com.mysql.jdbc.ConnectionImpl) con);
+        }
+        return null;
+    }
+
+    /**
+     * Gets the time stamp (the number of milliseconds since January 1, 1970, 00:00:00 GMT) when the last packet has been either received or sent through given connection.
+     *
+     * @param con The connection to get the "last packet either received or sent" time from
+     * @return The time stamp or <code>null</code>
+     */
+    public static Long getLastPacketTime(Connection con) {
+        if (con instanceof com.mysql.jdbc.ConnectionImpl) {
+            return getLastPacketTime0((com.mysql.jdbc.ConnectionImpl) con);
+        }
+        return null;
+    }
+
+    private static Long getLastPacketTime0(com.mysql.jdbc.ConnectionImpl mysqlConnectionImpl) {
+        Long lastPacketReceivedTime = getLastPacketReceivedTime0(mysqlConnectionImpl);
+        Long lastPacketSentTime     = getLastPacketSentTime0(mysqlConnectionImpl);
+
+        if (null == lastPacketReceivedTime) {
+            // No "last packet received" time available. Prefer "last packet sent" time (if any)
+            return lastPacketSentTime;
+        }
+        if (null == lastPacketSentTime) {
+            // Neither nor...
+            return null;
+        }
+
+        return lastPacketReceivedTime.longValue() > lastPacketSentTime.longValue() ? lastPacketReceivedTime : lastPacketSentTime;
+    }
+
+    // ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+    /** Simple holder to delay initialization when needed */
+    private static class MysqlConnectionFieldHolder {
+        static final Field mysqlConnectionField;
+        static {
+            Field f;
+            try {
+                f = com.mysql.jdbc.MysqlIO.class.getDeclaredField("mysqlConnection");
+                f.setAccessible(true);
+            } catch (final SecurityException e) {
+                f = null;
+            } catch (final NoSuchFieldException e) {
+                f = null;
+            }
+            mysqlConnectionField = f;
+        }
+
     }
 
     /** The closed state for a connection */
@@ -135,7 +296,7 @@ public class MysqlUtils {
 
     private static boolean seemsClosed(com.mysql.jdbc.ConnectionImpl mysqlConnectionImpl) {
         try {
-            Field mysqlConnectionField = MysqlUtils.mysqlConnectionField;
+            Field mysqlConnectionField = MysqlConnectionFieldHolder.mysqlConnectionField;
             if (null != mysqlConnectionField) {
                 return null == mysqlConnectionField.get(mysqlConnectionImpl.getIO());
             }

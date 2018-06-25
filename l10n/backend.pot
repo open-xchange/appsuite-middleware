@@ -27,27 +27,39 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#. #-#-#-#-#  backend2.pot (PACKAGE VERSION)  #-#-#-#-#
-#. -
-#. * Confirmation actions
-#.
-#. accepted
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/ContextSensitiveMessages.java:73
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:672
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:699
+#. The verb "accepted", like "User A has accepted an appointment."
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/ContextSensitiveMessages.java:82
+msgctxt "verb"
 msgid "accepted"
 msgstr ""
 
-#. #-#-#-#-#  backend2.pot (PACKAGE VERSION)  #-#-#-#-#
-#. declined
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/ContextSensitiveMessages.java:77
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:674
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:702
+#. The adjective "accepted", like "The users status is 'accepted'."
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/ContextSensitiveMessages.java:85
+msgctxt "adjective"
+msgid "accepted"
+msgstr ""
+
+#. The verb "declined", like "User A has declined an appointment."
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/ContextSensitiveMessages.java:101
+msgctxt "verb"
 msgid "declined"
 msgstr ""
 
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/ContextSensitiveMessages.java:81
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:676
+#. The adjective "declined", like "The users status is 'declined'."
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/ContextSensitiveMessages.java:104
+msgctxt "adjective"
+msgid "declined"
+msgstr ""
+
+#. The verb "tentatively accepted", like "User A has tentatively accepted an appointment."
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/ContextSensitiveMessages.java:120
+msgctxt "verb"
+msgid "tentatively accepted"
+msgstr ""
+
+#. The adjective "tentatively accepted", like "The users status is 'tentatively accepted'."
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/ContextSensitiveMessages.java:123
+msgctxt "adjective"
 msgid "tentatively accepted"
 msgstr ""
 
@@ -6979,6 +6991,25 @@ msgstr ""
 #. Not set
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:666
 msgid "Not set"
+msgstr ""
+
+#. -
+#. * Confirmation actions
+#.
+#. accepted
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:672
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:699
+msgid "accepted"
+msgstr ""
+
+#. declined
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:674
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:702
+msgid "declined"
+msgstr ""
+
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:676
+msgid "tentatively accepted"
 msgstr ""
 
 #. -

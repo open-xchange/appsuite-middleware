@@ -102,6 +102,11 @@ public class SyncDeliverTasks
      */
     public void execute(final Collection<EventHandlerProxy> tasks, final Event event, final boolean filterAsyncUnordered)
     {
+        if (null == tasks || tasks.isEmpty()) {
+            // Nothing to do... No one interested in given event
+            return;
+        }
+
         final Thread sleepingThread = Thread.currentThread();
         final SyncThread syncThread = sleepingThread instanceof SyncThread ? (SyncThread)sleepingThread : null;
 

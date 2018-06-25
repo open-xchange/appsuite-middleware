@@ -49,22 +49,17 @@
 
 package com.openexchange.chronos.impl.groupware;
 
-import java.sql.Connection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.common.DeleteResultImpl;
 import com.openexchange.chronos.common.UpdateResultImpl;
 import com.openexchange.chronos.impl.DefaultCalendarEvent;
 import com.openexchange.chronos.impl.Utils;
-import com.openexchange.chronos.provider.CalendarAccount;
 import com.openexchange.chronos.service.CalendarEvent;
 import com.openexchange.chronos.service.CalendarHandler;
 import com.openexchange.chronos.service.CalendarParameters;
@@ -72,10 +67,7 @@ import com.openexchange.chronos.service.DeleteResult;
 import com.openexchange.chronos.service.EntityResolver;
 import com.openexchange.chronos.service.UpdateResult;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.groupware.contexts.Context;
 import com.openexchange.session.Session;
-import com.openexchange.tools.oxfolder.OXFolderAccess;
 
 /**
  * {@link SimpleResultTracker} - Tracks update and delete operations on calendar events. This tracker
@@ -86,39 +78,33 @@ import com.openexchange.tools.oxfolder.OXFolderAccess;
  */
 class SimpleResultTracker {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(SimpleResultTracker.class);
-
-    private List<UpdateResult>          updateResults;
-    private List<DeleteResult>          deleteResults;
-    private Set<String>                 affectedFolders;
-    private Set<CalendarHandler> calendarHandlers;
+    private final List<UpdateResult> updateResults;
+    private final List<DeleteResult> deleteResults;
+    private final Set<String> affectedFolders;
 
     /**
      * Initializes a new {@link SimpleResultTracker}.
-     *
-     * @param calendarHandlers The {@link CalendarHandler}s to notify
      */
-    public SimpleResultTracker(Set<CalendarHandler> calendarHandlers) {
+    public SimpleResultTracker() {
         super();
         this.updateResults = new LinkedList<>();
         this.deleteResults = new LinkedList<>();
         this.affectedFolders = new HashSet<>();
-        this.calendarHandlers = calendarHandlers;
     }
 
     /**
      * Creates a new {@link CalendarEvent} and calls {@link CalendarHandler#handle(CalendarEvent)}
      *
-     * @param connection The {@link Connection}
-     * @param context The {@link Context}
-     * @param session The {@link Session} of the context admin
-     * @param entityResolver The {@link EntityResolver}
+     * @param session The admin session
+     * @param entityResolver The entity resolver, or <code>null</code> if not available
+     * @param calendarHandlers The handlers to notify
      * @param parameters Additional calendar parameters, or <code>null</code> if not set
      */
-    public void notifyCalenderHandlers(Connection connection, Context context, Session session, EntityResolver entityResolver, CalendarParameters parameters) {
-        Map<Integer, List<String>> affectedFoldersPerUser = getAffectedFoldersPerUser(context, connection, entityResolver);
+    public void notifyCalenderHandlers(Session session, EntityResolver entityResolver, Set<CalendarHandler> calendarHandlers, CalendarParameters parameters) throws OXException {
+        Map<Integer, List<String>> affectedFoldersPerUser = Utils.getAffectedFoldersPerUser(session.getContextId(), entityResolver, affectedFolders);
         if (false == affectedFoldersPerUser.isEmpty()) {
-            DefaultCalendarEvent calendarEvent = new DefaultCalendarEvent(context.getContextId(), CalendarAccount.DEFAULT_ACCOUNT.getAccountId(), -1, session, affectedFoldersPerUser, Collections.emptyList(), updateResults, deleteResults, parameters);
+            DefaultCalendarEvent calendarEvent = new DefaultCalendarEvent(
+                session.getContextId(), Utils.ACCOUNT_ID, -1, affectedFoldersPerUser, Collections.emptyList(), updateResults, deleteResults, session, entityResolver, parameters);
             for (CalendarHandler handler : calendarHandlers) {
                 handler.handle(calendarEvent);
             }
@@ -162,30 +148,4 @@ class SimpleResultTracker {
         }
     }
 
-    /**
-     * Get the affected folders per user
-     *
-     * @param context The {@link Context}
-     * @param connection The {@link Connection}
-     * @param entityResolver The {@link EntityResolver}
-     * @return A {@link Map} containing changed folders per user
-     */
-    private Map<Integer, List<String>> getAffectedFoldersPerUser(Context context, Connection connection, EntityResolver entityResolver) {
-        Map<Integer, List<String>> affectedFoldersPerUser = new HashMap<Integer, List<String>>();
-        OXFolderAccess folderAccess = new OXFolderAccess(connection, context);
-        for (String folderId : affectedFolders) {
-            try {
-                FolderObject folder = folderAccess.getFolderObject(Integer.valueOf(folderId).intValue());
-                Set<Integer> affectedUsers = Utils.getAffectedUsers(folder, entityResolver);
-                for (Integer userId : affectedUsers) {
-                    com.openexchange.tools.arrays.Collections.put(affectedFoldersPerUser, userId, folderId);
-                }
-            } catch (NumberFormatException e) {
-                LOGGER.debug("Could not convert id {} to an Integer", e, folderId);
-            } catch (OXException e) {
-                LOGGER.debug("Could not get folder with id {}", e, folderId);
-            }
-        }
-        return affectedFoldersPerUser;
-    }
 }

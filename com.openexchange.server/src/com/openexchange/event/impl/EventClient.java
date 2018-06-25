@@ -593,14 +593,9 @@ public class EventClient {
         if (!oldContact.containsImageLastModified() || oldContact.getImageLastModified() == null) {
             return;
         }
+        ResourceCache resourceCache = ServerServiceRegistry.getInstance().getService(ResourceCache.class);
         ImageLocation imageLocation = new ImageLocation.Builder().folder(oldContact.getParentFolderID()).timestamp(Long.toString(oldContact.getImageLastModified().getTime())).build();
-        Dictionary<String, Object> props = new Hashtable<String, Object>(4);
-        props.put(FileStorageEventConstants.SESSION, session);
-        props.put(FileStorageEventConstants.E_TAG, first.getETag(imageLocation, session));
-        props.put(FileStorageEventConstants.FOLDER_ID, oldContact.getParentFolderID());
-        props.put(FileStorageEventConstants.OBJECT_ID, oldContact.getObjectID());
-        
-        triggerEvent(new Event(FileStorageEventConstants.UPDATE_TOPIC, props));
+        resourceCache.removeAlikes(first.getETag(imageLocation, session), 0, contextId);
     }
 
     public void delete(final Contact contact) throws OXException, OXException {

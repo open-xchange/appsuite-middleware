@@ -172,4 +172,16 @@ public interface CalendarServiceUtilities {
      */
     Quota[] getQuotas(CalendarSession session) throws OXException;
 
+    /**
+     * Loads the recurrence data for an existing recurring event series.
+     * <p/>
+     * No permissions checks are performed, i.e. the recurrence data is also loaded for event series the current session's user cannot
+     * access.
+     *
+     * @param session The calendar session
+     * @param seriesId The identifier of the event series to load the recurrence data for
+     * @return The recurrence data
+     */
+    RecurrenceData loadRecurrenceData(CalendarSession session, String seriesId) throws OXException;
+
 }

@@ -56,7 +56,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import com.openexchange.chronos.Event;
+import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.common.DefaultEventsResult;
+import com.openexchange.chronos.common.DefaultRecurrenceData;
+import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.impl.performer.ChangeExceptionsPerformer;
 import com.openexchange.chronos.impl.performer.CountEventsPerformer;
 import com.openexchange.chronos.impl.performer.ForeignEventsPerformer;
@@ -65,6 +68,7 @@ import com.openexchange.chronos.impl.performer.ResolvePerformer;
 import com.openexchange.chronos.service.CalendarServiceUtilities;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.EventsResult;
+import com.openexchange.chronos.service.RecurrenceData;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.exception.OXException;
 import com.openexchange.quota.Quota;
@@ -149,6 +153,25 @@ public class CalendarServiceUtilitiesImpl implements CalendarServiceUtilities {
             @Override
             protected Quota[] execute(CalendarSession session, CalendarStorage storage) throws OXException {
                 return new Quota[] { Utils.getQuota(session, storage) };
+            }
+        }.executeQuery();
+    }
+
+    @Override
+    public RecurrenceData loadRecurrenceData(CalendarSession session, String seriesId) throws OXException {
+        return new InternalCalendarStorageOperation<RecurrenceData>(session) {
+
+            @Override
+            protected RecurrenceData execute(CalendarSession session, CalendarStorage storage) throws OXException {
+                EventField[] recurrenceDataFields = new EventField[] {
+                    EventField.ID, EventField.SERIES_ID, EventField.RECURRENCE_RULE, EventField.START_DATE, EventField.END_DATE,
+                    EventField.RECURRENCE_DATES, EventField.DELETE_EXCEPTION_DATES, EventField.CHANGE_EXCEPTION_DATES
+                };
+                Event seriesMaster = storage.getEventStorage().loadEvent(seriesId, recurrenceDataFields);
+                if (null == seriesMaster || false == isSeriesMaster(seriesMaster)) {
+                    throw CalendarExceptionCodes.EVENT_NOT_FOUND.create(seriesId);
+                }
+                return new DefaultRecurrenceData(seriesMaster);
             }
         }.executeQuery();
     }

@@ -49,28 +49,27 @@
 
 package com.openexchange.chronos.impl.groupware;
 
-import java.sql.Connection;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
+import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.AttendeeField;
 import com.openexchange.chronos.CalendarUser;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.Organizer;
 import com.openexchange.chronos.common.CalendarUtils;
+import com.openexchange.chronos.common.mapping.EventMapper;
+import com.openexchange.chronos.impl.Consistency;
 import com.openexchange.chronos.provider.CalendarAccount;
 import com.openexchange.chronos.service.CalendarHandler;
 import com.openexchange.chronos.service.CalendarParameters;
-import com.openexchange.chronos.service.CalendarUtilities;
 import com.openexchange.chronos.service.EntityResolver;
 import com.openexchange.chronos.storage.CalendarStorage;
-import com.openexchange.chronos.storage.CalendarStorageFactory;
-import com.openexchange.database.provider.DBProvider;
-import com.openexchange.database.provider.DBTransactionPolicy;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.contexts.Context;
 import com.openexchange.search.SearchTerm;
 import com.openexchange.search.SingleSearchTerm.SingleOperation;
 import com.openexchange.session.Session;
@@ -86,39 +85,30 @@ class StorageUpdater {
     private static final EventField[] SEARCH_FIELDS = { EventField.ID, EventField.SERIES_ID, EventField.RECURRENCE_ID, EventField.FOLDER_ID, EventField.CREATED_BY, EventField.MODIFIED_BY,
         EventField.CALENDAR_USER, EventField.ORGANIZER, EventField.ATTENDEES };
 
-    private final Context             context;
-    private final int                 attendeeId;
-    private final CalendarUser        replacement;
-    private final Date                date;
-    private final EntityResolver      entityResolver;
-    private final CalendarStorage     storage;
+    private final CalendarStorage storage;
     private final SimpleResultTracker tracker;
-    private final CalendarUtilities   calendarUtilities;
-    private final DBProvider          dbProvider;
+    private final int attendeeId;
+    private final CalendarUser replacement;
+    private final Date date;
+    private final EntityResolver entityResolver;
 
     /**
-     * Initializes a new {@link CalendarDeleteListener}.
+     * Initializes a new {@link StorageUpdater}.
      *
-     * @param context The {@link Context}
+     * @param storage The underlying calendar storage
+     * @param entityResolver The entity resolver to use
+     * @param dbProvider The database provider to use
      * @param attendeeId The identifier of the attendee
-     * @param destinationUserId The identifier of the destination user. <code>null</code> to use the context admin
-     * @param calendarUtilities The {@link CalendarUtilities}
-     * @param factory The {@link CalendarStorageFactory}
-     * @param dbProvider The {@link DBProvider} holding the connections
-     * @param calendarHandlers The {@link CalendarHandler}
-     * @throws OXException In case {@link EntityResolver} or {@link CalendarStorage} can't be created
+     * @param destinationUserId The identifier of the destination user
      */
-    StorageUpdater(Context context, int attendeeId, Integer destinationUserId, CalendarUtilities calendarUtilities, CalendarStorageFactory factory, DBProvider dbProvider, Set<CalendarHandler> calendarHandlers) throws OXException {
+    public StorageUpdater(CalendarStorage storage, EntityResolver entityResolver, int attendeeId, int destinationUserId) throws OXException {
         super();
-        this.context = context;
+        this.entityResolver = entityResolver;
         this.attendeeId = attendeeId;
-        this.entityResolver = calendarUtilities.getEntityResolver(context.getContextId());
-        this.replacement = entityResolver.prepareUserAttendee(null == destinationUserId || 0 >= destinationUserId ? context.getMailadmin() : destinationUserId.intValue());
-        this.storage = factory.create(context, CalendarAccount.DEFAULT_ACCOUNT.getAccountId(), entityResolver, dbProvider, DBTransactionPolicy.NO_TRANSACTIONS);
-        this.tracker = new SimpleResultTracker(calendarHandlers);
-        this.calendarUtilities = calendarUtilities;
-        this.dbProvider = dbProvider;
+        this.replacement = entityResolver.prepareUserAttendee(destinationUserId);
+        this.tracker = new SimpleResultTracker();
         this.date = new Date();
+        this.storage = storage;
     }
 
     /**
@@ -128,15 +118,22 @@ class StorageUpdater {
      * @throws OXException Various
      */
     void removeAttendeeFrom(Event event) throws OXException {
-        Event updatedEvent = calendarUtilities.copyEvent(event, (EventField[]) null);
-        updatedEvent.setModifiedBy(replacement);
-        updatedEvent.setLastModified(date);
-        updatedEvent.setTimestamp(date.getTime());
-        storage.getAlarmStorage().deleteAlarms(event.getId(), attendeeId);
-        storage.getAlarmTriggerStorage().deleteTriggers(Collections.singletonList(event.getId()), attendeeId);
-        storage.getAttendeeStorage().deleteAttendees(event.getId(), Collections.singletonList(CalendarUtils.find(event.getAttendees(), attendeeId)));
-        storage.getEventStorage().updateEvent(updatedEvent);
-        tracker.addUpdate(event, updatedEvent);
+        List<Attendee> updatedAttendees = new ArrayList<Attendee>(event.getAttendees());
+        Attendee attendee = CalendarUtils.find(updatedAttendees, attendeeId);
+        if (null != attendee) {
+            Event eventUpdate = new Event();
+            eventUpdate.setId(event.getId());
+            updatedAttendees.remove(attendee);
+            eventUpdate.setAttendees(updatedAttendees);
+            Consistency.setModified(date, eventUpdate, replacement);
+            storage.getAlarmStorage().deleteAlarms(event.getId(), attendeeId);
+            storage.getAlarmTriggerStorage().deleteTriggers(Collections.singletonList(event.getId()), attendeeId);
+            storage.getAttendeeStorage().deleteAttendees(event.getId(), Collections.singletonList(attendee));
+            storage.getEventStorage().updateEvent(eventUpdate);
+            Event updatedEvent = EventMapper.getInstance().copy(event, null, (EventField[]) null);
+            updatedEvent = EventMapper.getInstance().copy(eventUpdate, updatedEvent, (EventField[]) null);
+            tracker.addUpdate(event, updatedEvent);
+        }
     }
 
     /**
@@ -175,8 +172,19 @@ class StorageUpdater {
      * @throws OXException Various
      */
     void deleteEvent(List<Event> events, Session session) throws OXException {
-        for (final Event event : events) {
-            deleteEvent(event, session);
+        if (null == events || 0 == events.size()) {
+            return;
+        }
+        List<String> eventIds = Arrays.asList(CalendarUtils.getObjectIDs(events));
+        for (Event event : events) {
+            storage.getAttachmentStorage().deleteAttachments(session, CalendarUtils.getFolderView(event, attendeeId), event.getId());
+        }
+        storage.getAlarmTriggerStorage().deleteTriggers(eventIds);
+        storage.getAlarmStorage().deleteAlarms(eventIds);
+        storage.getAttendeeStorage().deleteAttendees(eventIds);
+        storage.getEventStorage().deleteEvents(eventIds);
+        for (Event event : events) {
+            tracker.addDelete(event, date.getTime());
         }
     }
 
@@ -187,23 +195,39 @@ class StorageUpdater {
      * @throws OXException Various
      */
     void replaceAttendeeIn(Event event) throws OXException {
-        Event updatedEvent = calendarUtilities.copyEvent(event, (EventField[]) null);
+        Event eventUpdate = new Event();
+        boolean updated = false;
         if (CalendarUtils.matches(event.getCreatedBy(), attendeeId)) {
-            updatedEvent.setCreatedBy(replacement);
+            eventUpdate.setCreatedBy(replacement);
+            updated = true;
         }
         if (CalendarUtils.matches(event.getModifiedBy(), attendeeId)) {
-            updatedEvent.setModifiedBy(replacement);
+            eventUpdate.setModifiedBy(replacement);
+            updated = true;
         }
         if (CalendarUtils.matches(event.getCalendarUser(), attendeeId)) {
-            updatedEvent.setCalendarUser(replacement);
+            eventUpdate.setCalendarUser(replacement);
+            updated = true;
         }
-        if (CalendarUtils.matches(event.getOrganizer(), attendeeId)) {
-            updatedEvent.setOrganizer(entityResolver.applyEntityData(new Organizer(), replacement.getEntity()));
+        if (null != event.getOrganizer()) {
+            if (CalendarUtils.matches(event.getOrganizer(), attendeeId)) {
+                eventUpdate.setOrganizer(entityResolver.applyEntityData(new Organizer(), replacement.getEntity()));
+                updated = true;
+            } else if (CalendarUtils.matches(event.getOrganizer().getSentBy(), attendeeId)) {
+                Organizer organizer = new Organizer(event.getOrganizer());
+                organizer.setSentBy(replacement);
+                eventUpdate.setOrganizer(organizer);
+                updated = true;
+            }
         }
-        updatedEvent.setLastModified(date);
-        updatedEvent.setTimestamp(date.getTime());
-        storage.getEventStorage().updateEvent(updatedEvent);
-        tracker.addUpdate(event, updatedEvent);
+        if (updated) {
+            eventUpdate.setId(event.getId());
+            Consistency.setModified(date, eventUpdate, replacement);
+            storage.getEventStorage().updateEvent(eventUpdate);
+            Event updatedEvent = EventMapper.getInstance().copy(event, null, (EventField[]) null);
+            updatedEvent = EventMapper.getInstance().copy(eventUpdate, updatedEvent, (EventField[]) null);
+            tracker.addUpdate(event, updatedEvent);
+        }
     }
 
     /**
@@ -215,6 +239,76 @@ class StorageUpdater {
     void replaceAttendeeIn(List<Event> events) throws OXException {
         for (final Event event : events) {
             replaceAttendeeIn(event);
+        }
+    }
+
+    /**
+     * Removes any references to the internal user from multiple events. This includes removing the user from the list of attendees,
+     * removing his alarms and -triggers, as well as replacing him in the created-by-, modified-by-, organizer- and calendar-user-
+     * properties.
+     *
+     * @param events The events to remove the user from
+     */
+    public void removeUserReferences(List<Event> events) throws OXException {
+        if (null == events || events.isEmpty()) {
+            return;
+        }
+        /*
+         * delete any alarms and alarm triggers
+         */
+        storage.getAlarmTriggerStorage().deleteTriggers(attendeeId);
+        storage.getAlarmStorage().deleteAlarms(attendeeId);
+        /*
+         * remove user references from each event
+         */
+        for (Event event : events) {
+            removeUserReferences(event);
+        }
+    }
+
+    private void removeUserReferences(Event event) throws OXException {
+        Event eventUpdate = new Event();
+        boolean updated = false;
+        /*
+         * remove user in event metadata
+         */
+        if (CalendarUtils.matches(event.getCreatedBy(), attendeeId)) {
+            eventUpdate.setCreatedBy(replacement);
+            updated = true;
+        }
+        if (CalendarUtils.matches(event.getModifiedBy(), attendeeId)) {
+            eventUpdate.setModifiedBy(replacement);
+            updated = true;
+        }
+        if (CalendarUtils.matches(event.getCalendarUser(), attendeeId)) {
+            eventUpdate.setCalendarUser(replacement);
+            updated = true;
+        }
+        if (CalendarUtils.matches(event.getOrganizer(), attendeeId)) {
+            eventUpdate.setOrganizer(entityResolver.applyEntityData(new Organizer(), replacement.getEntity()));
+            updated = true;
+        }
+        /*
+         * remove user from attendees
+         */
+        Attendee attendee = CalendarUtils.find(event.getAttendees(), attendeeId);
+        if (null != attendee) {
+            storage.getAttendeeStorage().deleteAttendees(event.getId(), Collections.singletonList(attendee));
+            List<Attendee> updatedAttendees = new ArrayList<Attendee>(event.getAttendees());
+            updatedAttendees.remove(attendee);
+            eventUpdate.setAttendees(updatedAttendees);
+            updated = true;
+        }
+        /*
+         * update event data in storage & track update result
+         */
+        if (updated) {
+            eventUpdate.setId(event.getId());
+            Consistency.setModified(date, eventUpdate, replacement);
+            storage.getEventStorage().updateEvent(eventUpdate);
+            Event updatedEvent = EventMapper.getInstance().copy(event, null, (EventField[]) null);
+            updatedEvent = EventMapper.getInstance().copy(eventUpdate, updatedEvent, (EventField[]) null);
+            tracker.addUpdate(event, updatedEvent);
         }
     }
 
@@ -243,12 +337,12 @@ class StorageUpdater {
     /**
      * Notifies the {@link CalendarHandler}s
      *
-     * @param session The {@link Session}
+     * @param session The admin session
+     * @param calendarHandlers The handlers to notify
      * @param parameters Additional calendar parameters, or <code>null</code> if not set
-     * @throws OXException In case {@link Connection} can not be acquired
      */
-    void notifyCalendarHandlers(Session session, CalendarParameters parameters) throws OXException {
-        tracker.notifyCalenderHandlers(dbProvider.getWriteConnection(context), context, session, entityResolver, parameters);
+    void notifyCalendarHandlers(Session session, Set<CalendarHandler> handlers, CalendarParameters parameters) throws OXException {
+        tracker.notifyCalenderHandlers(session, entityResolver, handlers, parameters);
     }
 
     /**

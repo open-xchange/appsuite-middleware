@@ -66,7 +66,8 @@ public class EventAdminImpl implements EventAdmin
                     final int timeout,
                     final String[] ignoreTimeout,
                     final boolean requireTopic,
-                    final String[] ignoreTopics)
+                    final String[] ignoreTopics,
+                    final int maxNumEventsPerThread)
     {
         checkNull(syncPool, "syncPool");
         checkNull(asyncPool, "asyncPool");
@@ -75,7 +76,7 @@ public class EventAdminImpl implements EventAdmin
         this.tracker.update(ignoreTimeout, requireTopic);
         this.tracker.open();
         m_sendManager = new SyncDeliverTasks(syncPool, timeout);
-        m_postManager = new AsyncDeliverTasks(asyncPool, m_sendManager);
+        m_postManager = new AsyncDeliverTasks(asyncPool, m_sendManager, maxNumEventsPerThread);
         m_ignoreTopics = EventHandlerTracker.createMatchers(ignoreTopics);
     }
 
@@ -163,11 +164,13 @@ public class EventAdminImpl implements EventAdmin
     public void update(final int timeout,
                     final String[] ignoreTimeout,
                     final boolean requireTopic,
-                    final String[] ignoreTopics)
+                    final String[] ignoreTopics,
+                    final int maxNumEventsPerThread)
     {
         this.tracker.close();
         this.tracker.update(ignoreTimeout, requireTopic);
         this.m_sendManager.update(timeout);
+        this.m_postManager.update(maxNumEventsPerThread);
         this.tracker.open();
         this.m_ignoreTopics = EventHandlerTracker.createMatchers(ignoreTopics);
     }

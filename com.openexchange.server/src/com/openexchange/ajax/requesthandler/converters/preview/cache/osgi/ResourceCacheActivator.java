@@ -89,6 +89,7 @@ import com.openexchange.groupware.update.UpdateTaskProviderService;
 import com.openexchange.management.ManagementService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.osgi.SimpleRegistryListener;
+import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.timer.TimerService;
 
 
@@ -177,6 +178,7 @@ public final class ResourceCacheActivator extends HousekeepingActivator {
         // Register stuff
         registerService(ResourceCache.class, cache);
         registerService(Reloadable.class, cache);
+        ServerServiceRegistry.getInstance().addService(ResourceCache.class, cache);
         {
             final Dictionary<String, Object> d = new Hashtable<String, Object>(1);
             d.put(EventConstants.EVENT_TOPIC, new String[] { FileStorageEventConstants.UPDATE_TOPIC, FileStorageEventConstants.DELETE_TOPIC });

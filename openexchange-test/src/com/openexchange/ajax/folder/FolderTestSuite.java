@@ -74,7 +74,6 @@ import com.openexchange.ajax.folder.api2.UpdatesTest;
 import com.openexchange.ajax.folder.api2.VisibleFoldersTest;
 import com.openexchange.ajax.folder.api_client.MailFolderCountTest;
 import com.openexchange.ajax.infostore.test.Bug37211Test;
-import com.openexchange.ajax.infostore.test.InfostoreObjectCountTest;
 import com.openexchange.test.concurrent.ParallelSuite;
 
 /**
@@ -111,7 +110,6 @@ import com.openexchange.test.concurrent.ParallelSuite;
     ContactObjectCountTest.class,
     TaskObjectCountTest.class,
     AppointmentObjectCountTest.class,
-    InfostoreObjectCountTest.class,
                     // EAS subscribe
     com.openexchange.ajax.folder.eas.SubscribeTest.class,
     com.openexchange.ajax.folder.eas.MultipleSubscribeTest.class,

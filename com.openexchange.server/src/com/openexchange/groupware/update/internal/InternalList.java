@@ -725,7 +725,7 @@ public final class InternalList {
 
         // Convert legacy calendar tables to utf8mb4
         list.add(new com.openexchange.groupware.update.tasks.LegacyCalendarTablesUtf8Mb4UpdateTask());
-        
+
         // Drops the unused "Shared address book" from database
         list.add(new com.openexchange.groupware.update.tasks.DropUnusedSharedAddressBookFolder());
 

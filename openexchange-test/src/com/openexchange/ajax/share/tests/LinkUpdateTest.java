@@ -123,10 +123,11 @@ public class LinkUpdateTest extends ShareTest {
          */
         getResponse = getClient().execute(new GetLinkRequest(target, getTimeZone()));
         assertFalse(getResponse.getErrorMessage(), getResponse.hasError());
+
         ShareLink updatedLink = getResponse.getShareLink();
         assertNotNull("got no updated link", updatedLink);
-        assertEquals(link.getShareURL(), updatedLink.getShareURL());
         assertFalse(updatedLink.isNew());
+        assertEquals(link.getShareURL(), updatedLink.getShareURL());
         assertEquals("expiry date wrong", expiryDate, updatedLink.getExpiry());
         /*
          * update link & change expiry date

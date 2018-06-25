@@ -179,9 +179,11 @@ public class OAuthServiceImpl implements OAuthService {
             String cbUrl = callbackUrl;
 
             // Apply possible modifications to call-back URL
-            final String modifiedUrl = metaData.modifyCallbackURL(cbUrl, currentHost, session);
-            if (modifiedUrl != null) {
-                cbUrl = modifiedUrl;
+            {
+                final String modifiedUrl = metaData.modifyCallbackURL(cbUrl, currentHost, session);
+                if (modifiedUrl != null) {
+                    cbUrl = modifiedUrl;
+                }
             }
             // Check for available deferrer service
             DeferringURLService ds = Services.getService(DeferringURLService.class);
@@ -217,7 +219,9 @@ public class OAuthServiceImpl implements OAuthService {
                     }
 
                     String prevCbUrl = cbUrl;
-                    cbUrl = currentHost.injectRoute(new StringBuilder(uri.getScheme()).append("://").append(uri.getHost()).append(path).toString());
+                    String deferredBaseURL = new StringBuilder(uri.getScheme()).append("://").append(uri.getHost()).append(path).toString();
+                    // For the Twitter API we need to inject the route as URL parameter instead of path segment, see Bug 59098
+                    cbUrl = KnownApi.TWITTER.getServiceId().equals(serviceMetaData) ? currentHost.injectRouteAsParameter(deferredBaseURL) : currentHost.injectRoute(deferredBaseURL);
 
                     org.scribe.oauth.OAuthService service = getScribeService(metaData, cbUrl, session, scopes);
                     scribeToken = service.getRequestToken();
