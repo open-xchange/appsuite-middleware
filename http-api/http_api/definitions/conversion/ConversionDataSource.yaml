@@ -1,10 +1,14 @@
-type: array
-items:
-  type: object
-  properties:
-    com.openexchange.mail.conversion.fullname:
-      type: string
-    com.openexchange.mail.conversion.mailid:
-      type: string
-    com.openexchange.mail.conversion.sequenceid:
-      type: string
+type: object
+properties:
+  com.openexchange.mail.conversion.fullname:
+    type: string
+    description: The identifier of the folder.
+    example: "default0/INBOX"
+  com.openexchange.mail.conversion.mailid:
+    type: string
+    description: The identifier of the mail.
+    example: "1337"
+  com.openexchange.mail.conversion.sequenceid:
+    type: string
+    description: The identifier of attachment to analyze.
+    example: "1.3"
