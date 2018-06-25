@@ -62,6 +62,11 @@ import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 import com.openexchange.admin.rmi.exceptions.UserExistsException;
 import com.openexchange.admin.rmi.factory.UserFactory;
 
+/**
+ * {@link UserCopyTest}
+ *
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ */
 public class UserCopyTest extends AbstractRMITest {
 
     private Context srcCtx;
