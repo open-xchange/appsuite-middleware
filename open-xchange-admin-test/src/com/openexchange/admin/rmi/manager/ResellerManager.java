@@ -102,7 +102,9 @@ public class ResellerManager extends AbstractManager {
      */
     public ResellerAdmin create(ResellerAdmin resellerAdmin) throws Exception {
         OXResellerInterface resellerInterface = getResellerInterface();
-        return resellerInterface.create(resellerAdmin, getMasterCredentials());
+        ResellerAdmin admin = resellerInterface.create(resellerAdmin, getMasterCredentials());
+        managedObjects.put(admin.getId(), admin);
+        return admin;
     }
 
     /**
