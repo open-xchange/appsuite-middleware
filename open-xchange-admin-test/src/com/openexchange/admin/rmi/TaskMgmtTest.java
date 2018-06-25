@@ -60,6 +60,7 @@ import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.dataobjects.Database;
 import com.openexchange.admin.rmi.dataobjects.User;
 import com.openexchange.admin.rmi.exceptions.TaskManagerException;
+import com.openexchange.admin.rmi.factory.UserFactory;
 import com.openexchange.admin.user.copy.rmi.TestTool;
 
 public class TaskMgmtTest extends AbstractRMITest {
@@ -78,7 +79,7 @@ public class TaskMgmtTest extends AbstractRMITest {
     public void setUp() throws Exception {
         super.setUp();
 
-        admin = newUser("oxadmin", "secret", "Admin User", "Admin", "User", "oxadmin@example.com");
+        admin = UserFactory.createUser("oxadmin", "secret", "Admin User", "Admin", "User", "oxadmin@example.com");
         ti = getTaskInterface();
     }
 

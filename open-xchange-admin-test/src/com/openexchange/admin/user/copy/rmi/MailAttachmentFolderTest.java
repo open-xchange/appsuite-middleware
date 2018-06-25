@@ -59,6 +59,7 @@ import org.junit.Test;
 import com.openexchange.admin.rmi.AbstractRMITest;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.User;
+import com.openexchange.admin.rmi.factory.UserFactory;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.ListRequest;
 import com.openexchange.ajax.folder.actions.ListResponse;
@@ -115,17 +116,17 @@ public class MailAttachmentFolderTest extends AbstractRMITest {
             }
         }
 
-        admin = newUser("oxadmin", "secret", "Admin User", "Admin", "User", "oxadmin@example.com");
+        admin = UserFactory.createUser("oxadmin", "secret", "Admin User", "Admin", "User", "oxadmin@example.com");
         srcCtx = TestTool.createContext(getContextManager(), "UserMoveSourceCtx_", admin, "all", superAdminCredentials);
         dstCtx = TestTool.createContext(getContextManager(), "UserMoveDestinationCtx_", admin, "all", superAdminCredentials);
 
-        srcUser = newUser("user", "secret", "Test User", "Test", "User", "oxuser@example.com");
+        srcUser = UserFactory.createUser("user", "secret", "Test User", "Test", "User", "oxuser@example.com");
         srcUser.setImapServer("example.com");
         srcUser.setImapLogin("oxuser");
         srcUser.setSmtpServer("example.com");
         srcUser = getUserManager().create(srcCtx, srcUser, adminCredentials);
 
-        User dummy = newUser("dummy", "secret", "Dummy User", "Dummy", "User", "oxuser2@example.com");
+        User dummy = UserFactory.createUser("dummy", "secret", "Dummy User", "Dummy", "User", "oxuser2@example.com");
         dummy.setImapServer("example.com");
         dummy.setImapLogin("oxuser");
         dummy.setSmtpServer("example.com");

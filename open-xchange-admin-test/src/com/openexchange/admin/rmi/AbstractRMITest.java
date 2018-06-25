@@ -68,6 +68,7 @@ import com.openexchange.admin.rmi.dataobjects.Group;
 import com.openexchange.admin.rmi.dataobjects.Resource;
 import com.openexchange.admin.rmi.dataobjects.User;
 import com.openexchange.admin.rmi.exceptions.NoSuchResourceException;
+import com.openexchange.admin.rmi.factory.UserFactory;
 import com.openexchange.admin.rmi.manager.ContextManager;
 import com.openexchange.admin.rmi.manager.DatabaseManager;
 import com.openexchange.admin.rmi.manager.FilestoreManager;
@@ -141,8 +142,8 @@ public abstract class AbstractRMITest {
         adminContext = getTestContextObject(adminCredentials);
 
         superAdminCredentials = getMasterAdminCredentials();
-        superAdmin = newUser(superAdminCredentials.getLogin(), superAdminCredentials.getPassword(), "ContextCreatingAdmin", "Ad", "Min", "adminmaster@ox.invalid");
-        contextAdmin = newUser(adminCredentials.getLogin(), adminCredentials.getPassword(), "ContextAdmin", "Context", "Admin", "contextAdmin@ox.invalid");
+        superAdmin = UserFactory.createUser(superAdminCredentials.getLogin(), superAdminCredentials.getPassword(), "ContextCreatingAdmin", "Ad", "Min", "adminmaster@ox.invalid");
+        contextAdmin = UserFactory.createUser(adminCredentials.getLogin(), adminCredentials.getPassword(), "ContextAdmin", "Context", "Admin", "contextAdmin@ox.invalid");
         superAdminContext = getTestContextObject(superAdminCredentials);
     }
 
@@ -277,20 +278,6 @@ public abstract class AbstractRMITest {
         assertResourceEquals(expected, lookup);
     }
 
-    /*** pseudo constructors requiring mandatory fields ***/
-
-    public static User newUser(String name, String passwd, String displayName, String givenName, String surname, String email) {
-        User user = new User();
-        user.setName(name);
-        user.setPassword(passwd);
-        user.setDisplay_name(displayName);
-        user.setGiven_name(givenName);
-        user.setSur_name(surname);
-        user.setPrimaryEmail(email);
-        user.setEmail1(email);
-        return user;
-    }
-
     public static Group newGroup(String displayName, String name) {
         Group group = new Group();
         group.setDisplayname(displayName);
@@ -304,17 +291,6 @@ public abstract class AbstractRMITest {
         res.setDisplayname(displayName);
         res.setEmail(email);
         return res;
-    }
-
-    public static Context newContext(String name, int id) {
-        Context newContext = new Context();
-        Filestore filestore = new Filestore();
-        filestore.setSize(Long.valueOf(128l));
-        newContext.setFilestoreId(filestore.getId());
-        newContext.setName(name);
-        newContext.setMaxQuota(filestore.getSize());
-        newContext.setId(Integer.valueOf(id));
-        return newContext;
     }
 
     /*** Interfaces ***/

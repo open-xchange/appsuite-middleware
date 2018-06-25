@@ -51,6 +51,7 @@ package com.openexchange.admin.rmi.factory;
 
 import java.util.UUID;
 import com.openexchange.admin.rmi.dataobjects.Context;
+import com.openexchange.admin.rmi.dataobjects.Filestore;
 
 /**
  * {@link ContextFactory}
@@ -60,6 +61,12 @@ import com.openexchange.admin.rmi.dataobjects.Context;
  */
 public class ContextFactory {
 
+    /**
+     * Creates a new {@link Context} object with the specified quota
+     * 
+     * @param maxQuota the maximum quota of the context
+     * @return The new {@link Context} object
+     */
     public static Context createContext(long maxQuota) {
         Context context = new Context();
         context.setName("Name-" + UUID.randomUUID().toString());
@@ -67,9 +74,36 @@ public class ContextFactory {
         return context;
     }
 
+    /**
+     * Creates a new {@link Context} object with the specified id
+     * and max quota
+     * 
+     * @param contextId The context identifier
+     * @param maxQuota The maximum quota of the context
+     * @return The new {@link Context} object
+     */
     public static Context createContext(int contextId, long maxQuota) {
         Context context = createContext(maxQuota);
         context.setMaxQuota(maxQuota);
         return context;
+    }
+
+    /**
+     * Creates a new {@link Context} object with 128M filestore
+     * and the specified id and name
+     * 
+     * @param contextId The context identifier
+     * @param name The context's name
+     * @return The new {@link Context} object
+     */
+    public static Context createContext(int contextId, String name) {
+        Context newContext = new Context();
+        Filestore filestore = new Filestore();
+        filestore.setSize(Long.valueOf(128l));
+        newContext.setFilestoreId(filestore.getId());
+        newContext.setName(name);
+        newContext.setMaxQuota(filestore.getSize());
+        newContext.setId(Integer.valueOf(contextId));
+        return newContext;
     }
 }

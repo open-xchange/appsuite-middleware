@@ -78,19 +78,26 @@ public class UserFactory {
      * @return The newly created {@link User} object
      */
     public static User createContextAdmin(String name, String password) {
-        User oxadmin = new User();
-        oxadmin.setName(name);
-        oxadmin.setDisplay_name(name);
-        oxadmin.setGiven_name(name);
-        oxadmin.setSur_name(name);
-        oxadmin.setPrimaryEmail(name + "@example.com");
-        oxadmin.setEmail1(name + "@example.com");
-        oxadmin.setPassword(password);
-        return oxadmin;
+        return createUser(name, password, name, name, name, name + "@example.com");
     }
 
     /**
-     * Creates a new {@link User} with only the mandatory fields set
+     * Creates a new user
+     */
+    public static User createUser(String name, String passwd, String displayName, String givenName, String surname, String email) {
+        User user = new User();
+        user.setName(name);
+        user.setPassword(passwd);
+        user.setDisplay_name(displayName);
+        user.setGiven_name(givenName);
+        user.setSur_name(surname);
+        user.setPrimaryEmail(email);
+        user.setEmail1(email);
+        return user;
+    }
+
+    /**
+     * Creates a new {@link User} with only the mandatory fields
      * 
      * @param ident The user identity
      * @param password the password
@@ -98,22 +105,14 @@ public class UserFactory {
      * @return The {@link User} object
      */
     public static User createUser(String ident, String password, String domain) {
-        User usr = new User();
-
-        usr.setName(ident);
-        usr.setPassword(password);
-
-        usr.setMailenabled(true);
-
-        usr.setPrimaryEmail("primaryemail-" + ident + "@" + domain);
-        usr.setEmail1("primaryemail-" + ident + "@" + domain);
-        usr.setDisplay_name("Displayname " + ident);
-        usr.setGiven_name(ident);
-        usr.setSur_name("Lastname " + ident);
-
-        return usr;
+        User user = createUser(ident, password, "Displayname " + ident, ident, "Lastname " + ident, "primaryemail-" + ident + "@" + domain);
+        user.setMailenabled(true);
+        return user;
     }
 
+    /**
+     * Creates a new user
+     */
     public static User createUser(String ident, String password, String domain, Context context) {
         return createUser(ident, password, domain, context, true);
     }

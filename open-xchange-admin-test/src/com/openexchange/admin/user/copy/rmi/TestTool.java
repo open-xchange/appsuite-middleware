@@ -49,11 +49,11 @@
 
 package com.openexchange.admin.user.copy.rmi;
 
-import com.openexchange.admin.rmi.AbstractRMITest;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.dataobjects.User;
 import com.openexchange.admin.rmi.exceptions.ContextExistsException;
+import com.openexchange.admin.rmi.factory.ContextFactory;
 import com.openexchange.admin.rmi.manager.ContextManager;
 import com.openexchange.configuration.TestConfig;
 import com.openexchange.configuration.TestConfig.Property;
@@ -71,7 +71,7 @@ public class TestTool {
         boolean created = false;
         while (!created) {
             try {
-                Context newContext = AbstractRMITest.newContext(prefix + ctxId, ctxId);
+                Context newContext = ContextFactory.createContext(ctxId, prefix + ctxId);
                 if (filestoreId > 0) {
                     newContext.setFilestoreId(filestoreId);
                 }

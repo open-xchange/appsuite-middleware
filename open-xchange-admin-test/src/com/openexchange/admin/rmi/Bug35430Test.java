@@ -57,6 +57,8 @@ import org.junit.Test;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.User;
 import com.openexchange.admin.rmi.exceptions.ContextExistsException;
+import com.openexchange.admin.rmi.factory.ContextFactory;
+import com.openexchange.admin.rmi.factory.UserFactory;
 
 /**
  * {@link Bug35430Test}
@@ -95,8 +97,8 @@ public final class Bug35430Test extends AbstractRMITest {
     }
 
     private Context createContext(String name, int cid) throws Exception {
-        Context newContext = newContext(name, cid);
-        User newAdmin = newUser("oxadmin", "secret", "New Admin", "New", "Admin", "newadmin@ox.invalid");
+        Context newContext = ContextFactory.createContext(cid, name);
+        User newAdmin = UserFactory.createUser("oxadmin", "secret", "New Admin", "New", "Admin", "newadmin@ox.invalid");
         boolean created = false;
         try {
             newContext = getContextManager().create(newContext, newAdmin);

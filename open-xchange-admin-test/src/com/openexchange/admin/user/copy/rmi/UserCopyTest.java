@@ -60,6 +60,7 @@ import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.User;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 import com.openexchange.admin.rmi.exceptions.UserExistsException;
+import com.openexchange.admin.rmi.factory.UserFactory;
 
 public class UserCopyTest extends AbstractRMITest {
 
@@ -181,7 +182,7 @@ public class UserCopyTest extends AbstractRMITest {
     }
 
     private User createUser(Context ctx) throws Exception {
-        User user = newUser("user", "secret", "Test User", "Test", "User", "oxuser@example.com");
+        User user = UserFactory.createUser("user", "secret", "Test User", "Test", "User", "oxuser@example.com");
         user.setImapServer("example.com");
         user.setImapLogin("oxuser");
         user.setSmtpServer("example.com");

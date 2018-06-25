@@ -68,6 +68,8 @@ import com.openexchange.admin.rmi.exceptions.NoSuchContextException;
 import com.openexchange.admin.rmi.exceptions.NoSuchGroupException;
 import com.openexchange.admin.rmi.exceptions.NoSuchResourceException;
 import com.openexchange.admin.rmi.exceptions.NoSuchUserException;
+import com.openexchange.admin.rmi.factory.ContextFactory;
+import com.openexchange.admin.rmi.factory.UserFactory;
 import com.openexchange.admin.user.copy.rmi.TestTool;
 
 /**
@@ -95,7 +97,7 @@ public class AdditionalRMITests extends AbstractRMITest {
     public final void setupContexts() throws Exception {
         context = TestTool.createContext(getContextManager(), "AdditionalCtx_", contextAdmin, "all", superAdminCredentials);
 
-        user = newUser("thorben.betten", "secret", myDisplayName, "Thorben", "Betten", "oxuser@example.com");
+        user = UserFactory.createUser("thorben.betten", "secret", myDisplayName, "Thorben", "Betten", "oxuser@example.com");
         user.setImapServer("example.com");
         user.setImapLogin("oxuser");
         user.setSmtpServer("example.com");
@@ -215,9 +217,9 @@ public class AdditionalRMITests extends AbstractRMITest {
      */
     @Test
     public void testCreateFirstUser() throws Exception {
-        Context newContext = newContext("newContext", ((int) (Math.random() * 1000)));
+        Context newContext = ContextFactory.createContext(((int) (Math.random() * 1000)), "newContext");
 
-        User newAdmin = newUser("new_admin", "secret", "New Admin", "New", "Admin", "newadmin@ox.invalid");
+        User newAdmin = UserFactory.createUser("new_admin", "secret", "New Admin", "New", "Admin", "newadmin@ox.invalid");
         try {
             newContext = getContextManager().create(newContext, newAdmin);// required line for test
             Credentials newAdminCredentials = new Credentials();
@@ -233,7 +235,7 @@ public class AdditionalRMITests extends AbstractRMITest {
 
     @Test
     public void testCreateOxUser() throws Exception {
-        User myNewUser = newUser("new_user", "secret", "New User", "New", "User", "newuser@ox.invalid");
+        User myNewUser = UserFactory.createUser("new_user", "secret", "New User", "New", "User", "newuser@ox.invalid");
         UserModuleAccess access = new UserModuleAccess();
 
         boolean userCreated = false;
@@ -428,8 +430,8 @@ public class AdditionalRMITests extends AbstractRMITest {
     @Test
     public void testContextExistsException() throws Exception {
         boolean contextCreated = false;
-        Context newContext = newContext("newContext", 666);
-        User newAdmin = newUser("oxadmin", "secret", "New Admin", "New", "Admin", "newadmin@ox.invalid");
+        Context newContext = ContextFactory.createContext(666, "newContext");
+        User newAdmin = UserFactory.createUser("oxadmin", "secret", "New Admin", "New", "Admin", "newadmin@ox.invalid");
         try {
             newContext = getContextManager().create(newContext, newAdmin);
             contextCreated = true;
@@ -448,7 +450,7 @@ public class AdditionalRMITests extends AbstractRMITest {
 
     @Test
     public void testNoSuchContextException() throws Exception {
-        Context missingContext = newContext("missing", Integer.MAX_VALUE);
+        Context missingContext = ContextFactory.createContext(Integer.MAX_VALUE, "missing");
         try {
             getContextManager().delete(missingContext);
             fail("Expected NoSuchContextException");
