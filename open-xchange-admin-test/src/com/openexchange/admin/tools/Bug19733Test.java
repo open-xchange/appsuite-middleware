@@ -49,6 +49,7 @@
 
 package com.openexchange.admin.tools;
 
+import static org.junit.Assert.assertEquals;
 import org.junit.Test;
 import com.openexchange.admin.rmi.dataobjects.User;
 
@@ -63,10 +64,10 @@ public final class Bug19733Test {
         super();
     }
 
-     @Test
-     public void testGetImapPort() {
+    @Test
+    public void testGetImapPort() {
         final User user = new User();
         user.setImapServer("21a7:a92c:2323::1");
-        final int port = user.getImapPort();
+        assertEquals("Ports are not equal", 143, user.getImapPort());
     }
 }
