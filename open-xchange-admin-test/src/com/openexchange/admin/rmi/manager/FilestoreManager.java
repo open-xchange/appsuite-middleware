@@ -127,6 +127,18 @@ public class FilestoreManager extends AbstractManager {
         OXUtilInterface utilInterface = getUtilInterface();
         return utilInterface.listFilestore(searchPattern, getMasterCredentials());
     }
+    
+    /**
+     * Searches for filestores with the specified search pattern
+     * 
+     * @param searchPattern The search pattern
+     * @return An array with all found {@link Filestore}s
+     * @throws Exception if an error is occurred
+     */
+    public Filestore[] listFilestores(String searchPattern, boolean omitUsage) throws Exception {
+        OXUtilInterface utilInterface = getUtilInterface();
+        return utilInterface.listFilestore(searchPattern, getMasterCredentials(), omitUsage);
+    }
 
     /*
      * (non-Javadoc)

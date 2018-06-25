@@ -88,10 +88,14 @@ public class UserFactory {
         return usr;
     }
 
+    public static User createUser(String ident, String password, String domain, Context context) {
+        return createUser(ident, password, domain, context, true);
+    }
+
     /**
      * Creates a new {@link User} object with all fields set
      */
-    public static User createUser(String ident, String password, String domain, Context context) {
+    public static User createUser(String ident, String password, String domain, Context context, boolean dedicatedFilestore) {
         User usr = createUser(ident, password, domain);
         usr.setLanguage("de_DE");
         // new for testing
@@ -100,7 +104,7 @@ public class UserFactory {
         usr.setEmail2("email2-" + ident + "@" + domain);
         usr.setEmail3("email3-" + ident + "@" + domain);
 
-        if (context != null) {
+        if (context != null && dedicatedFilestore) {
             usr.setFilestoreId(context.getFilestoreId());
             usr.setFilestore_name(context.getFilestore_name());
         }

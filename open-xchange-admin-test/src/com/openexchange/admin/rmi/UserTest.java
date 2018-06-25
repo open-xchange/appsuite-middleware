@@ -249,7 +249,6 @@ public class UserTest extends AbstractRMITest {
      */
     @Test(expected = NoSuchUserException.class)
     public void testDelete() throws Exception {
-
         // create new user
         UserModuleAccess access = new UserModuleAccess();
 
@@ -544,55 +543,46 @@ public class UserTest extends AbstractRMITest {
      */
     @Test
     public void testListUsersWithOwnFilestore() throws Exception {
-
         Filestore fs = null;
 
         UserModuleAccess client_access = new UserModuleAccess();
-        User usr = UserFactory.createUser(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, TEST_DOMAIN, context);
-        OXUtilInterface oxutil = (OXUtilInterface) Naming.lookup(getRMIHostUrl() + OXUtilInterface.RMI_NAME);
-        try {
-            User createduser = getUserManager().createUser(context, usr, client_access, adminCredentials);
-            //test if filestore already exists
-            Filestore[] filestores = oxutil.listFilestore("file:///", superAdminCredentials, true);
-            if (filestores != null && filestores.length != 0) {
-                if (filestores.length != 1) {
-                    fail("Unexpected failure. Multiple filestores already exists.");
-                } else {
-                    fs = filestores[0];
-                }
-            }
-
-            if (fs == null) {
-                //create new filestore
-                fs = new Filestore();
-                fs.setMaxContexts(10);
-                fs.setSize(1024l);
-                fs.setUrl("file:///");
-
-                fs = oxutil.registerFilestore(fs, superAdminCredentials);
-            }
-            //move user to new filestore
-            getUserManager().moveFromContextToUserFilestore(context, usr, fs, 10, adminCredentials);
-            Thread.sleep(500); //wait for move
-
-            User[] srv_response = getUserManager().listUsersWithOwnFilestore(context, fs.getId(), adminCredentials);
-
-            assertTrue("Expected list size > 0 ", srv_response.length > 0);
-
-            boolean founduser = false;
-            for (User element : srv_response) {
-                if (element.getId().intValue() == createduser.getId().intValue()) {
-                    founduser = true;
-                }
-            }
-
-            assertTrue("Expected to find added user in user list", founduser);
-        } finally {
-            getUserManager().deleteUser(context, usr, adminCredentials);
-            if (fs != null) {
-                oxutil.unregisterFilestore(fs, superAdminCredentials);
+        User usr = UserFactory.createUser(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, TEST_DOMAIN, context, false);
+        User createduser = getUserManager().createUser(context, usr, client_access, adminCredentials);
+        //test if filestore already exists
+        Filestore[] filestores = getFilestoreManager().listFilestores("file:///", true);
+        if (filestores != null && filestores.length != 0) {
+            if (filestores.length != 1) {
+                fail("Unexpected failure. Multiple filestores already exists.");
+            } else {
+                fs = filestores[0];
             }
         }
+
+        if (fs == null) {
+            //create new filestore
+            fs = new Filestore();
+            fs.setMaxContexts(10);
+            fs.setSize(1024l);
+            fs.setUrl("file:///");
+
+            fs = getFilestoreManager().registerFilestore(fs);
+        }
+        //move user to new filestore
+        getUserManager().moveFromContextToUserFilestore(context, usr, fs, 10, adminCredentials);
+        Thread.sleep(500); //wait for move
+
+        User[] srv_response = getUserManager().listUsersWithOwnFilestore(context, fs.getId(), adminCredentials);
+
+        assertTrue("Expected list size > 0 ", srv_response.length > 0);
+
+        boolean founduser = false;
+        for (User element : srv_response) {
+            if (element.getId().intValue() == createduser.getId().intValue()) {
+                founduser = true;
+            }
+        }
+
+        assertTrue("Expected to find added user in user list", founduser);
     }
 
     /**
@@ -1263,8 +1253,7 @@ public class UserTest extends AbstractRMITest {
      */
     @Test
     public void testExists() throws Exception {
-
-        User exists = UserFactory.createUser(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, TEST_DOMAIN, context);
+        User exists = UserFactory.createUser(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, TEST_DOMAIN, context, false);
         User notexists = new User();
         notexists.setName("Rumpelstilz");
         User createduser = getUserManager().createUser(context, exists, adminCredentials);
