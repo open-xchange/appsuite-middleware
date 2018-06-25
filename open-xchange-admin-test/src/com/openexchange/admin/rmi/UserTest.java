@@ -252,7 +252,7 @@ public class UserTest extends AbstractRMITest {
         // create new user
         UserModuleAccess access = new UserModuleAccess();
 
-        User usr = UserFactory.createUser(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, TEST_DOMAIN, context);
+        User usr = UserFactory.createUser(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, TEST_DOMAIN, context, false);
         User createduser = getUserManager().createUser(context, usr, access, adminCredentials);
 
         // delete user
