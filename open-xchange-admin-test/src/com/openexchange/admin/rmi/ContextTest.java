@@ -53,7 +53,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-import java.rmi.Naming;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -129,8 +128,7 @@ public class ContextTest extends AbstractRMITest {
      */
     @Test
     public void testListContextByFilestore() throws Exception {
-        OXUtilInterface oxu = (OXUtilInterface) Naming.lookup(getRMIHostUrl() + OXUtilInterface.RMI_NAME);
-        Filestore[] fiss = oxu.listFilestore("*", superAdminCredentials);
+        Filestore[] fiss = getFilestoreManager().listFilestores("*");
         if (fiss.length <= 0) {
             fail("No databases found.");
         }

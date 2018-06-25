@@ -70,6 +70,7 @@ import com.openexchange.admin.rmi.dataobjects.User;
 import com.openexchange.admin.rmi.exceptions.NoSuchResourceException;
 import com.openexchange.admin.rmi.manager.ContextManager;
 import com.openexchange.admin.rmi.manager.DatabaseManager;
+import com.openexchange.admin.rmi.manager.FilestoreManager;
 import com.openexchange.admin.rmi.manager.GroupManager;
 import com.openexchange.admin.rmi.manager.MaintenanceReasonManager;
 import com.openexchange.admin.rmi.manager.ResourceManager;
@@ -128,6 +129,7 @@ public abstract class AbstractRMITest {
         getResourceManager().cleanUp();
         getDatabaseManager().cleanUp();
         getServerManager().cleanUp();
+        getFilestoreManager().cleanUp();
         getMaintenanceReasonManager().cleanUp();
     }
 
@@ -437,6 +439,15 @@ public abstract class AbstractRMITest {
      */
     protected static ResourceManager getResourceManager() {
         return ResourceManager.getInstance(getRMIHostUrl(), getMasterAdminCredentials());
+    }
+
+    /**
+     * Gets the {@link FilestoreManager}
+     * 
+     * @return the {@link FilestoreManager}
+     */
+    protected static FilestoreManager getFilestoreManager() {
+        return FilestoreManager.getInstance(getRMIHostUrl(), getMasterAdminCredentials());
     }
 
     //TODO: reference a created context and not some hard-coded id.... 
