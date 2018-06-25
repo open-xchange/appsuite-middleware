@@ -141,7 +141,7 @@ public class OXResellerContextTest extends AbstractOXResellerTest {
 
     @Test
     public void testCreateContextNoQuota() throws Exception {
-        getResellerManager().delete(randomAdmin); // Delete normaly created FooAdminUser
+        getResellerManager().delete(randomAdmin); // Delete normally created FooAdminUser
 
         randomAdmin.setRestrictions(new Restriction[] { MaxOverallUserRestriction(2) });
         getResellerManager().create(randomAdmin);
@@ -166,7 +166,7 @@ public class OXResellerContextTest extends AbstractOXResellerTest {
 
     @Test
     public void testCreateTooManyOverallUser() throws Exception {
-        getResellerManager().delete(randomAdmin); // Delete normaly created FooAdminUser
+        getResellerManager().delete(randomAdmin); // Delete normally created FooAdminUser
 
         randomAdmin.setRestrictions(new Restriction[] { MaxOverallUserRestriction(2) });
         getResellerManager().create(randomAdmin);

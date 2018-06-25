@@ -89,7 +89,7 @@ public class ResellerManager extends AbstractManager {
      * @param rmiEndPointURL
      * @param masterCredentials
      */
-    public ResellerManager(String rmiEndPointURL, Credentials masterCredentials) {
+    private ResellerManager(String rmiEndPointURL, Credentials masterCredentials) {
         super(rmiEndPointURL, masterCredentials);
     }
 
