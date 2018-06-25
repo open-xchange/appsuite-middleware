@@ -68,7 +68,6 @@ import com.openexchange.testing.httpclient.models.AnalyzeResponse;
 import com.openexchange.testing.httpclient.models.Attendee;
 import com.openexchange.testing.httpclient.models.Attendee.CuTypeEnum;
 import com.openexchange.testing.httpclient.models.ConversionDataSource;
-import com.openexchange.testing.httpclient.models.ConversionDataSourcePair;
 import com.openexchange.testing.httpclient.models.EventData;
 import com.openexchange.testing.httpclient.models.EventId;
 import com.openexchange.testing.httpclient.models.MailDestinationData;
@@ -101,6 +100,22 @@ public abstract class AbstractITipTest extends AbstractChronosTest {
 
         String getDataSource() {
             return source;
+        }
+    }
+
+    /** All available output formats for iTIP calls */
+    enum DescriptionFormat {
+        /** Currently the only valid input for the field 'descriptionFormat' on iTIP actions */
+        HTML("html");
+
+        private final String format;
+
+        DescriptionFormat(String format) {
+            this.format = format;
+        }
+
+        String getFormat() {
+            return format;
         }
     }
 
@@ -164,45 +179,45 @@ public abstract class AbstractITipTest extends AbstractChronosTest {
      */
 
     /**
-     * @See {@link ChronosApi#accept(String, String, ConversionDataSource)}
+     * @See {@link ChronosApi#accept(String,String, String, ConversionDataSource)}
      */
     protected ActionResponse accept(ConversionDataSource body) throws ApiException {
-        return chronosApi.accept(session, DataSources.MAIL.getDataSource(), body);
+        return chronosApi.accept(session, DataSources.MAIL.getDataSource(), DescriptionFormat.HTML.getFormat(), body);
     }
 
     /**
-     * @See {@link ChronosApi#acceptAndIgnoreConflicts(String, String, ConversionDataSource)}
+     * @See {@link ChronosApi#acceptAndIgnoreConflicts(String, String, String, ConversionDataSource)}
      */
     protected ActionResponse acceptAndIgnoreConflicts(ConversionDataSource body) throws ApiException {
-        return chronosApi.acceptAndIgnoreConflicts(session, DataSources.MAIL.getDataSource(), body);
+        return chronosApi.acceptAndIgnoreConflicts(session, DataSources.MAIL.getDataSource(), DescriptionFormat.HTML.getFormat(), body);
     }
 
     /**
-     * @See {@link ChronosApi#tentative(String, String, ConversionDataSource)}
+     * @See {@link ChronosApi#tentative(String, String, String, ConversionDataSource)}
      */
     protected ActionResponse tentative(ConversionDataSource body) throws ApiException {
-        return chronosApi.tentative(session, DataSources.MAIL.getDataSource(), body);
+        return chronosApi.tentative(session, DataSources.MAIL.getDataSource(), DescriptionFormat.HTML.getFormat(), body);
     }
 
     /**
-     * @See {@link ChronosApi#decline(String, String, ConversionDataSource)}
+     * @See {@link ChronosApi#decline(String, String, String, ConversionDataSource)}
      */
     protected ActionResponse decline(ConversionDataSource body) throws ApiException {
-        return chronosApi.decline(session, DataSources.MAIL.getDataSource(), body);
+        return chronosApi.decline(session, DataSources.MAIL.getDataSource(), DescriptionFormat.HTML.getFormat(), body);
     }
 
     /**
-     * @See {@link ChronosApi#update(String, String, ConversionDataSource)}
+     * @See {@link ChronosApi#update(String, String, String, ConversionDataSource)}
      */
     protected ActionResponse update(ConversionDataSource body) throws ApiException {
-        return chronosApi.update(session, DataSources.MAIL.getDataSource(), body);
+        return chronosApi.update(session, DataSources.MAIL.getDataSource(), DescriptionFormat.HTML.getFormat(), body);
     }
 
     /**
-     * @See {@link ChronosApi#analyze(String, String, ConversionDataSource)}
+     * @See {@link ChronosApi#analyze(String, String, String, ConversionDataSource, String)}
      */
     protected AnalyzeResponse analyze(ConversionDataSource body) throws ApiException {
-        return chronosApi.analyze(session, DataSources.MAIL.getDataSource(), body);
+        return chronosApi.analyze(session, DataSources.MAIL.getDataSource(), DescriptionFormat.HTML.getFormat(), body, null);
     }
 
     /**
@@ -230,14 +245,9 @@ public abstract class AbstractITipTest extends AbstractChronosTest {
 
     protected ConversionDataSource constructBody(String mailId, String sequenceId) {
         ConversionDataSource body = new ConversionDataSource();
-        body.setIdentifier(DataSources.MAIL.getDataSource());
-
-        ConversionDataSourcePair sourcePairs = new ConversionDataSourcePair();
-        sourcePairs.setComOpenexchangeMailConversionFullname(FOLDER_HUMAN_READABLE);
-        sourcePairs.setComOpenexchangeMailConversionMailid(mailId);
-        sourcePairs.setComOpenexchangeMailConversionSequenceid(sequenceId);
-
-        body.setArgs(Collections.singletonList(sourcePairs));
+        body.setComOpenexchangeMailConversionFullname(FOLDER_HUMAN_READABLE);
+        body.setComOpenexchangeMailConversionMailid(mailId);
+        body.setComOpenexchangeMailConversionSequenceid(sequenceId);
         return body;
     }
 
