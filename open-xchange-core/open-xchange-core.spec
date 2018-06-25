@@ -17,7 +17,7 @@ BuildRequires: java7-devel
 BuildRequires: java-devel >= 1.7.0
 %endif
 Version:       @OXVERSION@
-%define        ox_release 48
+%define        ox_release 49
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -1444,6 +1444,9 @@ do
   ox_remove_property ${property} ${pfile}
 done
 
+# SoftwareChange_Request-175
+ox_add_property com.openexchange.server.migrationRedirectURL "" /opt/open-xchange/etc/server.properties
+
 PROTECT=( autoconfig.properties configdb.properties hazelcast.properties jolokia.properties mail.properties mail-push.properties management.properties secret.properties secrets server.properties sessiond.properties share.properties tokenlogin-secrets )
 for FILE in "${PROTECT[@]}"
 do
@@ -1485,6 +1488,8 @@ exit 0
 %doc com.openexchange.database/doc/examples
 
 %changelog
+* Mon Jun 18 2018 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2018-06-25 (4790)
 * Fri Apr 20 2018 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2018-04-23 (4669)
 * Mon Mar 19 2018 Marcus Klein <marcus.klein@open-xchange.com>

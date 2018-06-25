@@ -91,6 +91,7 @@ import com.openexchange.quota.QuotaType;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
+import com.openexchange.sessiond.SessiondService;
 import com.openexchange.share.CreatedShares;
 import com.openexchange.share.GuestInfo;
 import com.openexchange.share.LinkUpdate;
@@ -376,6 +377,7 @@ public class DefaultShareService implements ShareService {
             }
 
             boolean guestUserUpdated = false;
+            boolean passwordChanged = false;
             if (linkUpdate.containsExpiryDate()) {
                 String expiryDateValue = null != linkUpdate.getExpiryDate() ? String.valueOf(linkUpdate.getExpiryDate().getTime()) : null;
                 userService.setAttribute(connectionHelper.getConnection(), ShareTool.EXPIRY_DATE_USER_ATTRIBUTE, expiryDateValue, guest.getId(), context);
@@ -383,7 +385,8 @@ public class DefaultShareService implements ShareService {
             }
             if (linkUpdate.containsPassword()) {
                 if(updatePassword(connectionHelper, context, guest, linkUpdate.getPassword())){
-                    guestUserUpdated=true;
+                    guestUserUpdated = true;
+                    passwordChanged = true;
                 }
             }
 
@@ -394,6 +397,15 @@ public class DefaultShareService implements ShareService {
             connectionHelper.commit();
             if (guestUserUpdated) {
                 userService.invalidateUser(context, guest.getId());
+                if (passwordChanged) {
+                    // kill guest user sessions
+                    SessiondService service = services.getService(SessiondService.class);
+                    if (service == null) {
+                        LOG.error("Unable to remove guest sessions, because SessiondService is not available.");
+                    } else {
+                        service.removeUserSessionsGlobally(guest.getId(), session.getContextId());
+                    }
+                }
                 return new DefaultShareLink(shareInfo, moduleSupport.load(target, session).getTimestamp(), false);
             }
             return new DefaultShareLink(shareInfo, targetProxy.getTimestamp(), false);
