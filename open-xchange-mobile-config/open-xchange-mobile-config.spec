@@ -14,7 +14,7 @@ BuildRequires: java-1.8.0-openjdk-devel
 %endif
 # TODO: version not hardcoded in spec file
 Version:	@OXVERSION@
-%define        ox_release 7
+%define        ox_release 8
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        Creative Commons Attribution-Noncommercial-Share Alike 2.5 Generic
@@ -57,6 +57,8 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 %config(noreplace) /opt/open-xchange/etc/meta/*
 
 %changelog
+* Mon Jun 25 2018 Marcus Klein <jenkins@hudson-slave-1.netline.de>
+Second candidate for 7.10.0 release
 * Mon Jun 11 2018 Marcus Klein <jenkins@hudson-slave-1.netline.de>
 First candidate for 7.10.0 release
 * Fri May 18 2018 Marcus Klein <jenkins@hudson-slave-1.netline.de>

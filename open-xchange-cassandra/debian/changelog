@@ -1,3 +1,9 @@
+open-xchange-cassandra (7.10.0-8) stable; urgency=medium
+
+  * Second candidate for 7.10.0 release
+
+ -- Ioannis Chouklis <ioannis.chouklis@open-xchange.com>  Mon, 25 Jun 2018 14:32:44 +0200
+
 open-xchange-cassandra (7.10.0-7) stable; urgency=medium
 
   * First candidate for 7.10.0 release
