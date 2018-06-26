@@ -984,10 +984,10 @@ msgstr ""
 
 #. *
 #. * The event summary displayed for the birthday of a contact, with the first parameter being replaced by the contact's display name.
-#. * <code>????</code> is the <i>birthday cake</i> character (<code>U+1F382</code>).
+#. * <code>🎂</code> is the <i>birthday cake</i> character (<code>U+1F382</code>).
 #.
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.provider.birthdays/src/com/openexchange/chronos/provider/birthdays/BirthdaysCalendarStrings.java:81
-msgid "???? %1$s"
+msgid "🎂 %1$s"
 msgstr ""
 
 #. *
@@ -1000,11 +1000,11 @@ msgstr ""
 
 #. *
 #. * The event summary displayed for the n-th birthday of a contact, with the first parameter being replaced by the contact's display
-#. * name, and the second one with the contact's age. <code>????</code> is the <i>birthday cake</i> character
+#. * name, and the second one with the contact's age. <code>🎂</code> is the <i>birthday cake</i> character
 #. * (<code>U+1F382</code>).
 #.
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.provider.birthdays/src/com/openexchange/chronos/provider/birthdays/BirthdaysCalendarStrings.java:94
-msgid "???? %1$s (%2$d. birthday)"
+msgid "🎂 %1$s (%2$d. birthday)"
 msgstr ""
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.provider.caching/src/com/openexchange/chronos/provider/caching/basic/exception/BasicCachingCalendarExceptionMessages.java:63
@@ -3150,15 +3150,15 @@ msgid "Range"
 msgstr ""
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/calendar/CalendarStrings.java:92
-msgid "????????? 1 month"
+msgid "⁺∕₋ 1 month"
 msgstr ""
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/calendar/CalendarStrings.java:94
-msgid "????????? 3 months"
+msgid "⁺∕₋ 3 months"
 msgstr ""
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/calendar/CalendarStrings.java:96
-msgid "????????? 1 year"
+msgid "⁺∕₋ 1 year"
 msgstr ""
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/calendar/CalendarStrings.java:103
