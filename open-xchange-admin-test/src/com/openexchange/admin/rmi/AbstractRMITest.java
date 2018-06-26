@@ -72,6 +72,7 @@ import com.openexchange.admin.rmi.manager.MaintenanceReasonManager;
 import com.openexchange.admin.rmi.manager.ResellerManager;
 import com.openexchange.admin.rmi.manager.ResourceManager;
 import com.openexchange.admin.rmi.manager.ServerManager;
+import com.openexchange.admin.rmi.manager.TaskManagementManager;
 import com.openexchange.admin.rmi.manager.UserManager;
 import com.openexchange.admin.rmi.util.AssertUtil;
 import com.openexchange.configuration.AJAXConfig;
@@ -352,5 +353,14 @@ public abstract class AbstractRMITest {
      */
     protected static ResellerManager getResellerManager() {
         return ResellerManager.getInstance(getRMIHostUrl(), getMasterAdminCredentials());
+    }
+
+    /**
+     * Gets the {@link TaskManagementManager}
+     * 
+     * @return the {@link TaskManagementManager}
+     */
+    protected static TaskManagementManager getTaskManagementManager() {
+        return TaskManagementManager.getInstance(getRMIHostUrl(), getMasterAdminCredentials());
     }
 }

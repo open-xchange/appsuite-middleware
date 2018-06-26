@@ -65,21 +65,14 @@ import com.openexchange.admin.user.copy.rmi.TestTool;
 public class TaskMgmtTest extends AbstractRMITest {
 
     private User admin;
-
     private Context context;
-
     private String db_name;
-
     private Database client_db;
-
-    private OXTaskMgmtInterface ti;
 
     @Override
     public void setUp() throws Exception {
         super.setUp();
-
         admin = UserFactory.createUser("oxadmin", "secret", "Admin User", "Admin", "User", "oxadmin@example.com");
-        ti = getTaskInterface();
     }
 
     @Before
@@ -107,12 +100,12 @@ public class TaskMgmtTest extends AbstractRMITest {
     public void testGetTaskResultsContextCredentialsInt() throws MalformedURLException, RemoteException, NotBoundException, Exception {
         final int jobId = getContextManager().moveContextDatabase(context, client_db);
 
-        ti.getTaskResults(context, contextAdminCredentials, jobId);
+        getTaskManagementManager().getTaskResults(context, jobId, contextAdminCredentials);
         int counter = 0;
         boolean running = true;
         while (running && counter < 180) {
             try {
-                ti.deleteJob(context, contextAdminCredentials, jobId);
+                getTaskManagementManager().deleteJob(context, jobId, contextAdminCredentials);
                 running = false;
                 System.out.println("Task moveContextDatabase finished");
             } catch (TaskManagerException e) {
