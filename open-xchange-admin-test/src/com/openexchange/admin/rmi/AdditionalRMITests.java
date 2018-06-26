@@ -72,6 +72,7 @@ import com.openexchange.admin.rmi.factory.ContextFactory;
 import com.openexchange.admin.rmi.factory.GroupFactory;
 import com.openexchange.admin.rmi.factory.ResourceFactory;
 import com.openexchange.admin.rmi.factory.UserFactory;
+import com.openexchange.admin.rmi.util.AssertUtil;
 import com.openexchange.admin.user.copy.rmi.TestTool;
 
 /**

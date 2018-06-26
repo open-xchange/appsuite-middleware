@@ -75,6 +75,7 @@ import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 import com.openexchange.admin.rmi.exceptions.NoSuchUserException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.rmi.factory.UserFactory;
+import com.openexchange.admin.rmi.util.AssertUtil;
 
 /**
  * {@link UserTest}

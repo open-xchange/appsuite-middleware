@@ -73,7 +73,7 @@ import com.openexchange.admin.rmi.manager.ResellerManager;
 import com.openexchange.admin.rmi.manager.ResourceManager;
 import com.openexchange.admin.rmi.manager.ServerManager;
 import com.openexchange.admin.rmi.manager.UserManager;
-import com.openexchange.admin.user.copy.rmi.OXUserCopyInterface;
+import com.openexchange.admin.rmi.util.AssertUtil;
 import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.configuration.AJAXConfig.Property;
 import com.openexchange.exception.OXException;
@@ -242,11 +242,11 @@ public abstract class AbstractRMITest {
         AssertUtil.assertUserEquals(expected, lookupUser);
     }
 
-    /*** Interfaces ***/
-
-    public OXUserCopyInterface getUserCopyClient() throws MalformedURLException, RemoteException, NotBoundException {
-        return (OXUserCopyInterface) Naming.lookup(getRMIHostUrl() + OXUserCopyInterface.RMI_NAME);
+    public static String getChangedEmailAddress(String address, String changed) {
+        return address.replaceFirst("@", changed + "@");
     }
+
+    /*** Interfaces ***/
 
     public OXTaskMgmtInterface getTaskInterface() throws MalformedURLException, RemoteException, NotBoundException {
         return (OXTaskMgmtInterface) Naming.lookup(getRMIHostUrl() + OXTaskMgmtInterface.RMI_NAME);
@@ -352,9 +352,5 @@ public abstract class AbstractRMITest {
      */
     protected static ResellerManager getResellerManager() {
         return ResellerManager.getInstance(getRMIHostUrl(), getMasterAdminCredentials());
-    }
-
-    public static String getChangedEmailAddress(String address, String changed) {
-        return address.replaceFirst("@", changed + "@");
     }
 }

@@ -55,6 +55,7 @@ import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.dataobjects.Filestore;
 import com.openexchange.admin.rmi.dataobjects.User;
 import com.openexchange.admin.rmi.dataobjects.UserModuleAccess;
+import com.openexchange.admin.user.copy.rmi.OXUserCopyInterface;
 
 /**
  * {@link UserManager}
@@ -282,6 +283,21 @@ public class UserManager extends AbstractManager {
     public void changeModuleAccess(Context context, User user, UserModuleAccess access, Credentials contextAdminCredentials) throws Exception {
         OXUserInterface userInteface = getUserInterface();
         userInteface.changeModuleAccess(context, user, access, contextAdminCredentials);
+    }
+
+    /**
+     * Copies/Moves the specified {@link User} from the <code>source</code> to the
+     * <code>destination</code> {@link Context}
+     * 
+     * @param user The {@link User} to move/copy
+     * @param source The source {@link Context}
+     * @param destination The destination {@link Context}
+     * @return the resulting {@link User} object with the new identifier of the user in the context
+     * @throws Exception if an error is occurred
+     */
+    public User copy(User user, Context source, Context destination) throws Exception {
+        OXUserCopyInterface userCopyInterface = getRemoteInterface(OXUserCopyInterface.RMI_NAME, OXUserCopyInterface.class);
+        return userCopyInterface.copyUser(user, source, destination, getMasterCredentials());
     }
 
     /**

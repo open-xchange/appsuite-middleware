@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.admin.rmi;
+package com.openexchange.admin.rmi.util;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
