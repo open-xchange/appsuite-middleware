@@ -49,12 +49,12 @@
 
 package com.openexchange.metrics;
 
-import com.codahale.metrics.Counter;
-import com.codahale.metrics.Gauge;
-import com.codahale.metrics.Histogram;
-import com.codahale.metrics.Meter;
-import com.codahale.metrics.MetricRegistry.MetricSupplier;
-import com.codahale.metrics.Timer;
+import java.util.function.Supplier;
+import com.openexchange.metrics.types.Counter;
+import com.openexchange.metrics.types.Gauge;
+import com.openexchange.metrics.types.Histogram;
+import com.openexchange.metrics.types.Meter;
+import com.openexchange.metrics.types.Timer;
 
 /**
  * {@link MetricType}
@@ -80,7 +80,7 @@ public enum MetricType {
      * example, the component has a value which is maintained by a third-party
      * library, it easily be exposed by registering a Gauge instance which
      * returns that value.</p>
-     * <p>{@link Gauge} is the only metric that requires a {@link MetricSupplier}
+     * <p>{@link Gauge} is the only metric that requires a {@link Supplier}
      * to be passed along with the {@link MetricMetadata}.</p>
      */
     GAUGE,

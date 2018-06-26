@@ -49,8 +49,8 @@
 
 package com.openexchange.metrics.jmx.beans;
 
-import com.codahale.metrics.Gauge;
 import com.openexchange.management.MBeanMethodAnnotation;
+import com.openexchange.metrics.types.Gauge;
 
 /**
  * {@link GaugeMBean}
