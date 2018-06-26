@@ -1,10 +1,14 @@
 type: object
 properties:
-  identifier:
+  com.openexchange.mail.conversion.fullname:
     type: string
-    description: The identifier of the data source.
-  args:
-    type: array
-    description: A JSON array of optional JSON objects containing the name-value-pairs.
-    items:
-      $ref: "#/definitions/ConversionDataSourcePair"
+    description: The identifier of the folder.
+    example: "default0/INBOX"
+  com.openexchange.mail.conversion.mailid:
+    type: string
+    description: The identifier of the mail.
+    example: "1337"
+  com.openexchange.mail.conversion.sequenceid:
+    type: string
+    description: The identifier of attachment to analyze.
+    example: "1.3"

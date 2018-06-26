@@ -12,6 +12,13 @@
         name: dataSource
         type: string
         description: The identifier of the data source. Currently only "com.openexchange.mail.ical" is valid.
+        default: com.openexchange.mail.ical
+        required: true
+      - in: query
+        name: descriptionFormat
+        type: string
+        description: The desired output fromat. Currently only "html" is valid.
+        default: html
         required: true
       - in: body
         name: body

@@ -52,10 +52,13 @@ package com.openexchange.ajax.chronos.factory;
 import java.util.List;
 import java.util.Locale;
 import java.util.TimeZone;
+import java.util.UUID;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
 import com.openexchange.testing.httpclient.models.Attendee;
 import com.openexchange.testing.httpclient.models.EventData;
 import com.openexchange.testing.httpclient.models.EventData.TranspEnum;
+import net.fortuna.ical4j.model.DateTime;
 
 /**
  * {@link ICalFacotry} - Builds iCAL for given {@link EventData}
@@ -65,7 +68,28 @@ import com.openexchange.testing.httpclient.models.EventData.TranspEnum;
  */
 public class ICalFacotry {
 
-    enum Method {
+    /** Participant status */
+    public static enum PartStat {
+        ACCEPTED("ACCEPTED"),
+        TEANTATIVE("TEANTATIVE"),
+        DECLINED("DECLINED"),
+        NEEDS_ACTION("NEEDS-ACTION");
+
+        private final String status;
+
+        private PartStat(String status) {
+            this.status = status;
+        }
+
+        @Override
+        public String toString() {
+            return status;
+        }
+
+    }
+
+    /** iTIP methods */
+    public static enum Method {
         PUBLISH,
         REQUEST,
         REPLY,
@@ -76,10 +100,9 @@ public class ICalFacotry {
         DECLINECOUNTER;
     }
 
-    enum ProdID {
+    public static enum ProdID {
         OX("-//Open-Xchange//7.10.0-Rev6//EN"),
-        MICROSOFT(""),
-        ;
+        MICROSOFT(""),;
 
         private final String id;
 
@@ -96,6 +119,9 @@ public class ICalFacotry {
             return id;
         }
     }
+
+    /** {@link StringBuilder} instance to generate iCal */
+    private StringBuilder sb;
 
     /** The method to use in the iCal file */
     private Method method;
@@ -156,40 +182,29 @@ public class ICalFacotry {
 
     /**
      * Builds the iCal file with all available data.
+     * If fields aren't set in the {@link EventData}, they will be filled
+     * with standard data (modifies original {@link EventData})
      * 
      * @return The iCal file as {@link String}
      */
     public String build() {
-        StringBuilder sb = new StringBuilder();
+        sb = new StringBuilder();
 
-        sb.append("BEGIN:VCALENDAR");
-        addNewLine(sb);
-        sb.append("VERSION:2.0");
-        addNewLine(sb);
-
-        if (null == prodId) {
-            prodId = ProdID.OX;
-        }
-        sb.append("PRODID:").append(prodId.getId(null));
-        addNewLine(sb);
-
-        if (null == method) {
-            method = Method.REQUEST;
-        }
-        sb.append("METHOD:").append(method.name().toUpperCase());
-        addNewLine(sb);
-
-        setVTimezone(sb);
+        setField("BEGIN:VCALENDAR");
+        setField("VERSION:2.0");
+        setValue("PRODID:", prodId, ProdID.OX);
+        setValue("METHOD:", method.name().toUpperCase(), Method.REQUEST.name().toUpperCase());
+        setVTimezone();
 
         for (EventData eventData : data) {
-            setEvent(sb, eventData);
+            setEvent(eventData);
         }
-        sb.append("END:VCALENDAR");
+        setField("END:VCALENDAR");
 
         return sb.toString();
     }
 
-    private void setVTimezone(StringBuilder sb) {
+    private void setVTimezone() {
         /*
          * TODO
          * Base daylight and standard on actual time zone
@@ -197,141 +212,165 @@ public class ICalFacotry {
          */
         //        String tzid = data.get(0).getStartDate().getTzid();
         String tzid = "Europe/Berlin";
-        sb.append("BEGIN:VTIMEZONE");
-        addNewLine(sb);
-        sb.append("TZID:").append(tzid);
-        addNewLine(sb);
-        sb.append("TZURL:http://tzurl.org/zoneinfo-outlook/").append(tzid);
-        addNewLine(sb);
+        setField("BEGIN:VTIMEZONE");
+        setValue("TZID:", tzid);
+        setValue("TZURL:http://tzurl.org/zoneinfo-outlook/", tzid);
 
-        setDayLigth(sb, tzid);
-        setStandard(sb, tzid);
+        setDayLigth(tzid);
+        setStandard(tzid);
 
-        sb.append("END:VTIMEZONE");
-        addNewLine(sb);
+        setField("END:VTIMEZONE");
     }
 
-    private void setDayLigth(StringBuilder sb, String tzid) {
+    private void setDayLigth(String tzid) {
         TimeZone timeZone = TimeZone.getTimeZone(tzid);
-        sb.append("BEGIN:DAYLIGHT");
-        addNewLine(sb);
         long offset = TimeUnit.MILLISECONDS.toHours(timeZone.getRawOffset());
-        sb.append("TZOFFSETFROM:").append(offset);
-        addNewLine(sb);
-        sb.append("TZOFFSETTO:").append(offset + 1);
-        addNewLine(sb);
-        sb.append("TZNAME:").append(timeZone.toZoneId());
-        addNewLine(sb);
+
+        setField("BEGIN:DAYLIGHT");
+        setValue("TZOFFSETFROM:", getOffset(offset));
+        setValue("TZOFFSETTO:", getOffset(offset + 1));
+        setValue("TZNAME:", timeZone.toZoneId());
+
         // String dtstart = ???
         String dtstart = "19700329T020000";
-        sb.append("DTSTART:").append(dtstart);
-        addNewLine(sb);
+        setValue("DTSTART:", dtstart);
+
         // String rrule = ???;
         String rrule = "FREQ=YEARLY;BYMONTH=3;BYDAY=-1SU";
-        sb.append("RRULE:").append(rrule);
-        addNewLine(sb);
-        sb.append("END:DAYLIGHT");
-        addNewLine(sb);
+        setValue("RRULE:", rrule);
+        setField("END:DAYLIGHT");
     }
 
-    private void setStandard(StringBuilder sb, String tzid) {
+    private void setStandard(String tzid) {
         TimeZone timeZone = TimeZone.getTimeZone(tzid);
-        sb.append("BEGIN:STANDARD");
-        addNewLine(sb);
         long offset = TimeUnit.MILLISECONDS.toHours(timeZone.getRawOffset());
-        sb.append("TZOFFSETTO:").append(offset);
-        addNewLine(sb);
-        sb.append("TZOFFSETFROM:").append(offset + 1);
-        addNewLine(sb);
+
+        setField("BEGIN:STANDARD");
+        setValue("TZOFFSETTO:", getOffset(offset));
+        setValue("TZOFFSETFROM:", getOffset(offset + 1));
+
         //  sb.append("TZNAME:").append(timeZone.toZoneId());
-        sb.append("TZNAME:").append("CET");
-        addNewLine(sb);
+        setValue("TZNAME:", "CET");
+
         // String dtstart = ???
         String dtstart = "19701025T030000";
-        sb.append("DTSTART:").append(dtstart);
-        addNewLine(sb);
+        setValue("DTSTART:", dtstart);
+
         // String rrule = ???;
         String rrule = "FREQ=YEARLY;BYMONTH=10;BYDAY=-1SU";
-        sb.append("RRULE:").append(rrule);
-        addNewLine(sb);
-        sb.append("END:STANDARD");
-        addNewLine(sb);
+        setValue("RRULE:", rrule);
+        setField("END:STANDARD");
     }
 
-    private void setEvent(StringBuilder sb, EventData eventData) {
-        sb.append("BEGIN:VEVENT");
-        addNewLine(sb);
+    private void setEvent(EventData eventData) {
+        setField("BEGIN:VEVENT");
+        setValue("DTSTAMP:", Long.valueOf(System.currentTimeMillis()));
 
-        sb.append("DTSTAMP:").append(System.currentTimeMillis());
-        addNewLine(sb);
+        setAttendees(eventData);
 
-        setAttendees(sb, eventData);
+        setValue("CLASS:", eventData.getPropertyClass());
+        setValue("CREATED:", null == eventData.getCreated() ? null : new DateTime(eventData.getCreated().longValue()), current(), (DateTime created) -> {
+            eventData.setCreated(Long.valueOf(created.getTime()));
+        });
 
-        sb.append("CLASS:").append(eventData.getPropertyClass());
-        addNewLine(sb);
-
-        sb.append("CREATED:").append(eventData.getCreated());
-        addNewLine(sb);
-
-        sb.append("DESCRIPTION:").append(eventData.getDescription());
-        addNewLine(sb);
+        setValue("DESCRIPTION:", eventData.getDescription(), "This is an iMIP mail");
 
         sb.append("DTEND;TZID=").append(eventData.getEndDate().getTzid()).append(":").append(eventData.getEndDate().getValue());
-        addNewLine(sb);
+        addNewLine();
 
         sb.append("DTSTART;TZID=").append(eventData.getStartDate().getTzid()).append(":").append(eventData.getStartDate().getValue());
-        addNewLine(sb);
+        addNewLine();
 
-        sb.append("LAST-MODIFIED:").append(eventData.getLastModified());
-        addNewLine(sb);
+        setValue("LAST-MODIFIED:", null == eventData.getLastModified() ? null : new DateTime(eventData.getLastModified().longValue()), current(), (DateTime mod) -> {
+            eventData.setLastModified(Long.valueOf(mod.getTime()));
+        });
 
-        sb.append("LOCATION:").append(eventData.getLocation());
-        addNewLine(sb);
+        setValue("LOCATION:", eventData.getLocation(), "Germany, Olpe");
 
-        sb.append("ORGANIZER:").append("CN=\"").append(eventData.getOrganizer().getCn()).append("\":");
-        appendMailTo(sb, eventData.getOrganizer().getEmail());
-        addNewLine(sb);
+        sb.append("ORGANIZER;").append("CN=\"").append(eventData.getOrganizer().getCn()).append("\":");
+        appendMailTo(eventData.getOrganizer().getEmail());
+        addNewLine();
 
-        sb.append("SEQUENCE:").append(null == eventData.getSequence() ? "0" : eventData.getSequence());
-        addNewLine(sb);
+        setValue("SEQUENCE:", eventData.getSequence(), "0");
+        setValue("SUMMARY:", eventData.getSummary(), "This is the summary", (String s) -> {
+            eventData.setSummary(s);
+        });
 
-        sb.append("SUMMARY:").append(eventData.getSummary());
-        addNewLine(sb);
+        setValue("TRANSP:", eventData.getTransp(), TranspEnum.OPAQUE);
+        setValue("UID:", eventData.getUid(), UUID.randomUUID().toString(), (String uid) -> {
+            eventData.setUid(uid);
+        });
 
-        sb.append("TRANSP:").append(null == eventData.getTransp() ? TranspEnum.OPAQUE : eventData.getTransp());
-        addNewLine(sb);
-
-        sb.append("UID:").append(eventData.getUid());
-        addNewLine(sb);
-
-        sb.append("X-MICROSOFT-CDO-BUSYSTATUS:BUSY");
-        addNewLine(sb);
-
-        sb.append("END:VEVENT");
-        addNewLine(sb);
-
+        setField("X-MICROSOFT-CDO-BUSYSTATUS:BUSY");
+        setField("END:VEVENT");
     }
 
-    private void setAttendees(StringBuilder sb, EventData eventData) {
+    private void setAttendees(EventData eventData) {
         for (Attendee a : eventData.getAttendees()) {
             sb.append("ATTENDEE;CN=").append(a.getCn());
-            sb.append(";PARTSTAT=").append(a.getPartStat());
+            sb.append(";PARTSTAT=").append(null == a.getPartStat() ? PartStat.NEEDS_ACTION.toString() : a.getPartStat());
             sb.append(";CUTYPE=").append(a.getCuType());
             sb.append(";EMAIL=").append(a.getEmail());
             sb.append(":");
-            appendMailTo(sb, a.getEmail());
-            addNewLine(sb);
+            appendMailTo(a.getEmail());
+            addNewLine();
         }
     }
 
-    private void appendMailTo(StringBuilder sb, String mail) {
+    private void setField(String field) {
+        setValue(field, null, null);
+    }
+
+    private void setValue(String field, Object value) {
+        setValue(field, value, null);
+    }
+
+    private void setValue(String field, Object value, Object defaultValue) {
+        setValue(field, value, defaultValue, null);
+    }
+
+    private <T extends Object> void setValue(String field, T value, T defaultValue, Consumer<T> f) {
+        sb.append(field);
+        if (null == value) {
+            if (null != defaultValue) {
+                sb.append(defaultValue);
+                if (null != f) {
+                    f.accept(defaultValue);
+                }
+            }
+        } else {
+            sb.append(value);
+        }
+        addNewLine();
+    }
+
+    private String getOffset(long offset) {
+        StringBuilder offBy = new StringBuilder();
+        if (offset < 0) {
+            offBy.append("-");
+        } else {
+            offBy.append("+");
+        }
+        if (Math.abs(offset) < 10) {
+            offBy.append("0");
+        }
+        offBy.append(offset);
+        offBy.append("00");
+        return offBy.toString();
+    }
+
+    private DateTime current() {
+        return new DateTime(System.currentTimeMillis());
+    }
+
+    private void appendMailTo(String mail) {
         if (false == mail.toLowerCase().startsWith("mailto")) {
             sb.append("mailto:");
         }
         sb.append(mail);
     }
 
-    private void addNewLine(StringBuilder sb) {
+    private void addNewLine() {
         sb.append("\n");
     }
 

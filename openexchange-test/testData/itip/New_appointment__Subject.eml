@@ -1,0 +1,425 @@
+Return-Path: <anton@context1.oxoe.int>
+Delivered-To: <berta@context2.oxoe.int>
+Received: from singlenode.example.com
+	by backend.oxoe.int (Dovecot) with LMTP id xWPiBJI4GltUKAAAkOuz7g
+	for <berta@context2.oxoe.int>; Fri, 08 Jun 2018 08:04:34 +0000
+Received: from null (localhost [127.0.0.1])
+	by singlenode.example.com (Postfix) with ESMTP id 07F85191A0
+	for <berta@context2.oxoe.int>; Fri,  8 Jun 2018 08:04:34 +0000 (UTC)
+Date: Fri, 8 Jun 2018 10:04:33 +0200 (CEST)
+From: "anton, anton" <anton@context1.oxoe.int>
+Reply-To: "anton, anton" <anton@context1.oxoe.int>
+To: berta <berta@context2.oxoe.int>
+Message-ID: <Appointment.a3e326bb-3b2a-4236-94c7-47f413259fd8.1528445073684@open-xchange.com>
+In-Reply-To: <Appointment.a3e326bb-3b2a-4236-94c7-47f413259fd8@open-xchange.com>
+References: <Appointment.a3e326bb-3b2a-4236-94c7-47f413259fd8@open-xchange.com>
+Subject: New appointment: Subject
+MIME-Version: 1.0
+Content-Type: multipart/mixed; 
+	boundary="----=_Part_6_1474807529.1528445073736"
+X-Priority: 3 (normal)
+X-Mailer: Open-Xchange Mailer v7.10.0-Rev6
+Auto-Submitted: auto-generated
+X-Originating-Client: open-xchange-appsuite
+
+------=_Part_6_1474807529.1528445073736
+Content-Type: multipart/alternative; 
+	boundary="----=_Part_7_1952620993.1528445073933"
+
+------=_Part_7_1952620993.1528445073933
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
+
+You have been invited to an event by anton, anton:
+
+
+
+====[       Subject       ]====
+
+All times will be shown in the timezone Central European Time
+
+When: Friday, June 8, 2018 12:00 PM - 12:30 PM
+Where: Location
+
+
+====================================
+Description
+====================================
+
+== Participants: ==
+
+anton, anton (accepted)
+berta (waiting)
+
+== Resources ==
+
+
+== Details: ==
+
+Show as: Reserved
+Created: Friday, June 8, 2018 10:04 AM - anton, anton
+
+
+
+
+
+
+
+
+------=_Part_7_1952620993.1528445073933
+MIME-Version: 1.0
+Content-Type: text/html; charset=UTF-8
+Content-Transfer-Encoding: quoted-printable
+
+<!doctype html>
+<html>
+ <head>=20
+  <title></title>=20
+  <meta charset=3D"UTF-8">=20
+  <style type=3D"text/css">
+            .content {
+ white-space: normal;
+ color: black;
+ font-family: Arial, Helvetica, sans-serif;
+ font-size: 12px;
+ cursor: default;
+}
+/* shown_as */
+
+
+.shown_as.reserved { background-color: #08c; } /* blue */
+.shown_as.temporary { background-color: #fc0; } /* yellow */
+.shown_as.absent { background-color: #913F3F; } /* red */
+.shown_as.free { background-color: #8EB360; } /* green */
+
+.shown_as_label.reserved { color: #08c; } /* blue */
+.shown_as_label.temporary { color: #fc0; } /* yellow */
+.shown_as_label.absent { color: #913F3F; } /* red */
+.shown_as_label.free { color: #8EB360; } /* green */
+
+em {
+ font-weight: bold;
+}
+
+/* Detail view */
+
+.timezone {
+ margin-bottom: 2em;
+}
+
+.justification, .attachmentNote {
+ margin-top: 2em;
+ margin-bottom: 2em;
+}
+
+.calendar-detail .action {
+ float: right;
+ margin-right: 1em;
+}
+
+.calendar-detail .link {
+ cursor: pointer;
+ text-decoration: underline;
+ color: #00a0cd;
+}
+
+.calendar-detail .calendar-buttons {
+ height: 2em;
+ text-align: right;
+ line-height: 2em;
+ border-bottom: 1px solid #f0f0f0;
+}
+
+.calendar-detail .date {
+    font-size: 11pt;
+    color: #ccc;
+}
+
+.calendar-detail .interval {
+    color: #555;
+    white-space: nowrap;
+    float: right;
+}
+
+.calendar-detail .day {
+    color: #888;
+}
+
+.calendar-detail .title {
+    font-size: 18pt;
+    line-height: 22pt;
+    margin: 0.25em 0 0.25em 0;
+}
+
+.calendar-detail .location {
+    font-size: 11pt;
+    color: #888;
+    margin-bottom: 1em;
+}
+
+.calendar-detail .label {
+    font-size: 9pt;
+    color: #888;
+    clear: both;
+    border-bottom: 1px solid #ccc;
+    padding: 1em 0 0.25em 0em;
+    margin-bottom: 0.5em;
+}
+
+.calendar-detail .note {
+    max-width: 550px;
+    margin: 2em 0 1em 0;
+    -webkit-user-select: text;
+    -moz-user-select: text;
+    user-select: text;
+    cursor: text;
+}
+
+.calendar-detail .participants {
+    min-height: 2em;
+}
+
+.calendar-detail .participants table {
+    text-align: left;
+    vertical-align: left;
+}
+
+.calendar-detail .participant {
+    line-height: 1.2 em;
+}
+
+.calendar-detail .detail-label {
+    display: inline-block;
+    width: 110px;
+    white-space: nowrap;
+    color: #666;
+}
+
+.calendar-detail .detail {
+    white-space: nowrap;
+}
+
+.calendar-detail .detail.shown_as {
+    display: inline-block;
+    height: 1em;
+    width: 1em;
+}
+
+.calendar-detail .participant .status { font-weight: bold; }
+.calendar-detail .participant .status.accepted { color: #8EB360; } /* green=
+ */
+.calendar-detail .participant .status.declined { color: #913F3F; } /* red *=
+/
+.calendar-detail .participant .status.tentative { color: #c80; } /* orange =
+*/
+
+.calendar-detail .participant .comment {
+    color: #888;
+    display: block;
+    white-space: normal;
+    padding-left: 1em;
+}
+
+.calendar-detail .group {
+    margin: 0.75em 0 0.25em 0;
+    color: #333;
+}
+
+.person, .person-link {
+ color: #00A0CD;
+}
+
+.clear-title {
+ font-family: OpenSans, Helvetica, Arial, sans-serif;
+ font-weight: 200;
+ font-size: 20pt;
+ line-height: 1.15em;
+}
+
+.calendar-action {
+ margin-bottom: 2em;
+ font-family: OpenSans, Helvetica, Arial, sans-serif;
+ font-weight: 200;
+ font-size: 12pt;
+}
+
+.calendar-action .changes{
+    margin-top: 2em;
+ font-size: 11pt;
+}
+
+.calendar-action .changes .original {
+    font-weight: bold;
+}
+
+.calendar-action .changes .recurrencePosition {
+    font-weight: bold;
+}
+
+.calendar-action .changes .updated {
+    color: green;
+    font-weight: bold;
+}
+
+.calendar-action .status {  }
+.calendar-action  .status.accepted { color: #8EB360; } /* green */
+.calendar-action  .status.declined { color: #913F3F; } /* red */
+.calendar-action  .status.tentative { color: #c80; } /* orange */
+
+        </style>=20
+ </head>
+ <body>=20
+  <div class=3D"content">=20
+   <div class=3D"timezone">
+     All times will be shown in the timezone=20
+    <em>Central European Time</em>=20
+   </div>=20
+   <div class=3D"calendar-action">
+    You have been invited to an event by=20
+    <span class=3D"person">anton, anton</span>:
+   </div>=20
+   <div class=3D"calendar-detail">=20
+    <div class=3D"date">=20
+     <div class=3D"interval">
+       12:00 PM - 12:30 PM=20
+     </div>=20
+     <div class=3D"day">
+       Friday, June 8, 2018=20
+     </div>=20
+    </div>=20
+    <div class=3D"title clear-title">
+      Subject=20
+    </div>=20
+    <div class=3D"location">
+      Location=20
+    </div>=20
+    <div class=3D"calendar-buttons" style=3D"display:none"></div>=20
+    <div class=3D"note">
+      Description=20
+    </div>=20
+    <div class=3D"participants">=20
+     <div class=3D"label">
+       Participants:=20
+     </div>=20
+     <div class=3D"participant-list">=20
+      <div class=3D"participant">=20
+       <span class=3D"person">anton, anton</span>=20
+       <span class=3D"status accepted">=E2=9C=93</span>=20
+       <span class=3D"comment"></span>=20
+      </div>=20
+      <div class=3D"participant">=20
+       <span class=3D"person">berta</span>=20
+       <span class=3D"comment"></span>=20
+      </div>=20
+     </div>=20
+     <div class=3D"participants-clear"></div>=20
+    </div>=20
+    <div class=3D"participants">=20
+     <div class=3D"label">
+       Resources=20
+     </div>=20
+     <div class=3D"participant-list">=20
+     </div>=20
+     <div class=3D"participants-clear"></div>=20
+    </div>=20
+    <div>=20
+     <div class=3D"label">
+       Details:=20
+     </div>
+     <span class=3D"detail-label">Show as:&nbsp;</span>
+     <span class=3D"detail"><span class=3D"shown_as_label reserved">Reserve=
+d</span></span>
+     <br>=20
+     <span class=3D"detail-label">Created:&nbsp;</span>
+     <span class=3D"detail"><span>Friday, June 8, 2018 10:04 AM</span> <spa=
+n>-</span> <span>anton, anton</span></span>=20
+    </div>=20
+    <div class=3D"attachmentNote">=20
+    </div>=20
+    <div class=3D"justification">=20
+    </div>=20
+   </div>=20
+  </div>=20
+ </body>
+</html>
+------=_Part_7_1952620993.1528445073933
+Content-Type: text/calendar; charset=UTF-8; method=REQUEST
+Content-Transfer-Encoding: 7bit
+
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Open-Xchange//7.10.0-Rev6//EN
+METHOD:REQUEST
+BEGIN:VTIMEZONE
+TZID:Europe/Berlin
+TZURL:http://tzurl.org/zoneinfo-outlook/Europe/Berlin
+X-LIC-LOCATION:Europe/Berlin
+BEGIN:DAYLIGHT
+TZOFFSETFROM:+0100
+TZOFFSETTO:+0200
+TZNAME:CEST
+DTSTART:19700329T020000
+RRULE:FREQ=YEARLY;BYMONTH=3;BYDAY=-1SU
+END:DAYLIGHT
+BEGIN:STANDARD
+TZOFFSETFROM:+0200
+TZOFFSETTO:+0100
+TZNAME:CET
+DTSTART:19701025T030000
+RRULE:FREQ=YEARLY;BYMONTH=10;BYDAY=-1SU
+END:STANDARD
+END:VTIMEZONE
+BEGIN:VEVENT
+DTSTAMP:20180608T080433Z
+ATTENDEE;CN=berta;PARTSTAT=NEEDS-ACTION;CUTYPE=INDIVIDUAL;EMAIL=berta@conte
+ xt2.oxoe.int:mailto:berta@context2.oxoe.int
+ATTENDEE;CN="anton, anton";PARTSTAT=ACCEPTED;CUTYPE=INDIVIDUAL;EMAIL=anton@
+ context1.oxoe.int:mailto:anton@context1.oxoe.int
+CLASS:PUBLIC
+CREATED:20180608T080433Z
+DESCRIPTION:Description
+DTEND;TZID=Europe/Berlin:20180608T123000
+DTSTART;TZID=Europe/Berlin:20180608T120000
+LAST-MODIFIED:20180608T080433Z
+LOCATION:Location
+ORGANIZER;CN="anton, anton":mailto:anton@context1.oxoe.int
+SEQUENCE:0
+SUMMARY:Subject
+TRANSP:OPAQUE
+UID:a3e326bb-3b2a-4236-94c7-47f413259fd8
+X-MICROSOFT-CDO-BUSYSTATUS:BUSY
+END:VEVENT
+END:VCALENDAR
+
+------=_Part_7_1952620993.1528445073933--
+
+------=_Part_6_1474807529.1528445073736
+Content-Type: application/ics; charset=UTF-8; method=REQUEST;
+ name=invite.ics
+Content-Transfer-Encoding: base64
+Content-Disposition: attachment; filename=invite.ics
+
+QkVHSU46VkNBTEVOREFSDQpWRVJTSU9OOjIuMA0KUFJPRElEOi0vL09wZW4tWGNoYW5nZS8vNy4x
+MC4wLVJldjYvL0VODQpNRVRIT0Q6UkVRVUVTVA0KQkVHSU46VlRJTUVaT05FDQpUWklEOkV1cm9w
+ZS9CZXJsaW4NClRaVVJMOmh0dHA6Ly90enVybC5vcmcvem9uZWluZm8tb3V0bG9vay9FdXJvcGUv
+QmVybGluDQpYLUxJQy1MT0NBVElPTjpFdXJvcGUvQmVybGluDQpCRUdJTjpEQVlMSUdIVA0KVFpP
+RkZTRVRGUk9NOiswMTAwDQpUWk9GRlNFVFRPOiswMjAwDQpUWk5BTUU6Q0VTVA0KRFRTVEFSVDox
+OTcwMDMyOVQwMjAwMDANClJSVUxFOkZSRVE9WUVBUkxZO0JZTU9OVEg9MztCWURBWT0tMVNVDQpF
+TkQ6REFZTElHSFQNCkJFR0lOOlNUQU5EQVJEDQpUWk9GRlNFVEZST006KzAyMDANClRaT0ZGU0VU
+VE86KzAxMDANClRaTkFNRTpDRVQNCkRUU1RBUlQ6MTk3MDEwMjVUMDMwMDAwDQpSUlVMRTpGUkVR
+PVlFQVJMWTtCWU1PTlRIPTEwO0JZREFZPS0xU1UNCkVORDpTVEFOREFSRA0KRU5EOlZUSU1FWk9O
+RQ0KQkVHSU46VkVWRU5UDQpEVFNUQU1QOjIwMTgwNjA4VDA4MDQzM1oNCkFUVEVOREVFO0NOPWJl
+cnRhO1BBUlRTVEFUPU5FRURTLUFDVElPTjtDVVRZUEU9SU5ESVZJRFVBTDtFTUFJTD1iZXJ0YUBj
+b250ZQ0KIHh0Mi5veG9lLmludDptYWlsdG86YmVydGFAY29udGV4dDIub3hvZS5pbnQNCkFUVEVO
+REVFO0NOPSJhbnRvbiwgYW50b24iO1BBUlRTVEFUPUFDQ0VQVEVEO0NVVFlQRT1JTkRJVklEVUFM
+O0VNQUlMPWFudG9uQA0KIGNvbnRleHQxLm94b2UuaW50Om1haWx0bzphbnRvbkBjb250ZXh0MS5v
+eG9lLmludA0KQ0xBU1M6UFVCTElDDQpDUkVBVEVEOjIwMTgwNjA4VDA4MDQzM1oNCkRFU0NSSVBU
+SU9OOkRlc2NyaXB0aW9uDQpEVEVORDtUWklEPUV1cm9wZS9CZXJsaW46MjAxODA2MDhUMTIzMDAw
+DQpEVFNUQVJUO1RaSUQ9RXVyb3BlL0JlcmxpbjoyMDE4MDYwOFQxMjAwMDANCkxBU1QtTU9ESUZJ
+RUQ6MjAxODA2MDhUMDgwNDMzWg0KTE9DQVRJT046TG9jYXRpb24NCk9SR0FOSVpFUjtDTj0iYW50
+b24sIGFudG9uIjptYWlsdG86YW50b25AY29udGV4dDEub3hvZS5pbnQNClNFUVVFTkNFOjANClNV
+TU1BUlk6U3ViamVjdA0KVFJBTlNQOk9QQVFVRQ0KVUlEOmEzZTMyNmJiLTNiMmEtNDIzNi05NGM3
+LTQ3ZjQxMzI1OWZkOA0KWC1NSUNST1NPRlQtQ0RPLUJVU1lTVEFUVVM6QlVTWQ0KRU5EOlZFVkVO
+VA0KRU5EOlZDQUxFTkRBUg0K
+------=_Part_6_1474807529.1528445073736--
