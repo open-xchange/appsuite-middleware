@@ -51,59 +51,43 @@ package com.openexchange.admin.user.copy.rmi;
 
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-import java.rmi.RemoteException;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.admin.rmi.AbstractRMITest;
-import com.openexchange.admin.rmi.OXContextInterface;
-import com.openexchange.admin.rmi.OXUserInterface;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.User;
-import com.openexchange.admin.rmi.exceptions.DatabaseUpdateException;
-import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
-import com.openexchange.admin.rmi.exceptions.NoSuchContextException;
-import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.rmi.exceptions.UserExistsException;
-import com.openexchange.configuration.AJAXConfig;
+import com.openexchange.admin.rmi.factory.UserFactory;
 
+/**
+ * {@link UserCopyTest}
+ *
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ */
 public class UserCopyTest extends AbstractRMITest {
 
-    private OXContextInterface ci;
-
-    private OXUserInterface ui;
-
     private Context srcCtx;
-
     private Context dstCtx;
 
-    private User admin;
-
-    @Override
-    public void setUp() throws Exception {
-        super.setUp();
-        AJAXConfig.init();
-        ci = getContextInterface();
-        ui = getUserInterface();
+    /**
+     * Initialises a new {@link UserCopyTest}.
+     */
+    public UserCopyTest() {
+        super();
     }
 
     @Before
     public final void setupContexts() throws Exception {
-        admin = newUser("oxadmin", "secret", "Admin User", "Admin", "User", "oxadmin@example.com");
-        srcCtx = TestTool.createContext(ci, "UserCopySourceCtx_", admin, "all", superAdminCredentials);
-        dstCtx = TestTool.createContext(ci, "UserCopyDestinationCtx_", admin, "all", superAdminCredentials);
+        srcCtx = TestTool.createContext(getContextManager(), "UserCopySourceCtx_", contextAdmin, "all", superAdminCredentials);
+        dstCtx = TestTool.createContext(getContextManager(), "UserCopyDestinationCtx_", contextAdmin, "all", superAdminCredentials);
     }
 
     @After
     public final void tearDownContexts() throws Exception {
-        if (srcCtx != null) {
-            ci.delete(srcCtx, superAdminCredentials);
-        }
-        if (dstCtx != null) {
-            ci.delete(dstCtx, superAdminCredentials);
-        }
+        getContextManager().cleanUp();
     }
 
     @Test
@@ -192,7 +176,7 @@ public class UserCopyTest extends AbstractRMITest {
     public final void testUserExists() throws Exception {
         final OXUserCopyInterface oxu = getUserCopyClient();
         final User srcUser = createUser(srcCtx);
-        final User dstUser = createUser(dstCtx);
+        createUser(dstCtx);
         try {
             oxu.copyUser(srcUser, srcCtx, dstCtx, superAdminCredentials);
             fail("No exception thrown");
@@ -202,12 +186,12 @@ public class UserCopyTest extends AbstractRMITest {
         }
     }
 
-    private User createUser(Context ctx) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException {
-        User user = newUser("user", "secret", "Test User", "Test", "User", "oxuser@example.com");
+    private User createUser(Context ctx) throws Exception {
+        User user = UserFactory.createUser("user", "secret", "Test User", "Test", "User", "oxuser@example.com");
         user.setImapServer("example.com");
         user.setImapLogin("oxuser");
         user.setSmtpServer("example.com");
-        ui.create(ctx, user, getCredentials());
+        getUserManager().create(ctx, user, contextAdminCredentials);
         return user;
     }
 }

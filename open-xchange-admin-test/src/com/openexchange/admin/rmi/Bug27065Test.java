@@ -49,22 +49,8 @@
 
 package com.openexchange.admin.rmi;
 
-import java.net.MalformedURLException;
-import java.rmi.Naming;
-import java.rmi.NotBoundException;
-import java.rmi.RemoteException;
-import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.admin.rmi.dataobjects.Context;
-import com.openexchange.admin.rmi.dataobjects.Credentials;
-import com.openexchange.admin.rmi.dataobjects.User;
-import com.openexchange.admin.rmi.exceptions.ContextExistsException;
-import com.openexchange.admin.rmi.exceptions.DatabaseUpdateException;
-import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
-import com.openexchange.admin.rmi.exceptions.InvalidDataException;
-import com.openexchange.admin.rmi.exceptions.NoSuchContextException;
-import com.openexchange.admin.rmi.exceptions.StorageException;
 
 /**
  * Tries to reproduce the log messages described in bug 27065. This test does not really test or assert something. Therefore the logs must
@@ -73,40 +59,25 @@ import com.openexchange.admin.rmi.exceptions.StorageException;
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public final class Bug27065Test extends AbstractTest {
+public final class Bug27065Test extends AbstractRMITest {
 
-    private Credentials superAdmin;
-    private String url;
-    private OXContextInterface contextIface;
-    private User contextAdmin;
     private Context context;
 
+    /**
+     * Initialises a new {@link Bug27065Test}.
+     */
     public Bug27065Test() {
         super();
     }
 
-    @Before
-    public void setup() throws MalformedURLException, RemoteException, NotBoundException, StorageException, InvalidCredentialsException, InvalidDataException {
-        superAdmin = DummyMasterCredentials();
-        url = getRMIHostUrl();
-        contextIface = (OXContextInterface) Naming.lookup(url + OXContextInterface.RMI_NAME);
-        context = ContextTest.getTestContextObject(ContextTest.createNewContextID(superAdmin), 10l);
-        contextAdmin = UserTest.getTestUserObject("admin","secret", context);
-    }
-
-    @After
-    public void tearDown()
- throws RemoteException, InvalidDataException, StorageException, InvalidCredentialsException, NoSuchContextException, DatabaseUpdateException {
-        if (contextIface.exists(new Context(context.getId()), superAdmin)) {
-            contextIface.delete(context, superAdmin);
-        }
-    }
-
+    /**
+     * Reproduce the log message
+     */
     @Test
-    public void reproduceMessages() throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException, ContextExistsException, NoSuchContextException, DatabaseUpdateException, InterruptedException {
-        context = contextIface.create(context, contextAdmin, superAdmin);
+    public void reproduceMessages() throws Exception {
+        context = getContextManager().create(contextAdminCredentials);
         Thread.sleep(400); // Only necessary if the replication from master to slave becomes a little bit slow.
-        contextIface.changeModuleAccess(new Context(context.getId()), "webmail", superAdmin);
-        contextIface.downgrade(new Context(context.getId()), superAdmin);
+        getContextManager().changeModuleAccess(new Context(context.getId()), "webmail");
+        getContextManager().downgrade(new Context(context.getId()));
     }
 }

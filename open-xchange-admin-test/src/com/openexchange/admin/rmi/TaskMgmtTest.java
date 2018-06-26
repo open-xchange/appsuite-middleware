@@ -56,17 +56,15 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.admin.rmi.dataobjects.Context;
-import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.dataobjects.Database;
 import com.openexchange.admin.rmi.dataobjects.User;
 import com.openexchange.admin.rmi.exceptions.TaskManagerException;
+import com.openexchange.admin.rmi.factory.UserFactory;
 import com.openexchange.admin.user.copy.rmi.TestTool;
 
 public class TaskMgmtTest extends AbstractRMITest {
 
     private User admin;
-
-    private OXContextInterface ci;
 
     private Context context;
 
@@ -74,59 +72,47 @@ public class TaskMgmtTest extends AbstractRMITest {
 
     private Database client_db;
 
-    private OXUtilInterface oxu;
-
     private OXTaskMgmtInterface ti;
 
     @Override
     public void setUp() throws Exception {
         super.setUp();
 
-        admin = newUser("oxadmin", "secret", "Admin User", "Admin", "User", "oxadmin@example.com");
-        ci = getContextInterface();
-        oxu = getUtilInterface();
+        admin = UserFactory.createUser("oxadmin", "secret", "Admin User", "Admin", "User", "oxadmin@example.com");
         ti = getTaskInterface();
     }
 
     @Before
     public final void setupContexts() throws Exception {
-        context = TestTool.createContext(ci, "TaskMgmtCtx_", admin, "all", superAdminCredentials);
+        context = TestTool.createContext(getContextManager(), "TaskMgmtCtx_", admin, "all", superAdminCredentials);
         db_name = "db_" + System.currentTimeMillis();
         client_db = UtilTest.getTestDatabaseObject("localhost", db_name);
         if (null == client_db) {
             throw new NullPointerException("Database object is null");
         }
-        client_db.setId(oxu.registerDatabase(client_db, Boolean.FALSE, Integer.valueOf(0), superAdminCredentials).getId());
+        client_db.setId(getDatabaseManager().register(client_db, Boolean.FALSE, Integer.valueOf(0)).getId());
     }
 
     @After
     public final void tearDownContexts() throws Exception {
-        try {
-            if (ci != null && context != null && superAdminCredentials != null) {
-                ci.delete(context, superAdminCredentials);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        getContextManager().cleanUp();
         if (client_db != null) {
-            oxu.unregisterDatabase(new Database(client_db.getId()), superAdminCredentials);
+            getDatabaseManager().unregister(new Database(client_db.getId()));
         }
         db_name = null;
         client_db = null;
     }
 
-     @Test
-     public void testGetTaskResultsContextCredentialsInt() throws MalformedURLException, RemoteException, NotBoundException, Exception {
-        final Credentials cred = DummyCredentials();
+    @Test
+    public void testGetTaskResultsContextCredentialsInt() throws MalformedURLException, RemoteException, NotBoundException, Exception {
+        final int jobId = getContextManager().moveContextDatabase(context, client_db);
 
-        final int jobId = ci.moveContextDatabase(context, client_db, superAdminCredentials);
-
-        ti.getTaskResults(context, cred, jobId);
+        ti.getTaskResults(context, contextAdminCredentials, jobId);
         int counter = 0;
         boolean running = true;
         while (running && counter < 180) {
             try {
-                ti.deleteJob(context, cred, jobId);
+                ti.deleteJob(context, contextAdminCredentials, jobId);
                 running = false;
                 System.out.println("Task moveContextDatabase finished");
             } catch (TaskManagerException e) {

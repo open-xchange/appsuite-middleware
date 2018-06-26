@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2016-2020 OX Software GmbH
+ *     Copyright (C) 2018-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,27 +47,31 @@
  *
  */
 
-package com.openexchange.admin.tools;
+package com.openexchange.admin;
 
-import static org.junit.Assert.assertEquals;
-import org.junit.Test;
-import com.openexchange.admin.rmi.dataobjects.User;
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
+import org.junit.runners.Suite.SuiteClasses;
+import com.openexchange.admin.reseller.rmi.AdminResellerRmiTestSuite;
+import com.openexchange.admin.rmi.AdminRmiTestSuite;
+import com.openexchange.admin.tools.AdminToolsTestSuite;
+import com.openexchange.admin.user.copy.rmi.AdminUserCopyRmiTestSuite;
 
 /**
- * {@link Bug19733Test}
+ * {@link AdminRMITestSuite}
  *
- * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @since v7.10.1
  */
-public final class Bug19733Test {
+@RunWith(Suite.class)
+@SuiteClasses({
+    //@formatter:off
+    AdminResellerRmiTestSuite.class,
+    AdminRmiTestSuite.class,
+    AdminToolsTestSuite.class,
+    AdminUserCopyRmiTestSuite.class
+    //@formatter:on
+})
+public class AdminRMITestSuite {
 
-    public Bug19733Test() {
-        super();
-    }
-
-    @Test
-    public void testGetImapPort() {
-        final User user = new User();
-        user.setImapServer("21a7:a92c:2323::1");
-        assertEquals("Ports are not equal", 143, user.getImapPort());
-    }
 }

@@ -53,57 +53,235 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-import java.net.MalformedURLException;
-import java.rmi.Naming;
-import java.rmi.NotBoundException;
-import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
+import java.util.UUID;
 import org.junit.Test;
 import com.openexchange.admin.rmi.dataobjects.Context;
-import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.dataobjects.Database;
 import com.openexchange.admin.rmi.dataobjects.Filestore;
 import com.openexchange.admin.rmi.dataobjects.MaintenanceReason;
-import com.openexchange.admin.rmi.dataobjects.Server;
-import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
-import com.openexchange.admin.rmi.exceptions.StorageException;
+import com.openexchange.admin.rmi.factory.ContextFactory;
 
 /**
- *
+ * {@link ContextTest}
+ * 
  * @author cutmasta
  * @author d7
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class ContextTest extends AbstractTest {
+public class ContextTest extends AbstractRMITest {
 
-    @Test
-    public void testGetAdminId() throws Exception {
-        final Credentials cred = DummyMasterCredentials();
-        final String hosturl = getRMIHostUrl();
-        Context ctx = addSystemContext(getTestContextObject(cred), getRMIHostUrl(), cred);
-
-        OXContextInterface xctx = (OXContextInterface) Naming.lookup(hosturl + OXContextInterface.RMI_NAME);
-
-        assertEquals(2, xctx.getAdminId(ctx, cred));
+    /**
+     * Initialises a new {@link ContextTest}.
+     */
+    public ContextTest() {
+        super();
     }
 
+    /**
+     * Tests getting the admin id for a newly created context
+     */
+    @Test
+    public void testGetAdminId() throws Exception {
+        // The context admin's id is always '2'
+        Context context = ContextFactory.createContext(10L);
+        getContextManager().create(context, contextAdminCredentials);
+        assertEquals(2, getContextManager().getAdminId(context));
+    }
+
+    /**
+     * Tests loading all data for a context
+     */
+    @Test
+    public void testGetByName() throws Exception {
+        Context testContext = getContextManager().create(contextAdminCredentials);
+        Integer idAsInt = testContext.getId();
+        testContext.setId(null);
+        final Context srv_loaded = getContextManager().getData(testContext);
+
+        // Reset for compare
+        testContext.setId(idAsInt);
+        // FIXME: Add equals for context here. Same at nearly all other occurrences
+        assertTrue("Expected same context ids", idAsInt.intValue() == srv_loaded.getId().intValue());
+    }
+
+    /**
+     * Tests listing contexts by database
+     */
+    @Test
+    public void testListContextByDatabase() throws Exception {
+        Database[] dbs = getDatabaseManager().search("*");
+        if (dbs.length > 0) {
+            Context[] ids = getContextManager().search(dbs[0]);
+            assertTrue("No contexts found in database " + dbs[0].getUrl(), ids.length > 0);
+        } else {
+            fail("No databases found.");
+        }
+    }
+
+    /**
+     * Test list contexts by filestore
+     */
+    @Test
+    public void testListContextByFilestore() throws Exception {
+        getContextManager().create(contextAdminCredentials);
+        Filestore[] fiss = getFilestoreManager().search("*");
+        if (fiss.length <= 0) {
+            fail("No filestores found.");
+        }
+        boolean foundContextViaFilestore = false;
+        for (int a = 0; a < fiss.length; a++) {
+            Context[] ids = getContextManager().search(fiss[a]);
+            if (ids.length > 0) {
+                foundContextViaFilestore = true;
+                break;
+            }
+        }
+        assertTrue("No contexts found using filestores", foundContextViaFilestore);
+    }
+
+    /**
+     * Test happy path, create context
+     */
+    @Test
+    public void testCreateContext() throws Exception {
+        getContextManager().create(superAdminCredentials);
+    }
+
+    /**
+     * Test context creation with absent of quota information
+     */
+    @Test(expected = InvalidDataException.class)
+    public void testCreateContextNoQuota() throws Exception {
+        Context c = new Context();
+        c.setName("Name-" + UUID.randomUUID().toString());
+        getContextManager().create(c, contextAdminCredentials);
+    }
+
+    /**
+     * Test context creation, immediate delete, and re-creation with the same identifier
+     */
+    @Test
+    public void testCreateDeleteCreateContext() throws Exception {
+        Context context = getContextManager().create(contextAdminCredentials);
+        int ctxId = context.getId().intValue();
+        getContextManager().delete(context);
+        getContextManager().create(ctxId, 5000, contextAdminCredentials);
+    }
+
+    /**
+     * Tests context deletion
+     */
+    @Test
+    public void testDeleteContext() throws Exception {
+        Context context = getContextManager().create(superAdminCredentials);
+        getContextManager().delete(context);
+    }
+
+    /**
+     * Tests whether a context exists
+     */
+    @Test
+    public void testExistsContext() throws Exception {
+        Context testContext = getContextManager().create(contextAdminCredentials);
+        Context nonExistent = new Context();
+        nonExistent.setName("notexists.com");
+
+        assertFalse("Context must not exist", getContextManager().exists(nonExistent));
+        assertTrue("Context must exist", getContextManager().exists(testContext));
+    }
+
+    /**
+     * Tests enabling a context
+     */
+    @Test
+    public void testEnableContext() throws Exception {
+        Context testContext = getContextManager().create(contextAdminCredentials);
+
+        MaintenanceReason[] mrs = getMaintenanceReasonManager().search("*");
+        MaintenanceReason mr = new MaintenanceReason();
+        if (mrs.length == 0) {
+            // add reason , and then use this reason to disable the context
+            mr.setText("Context disabled " + System.currentTimeMillis());
+            int mr_id = getMaintenanceReasonManager().create(mr).getId().intValue();
+            mr.setId(mr_id);
+        } else {
+            mr.setId(mrs[0].getId());
+        }
+
+        getContextManager().disable(testContext);
+        Context[] ctxs = getContextManager().search(testContext.getIdAsString());
+        boolean ctx_disabled = false;
+        for (final Context elem : ctxs) {
+            if (elem.getId().intValue() == testContext.getId().intValue() && !elem.isEnabled()) {
+                ctx_disabled = true;
+            }
+        }
+        assertTrue("Context could be not disabled", ctx_disabled);
+
+        // now enable context again
+        getContextManager().enable(testContext);
+        ctxs = getContextManager().search(testContext.getIdAsString());
+        boolean ctx_ensabled = false;
+        for (final Context elem : ctxs) {
+            if ((elem.getId().intValue() == testContext.getId().intValue()) && elem.isEnabled()) {
+                ctx_ensabled = true;
+            }
+        }
+        assertTrue("Context could be not enabled", ctx_ensabled);
+    }
+
+    /**
+     * Tests disabling a context
+     */
+    @Test
+    public void testDisableContext() throws Exception {
+        Context testContext = getContextManager().create(contextAdminCredentials);
+
+        MaintenanceReason[] mrs = getMaintenanceReasonManager().search("*");
+        MaintenanceReason mr = new MaintenanceReason();
+        if (mrs.length == 0) {
+            // add reason , and then use this reason to disable the context
+            mr.setText("Context disabled " + System.currentTimeMillis());
+            int mr_id = getMaintenanceReasonManager().create(mr).getId().intValue();
+            mr.setId(mr_id);
+        } else {
+            mr.setId(mrs[0].getId());
+        }
+        getContextManager().disable(testContext);
+        Context[] ctxs = getContextManager().search(testContext.getIdAsString());
+        boolean ctx_disabled = false;
+
+        for (final Context elem : ctxs) {
+            if (!elem.isEnabled()) {
+                ctx_disabled = true;
+            }
+        }
+        assertTrue("context could be not disabled", ctx_disabled);
+    }
+
+    /**
+     * Test getting and changing an existing context
+     */
     @Test
     public void testGetAndChangeContext() throws Exception {
-        final Credentials cred = DummyMasterCredentials();
-        final String hosturl = getRMIHostUrl();
-        Context ctx = addSystemContext(getTestContextObject(cred), getRMIHostUrl(), cred);
+        Context context = new Context();
+        context.setName("testGetAndChangeContext-" + UUID.randomUUID().toString());
+        context.setMaxQuota(5000L);
+        context.setUserAttribute("com.openexchange.test", "flavor", "lemon");
+        context.setUserAttribute("com.openexchange.test", "texture", "squishy");
 
-        OXContextInterface xctx = (OXContextInterface) Naming.lookup(hosturl + OXContextInterface.RMI_NAME);
-
-        Context srv_loaded = xctx.getData(ctx, cred);
+        getContextManager().create(context, contextAdminCredentials);
+        Context srv_loaded = getContextManager().getData(context);
 
         assertEquals("lemon", srv_loaded.getUserAttribute("com.openexchange.test", "flavor"));
         assertEquals("squishy", srv_loaded.getUserAttribute("com.openexchange.test", "texture"));
 
-        assertTrue("Expected same context ids", ctx.getId().intValue() == srv_loaded.getId().intValue());
+        assertTrue("Expected same context ids", context.getId().intValue() == srv_loaded.getId().intValue());
 
         String add_mapping = srv_loaded.getId().intValue() + "_" + System.currentTimeMillis();
         srv_loaded.addLoginMapping(add_mapping);
@@ -118,9 +296,9 @@ public class ContextTest extends AbstractTest {
         srv_loaded.setUserAttribute("com.openexchange.test", "texture", null);
 
         // change context and load again
-        xctx.change(srv_loaded, cred);
+        getContextManager().change(srv_loaded);
 
-        Context edited_ctx = xctx.getData(ctx, cred);
+        Context edited_ctx = getContextManager().getData(context);
 
         assertEquals("pistaccio", srv_loaded.getUserAttribute("com.openexchange.test", "flavor"));
         assertEquals("green", srv_loaded.getUserAttribute("com.openexchange.test", "color"));
@@ -136,204 +314,42 @@ public class ContextTest extends AbstractTest {
         assertTrue("Expected changed context name to be same as loaded ctx", edited_ctx.getName().equals(changed_context_name));
     }
 
-    @Test
-    public void testGetByName() throws Exception {
-        final Credentials cred = DummyMasterCredentials();
-        final String hosturl = getRMIHostUrl();
-        final Context ctx = addSystemContext(getTestContextObject(cred), getRMIHostUrl(), cred);
-
-        OXContextInterface xctx = (OXContextInterface) Naming.lookup(hosturl + OXContextInterface.RMI_NAME);
-
-        final Integer idAsInt = ctx.getId();
-        ctx.setId(null);
-        final Context srv_loaded = xctx.getData(ctx, cred);
-
-        // Reset for compare
-        ctx.setId(idAsInt);
-        // FIXME: Add equals for context here. Same at nearly all other occurrences
-        assertTrue("Expected same context ids", idAsInt.intValue() == srv_loaded.getId().intValue());
-    }
-
-    @Test
-    public void testListContextByDatabase() throws Exception {
-        final Credentials cred = DummyMasterCredentials();
-        final Context ctx = getTestContextObject(cred);
-        final String hosturl = getRMIHostUrl();
-        addContext(ctx, hosturl, cred);
-        OXUtilInterface oxu = (OXUtilInterface) Naming.lookup(hosturl + OXUtilInterface.RMI_NAME);
-        Database[] dbs = oxu.listDatabase("*", cred);
-        if (dbs.length > 0) {
-            Context[] ids = searchContextByDatabase(dbs[0], hosturl, cred);
-            assertTrue("no contexts found on database " + dbs[0].getUrl(), ids.length > 0);
-        } else {
-            fail("no databases found to search with");
-        }
-    }
-
-    @Test
-    public void testListContextByFilestore() throws Exception {
-        final Credentials cred = DummyMasterCredentials();
-        final Context ctx = getTestContextObject(cred);
-        final String hosturl = getRMIHostUrl();
-        addContext(ctx, hosturl, cred);
-        OXUtilInterface oxu = (OXUtilInterface) Naming.lookup(hosturl + OXUtilInterface.RMI_NAME);
-        Filestore[] fiss = oxu.listFilestore("*", cred);
-        if (fiss.length > 0) {
-            boolean foundctxviastore = false;
-            for (int a = 0; a < fiss.length; a++) {
-                Context[] ids = searchContextByFilestore(fiss[a], hosturl, cred);
-                if (ids.length > 0) {
-                    foundctxviastore = true;
-                }
-            }
-            assertTrue("no contexts found on filestores", foundctxviastore);
-        } else {
-            fail("no databases found to search with");
-        }
-    }
-
-    @Test
-    public void testDisableContext() throws Exception {
-        final Credentials cred = DummyMasterCredentials();
-        final Context ctx = getTestContextObject(cred);
-        final String hosturl = getRMIHostUrl();
-        addContext(ctx, hosturl, cred);
-        OXUtilInterface oxu = (OXUtilInterface) Naming.lookup(hosturl + OXUtilInterface.RMI_NAME);
-        MaintenanceReason[] mrs = oxu.listMaintenanceReason("*", cred);
-        MaintenanceReason mr = new MaintenanceReason();
-        if (mrs.length == 0) {
-            // add reason , and then use this reason to disable the context
-            mr.setText("Context disabled " + System.currentTimeMillis());
-            int mr_id = oxu.createMaintenanceReason(mr, cred).getId().intValue();
-            mr.setId(mr_id);
-        } else {
-            mr.setId(mrs[0].getId());
-        }
-        disableContext(ctx, hosturl, cred);
-        Context[] ctxs = searchContext(String.valueOf(ctx.getId()), hosturl, cred);
-        boolean ctx_disabled = false;
-
-        for (final Context elem : ctxs) {
-            if (!elem.isEnabled()) {
-                ctx_disabled = true;
-            }
-        }
-        assertTrue("context could be not disabled", ctx_disabled);
-
-    }
-
-    @Test
-    public void testEnableContext() throws Exception {
-        final Credentials cred = DummyMasterCredentials();
-        final Context ctx = getTestContextObject(cred);
-        final String hosturl = getRMIHostUrl();
-
-        addContext(ctx, hosturl, cred);
-        OXUtilInterface oxu = (OXUtilInterface) Naming.lookup(hosturl + OXUtilInterface.RMI_NAME);
-        MaintenanceReason[] mrs = oxu.listMaintenanceReason("*", cred);
-        MaintenanceReason mr = new MaintenanceReason();
-        if (mrs.length == 0) {
-            // add reason , and then use this reason to disable the context
-            mr.setText("Context disabled " + System.currentTimeMillis());
-            int mr_id = oxu.createMaintenanceReason(mr, cred).getId().intValue();
-            mr.setId(mr_id);
-        } else {
-            mr.setId(mrs[0].getId());
-        }
-
-        disableContext(ctx, hosturl, cred);
-        Context[] ctxs = searchContext(ctx.getIdAsString(), hosturl, cred);
-        boolean ctx_disabled = false;
-        for (final Context elem : ctxs) {
-            if (elem.getId().intValue() == ctx.getId().intValue() && !elem.isEnabled()) {
-                ctx_disabled = true;
-            }
-        }
-        assertTrue("context could be not disabled", ctx_disabled);
-
-        // now enable context again
-        enableContext(ctx, hosturl, cred);
-        ctxs = searchContext(String.valueOf(ctx.getId()), hosturl, cred);
-        boolean ctx_ensabled = false;
-        for (final Context elem : ctxs) {
-            if ((elem.getId().intValue() == ctx.getId().intValue()) && elem.isEnabled()) {
-                ctx_ensabled = true;
-            }
-        }
-        assertTrue("context could be not enabled", ctx_ensabled);
-    }
-
-    @Test
-    public void testCreateContext() throws Exception {
-        final Credentials cred = DummyMasterCredentials();
-        Context ctxset = getTestContextObject(cred);
-        addContext(ctxset, getRMIHostUrl(), cred);
-    }
-
-    @Test(expected = InvalidDataException.class)
-    public void testCreateContextNoQuota() throws Exception {
-        final Credentials cred = DummyMasterCredentials();
-        Context ctxset = getTestContextObjectNoQuota(cred);
-        addContext(ctxset, getRMIHostUrl(), cred);
-        deleteContext(ctxset, getRMIHostUrl(), cred);
-    }
-
-    @Test
-    public void testCreateDeleteCreateContext() throws Exception {
-        final Credentials cred = DummyMasterCredentials();
-        int ctxid = createNewContextID(cred);
-        final String hosturl = getRMIHostUrl();
-        final Context ctx = getTestContextObject(ctxid, 50);
-        ctxid = addSystemContext(ctx, hosturl, cred).getId().intValue();
-        deleteContext(ctx, hosturl, cred);
-        addSystemContext(ctx, hosturl, cred).getId().intValue();
-    }
-
+    /**
+     * Tests adding the same login mapping twice
+     */
     @Test
     public void testDuplicateLoginMappingsThrowReadableError() throws Exception {
-        final Credentials cred = DummyMasterCredentials();
-
         List<Context> clean = new ArrayList<Context>();
 
-        Context ctx1 = getTestContextObject(cred);
+        Context ctx1 = ContextFactory.createContext(5000);
         ctx1.setLoginMappings(new HashSet<String>(Arrays.asList("foo")));
-        addContext(ctx1, getRMIHostUrl(), cred);
+
+        getContextManager().create(ctx1, contextAdminCredentials);
         clean.add(ctx1);
         try {
-            Context ctx2 = getTestContextObject(cred);
+            Context ctx2 = ContextFactory.createContext(5000);
             ctx2.setLoginMappings(new HashSet<String>(Arrays.asList("foo")));
-            addContext(ctx2, getRMIHostUrl(), cred);
+            getContextManager().create(ctx2, contextAdminCredentials);
             clean.add(ctx2);
             fail("Could add Context");
         } catch (Exception x) {
             assertEquals("Cannot map 'foo' to the newly created context. This mapping is already in use.", x.getMessage());
         } finally {
             for (Context context : clean) {
-                deleteContext(context, getRMIHostUrl(), cred);
+                getContextManager().delete(context);
             }
         }
-
     }
 
-    @Test
-    public void testDeleteContext() throws Exception {
-        final Credentials cred = DummyMasterCredentials();
-        int ctxid = createNewContextID(cred);
-        final String hosturl = getRMIHostUrl();
-        final Context ctx = getTestContextObject(ctxid, 50);
-        ctxid = addSystemContext(ctx, hosturl, cred).getId().intValue();
-        deleteContext(ctx, hosturl, cred);
-    }
-
+    /**
+     * List contexts, search by id
+     */
     @Test
     public void testListContext() throws Exception {
-        final Credentials cred = DummyMasterCredentials();
-        int ctxid = createNewContextID(cred);
-        final String hosturl = getRMIHostUrl();
-        final Context ctxset = getTestContextObject(ctxid, 50);
-        addContext(ctxset, hosturl, cred);
+        Context testContext = getContextManager().create(contextAdminCredentials);
+        int ctxid = testContext.getId().intValue();
         // now search exactly for the added context
-        Context[] ctxs = searchContext(String.valueOf(ctxid), hosturl, cred);
+        Context[] ctxs = getContextManager().search(Integer.toString(ctxid));
         boolean foundctx = false;
         for (final Context elem : ctxs) {
             if (elem.getId().intValue() == ctxid) {
@@ -342,130 +358,4 @@ public class ContextTest extends AbstractTest {
         }
         assertTrue("context not found", foundctx);
     }
-
-    private Context[] searchContextByDatabase(Database db, String host, Credentials cred) throws Exception {
-        OXContextInterface xres = (OXContextInterface) Naming.lookup(host + OXContextInterface.RMI_NAME);
-        return xres.listByDatabase(db, cred);
-    }
-
-    private Context[] searchContextByFilestore(Filestore fis, String host, Credentials cred) throws Exception {
-        OXContextInterface xres = (OXContextInterface) Naming.lookup(host + OXContextInterface.RMI_NAME);
-        return xres.listByFilestore(fis, cred);
-    }
-
-    public static Context[] searchContext(String pattern, String host, Credentials cred) throws MalformedURLException, RemoteException, NotBoundException, StorageException, InvalidCredentialsException, InvalidDataException {
-        OXContextInterface xres = (OXContextInterface) Naming.lookup(host + OXContextInterface.RMI_NAME);
-        return xres.list(pattern, cred);
-    }
-
-    private void deleteContext(Context ctx, String host, Credentials cred) throws Exception {
-        OXContextInterface xres = (OXContextInterface) Naming.lookup(host + OXContextInterface.RMI_NAME);
-        xres.delete(ctx, cred);
-    }
-
-    private Context addSystemContext(Context ctx, String host, Credentials cred) throws Exception {
-        OXUtilInterface oxu = (OXUtilInterface) Naming.lookup(host + OXUtilInterface.RMI_NAME);
-        // first check if the needed server entry is in db, if not, add server
-        // first,
-        if (oxu.listServer("local", cred).length != 1) {
-            Server srv = new Server();
-            srv.setName("local");
-            oxu.registerServer(srv, cred);
-        }
-        // then check if filestore is in db, if not, create register filestore
-        // first
-        if (oxu.listFilestore("*", cred).length == 0) {
-            Filestore fis = new Filestore();
-            fis.setMaxContexts(10000);
-            fis.setSize(8796093022208L);
-            java.net.URI uri = new java.net.URI("file:/tmp/disc_" + System.currentTimeMillis());
-            fis.setUrl(uri.toString());
-            new java.io.File(uri.getPath()).mkdir();
-            oxu.registerFilestore(fis, cred);
-        }
-        // then check if a database is in db for the new ctx, if not register
-        // database first,
-        // THEN we can add the context with its data
-        if (oxu.listDatabase("test-ox-db", cred).length == 0) {
-            Database db = UtilTest.getTestDatabaseObject("localhost", "test-ox-db");
-            oxu.registerDatabase(db, Boolean.FALSE, Integer.valueOf(0), cred);
-        }
-
-        OXContextInterface oxcontext = (OXContextInterface) Naming.lookup(host + OXContextInterface.RMI_NAME);
-
-        oxcontext.create(ctx, UserTest.getTestUserObject("admin", "secret", ctx), cred);
-        return ctx;
-    }
-
-    private int addContext(Context ctx, String host, Credentials cred) throws Exception {
-        return addSystemContext(ctx, host, cred).getId().intValue();
-    }
-
-    private void disableContext(Context ctx, String host, Credentials cred) throws Exception {
-        OXContextInterface xres = (OXContextInterface) Naming.lookup(host + OXContextInterface.RMI_NAME);
-        //xres.disable(ctx, mr, cred);
-        xres.disable(ctx, cred);
-    }
-
-    private void enableContext(Context ctx, String host, Credentials cred) throws Exception {
-        OXContextInterface xres = (OXContextInterface) Naming.lookup(host + OXContextInterface.RMI_NAME);
-        xres.enable(ctx, cred);
-    }
-
-    public static int searchNextFreeContextID(int pos, Credentials cred) throws MalformedURLException, RemoteException, NotBoundException, StorageException, InvalidCredentialsException, InvalidDataException {
-        Context[] ctx = searchContext(String.valueOf(pos), getRMIHostUrl(), cred);
-        if (ctx.length == 0) {
-            return pos;
-        } else {
-            return -1;
-        }
-    }
-
-    public static Context getTestContextObject(Credentials cred) throws MalformedURLException, RemoteException, NotBoundException, StorageException, InvalidCredentialsException, InvalidDataException {
-        return getTestContextObject(createNewContextID(cred), 5000);
-    }
-
-    public static Context getTestContextObjectNoQuota(Credentials cred) throws MalformedURLException, RemoteException, NotBoundException, StorageException, InvalidCredentialsException, InvalidDataException {
-        return getTestContextObject(createNewContextID(cred));
-    }
-
-    public static Context getTestContextObject(int context_id, long quota_max_in_mb) {
-        Context ctx = getTestContextObject(context_id);
-        ctx.setMaxQuota(quota_max_in_mb);
-        ctx.setUserAttribute("com.openexchange.test", "flavor", "lemon");
-        ctx.setUserAttribute("com.openexchange.test", "texture", "squishy");
-        return ctx;
-    }
-
-    // Must be public static to override method
-    public static Context getTestContextObject(int context_id) {
-        Context ctx = new Context(context_id);
-        ctx.setName("Name-" + ctx.getId());
-        return ctx;
-    }
-
-    public static int createNewContextID(Credentials cred) throws MalformedURLException, RemoteException, NotBoundException, StorageException, InvalidCredentialsException, InvalidDataException {
-        int pos = 5;
-        int ret = -1;
-        while (ret == -1) {
-            ret = searchNextFreeContextID(pos, cred);
-            pos = pos + 3;
-        }
-        return ret;
-    }
-
-    @Test
-    public void testExistsContext() throws Exception {
-        OXContextInterface ctxstub = (OXContextInterface) Naming.lookup(getRMIHostUrl() + OXContextInterface.RMI_NAME);
-
-        final Credentials cred = DummyMasterCredentials();
-        Context ctxexists = getTestContextObject(cred);
-        addContext(ctxexists, getRMIHostUrl(), cred);
-        Context ctxnotexists = new Context();
-        ctxnotexists.setName("notexists.com");
-
-        assertFalse("context must not exist", ctxstub.exists(ctxnotexists, cred));
-        assertTrue("context must exist", ctxstub.exists(ctxexists, cred));
-    }
-
 }

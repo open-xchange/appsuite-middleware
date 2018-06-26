@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2016-2020 OX Software GmbH
+ *     Copyright (C) 2018-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,27 +47,56 @@
  *
  */
 
-package com.openexchange.admin.tools;
+package com.openexchange.admin.rmi.factory;
 
-import static org.junit.Assert.assertEquals;
-import org.junit.Test;
-import com.openexchange.admin.rmi.dataobjects.User;
+import com.openexchange.admin.rmi.dataobjects.Resource;
 
 /**
- * {@link Bug19733Test}
+ * {@link ResourceFactory}
  *
- * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @since v7.10.1
  */
-public final class Bug19733Test {
+public class ResourceFactory {
 
-    public Bug19733Test() {
-        super();
+    /**
+     * Creates a new {@link Resource} object
+     * 
+     * @param name The resource's name
+     * @param displayName The resource's display name
+     * @param email The resource's e-mail
+     * @return The newly created {@link Resource} object
+     */
+    public static Resource createResource(String name, String displayName, String email) {
+        Resource res = new Resource();
+        res.setName(name);
+        res.setDisplayname(displayName);
+        res.setEmail(email);
+        return res;
     }
 
-    @Test
-    public void testGetImapPort() {
-        final User user = new User();
-        user.setImapServer("21a7:a92c:2323::1");
-        assertEquals("Ports are not equal", 143, user.getImapPort());
+    /**
+     * Creates a new {@link Resource} object
+     * 
+     * @param name The name of the resource
+     * @param displayName The display name of the resource
+     * @param description The description of the resource
+     * @param email The e-mail of the resource
+     * @return The newly created {@link Resource} obejct
+     */
+    public static Resource createResource(String name, String displayName, String description, String email) {
+        Resource resource = createResource(name, displayName, email);
+        resource.setDescription(description);
+        return resource;
+    }
+
+    /**
+     * Creates a new {@link Resource} object
+     * 
+     * @param name The resource's name
+     * @return The newly created resource
+     */
+    public static Resource createResource(String name) {
+        return createResource(name, "displayname of resource " + name, "description of resource " + name, "resource-email-" + name + "@example.org");
     }
 }

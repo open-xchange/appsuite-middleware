@@ -51,9 +51,7 @@ package com.openexchange.admin.rmi;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import java.rmi.Naming;
 import org.junit.Test;
-import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.dataobjects.Database;
 
 /**
@@ -61,21 +59,25 @@ import com.openexchange.admin.rmi.dataobjects.Database;
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public final class Bug16865Test extends AbstractTest {
+public final class Bug16865Test extends AbstractRMITest {
 
-     @Test
-     public void testDefaultInitial() throws Throwable {
-        Credentials cred = ContextTest.DummyMasterCredentials();
-        String host = AbstractRMITest.getRMIHostUrl();
-        OXUtilInterface util = (OXUtilInterface) Naming.lookup(host + OXUtilInterface.RMI_NAME);
+    /**
+     * Initialises a new {@link Bug16865Test}.
+     */
+    public Bug16865Test() {
+        super();
+    }
+
+    @Test
+    public void testDefaultInitial() throws Throwable {
         Database db = new Database();
         db.setName("test" + System.currentTimeMillis());
         db.setPassword("secret");
         db.setMaster(Boolean.TRUE);
-        Database created = util.registerDatabase(db, Boolean.FALSE, Integer.valueOf(0), cred);
+        Database created = getDatabaseManager().register(db, Boolean.FALSE, Integer.valueOf(0));
         try {
             Database test = null;
-            for (Database tmpDB : util.listAllDatabase(cred)) {
+            for (Database tmpDB : getDatabaseManager().listAll()) {
                 if (tmpDB.getName().equals(db.getName())) {
                     test = tmpDB;
                 }
@@ -83,7 +85,7 @@ public final class Bug16865Test extends AbstractTest {
             assertNotNull("Just registered database not found.", test);
             assertEquals("Initial number of database connections must be zero by default.", Integer.valueOf(0), test.getPoolInitial());
         } finally {
-            util.unregisterDatabase(created, cred);
+            getDatabaseManager().unregister(created);
         }
     }
 }

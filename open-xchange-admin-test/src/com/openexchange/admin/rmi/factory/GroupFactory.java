@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2016-2020 OX Software GmbH
+ *     Copyright (C) 2018-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,27 +47,28 @@
  *
  */
 
-package com.openexchange.admin.tools;
+package com.openexchange.admin.rmi.factory;
 
-import static org.junit.Assert.assertEquals;
-import org.junit.Test;
-import com.openexchange.admin.rmi.dataobjects.User;
+import com.openexchange.admin.rmi.dataobjects.Group;
 
 /**
- * {@link Bug19733Test}
+ * {@link GroupFactory}
  *
- * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @since v7.10.1
  */
-public final class Bug19733Test {
+public final class GroupFactory {
 
-    public Bug19733Test() {
-        super();
-    }
-
-    @Test
-    public void testGetImapPort() {
-        final User user = new User();
-        user.setImapServer("21a7:a92c:2323::1");
-        assertEquals("Ports are not equal", 143, user.getImapPort());
+    /**
+     * Creates a group with the specified identity
+     * 
+     * @param identity The identity of the group
+     * @return The new {@link Group}
+     */
+    public static final Group createGroup(String identity) {
+        Group grp = new Group();
+        grp.setDisplayname("display name " + identity);
+        grp.setName(identity);
+        return grp;
     }
 }

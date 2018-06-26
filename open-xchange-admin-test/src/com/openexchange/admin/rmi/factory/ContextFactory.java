@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2016-2020 OX Software GmbH
+ *     Copyright (C) 2018-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,27 +47,63 @@
  *
  */
 
-package com.openexchange.admin.tools;
+package com.openexchange.admin.rmi.factory;
 
-import static org.junit.Assert.assertEquals;
-import org.junit.Test;
-import com.openexchange.admin.rmi.dataobjects.User;
+import java.util.UUID;
+import com.openexchange.admin.rmi.dataobjects.Context;
+import com.openexchange.admin.rmi.dataobjects.Filestore;
 
 /**
- * {@link Bug19733Test}
+ * {@link ContextFactory}
  *
- * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @since v7.10.1
  */
-public final class Bug19733Test {
+public class ContextFactory {
 
-    public Bug19733Test() {
-        super();
+    /**
+     * Creates a new {@link Context} object with the specified quota
+     * 
+     * @param maxQuota the maximum quota of the context
+     * @return The new {@link Context} object
+     */
+    public static Context createContext(long maxQuota) {
+        Context context = new Context();
+        context.setName("Name-" + UUID.randomUUID().toString());
+        context.setMaxQuota(maxQuota);
+        return context;
     }
 
-    @Test
-    public void testGetImapPort() {
-        final User user = new User();
-        user.setImapServer("21a7:a92c:2323::1");
-        assertEquals("Ports are not equal", 143, user.getImapPort());
+    /**
+     * Creates a new {@link Context} object with the specified id
+     * and max quota
+     * 
+     * @param contextId The context identifier
+     * @param maxQuota The maximum quota of the context
+     * @return The new {@link Context} object
+     */
+    public static Context createContext(int contextId, long maxQuota) {
+        Context context = createContext(maxQuota);
+        context.setMaxQuota(maxQuota);
+        return context;
+    }
+
+    /**
+     * Creates a new {@link Context} object with 128M filestore
+     * and the specified id and name
+     * 
+     * @param contextId The context identifier
+     * @param name The context's name
+     * @return The new {@link Context} object
+     */
+    public static Context createContext(int contextId, String name) {
+        Context newContext = new Context();
+        Filestore filestore = new Filestore();
+        filestore.setSize(Long.valueOf(128l));
+        newContext.setFilestoreId(filestore.getId());
+        newContext.setName(name);
+        newContext.setMaxQuota(filestore.getSize());
+        newContext.setId(Integer.valueOf(contextId));
+        return newContext;
     }
 }

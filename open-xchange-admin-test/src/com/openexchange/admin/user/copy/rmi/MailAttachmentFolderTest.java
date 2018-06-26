@@ -55,14 +55,11 @@ import static org.junit.Assert.fail;
 import java.io.File;
 import java.io.IOException;
 import org.json.JSONException;
-import org.junit.After;
 import org.junit.Test;
 import com.openexchange.admin.rmi.AbstractRMITest;
-import com.openexchange.admin.rmi.AbstractTest;
-import com.openexchange.admin.rmi.OXContextInterface;
-import com.openexchange.admin.rmi.OXUserInterface;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.User;
+import com.openexchange.admin.rmi.factory.UserFactory;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.ListRequest;
 import com.openexchange.ajax.folder.actions.ListResponse;
@@ -93,10 +90,6 @@ import com.openexchange.test.TestInit;
  */
 public class MailAttachmentFolderTest extends AbstractRMITest {
 
-    private OXContextInterface ci;
-
-    private OXUserInterface ui;
-
     private Context srcCtx;
 
     private Context dstCtx;
@@ -111,35 +104,33 @@ public class MailAttachmentFolderTest extends AbstractRMITest {
     public void setUp() throws Exception {
         super.setUp();
         AJAXConfig.init();
-        ci = getContextInterface();
-        ui = getUserInterface();
 
-        superAdminCredentials = AbstractTest.DummyMasterCredentials();
-        Context[] contexts = ci.list("UserMove*", superAdminCredentials);
+        superAdminCredentials = superAdminCredentials;
+        Context[] contexts = getContextManager().search("UserMove*");
         for (Context ctx : contexts) {
             System.out.println("Deleting context " + ctx.getName() + " in schema " + ctx.getReadDatabase().getScheme());
             try {
-                ci.delete(ctx, superAdminCredentials);
+                getContextManager().delete(ctx);
             } catch (Exception e) {
                 System.out.println("Error during context deletion.");
             }
         }
 
-        admin = newUser("oxadmin", "secret", "Admin User", "Admin", "User", "oxadmin@example.com");
-        srcCtx = TestTool.createContext(ci, "UserMoveSourceCtx_", admin, "all", superAdminCredentials);
-        dstCtx = TestTool.createContext(ci, "UserMoveDestinationCtx_", admin, "all", superAdminCredentials);
+        admin = UserFactory.createUser("oxadmin", "secret", "Admin User", "Admin", "User", "oxadmin@example.com");
+        srcCtx = TestTool.createContext(getContextManager(), "UserMoveSourceCtx_", admin, "all", superAdminCredentials);
+        dstCtx = TestTool.createContext(getContextManager(), "UserMoveDestinationCtx_", admin, "all", superAdminCredentials);
 
-        srcUser = newUser("user", "secret", "Test User", "Test", "User", "oxuser@example.com");
+        srcUser = UserFactory.createUser("user", "secret", "Test User", "Test", "User", "oxuser@example.com");
         srcUser.setImapServer("example.com");
         srcUser.setImapLogin("oxuser");
         srcUser.setSmtpServer("example.com");
-        srcUser = ui.create(srcCtx, srcUser, getCredentials());
+        srcUser = getUserManager().create(srcCtx, srcUser, contextAdminCredentials);
 
-        User dummy = newUser("dummy", "secret", "Dummy User", "Dummy", "User", "oxuser2@example.com");
+        User dummy = UserFactory.createUser("dummy", "secret", "Dummy User", "Dummy", "User", "oxuser2@example.com");
         dummy.setImapServer("example.com");
         dummy.setImapLogin("oxuser");
         dummy.setSmtpServer("example.com");
-        dummy = ui.create(dstCtx, dummy, getCredentials());
+        dummy = getUserManager().create(dstCtx, dummy, contextAdminCredentials);
 
         AJAXSession dummySession = performLogin(dummy.getName() + '@' + dstCtx.getName(), "secret");
         AJAXClient dummyClient = new AJAXClient(dummySession, false);
@@ -148,25 +139,20 @@ public class MailAttachmentFolderTest extends AbstractRMITest {
 
         // some debug logging for jenkins
 
-        System.out.println("Dummy ContextID: "+ dummyClient.getValues().getContextId());
-        System.out.println("Dummy DefaultAddress: "+ dummyClient.getValues().getDefaultAddress());
-        System.out.println("Dummy DraftsFolder: "+ dummyClient.getValues().getDraftsFolder());
-        System.out.println("Dummy InboxFolder: "+ dummyClient.getValues().getInboxFolder());
-        System.out.println("Dummy PrivateAppointmentFolder: "+ dummyClient.getValues().getPrivateAppointmentFolder());
-        System.out.println("Dummy PrivateInfoStoreFolder: "+ dummyClient.getValues().getPrivateInfostoreFolder());
-        System.out.println("Dummy PrivateContactFolder: "+ dummyClient.getValues().getPrivateContactFolder());
-        System.out.println("Dummy PrivateTaskFolder: "+ dummyClient.getValues().getPrivateTaskFolder());
-        System.out.println("Dummy SendAdress: "+ dummyClient.getValues().getSendAddress());
-        System.out.println("Dummy TrashFolder: "+ dummyClient.getValues().getTrashFolder());
-        System.out.println("Dummy UserId: "+ dummyClient.getValues().getUserId());
-
+        System.out.println("Dummy ContextID: " + dummyClient.getValues().getContextId());
+        System.out.println("Dummy DefaultAddress: " + dummyClient.getValues().getDefaultAddress());
+        System.out.println("Dummy DraftsFolder: " + dummyClient.getValues().getDraftsFolder());
+        System.out.println("Dummy InboxFolder: " + dummyClient.getValues().getInboxFolder());
+        System.out.println("Dummy PrivateAppointmentFolder: " + dummyClient.getValues().getPrivateAppointmentFolder());
+        System.out.println("Dummy PrivateInfoStoreFolder: " + dummyClient.getValues().getPrivateInfostoreFolder());
+        System.out.println("Dummy PrivateContactFolder: " + dummyClient.getValues().getPrivateContactFolder());
+        System.out.println("Dummy PrivateTaskFolder: " + dummyClient.getValues().getPrivateTaskFolder());
+        System.out.println("Dummy SendAdress: " + dummyClient.getValues().getSendAddress());
+        System.out.println("Dummy TrashFolder: " + dummyClient.getValues().getTrashFolder());
+        System.out.println("Dummy UserId: " + dummyClient.getValues().getUserId());
 
         for (int i = 0; i < 7; i++) {
-            FolderObject pf = ftm.generatePrivateFolder(
-                "dummy_folder_" + i,
-                FolderObject.INFOSTORE,
-                dummyClient.getValues().getPrivateInfostoreFolder(),
-                dummyClient.getValues().getUserId());
+            FolderObject pf = ftm.generatePrivateFolder("dummy_folder_" + i, FolderObject.INFOSTORE, dummyClient.getValues().getPrivateInfostoreFolder(), dummyClient.getValues().getUserId());
             dummyFolders[i] = pf;
         }
         ftm.insertFoldersOnServer(dummyFolders);
@@ -209,11 +195,11 @@ public class MailAttachmentFolderTest extends AbstractRMITest {
         client.logout();
     }
 
-     @Test
-     public void testCopyWrongMailAttachments() throws Exception {
+    @Test
+    public void testCopyWrongMailAttachments() throws Exception {
         OXUserCopyInterface umi = getUserCopyClient();
         User dstUser = umi.copyUser(srcUser, srcCtx, dstCtx, superAdminCredentials);
-        dstUser = ui.getData(dstCtx, dstUser, getCredentials());
+        dstUser = getUserManager().getData(dstCtx, dstUser, contextAdminCredentials);
         System.err.println("DstUser: " + dstUser.getId() + "(" + dstCtx.getIdAsString() + ")");
 
         AJAXSession session = performLogin(dstUser.getName() + '@' + dstCtx.getName(), "secret");
@@ -231,8 +217,7 @@ public class MailAttachmentFolderTest extends AbstractRMITest {
             }
 
             assertNotNull("Mail attachment folder has not been created.", mailAttachmentFolder);
-            int columns[] = new int[] {
-                Metadata.ID, Metadata.TITLE, Metadata.DESCRIPTION, Metadata.FILE_MIMETYPE, Metadata.FILENAME };
+            int columns[] = new int[] { Metadata.ID, Metadata.TITLE, Metadata.DESCRIPTION, Metadata.FILE_MIMETYPE, Metadata.FILENAME };
             AllInfostoreRequest allRequest = new AllInfostoreRequest(mailAttachmentFolder.getObjectID(), columns, 1, Order.ASCENDING);
             AbstractColumnsResponse allResponse = client.execute(allRequest);
             Object[][] documents = allResponse.getArray();
@@ -244,33 +229,6 @@ public class MailAttachmentFolderTest extends AbstractRMITest {
             assertEquals("Wrong file name", expectedDocument.getFileName(), document[4]);
         } finally {
             client.logout();
-        }
-    }
-
-    @After
-    public void tearDown()
- throws Exception {
-        try {
-            if (ui != null && srcCtx != null) {
-                ui.delete(srcCtx, srcUser, null, getCredentials());
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        try {
-            if (ci != null && srcCtx != null && superAdminCredentials != null) {
-                ci.delete(srcCtx, superAdminCredentials);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        try {
-            if (ci != null && dstCtx != null && superAdminCredentials != null) {
-                ci.delete(dstCtx, superAdminCredentials);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
         }
     }
 

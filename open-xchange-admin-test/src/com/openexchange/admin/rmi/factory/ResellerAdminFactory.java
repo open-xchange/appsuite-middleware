@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2016-2020 OX Software GmbH
+ *     Copyright (C) 2018-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,27 +47,62 @@
  *
  */
 
-package com.openexchange.admin.tools;
+package com.openexchange.admin.rmi.factory;
 
-import static org.junit.Assert.assertEquals;
-import org.junit.Test;
-import com.openexchange.admin.rmi.dataobjects.User;
+import org.apache.commons.lang3.RandomStringUtils;
+import com.openexchange.admin.reseller.rmi.AbstractOXResellerTest;
+import com.openexchange.admin.reseller.rmi.dataobjects.ResellerAdmin;
 
 /**
- * {@link Bug19733Test}
+ * {@link ResellerAdminFactory}
  *
- * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @since v7.10.1
  */
-public final class Bug19733Test {
+public class ResellerAdminFactory {
 
-    public Bug19733Test() {
-        super();
+    /**
+     * Creates a new {@link ResellerAdmin} object
+     * 
+     * @return the new {@link ResellerAdmin} object
+     */
+    public static ResellerAdmin createResellerAdmin() {
+        return createResellerAdmin(AbstractOXResellerTest.TESTUSER, "Test Reseller Admin");
     }
 
-    @Test
-    public void testGetImapPort() {
-        final User user = new User();
-        user.setImapServer("21a7:a92c:2323::1");
-        assertEquals("Ports are not equal", 143, user.getImapPort());
+    /**
+     * Creates a new {@link ResellerAdmin} object
+     * 
+     * @param name The reseller admin's name
+     * @return the new {@link ResellerAdmin} object
+     */
+    public static ResellerAdmin createResellerAdmin(String name) {
+        return createResellerAdmin(name, "Test Display Name");
+    }
+
+    /**
+     * Creates a new {@link ResellerAdmin} with a random 10 character long name
+     * 
+     * @return The new reseller admin object
+     */
+    public static ResellerAdmin createRandomResellerAdmin() {
+        String user = RandomStringUtils.randomAscii(10);
+        ResellerAdmin adm = createResellerAdmin(user, user + " display");
+        adm.setPassword("secret");
+        return adm;
+    }
+
+    /**
+     * Creates a new {@link ResellerAdmin} with the specified name and display name
+     * 
+     * @param name The name of the reseller admin
+     * @param displayname The display name of the reseller admin
+     * @return The new reseller admin object
+     */
+    public static ResellerAdmin createResellerAdmin(String name, String displayname) {
+        ResellerAdmin adm = new ResellerAdmin(name);
+        adm.setDisplayname(displayname);
+        adm.setPassword("secret");
+        return adm;
     }
 }
