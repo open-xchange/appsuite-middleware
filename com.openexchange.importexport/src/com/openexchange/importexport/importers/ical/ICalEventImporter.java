@@ -116,7 +116,7 @@ public class ICalEventImporter extends AbstractICalImporter {
         }
 
         // Workaround for bug 57282:
-        strippAttendeesAndOrganizer(importedCalendar);
+        stripAttendeesAndOrganizer(importedCalendar);
 
         /*
          * store imported events & track corresponding results
@@ -301,7 +301,7 @@ public class ICalEventImporter extends AbstractICalImporter {
      * @param calendar The calendar to strip the calendar users from
      * @throws OXException In case calendar user for the session user can't be created
      */
-    private void strippAttendeesAndOrganizer(ImportedCalendar calendar) throws OXException {
+    private void stripAttendeesAndOrganizer(ImportedCalendar calendar) throws OXException {
         EntityResolver entityResolver = ImportExportServices.getCalendarUtilities().getEntityResolver(getSession().getContextId());
         int userId = getSession().getUserId();
         for (Event event : calendar.getEvents()) {

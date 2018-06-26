@@ -47,23 +47,51 @@
  *
  */
 
-package com.openexchange.metrics.jmx.beans;
+package com.openexchange.filestore.impl;
 
-import com.openexchange.management.MBeanMethodAnnotation;
-import com.openexchange.metrics.types.Gauge;
+import java.io.IOException;
 
 /**
- * {@link GaugeMBean}
+ * {@link StorageFullIOException} - The I/O exception to advertise that storage limit is exceeded.
  *
- * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.10.0
  */
-public interface GaugeMBean extends MetricMBean {
+public class StorageFullIOException extends IOException {
+
+    private static final long serialVersionUID = 5590995590704481202L;
+
+    /** The actual size of the request. */
+    private final long actual;
+
+    /** The maximum permitted size of the request. */
+    private final long permitted;
 
     /**
-     * Returns the value of the {@link Gauge}
-     * 
-     * @return the value of the {@link Gauge}
+     * Initializes a new {@link StorageFullIOException}.
      */
-    @MBeanMethodAnnotation(description = "Returns the value of the gague", parameterDescriptions = { "" }, parameters = { "" })
-    Object getValue();
+    public StorageFullIOException(long actual, long permitted) {
+        super();
+        this.actual = actual;
+        this.permitted = permitted;
+    }
+
+    /**
+     * Gets the actual size of the file, which was about to be stored.
+     *
+     * @return The actual size of the file.
+     */
+    public long getActualSize() {
+        return actual;
+    }
+
+    /**
+     * Gets the permitted storage size.
+     *
+     * @return The permitted size.
+     */
+    public long getPermittedSize() {
+        return permitted;
+    }
+
 }

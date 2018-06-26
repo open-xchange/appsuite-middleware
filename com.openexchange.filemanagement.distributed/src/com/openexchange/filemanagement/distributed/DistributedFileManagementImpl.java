@@ -164,16 +164,15 @@ public class DistributedFileManagementImpl implements DistributedFileManagement 
     public InputStream get(String id) throws OXException {
         try {
             String url = map().get(id);
-            InputStream retval = null;
             if (url != null) {
                 try {
-                    retval = loadFile("http://" + url + "/" + id);
+                    return loadFile("http://" + url + "/" + id);
                 } catch (IOException e) {
                     throw ManagedFileExceptionErrorMessage.IO_ERROR.create(e, e.getMessage());
                 }
             }
 
-            return retval;
+            return null;
         } catch (HazelcastInstanceNotActiveException e) {
             handleHzNotActiveException(e);
             throw ManagedFileExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());

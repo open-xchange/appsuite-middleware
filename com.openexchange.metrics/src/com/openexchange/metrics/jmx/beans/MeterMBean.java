@@ -49,8 +49,8 @@
 
 package com.openexchange.metrics.jmx.beans;
 
-import com.codahale.metrics.Meter;
 import com.openexchange.management.MBeanMethodAnnotation;
+import com.openexchange.metrics.types.Meter;
 
 /**
  * {@link MeterMBean}

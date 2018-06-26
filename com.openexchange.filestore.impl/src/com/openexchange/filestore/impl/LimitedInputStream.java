@@ -47,23 +47,87 @@
  *
  */
 
-package com.openexchange.metrics.jmx.beans;
+package com.openexchange.filestore.impl;
 
-import com.openexchange.management.MBeanMethodAnnotation;
-import com.openexchange.metrics.types.Gauge;
+import java.io.FilterInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 
 /**
- * {@link GaugeMBean}
+ * {@link LimitedInputStream}
  *
- * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.10.0
  */
-public interface GaugeMBean extends MetricMBean {
+public class LimitedInputStream extends FilterInputStream {
 
     /**
-     * Returns the value of the {@link Gauge}
-     * 
-     * @return the value of the {@link Gauge}
+     * The maximum size of an item, in bytes.
      */
-    @MBeanMethodAnnotation(description = "Returns the value of the gague", parameterDescriptions = { "" }, parameters = { "" })
-    Object getValue();
+    private final long sizeMax;
+
+    /**
+     * The current number of bytes.
+     */
+    private long count;
+
+    /**
+     * Creates a new instance.
+     *
+     * @param inputStream The input stream, which shall be limited.
+     * @param pSizeMax The limit; no more than this number of bytes shall be returned by the source stream.
+     */
+    public LimitedInputStream(InputStream inputStream, long pSizeMax) {
+        super(inputStream);
+        sizeMax = pSizeMax;
+    }
+
+    /**
+     * Called to indicate, that the input streams limit has been exceeded.
+     *
+     * @param pSizeMax The input streams limit, in bytes.
+     * @param pCount The actual number of bytes.
+     * @throws IOException The called method is expected to raise an IOException.
+     */
+    protected void raiseError(long pSizeMax, long pCount) throws IOException {
+        throw new StorageFullIOException(pCount, pSizeMax);
+    }
+
+    /**
+     * Called to check, whether the input streams
+     * limit is reached.
+     *
+     * @throws IOException The given limit is exceeded.
+     */
+    private void checkLimit() throws IOException {
+        if (count > sizeMax) {
+            raiseError(sizeMax, count);
+        }
+    }
+
+    @Override
+    public int read() throws IOException {
+        int res = super.read();
+        if (res != -1) {
+            count++;
+            checkLimit();
+        }
+        return res;
+    }
+
+    @Override
+    public int read(byte[] b, int off, int len) throws IOException {
+        int res = super.read(b, off, len);
+        if (res > 0) {
+            count += res;
+            checkLimit();
+        }
+        return res;
+    }
+
+    @Override
+    public void close() throws IOException {
+        super.close();
+    }
+
 }

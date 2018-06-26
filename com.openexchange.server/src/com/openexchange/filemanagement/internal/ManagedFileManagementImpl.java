@@ -192,8 +192,8 @@ public final class ManagedFileManagementImpl implements ManagedFileManagement {
                         // Expired if deleted OR time-to-live has elapsed
                         int optTimeToLive = cur.optTimeToLive();
                         long timeElapsed = now - cur.getLastAccess();
-                        
-                        File file = cur.getFilePlain();
+
+                        File file = cur.getFilePlain(); // Use getFilePlain() to avoid touching (and thus resetting) last-accessed time stamp
                         if (false == file.exists()) {
                             // File does no more exist
                             String fname = file.getName();
@@ -205,10 +205,9 @@ public final class ManagedFileManagementImpl implements ManagedFileManagement {
                             filesIter.remove();
                             logger.debug("Removed expired managed file {}, id {}", fname, cur.getID());
                         } else {
-                            // For Safety's sake, cleanse from orphaned files
+                            // For safety's sake, cleanse from orphaned files
                             if (null != orphanedFiles) {
-                                // Use getFileName() so that the underlying ManagedFile is not 'touched' again (something that will reset the LastAccess timestamp)
-                                orphanedFiles.remove(cur.getFilePlain().getName());
+                                orphanedFiles.remove(file.getName());
                             }
                         }
                     }
@@ -592,11 +591,13 @@ public final class ManagedFileManagementImpl implements ManagedFileManagement {
         }
 
         try {
-            if (!distributedFileManagement.exists(id)) {
+            // Get remote file
+            InputStream inputStream = distributedFileManagement.get(id);
+            if (null == inputStream) {
+                // Does not exist
                 return null;
             }
-            // Get remote file
-            final ManagedFile managedFile = createManagedFile(id, distributedFileManagement.get(id));
+            ManagedFile managedFile = createManagedFile(id, inputStream);
             // Safe touch
             try {
                 distributedFileManagement.touch(id);
@@ -609,7 +610,6 @@ public final class ManagedFileManagementImpl implements ManagedFileManagement {
             LOG.warn("Could not load remote file: {}", id, e);
             return null;
         }
-
     }
 
     File getTmpDirByPath(final String path) {
