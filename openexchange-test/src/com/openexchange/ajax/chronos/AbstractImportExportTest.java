@@ -51,13 +51,19 @@ package com.openexchange.ajax.chronos;
 
 import static org.junit.Assert.assertTrue;
 import java.io.File;
+import java.util.Calendar;
 import java.util.List;
+import java.util.TimeZone;
+import java.util.UUID;
 import com.openexchange.ajax.chronos.manager.ICalImportExportManager;
 import com.openexchange.configuration.asset.Asset;
 import com.openexchange.configuration.asset.AssetType;
+import com.openexchange.testing.httpclient.invoker.ApiException;
+import com.openexchange.testing.httpclient.models.ContactData;
 import com.openexchange.testing.httpclient.models.EventData;
 import com.openexchange.testing.httpclient.models.EventId;
 import com.openexchange.testing.httpclient.models.InfoItemExport;
+import com.openexchange.testing.httpclient.modules.ContactsApi;
 import com.openexchange.testing.httpclient.modules.ExportApi;
 import com.openexchange.testing.httpclient.modules.ImportApi;
 
@@ -73,12 +79,15 @@ public class AbstractImportExportTest extends AbstractChronosTest {
 
     protected ImportApi importApi;
     protected ExportApi exportApi;
+    protected ContactsApi contactsApi;
 
     @Override
     public void setUp() throws Exception {
         super.setUp();
         importApi = new ImportApi(getApiClient());
         exportApi = new ExportApi(getApiClient());
+        contactsApi = new ContactsApi(getApiClient());
+
         importExportManager = new ICalImportExportManager(exportApi, importApi);
     }
 
@@ -95,6 +104,26 @@ public class AbstractImportExportTest extends AbstractChronosTest {
     protected String importICalFile(String fileName) throws Exception {
         Asset asset = assetManager.getAsset(AssetType.ics, fileName);
         return importExportManager.importICalFile(defaultUserApi.getSession(), defaultFolderId, new File(asset.getAbsolutePath()), true, false);
+    }
+
+    protected void createContactWithBirthdayEvent(String session) throws ApiException {
+        contactsApi.createContact(session, createContactData());
+    }
+
+    private ContactData createContactData() {
+        final Calendar c = Calendar.getInstance();
+        c.setTimeZone(TimeZone.getTimeZone("UTC"));
+        c.set(Calendar.HOUR_OF_DAY, 0);
+        c.set(Calendar.MINUTE, 0);
+        c.set(Calendar.SECOND, 0);
+        c.set(Calendar.MILLISECOND, 0);
+
+        ContactData contact = new ContactData();
+        contact.setFirstName("Peter");
+        contact.setSecondName("Paul"+UUID.randomUUID());
+        contact.setBirthday(c.getTimeInMillis());
+
+        return contact;
     }
 
     protected void assertEventData(List<EventData> eventData, String iCalExport) {
