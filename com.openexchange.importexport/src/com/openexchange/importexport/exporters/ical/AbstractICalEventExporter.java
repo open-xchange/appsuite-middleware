@@ -56,10 +56,12 @@ import java.util.List;
 import java.util.Map;
 import com.openexchange.ajax.container.ThresholdFileHolder;
 import com.openexchange.chronos.Event;
+import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.ical.CalendarExport;
 import com.openexchange.chronos.ical.ICalParameters;
 import com.openexchange.chronos.ical.ICalService;
+import com.openexchange.chronos.service.CalendarUtilities;
 import com.openexchange.chronos.service.EventID;
 import com.openexchange.exception.OXException;
 import com.openexchange.importexport.osgi.ImportExportServices;
@@ -138,21 +140,25 @@ public abstract class AbstractICalEventExporter extends AbstractICalExporter {
      * @param session The session
      * @return The stripped {@link Event}
      */
-    private Event stripAttendeesAndOrganizer(Event event, Session session) {
+    private Event stripAttendeesAndOrganizer(Event event, Session session) throws OXException {
         // Change for bug 57282
+        CalendarUtilities calendarUtilities = ImportExportServices.getCalendarUtilities();
+        event = calendarUtilities.copyEvent(event, (EventField[]) null);
         if (CalendarUtils.isAttendee(event, session.getUserId())) {
             if (event.getAttendees().size() > 1) {
                 event.setAttendees(Collections.singletonList(CalendarUtils.find(event.getAttendees(), session.getUserId())));
             }
         } else if (CalendarUtils.isOrganizer(event, session.getUserId())) {
-            event.removeAttendees();
-        } else {
             if (event.containsAttendees()) {
                 event.removeAttendees();
             }
-            if (event.containsOrganizer()) {
-                event.removeOrganizer();
-            }
+        } else {
+                if (event.containsAttendees()) {
+                    event.removeAttendees();
+                }
+                if (event.containsOrganizer()) {
+                    event.removeOrganizer();
+                }
         }
         return event;
     }
