@@ -111,7 +111,6 @@ import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.session.Session;
 import com.openexchange.threadpool.AbstractTask;
 import com.openexchange.threadpool.ThreadPools;
-import com.openexchange.threadpool.behavior.CallerRunsBehavior;
 import com.sun.mail.iap.Argument;
 import com.sun.mail.iap.BadCommandException;
 import com.sun.mail.iap.ProtocolException;
@@ -172,7 +171,7 @@ public final class IMAPConversationWorker {
      */
 
     private final IMAPMessageStorage imapMessageStorage;
-    private final IMAPFolderStorage imapFolderStorage;
+    final IMAPFolderStorage imapFolderStorage;
 
     /**
      * Initializes a new {@link IMAPConversationWorker}.
@@ -373,33 +372,7 @@ public final class IMAPConversationWorker {
                         // Add to conversation if references or referenced-by
                         final List<MailMessage> toMergeWith = ImmutableList.copyOf(sentMessages);
                         sentMessages = null;
-                        boolean hasNext = true;
-                        for (Iterator<Conversation> iter = conversations.iterator(); hasNext;) {
-                            final Conversation conversation = iter.next();
-                            hasNext = iter.hasNext();
-                            if (hasNext) {
-                                // Not the last one...
-                                AbstractTask<Void> merge = new AbstractTask<Void>() {
-
-                                    @Override
-                                    public Void call() throws Exception {
-                                        for (MailMessage sentMessage : toMergeWith) {
-                                            if (conversation.referencesOrIsReferencedBy(sentMessage)) {
-                                                conversation.addMessage(sentMessage);
-                                            }
-                                        }
-                                        return null;
-                                    }
-                                };
-                                ThreadPools.getThreadPool().submit(merge, CallerRunsBehavior.<Void> getInstance());
-                            } else {
-                                for (MailMessage sentMessage : toMergeWith) {
-                                    if (conversation.referencesOrIsReferencedBy(sentMessage)) {
-                                        conversation.addMessage(sentMessage);
-                                    }
-                                }
-                            }
-                        }
+                        Conversations.foldAndMergeWithList(conversations, toMergeWith);
                     }
                 }
                 // Switch back folder
@@ -479,7 +452,6 @@ public final class IMAPConversationWorker {
 
         // Fill slice with this thread
         fillMessages(slice, fullName, sentFullName, mergeWithSent, usedFields, headerNames, body, isRev1);
-
         // Fill others with another thread & put complete list into cache after all filled
         if (null != first || null != rest) {
             final MailAccount mailAccount = imapMessageStorage.getMailAccount();

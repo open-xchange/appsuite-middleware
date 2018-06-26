@@ -56,6 +56,7 @@ import java.util.Comparator;
 import java.util.ConcurrentModificationException;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 import com.openexchange.mail.MailSortField;
@@ -86,14 +87,16 @@ public final class Conversation {
     private boolean messageIdsEmpty;
     private boolean referencesEmpty;
 
+    private Conversation main;
+
     /**
      * Initializes a new {@link Conversation}.
      */
     public Conversation() {
         super();
         messages = new HashSet<MailMessageWrapper>(DEFAULT_INITIAL_CAPACITY);
-        messageIds = new HashSet<String>(DEFAULT_INITIAL_CAPACITY << 1, 0.9f);
-        references = new HashSet<String>(DEFAULT_INITIAL_CAPACITY << 1, 0.9f);
+        messageIds = new LinkedHashSet<String>(DEFAULT_INITIAL_CAPACITY << 1, 0.9f);
+        references = new LinkedHashSet<String>(DEFAULT_INITIAL_CAPACITY << 1, 0.9f);
 
         messageIdsEmpty = true;
         referencesEmpty = true;
@@ -170,14 +173,36 @@ public final class Conversation {
      */
     public Conversation join(final Conversation other) {
         if (null != other) {
+            if (this.equals(other)) {
+                return this;
+            }
+            Conversation main = this.main;
+            if (null != main) {
+                main.join(other);
+                return main.getMain();
+            }
             final Set<MailMessageWrapper> messages = other.messages;
             for (final MailMessageWrapper mmw : messages) {
                 addWrapper(mmw);
             }
+            other.setMain(this);
         }
         return this;
     }
 
+    private void setMain(Conversation main) {
+        this.main = main;
+    }
+
+    private Conversation getMain() {
+        Conversation main = this.main;
+        if (main != null) {
+            return main;
+        } else {
+            return this;
+        }
+    }
+    
     /**
      * Checks if this conversation references OR is referenced by given message
      *
@@ -331,6 +356,14 @@ public final class Conversation {
         }
         Collections.sort(ret, null == comparator ? COMPARATOR_DESC : comparator);
         return ret;
+    }
+
+    public Set<String> getReferences() {
+        return references;
+    }
+
+    public Set<String> getMessageIds() {
+        return messageIds;
     }
 
     /**
