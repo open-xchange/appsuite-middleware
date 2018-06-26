@@ -71,7 +71,7 @@ public class ICalFacotry {
     /** Participant status */
     public static enum PartStat {
         ACCEPTED("ACCEPTED"),
-        TEANTATIVE("TEANTATIVE"),
+        TENTATIVE("TEANTATIVE"),
         DECLINED("DECLINED"),
         NEEDS_ACTION("NEEDS-ACTION");
 
