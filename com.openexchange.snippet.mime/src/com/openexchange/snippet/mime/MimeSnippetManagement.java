@@ -998,7 +998,7 @@ public final class MimeSnippetManagement implements SnippetManagement {
                 if (difference > 0 && null != quota) {
                     Quota sizeQuota = quota.getQuota(QuotaType.SIZE);
                     if (null != sizeQuota && (sizeQuota.isExceeded() || sizeQuota.willExceed(difference))) {
-                        throw QuotaExceptionCodes.QUOTA_EXCEEDED_SIGNATURES.create(Integer.valueOf(bytesToReadableString(sizeQuota.getLimit())));
+                        throw QuotaExceptionCodes.QUOTA_EXCEEDED_SIGNATURES.create(bytesToReadableString(sizeQuota.getLimit()));
                     }
                 }
 
