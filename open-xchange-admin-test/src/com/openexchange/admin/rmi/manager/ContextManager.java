@@ -53,7 +53,6 @@ import java.net.URI;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.admin.rmi.OXContextInterface;
-import com.openexchange.admin.rmi.OXUtilInterface;
 import com.openexchange.admin.rmi.UtilTest;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
@@ -95,6 +94,7 @@ public class ContextManager extends AbstractManager {
 
     private final ServerManager serverManager;
     private final DatabaseManager databaseManager;
+    private final FilestoreManager filestoreManager;
 
     /**
      * Initialises a new {@link ContextManager}.
@@ -103,6 +103,7 @@ public class ContextManager extends AbstractManager {
         super(host, masterCredentials);
         serverManager = ServerManager.getInstance(host, masterCredentials);
         databaseManager = DatabaseManager.getInstance(host, masterCredentials);
+        filestoreManager = FilestoreManager.getInstance(host, masterCredentials);
     }
 
     /*
@@ -487,8 +488,7 @@ public class ContextManager extends AbstractManager {
      * @throws Exception if an error is occurred during registration
      */
     private void registerFilestore() throws Exception {
-        OXUtilInterface utilInterface = getUtilInterface();
-        if (utilInterface.listFilestore("*", getMasterCredentials()).length != 0) {
+        if (filestoreManager.search("*").length != 0) {
             return;
         }
         Filestore filestore = new Filestore();
@@ -499,7 +499,7 @@ public class ContextManager extends AbstractManager {
         filestore.setUrl(uri.toString());
 
         new java.io.File(uri.getPath()).mkdir();
-        utilInterface.registerFilestore(filestore, getMasterCredentials());
+        filestoreManager.register(filestore);
     }
 
     //////////////////////////// RMI LOOK-UPS //////////////////////////////
