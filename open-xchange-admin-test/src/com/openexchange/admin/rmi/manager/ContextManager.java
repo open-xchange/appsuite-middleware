@@ -50,8 +50,6 @@
 package com.openexchange.admin.rmi.manager;
 
 import java.net.URI;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import com.openexchange.admin.rmi.OXContextInterface;
 import com.openexchange.admin.rmi.UtilTest;
 import com.openexchange.admin.rmi.dataobjects.Context;
@@ -87,8 +85,6 @@ public class ContextManager extends AbstractManager {
         return INSTANCE;
     }
 
-    private static final Logger LOG = LoggerFactory.getLogger(ContextManager.class);
-
     /** Default max quota for a {@link Context}, 5GB */
     private static final long DEFAULT_MAX_QUOTA = 5000;
 
@@ -112,20 +108,8 @@ public class ContextManager extends AbstractManager {
      * @see com.openexchange.admin.rmi.manager.AbstractManager#clean(java.lang.Object)
      */
     @Override
-    boolean clean(Object object) {
-        if (!(object instanceof Context)) {
-            LOG.error("The specified object is not of type Context", object.toString());
-            return false;
-        }
-
-        Context ctx = (Context) object;
-        try {
-            delete(ctx);
-            return true;
-        } catch (Exception e) {
-            LOG.error("The context '{}' could not be deleted!", ctx.getId(), e);
-            return false;
-        }
+    void clean(Object object) throws Exception {
+        delete((Context) object);
     }
 
     /**

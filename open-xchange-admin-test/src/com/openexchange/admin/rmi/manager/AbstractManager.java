@@ -96,7 +96,7 @@ abstract class AbstractManager {
             if (entry.getValue() == null) {
                 continue;
             }
-            if (!clean(entry.getValue())) {
+            if (!delete(entry.getValue(), entry.getValue().getClass())) {
                 failed.put(entry.getKey(), entry.getValue());
             }
         }
@@ -109,12 +109,36 @@ abstract class AbstractManager {
     }
 
     /**
+     * Generic method for deleting an object from the managed map
+     * 
+     * @param object The object to delete
+     * @param clazz The type of the object
+     * @return <code>true</code> if clean was successful; <code>false</code> otherwise
+     */
+    <T> boolean delete(Object object, Class<T> clazz) {
+        if (object == null) {
+            return true;
+        }
+        if (!(object.getClass().isAssignableFrom(clazz))) {
+            LOG.error("The specified object is not of type {}", object.toString(), clazz.getSimpleName());
+            return false;
+        }
+        try {
+            clean(object);
+            return true;
+        } catch (Exception e) {
+            LOG.error("The {} '{}' could not be deleted", clazz.getSimpleName(), object.toString());
+            return false;
+        }
+    }
+
+    /**
      * Part of the clean-up procedure. Cleans the specified object.
      * 
      * @param object The object to clean
      * @return <code>true</code> if clean was successful; <code>false</code> otherwise
      */
-    abstract boolean clean(Object object);
+    abstract void clean(Object object) throws Exception;
 
     /**
      * Gets the masterCredentials

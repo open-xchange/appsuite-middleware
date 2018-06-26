@@ -120,9 +120,8 @@ public class TaskManagementManager extends AbstractManager {
      * @see com.openexchange.admin.rmi.manager.AbstractManager#clean(java.lang.Object)
      */
     @Override
-    boolean clean(Object object) {
+    void clean(Object object) {
         // No clean-up applicable
-        return true;
     }
 
     /**

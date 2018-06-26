@@ -236,9 +236,8 @@ public class GroupManager extends AbstractManager {
      * @see com.openexchange.admin.rmi.manager.AbstractManager#clean(java.lang.Object)
      */
     @Override
-    boolean clean(Object object) {
+    void clean(Object object) {
         // Nothing to do, the group will be implicitly deleted when the context is deleted.
-        return true;
     }
 
     /**

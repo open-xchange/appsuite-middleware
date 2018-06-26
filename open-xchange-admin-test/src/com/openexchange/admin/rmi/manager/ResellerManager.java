@@ -49,8 +49,6 @@
 
 package com.openexchange.admin.rmi.manager;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import com.openexchange.admin.reseller.rmi.OXResellerInterface;
 import com.openexchange.admin.reseller.rmi.dataobjects.ResellerAdmin;
 import com.openexchange.admin.reseller.rmi.dataobjects.Restriction;
@@ -80,8 +78,6 @@ public class ResellerManager extends AbstractManager {
         }
         return INSTANCE;
     }
-
-    private static final Logger LOG = LoggerFactory.getLogger(ContextManager.class);
 
     /**
      * Initialises a new {@link ResellerManager}.
@@ -184,20 +180,8 @@ public class ResellerManager extends AbstractManager {
      * @see com.openexchange.admin.rmi.manager.AbstractManager#clean(java.lang.Object)
      */
     @Override
-    boolean clean(Object object) {
-        if (!(object instanceof ResellerAdmin)) {
-            LOG.error("The specified object is not of type ResellerAdmin", object.toString());
-            return false;
-        }
-
-        ResellerAdmin resellerAdmin = (ResellerAdmin) object;
-        try {
-            delete(resellerAdmin);
-            return true;
-        } catch (Exception e) {
-            LOG.error("The reseller admin '{}' could not be deleted!", resellerAdmin.getId(), e);
-            return false;
-        }
+    void clean(Object object) throws Exception {
+        delete((ResellerAdmin) object);
     }
     //////////////////////////// RMI LOOK-UPS //////////////////////////////
 

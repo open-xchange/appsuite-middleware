@@ -49,8 +49,6 @@
 
 package com.openexchange.admin.rmi.manager;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import com.openexchange.admin.rmi.OXUtilInterface;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.dataobjects.MaintenanceReason;
@@ -61,8 +59,6 @@ import com.openexchange.admin.rmi.dataobjects.MaintenanceReason;
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 public class MaintenanceReasonManager extends AbstractManager {
-
-    private static final Logger LOG = LoggerFactory.getLogger(MaintenanceReasonManager.class);
 
     private static MaintenanceReasonManager INSTANCE;
 
@@ -132,19 +128,7 @@ public class MaintenanceReasonManager extends AbstractManager {
      * @see com.openexchange.admin.rmi.manager.AbstractManager#clean(java.lang.Object)
      */
     @Override
-    boolean clean(Object object) {
-        if (!(object instanceof MaintenanceReason)) {
-            LOG.error("The specified object is not of type MaintenanceReason", object.toString());
-            return false;
-        }
-
-        MaintenanceReason mr = (MaintenanceReason) object;
-        try {
-            delete(mr);
-            return true;
-        } catch (Exception e) {
-            LOG.error("The maintenance reason '{}' could not be deleted!", mr.getId(), e);
-            return false;
-        }
+    void clean(Object object) throws Exception {
+        delete((MaintenanceReason) object);
     }
 }

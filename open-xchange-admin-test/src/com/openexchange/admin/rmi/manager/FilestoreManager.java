@@ -49,8 +49,6 @@
 
 package com.openexchange.admin.rmi.manager;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import com.openexchange.admin.rmi.OXUtilInterface;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.dataobjects.Filestore;
@@ -62,8 +60,6 @@ import com.openexchange.admin.rmi.dataobjects.Filestore;
  * @since v7.10.0
  */
 public class FilestoreManager extends AbstractManager {
-
-    private static final Logger LOG = LoggerFactory.getLogger(FilestoreManager.class);
 
     private static FilestoreManager INSTANCE;
 
@@ -127,7 +123,7 @@ public class FilestoreManager extends AbstractManager {
         OXUtilInterface utilInterface = getUtilInterface();
         return utilInterface.listFilestore(searchPattern, getMasterCredentials());
     }
-    
+
     /**
      * Searches for filestores with the specified search pattern
      * 
@@ -146,18 +142,7 @@ public class FilestoreManager extends AbstractManager {
      * @see com.openexchange.admin.rmi.manager.AbstractManager#clean(java.lang.Object)
      */
     @Override
-    boolean clean(Object object) {
-        if (!(object instanceof Filestore)) {
-            LOG.error("The specified object is not of type Filestore", object.toString());
-            return false;
-        }
-        Filestore filestore = (Filestore) object;
-        try {
-            unregister(filestore);
-            return true;
-        } catch (Exception e) {
-            LOG.error("The filestore '{}' could not be unregistered!", filestore.getId(), e);
-            return false;
-        }
+    void clean(Object object) throws Exception {
+        unregister((Filestore) object);
     }
 }

@@ -49,8 +49,6 @@
 
 package com.openexchange.admin.rmi.manager;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import com.openexchange.admin.rmi.OXUtilInterface;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.dataobjects.Database;
@@ -78,8 +76,6 @@ public class DatabaseManager extends AbstractManager {
         }
         return INSTANCE;
     }
-
-    private static final Logger LOG = LoggerFactory.getLogger(DatabaseManager.class);
 
     /**
      * Initialises a new {@link DatabaseManager}.
@@ -157,18 +153,7 @@ public class DatabaseManager extends AbstractManager {
      * @see com.openexchange.admin.rmi.manager.AbstractManager#clean(java.lang.Object)
      */
     @Override
-    boolean clean(Object object) {
-        if (!(object instanceof Database)) {
-            LOG.error("The specified object is not of type Database", object.toString());
-            return false;
-        }
-        Database database = (Database) object;
-        try {
-            unregister(database);
-            return true;
-        } catch (Exception e) {
-            LOG.error("The database '{}' could not be unregistered!", database.getId(), e);
-            return false;
-        }
+    void clean(Object object) throws Exception {
+        unregister((Database) object);
     }
 }
