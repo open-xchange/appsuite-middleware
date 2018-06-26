@@ -120,6 +120,8 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.management.impl"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.message.timeline"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.messaging"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.metrics"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.metrics.dropwizard"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.modules.json"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.modules.model"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.modules.storage"/>
