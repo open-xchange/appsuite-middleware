@@ -182,14 +182,7 @@ public class ContextManager extends AbstractManager {
      * @throws Exception if an error is occurred
      */
     public Context create(Context context, User contextAdmin) throws Exception {
-        prerequisites();
-        if (context.getId() == null || context.getId().intValue() <= 0) {
-            context.setId(new Integer(getNextFreeContextId()));
-        }
-        OXContextInterface contextInterface = getContextInterface();
-        Context ctx = contextInterface.create(context, contextAdmin, getMasterCredentials());
-        managedObjects.put(ctx.getId(), ctx);
-        return ctx;
+        return create(context, contextAdmin, getMasterCredentials());
     }
 
     /**
