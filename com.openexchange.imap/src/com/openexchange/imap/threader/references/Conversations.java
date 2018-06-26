@@ -58,7 +58,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
+import java.util.Map;
 import javax.mail.FetchProfile;
 import javax.mail.FetchProfile.Item;
 import javax.mail.MessagingException;
@@ -359,36 +359,34 @@ public final class Conversations {
      * @return The folded conversations
      */
     public static List<Conversation> fold(final List<Conversation> toFold) {
-        HashMap<String, Conversation> lookupTable = new HashMap<String, Conversation>(toFold.size());
-        fold(toFold, lookupTable);
+        fold(toFold, new HashMap<String, Conversation>(toFold.size()));
         return toFold;
     }
 
-    private static void fold(final List<Conversation> toFold, HashMap<String, Conversation> lookupTable) {
-        Iterator<Conversation> iter = toFold.iterator();
-        while (iter.hasNext()) {
+    private static void fold(final List<Conversation> toFold, Map<String, Conversation> lookupTable) {
+        for (Iterator<Conversation> iter = toFold.iterator(); iter.hasNext();) {
+            Conversation conversation = iter.next();
+
             boolean removed = false;
-            final Conversation other = iter.next();
-            Set<String> messageIds = other.getMessageIds();
-            for (String string : messageIds) {
-                Conversation putIfAbsent = lookupTable.putIfAbsent(string, other);
-                if (null != putIfAbsent && !other.equals(putIfAbsent)) {
+            for (String messageId : conversation.getMessageIds()) {
+                Conversation existing = lookupTable.putIfAbsent(messageId, conversation);
+                if (null != existing && !conversation.equals(existing)) {
                     if (!removed) {
                         iter.remove();
                         removed = true;
                     }
-                    putIfAbsent.join(other);
+                    existing.join(conversation);
                 }
             }
-            Set<String> references = other.getReferences();
-            for (String string : references) {
-                Conversation putIfAbsent = lookupTable.putIfAbsent(string, other);
-                if (null != putIfAbsent && !other.equals(putIfAbsent)) {
+
+            for (String reference : conversation.getReferences()) {
+                Conversation existing = lookupTable.putIfAbsent(reference, conversation);
+                if (null != existing && !conversation.equals(existing)) {
                     if (!removed) {
                         iter.remove();
                         removed = true;
                     }
-                    putIfAbsent.join(other);
+                    existing.join(conversation);
                 }
             }
         }
@@ -405,16 +403,17 @@ public final class Conversations {
         HashMap<String, Conversation> lookupTable = new HashMap<String, Conversation>(toFold.size());
         fold(toFold, lookupTable);
         for (MailMessage mailMessage : toMergeWith) {
-            final String messageId = mailMessage.getMessageId();
-            {
+            String messageId = mailMessage.getMessageId();
+            if (null != messageId) {
                 Conversation conversation = lookupTable.get(messageId);
                 if (null != conversation) {
                     conversation.addMessage(mailMessage);
                 }
             }
-            String[] references2 = mailMessage.getReferences();
-            if (null != references2) {
-                for (String reference : references2) {
+
+            String[] references = mailMessage.getReferences();
+            if (null != references) {
+                for (String reference : references) {
                     Conversation conversation = lookupTable.get(reference);
                     if (null != conversation) {
                         conversation.addMessage(mailMessage);
