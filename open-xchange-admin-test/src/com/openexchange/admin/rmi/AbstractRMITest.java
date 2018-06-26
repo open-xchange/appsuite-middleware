@@ -49,15 +49,12 @@
 
 package com.openexchange.admin.rmi;
 
-import static org.junit.Assert.assertEquals;
 import java.net.MalformedURLException;
 import java.rmi.Naming;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -201,73 +198,48 @@ public abstract class AbstractRMITest {
     }
 
     /**
-     * compares two user arrays by retrieving all the IDs they contain
-     * an checking if they match. Ignores duplicate entries, ignores
-     * users without an ID at all.
+     * Asserts that the resource was created properly by fetching it and comparing it with the expected one.
+     * 
+     * @param expected The expected {@link Resource}
+     * @param context The {@link Context}
+     * @param credentials The admin credentials
+     * @throws Exception if an error is occurred
      */
-    public void assertIDsAreEqual(User[] arr1, User[] arr2) {
-        Set<Integer> set1 = new HashSet<Integer>();
-        for (User element : arr1) {
-            set1.add(element.getId());
-        }
-        Set<Integer> set2 = new HashSet<Integer>();
-        for (int i = 0; i < arr1.length; i++) {
-            set2.add(arr2[i].getId());
-        }
-
-        assertEquals("Both arrays should return the same IDs", set1, set2);
-    }
-
-    /*** Asserts for mandatory fields ***/
-
-    public void assertUserEquals(User expected, User actual) {
-        assertEquals("Name should match", expected.getName(), actual.getName());
-        assertEquals("Display name should match", expected.getDisplay_name(), actual.getDisplay_name());
-        assertEquals("Given name should match", expected.getGiven_name(), actual.getGiven_name());
-        assertEquals("Surname should match", expected.getSur_name(), actual.getSur_name());
-        assertEquals("Primary E-Mail should match", expected.getPrimaryEmail(), actual.getPrimaryEmail());
-        assertEquals("E-Ma0il #1 should match", expected.getEmail1(), actual.getEmail1());
-    }
-
-    public void assertGroupEquals(Group expected, Group actual) {
-        assertEquals("Display name should match", expected.getDisplayname(), actual.getDisplayname());
-        assertEquals("Name should match", expected.getName(), actual.getName());
-    }
-
-    public void assertResourceEquals(Resource expected, Resource actual) {
-        assertEquals("Display name should match", expected.getDisplayname(), actual.getDisplayname());
-        assertEquals("Name should match", expected.getName(), actual.getName());
-        assertEquals("E-Mail should match", expected.getEmail(), actual.getEmail());
-    }
-
-    /*** Asserting proper creation by comparing data in the database with given one ***/
-
-    public void assertUserWasCreatedProperly(User expected, Context context, Credentials credentials) throws Exception {
-        User lookupUser = new User();
-        lookupUser.setId(expected.getId());
-        lookupUser = getUserManager().getData(context, lookupUser, credentials);
-        assertUserEquals(expected, lookupUser);
-    }
-
-    public void assertGroupWasCreatedProperly(Group expected, Context context, Credentials credentials) throws Exception {
-        Group lookup = new Group();
-        lookup.setId(expected.getId());
-        lookup = getGroupManager().getData(lookup, context, credentials);
-        assertGroupEquals(expected, lookup);
-    }
-
     public void assertResourceWasCreatedProperly(Resource expected, Context context, Credentials credentials) throws Exception {
         Resource lookup = new Resource();
         lookup.setId(expected.getId());
         lookup = getResourceManager().getData(lookup, context, credentials);
-        assertResourceEquals(expected, lookup);
+        AssertUtil.assertResourceEquals(expected, lookup);
     }
 
-    public static Group newGroup(String displayName, String name) {
-        Group group = new Group();
-        group.setDisplayname(displayName);
-        group.setName(name);
-        return group;
+    /**
+     * Asserts that the group was created properly by fetching it and comparing it with the expected one.
+     * 
+     * @param expected The expected {@link Group}
+     * @param context The {@link Context}
+     * @param credentials The admin credentials
+     * @throws Exception if an error is occurred
+     */
+    public void assertGroupWasCreatedProperly(Group expected, Context context, Credentials credentials) throws Exception {
+        Group lookup = new Group();
+        lookup.setId(expected.getId());
+        lookup = getGroupManager().getData(lookup, context, credentials);
+        AssertUtil.assertGroupEquals(expected, lookup);
+    }
+
+    /**
+     * Asserts that the user was created properly by fetching it and comparing it with the expected one.
+     * 
+     * @param expected The expected {@link User}
+     * @param context The {@link Context}
+     * @param credentials The admin credentials
+     * @throws Exception if an error is occurred
+     */
+    public void assertUserWasCreatedProperly(User expected, Context context, Credentials credentials) throws Exception {
+        User lookupUser = new User();
+        lookupUser.setId(expected.getId());
+        lookupUser = getUserManager().getData(context, lookupUser, credentials);
+        AssertUtil.assertUserEquals(expected, lookupUser);
     }
 
     /*** Interfaces ***/

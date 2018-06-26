@@ -69,6 +69,7 @@ import com.openexchange.admin.rmi.exceptions.NoSuchGroupException;
 import com.openexchange.admin.rmi.exceptions.NoSuchResourceException;
 import com.openexchange.admin.rmi.exceptions.NoSuchUserException;
 import com.openexchange.admin.rmi.factory.ContextFactory;
+import com.openexchange.admin.rmi.factory.GroupFactory;
 import com.openexchange.admin.rmi.factory.ResourceFactory;
 import com.openexchange.admin.rmi.factory.UserFactory;
 import com.openexchange.admin.user.copy.rmi.TestTool;
@@ -157,7 +158,7 @@ public class AdditionalRMITests extends AbstractRMITest {
         final Credentials credentials = contextAdminCredentials;
         User[] allUsers = getUserManager().listAll(context, credentials);// required line for test
         User[] queriedUsers = getUserManager().getData(context, allUsers, credentials);// required line for test
-        assertIDsAreEqual(allUsers, queriedUsers);
+        AssertUtil.assertIDsAreEqual(allUsers, queriedUsers);
     }
 
     /*
@@ -256,7 +257,7 @@ public class AdditionalRMITests extends AbstractRMITest {
     @Test
     public void testCreateOxGroup() throws Exception {
         boolean groupCreated = false;
-        Group group = newGroup("groupdisplayname", "groupname");
+        Group group = GroupFactory.createGroup("groupdisplayname", "groupname");
         try {
             group = getGroupManager().create(group, context, contextAdminCredentials);// required line for test
             groupCreated = true;
@@ -310,7 +311,7 @@ public class AdditionalRMITests extends AbstractRMITest {
     @Test
     public void testUpdateOxGroup() throws Exception {
         boolean groupCreated = false;
-        Group group = newGroup("groupdisplayname", "groupname");
+        Group group = GroupFactory.createGroup("groupdisplayname", "groupname");
         try {
             group = getGroupManager().create(group, context, contextAdminCredentials);
             groupCreated = true;

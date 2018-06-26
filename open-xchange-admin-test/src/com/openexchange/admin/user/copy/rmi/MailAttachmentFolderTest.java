@@ -104,8 +104,6 @@ public class MailAttachmentFolderTest extends AbstractRMITest {
     public void setUp() throws Exception {
         super.setUp();
         AJAXConfig.init();
-
-        superAdminCredentials = superAdminCredentials;
         Context[] contexts = getContextManager().search("UserMove*");
         for (Context ctx : contexts) {
             System.out.println("Deleting context " + ctx.getName() + " in schema " + ctx.getReadDatabase().getScheme());

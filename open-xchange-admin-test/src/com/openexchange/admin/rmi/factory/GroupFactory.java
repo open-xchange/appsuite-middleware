@@ -66,9 +66,20 @@ public final class GroupFactory {
      * @return The new {@link Group}
      */
     public static final Group createGroup(String identity) {
-        Group grp = new Group();
-        grp.setDisplayname("display name " + identity);
-        grp.setName(identity);
-        return grp;
+        return createGroup("display name " + identity, identity);
+    }
+
+    /**
+     * Creates a new group object with the specified name and display name
+     * 
+     * @param displayName The display name of the group
+     * @param name The name of the group
+     * @return The new {@link Group} object
+     */
+    public static final Group createGroup(String displayName, String name) {
+        Group group = new Group();
+        group.setDisplayname(displayName);
+        group.setName(name);
+        return group;
     }
 }
