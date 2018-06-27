@@ -134,16 +134,26 @@ public class StreamedUploadFileImpl implements StreamedUploadFile {
 
     @Override
     public String getPreparedFileName() {
+        if (null == preparedFileName) {
+            if (null == fileName) {
+                return null;
+            }
+            preparedFileName = fileName;
+            /*
+             * Try guessing the filename separator
+             */
+            int pos = -1;
+            if ((pos = preparedFileName.lastIndexOf('\\')) != -1) {
+                preparedFileName = preparedFileName.substring(pos + 1);
+            } else if ((pos = preparedFileName.lastIndexOf('/')) != -1) {
+                preparedFileName = preparedFileName.substring(pos + 1);
+            }
+            // TODO: Ensure that filename is not transfer-encoded
+            // preparedFileName = CodecUtils.decode(preparedFileName,
+            // ServerConfig
+            // .getProperty(ServerConfig.Property.DefaultEncoding));
+        }
         return preparedFileName;
-    }
-
-    /**
-     * Sets the prepared file name
-     *
-     * @param preparedFileName The prepared file name to set
-     */
-    public void setPreparedFileName(String preparedFileName) {
-        this.preparedFileName = preparedFileName;
     }
 
     @Override

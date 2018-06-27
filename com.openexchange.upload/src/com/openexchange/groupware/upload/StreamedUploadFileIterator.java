@@ -70,8 +70,9 @@ public interface StreamedUploadFileIterator {
      * Returns {@code true} if the iteration has more upload files.
      *
      * @return {@code true} if the iteration has more upload files
+     * @throws OXException if the next upload file cannot be checked
      */
-    boolean hasNext();
+    boolean hasNext() throws OXException;
 
     /**
      * Returns the next upload file in the iteration.

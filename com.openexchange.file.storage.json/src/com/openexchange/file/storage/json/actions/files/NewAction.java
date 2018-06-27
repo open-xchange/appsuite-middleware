@@ -92,6 +92,7 @@ public class NewAction extends AbstractWriteAction {
         if (request.hasUploads()) {
             // Save file metadata with binary payload
             newId = fileAccess.saveDocument(file, request.getUploadedFileData(), FileStorageFileAccess.UNDEFINED_SEQUENCE_NUMBER, request.getSentColumns(), false, ignoreWarnings, tryAddVersion);
+            request.uploadFinished();
         } else {
             // Save file metadata without binary payload
             newId = fileAccess.saveFileMetadata(file, FileStorageFileAccess.UNDEFINED_SEQUENCE_NUMBER, request.getSentColumns(), ignoreWarnings, tryAddVersion);

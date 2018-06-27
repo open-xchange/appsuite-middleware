@@ -83,15 +83,16 @@ import com.openexchange.session.Session;
 
 
 /**
- * {@link StreamedUploadImpl}
+ * {@link MultipartStreamedUpload}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.10.1
  */
-public class StreamedUploadImpl implements StreamedUpload {
+public class MultipartStreamedUpload implements StreamedUpload {
 
-    final FileItemIterator iter;
     private final Map<String, String> formFields;
+    private boolean iteratorCreated;
+    final FileItemIterator iter;
     final String uuid;
     final List<StreamedUploadFileListener> listeners;
     final Session session;
@@ -101,10 +102,12 @@ public class StreamedUploadImpl implements StreamedUpload {
     FileItemStream current;
 
     /**
-     * Initializes a new {@link StreamedUploadImpl}.
+     * Initializes a new {@link MultipartStreamedUpload}.
      */
-    public StreamedUploadImpl(FileItemIterator iter, String uuid, List<StreamedUploadFileListener> listeners, String action, String fileName, String requestCharacterEncoding, Session session) throws OXException {
+    public MultipartStreamedUpload(FileItemIterator iter, String uuid, List<StreamedUploadFileListener> listeners, String action, String fileName, String requestCharacterEncoding, Session session) throws OXException {
         super();
+        formFields = new HashMap<String, String>();
+        iteratorCreated = false;
         this.iter = iter;
         this.uuid = uuid;
         this.listeners = listeners;
@@ -112,7 +115,6 @@ public class StreamedUploadImpl implements StreamedUpload {
         this.fileName = fileName;
         this.charEnc = null == requestCharacterEncoding ? ServerConfig.getProperty(Property.DefaultEncoding) : requestCharacterEncoding;
         this.session = session;
-        formFields = new HashMap<String, String>();
 
         // Consume form fields
         try {
@@ -172,7 +174,23 @@ public class StreamedUploadImpl implements StreamedUpload {
     }
 
     @Override
+    public boolean hasAny() {
+        if (iteratorCreated) {
+            // Already consumed
+            throw new IllegalStateException("Already consumed");
+        }
+
+        return null != current;
+    }
+
+    @Override
     public StreamedUploadFileIterator getUploadFiles() {
+        if (iteratorCreated) {
+            // Already consumed
+            throw new IllegalStateException("Already consumed");
+        }
+
+        iteratorCreated = true;
         FileItemStream item = current;
         if (null == item) {
             // No upload files
@@ -186,7 +204,7 @@ public class StreamedUploadImpl implements StreamedUpload {
 
     private static class FileItemStreamedUploadFileIterator implements StreamedUploadFileIterator {
 
-        private final StreamedUploadImpl streamedUpload;
+        private final MultipartStreamedUpload streamedUpload;
         private final String uuid;
         private final Session session;
         private final List<StreamedUploadFileListener> listeners;
@@ -194,9 +212,9 @@ public class StreamedUploadImpl implements StreamedUpload {
         private final FileItemIterator iter;
 
         /**
-         * Initializes a new {@link StreamedUploadImpl.FileItemStreamedUploadFileIterator}.
+         * Initializes a new {@link MultipartStreamedUpload.FileItemStreamedUploadFileIterator}.
          */
-        FileItemStreamedUploadFileIterator(StreamedUploadImpl streamedUpload) {
+        FileItemStreamedUploadFileIterator(MultipartStreamedUpload streamedUpload) {
             super();
             this.streamedUpload = streamedUpload;
             iter = streamedUpload.iter;
@@ -207,20 +225,47 @@ public class StreamedUploadImpl implements StreamedUpload {
         }
 
         @Override
-        public boolean hasNext() {
-            return streamedUpload.current != null;
+        public boolean hasNext() throws OXException {
+            if (streamedUpload.current != null) {
+                return true;
+            }
+
+            try {
+                // Advance this iterator
+                while (null == streamedUpload.current && iter.hasNext()) {
+                    FileItemStream next = iter.next();
+                    if (next.isFormField()) {
+                        streamedUpload.addFormField(next.getFieldName(), Streams.stream2string(next.openStream(), streamedUpload.charEnc));
+                    } else {
+                        String name = next.getName();
+                        if (!isEmpty(name)) {
+                            streamedUpload.current = next;
+                        }
+                    }
+                }
+
+                if (null == streamedUpload.current) {
+                    // No further uploads available. Signal success
+                    for (StreamedUploadFileListener listener : listeners) {
+                        listener.onUploadSuceeded(uuid, streamedUpload, session);
+                    }
+                }
+
+                return (streamedUpload.current != null);
+            } catch (Exception e) {
+                throw handleException(uuid, e, action, session, listeners);
+            }
         }
 
         @Override
         public StreamedUploadFile next() throws OXException {
-            if (null == streamedUpload.current) {
+            FileItemStream item = streamedUpload.current;
+            if (null == item) {
                 throw new NoSuchElementException();
             }
+            streamedUpload.current = null;
 
             try {
-                FileItemStream item = streamedUpload.current;
-                streamedUpload.current = null;
-
                 StreamedUploadFileImpl uploadFile = new StreamedUploadFileImpl();
                 uploadFile.setFieldName(item.getFieldName());
                 String fileName = isEmpty(streamedUpload.fileName) ? item.getName() : streamedUpload.fileName;
@@ -286,26 +331,6 @@ public class StreamedUploadImpl implements StreamedUpload {
                     } catch (OXException e) {
                         // Do not signal this OXException to listeners as it was created by one of the listeners itself
                         throw new DontHandleException(e);
-                    }
-                }
-
-                // Advance this iterator
-                while (null == streamedUpload.current && iter.hasNext()) {
-                    FileItemStream next = iter.next();
-                    if (next.isFormField()) {
-                        streamedUpload.addFormField(next.getFieldName(), Streams.stream2string(next.openStream(), streamedUpload.charEnc));
-                    } else {
-                        String name = next.getName();
-                        if (!isEmpty(name)) {
-                            streamedUpload.current = next;
-                        }
-                    }
-                }
-
-                if (null == streamedUpload.current) {
-                    // No further uploads available. Signal success
-                    for (StreamedUploadFileListener listener : listeners) {
-                        listener.onUploadSuceeded(uuid, streamedUpload, session);
                     }
                 }
 

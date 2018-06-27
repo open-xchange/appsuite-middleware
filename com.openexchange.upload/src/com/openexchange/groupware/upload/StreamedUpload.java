@@ -90,14 +90,30 @@ public interface StreamedUpload {
     Iterator<String> getFormFieldNames();
 
     /**
+     * Whether this stream upload provides any upload file
+     *
+     * @return <code>true</code> if any upload file is provided; otherwise <code>false</code>
+     */
+    boolean hasAny();
+
+    /**
      * Gets an iterator for upload files.
      * <p>
      * <div style="margin-left: 0.1in; margin-right: 0.5in; margin-bottom: 0.1in; background-color:#FFDDDD;">
-     * <b>Note</b>: Each retrieved <code>StreamedUploadFile</code> is supposed to be handled directly.<br>
+     * <b>Note</b>:
+     * <ul>
+     * <li>
+     * This method can only be called once. Calling this method multiple times will yield <code>IllegalStateException</code>
+     * </li>
+     * <li>
+     * Each retrieved <code>StreamedUploadFile</code> is supposed to be handled directly.<br>
      * Continuing to the (possibly) next <code>StreamedUploadFile</code> instance renders the previously obtained one useless.
+     * </li>
+     * </ul>
      * </div>
      *
      * @return An iterator for form fields.
+     * @throws IllegalStateException If this method is called more than once
      */
     StreamedUploadFileIterator getUploadFiles();
 

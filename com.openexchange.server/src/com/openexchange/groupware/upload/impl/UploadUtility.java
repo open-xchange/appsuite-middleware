@@ -50,6 +50,7 @@
 package com.openexchange.groupware.upload.impl;
 
 import static com.openexchange.java.Strings.isEmpty;
+import static java.lang.String.format;
 import java.io.EOFException;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -387,7 +388,8 @@ public final class UploadUtility {
         String uuid = UUIDs.getUnformattedStringFromRandom();
 
         // Create the upload instance
-        return new StreamedUploadImpl(iter, uuid, listeners, action, action, req.getCharacterEncoding(), session);
+        String fileName = req.getParameter("filename");
+        return new MultipartStreamedUpload(iter, uuid, listeners, action, fileName, req.getCharacterEncoding(), session);
     }
 
     /**
@@ -526,6 +528,79 @@ public final class UploadUtility {
         }
 
         return null; // To keep compiler happy
+    }
+
+    /**
+     * (Statically) Processes specified request's upload for a simple binary upload.
+     *
+     * @param req The request whose upload shall be processed
+     * @param maxFileSize The maximum allowed size of a single uploaded file or <code>-1</code>
+     * @param maxOverallSize The maximum allowed size of a complete request or <code>-1</code>
+     * @param session The associated session or <code>null</code>
+     * @return The processed instance of {@link UploadEvent}
+     * @throws OXException Id processing the upload fails
+     */
+    public static StreamedUpload processStreamedPutUpload(HttpServletRequest req, long maxFileSize, long maxOverallSize, Session session) throws OXException {
+        if (!"PUT".equals(req.getMethod())) {
+            throw AjaxExceptionCodes.MISSING_REQUEST_BODY.create();
+        }
+
+        // Check action parameter existence
+        String action;
+        try {
+            action = AJAXServlet.getAction(req);
+        } catch (OXException e) {
+            throw UploadException.UploadCode.UPLOAD_FAILED.create(e);
+        }
+
+        // Get the currently available listeners
+        List<StreamedUploadFileListener> listeners = Collections.emptyList();
+        ServiceListing<StreamedUploadFileListener> listing = STREAMED_LISTENERS.get();
+        if (null != listing) {
+            listeners = new ArrayList<>(listing.getServiceList());
+        }
+
+        // Yield an ID
+        String uuid = UUIDs.getUnformattedStringFromRandom();
+
+        String contentType = req.getHeader("Content-type");
+        String fileName = req.getParameter("filename");
+
+        InputStream in;
+        try {
+            long limit;
+            if (maxFileSize >= 0) {
+                limit = maxFileSize;
+                if (maxOverallSize >= 0 && maxOverallSize < limit) {
+                    limit = maxOverallSize;
+                }
+            } else {
+                limit = maxOverallSize;
+            }
+            if (maxOverallSize >= 0) {
+                final InputStream requestStream = req.getInputStream();
+                in = new org.apache.commons.fileupload.util.LimitedInputStream(requestStream, maxOverallSize) {
+
+                    @Override
+                    protected void raiseError(long pSizeMax, long pCount) throws IOException {
+                        requestStream.close();
+                        FileSizeLimitExceededException e = new FileSizeLimitExceededException(format("The file exceeds its maximum permitted size of %s bytes.", Long.valueOf(pSizeMax)), pCount, pSizeMax);
+                        e.setFileName(fileName);
+                        throw new FileUploadIOException(e);
+                    }
+                };
+            } else {
+                in = req.getInputStream();
+            }
+        } catch (IOException e) {
+            UploadException exception = UploadException.UploadCode.UPLOAD_FAILED.create(e, action);
+            for (StreamedUploadFileListener listener : listeners) {
+                listener.onUploadFailed(uuid, exception, session);
+            }
+            throw exception;
+        }
+
+        return new SingleStreamedUpload(in, contentType, fileName, uuid, listeners, action, session);
     }
 
     /**

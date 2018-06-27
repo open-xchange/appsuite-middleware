@@ -100,6 +100,7 @@ public class UpdateAction extends AbstractWriteAction {
                 boolean ignoreVersion = request.getBoolParameter("ignoreVersion") && fileAccess.supports(id.getService(), id.getAccountId(), FileStorageCapability.IGNORABLE_VERSION);
                 newId = fileAccess.saveDocument(file, request.getUploadedFileData(), request.getTimestamp(), columns, ignoreVersion, ignoreWarnings, false);
             }
+            request.uploadFinished();
         } else {
             // Save file metadata without binary payload
             newId = fileAccess.saveFileMetadata(file, request.getTimestamp(), columns, ignoreWarnings, false);
