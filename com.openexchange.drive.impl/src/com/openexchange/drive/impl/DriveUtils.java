@@ -316,7 +316,7 @@ public class DriveUtils {
      * @return <code>true</code> if the exception indicates a failed saved exception, <code>false</code>, otherwise
      */
     public static boolean indicatesFailedSave(OXException e) {
-        return "IFO-0100".equals(e.getErrorCode()) || "IFO-2103".equals(e.getErrorCode()) ||
+        return "IFO-0100".equals(e.getErrorCode()) || "IFO-2103".equals(e.getErrorCode()) || "RDB-0002".equals(e.getErrorCode()) ||
             "FLD-0092".equals(e.getErrorCode()) || "FLD-0064".equals(e.getErrorCode()) || "FLD-1014".equals(e.getErrorCode());
     }
 
