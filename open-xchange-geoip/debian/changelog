@@ -1,3 +1,9 @@
+open-xchange-geoip (7.10.0-9) stable; urgency=medium
+
+  * Third candidate for 7.10.0 release
+
+ -- Thorben Betten <thorben.betten@open-xchange.com>  Wed, 27 Jun 2018 14:49:40 +0200
+
 open-xchange-geoip (7.10.0-8) stable; urgency=medium
 
   * Second candidate for 7.10.0 release
