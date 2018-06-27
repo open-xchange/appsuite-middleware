@@ -19,7 +19,7 @@ BuildRequires: java-devel >= 1.7.0
 %endif
 %endif
 Version:        @OXVERSION@
-%define        ox_release 34
+%define        ox_release 35
 Release:        %{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GPL-2.0
@@ -63,6 +63,8 @@ ant -lib build/lib -Dbasedir=build -Dhtdoc=%{docroot} -DdestDir=%{buildroot} -Dp
 /opt/open-xchange/bundles/*
 
 %changelog
+* Tue Jun 26 2018 Carsten Hoeger <choeger@open-xchange.com>
+Build for patch 2018-06-21 (4801)
 * Mon Jun 18 2018 Carsten Hoeger <choeger@open-xchange.com>
 Build for patch 2018-06-25 (4791)
 * Fri Jun 08 2018 Carsten Hoeger <choeger@open-xchange.com>

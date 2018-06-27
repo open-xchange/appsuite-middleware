@@ -1,0 +1,23 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Open-Xchange Metrics Bundle
+Bundle-SymbolicName: com.openexchange.metrics
+Bundle-Version: 7.8.4
+Bundle-Vendor: OX Software GmbH
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-ClassPath: .
+Export-Package: com.openexchange.metrics,
+ com.openexchange.metrics.exceptions,
+ com.openexchange.metrics.jmx,
+ com.openexchange.metrics.jmx.beans,
+ com.openexchange.metrics.types
+Import-Package: com.openexchange.exception,
+ com.openexchange.java,
+ com.openexchange.management,
+ com.openexchange.osgi,
+ com.openexchange.osgi.annotation,
+ com.openexchange.server,
+ javax.management,
+ org.osgi.framework,
+ org.osgi.util.tracker,
+ org.slf4j
