@@ -169,7 +169,7 @@ public class LogbackConfigurationRMIServiceImpl implements LogbackConfigurationR
         } else {
             builder.append("Updating ");
         }
-        builder.append("filter for user with ID \"").append(userId).append("\", in context with ID \"").append(contextId).append("\" and policy \"ACCEPT\"");
+        builder.append("filter for user with ID '").append(userId).append("', in context with ID '").append(contextId).append("' and policy 'ACCEPT'");
         response.addMessage(builder.toString(), MessageType.INFO);
 
         addLoggersToFilter(getLoggerWhitelist(), loggers, filter, response);
@@ -219,7 +219,7 @@ public class LogbackConfigurationRMIServiceImpl implements LogbackConfigurationR
         if (loggers.isEmpty()) {
             removeFilter(key);
             builder.setLength(0);
-            builder.append("Removed context filter with context ID \"").append(contextId).append("\"");
+            builder.append("Removed context filter with context ID '").append(contextId).append("'");
             LOG.info(builder.toString());
             response.addMessage(builder.toString(), MessageType.INFO);
             return response;
@@ -227,7 +227,7 @@ public class LogbackConfigurationRMIServiceImpl implements LogbackConfigurationR
         ExtendedMDCFilter filter = (ExtendedMDCFilter) turboFilterCache.get(key);
         if (filter == null) {
             builder.setLength(0);
-            builder.append("Context filter with contextID \"").append(contextId).append("\" does not exist.");
+            builder.append("Context filter with contextID '").append(contextId).append("' does not exist.");
             LOG.info(builder.toString());
             response.addMessage(builder.toString(), MessageType.WARNING);
             return response;
@@ -236,7 +236,7 @@ public class LogbackConfigurationRMIServiceImpl implements LogbackConfigurationR
         for (String s : loggers) {
             filter.removeLogger(s);
             builder.setLength(0);
-            builder.append("Removed logger \"").append(s).append("\"").append(" from context filter with context ID \"").append(contextId).append("\"");
+            builder.append("Removed logger '").append(s).append("'").append(" from context filter with context ID '").append(contextId).append("'");
             response.addMessage(builder.toString(), MessageType.INFO);
             LOG.info(builder.toString());
         }
@@ -261,14 +261,14 @@ public class LogbackConfigurationRMIServiceImpl implements LogbackConfigurationR
         if (loggers.isEmpty()) {
             removeFilter(key);
             builder.setLength(0);
-            builder.append("Removed user filter for user with ID \"").append(userId).append("\", context with ID \"").append(contextId).append("\" and policy \"ACCEPT\"");
+            builder.append("Removed user filter for user with ID '").append(userId).append("', context with ID '").append(contextId).append("' and policy 'ACCEPT'");
             LOG.info(builder.toString());
             response.addMessage(builder.toString(), MessageType.INFO);
             return response;
         }
         ExtendedMDCFilter filter = (ExtendedMDCFilter) turboFilterCache.get(key);
         if (filter == null) {
-            builder.append("User filter for user with ID \"").append(userId).append("\", context with ID \"").append(contextId).append("\" and policy \"ACCEPT\" does not exist");
+            builder.append("User filter for user with ID '").append(userId).append("', context with ID '").append(contextId).append("' and policy 'ACCEPT' does not exist");
             LOG.info(builder.toString());
             response.addMessage(builder.toString(), MessageType.WARNING);
             return response;
@@ -276,7 +276,7 @@ public class LogbackConfigurationRMIServiceImpl implements LogbackConfigurationR
         for (String s : loggers) {
             filter.removeLogger(s);
             builder.setLength(0);
-            builder.append("Removed logger \"").append(s).append("\"").append(" from ").append(" user filter for user with ID \"").append(userId).append("\", context with ID \"").append(contextId).append("\" and policy \"ACCEPT\"");
+            builder.append("Removed logger '").append(s).append("'").append(" from ").append(" user filter for user with ID '").append(userId).append("', context with ID '").append(contextId).append("' and policy 'ACCEPT'");
             LOG.info(builder.toString());
             response.addMessage(builder.toString(), MessageType.INFO);
         }
@@ -299,7 +299,7 @@ public class LogbackConfigurationRMIServiceImpl implements LogbackConfigurationR
         if (loggers.isEmpty()) {
             removeFilter(key);
             builder.setLength(0);
-            builder.append("Removed session filter with ID \"").append(sessionId).append("\"");
+            builder.append("Removed session filter with ID '").append(sessionId).append("'");
             LOG.info(builder.toString());
             response.addMessage(builder.toString(), MessageType.INFO);
             return response;
@@ -307,7 +307,7 @@ public class LogbackConfigurationRMIServiceImpl implements LogbackConfigurationR
         ExtendedMDCFilter filter = (ExtendedMDCFilter) turboFilterCache.get(key);
         if (filter == null) {
             builder.setLength(0);
-            builder.append("Session filter with ID \"").append(sessionId).append("\"").append(" does not exist.");
+            builder.append("Session filter with ID '").append(sessionId).append("'").append(" does not exist.");
             LOG.info(builder.toString());
             response.addMessage(builder.toString(), MessageType.WARNING);
             return response;
@@ -315,7 +315,7 @@ public class LogbackConfigurationRMIServiceImpl implements LogbackConfigurationR
         for (String s : loggers) {
             filter.removeLogger(s);
             builder.setLength(0);
-            builder.append("Removed logger \"").append(s).append("\"").append(" from ").append(" session filter with ID \"").append(sessionId).append("\" and policy \"ACCEPT\"");
+            builder.append("Removed logger '").append(s).append("'").append(" from ").append(" session filter with ID '").append(sessionId).append("' and policy 'ACCEPT'");
             response.addMessage(builder.toString(), MessageType.INFO);
             LOG.info(builder.toString());
         }
@@ -355,7 +355,7 @@ public class LogbackConfigurationRMIServiceImpl implements LogbackConfigurationR
             loggerContext.getLogger(s).setLevel(l);
             dynamicallyModifiedLoggers.put(s, l);
             builder.setLength(0);
-            builder.append("Setting log level for \"").append(s).append("\" to \"").append(l).append("\"");
+            builder.append("Setting log level for '").append(s).append("' to '").append(l).append("'");
             response.addMessage(builder.toString(), MessageType.INFO);
             LOG.info(builder.toString());
         }
@@ -370,7 +370,7 @@ public class LogbackConfigurationRMIServiceImpl implements LogbackConfigurationR
     @Override
     public LogbackRemoteResponse overrideExceptionCategories(String categories) throws RemoteException {
         LogbackRemoteResponse response = new LogbackRemoteResponse();
-        LOG.info("Setting suppressed Exception Categories to \"{}\"", categories);
+        LOG.info("Setting suppressed Exception Categories to '{}'", categories);
         ExceptionCategoryFilter.setCategories(categories);
         response.addMessage("Setting suppressed Exception Categories to " + categories, MessageType.INFO);
         return response;
