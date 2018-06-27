@@ -47,81 +47,28 @@
  *
  */
 
-package com.openexchange.filestore.impl;
+package com.openexchange.groupware.upload.osgi;
 
-import java.io.FilterInputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import org.osgi.framework.BundleContext;
+import com.openexchange.groupware.upload.StreamedUploadFileListener;
+import com.openexchange.groupware.upload.UploadFileListener;
+import com.openexchange.osgi.RankingAwareNearRegistryServiceTracker;
 
 /**
- * {@link LimitedInputStream}
+ * {@link StreamedUploadListenerTracker} - Tracks registered instances of {@link UploadFileListener}.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since v7.10.0
+ * @since v7.10.1
  */
-public class LimitedInputStream extends FilterInputStream {
+public class StreamedUploadListenerTracker extends RankingAwareNearRegistryServiceTracker<StreamedUploadFileListener> {
 
     /**
-     * The maximum size of an item, in bytes.
-     */
-    private final long sizeMax;
-
-    /**
-     * The current number of bytes.
-     */
-    private long count;
-
-    /**
-     * Creates a new instance.
+     * Initializes a new {@link StreamedUploadListenerTracker}.
      *
-     * @param inputStream The input stream, which shall be limited.
-     * @param pSizeMax The limit; no more than this number of bytes shall be returned by the source stream.
+     * @param context The bundle context
      */
-    public LimitedInputStream(InputStream inputStream, long pSizeMax) {
-        super(inputStream);
-        sizeMax = pSizeMax;
-    }
-
-    /**
-     * Called to indicate, that the input streams limit has been exceeded.
-     *
-     * @param pSizeMax The input streams limit, in bytes.
-     * @param pCount The actual number of bytes.
-     * @throws IOException If the called method is expected to raise an I/O error
-     */
-    protected void raiseError(long pSizeMax, long pCount) throws IOException {
-        throw new StorageFullIOException(pCount, pSizeMax);
-    }
-
-    /**
-     * Called to check, whether the input stream's limit is reached.
-     *
-     * @throws IOException If the given limit is exceeded
-     */
-    private void checkLimit() throws IOException {
-        if (count > sizeMax) {
-            raiseError(sizeMax, count);
-        }
-    }
-
-    @Override
-    public int read() throws IOException {
-        int res = super.read();
-        if (res != -1) {
-            count++;
-            checkLimit();
-        }
-        return res;
-    }
-
-    @Override
-    public int read(byte[] b, int off, int len) throws IOException {
-        int res = super.read(b, off, len);
-        if (res > 0) {
-            count += res;
-            checkLimit();
-        }
-        return res;
+    public StreamedUploadListenerTracker(BundleContext context) {
+        super(context, StreamedUploadFileListener.class, 0);
     }
 
 }

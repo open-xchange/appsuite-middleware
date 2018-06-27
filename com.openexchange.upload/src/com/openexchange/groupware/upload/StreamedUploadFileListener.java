@@ -47,81 +47,61 @@
  *
  */
 
-package com.openexchange.filestore.impl;
+package com.openexchange.groupware.upload;
 
-import java.io.FilterInputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import com.openexchange.exception.OXException;
+import com.openexchange.session.Session;
 
 /**
- * {@link LimitedInputStream}
+ * {@link StreamedUploadFileListener} - Receives various call-backs on streamed upload of a file.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since v7.10.0
+ * @since v7.10.1
  */
-public class LimitedInputStream extends FilterInputStream {
+public interface StreamedUploadFileListener {
 
     /**
-     * The maximum size of an item, in bytes.
-     */
-    private final long sizeMax;
-
-    /**
-     * The current number of bytes.
-     */
-    private long count;
-
-    /**
-     * Creates a new instance.
+     * Invoked before the upload's stream gets processed; providing basic information.
      *
-     * @param inputStream The input stream, which shall be limited.
-     * @param pSizeMax The limit; no more than this number of bytes shall be returned by the source stream.
+     * @param uploadId The identifier that uniquely identifies the upload
+     * @param fileName The name of the uploaded file
+     * @param fieldName The name of the field in the multipart form (if any)
+     * @param contentType The content type
+     * @param session The session associated with the upload or <code>null</code>
+     * @throws OXException If this listener signals that uploaded should be aborted
      */
-    public LimitedInputStream(InputStream inputStream, long pSizeMax) {
-        super(inputStream);
-        sizeMax = pSizeMax;
-    }
+    void onBeforeUploadProcessed(String uploadId, String fileName, String fieldName, String contentType, Session session) throws OXException;
 
     /**
-     * Called to indicate, that the input streams limit has been exceeded.
+     * Invoked after the upload's stream gets processed; providing basic information.
      *
-     * @param pSizeMax The input streams limit, in bytes.
-     * @param pCount The actual number of bytes.
-     * @throws IOException If the called method is expected to raise an I/O error
+     * @param uploadId The identifier that uniquely identifies the upload
+     * @param uploadFile The fully parsed uploaded file
+     * @param session The session associated with the upload or <code>null</code>
+     * @throws OXException If this listener signals that uploaded should be aborted
      */
-    protected void raiseError(long pSizeMax, long pCount) throws IOException {
-        throw new StorageFullIOException(pCount, pSizeMax);
-    }
+    void onAfterUploadProcessed(String uploadId, StreamedUploadFile uploadFile, Session session) throws OXException;
 
     /**
-     * Called to check, whether the input stream's limit is reached.
+     * Invoked in case upload failed while processing individual uploaded files;<br>
+     * e.g. upload quota is exceeded.
+     * <p>
+     * All previously processed upload files will be deleted.
      *
-     * @throws IOException If the given limit is exceeded
+     * @param uploadId The identifier that uniquely identifies the upload
+     * @param exception The exception rendering the upload as failure
+     * @param session The session associated with the upload or <code>null</code>
      */
-    private void checkLimit() throws IOException {
-        if (count > sizeMax) {
-            raiseError(sizeMax, count);
-        }
-    }
+    void onUploadFailed(String uploadId, OXException exception, Session session);
 
-    @Override
-    public int read() throws IOException {
-        int res = super.read();
-        if (res != -1) {
-            count++;
-            checkLimit();
-        }
-        return res;
-    }
-
-    @Override
-    public int read(byte[] b, int off, int len) throws IOException {
-        int res = super.read(b, off, len);
-        if (res > 0) {
-            count += res;
-            checkLimit();
-        }
-        return res;
-    }
-
+    /**
+     * Invoked in case upload succeeded.
+     * <p>
+     * All uploaded files were successfully processed.
+     *
+     * @param uploadId The identifier that uniquely identifies the upload
+     * @param upload The successfully parsed upload
+     * @param session The session associated with the upload or <code>null</code>
+     */
+    void onUploadSuceeded(String uploadId, StreamedUpload upload, Session session);
 }

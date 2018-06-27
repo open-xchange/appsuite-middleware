@@ -75,15 +75,20 @@ public class UploadActivator extends HousekeepingActivator {
 
     @Override
     protected void startBundle() throws Exception {
-        UploadListenerTracker tracker = new UploadListenerTracker(context);
-        rememberTracker(tracker);
+        UploadListenerTracker uploadListenerTracker = new UploadListenerTracker(context);
+        rememberTracker(uploadListenerTracker);
+
+        StreamedUploadListenerTracker streamedUploadListenerTracker = new StreamedUploadListenerTracker(context);
+        rememberTracker(streamedUploadListenerTracker);
         openTrackers();
 
-        UploadUtility.setUploadFileListenerLsting(tracker);
+        UploadUtility.setUploadFileListenerLsting(uploadListenerTracker);
+        UploadUtility.setStreamedUploadFileListenerLsting(streamedUploadListenerTracker);
     }
 
     @Override
     protected void stopBundle() throws Exception {
+        UploadUtility.setStreamedUploadFileListenerLsting(null);
         UploadUtility.setUploadFileListenerLsting(null);
         super.stopBundle();
     }

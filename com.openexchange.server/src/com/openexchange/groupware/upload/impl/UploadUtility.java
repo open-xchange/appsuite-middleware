@@ -82,6 +82,8 @@ import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.configuration.ServerConfig.Property;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.upload.StreamedUpload;
+import com.openexchange.groupware.upload.StreamedUploadFileListener;
 import com.openexchange.groupware.upload.UploadFile;
 import com.openexchange.groupware.upload.UploadFileListener;
 import com.openexchange.java.Streams;
@@ -221,6 +223,17 @@ public final class UploadUtility {
         LISTENERS.set(listing);
     }
 
+    private static final AtomicReference<ServiceListing<StreamedUploadFileListener>> STREAMED_LISTENERS = new AtomicReference<>();
+
+    /**
+     * Sets the specified listing of upload file listeners
+     *
+     * @param listing The listing to set
+     */
+    public static void setStreamedUploadFileListenerLsting(ServiceListing<StreamedUploadFileListener> listing) {
+        STREAMED_LISTENERS.set(listing);
+    }
+
     // ----------------------------------------------- Parse/process an upload request -----------------------------------------------------
 
     /**
@@ -281,6 +294,103 @@ public final class UploadUtility {
     }
 
     /**
+     * Creates the <code>FileItemIterator</code> from specified arguments.
+     *
+     * @param req The HTTP reqauest providing the upload
+     * @param maxFileSize The max. file size
+     * @param maxOverallSize The max. total size
+     * @param action The associated action identifier
+     * @return The <code>FileItemIterator</code> instance
+     * @throws UploadException If <code>FileItemIterator</code> instance cannot be returned
+     */
+    private static FileItemIterator createFileItemIteratorFor(HttpServletRequest req, long maxFileSize, long maxOverallSize, String action) throws UploadException {
+        // Parse the upload request
+        FileItemIterator iter;
+        try {
+            // Get file upload...
+            // ... and add some "extra space" as Apache Fileupload considers the maximum allowed size of a complete request (incl. form fields)
+            ServletFileUpload upload = newFileUploadBase(maxFileSize, maxOverallSize > 0 ? maxOverallSize + 1024 : maxOverallSize);
+            // Check request's character encoding
+            if (null == req.getCharacterEncoding()) {
+                String defaultEnc = ServerConfig.getProperty(Property.DefaultEncoding);
+                try {
+                    // Might be ineffective if already fully parsed
+                    req.setCharacterEncoding(defaultEnc);
+                } catch (Exception e) { /* Ignore */
+                }
+                upload.setHeaderEncoding(defaultEnc);
+            }
+            // Parse multipart request
+            ServletRequestContext requestContext = new ServletRequestContext(req);
+            return upload.getItemIterator(requestContext);
+        } catch (FileSizeLimitExceededException e) {
+            throw UploadFileSizeExceededException.create(e.getActualSize(), e.getPermittedSize(), true);
+        } catch (SizeLimitExceededException e) {
+            throw UploadSizeExceededException.create(e.getActualSize(), e.getPermittedSize(), true);
+        } catch (FileUploadException e) {
+            Throwable cause = e.getCause();
+            if (cause instanceof IOException) {
+                String message = cause.getMessage();
+                if (null != message && message.startsWith("Max. byte count of ")) {
+                    // E.g. Max. byte count of 10240 exceeded.
+                    int pos = message.indexOf(" exceeded", 19 + 1);
+                    String limit = message.substring(19, pos);
+                    throw UploadException.UploadCode.MAX_UPLOAD_SIZE_EXCEEDED_UNKNOWN.create(cause, getSize(Long.parseLong(limit), 2, false, true));
+                }
+            } else if (cause instanceof EOFException) {
+                // Stream closed/ended unexpectedly
+                throw UploadException.UploadCode.UNEXPECTED_EOF.create(cause, cause.getMessage());
+            }
+            throw UploadException.UploadCode.UPLOAD_FAILED.create(e, null == cause ? e.getMessage() : (null == cause.getMessage() ? e.getMessage() : cause.getMessage()));
+        } catch (IOException e) {
+            throw UploadException.UploadCode.UPLOAD_FAILED.create(e, action);
+        }
+    }
+
+    /**
+     * Stream-wise processes specified request's upload provided that request is of content type <code>multipart/*</code>.
+     *
+     * @param req The HTTP request
+     * @param maxFileSize The maximum allowed size of a single uploaded file or <code>-1</code>
+     * @param maxOverallSize The maximum allowed size of a complete request or <code>-1</code>
+     * @param session The associated session or <code>null</code>
+     * @return The streamed upload
+     * @throws OXException If streamed upload cannot be returned
+     */
+    public static StreamedUpload processStreamedUpload(HttpServletRequest req, long maxFileSize, long maxOverallSize, Session session) throws OXException {
+        if (!Tools.isMultipartContent(req)) {
+            // No multipart content
+            throw UploadException.UploadCode.NO_MULTIPART_CONTENT.create();
+        }
+
+        // Check action parameter existence
+        String action;
+        try {
+            action = AJAXServlet.getAction(req);
+        } catch (OXException e) {
+            throw UploadException.UploadCode.UPLOAD_FAILED.create(e);
+        }
+
+        // Parse the upload request
+        FileItemIterator iter = createFileItemIteratorFor(req, maxFileSize, maxOverallSize, action);
+
+        // Get the currently available listeners
+        List<StreamedUploadFileListener> listeners = Collections.emptyList();
+        {
+            ServiceListing<StreamedUploadFileListener> listing = STREAMED_LISTENERS.get();
+            if (null != listing) {
+                listeners = new ArrayList<>(listing.getServiceList());
+            }
+        }
+
+        // Yield an ID
+        String uuid = UUIDs.getUnformattedStringFromRandom();
+
+        // Create the upload instance
+        return new StreamedUploadImpl(iter, uuid, listeners, action, action, req.getCharacterEncoding(), session);
+    }
+
+    /**
      * (Statically) Processes specified request's upload provided that request is of content type <code>multipart/*</code>.
      *
      * @param req The request whose upload shall be processed
@@ -305,46 +415,7 @@ public final class UploadUtility {
         }
 
         // Parse the upload request
-        FileItemIterator iter;
-        try {
-            // Get file upload...
-            // ... and add some "extra space" as Apache Fileupload considers the maximum allowed size of a complete request (incl. form fields)
-            ServletFileUpload upload = newFileUploadBase(maxFileSize, maxOverallSize > 0 ? maxOverallSize + 1024 : maxOverallSize);
-            // Check request's character encoding
-            if (null == req.getCharacterEncoding()) {
-                String defaultEnc = ServerConfig.getProperty(Property.DefaultEncoding);
-                try {
-                    // Might be ineffective if already fully parsed
-                    req.setCharacterEncoding(defaultEnc);
-                } catch (Exception e) { /* Ignore */
-                }
-                upload.setHeaderEncoding(defaultEnc);
-            }
-            // Parse multipart request
-            ServletRequestContext requestContext = new ServletRequestContext(req);
-            iter = upload.getItemIterator(requestContext);
-        } catch (FileSizeLimitExceededException e) {
-            throw UploadFileSizeExceededException.create(e.getActualSize(), e.getPermittedSize(), true);
-        } catch (SizeLimitExceededException e) {
-            throw UploadSizeExceededException.create(e.getActualSize(), e.getPermittedSize(), true);
-        } catch (FileUploadException e) {
-            Throwable cause = e.getCause();
-            if (cause instanceof IOException) {
-                String message = cause.getMessage();
-                if (null != message && message.startsWith("Max. byte count of ")) {
-                    // E.g. Max. byte count of 10240 exceeded.
-                    int pos = message.indexOf(" exceeded", 19 + 1);
-                    String limit = message.substring(19, pos);
-                    throw UploadException.UploadCode.MAX_UPLOAD_SIZE_EXCEEDED_UNKNOWN.create(cause, getSize(Long.parseLong(limit), 2, false, true));
-                }
-            } else if (cause instanceof EOFException) {
-                // Stream closed/ended unexpectedly
-                throw UploadException.UploadCode.UNEXPECTED_EOF.create(cause, cause.getMessage());
-            }
-            throw UploadException.UploadCode.UPLOAD_FAILED.create(e, null == cause ? e.getMessage() : (null == cause.getMessage() ? e.getMessage() : cause.getMessage()));
-        } catch (IOException e) {
-            throw UploadException.UploadCode.UPLOAD_FAILED.create(e, action);
-        }
+        FileItemIterator iter = createFileItemIteratorFor(req, maxFileSize, maxOverallSize, action);
 
         // Get the currently available listeners
         List<UploadFileListener> listeners = Collections.emptyList();
@@ -626,6 +697,15 @@ public final class UploadUtility {
         return retval;
     }
 
+    /**
+     * Advertises specified exception to listeners and re-throws it
+     *
+     * @param uuid The upload's UUID
+     * @param exception The exception to advertise
+     * @param session The associated session
+     * @param listeners The listeners to notify
+     * @throws OXException The re-thrown exception
+     */
     private static void throwException(String uuid, OXException exception, Session session, List<UploadFileListener> listeners) throws OXException {
         for (UploadFileListener listener : listeners) {
             listener.onUploadFailed(uuid, exception, session);
@@ -762,7 +842,7 @@ public final class UploadUtility {
         return retval;
     }
 
-    private static ContentType getContentTypeSafe(String contentType) {
+    static ContentType getContentTypeSafe(String contentType) {
         if (null == contentType) {
             return null;
         }

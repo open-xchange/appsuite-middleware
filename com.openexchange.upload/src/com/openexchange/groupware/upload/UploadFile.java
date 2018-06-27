@@ -58,14 +58,7 @@ import java.io.InputStream;
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public interface UploadFile {
-
-    /**
-     * Gets the file's field name in multipart upload.
-     *
-     * @return The file's field name in multipart upload.
-     */
-    String getFieldName();
+public interface UploadFile extends BasicUploadFile {
 
     /**
      * Sets the file's field name in multipart upload.
@@ -75,13 +68,6 @@ public interface UploadFile {
     void setFieldName(final String fieldName);
 
     /**
-     * Gets the file's content type.
-     *
-     * @return The file's content type.
-     */
-    String getContentType();
-
-    /**
      * Sets the file's content type.
      *
      * @param contentType The file's content type.
@@ -89,38 +75,11 @@ public interface UploadFile {
     void setContentType(final String contentType);
 
     /**
-     * Gets the value of the optional <code>"Content-Id"</code> header.
-     *
-     * @return The value of the <code>"Content-Id"</code> header or <code>null</code>
-     */
-    String getContentId();
-
-    /**
      * Sets the value of the <code>"Content-Id"</code> header.
      *
      * @param contentId The value of the <code>"Content-Id"</code> header or <code>null</code>
      */
     void setContentId(final String contentId);
-
-    /**
-     * Gets the file name as given through upload form.
-     * <p>
-     * The file name possible contains the full path on sender's file system and may be encoded as well; e.g.<br>
-     * <code>l=C3=B6l=C3=BCl=C3=96=C3=96=C3=96.txt</code> or <code>C:\MyFolderOnDisk\myfile.dat</code>
-     * <p>
-     * To ensure to deal with the expected file name call {@link #getPreparedFileName()}.
-     *
-     * @see #getPreparedFileName()
-     * @return The file name.
-     */
-    String getFileName();
-
-    /**
-     * Gets the prepared file name; meaning prepending path and encoding information omitted.
-     *
-     * @return The prepared file name
-     */
-    String getPreparedFileName();
 
     /**
      * Sets the file name as provided through upload form.

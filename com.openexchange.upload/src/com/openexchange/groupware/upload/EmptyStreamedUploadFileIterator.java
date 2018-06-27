@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,81 +47,41 @@
  *
  */
 
-package com.openexchange.filestore.impl;
+package com.openexchange.groupware.upload;
 
-import java.io.FilterInputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.util.NoSuchElementException;
+import com.openexchange.exception.OXException;
+import com.openexchange.groupware.upload.StreamedUploadFile;
+import com.openexchange.groupware.upload.StreamedUploadFileIterator;
 
 /**
- * {@link LimitedInputStream}
+ * The empty streamed upload file iterator.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since v7.10.0
+ * @since v7.10.1
  */
-public class LimitedInputStream extends FilterInputStream {
+public class EmptyStreamedUploadFileIterator implements StreamedUploadFileIterator {
+
+    private static final EmptyStreamedUploadFileIterator INSTANCE = new EmptyStreamedUploadFileIterator();
 
     /**
-     * The maximum size of an item, in bytes.
-     */
-    private final long sizeMax;
-
-    /**
-     * The current number of bytes.
-     */
-    private long count;
-
-    /**
-     * Creates a new instance.
+     * Gets the instance
      *
-     * @param inputStream The input stream, which shall be limited.
-     * @param pSizeMax The limit; no more than this number of bytes shall be returned by the source stream.
+     * @return The instance
      */
-    public LimitedInputStream(InputStream inputStream, long pSizeMax) {
-        super(inputStream);
-        sizeMax = pSizeMax;
+    public static EmptyStreamedUploadFileIterator getInstance() {
+        return INSTANCE;
     }
 
-    /**
-     * Called to indicate, that the input streams limit has been exceeded.
-     *
-     * @param pSizeMax The input streams limit, in bytes.
-     * @param pCount The actual number of bytes.
-     * @throws IOException If the called method is expected to raise an I/O error
-     */
-    protected void raiseError(long pSizeMax, long pCount) throws IOException {
-        throw new StorageFullIOException(pCount, pSizeMax);
-    }
+    // -----------------------------------------------------------------------------------------------------------------
 
-    /**
-     * Called to check, whether the input stream's limit is reached.
-     *
-     * @throws IOException If the given limit is exceeded
-     */
-    private void checkLimit() throws IOException {
-        if (count > sizeMax) {
-            raiseError(sizeMax, count);
-        }
+    @Override
+    public StreamedUploadFile next() throws OXException {
+        throw new NoSuchElementException();
     }
 
     @Override
-    public int read() throws IOException {
-        int res = super.read();
-        if (res != -1) {
-            count++;
-            checkLimit();
-        }
-        return res;
+    public boolean hasNext() {
+        return false;
     }
-
-    @Override
-    public int read(byte[] b, int off, int len) throws IOException {
-        int res = super.read(b, off, len);
-        if (res > 0) {
-            count += res;
-            checkLimit();
-        }
-        return res;
-    }
-
 }

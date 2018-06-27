@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,81 +47,58 @@
  *
  */
 
-package com.openexchange.filestore.impl;
+package com.openexchange.groupware.upload;
 
-import java.io.FilterInputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.util.Iterator;
 
 /**
- * {@link LimitedInputStream}
+ * {@link StreamedUpload} - A streamed upload.
+ * <p>
+ * Requires that a multipart/form-data POST request first provides the named form-data items then followed by uploaded files.<br>
+ * Example:
+ * <pre>
+ * ------SomeBoundary
+ * Content-Disposition: form-data; name="json"
+ *
+ * {"folder_id":"1234","description":"Some descriptive text"}
+ * ------SomeBoundary
+ * Content-Disposition: form-data; name="file"; filename="image.png"
+ * Content-Type: image/png
+ *
+ * [file-data]
+ * ------SomeBoundary--
+ * </pre>
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since v7.10.0
+ * @since v7.10.1
  */
-public class LimitedInputStream extends FilterInputStream {
+public interface StreamedUpload {
 
     /**
-     * The maximum size of an item, in bytes.
-     */
-    private final long sizeMax;
-
-    /**
-     * The current number of bytes.
-     */
-    private long count;
-
-    /**
-     * Creates a new instance.
+     * Gets the form field whose name equals specified field name.
      *
-     * @param inputStream The input stream, which shall be limited.
-     * @param pSizeMax The limit; no more than this number of bytes shall be returned by the source stream.
+     * @param fieldName The field name.
+     * @return The value of associated form field or <code>null</code>.
      */
-    public LimitedInputStream(InputStream inputStream, long pSizeMax) {
-        super(inputStream);
-        sizeMax = pSizeMax;
-    }
+    String getFormField(String fieldName);
 
     /**
-     * Called to indicate, that the input streams limit has been exceeded.
+     * Gets an iterator for form fields.
      *
-     * @param pSizeMax The input streams limit, in bytes.
-     * @param pCount The actual number of bytes.
-     * @throws IOException If the called method is expected to raise an I/O error
+     * @return An iterator for form fields.
      */
-    protected void raiseError(long pSizeMax, long pCount) throws IOException {
-        throw new StorageFullIOException(pCount, pSizeMax);
-    }
+    Iterator<String> getFormFieldNames();
 
     /**
-     * Called to check, whether the input stream's limit is reached.
+     * Gets an iterator for upload files.
+     * <p>
+     * <div style="margin-left: 0.1in; margin-right: 0.5in; margin-bottom: 0.1in; background-color:#FFDDDD;">
+     * <b>Note</b>: Each retrieved <code>StreamedUploadFile</code> is supposed to be handled directly.<br>
+     * Continuing to the (possibly) next <code>StreamedUploadFile</code> instance renders the previously obtained one useless.
+     * </div>
      *
-     * @throws IOException If the given limit is exceeded
+     * @return An iterator for form fields.
      */
-    private void checkLimit() throws IOException {
-        if (count > sizeMax) {
-            raiseError(sizeMax, count);
-        }
-    }
-
-    @Override
-    public int read() throws IOException {
-        int res = super.read();
-        if (res != -1) {
-            count++;
-            checkLimit();
-        }
-        return res;
-    }
-
-    @Override
-    public int read(byte[] b, int off, int len) throws IOException {
-        int res = super.read(b, off, len);
-        if (res > 0) {
-            count += res;
-            checkLimit();
-        }
-        return res;
-    }
+    StreamedUploadFileIterator getUploadFiles();
 
 }

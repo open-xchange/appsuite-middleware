@@ -47,81 +47,54 @@
  *
  */
 
-package com.openexchange.filestore.impl;
-
-import java.io.FilterInputStream;
-import java.io.IOException;
-import java.io.InputStream;
+package com.openexchange.groupware.upload;
 
 /**
- * {@link LimitedInputStream}
+ * {@link BasicUploadFile} - The basic interface for an uploaded file.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since v7.10.0
  */
-public class LimitedInputStream extends FilterInputStream {
+public interface BasicUploadFile {
 
     /**
-     * The maximum size of an item, in bytes.
-     */
-    private final long sizeMax;
-
-    /**
-     * The current number of bytes.
-     */
-    private long count;
-
-    /**
-     * Creates a new instance.
+     * Gets the file's field name in multipart upload.
      *
-     * @param inputStream The input stream, which shall be limited.
-     * @param pSizeMax The limit; no more than this number of bytes shall be returned by the source stream.
+     * @return The file's field name in multipart upload.
      */
-    public LimitedInputStream(InputStream inputStream, long pSizeMax) {
-        super(inputStream);
-        sizeMax = pSizeMax;
-    }
+    String getFieldName();
 
     /**
-     * Called to indicate, that the input streams limit has been exceeded.
+     * Gets the file's content type.
      *
-     * @param pSizeMax The input streams limit, in bytes.
-     * @param pCount The actual number of bytes.
-     * @throws IOException If the called method is expected to raise an I/O error
+     * @return The file's content type.
      */
-    protected void raiseError(long pSizeMax, long pCount) throws IOException {
-        throw new StorageFullIOException(pCount, pSizeMax);
-    }
+    String getContentType();
 
     /**
-     * Called to check, whether the input stream's limit is reached.
+     * Gets the value of the optional <code>"Content-Id"</code> header.
      *
-     * @throws IOException If the given limit is exceeded
+     * @return The value of the <code>"Content-Id"</code> header or <code>null</code>
      */
-    private void checkLimit() throws IOException {
-        if (count > sizeMax) {
-            raiseError(sizeMax, count);
-        }
-    }
+    String getContentId();
 
-    @Override
-    public int read() throws IOException {
-        int res = super.read();
-        if (res != -1) {
-            count++;
-            checkLimit();
-        }
-        return res;
-    }
+    /**
+     * Gets the file name as given through upload form.
+     * <p>
+     * The file name possible contains the full path on sender's file system and may be encoded as well; e.g.<br>
+     * <code>l=C3=B6l=C3=BCl=C3=96=C3=96=C3=96.txt</code> or <code>C:\MyFolderOnDisk\myfile.dat</code>
+     * <p>
+     * To ensure to deal with the expected file name call {@link #getPreparedFileName()}.
+     *
+     * @see #getPreparedFileName()
+     * @return The file name.
+     */
+    String getFileName();
 
-    @Override
-    public int read(byte[] b, int off, int len) throws IOException {
-        int res = super.read(b, off, len);
-        if (res > 0) {
-            count += res;
-            checkLimit();
-        }
-        return res;
-    }
+    /**
+     * Gets the prepared file name; meaning prepending path and encoding information omitted.
+     *
+     * @return The prepared file name
+     */
+    String getPreparedFileName();
 
 }
