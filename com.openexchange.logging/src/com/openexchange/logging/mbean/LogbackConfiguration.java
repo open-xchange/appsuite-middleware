@@ -86,6 +86,7 @@ import ch.qos.logback.core.spi.FilterReply;
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @deprecated To be removed with 7.10.1. Use {@link LogbackConfigurationRMIServiceImpl} instead.
  */
 public class LogbackConfiguration extends StandardMBean implements LogbackConfigurationMBean {
 

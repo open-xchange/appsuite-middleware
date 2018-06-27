@@ -52,11 +52,13 @@ package com.openexchange.logging.mbean;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import com.openexchange.logging.rmi.LogbackRemoteResponse;
 
 /**
  * {@link LogbackMBeanResponse}
  * 
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @deprecated To be removed with 7.10.1. Use {@link LogbackRemoteResponse} instead.
  */
 public class LogbackMBeanResponse implements Serializable {
 
@@ -90,15 +92,15 @@ public class LogbackMBeanResponse implements Serializable {
      */
     public void addMessage(String message, MessageType type) {
         switch (type) {
-        case ERROR:
-            errors.add(message);
-            break;
-        case WARNING:
-            warnings.add(message);
-            break;
-        case INFO:
-            infos.add(message);
-            break;
+            case ERROR:
+                errors.add(message);
+                break;
+            case WARNING:
+                warnings.add(message);
+                break;
+            case INFO:
+                infos.add(message);
+                break;
         }
     }
 
@@ -110,14 +112,14 @@ public class LogbackMBeanResponse implements Serializable {
      */
     public List<String> getMessages(MessageType type) {
         switch (type) {
-        case ERROR:
-            return errors;
-        case WARNING:
-            return warnings;
-        case INFO:
-            return infos;
-        default:
-            return null;
+            case ERROR:
+                return errors;
+            case WARNING:
+                return warnings;
+            case INFO:
+                return infos;
+            default:
+                return null;
         }
     }
 }
