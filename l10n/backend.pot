@@ -986,7 +986,7 @@ msgstr ""
 #. * The event summary displayed for the birthday of a contact, with the first parameter being replaced by the contact's display name.
 #. * <code>🎂</code> is the <i>birthday cake</i> character (<code>U+1F382</code>).
 #.
-#: com.openexchange.chronos.provider.birthdays/src/com/openexchange/chronos/provider/birthdays/BirthdaysCalendarStrings.java:81
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.provider.birthdays/src/com/openexchange/chronos/provider/birthdays/BirthdaysCalendarStrings.java:81
 msgid "🎂 %1$s"
 msgstr ""
 
@@ -1003,7 +1003,7 @@ msgstr ""
 #. * name, and the second one with the contact's age. <code>🎂</code> is the <i>birthday cake</i> character
 #. * (<code>U+1F382</code>).
 #.
-#: com.openexchange.chronos.provider.birthdays/src/com/openexchange/chronos/provider/birthdays/BirthdaysCalendarStrings.java:94
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.provider.birthdays/src/com/openexchange/chronos/provider/birthdays/BirthdaysCalendarStrings.java:94
 msgid "🎂 %1$s (%2$d. birthday)"
 msgstr ""
 
@@ -3149,15 +3149,15 @@ msgstr ""
 msgid "Range"
 msgstr ""
 
-#: com.openexchange.find/src/com/openexchange/find/calendar/CalendarStrings.java:92
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/calendar/CalendarStrings.java:92
 msgid "⁺∕₋ 1 month"
 msgstr ""
 
-#: com.openexchange.find/src/com/openexchange/find/calendar/CalendarStrings.java:94
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/calendar/CalendarStrings.java:94
 msgid "⁺∕₋ 3 months"
 msgstr ""
 
-#: com.openexchange.find/src/com/openexchange/find/calendar/CalendarStrings.java:96
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/calendar/CalendarStrings.java:96
 msgid "⁺∕₋ 1 year"
 msgstr ""
 

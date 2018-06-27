@@ -247,8 +247,8 @@ public class GrizzlyConfig {
                         }
 
                         {
-                            tmp = configService.getProperty("com.openexchange.http.grizzly.accesslog.timezone", "UTC").trim();
-                            TimeZone timeZone = TimeZone.getTimeZone(tmp);
+                            tmp = configService.getProperty("com.openexchange.http.grizzly.accesslog.timezone", "").trim();
+                            TimeZone timeZone = Strings.isEmpty(tmp) ? TimeZone.getDefault() : TimeZone.getTimeZone(tmp);
                             accessLogConfigBuilder.withTimeZone(timeZone);
                         }
 

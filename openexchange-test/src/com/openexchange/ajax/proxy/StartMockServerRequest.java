@@ -67,7 +67,7 @@ import com.openexchange.ajax.framework.Params;
  */
 public class StartMockServerRequest implements AJAXRequest<StartMockServerResponse> {
 
-    private boolean failOnError = true;
+    private boolean failOnError = false;
 
     public void setFailOnError(boolean failOnError) {
         this.failOnError = failOnError;

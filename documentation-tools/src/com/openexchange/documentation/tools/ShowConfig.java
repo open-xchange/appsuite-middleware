@@ -110,7 +110,7 @@ public class ShowConfig {
         try {
             CommandLine parse = parser.parse(options, args);
             if(parse.hasOption(HELP_OPTION)) {
-                printUsage(1);
+                printUsage(0);
             }
 
             File yamlFolder = new File(DEFAULT_FOLDER);
