@@ -133,7 +133,7 @@ public class RestrictedAttendeePermissionsTest extends AbstractAttendeeTest {
 
         expectedEventData = eventManager.getEvent(folderId, expectedEventId);
         assertNotNull(expectedEventData);
-        assertEquals(1, expectedEventData.getAttendees().size());
+        assertEquals("Wrong attendee size.", 1, expectedEventData.getAttendees().size());
     }
 
     @Test
