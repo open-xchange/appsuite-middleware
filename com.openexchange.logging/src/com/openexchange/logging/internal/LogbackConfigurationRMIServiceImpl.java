@@ -458,10 +458,10 @@ public class LogbackConfigurationRMIServiceImpl implements LogbackConfigurationR
             sb.append(appender.getClass().getSimpleName()).append(": ").append(appender.getName());
             if (appender instanceof AsyncAppender) {
                 AsyncAppender asyncAppender = (AsyncAppender) appender;
-                sb.append(" [capacity=").append(asyncAppender.getQueueSize()).append(",size=").append(asyncAppender.getNumberOfElementsInQueue()).append(']');
+                sb.append(" [capacity=").append(asyncAppender.getQueueSize()).append(", size=").append(asyncAppender.getNumberOfElementsInQueue()).append(']');
             } else if (appender instanceof LogstashSocketAppender) {
                 LogstashSocketAppender socketAppender = (LogstashSocketAppender) appender;
-                sb.append(" [capacity=").append(socketAppender.getQueueSize()).append(",size=").append(socketAppender.getNumberOfElementsInQueue()).append(']');
+                sb.append(" [capacity=").append(socketAppender.getQueueSize()).append(", size=").append(socketAppender.getNumberOfElementsInQueue()).append(']');
             }
 
             sb.append(lineSeparator);
@@ -496,7 +496,7 @@ public class LogbackConfigurationRMIServiceImpl implements LogbackConfigurationR
         } else {
             builder.append("Updated ");
         }
-        builder.append("filter with key '").append(key).append("'and value '").append(value).append("' and policy 'ACCEPT'");
+        builder.append("filter with key '").append(key).append("' and value '").append(value).append("' and policy 'ACCEPT'");
         response.addMessage(builder.toString(), MessageType.INFO);
 
         addLoggersToFilter(getLoggerWhitelist(), loggers, filter, response);
