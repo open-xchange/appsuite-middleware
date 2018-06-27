@@ -53,7 +53,6 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import com.openexchange.logging.mbean.LogbackMBeanResponse;
 
 /**
  * {@link LogbackRemoteResponse} - A response object containing information about
@@ -75,7 +74,7 @@ public class LogbackRemoteResponse implements Serializable {
     };
 
     /**
-     * Initializes a new {@link LogbackMBeanResponse}.
+     * Initialises a new {@link LogbackRemoteResponse}.
      */
     public LogbackRemoteResponse() {
         super();
