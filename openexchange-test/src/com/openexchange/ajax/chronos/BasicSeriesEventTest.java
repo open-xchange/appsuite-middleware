@@ -227,7 +227,7 @@ public class BasicSeriesEventTest extends AbstractChronosTest {
         updatedData.setId(occurence.getId());
         updatedData.setFolder(folderId);
 
-        eventManager.updateOccurenceEvent(updatedData, occurence.getRecurrenceId());
+        eventManager.updateOccurenceEvent(updatedData, occurence.getRecurrenceId(), true);
 
         UpdatesResult updates = eventManager.getUpdates(from, false, folderId);
 

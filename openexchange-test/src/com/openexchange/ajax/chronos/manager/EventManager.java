@@ -474,7 +474,7 @@ public class EventManager extends AbstractManager {
      * @throws ChronosApiException if a Chronos API error is occurred
      */
     public EventData updateEvent(EventData eventData) throws ApiException, ChronosApiException {
-        return updateEvent(eventData, false, true);
+        return updateEvent(eventData, false, false);
     }
 
     /**
@@ -497,12 +497,13 @@ public class EventManager extends AbstractManager {
      *
      * @param eventData The data of the event
      * @param the recurrence identifier
+     * @param ignoreConflicts Whether to ignore conflicts or not
      * @return The updated event
      * @throws ApiException if an API error is occurred
      * @throws ChronosApiException if a Chronos API error is occurred
      */
-    public EventData updateOccurenceEvent(EventData eventData, String recurrenceId) throws ApiException, ChronosApiException {
-        return updateOccurenceEvent(eventData, recurrenceId, false);
+    public EventData updateOccurenceEvent(EventData eventData, String recurrenceId, boolean ignoreConflicts) throws ApiException, ChronosApiException {
+        return updateOccurenceEvent(eventData, recurrenceId, false, ignoreConflicts);
     }
 
     /**
@@ -511,12 +512,13 @@ public class EventManager extends AbstractManager {
      * @param eventData The data of the event
      * @param the recurrence identifier
      * @param expectException Whether an exception is expected or not
+     * @param ignoreConflicts Whether to ignore conflicts or not
      * @return The updated event
      * @throws ApiException if an API error is occurred
      * @throws ChronosApiException if a Chronos API error is occurred
      */
-    public EventData updateOccurenceEvent(EventData eventData, String recurrenceId, boolean expectException) throws ApiException, ChronosApiException {
-        ChronosCalendarResultResponse updateResponse = userApi.getChronosApi().updateEvent(userApi.getSession(), getFolder(eventData), eventData.getId(), eventData, this.lastTimeStamp, recurrenceId, null, true, false, false, null, null, EXPAND_SERIES);
+    public EventData updateOccurenceEvent(EventData eventData, String recurrenceId, boolean expectException, boolean ignoreConflicts) throws ApiException, ChronosApiException {
+        ChronosCalendarResultResponse updateResponse = userApi.getChronosApi().updateEvent(userApi.getSession(), getFolder(eventData), eventData.getId(), eventData, this.lastTimeStamp, recurrenceId, null, !ignoreConflicts, false, false, null, null, EXPAND_SERIES);
         return handleUpdate(updateResponse, expectException);
     }
 
