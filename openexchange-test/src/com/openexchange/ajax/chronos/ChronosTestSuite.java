@@ -52,7 +52,6 @@ package com.openexchange.ajax.chronos;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 import com.openexchange.ajax.chronos.bugs.ChronosBugsTestSuite;
-import com.openexchange.ajax.chronos.schedjoules.BasicSchedJoulesAPITest;
 import com.openexchange.ajax.chronos.schedjoules.SchedJoulesTestSuite;
 import com.openexchange.test.concurrent.ParallelSuite;
 
@@ -69,7 +68,6 @@ import com.openexchange.test.concurrent.ParallelSuite;
     BasicAlarmTriggerTest.class,
     //BasicAvailabilityTest.class,
     BasicFreeBusyTest.class,
-    BasicSchedJoulesAPITest.class,
     SchedJoulesTestSuite.class,
     BasicSelfProtectionTest.class,
     BasicSeriesEventTest.class,
