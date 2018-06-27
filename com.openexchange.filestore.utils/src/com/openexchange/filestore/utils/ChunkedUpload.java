@@ -132,7 +132,9 @@ public abstract class ChunkedUpload<I extends InputStream, C extends UploadChunk
                 fileHolder.write(buffer, 0, read);
                 if (fileHolder.getCount() >= minChunkSize) {
                     // Chunk size reached
-                    return createChunkWith(fileHolder, false);
+                    C chunk = createChunkWith(fileHolder, false);
+                    fileHolder = null;
+                    return chunk;
                 }
             }
             /*
