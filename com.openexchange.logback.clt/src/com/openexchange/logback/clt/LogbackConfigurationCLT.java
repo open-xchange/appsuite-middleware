@@ -510,7 +510,7 @@ public class LogbackConfigurationCLT extends AbstractRmiCLI<Void> {
                         builder.append(s).append(",");
                     }
                 }
-                //params.add(builder.subSequence(0, builder.length() - 1).toString());
+                logbackConfigService.overrideExceptionCategories(builder.subSequence(0, builder.length() - 1).toString());
             }
         };
 
