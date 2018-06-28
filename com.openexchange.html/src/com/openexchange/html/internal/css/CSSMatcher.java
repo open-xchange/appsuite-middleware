@@ -801,6 +801,13 @@ public final class CSSMatcher {
                 modified |= checkCSSElements(cssElemsBuffer, styleMap, removeIfAbsent);
                 final String prefix = cssElemsBuffer.toString();
                 cssElemsBuffer.setLength(0);
+                
+                // Check matched part, in case the font attribute is messing around
+                cssElemsBuffer.append(css.substring(m.start(), m.end()));
+                modified |= checkCSSElements(cssElemsBuffer, styleMap, removeIfAbsent);
+                final String match = cssElemsBuffer.toString();
+                cssElemsBuffer.setLength(0);
+                
                 // Check block part
                 {
                     int i = m.end();
@@ -810,10 +817,13 @@ public final class CSSMatcher {
                     lastPos = i + 1;
                 }
                 modified |= checkCSSElements(cssElemsBuffer, styleMap, removeIfAbsent);
-                cssElemsBuffer.insert(0, m.group()).append('}').append('\n'); // Surround with block definition
-                // Add to main builder
-                cssBuilder.append(prefix);
-                cssBuilder.append(cssElemsBuffer);
+                
+                if (!Strings.isEmpty(match)) {
+                    cssElemsBuffer.insert(0, match).append('}').append('\n');
+                    // Add to main builder
+                    cssBuilder.append(prefix);
+                    cssBuilder.append(cssElemsBuffer);
+                }
                 cssElemsBuffer.setLength(0);
             } while (!thread.isInterrupted() && (lastPos < cssLength) && m.find(lastPos));
             if (lastPos < cssLength) {

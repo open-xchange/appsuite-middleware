@@ -9,7 +9,7 @@ BuildRequires: open-xchange-osgi
 BuildRequires: open-xchange-xerces
 BuildRequires: java-devel >= 1.6.0
 Version:       @OXVERSION@
-%define        ox_release 38
+%define        ox_release 39
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -1275,6 +1275,9 @@ ox_comment html.tag.input add /opt/open-xchange/etc/whitelist.properties
 # SoftwareChange_Request-3934
 ox_comment html.style.list-style-image add /opt/open-xchange/etc/whitelist.properties
 
+# SoftwareChange_Request-175
+ox_add_property com.openexchange.server.migrationRedirectURL "" /opt/open-xchange/etc/server.properties
+
 PROTECT="configdb.properties mail.properties management.properties oauth-provider.properties secret.properties secrets sessiond.properties tokenlogin-secrets"
 for FILE in $PROTECT
 do
@@ -1315,6 +1318,8 @@ exit 0
 %doc com.openexchange.server/ChangeLog
 
 %changelog
+* Thu Jun 21 2018 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2018-06-25 (4789)
 * Fri May 11 2018 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2018-05-04 (4695)
 * Fri Apr 20 2018 Marcus Klein <marcus.klein@open-xchange.com>

@@ -49,18 +49,11 @@
 
 package com.openexchange.http.testservlet;
 
-import static com.openexchange.http.testservlet.SaneScriptTags.saneScriptTags;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.UnsupportedEncodingException;
-import java.util.Enumeration;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import com.openexchange.configuration.ServerConfig;
-import com.openexchange.configuration.ServerConfig.Property;
-import com.openexchange.java.Streams;
 
 /**
  * {@link TestServlet} - Default TestServlet for basic server tests.
@@ -76,13 +69,6 @@ public class TestServlet extends HttpServlet {
      */
     public TestServlet() {
         super();
-    }
-
-    @Override
-    protected void service(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
-        // create a new HttpSession if it's missing
-        req.getSession(true);
-        super.service(req, resp);
     }
 
     /**
@@ -111,43 +97,7 @@ public class TestServlet extends HttpServlet {
         page.append("<body>\n");
         page.append("<h1>TestServlet's doGet Page</h1><hr/>\n");
         page.append("<p>This is a <i>tiny</i> paragraph with some text inside!</p>\n");
-        page.append("</p><p><b>Headers</b><br>");
-        final Enumeration<?> paramEnum = req.getHeaderNames();
-        while (paramEnum.hasMoreElements()) {
-            final String headerName = (String) paramEnum.nextElement();
-            page.append(headerName);
-            page.append(": ");
-            final Enumeration<?> valueEnum = req.getHeaders(headerName);
-            while (valueEnum.hasMoreElements()) {
-                page.append(saneScriptTags(valueEnum.nextElement().toString()));
-                page.append(valueEnum.hasMoreElements() ? ", " : "");
-            }
-            page.append("<br>");
-        }
-        page.append("</p><p>The content: ").append(saneScriptTags(this.getBody(req)));
-        page.append("</p></body>\n</html>");
-
-        /*boolean found = false;
-        {
-            Cookie[] cookies = req.getCookies();
-            if (null != cookies) {
-                for (int i = cookies.length; !found && i-- > 0;) {
-                    Cookie cookie = cookies[i];
-                    if ("check-me".equals(cookie.getName())) {
-                        found = true;
-                        System.out.println("Cookie found!");
-                    }
-                }
-            }
-        }
-
-        if (!found) {
-            Cookie cookie = new Cookie("check-me", "foobariscool");
-            cookie.setPath("/");
-            cookie.setMaxAge(10);
-            resp.addCookie(cookie);
-            System.out.println("Cookie added!");
-        }*/
+        page.append("</body>\n</html>");
 
         resp.setContentType("text/html; charset=UTF-8");
         final byte[] output = page.toString().getBytes(com.openexchange.java.Charsets.UTF_8);
@@ -186,60 +136,13 @@ public class TestServlet extends HttpServlet {
         page.append("<html>\n");
         page.append("<head><title>TestServlet's doGet Page</title></head>\n");
         page.append("<body>\n");
-        page.append("<h1>TestServlet's doGet Page</h1><hr/>\n");
+        page.append("<h1>TestServlet's doPut Page</h1><hr/>\n");
         page.append("<p>This is a tiny paragraph with some text inside!</p>\n");
-        final Enumeration<?> paramEnum = req.getHeaderNames();
-        while (paramEnum.hasMoreElements()) {
-            final String headerName = (String) paramEnum.nextElement();
-            page.append(headerName);
-            page.append(": ");
-            final Enumeration<?> valueEnum = req.getHeaders(headerName);
-            while (valueEnum.hasMoreElements()) {
-                page.append(saneScriptTags(valueEnum.nextElement().toString()));
-                page.append(valueEnum.hasMoreElements() ? ", " : "");
-            }
-            page.append("<br>");
-        }
-        page.append("</p><p>The content: ").append(saneScriptTags(this.getBody(req)));
-        page.append("</p></body>\n</html>");
+        page.append("</body>\n</html>");
         resp.setContentType("text/html; charset=UTF-8");
         final byte[] output = page.toString().getBytes(com.openexchange.java.Charsets.UTF_8);
         resp.setContentLength(output.length);
         resp.getOutputStream().write(output);
     }
 
-    /**
-     * Returns the complete body as a string. Be carefull when getting big request bodies.
-     *
-     * @param req http servlet request.
-     * @return a string with the complete body.
-     * @throws IOException if an error occurs while reading the body.
-     */
-    public String getBody(final HttpServletRequest req) throws IOException {
-        InputStreamReader isr = null;
-        try {
-            int count = 0;
-            final char[] c = new char[8192];
-            String charset = null == req.getCharacterEncoding() ? ServerConfig.getProperty(Property.DefaultEncoding) : req.getCharacterEncoding();
-            if (null == charset) {
-                charset = "UTF-8";
-            }
-            isr = new InputStreamReader(req.getInputStream(), charset);
-            if ((count = isr.read(c)) > 0) {
-                final StringBuilder sb = new StringBuilder(16384);
-                do {
-                    sb.append(c, 0, count);
-                } while ((count = isr.read(c)) > 0);
-                return sb.toString();
-            }
-            return "";
-        } catch (final UnsupportedEncodingException e) {
-            /*
-             * Should never occur
-             */
-            return "";
-        } finally {
-            Streams.close(isr);
-        }
-    }
 }

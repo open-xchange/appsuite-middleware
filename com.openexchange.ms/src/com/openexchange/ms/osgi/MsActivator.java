@@ -51,7 +51,6 @@ package com.openexchange.ms.osgi;
 
 import java.util.Dictionary;
 import java.util.Hashtable;
-import java.util.concurrent.atomic.AtomicReference;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.event.EventConstants;
@@ -60,6 +59,8 @@ import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.HazelcastInstanceNotActiveException;
+import com.openexchange.caching.CacheService;
+import com.openexchange.database.DatabaseService;
 import com.openexchange.hazelcast.configuration.HazelcastConfigurationService;
 import com.openexchange.hazelcast.serialization.CustomPortableFactory;
 import com.openexchange.ms.MsEventConstants;
@@ -68,6 +69,7 @@ import com.openexchange.ms.PortableMsService;
 import com.openexchange.ms.internal.HzMsService;
 import com.openexchange.ms.internal.Services;
 import com.openexchange.ms.internal.Unregisterer;
+import com.openexchange.ms.internal.portable.PortableContextInvalidationCallableFactory;
 import com.openexchange.ms.internal.portable.PortableHzMsService;
 import com.openexchange.ms.internal.portable.PortableMessageFactory;
 import com.openexchange.osgi.HousekeepingActivator;
@@ -105,47 +107,47 @@ public class MsActivator extends HousekeepingActivator implements Unregisterer {
              * create & register portable message factory
              */
             registerService(CustomPortableFactory.class, new PortableMessageFactory());
+            registerService(CustomPortableFactory.class, new PortableContextInvalidationCallableFactory());
             /*
              * start ms services based on hazelcast instance's lifecycle
              */
             final BundleContext context = this.context;
-            final AtomicReference<MsService> msServiceRef = new AtomicReference<MsService>();
-            final AtomicReference<PortableMsService> portableMsServiceRef = new AtomicReference<PortableMsService>();
             ServiceTracker<HazelcastInstance, HazelcastInstance> hzTracker = new ServiceTracker<HazelcastInstance, HazelcastInstance>(context, HazelcastInstance.class, new ServiceTrackerCustomizer<HazelcastInstance, HazelcastInstance>() {
 
+                private HzMsService msService;
+
                 @Override
-                public HazelcastInstance addingService(final ServiceReference<HazelcastInstance> reference) {
-                    if (msServiceRef.get() != null) {
+                public synchronized HazelcastInstance addingService(final ServiceReference<HazelcastInstance> reference) {
+                    if (msService != null) {
                         return null;
                     }
+
                     // Get HazelcastInstance from service reference
-                    final HazelcastInstance hz = context.getService(reference);
-                    final HzMsService msService = new HzMsService(hz);
-                    if (msServiceRef.compareAndSet(null, msService)) {
-                        registerService(MsService.class, msService);
-                        PortableMsService portableMsService = new PortableHzMsService(hz);
-                        portableMsServiceRef.set(portableMsService);
-                        registerService(PortableMsService.class, portableMsService);
-                        registerEventHandler(msService);
-                        return hz;
-                    }
-                    context.ungetService(reference);
-                    return null;
+                    HazelcastInstance hazelcastInstance = context.getService(reference);
+                    HzMsService msService = new HzMsService(hazelcastInstance);
+                    this.msService = msService;
+                    registerService(MsService.class, msService);
+
+                    PortableMsService portableMsService = new PortableHzMsService(hazelcastInstance);
+                    registerService(PortableMsService.class, portableMsService);
+
+                    registerEventHandler(msService);
+                    return hazelcastInstance;
                 }
 
                 @Override
-                public void modifiedService(final ServiceReference<HazelcastInstance> reference, final HazelcastInstance service) {
+                public void modifiedService(final ServiceReference<HazelcastInstance> reference, final HazelcastInstance hazelcastInstance) {
                     // Ignore
                 }
 
                 @Override
-                public void removedService(final ServiceReference<HazelcastInstance> reference, final HazelcastInstance service) {
-                    if (null != service) {
-                        final MsService msService = msServiceRef.get();
+                public synchronized void removedService(final ServiceReference<HazelcastInstance> reference, final HazelcastInstance hazelcastInstance) {
+                    if (null != hazelcastInstance) {
+                        HzMsService msService = this.msService;
                         if (null != msService) {
                             unregisterServices();
-                            msServiceRef.set(null);
-                            portableMsServiceRef.set(null);
+                            msService.shutDown();
+                            this.msService = null;
                         }
                         context.ungetService(reference);
                     }
@@ -153,6 +155,8 @@ public class MsActivator extends HousekeepingActivator implements Unregisterer {
             });
             hzTracker.open();
             this.hzTracker = hzTracker;
+            trackService(DatabaseService.class);
+            trackService(CacheService.class);
 
             // Open other
             openTrackers();
