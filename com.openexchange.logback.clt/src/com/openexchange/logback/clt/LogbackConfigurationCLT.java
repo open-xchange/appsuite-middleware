@@ -481,30 +481,30 @@ public class LogbackConfigurationCLT extends AbstractRmiCLI<Void> {
             void executeWith(CommandLine commandLine, LogbackConfigurationRMIService logbackConfigService) throws RemoteException {
                 System.out.println(logbackConfigService.getRootAppenderStats());
             }
-        }, 
-        OVERRIDE_EXCEPTION_CATEGORIES{
+        },
+        OVERRIDE_EXCEPTION_CATEGORIES {
 
             @Override
             void executeWith(CommandLine commandLine, LogbackConfigurationRMIService logbackConfigService) throws RemoteException {
                 String[] v = commandLine.getOptionValues("oec");
                 String[] oeca = commandLine.getArgs();
                 Object[] oneArrayToRuleThemAll = ArrayUtils.addAll(v, oeca);
-                if (oneArrayToRuleThemAll.length > 0) {
-                    StringBuilder builder = new StringBuilder();
-                    for (Object o : oneArrayToRuleThemAll) {
-                        if (o instanceof String) {
-                            String s = ((String) o).toUpperCase();
-                            if (isValidCategory(s)) {
-                                builder.append(s).append(",");
-                            }
-                        } else {
-                            //printUsage(-1);
-                        }
-                    }
-                    //params.add(builder.subSequence(0, builder.length() - 1).toString());
-                } else {
+                if (oneArrayToRuleThemAll.length <= 0) {
                     //printUsage(-1);
-                }                
+                    return;
+                }
+                StringBuilder builder = new StringBuilder();
+                for (Object o : oneArrayToRuleThemAll) {
+                    if (!(o instanceof String)) {
+                        //printUsage(-1);
+                        return;
+                    }
+                    String s = ((String) o).toUpperCase();
+                    if (isValidCategory(s)) {
+                        builder.append(s).append(",");
+                    }
+                }
+                //params.add(builder.subSequence(0, builder.length() - 1).toString());
             }
         };
 
