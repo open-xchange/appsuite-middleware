@@ -54,6 +54,13 @@ import java.util.Iterator;
 /**
  * {@link StreamedUpload} - A streamed upload.
  * <p>
+ * <div style="margin-left: 0.1in; margin-right: 0.5in; margin-bottom: 0.1in; background-color:#FFDDDD;">
+ * Please note that a streamed upload comes with various limitations as the uploaded files are supposed to be streamed-through to the
+ * destination. Therefore {@link #getUploadFiles()} may only be called once and the upload files returned by {@link StreamedUploadFileIterator}
+ * are supposed to be handled/consumed directly. Continuing to the next upload file renders the previously returned one unusable.
+ * </div>
+ * <p>
+ * <div style="margin-left: 0.1in; margin-right: 0.5in; margin-bottom: 0.1in; background-color:#FFDDDD;">
  * Requires that a multipart/form-data POST request first provides the named form-data items then followed by uploaded files.<br>
  * Example:
  * <pre>
@@ -68,6 +75,8 @@ import java.util.Iterator;
  * [file-data]
  * ------SomeBoundary--
  * </pre>
+ * </div>
+ * <p>
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.10.1
