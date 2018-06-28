@@ -114,8 +114,6 @@ public class PermissionsCascadeTest extends AbstractAJAXSession {
      * Test simple permissions cascade.
      *
      * Creates a simple folder tree, assigns permissions and asserts
-     *
-     * @throws Exception
      */
     @Test
     public void testCascadePermissionsInChildrenFolders() throws Exception {
@@ -126,8 +124,6 @@ public class PermissionsCascadeTest extends AbstractAJAXSession {
 
     /**
      * Test cascading in sibling folders
-     *
-     * @throws Exception
      */
     @Test
     public void testCasccadePermissionsInSiblingFolders() throws Exception {
@@ -137,8 +133,6 @@ public class PermissionsCascadeTest extends AbstractAJAXSession {
 
     /**
      * Assert cascaded permissions in tree, starting by root node
-     *
-     * @throws Exception
      */
     private void assertCascadePermissions() throws Exception {
         // Fetch that folder
@@ -150,7 +144,7 @@ public class PermissionsCascadeTest extends AbstractAJAXSession {
 
         // Apply permissions
         rootFolder.addPermission(Create.ocl(client2.getValues().getUserId(), false, false, OCLPermission.READ_FOLDER, OCLPermission.READ_OWN_OBJECTS, OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS));
-        rootFolder.setLastModified(timestamp);
+        rootFolder.setLastModified(new Date(timestamp.getTime() + 3600));
         getClient().execute(new UpdateRequest(EnumAPI.OUTLOOK, rootFolder).setCascadePermissions(true));
 
         // Fetch all folders of the tree and make sure that the permissions are cascaded
@@ -176,8 +170,6 @@ public class PermissionsCascadeTest extends AbstractAJAXSession {
      *
      * Apply new permissions to folder (A) and assert that the permissions are not cascaded.
      * Then apply the new permissions again and ignore the warnings. Assert that the permissions are cascaded.
-     *
-     * @throws Exception
      */
     @Test
     public void testCascadePermissionsInTreeRollbackAndThenIgnore() throws Exception {
@@ -270,7 +262,6 @@ public class PermissionsCascadeTest extends AbstractAJAXSession {
      * @param includedUsers The users that should be included in the permission bits
      * @param excludedUsers The users that should be excluded from the permission bits
      * @param client The client
-     * @throws Exception
      */
     private void assertPermissions(FolderObject folderObject, int[] includedUsers, int[] excludedUsers, AJAXClient client) throws Exception {
         final GetResponse getResponse = client.execute(new GetRequest(EnumAPI.OUTLOOK, folderObject.getObjectID()));
@@ -306,7 +297,6 @@ public class PermissionsCascadeTest extends AbstractAJAXSession {
      *
      * @param folderId The folder identifier
      * @param tree The tree
-     * @throws Exception
      */
     private void fetchAllSubfolders(int folderId, List<FolderObject> tree) throws Exception {
         ListResponse listResponse = getClient().execute(new ListRequest(EnumAPI.OUTLOOK, Integer.toString(folderId), new int[] { 1, 304, 306 }, false));
@@ -326,7 +316,6 @@ public class PermissionsCascadeTest extends AbstractAJAXSession {
      * @param folderName The folder name
      * @param parent The parent
      * @return The folder identifier
-     * @throws Exception
      */
     private FolderObject createFolder(String folderName, int parent) throws Exception {
         return createFolder(folderName, parent, getClient());
@@ -339,7 +328,6 @@ public class PermissionsCascadeTest extends AbstractAJAXSession {
      * @param parent The parent
      * @param client The client
      * @return The folder identifier
-     * @throws Exception
      */
     private FolderObject createFolder(String folderName, int parent, AJAXClient client) throws Exception {
         FolderObject folder = Create.createPrivateFolder(folderName, FolderObject.INFOSTORE, client.getValues().getUserId());
@@ -355,7 +343,6 @@ public class PermissionsCascadeTest extends AbstractAJAXSession {
      * Creates a simple folder tree
      *
      * @param rootName The name of the root node
-     * @throws Exception
      */
     private FolderObject createSimpleTree(String rootName, int levels) throws Exception {
         FolderObject rootFolder = createFolder(rootName, getClient().getValues().getPrivateInfostoreFolder());
@@ -370,7 +357,6 @@ public class PermissionsCascadeTest extends AbstractAJAXSession {
      * Creates a folder tree with folders placed randomly in the hierarchy.
      *
      * @param rootName The name of the root node
-     * @throws Exception
      */
     private FolderObject createRandomTree(String rootName, int folderCount) throws Exception {
         FolderObject rootFolder = createFolder(rootName, getClient().getValues().getPrivateInfostoreFolder());
