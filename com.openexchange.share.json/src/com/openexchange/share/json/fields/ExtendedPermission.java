@@ -145,12 +145,12 @@ public abstract class ExtendedPermission {
                 if (session.getUserId() != toAdd.getId()) {
                     Set<Integer> sharingUsers = Anonymizers.getSharingUsersFor(session.getContextId(), session.getUserId());
                     if (false == sharingUsers.contains(Integer.valueOf(toAdd.getId()))) {
-                        toAdd = Anonymizers.optAnonymize(toAdd, Module.CONTACT, session);
+                        toAdd = Anonymizers.optAnonymize(toAdd, Module.USER, session);
                     }
                 }
             } else {
                 if (session.getUserId() != toAdd.getId() && Anonymizers.isNonVisibleGuest(toAdd.getId(), session)) {
-                    toAdd = Anonymizers.optAnonymize(toAdd, Module.CONTACT, session);
+                    toAdd = Anonymizers.optAnonymize(toAdd, Module.USER, session);
                 }
             }
             addContactInfo(jsonObject, toAdd);
