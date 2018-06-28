@@ -1407,7 +1407,6 @@ public class AJAXRequestData {
         return null;
     }
 
-
     /**
      * Gets the streamed upload
      *
@@ -1536,7 +1535,7 @@ public class AJAXRequestData {
      * @return A string builder with the URL so far, ready for meddling.
      */
     public StringBuilder constructURL(final String path, final boolean withRoute) {
-        return constructURL(null, path, withRoute, null);
+        return constructURL(null, path, withRoute);
     }
 
     /**
@@ -1553,38 +1552,15 @@ public class AJAXRequestData {
      * @return A string builder with the URL so far, ready for meddling.
      */
     public StringBuilder constructURL(final String protocol, final String path, final boolean withRoute, final String query) {
-        final StringBuilder url = new StringBuilder(64 + (null == query ? 0 : query.length()));
-        // Protocol/schema
-        {
-            String prot = protocol;
-            if (prot == null) {
-                prot = isSecure() ? "https://" : "http://";
-            }
-            url.append(prot);
-            if (!prot.endsWith("://")) {
-                url.append("://");
-            }
-        }
-        // Host name
-        url.append(hostname);
-        // Path
-        if (path != null) {
-            if (!path.startsWith("/")) {
-                url.append('/');
-            }
-            url.append(path);
-        }
-        // JVM route
-        if (withRoute) {
-            url.append(";jsessionid=").append(route);
+        StringBuilder url = constructURL(protocol, path, withRoute);
+        if (Strings.isEmpty(query)) {
+            return url;
         }
         // Query string
-        if (query != null) {
-            if (!query.startsWith("?")) {
-                url.append('?');
-            }
-            url.append(query);
+        if (!query.startsWith("?")) {
+            url.append('?');
         }
+        url.append(query);
         // Return URL
         return url;
     }
@@ -1603,7 +1579,45 @@ public class AJAXRequestData {
      * @return A string builder with the URL so far, ready for meddling.
      */
     public StringBuilder constructURLWithParameters(final String protocol, final String path, final boolean withRoute, final Map<String, String> params) {
-        final StringBuilder url = new StringBuilder(128);
+        StringBuilder url = constructURL(protocol, path, withRoute);
+        if (params == null || params.isEmpty()) {
+            return url;
+        }
+        boolean first = true;
+        for (Map.Entry<String, String> entry : params.entrySet()) {
+            String key = entry.getKey();
+            if (Strings.isNotEmpty(key)) {
+                if (first) {
+                    url.append('?');
+                    first = false;
+                } else {
+                    url.append('&');
+                }
+                url.append(AJAXUtility.encodeUrl(key, true));
+                String value = entry.getValue();
+                if (Strings.isNotEmpty(value)) {
+                    url.append('=').append(AJAXUtility.encodeUrl(value, true));
+                }
+            }
+        }
+        // Return URL
+        return url;
+    }
+
+    /**
+     * Constructs a URL to this server, injecting the host name and optionally the JVM route.
+     *
+     * <pre>
+     * &lt;protocol&gt; + "://" + &lt;hostname&gt; + "/" + &lt;path&gt; + &lt;jvm-route&gt; + "?" + &lt;query-string&gt;
+     * </pre>
+     *
+     * @param protocol The protocol to use (HTTP or HTTPS). If <code>null</code>, defaults to the protocol used for this request.
+     * @param path The path on the server. If <code>null</code> no path is inserted
+     * @param withRoute Whether to include the JVM route in the server URL or not
+     * @return A string builder with the URL so far, ready for meddling.
+     */
+    private StringBuilder constructURL(String protocol, String path, boolean withRoute) {
+        StringBuilder url = new StringBuilder(128);
         // Protocol/schema
         {
             String prot = protocol;
@@ -1617,6 +1631,11 @@ public class AJAXRequestData {
         }
         // Host name
         url.append(hostname);
+        // Set the server port only if it is an SSL connection and the port is other than the
+        // standard 443 port port, or is it's other than the default non-secture one.
+        if (serverPort > 0 && ((isSecure() && serverPort != 443) || serverPort != 80)) {
+            url.append(':').append(serverPort);
+        }
         // Path
         if (path != null) {
             if (!path.startsWith("/")) {
@@ -1628,27 +1647,6 @@ public class AJAXRequestData {
         if (withRoute) {
             url.append(";jsessionid=").append(route);
         }
-        // Query string
-        if (params != null) {
-            boolean first = true;
-            for (Map.Entry<String, String> entry : params.entrySet()) {
-                String key = entry.getKey();
-                if (!Strings.isEmpty(key)) {
-                    if (first) {
-                        url.append('?');
-                        first = false;
-                    } else {
-                        url.append('&');
-                    }
-                    url.append(AJAXUtility.encodeUrl(key, true));
-                    String value = entry.getValue();
-                    if (!Strings.isEmpty(value)) {
-                        url.append('=').append(AJAXUtility.encodeUrl(value, true));
-                    }
-                }
-            }
-        }
-        // Return URL
         return url;
     }
 

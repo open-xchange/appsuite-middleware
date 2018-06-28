@@ -194,7 +194,7 @@ public class AJAXRequestDataTools {
          * Pass all parameters to AJAX request object
          */
         {
-            @SuppressWarnings("unchecked") final Set<Entry<String, String[]>> entrySet = req.getParameterMap().entrySet();
+            final Set<Entry<String, String[]>> entrySet = req.getParameterMap().entrySet();
             for (final Entry<String, String[]> entry : entrySet) {
                 retval.putParameter(entry.getKey(), entry.getValue()[0]);
             }
@@ -414,13 +414,13 @@ public class AJAXRequestDataTools {
             } else {
                 int i = Integer.parseInt(sLimit.substring(0, pos).trim());
                 start = i < 0 ? 0 : i;
-                i = Integer.parseInt(sLimit.substring(pos+1).trim());
+                i = Integer.parseInt(sLimit.substring(pos + 1).trim());
                 end = i < 0 ? 0 : i;
             }
         } catch (NumberFormatException e) {
             throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create(e, "limit", sLimit);
         }
-        return new int[] {start, end};
+        return new int[] { start, end };
     }
 
     /**
@@ -453,6 +453,7 @@ public class AJAXRequestDataTools {
             final HostnameService hostnameService = ServerServiceRegistry.getInstance().getService(HostnameService.class);
             if (null == hostnameService) {
                 request.setHostname(req.getServerName());
+                request.setServerPort(req.getServerPort());
             } else {
                 final String hn;
                 if (isGuest) {
@@ -461,6 +462,12 @@ public class AJAXRequestDataTools {
                     hn = hostnameService.getHostname(userId, contextId);
                 }
                 request.setHostname(null == hn ? req.getServerName() : hn);
+                if (null != hn) {
+                    request.setHostname(hn);
+                } else {
+                    request.setHostname(req.getServerName());
+                    request.setServerPort(req.getServerPort());
+                }
             }
         }
         request.setRemoteAddress(req.getRemoteAddr());
