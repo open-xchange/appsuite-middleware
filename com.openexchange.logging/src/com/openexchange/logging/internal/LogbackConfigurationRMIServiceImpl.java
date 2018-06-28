@@ -77,7 +77,6 @@ import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.classic.joran.JoranConfigurator;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.Appender;
-import ch.qos.logback.core.spi.FilterReply;
 
 /**
  * {@link LogbackConfigurationRMIServiceImpl} - The default implementation of the {@link LogbackConfigurationRMIService}
@@ -143,7 +142,7 @@ public class LogbackConfigurationRMIServiceImpl implements LogbackConfigurationR
      */
     @Override
     public LogbackRemoteResponse filterContext(int contextId, Map<String, Level> loggers) throws RemoteException {
-        return createExtendedMDCFilter(Name.SESSION_CONTEXT_ID.getName(), Integer.toString(contextId), loggers, FilterReply.ACCEPT);
+        return createExtendedMDCFilter(Name.SESSION_CONTEXT_ID.getName(), Integer.toString(contextId), loggers);
     }
 
     /*
@@ -187,7 +186,7 @@ public class LogbackConfigurationRMIServiceImpl implements LogbackConfigurationR
      */
     @Override
     public LogbackRemoteResponse filterSession(String sessionId, Map<String, Level> loggers) throws RemoteException {
-        return createExtendedMDCFilter(Name.SESSION_SESSION_ID.getName(), sessionId, loggers, FilterReply.ACCEPT);
+        return createExtendedMDCFilter(Name.SESSION_SESSION_ID.getName(), sessionId, loggers);
     }
 
     /*
@@ -480,9 +479,8 @@ public class LogbackConfigurationRMIServiceImpl implements LogbackConfigurationR
      * @param key The key of the filter
      * @param value The value of the filter
      * @param loggers The logger names along with their level
-     * @param onMatch The {@link FilterReply}
      */
-    private final LogbackRemoteResponse createExtendedMDCFilter(String key, String value, Map<String, Level> loggers, FilterReply onMatch) {
+    private final LogbackRemoteResponse createExtendedMDCFilter(String key, String value, Map<String, Level> loggers) {
         LogbackRemoteResponse response = new LogbackRemoteResponse();
         String sKey = createKey(key, value);
         ExtendedMDCFilter filter = (ExtendedMDCFilter) turboFilterCache.get(sKey);
