@@ -161,6 +161,12 @@ public class LogbackConfigurationCLT extends AbstractRmiCLI<Void> {
             CommandLineExecutor.LIST_LOGGERS.executeWith(cmd, logbackConfigService);
         } else if (cmd.hasOption("oec")) {
             CommandLineExecutor.OVERRIDE_EXCEPTION_CATEGORIES.executeWith(cmd, logbackConfigService);
+        } else if (cmd.hasOption("cf")) {
+            CommandLineExecutor.CLEAR_FILTERS.executeWith(cmd, logbackConfigService);
+        } else if (cmd.hasOption("la")) {
+            CommandLineExecutor.ROOT_APPENDER_STATS.executeWith(cmd, logbackConfigService);
+        } else {
+            printHelp();
         }
 
         return null;
