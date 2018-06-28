@@ -79,6 +79,7 @@ import com.openexchange.database.Heartbeat;
 import com.openexchange.database.internal.AssignmentImpl;
 import com.openexchange.database.internal.ConnectionState;
 import com.openexchange.database.internal.Initialization;
+import com.openexchange.database.internal.MysqlUtils;
 import com.openexchange.database.internal.Pools;
 import com.openexchange.database.internal.ReplicationMonitor;
 import com.openexchange.database.internal.StateAware;
@@ -566,9 +567,23 @@ public abstract class JDBC4ConnectionReturner implements Connection, StateAware,
         touch();
     }
 
+    /**
+     * Checks if this connection has already been {@link #close() closed}.
+     *
+     * @throws SQLException If connection has already been closed
+     */
     protected void checkForAlreadyClosed() throws SQLException {
         if (closed.get()) {
             throw new SQLException("Connection was already closed.");
+        }
+
+        MysqlUtils.ClosedState closedState = MysqlUtils.isClosed(delegate, false);
+        if (MysqlUtils.ClosedState.OPEN != closedState) {
+            if (MysqlUtils.ClosedState.INTERNALLY_CLOSED == closedState) {
+                // Connection explicitly closed or lost its internal network resources, thus unusable
+                throw new SQLException("Connection is internally closed.");
+            }
+            throw new SQLException("Connection is closed.");
         }
 
         touch();

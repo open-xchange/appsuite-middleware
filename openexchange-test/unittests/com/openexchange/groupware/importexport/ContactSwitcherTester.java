@@ -53,11 +53,9 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
 import org.junit.Test;
-import com.openexchange.ajax.fields.ExtendedContactFields;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.contact.helpers.ContactGetter;
@@ -66,7 +64,6 @@ import com.openexchange.groupware.contact.helpers.ContactSwitcher;
 import com.openexchange.groupware.contact.helpers.ContactSwitcherForBooleans;
 import com.openexchange.groupware.contact.helpers.ContactSwitcherForSimpleDateFormat;
 import com.openexchange.groupware.contact.helpers.ContactSwitcherForTimestamp;
-import com.openexchange.groupware.contact.helpers.SplitBirthdayFieldsSetter;
 import com.openexchange.groupware.container.Contact;
 
 /**
@@ -181,22 +178,6 @@ public class ContactSwitcherTester {
     public void testUnkownFieldHandling() throws OXException {
         assertFalse("Should return false when getting unknown field", new ContactGetter()._unknownfield(null, "field", "value"));
         assertFalse("Should return false when setting unknown field", new ContactSetter()._unknownfield(null, "field", "value"));
-    }
-
-    @Test
-    public void testSplitBirthdayFieldHandling() throws OXException {
-        SplitBirthdayFieldsSetter switcher = new SplitBirthdayFieldsSetter();
-        Contact contact = new Contact();
-        Integer day = 31, month = 12, year = 1970;
-        switcher._unknownfield(contact, ExtendedContactFields.BIRTHDAY_DAY, day);
-        switcher._unknownfield(contact, ExtendedContactFields.BIRTHDAY_MONTH, month);
-        switcher._unknownfield(contact, ExtendedContactFields.BIRTHDAY_YEAR, year);
-        Calendar expected = Calendar.getInstance();
-        expected.setTime(contact.getBirthday());
-
-        assertEquals("Day should match", day.intValue(), expected.get(Calendar.DAY_OF_MONTH));
-        assertEquals("Month should match", Calendar.DECEMBER, expected.get(Calendar.MONTH));
-        assertEquals("Year should match", year.intValue(), expected.get(Calendar.YEAR));
     }
 
     @Test

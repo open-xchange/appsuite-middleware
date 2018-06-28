@@ -357,10 +357,7 @@ public class UpdateTaskServiceImpl implements UpdateTaskService {
     private List<Map<String, Object>> getFailures(UpdateProcess updateProcess) {
         // Return possible failures
         Queue<TaskInfo> failures = updateProcess.getFailures();
-        if (failures == null) {
-            return Collections.emptyList();
-        }
-        if (failures.isEmpty()) {
+        if (failures == null || failures.isEmpty()) {
             return Collections.emptyList();
         }
 

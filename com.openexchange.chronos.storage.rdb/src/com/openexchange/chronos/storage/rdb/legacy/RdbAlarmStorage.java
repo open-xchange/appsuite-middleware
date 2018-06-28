@@ -322,7 +322,7 @@ public class RdbAlarmStorage extends RdbStorage implements AlarmStorage {
     }
 
     @Override
-    public void deleteAllAlarms() throws OXException {
+    public boolean deleteAllAlarms() throws OXException {
         throw new UnsupportedOperationException();
     }
 

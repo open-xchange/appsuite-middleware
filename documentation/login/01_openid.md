@@ -32,6 +32,7 @@ The following diagram describes the whole code flow login process. The current i
 
 ![Code flow login](01_openid/APIgw_Relationship Oauth2.png "Code flow login")
 
+
 ## Autologin with check for a valid OP session
 ![Autologin via OP](01_openid/Autologin via OP.png "Autologin via OP")
 

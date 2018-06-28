@@ -53,6 +53,7 @@ import java.io.File;
 import java.io.InputStream;
 import java.util.Collection;
 import java.util.Dictionary;
+import java.util.Hashtable;
 import java.util.Map;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
@@ -277,7 +278,7 @@ public class ServiceCallWrapperModifier {
 
         private final Object service;
 
-        private TestableServiceReference(final Object service) {
+        TestableServiceReference(final Object service) {
             super();
             this.service = service;
         }
@@ -314,6 +315,11 @@ public class ServiceCallWrapperModifier {
 
         public Object getService() {
             return service;
+        }
+
+        @Override
+        public Dictionary<String, Object> getProperties() {
+            return new Hashtable<>(0);
         }
 
     }

@@ -985,6 +985,11 @@ public class RdbUserStorage extends UserStorage {
 
     @Override
     public void setAttribute(Connection con, String name, String value, int userId, Context context) throws OXException {
+        if (null == con) {
+            setAttributeAndReturnUser(name, value, userId, context, false);
+            return;
+        }
+
         if (value == null) {
             deleteAttribute(name, userId, context, con);
         } else {
@@ -1017,10 +1022,7 @@ public class RdbUserStorage extends UserStorage {
         }
         User retval = null;
         Connection con = DBPool.pickupWriteable(context);
-        boolean rollback = false;
         try {
-            Databases.startTransaction(con);
-            rollback = true;
             if (value == null) {
                 deleteAttribute(name, userId, context, con);
             } else {
@@ -1029,17 +1031,7 @@ public class RdbUserStorage extends UserStorage {
             if (returnUser) {
                 retval = getUser(context, con, new int[] { userId })[0];
             }
-            con.commit();
-            rollback = false;
-        } catch (SQLException e) {
-            throw UserExceptionCode.SQL_ERROR.create(e, e.getMessage());
         } finally {
-            if (null != con) {
-                if (rollback) {
-                    Databases.rollback(con);
-                }
-                Databases.autocommit(con);
-            }
             DBPool.closeWriterSilent(context, con);
         }
         return retval;

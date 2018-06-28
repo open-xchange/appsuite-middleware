@@ -637,6 +637,79 @@ public class Strings {
     }
 
     /**
+     * Replaces all occurrences of the specified sequence in string with given replacement character.
+     *
+     * @param s The string to replace in
+     * @param sequence The sequence to replace
+     * @param replacement The replacement character
+     * @return The string with all occurrences replaced
+     */
+    public static String replaceSequenceWith(String s, String sequence, char replacement) {
+        if ((null == s) || (null == sequence)) {
+            return s;
+        }
+
+        int length = s.length();
+        StringBuilder sb = null;
+        int pos = 0;
+        int prev = 0;
+        while (prev < length && (pos = s.indexOf(sequence, prev)) >= 0) {
+            if (null == sb) {
+                sb = new StringBuilder(length);
+                if (pos > 0) {
+                    sb.append(s, 0, pos);
+                }
+            } else {
+                sb.append(s, prev, pos);
+            }
+            sb.append(replacement);
+            prev = pos + sequence.length();
+        }
+        
+        if (prev > 0) {
+            sb.append(s.substring(prev, s.length()));
+        }
+        return null == sb ? s : sb.toString();
+    }
+
+
+    /**
+     * Replaces all occurrences of the specified sequence in string with given replacement.
+     *
+     * @param s The string to replace in
+     * @param sequence The sequence to replace
+     * @param replacement The replacement
+     * @return The string with all occurrences replaced
+     */
+    public static String replaceSequenceWith(String s, String sequence, String replacement) {
+        if ((null == s) || (null == sequence) || (null == replacement)) {
+            return s;
+        }
+
+        int length = s.length();
+        StringBuilder sb = null;
+        int pos = 0;
+        int prev = 0;
+        while (prev < length && (pos = s.indexOf(sequence, prev)) >= 0) {
+            if (null == sb) {
+                sb = new StringBuilder(length);
+                if (pos > 0) {
+                    sb.append(s, 0, pos);
+                }
+            } else {
+                sb.append(s, prev, pos);
+            }
+            sb.append(replacement);
+            prev = pos + sequence.length();
+        }
+        
+        if (prev > 0) {
+            sb.append(s.substring(prev, s.length()));
+        }
+        return null == sb ? s : sb.toString();
+    }
+
+    /**
      * Replaces whitespaces in given string with specified <code>replacement</code>.
      *
      * @param s The string replacement

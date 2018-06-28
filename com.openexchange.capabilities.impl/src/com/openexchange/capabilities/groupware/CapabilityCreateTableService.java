@@ -65,7 +65,7 @@ public final class CapabilityCreateTableService extends AbstractCreateTableImpl 
         " cid INT4 unsigned NOT NULL," +
         " cap VARCHAR(64) CHARACTER SET latin1 NOT NULL DEFAULT ''," +
         " PRIMARY KEY (cid, cap)" +
-        ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci";
+        ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci";
 
     private static final String TABLE_CAP_USER = "capability_user";
 
@@ -74,7 +74,7 @@ public final class CapabilityCreateTableService extends AbstractCreateTableImpl 
         " user INT4 unsigned NOT NULL," +
         " cap VARCHAR(64) CHARACTER SET latin1 NOT NULL DEFAULT ''," +
         " PRIMARY KEY (cid, user, cap)" +
-        ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci";
+        ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci";
 
     /**
      * Gets the table names.

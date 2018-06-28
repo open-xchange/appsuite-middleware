@@ -63,6 +63,7 @@ import com.openexchange.tools.oxfolder.memory.ConditionTreeMapManagement;
  * {@link OXFolderDeleteFinishedListener}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @since 7.10.0
  */
 public class OXFolderDeleteFinishedListener implements DeleteFinishedListener {
 

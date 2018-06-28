@@ -316,7 +316,7 @@ public class DriveUtils {
      * @return <code>true</code> if the exception indicates a failed saved exception, <code>false</code>, otherwise
      */
     public static boolean indicatesFailedSave(OXException e) {
-        return "IFO-0100".equals(e.getErrorCode()) || "IFO-2103".equals(e.getErrorCode()) ||
+        return "IFO-0100".equals(e.getErrorCode()) || "IFO-2103".equals(e.getErrorCode()) || "RDB-0002".equals(e.getErrorCode()) ||
             "FLD-0092".equals(e.getErrorCode()) || "FLD-0064".equals(e.getErrorCode()) || "FLD-1014".equals(e.getErrorCode());
     }
 
@@ -387,7 +387,22 @@ public class DriveUtils {
      * @return <code>true</code> if the session belongs to a known drive client, <code>false</code>, otherwise
      */
     public static boolean isDriveSession(Session session) {
-        return null != session && false == DriveClientType.UNKNOWN.equals(DriveClientType.parse(session.getClient()));
+        return null != session && false == DriveClientType.UNKNOWN.equals(DriveClientType.parse(getClientSafe(session)));
+    }
+
+    /**
+     * Retrieves the session-associated client identifier.
+     *
+     * @param session The session to retrieve from
+     * @return The client identifier or <code>null</code>
+     */
+    private static String getClientSafe(Session session) {
+        try {
+            return session.getClient();
+        } catch (Exception e) {
+            // Apparently client cannot be determined
+            return null;
+        }
     }
 
     /**

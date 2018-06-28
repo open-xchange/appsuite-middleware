@@ -66,12 +66,14 @@ import static com.openexchange.chronos.common.CalendarUtils.shiftRecurrenceId;
 import static com.openexchange.chronos.common.CalendarUtils.shiftRecurrenceIds;
 import static com.openexchange.chronos.impl.Utils.asList;
 import static com.openexchange.chronos.impl.Utils.prepareOrganizer;
+import static com.openexchange.java.Autoboxing.b;
 import static com.openexchange.java.Autoboxing.i;
 import static com.openexchange.tools.arrays.Collections.isNullOrEmpty;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
+import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -107,6 +109,7 @@ import com.openexchange.chronos.impl.Check;
 import com.openexchange.chronos.impl.Consistency;
 import com.openexchange.chronos.impl.DeltaEvent;
 import com.openexchange.chronos.impl.Utils;
+import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.CollectionUpdate;
 import com.openexchange.chronos.service.EventUpdate;
@@ -117,7 +120,6 @@ import com.openexchange.chronos.service.SimpleCollectionUpdate;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.type.PublicType;
 import com.openexchange.groupware.tools.mappings.Mapping;
-import com.openexchange.tools.arrays.Arrays;
 
 /**
  * {@link EventUpdateProcessor}
@@ -149,10 +151,9 @@ public class EventUpdateProcessor implements EventUpdate {
      * @param originalChangeExceptions The change exceptions of the original series event, or <code>null</code> if not applicable
      * @param updatedEvent The updated event, as passed by the client
      * @param timestamp The timestamp to apply in the updated event data
-     * @param consideredFields An optional list defining the <i>whitelist<i/> of event fields to consider during the update
      * @param ignoredFields Additional fields to ignore during the update
      */
-    public EventUpdateProcessor(CalendarSession session, CalendarFolder folder, Event originalEvent, List<Event> originalChangeExceptions, Event updatedEvent, Date timestamp, EventField[] consideredFields, EventField... ignoredFields) throws OXException {
+    public EventUpdateProcessor(CalendarSession session, CalendarFolder folder, Event originalEvent, List<Event> originalChangeExceptions, Event updatedEvent, Date timestamp, EventField... ignoredFields) throws OXException {
         super();
         this.session = session;
         this.folder = folder;
@@ -160,7 +161,7 @@ public class EventUpdateProcessor implements EventUpdate {
         /*
          * apply, check, adjust event update as needed
          */
-        Event changedEvent = apply(originalEvent, updatedEvent, consideredFields, ignoredFields);
+        Event changedEvent = apply(originalEvent, updatedEvent, ignoredFields);
         checkIntegrity(originalEvent, changedEvent);
         ensureConsistency(originalEvent, changedEvent, timestamp);
         List<Event> changedChangeExceptions = adjustExceptions(originalEvent, changedEvent, originalChangeExceptions);
@@ -285,6 +286,8 @@ public class EventUpdateProcessor implements EventUpdate {
     private void ensureConsistency(Event originalEvent, Event updatedEvent, Date timestamp) throws OXException {
         Consistency.adjustAllDayDates(updatedEvent);
         Consistency.adjustTimeZones(session, calendarUser.getEntity(), updatedEvent, originalEvent);
+        Consistency.adjustRecurrenceRule(updatedEvent);
+
         /*
          * adjust recurrence-related properties
          */
@@ -421,11 +424,10 @@ public class EventUpdateProcessor implements EventUpdate {
      *
      * @param originalEvent The original event being updated
      * @param updatedEvent The updated event, as passed by the client
-     * @param consideredFields An optional list defining the <i>whitelist<i/> of event fields to consider during the update
      * @param ignoredFields Optional event fields to ignore during the update
      * @return The changed event
      */
-    private Event apply(Event originalEvent, Event updatedEvent, EventField[] consideredFields, EventField... ignoredFields) throws OXException {
+    private Event apply(Event originalEvent, Event updatedEvent, EventField... ignoredFields) throws OXException {
         /*
          * determine relevant changes in passed event update
          */
@@ -435,9 +437,16 @@ public class EventUpdateProcessor implements EventUpdate {
                 updatedFields.remove(ignoredField);
             }
         }
-        if (null != consideredFields) {
+        /*
+         * only consider whitelist of fields in attendee scheduling resources as needed
+         */
+        if (isAttendeeSchedulingResource(originalEvent, calendarUser.getEntity()) &&
+            b(session.get(CalendarParameters.PARAMETER_IGNORE_FORBIDDEN_ATTENDEE_CHANGES, Boolean.class, Boolean.FALSE))) {
+            EnumSet<EventField> consideredFields = EnumSet.of(
+                EventField.ALARMS, EventField.ATTENDEES, EventField.TRANSP, EventField.DELETE_EXCEPTION_DATES, EventField.CREATED, EventField.TIMESTAMP, EventField.LAST_MODIFIED
+            );
             for (Iterator<EventField> iterator = updatedFields.iterator(); iterator.hasNext();) {
-                if (false == Arrays.contains(consideredFields, iterator.next())) {
+                if (false == consideredFields.contains(iterator.next())) {
                     iterator.remove();
                 }
             }
@@ -461,8 +470,24 @@ public class EventUpdateProcessor implements EventUpdate {
          * (virtually) apply & take over attendee updates in changed event
          */
         if (updatedFields.contains(EventField.ATTENDEES)) {
-            List<Attendee> updatedAttendees = AttendeeHelper.onUpdatedEvent(session, folder, originalEvent.getAttendees(), updatedEvent.getAttendees()).previewChanges();
-            changedEvent.setAttendees(AttendeeMapper.getInstance().copy(updatedAttendees, (AttendeeField[]) null));
+            List<Attendee> changedAttendees = AttendeeHelper.onUpdatedEvent(session, folder, originalEvent.getAttendees(), updatedEvent.getAttendees()).previewChanges();
+            /*
+             * only consider 'own' attendee in attendee scheduling resources as needed
+             */
+            if (isAttendeeSchedulingResource(originalEvent, calendarUser.getEntity()) &&
+                b(session.get(CalendarParameters.PARAMETER_IGNORE_FORBIDDEN_ATTENDEE_CHANGES, Boolean.class, Boolean.FALSE))) {
+                Attendee changedUserAttendee = find(changedAttendees, calendarUser);
+                List<Attendee> updatedAttendees = new ArrayList<Attendee>(originalEvent.getAttendees().size());
+                for (Attendee originalAttendee : originalEvent.getAttendees()) {
+                    if (false == matches(originalAttendee, calendarUser)) {
+                        updatedAttendees.add(originalAttendee);
+                    } else if (null != changedUserAttendee) {
+                        updatedAttendees.add(changedUserAttendee);
+                    }
+                }
+                changedAttendees = updatedAttendees;
+            }
+            changedEvent.setAttendees(AttendeeMapper.getInstance().copy(changedAttendees, (AttendeeField[]) null));
         }
         return changedEvent;
     }
@@ -545,7 +570,9 @@ public class EventUpdateProcessor implements EventUpdate {
      */
     private static boolean needsSequenceNumberIncrement(Event originalEvent, Event updatedEvent) throws OXException {
         EventField[] relevantFields = new EventField[] {
-            EventField.SUMMARY, EventField.LOCATION, EventField.RECURRENCE_RULE, EventField.START_DATE, EventField.END_DATE };
+            EventField.SUMMARY, EventField.LOCATION, EventField.RECURRENCE_RULE, EventField.START_DATE, EventField.END_DATE,
+            EventField.RECURRENCE_DATES, EventField.DELETE_EXCEPTION_DATES, EventField.TRANSP
+        };
         if (false == EventMapper.getInstance().equalsByFields(originalEvent, updatedEvent, relevantFields)) {
             return true;
         }
@@ -803,6 +830,15 @@ public class EventUpdateProcessor implements EventUpdate {
              */
             SimpleCollectionUpdate<RecurrenceId> exceptionDateUpdates = getExceptionDateUpdates(originalEvent.getDeleteExceptionDates(), updatedEvent.getDeleteExceptionDates());
             if (false == exceptionDateUpdates.getRemovedItems().isEmpty()) {
+                return true;
+            }
+        }
+        if (false == EventMapper.getInstance().get(EventField.RECURRENCE_DATES).equals(originalEvent, updatedEvent)) {
+            /*
+             * reset if there are 'new' occurrences (caused by newly introduced recurrence dates)
+             */
+            SimpleCollectionUpdate<RecurrenceId> exceptionDateUpdates = getExceptionDateUpdates(originalEvent.getRecurrenceDates(), updatedEvent.getRecurrenceDates());
+            if (false == exceptionDateUpdates.getAddedItems().isEmpty()) {
                 return true;
             }
         }

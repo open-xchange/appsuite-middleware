@@ -105,7 +105,7 @@ public final class ClearAction extends AbstractFolderAction {
         /*
          * Delete
          */
-        final List<OXException> warnings = new LinkedList<OXException>();
+        final List<OXException> warnings = new LinkedList<>();
         final JSONArray responseArray = new JSONArray();
         final FolderService folderService = ServiceRegistry.getInstance().getService(FolderService.class, true);
         for (int i = 0; i < len; i++) {

@@ -62,10 +62,10 @@ public class ContextAttributeCreateTable extends AbstractCreateTableImpl {
 
     private static final String[] CREATE_TABLE = new String[] { "CREATE TABLE `contextAttribute` ("
         + " `cid` INT4 unsigned NOT NULL,"
-        + " `name` varchar(128) collate utf8_unicode_ci NOT NULL,"
-        + " `value` TEXT collate utf8_unicode_ci NOT NULL,"
+        + " `name` varchar(128) collate utf8mb4_unicode_ci NOT NULL,"
+        + " `value` TEXT collate utf8mb4_unicode_ci NOT NULL,"
         + " PRIMARY KEY `cid` (`cid`,`name`,`value`(20))"
-        + ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" };
+        + ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci" };
 
     @Override
     protected String[] getCreateStatements() {

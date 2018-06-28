@@ -73,7 +73,6 @@ import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.AlarmAction;
 import com.openexchange.chronos.Attachment;
 import com.openexchange.chronos.Attendee;
-import com.openexchange.chronos.CalendarUserType;
 import com.openexchange.chronos.Classification;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
@@ -82,7 +81,6 @@ import com.openexchange.chronos.ExtendedProperty;
 import com.openexchange.chronos.ExtendedPropertyParameter;
 import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.RelatedTo;
-import com.openexchange.chronos.ResourceId;
 import com.openexchange.chronos.Trigger;
 import com.openexchange.chronos.common.AlarmUtils;
 import com.openexchange.chronos.common.CalendarUtils;
@@ -310,28 +308,6 @@ public class EventPatches {
                  */
                 adjustMozillaSnoozeTime(importedEvent);
                 adjustMozillaSnooze(importedEvent);
-            }
-        }
-
-        /**
-         * Restores an original {@link CalendarUserType#RESOURCE} attribute for resource attendees, in case the attendee's URI points to
-         * an internal resource, and the requesting client equals {@link DAVUserAgent#IOS}.
-         *
-         * @param resource The event resource
-         * @param importedEvent The imported series master event as supplied by the client
-         * @see <a href="https://bugs.open-xchange.com/show_bug.cgi?id=57611#c12">Bug 57611</a>
-         */
-        private static void restoreResourceCUTypes(EventResource resource, Event importedEvent) {
-            if (DAVUserAgent.IOS.equals(resource.getUserAgent()) && null != importedEvent.getAttendees()) {
-                for (Attendee attendee : importedEvent.getAttendees()) {
-                    ResourceId resourceId = ResourceId.parse(attendee.getUri());
-                    if (null != resourceId && CalendarUserType.RESOURCE.equals(resourceId.getCalendarUserType()) &&
-                        false == resourceId.getCalendarUserType().equals(attendee.getCuType()) &&
-                        resource.getFactory().getContext().getContextId() == resourceId.getContextID()) {
-                        attendee.setCuType(resourceId.getCalendarUserType());
-                        LOG.debug("Implicitly preserving CUTYPE for {}", attendee);
-                    }
-                }
             }
         }
 
@@ -683,7 +659,6 @@ public class EventPatches {
                  */
                 applyFilename(resource, importedEvent);
                 adjustAttendeeComments(resource, importedEvent);
-                restoreResourceCUTypes(resource, importedEvent);
                 adjustProposedTimePrefixes(importedEvent);
                 adjustSnoozeExceptions(resource, importedEvent, importedChangeExceptions);
                 adjustAlarms(resource, importedEvent, null);
@@ -696,7 +671,6 @@ public class EventPatches {
                  */
                 for (Event importedChangeException : importedChangeExceptions) {
                     adjustAttendeeComments(resource, importedChangeException);
-                    restoreResourceCUTypes(resource, importedChangeException);
                     adjustProposedTimePrefixes(importedChangeException);
                     adjustAlarms(resource, importedChangeException, importedEvent);
                     applyManagedAttachments(importedChangeException);
@@ -889,24 +863,6 @@ public class EventPatches {
         }
 
         /**
-         * Removes the <code>CUTYPE</code> attribute from attendees in case it is set to {@link CalendarUserType#RESOURCE}, and the requesting
-         * client equals {@link DAVUserAgent#IOS}.
-         *
-         * @param resource The parent event resource
-         * @param exportedEvent The event being exported
-         * @return The patched event
-         * @see <a href="https://bugs.open-xchange.com/show_bug.cgi?id=57611#c12">Bug 57611</a>
-         */
-        private static Event removeResourceCUTypes(EventResource resource, Event exportedEvent) {
-            if (DAVUserAgent.IOS.equals(resource.getUserAgent())) {
-                for (Attendee attendee : CalendarUtils.filter(exportedEvent.getAttendees(), Boolean.TRUE, CalendarUserType.RESOURCE)) {
-                    attendee.removeCuType();
-                }
-            }
-            return exportedEvent;
-        }
-
-        /**
          * Prepares the URIs for all managed attachments of the event.
          *
          * @param resource The parent event resource
@@ -940,7 +896,6 @@ public class EventPatches {
          */
         public Event applyAll(EventResource resource, Event exportedEvent) {
             exportedEvent = removeImplicitAttendee(resource, exportedEvent);
-            exportedEvent = removeResourceCUTypes(resource, exportedEvent);
             exportedEvent = adjustProposedTimePrefixes(exportedEvent);
             exportedEvent = applyAttendeeComments(resource, exportedEvent);
             exportedEvent = adjustAlarms(resource, exportedEvent);

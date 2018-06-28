@@ -370,4 +370,17 @@ public abstract class DAVAction extends AbstractAction {
         throw WebdavProtocolException.generalError(request.getUrl(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
     }
 
+    /**
+     * Optionally sets a response header if the supplied value reference is not <code>null</code>.
+     *
+     * @param header The name of the header name to set
+     * @param value The value to set, or <code>null</code> to do nothing
+     * @param response The response to set the header in
+     */
+    protected void setHeaderOpt(String header, Object value, WebdavResponse response) {
+        if (null != value) {
+            response.setHeader(header, value.toString());
+        }
+    }
+
 }

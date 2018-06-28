@@ -516,18 +516,10 @@ public final class NewAction extends AbstractMailAction implements EnqueuableAJA
 
             // Trigger contact collector
             try {
-                ServerUserSetting setting = ServerUserSetting.getInstance();
-                if (setting.isContactCollectOnMailTransport(session.getContextId(), session.getUserId()).booleanValue()) {
-                    triggerContactCollector(session, composedMails, true);
-                }
-            } catch (final Exception e) {
+                boolean memorizeAddresses = ServerUserSetting.getInstance().isContactCollectOnMailTransport(session.getContextId(), session.getUserId()).booleanValue();
+                triggerContactCollector(session, composedMails, memorizeAddresses, true);
+            } catch (Exception e) {
                 LOG.warn("Contact collector could not be triggered.", e);
-            }
-
-            try {
-                triggerUseCountIncrementForGAB(session, sentMessage.getAllRecipients());
-            } catch (OXException e) {
-                LOG.warn("Use count could not be incremented.", e);
             }
 
             if (msgIdentifier == null) {
@@ -638,6 +630,7 @@ public final class NewAction extends AbstractMailAction implements EnqueuableAJA
             if (newMessageId) {
                 message.removeHeader("Message-ID");
             }
+            message.foldAllHeaderLines();
             String fromAddr = message.getHeader(MessageHeaders.HDR_FROM, null);
             if (isEmpty(fromAddr)) {
                 // Add from address

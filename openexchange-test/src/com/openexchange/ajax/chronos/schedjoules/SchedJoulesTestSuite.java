@@ -51,14 +51,13 @@ package com.openexchange.ajax.chronos.schedjoules;
 
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
-import com.openexchange.test.concurrent.ParallelSuite;
 
 /**
  * {@link SchedJoulesTestSuite}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-@RunWith(ParallelSuite.class)
+@RunWith(Suite.class)
 @Suite.SuiteClasses({
     // @formatter:off
     BasicSchedJoulesAPITest.class,

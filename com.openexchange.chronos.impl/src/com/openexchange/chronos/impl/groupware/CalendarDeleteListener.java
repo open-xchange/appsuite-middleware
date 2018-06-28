@@ -49,6 +49,8 @@
 
 package com.openexchange.chronos.impl.groupware;
 
+import static com.openexchange.chronos.common.CalendarUtils.getSearchTerm;
+import static com.openexchange.chronos.common.CalendarUtils.isLastUserAttendee;
 import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_SUPPRESS_ITIP;
 import java.sql.Connection;
 import java.util.LinkedList;
@@ -60,10 +62,15 @@ import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.ResourceId;
 import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.common.DefaultCalendarParameters;
+import com.openexchange.chronos.impl.Utils;
+import com.openexchange.chronos.impl.osgi.Services;
 import com.openexchange.chronos.service.CalendarHandler;
 import com.openexchange.chronos.service.CalendarUtilities;
+import com.openexchange.chronos.service.EntityResolver;
+import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.chronos.storage.CalendarStorageFactory;
 import com.openexchange.database.provider.DBProvider;
+import com.openexchange.database.provider.DBTransactionPolicy;
 import com.openexchange.database.provider.SimpleDBProvider;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
@@ -92,22 +99,19 @@ import com.openexchange.tools.session.ServerSessionAdapter;
  */
 public final class CalendarDeleteListener implements DeleteListener {
 
-    private final CalendarStorageFactory factory;
-    private final CalendarUtilities      calendarUtilities;
-    private final Set<CalendarHandler>   calendarHandlers;
+    private final Set<CalendarHandler> calendarHandlers;
+    private final CalendarUtilities calendarUtilities;
 
     /**
      * Initializes a new {@link CalendarDeleteListener}.
      *
-     * @param factory The {@link CalendarStorageFactory}
-     * @param calendarUtilities The {@link CalendarUtilities}
+     * @param calendarUtilities A reference to the calendar utilities
      * @param calendarHandlers The {@link CalendarHandler}s to notify
      */
-    public CalendarDeleteListener(CalendarStorageFactory factory, CalendarUtilities calendarUtilities, Set<CalendarHandler> calendarHandlers) {
+    public CalendarDeleteListener(CalendarUtilities calendarUtilities, Set<CalendarHandler> calendarHandlers) {
         super();
-        this.factory = factory;
-        this.calendarUtilities = calendarUtilities;
         this.calendarHandlers = calendarHandlers;
+        this.calendarUtilities = calendarUtilities;
     }
 
     @Override
@@ -146,43 +150,45 @@ public final class CalendarDeleteListener implements DeleteListener {
      * @throws OXException In case service is unavailable or SQL error
      */
     private void purgeUserData(DBProvider dbProvider, Context context, int userId, Integer destinationUserId, Session adminSession) throws OXException {
-        StorageUpdater updater = new StorageUpdater(context, userId, destinationUserId, calendarUtilities, factory, dbProvider, calendarHandlers);
-
+        EntityResolver entityResolver = calendarUtilities.getEntityResolver(context.getContextId());
+        CalendarStorage storage = Services.getService(CalendarStorageFactory.class).create(context, Utils.ACCOUNT_ID, entityResolver, dbProvider, DBTransactionPolicy.NO_TRANSACTIONS);
+        StorageUpdater updater = new StorageUpdater(storage, entityResolver, userId, null == destinationUserId ? context.getMailadmin() : destinationUserId.intValue());
         /*
-         * Update events where the user is attendee, delete where he is the last internal user
+         * Get all events the user attends & distinguish between those that can be deleted completely, and those that need to be updated
          */
-        List<Event> events = updater.searchEvents();
         List<Event> eventsToDelete = new LinkedList<>();
-        for (final Event event : events) {
-            if (CalendarUtils.isLastUserAttendee(event.getAttendees(), userId)) {
+        List<Event> eventsToUpdate = new LinkedList<>();
+        for (Event event : updater.searchEvents()) {
+            if (isLastUserAttendee(event.getAttendees(), userId)) {
                 // The attendee is the only one left, delete event
                 eventsToDelete.add(event);
+            } else {
+                // remove attendee from group scheduled with other internal users
+                eventsToUpdate.add(event);
             }
         }
-        updater.deleteEvent(eventsToDelete, ServerSessionAdapter.valueOf(userId, context.getContextId()));
-        events.removeAll(eventsToDelete);
-        updater.removeAttendeeFrom(events);
-        updater.replaceAttendeeIn(events);
-
         /*
-         * Update event fields where the user might be referenced
+         * Remove user references in events where the user is attendee, delete where he is the last internal user
          */
-        CompositeSearchTerm references = new CompositeSearchTerm(CompositeOperation.OR);
-        references.addSearchTerm(CalendarUtils.getSearchTerm(EventField.CREATED_BY, SingleOperation.EQUALS, Integer.valueOf(userId)));
-        references.addSearchTerm(CalendarUtils.getSearchTerm(EventField.MODIFIED_BY, SingleOperation.EQUALS, Integer.valueOf(userId)));
-        references.addSearchTerm(CalendarUtils.getSearchTerm(EventField.CALENDAR_USER, SingleOperation.EQUALS, Integer.valueOf(userId)));
-        references.addSearchTerm(CalendarUtils.getSearchTerm(EventField.ORGANIZER, SingleOperation.EQUALS, ResourceId.forUser(context.getContextId(), userId)));
-
-        events = updater.searchEvents(references);
-        updater.replaceAttendeeIn(events);
-
+        updater.removeUserReferences(eventsToUpdate);
+        updater.deleteEvent(eventsToDelete, ServerSessionAdapter.valueOf(userId, context.getContextId()));
+        /*
+         * Update event fields where the user might still be referenced
+         */
+        CompositeSearchTerm searchTerm = new CompositeSearchTerm(CompositeOperation.OR)
+            .addSearchTerm(getSearchTerm(EventField.CREATED_BY, SingleOperation.EQUALS, Integer.valueOf(userId)))
+            .addSearchTerm(CalendarUtils.getSearchTerm(EventField.MODIFIED_BY, SingleOperation.EQUALS, Integer.valueOf(userId)))
+            .addSearchTerm(CalendarUtils.getSearchTerm(EventField.CALENDAR_USER, SingleOperation.EQUALS, Integer.valueOf(userId)))
+            .addSearchTerm(CalendarUtils.getSearchTerm(EventField.ORGANIZER, SingleOperation.EQUALS, '*' + ResourceId.forUser(context.getContextId(), userId) + '*'))
+        ;
+        updater.replaceAttendeeIn(updater.searchEvents(searchTerm));
         /*
          * Delete account
          */
         updater.deleteAccount();
 
         // Trigger calendar events
-        updater.notifyCalendarHandlers(adminSession, new DefaultCalendarParameters().set(PARAMETER_SUPPRESS_ITIP, Boolean.TRUE));
+        updater.notifyCalendarHandlers(adminSession, calendarHandlers, new DefaultCalendarParameters().set(PARAMETER_SUPPRESS_ITIP, Boolean.TRUE));
     }
 
     /**
@@ -196,9 +202,11 @@ public final class CalendarDeleteListener implements DeleteListener {
      * @throws OXException In case service is unavailable or SQL error
      */
     private void deleteAttendee(DBProvider dbProvider, Context context, int attendeeId, Session adminSession) throws OXException {
-        StorageUpdater updater = new StorageUpdater(context, attendeeId, null, calendarUtilities, factory, dbProvider, calendarHandlers);
+        EntityResolver entityResolver = calendarUtilities.getEntityResolver(context.getContextId());
+        CalendarStorage storage = Services.getService(CalendarStorageFactory.class).create(context, Utils.ACCOUNT_ID, entityResolver, dbProvider, DBTransactionPolicy.NO_TRANSACTIONS);
+        StorageUpdater updater = new StorageUpdater(storage, entityResolver, attendeeId, context.getMailadmin());
         updater.removeAttendeeFrom(updater.searchEvents());
-        updater.notifyCalendarHandlers(adminSession, new DefaultCalendarParameters().set(PARAMETER_SUPPRESS_ITIP, Boolean.TRUE));
+        updater.notifyCalendarHandlers(adminSession, calendarHandlers, new DefaultCalendarParameters().set(PARAMETER_SUPPRESS_ITIP, Boolean.TRUE));
     }
 
 }

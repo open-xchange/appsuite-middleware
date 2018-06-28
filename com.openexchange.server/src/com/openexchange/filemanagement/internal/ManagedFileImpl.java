@@ -221,7 +221,9 @@ public final class ManagedFileImpl implements ManagedFile, FileRemovedRegistry, 
 
     @Override
     public void touch() {
-        lastAccessed = System.currentTimeMillis();
+        long now = System.currentTimeMillis();
+        lastAccessed = now;
+        file.setLastModified(now);
     }
 
     @Override

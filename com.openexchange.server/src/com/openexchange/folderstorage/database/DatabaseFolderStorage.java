@@ -192,6 +192,10 @@ import gnu.trove.set.hash.TIntHashSet;
  */
 public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage, LockCleaningFolderStorage, RestoringFolderStorage {
 
+    private static final String DEL_OXFOLDER_PERMISSIONS = "del_oxfolder_permissions";
+
+    private static final String DEL_OXFOLDER_TREE = "del_oxfolder_tree";
+
     /** The logger */
     static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(DatabaseFolderStorage.class);
 
@@ -219,15 +223,9 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage,
 
         private final ConnectionMode connection;
 
-        //private final DatabaseService databaseService;
-
-        //private final int contextId;
-
-        protected NonClosingConnectionProvider(final ConnectionMode connection/* , final DatabaseService databaseService, final int contextId */) {
+        protected NonClosingConnectionProvider(final ConnectionMode connection) {
             super();
             this.connection = connection;
-            //this.databaseService = databaseService;
-            //this.contextId = contextId;
         }
 
         @Override
@@ -457,7 +455,7 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage,
             }
             final int folderId = Integer.parseInt(folderIdentifier);
             final Context context = storageParameters.getContext();
-            FolderObject.loadFolderObjectFromDB(folderId, context, con, false, false, "del_oxfolder_tree", "del_oxfolder_permissions");
+            FolderObject.loadFolderObjectFromDB(folderId, context, con, false, false, DEL_OXFOLDER_TREE, DEL_OXFOLDER_PERMISSIONS);
             /*
              * From backup to working table
              */
@@ -483,8 +481,6 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage,
     private Permission[] getConfiguredDefaultPermissionsFor(String parentId, int userId, int contextId) throws OXException {
         return ConfiguredDefaultPermissions.getInstance().getConfiguredDefaultPermissionsFor(parentId, userId, contextId);
     }
-
-    // private static final TIntSet SPECIALS = new TIntHashSet(new int[] { FolderObject.SYSTEM_PRIVATE_FOLDER_ID, FolderObject.SYSTEM_PUBLIC_FOLDER_ID, FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID });
 
     @Override
     public void createFolder(final Folder folder, final StorageParameters storageParameters) throws OXException {
@@ -1013,7 +1009,7 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage,
                     throw OXFolderExceptionCode.NOT_EXISTS.create(folderIdentifier, Integer.valueOf(ctx.getContextId()));
                 }
 
-                final FolderObject fo = FolderObject.loadFolderObjectFromDB(folderId, ctx, con, true, false, "del_oxfolder_tree", "del_oxfolder_permissions");
+                final FolderObject fo = FolderObject.loadFolderObjectFromDB(folderId, ctx, con, true, false, DEL_OXFOLDER_TREE, DEL_OXFOLDER_PERMISSIONS);
                 retval = new DatabaseFolder(fo);
             }
             retval.setTreeID(treeId);
@@ -1144,7 +1140,7 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage,
             }
             provider = getConnection(Mode.READ, storageParameters);
             final Connection con = provider.getConnection();
-            final List<FolderObject> folders = OXFolderBatchLoader.loadFolderObjectsFromDB(list.toArray(), ctx, con, true, false, "del_oxfolder_tree", "del_oxfolder_permissions");
+            final List<FolderObject> folders = OXFolderBatchLoader.loadFolderObjectsFromDB(list.toArray(), ctx, con, true, false, DEL_OXFOLDER_TREE, DEL_OXFOLDER_PERMISSIONS);
             provider.close();
             provider = null;
             final int size = folders.size();
@@ -2011,7 +2007,7 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage,
                 if (folderId < 0) {
                     retval = false;
                 } else {
-                    retval = OXFolderSQL.exists(folderId, con, ctx, "del_oxfolder_tree");
+                    retval = OXFolderSQL.exists(folderId, con, ctx, DEL_OXFOLDER_TREE);
                 }
             }
             return retval;

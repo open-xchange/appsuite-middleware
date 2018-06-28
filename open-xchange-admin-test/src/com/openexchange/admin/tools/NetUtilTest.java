@@ -98,19 +98,17 @@ public class NetUtilTest {
      */
     @Test
     public final void testIsValidBroadcast() {
-        String[] bcasts = new String[] {"192.168.0.111", "10.20.127.255"};
-        String[] nets = new String[] {"192.168.0.96", "10.20.0.0"};
-        String[] masks = new String[] {"255.255.255.240", "255.255.128.0"};
-        for(int n=0; n<bcasts.length; n++) {
-            assertTrue("Broadcast " + bcasts[n] + " must be valid",
-                    NetUtil.isValidBroadcast(bcasts[n], nets[n], masks[n]));
+        String[] bcasts = new String[] { "192.168.0.111", "10.20.127.255" };
+        String[] nets = new String[] { "192.168.0.96", "10.20.0.0" };
+        String[] masks = new String[] { "255.255.255.240", "255.255.128.0" };
+        for (int n = 0; n < bcasts.length; n++) {
+            assertTrue("Broadcast " + bcasts[n] + " must be valid", NetUtil.isValidBroadcast(bcasts[n], nets[n], masks[n]));
         }
-        bcasts = new String[] {"192.168.0.113", "10.20.127.254"};
-        nets = new String[] {"192.168.0.96", "10.20.0.0"};
-        masks = new String[] {"255.255.255.240", "255.255.128.0"};
-        for(int n=0; n<bcasts.length; n++) {
-            assertFalse("Broadcast " + bcasts[n] + " must be invalid",
-                    NetUtil.isValidBroadcast(bcasts[n], nets[n], masks[n]));
+        bcasts = new String[] { "192.168.0.113", "10.20.127.254" };
+        nets = new String[] { "192.168.0.96", "10.20.0.0" };
+        masks = new String[] { "255.255.255.240", "255.255.128.0" };
+        for (int n = 0; n < bcasts.length; n++) {
+            assertFalse("Broadcast " + bcasts[n] + " must be invalid", NetUtil.isValidBroadcast(bcasts[n], nets[n], masks[n]));
         }
     }
 
@@ -120,12 +118,12 @@ public class NetUtilTest {
      */
     @Test
     public final void testIsValidIPNetmask() {
-        final String[] validIPMasks = new String[] {"10.11.12.13/255.255.0.0", "172.16.13.14/8"};
-        for(final String ipmask : validIPMasks) {
+        final String[] validIPMasks = new String[] { "10.11.12.13/255.255.0.0", "172.16.13.14/8" };
+        for (final String ipmask : validIPMasks) {
             assertTrue("IPMask " + ipmask + " must be valid", NetUtil.isValidIPNetmask(ipmask));
         }
-        final String[] invalidIPMasks = new String[] {"10.11.12.13/2.255.0.0", "172.16.13.14/255.", ""};
-        for(final String ipmask : invalidIPMasks) {
+        final String[] invalidIPMasks = new String[] { "10.11.12.13/2.255.0.0", "172.16.13.14/255.", "" };
+        for (final String ipmask : invalidIPMasks) {
             assertFalse("IPMask " + ipmask + " must be invalid", NetUtil.isValidIPNetmask(ipmask));
         }
     }

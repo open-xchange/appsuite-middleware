@@ -44,6 +44,10 @@ public class ParallelsMailMappingService implements MailResolver {
             // Does not seem to be a valid E-Mail address
             return null;
         }
+        
+        if (Strings.containsSurrogatePairs(mail)) {
+            return ResolvedMail.DENY();
+        }
 
         DatabaseService dbservice = services.getService(DatabaseService.class);
         if (null == dbservice) {

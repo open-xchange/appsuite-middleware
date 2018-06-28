@@ -134,7 +134,7 @@ public class AppointmentObjectCountTest extends AbstractObjectCountTest {
         assertEquals("Wrong amount.", 0, getCount(client2, folder));
         insertAppointments(ctm2, folder);
         assertEquals("Wrong amount.", 6, getCount(client1, folder));
-        assertEquals("Wrong amount.", 0, getCount(client2, folder));
+        assertEquals("Wrong amount.", 3, getCount(client2, folder));
     }
 
     @Test

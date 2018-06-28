@@ -52,6 +52,7 @@ package com.openexchange.logging.mbean;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import com.openexchange.logging.rmi.LogbackConfigurationRMIService;
 import com.openexchange.management.MBeanMethodAnnotation;
 import ch.qos.logback.classic.Level;
 
@@ -59,6 +60,7 @@ import ch.qos.logback.classic.Level;
  * {@link LogbackConfigurationMBean}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @deprecated To be removed with 7.10.1. Use {@link LogbackConfigurationRMIService} instead.
  */
 public interface LogbackConfigurationMBean {
 

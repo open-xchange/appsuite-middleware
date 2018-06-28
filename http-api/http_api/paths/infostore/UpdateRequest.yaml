@@ -27,9 +27,7 @@
         description: A JSON object containing a field `file` with the modified fields of the infoitem's data. It is possible to let added object permission entities be notified about newly shared files. In that case add a "notification" object.
         required: true
         schema:
-          type: array
-          items:
-            $ref: "#/definitions/InfoItemBody"
+          $ref: "#/definitions/InfoItemBody"
     responses:
       200:
         description: |

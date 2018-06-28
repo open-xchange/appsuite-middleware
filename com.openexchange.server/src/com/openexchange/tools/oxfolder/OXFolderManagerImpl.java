@@ -1055,8 +1055,8 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
                     try {
                         final FolderObject tmp = new FolderObject(subfolderId);
                         FolderObject folderFromMaster = getFolderFromMaster(subfolderId);
-                        List<OCLPermission> mergePermissions = mergePermissionsForHandDown(permission, folderFromMaster.getPermissions(), folderId);
-                        tmp.setPermissions(mergePermissions);
+                        List<OCLPermission> tmpPermissions = adjustPermissions(permission, folderId);
+                        tmp.setPermissions(tmpPermissions);
                         doUpdate(tmp, options, folderFromMaster, lastModified, true, alreadyCheckedParents);  // Calls handDown() for subfolder, as well
                         if (null != cacheManager) {
                             cacheManager.removeFolderObject(subfolderId, ctx);
@@ -1078,42 +1078,15 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
      * Merges old and new permissions for hand down
      *
      * @param permission The new permissions
-     * @param originalPermissions The original permissions
      * @param parentId The id of the parent folder
      */
-    List<OCLPermission> mergePermissionsForHandDown(ComparedOCLFolderPermissions permission, List<OCLPermission> originalPermissions, int parentId) {
+    List<OCLPermission> adjustPermissions(ComparedOCLFolderPermissions permission, int parentId) {
         List<OCLPermission> result = new ArrayList<>(permission.getNewPermissions().size());
         for (OCLPermission perm : permission.getNewPermissions()) {
             result.add(perm);
         }
         adjustTypeOfInheritedPermissions(result, parentId);
-        for(OCLPermission orig: originalPermissions){
-            if (!containsEntity(orig, permission)) {
-                result.add(orig);
-            }
-        }
         return result;
-    }
-
-    /**
-     * Checks if the list of permissions contains a permission with the same entity
-     *
-     * @param perm
-     * @param permissions
-     * @return
-     */
-    private boolean containsEntity(OCLPermission perm, ComparedOCLFolderPermissions permission) {
-        for (OCLPermission tmp : permission.getNewPermissions()) {
-            if (tmp.getEntity() == perm.getEntity() && perm.isGroupPermission() == tmp.isGroupPermission()) {
-                return true;
-            }
-        }
-        for (OCLPermission deleted : permission.getRemovedUserPermissions()) {
-            if (deleted.getEntity() == perm.getEntity() && perm.isGroupPermission() == deleted.isGroupPermission()) {
-                return true;
-            }
-        }
-        return false;
     }
 
     /**

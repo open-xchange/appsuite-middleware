@@ -127,8 +127,6 @@ public class Multiple extends SessionServlet {
 
     protected static final String MODULE = "module";
 
-    // protected static final String MODULE_INFOSTORE = "infostore";
-
     protected static final String MODULE_FOLDER = "folder";
 
     protected static final String MODULE_FOLDERS = "folders";
@@ -192,13 +190,7 @@ public class Multiple extends SessionServlet {
             final Writer writer = resp.getWriter();
             writeTo(null == respArr ? new JSONArray(0) : respArr, writer);
             writer.flush();
-        } catch (final JSONException e) {
-            logError(session, e);
-            sendError(resp);
-        } catch (final OXException e) {
-            logError(session, e);
-            sendError(resp);
-        } catch (final RuntimeException e) {
+        } catch (final JSONException | OXException | RuntimeException e) {
             logError(session, e);
             sendError(resp);
         } finally {
@@ -441,21 +433,17 @@ public class Multiple extends SessionServlet {
             }
             String moduleCandidate = module;
             boolean handles = dispatcher.handles(moduleCandidate);
-            if (false == handles) {
-                for (int pos; false == handles && (pos = moduleCandidate.lastIndexOf('/')) > 0;) {
+            if (!handles) {
+                for (int pos; !handles && (pos = moduleCandidate.lastIndexOf('/')) > 0;) {
                     moduleCandidate = moduleCandidate.substring(0, pos);
                     handles = dispatcher.handles(moduleCandidate);
                 }
             }
             if (handles && MODULE_MAIL.equals(module)) {
                 if (action.equalsIgnoreCase(AJAXServlet.ACTION_UPDATE)) {
-                    if (MailRequest.isMove(jsonObj)) {
+                    if (MailRequest.isMove(jsonObj) || MailRequest.isStoreFlags(jsonObj) || MailRequest.isColorLabel(jsonObj)) {
                         handles = false;
-                    } else if (MailRequest.isStoreFlags(jsonObj)) {
-                        handles = false;
-                    } else if (MailRequest.isColorLabel(jsonObj)) {
-                        handles = false;
-                    }
+                    } 
                 } else if (action.equalsIgnoreCase(AJAXServlet.ACTION_COPY)) {
                     handles = false;
                 } else if (action.equalsIgnoreCase(AJAXServlet.ACTION_GET) && MailRequest.isCollectableGet(jsonObj)) {
@@ -507,7 +495,7 @@ public class Multiple extends SessionServlet {
                             ResponseWriter.writeException(requestResult.getException(), jsonWriter, localeFrom(session), includeStackTraceOnError);
                         }
 
-                        if (false == requestResult.getWarnings().isEmpty()) {
+                        if (!requestResult.getWarnings().isEmpty()) {
                             ResponseWriter.writeWarnings(new ArrayList<OXException>(requestResult.getWarnings()), jsonWriter, localeFrom(session));
                         }
                     }
@@ -578,16 +566,6 @@ public class Multiple extends SessionServlet {
                     multipleHandler.close();
                     jsonWriter.endObject();
                 }
-            /*} else if (MODULE_INFOSTORE.equals(module)) {
-                writeMailRequest(req);
-                final InfostoreRequest infoRequest = new InfostoreRequest(session, jsonWriter);
-                try {
-                    infoRequest.action(action, new JSONSimpleRequest(jsonObj));
-                } catch (final OXPermissionException e) {
-                    jsonWriter.object();
-                    ResponseWriter.writeException(e, jsonWriter);
-                    jsonWriter.endObject();
-                } */
             } else if (MODULE_FOLDER.equals(module) || MODULE_FOLDERS.equals(module)) {
                 try {
                     writeMailRequest(req);

@@ -61,13 +61,13 @@ public interface OIDCConfig {
      * 
      * @return true or false
      */
-    Boolean isEnabled();
+    boolean isEnabled();
     
     /**
      * Start the default core OIDC backend.
      * 
      * @return true or false
      */
-    Boolean startDefaultBackend();
+    boolean startDefaultBackend();
     
 }

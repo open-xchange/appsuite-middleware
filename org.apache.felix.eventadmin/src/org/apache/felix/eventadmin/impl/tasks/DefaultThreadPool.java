@@ -94,7 +94,7 @@ public class DefaultThreadPool
             }
         }
     }
-    
+
     /**
      * Returns current pool size.
      */
@@ -111,7 +111,7 @@ public class DefaultThreadPool
     {
         ExecutorService executor = this.executor;
         if (null != executor)
-        {            
+        {
             executor.shutdownNow();
         }
     }
@@ -119,15 +119,17 @@ public class DefaultThreadPool
     /**
      * Execute the task in a free thread or create a new one.
      * @param task The task to execute
+     * @return <code>true</code> if successfully submitted; otherwise <code>false</code>
      */
-    public void executeTask(final Runnable task)
+    public boolean executeTask(final Runnable task)
     {
         try
         {
             ExecutorService executor = this.executor;
             if (null != executor)
-            {                
+            {
                 executor.submit(task);
+                return true;
             }
         }
         catch (final Throwable t)
@@ -137,5 +139,6 @@ public class DefaultThreadPool
                     "Exception: " + t, t);
             // ignore this
         }
+        return false;
     }
 }

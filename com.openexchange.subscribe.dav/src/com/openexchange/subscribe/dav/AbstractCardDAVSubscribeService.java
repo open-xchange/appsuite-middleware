@@ -224,7 +224,7 @@ public abstract class AbstractCardDAVSubscribeService extends AbstractDAVSubscri
         newContactFolder.setFolderName(addressBook.getDisplayName());
         newContactFolder.setModule(FolderObject.CONTACT);
         OCLPermission permission = new OCLPermission();
-        permission.setEntity(subscription.getSession().getUserId());
+        permission.setEntity(null != subscription.getSession() ? subscription.getSession().getUserId() : -1);
         permission.setGroupPermission(false);
         permission.setAllPermission(OCLPermission.CREATE_SUB_FOLDERS, OCLPermission.READ_ALL_OBJECTS, OCLPermission.WRITE_ALL_OBJECTS, OCLPermission.DELETE_ALL_OBJECTS);
         permission.setFolderAdmin(true);

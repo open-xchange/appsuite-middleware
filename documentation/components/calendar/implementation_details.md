@@ -663,32 +663,14 @@ As noted above in "Migration of legacy data", the database will work temporarily
 
 # Import and Export
 
-When importing or exporting calendar the data is truncated. This chapter describes under which circumstances the data is truncated.
+This chapter will describe the impact on calendar data during an import or an export of an calendar. 
 
 ## Import
 
-During the import attendees and the organizer will be replaced by the user importing the event or the calendar. This is mainly done to avoid conflicts and unwanted invite or accept mails. There are three cases that lead to this decision:
+During the import all information about attendees and the organizer will be ignored. The following case that lead to this decision.  
 
-### No organizer set
-The event that is being imported doesn't have an organizer. Therefore the user importing the event becomes the new organizer. To be formally correct the organizer must inform all attendees with an invitation mail to the new event. This generates mails to an event that already exists and hosted somewhere.
-
-### External organizer
-The event to be imported is organized by an external. To notify the organizer of the users status a mail must be sent, letting the user automatically become a party crasher. 
-
-### Internal organizer
-The event to import is organized by another internal user. Therefore the event should already be created and the user should be added to this existing event. This operation can't be performed because only the organizer is allowed to modify an event.
+Lets consider the case that the event is organized by another entity than the user importing the event. Furthermore lets assume the user importing isn't attending the event (normally this is handled via iTIP or other internal mechanisms). Based on our current concept of "personal" calendar folders of internal user (see [Group-scheduled Events](#group-scheduled-events)) we aren't able to save the event without saving the current user as attendee. This means that the user would always become a 'party-crasher'. To avoid this the only feasible way is to remove the organizer. The attendees then get removed avoid the impression that the event was taken over by a new organizer. 
 
 
 ## Export
-
-Due privacy concerns and the above sketched problems with importing data, exporting a calendar or a single event will truncate some of the data. There a three different cases handled.
-
-### Calendar user is the organizer
-The user is the organizer of the event but not an attendee. The user might have no relationship to the attendees and only created the event on behalf of someone else. Therefore the attendees aren't added to the exported event. 
-
-### Calendar user is attendee
-Besides optional others attendees the user is an attendee of the event. To not expose other attendees those optinal other attendees are removed on the exported event.
-
-### Calendar user isn't attendee
-This case can happen in shared or public calendars. The user can at least see the event but isn't part of the event in any other way. Therefore neither the attendees nor the organizer is added to the exported event.
-
+The export will only touch so called 'pseudo group scheduled' events. Events that are only attended by the organizer herself are considered 'pseudo group scheduled'. Those events will be exported without the organizer and the attendee information as those are only persisted to legacy reasons (see [Group-scheduled Events](#group-scheduled-events)). 

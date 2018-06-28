@@ -94,10 +94,13 @@ public class HazelcastUpgradeActivator extends HousekeepingActivator {
         ClientConfig clientConfig = getConfig(getService(ConfigurationService.class));
         if (null != clientConfig) {
             UpgradedCacheListener cacheListener = new UpgradedCacheListener(clientConfig);
-            String region = UpgradedCacheListener.CACHE_REGION;
-            LOG.warn("Listening to events for cache region \"{}\". " +
-                "Please remember to uninstall this package once all nodes in the cluster have been upgraded.", region);
-            getService(com.openexchange.caching.events.CacheEventService.class).addListener(region, cacheListener);
+            String region1 = UpgradedCacheListener.CACHE_REGION_CONTEXT;
+            String region2 = UpgradedCacheListener.CACHE_REGION_SCHEMA_STORE;
+            LOG.warn("Listening to events for cache regions \"{}\" and \"{}\". " +
+                "Please remember to uninstall this package once all nodes in the cluster have been upgraded.", region1, region2);
+            CacheEventService cacheEventService = getService(com.openexchange.caching.events.CacheEventService.class);
+            cacheEventService.addListener(region1, cacheListener);
+            cacheEventService.addListener(region2, cacheListener);
             this.cacheListener = cacheListener;
         }
     }
@@ -109,7 +112,10 @@ public class HazelcastUpgradeActivator extends HousekeepingActivator {
         if (null != cacheListener) {
             CacheEventService cacheEventService = getService(com.openexchange.caching.events.CacheEventService.class);
             if (null != cacheEventService) {
-                cacheEventService.removeListener(cacheListener);
+                String region1 = UpgradedCacheListener.CACHE_REGION_CONTEXT;
+                String region2 = UpgradedCacheListener.CACHE_REGION_SCHEMA_STORE;
+                cacheEventService.removeListener(region1, cacheListener);
+                cacheEventService.removeListener(region2, cacheListener);
             }
             this.cacheListener = null;
         }

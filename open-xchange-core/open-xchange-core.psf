@@ -143,6 +143,7 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.message.timeline"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.messaging"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.metrics"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.metrics.dropwizard"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.modules.json"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.modules.model"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.modules.storage"/>
@@ -242,6 +243,7 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.websockets.monitoring"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.xml"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.squareup.okhttp3"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,de.l3s.boilerpipe"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,documentation-generic"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,documentation-tools"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,javapns.notification.management"/>

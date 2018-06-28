@@ -453,6 +453,17 @@ public final class SQL {
         }
         return null;
     }
+    
+
+    @Nullable
+    public static Mapper<?> mapFromExternalParticipantsColumn(String columnName) {
+        for (final Mapper<?> mapper : ParticipantMapping.EXTERNAL_MAPPERS) {
+            if (mapper.getDBColumnName().equals(columnName)) {
+                return mapper;
+            }
+        }
+        return null;
+    }
 
     static {
         final StringBuilder selectAll = new StringBuilder();

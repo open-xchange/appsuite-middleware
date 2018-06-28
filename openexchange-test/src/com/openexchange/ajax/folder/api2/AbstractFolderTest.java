@@ -93,6 +93,7 @@ public class AbstractFolderTest extends AbstractAJAXSession {
         super();
     }
 
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
@@ -249,7 +250,7 @@ public class AbstractFolderTest extends AbstractAJAXSession {
         }
         CommonDeleteResponse deleteResponse = client.executeSafe(deleteRequest);
         JSONArray failures = (JSONArray) deleteResponse.getData();
-        assertTrue(failures.isEmpty());
+        assertTrue("Deletion contained failures: " + failures.toString(), failures.isEmpty());
     }
 
     /**

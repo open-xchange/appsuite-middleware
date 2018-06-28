@@ -53,9 +53,11 @@ import static com.openexchange.osgi.Tools.requireService;
 import com.openexchange.chronos.provider.composition.IDBasedCalendarAccess;
 import com.openexchange.chronos.provider.composition.IDBasedCalendarAccessFactory;
 import com.openexchange.chronos.service.CalendarParameters;
+import com.openexchange.dav.DAVProtocol;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
+import com.openexchange.tools.webdav.WebDAVRequestContext;
 
 /**
  * {@link CalendarAccessOperation}
@@ -114,6 +116,7 @@ public abstract class CalendarAccessOperation<T> {
         calendarAccess.set(CalendarParameters.PARAMETER_IGNORE_STORAGE_WARNINGS, Boolean.TRUE);
         calendarAccess.set(CalendarParameters.PARAMETER_TRACK_ATTENDEE_USAGE, Boolean.TRUE);
         calendarAccess.set(CalendarParameters.PARAMETER_IGNORE_FORBIDDEN_ATTENDEE_CHANGES, Boolean.TRUE);
+        applySuppressScheduleReply(calendarAccess);
         return calendarAccess;
     }
 
@@ -124,5 +127,21 @@ public abstract class CalendarAccessOperation<T> {
      * @return The result
      */
     protected abstract T perform(IDBasedCalendarAccess access) throws OXException;
+
+    /**
+     * Configures the supplied calendar access instance to suppress scheduling message for the current operation, based on the value of
+     * the supplied <code>Schedule-Reply</code>-header of the underlying request.
+     *
+     * @see <a href="https://tools.ietf.org/html/rfc6638#section-8.1">RFC 6638, section 8.1</a>
+     */
+    private static void applySuppressScheduleReply(IDBasedCalendarAccess access) {
+        /*
+         * evaluate "Schedule-Reply" header if present, then set calendar parameter accordingly
+         */
+        WebDAVRequestContext requestContext = DAVProtocol.getRequestContext();
+        if (null != requestContext && "F".equals(requestContext.getHeader("Schedule-Reply"))) {
+            access.set(CalendarParameters.PARAMETER_SUPPRESS_ITIP, Boolean.TRUE);
+        }
+    }
 
 }

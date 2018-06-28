@@ -128,6 +128,15 @@ public class Compat {
             event = adjustRecurrenceForMasterAfterLoad(eventStorage, event);
         } else if (null != event.getSeriesId() && false == event.getSeriesId().equals(event.getId())) {
             event = adjustRecurrenceForExceptionAfterLoad(eventStorage, connection, event);
+        } else {
+            /*
+             * ensure to remove any recurrence remnants for non series events
+             */
+            event.removeRecurrenceRule();
+            event.removeSeriesId();
+            event.removeRecurrenceId();
+            event.removeChangeExceptionDates();
+            event.removeDeleteExceptionDates();
         }
         /*
          * enhance organizer with static properties

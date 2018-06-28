@@ -63,10 +63,10 @@ public class CreatePositionsTable extends AbstractCreateTableImpl {
     protected String[] getCreateStatements() {
         return new String[]{"CREATE TABLE uwaWidgetPosition "
             + "(cid INT4 UNSIGNED NOT NULL, user INT4 UNSIGNED NOT NULL, "
-            + "id VARCHAR(128) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL, "
-            + "adj TEXT CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL, "
+            + "id VARCHAR(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL, "
+            + "adj TEXT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL, "
             + "PRIMARY KEY (cid, user, id))  "
-            + "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci"};
+            + "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci"};
     }
 
     @Override

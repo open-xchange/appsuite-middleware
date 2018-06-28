@@ -62,6 +62,7 @@ import com.openexchange.file.storage.FileStorageAccountDeleteListener;
 import com.openexchange.file.storage.FileStorageAccountManagerProvider;
 import com.openexchange.file.storage.FileStorageService;
 import com.openexchange.file.storage.rdb.Services;
+import com.openexchange.file.storage.rdb.groupware.FileStorageConvertUtf8ToUtf8mb4Task;
 import com.openexchange.file.storage.rdb.groupware.FileStorageRdbCreateTableTask;
 import com.openexchange.file.storage.rdb.groupware.FileStorageRdbDeleteListener;
 import com.openexchange.file.storage.rdb.internal.CachingFileStorageAccountStorage;
@@ -69,6 +70,7 @@ import com.openexchange.file.storage.rdb.internal.DeleteListenerRegistry;
 import com.openexchange.file.storage.rdb.internal.RdbFileStorageAccountManagerProvider;
 import com.openexchange.file.storage.rdb.secret.RdbFileStorageSecretHandling;
 import com.openexchange.file.storage.registry.FileStorageServiceRegistry;
+import com.openexchange.folderstorage.cache.service.FolderCacheInvalidationService;
 import com.openexchange.groupware.delete.DeleteListener;
 import com.openexchange.groupware.update.DefaultUpdateTaskProviderService;
 import com.openexchange.groupware.update.UpdateTaskProviderService;
@@ -103,7 +105,7 @@ public class FileStorageRdbActivator extends HousekeepingActivator {
     protected Class<?>[] getNeededServices() {
         return new Class<?>[] {
             DatabaseService.class, GenericConfigurationStorageService.class, ContextService.class, FileStorageServiceRegistry.class,
-            CacheService.class, SecretEncryptionFactoryService.class, IDGeneratorService.class, CryptoService.class };
+            CacheService.class, SecretEncryptionFactoryService.class, IDGeneratorService.class, CryptoService.class, FolderCacheInvalidationService.class };
     }
 
     @Override
@@ -151,7 +153,7 @@ public class FileStorageRdbActivator extends HousekeepingActivator {
              * The update task/create table service
              */
             final FileStorageRdbCreateTableTask createTableTask = new FileStorageRdbCreateTableTask();
-            registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(createTableTask));
+            registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(createTableTask, new FileStorageConvertUtf8ToUtf8mb4Task()));
             registerService(CreateTableService.class, createTableTask);
             /*
              * The delete listener

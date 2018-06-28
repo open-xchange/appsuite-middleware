@@ -114,7 +114,7 @@ public class TaskResource extends CalDAVResource<Task> {
         checkForExplicitRemoves(originalTask, taskToSave);
         TaskPatches.Incoming.adjustTaskStatus(originalTask, taskToSave);
         TaskPatches.Incoming.adjustTaskStart(originalTask, taskToSave);
-        getTaskInterface().updateTaskObject(taskToSave, parentFolderID, object.getLastModified());
+        getTaskInterface().updateTaskObject(taskToSave, getId(parent), object.getLastModified());
         handleAttachments(originalTask, taskToSave);
     }
 
@@ -126,7 +126,7 @@ public class TaskResource extends CalDAVResource<Task> {
     @Override
     protected void createObject() throws OXException {
         taskToSave.removeObjectID(); // in case it's already assigned due to retry operations
-        taskToSave.setParentFolderID(null != object ? object.getParentFolderID() : parentFolderID);
+        taskToSave.setParentFolderID(null != object ? object.getParentFolderID() : getId(parent));
         getTaskInterface().insertTaskObject(taskToSave);
         handleAttachments(null, taskToSave);
     }
@@ -136,7 +136,7 @@ public class TaskResource extends CalDAVResource<Task> {
         final Task task = new Task();
         task.setObjectID(object.getObjectID());
         task.setParentFolderID(Tools.parse(target.getFolder().getID()));
-        getTaskInterface().updateTaskObject(task, parentFolderID, object.getLastModified());
+        getTaskInterface().updateTaskObject(task, getId(parent), object.getLastModified());
     }
 
     @Override
@@ -162,7 +162,7 @@ public class TaskResource extends CalDAVResource<Task> {
                 taskToSave.setObjectID(object.getObjectID());
                 taskToSave.removeUid();
             } else {
-                taskToSave.setParentFolderID(parentFolderID);
+                taskToSave.setParentFolderID(getId(parent));
             }
         }
     }

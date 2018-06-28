@@ -111,9 +111,9 @@
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.file.storage.composition"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.filestore"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.filestore.impl"/>
-	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/org.eclipse.osgi_3.12.50.v20170928-1321.jar"/>
-	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/org.eclipse.osgi.services_3.6.0.v20170228-1906.jar"/>
-	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/org.eclipse.osgi.util_3.4.0.v20170111-1608.jar"/>
+	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/org.eclipse.osgi_3.13.0.v20180409-1500.jar" sourcepath="/com.openexchange.bundles/source/org.eclipse.osgi.source_3.13.0.v20180409-1500.jar"/>
+	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/org.eclipse.osgi.services_3.7.0.v20180223-1712.jar"/>
+	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/org.eclipse.osgi.util_3.5.0.v20180219-1511.jar"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.sessionstorage"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.cluster.timer"/>
 	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/org.apache.commons.io_2.2.0.v201405211200.jar"/>
@@ -195,5 +195,7 @@
 	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/joda-time-2.9.9.jar"/>
 	<classpathentry kind="lib" path="/org.apache.tika/lib/tika-core-1.18.jar" sourcepath="/org.apache.tika/lib/source/tika-core-1.18-sources.jar"/>
 	<classpathentry kind="lib" path="/org.apache.tika/lib/tika-parsers-1.18.jar" sourcepath="/org.apache.tika/lib/source/tika-parsers-1.18-sources.jar"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.http.client"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.sms.tools"/>
 	<classpathentry kind="output" path="build"/>
 </classpath>

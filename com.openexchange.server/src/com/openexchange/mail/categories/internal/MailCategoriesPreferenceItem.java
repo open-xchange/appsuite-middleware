@@ -202,7 +202,10 @@ public class MailCategoriesPreferenceItem implements PreferencesItemService, Con
 
                     boolean featureEnabled = config.getBoolean(FIELD_FEATURE_ENABLED);
                     if (!service.isForced(session)) {
-                        service.enable(session, featureEnabled);
+                        boolean isFeatureEnabled = service.isEnabled(session);
+                        if (isFeatureEnabled != featureEnabled) {
+                            service.enable(session, featureEnabled);
+                        }
                     }
 
                     JSONArray mailCategories = getType(config.get(FIELD_LIST), JSONArray.class, setting.getSingleValue(), setting.getName());

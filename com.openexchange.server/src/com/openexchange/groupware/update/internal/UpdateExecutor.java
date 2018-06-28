@@ -49,7 +49,11 @@
 
 package com.openexchange.groupware.update.internal;
 
+import static com.eaio.util.text.HumanTime.exactly;
+import static com.openexchange.database.Databases.autocommit;
+import static com.openexchange.database.Databases.rollback;
 import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -75,6 +79,7 @@ import com.openexchange.groupware.update.UpdaterEventConstants;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.timer.ScheduledTimerTask;
 import com.openexchange.timer.TimerService;
+import com.openexchange.tools.exceptions.ExceptionUtils;
 
 /**
  * {@link UpdateExecutor}
@@ -88,7 +93,7 @@ public final class UpdateExecutor {
     private static final SchemaStore store = SchemaStore.getInstance();
 
     private volatile SchemaUpdateState state;
-    private final int contextId;
+    private final int optContextId;
     private final int poolId;
     private final String schema;
     private final List<UpdateTaskV2> tasks;
@@ -97,13 +102,13 @@ public final class UpdateExecutor {
      * Initializes a new {@link UpdateExecutor}.
      *
      * @param state The schema information
-     * @param contextId The optional context identifier; otherwise <code>0</code> (zero)
+     * @param optContextId The optional context identifier; otherwise <code>0</code> (zero)
      * @param tasks The optional tasks to perform; otherwise <code>null</code> (all tasks will be executed)
      */
-    public UpdateExecutor(SchemaUpdateState state, int contextId, List<UpdateTaskV2> tasks) {
+    public UpdateExecutor(SchemaUpdateState state, int optContextId, List<UpdateTaskV2> tasks) {
         super();
         this.state = state;
-        this.contextId = contextId;
+        this.optContextId = optContextId;
         this.tasks = tasks;
         this.poolId = state.getPoolId();
         this.schema = state.getSchema();
@@ -212,22 +217,26 @@ public final class UpdateExecutor {
 
             // Perform updates
             int poolId = this.poolId;
-            AbstractConnectionProvider connectionProvider = contextId > 0 ? new ContextConnectionProvider(contextId) : new PoolAndSchemaConnectionProvider(poolId, schema);
+            AbstractConnectionProvider connectionProvider = optContextId > 0 ? new ContextConnectionProvider(optContextId) : new PoolAndSchemaConnectionProvider(poolId, schema);
             try {
+                long startNanos;
+                long durMillis;
                 for (final UpdateTaskV2 task : scheduled) {
                     final String taskName = task.getClass().getSimpleName();
                     boolean success = false;
+                    startNanos = System.nanoTime();
                     try {
                         LOG.info("Starting update task {} on schema {}.", taskName, state.getSchema());
                         ProgressState logger = new ProgressStatusImpl(taskName, state.getSchema());
-                        PerformParameters params = new PerformParametersImpl(state, connectionProvider, contextId, logger);
+                        PerformParameters params = new PerformParametersImpl(state, connectionProvider, optContextId, logger);
                         task.perform(params);
                         success = true;
                     } catch (final OXException e) {
                         LOG.error("", e);
                     }
+                    durMillis = TimeUnit.MILLISECONDS.convert(System.nanoTime() - startNanos, TimeUnit.NANOSECONDS);
                     if (success) {
-                        LOG.info("Update task {} on schema {} done.", taskName, state.getSchema());
+                        LOG.info("Update task {} on schema {} done ({}).", taskName, state.getSchema(), exactly(durMillis, true));
                     } else {
                         if (throwExceptionOnFailure) {
                             throw SchemaExceptionCodes.TASK_FAILED.create(taskName, state.getSchema());
@@ -235,9 +244,9 @@ public final class UpdateExecutor {
                         if (null != failures) {
                             failures.offer(new TaskInfo(taskName, state.getSchema()));
                         }
-                        LOG.error("Update task {} on schema {} failed.", taskName, state.getSchema());
+                        LOG.error("Update task {} on schema {} failed ({}).", taskName, state.getSchema(), exactly(durMillis, true));
                     }
-                    addExecutedTask(task.getClass().getName(), success, poolId, state.getSchema());
+                    addExecutedTask(task.getClass().getName(), success, poolId, state.getSchema(), connectionProvider.getConnection());
                 }
             } finally {
                 connectionProvider.close();
@@ -259,6 +268,7 @@ public final class UpdateExecutor {
         } catch (final OXException e) {
             throw e;
         } catch (final Throwable t) {
+            ExceptionUtils.handleThrowable(t);
             throw UpdateExceptionCodes.UPDATE_FAILED.create(t, state.getSchema(), t.getMessage());
         } finally {
             // Stop timer task
@@ -294,16 +304,38 @@ public final class UpdateExecutor {
         return store.tryRefreshSchemaLock(state, !blocking);
     }
 
-    private final void addExecutedTask(String taskName, boolean success, int poolId, String schema) throws OXException {
-        store.addExecutedTask(taskName, success, poolId, schema);
+    private final void addExecutedTask(String taskName, boolean success, int poolId, String schema, Connection con) throws OXException {
+        int rollback = 0;
+        try {
+            con.setAutoCommit(false);
+            rollback = 1;
+
+            store.addExecutedTask(con, taskName, success, poolId, schema);
+
+            con.commit();
+            rollback = 2;
+        } catch (SQLException e) {
+            throw SchemaExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
+        } finally {
+            if (rollback > 0) {
+                if (rollback == 1) {
+                    rollback(con);
+                }
+                autocommit(con);
+            }
+        }
     }
 
     private final void removeContexts() throws OXException {
+        int[] contextIds = determineContextIds();
+        ContextStorage.getInstance().invalidateContexts(contextIds);
+    }
+
+    private final int[] determineContextIds() throws OXException {
         DatabaseService databaseService = Database.getDatabaseService();
         Connection con = databaseService.getReadOnly();
         try {
-            int[] contextIds = databaseService.getContextsInSchema(con, poolId, schema);
-            ContextStorage.getInstance().invalidateContexts(contextIds);
+            return databaseService.getContextsInSchema(con, poolId, schema);
         } finally {
             databaseService.backReadOnly(con);
         }

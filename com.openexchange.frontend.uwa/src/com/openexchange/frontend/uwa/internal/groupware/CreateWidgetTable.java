@@ -64,7 +64,7 @@ public class CreateWidgetTable extends AbstractCreateTableImpl {
         return new String[]{"CREATE TABLE uwaWidget "
             + "(cid INT4 UNSIGNED NOT NULL, "
             + "user INT4 UNSIGNED DEFAULT null, "
-            + "id VARCHAR(128) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL, "
+            + "id VARCHAR(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL, "
             + "autorefresh BOOL, "
             + "standalone BOOL, "
             + "title VARCHAR(128), "
@@ -74,7 +74,7 @@ public class CreateWidgetTable extends AbstractCreateTableImpl {
             + "parameters TEXT, "
             + "PRIMARY KEY (cid, id), "
             + "INDEX (cid, user)) "
-            + "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci"};
+            + "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci"};
     }
 
     @Override

@@ -211,6 +211,7 @@ public class DeletePerformer extends AbstractUpdatePerformer {
                     /*
                      * update series master in storage & track results
                      */
+                    eventUpdate.setSequence(originalEvent.getSequence() + 1);
                     Consistency.setModified(session, timestamp, eventUpdate, session.getUserId());
                     storage.getEventStorage().updateEvent(eventUpdate);
                     Event updatedEvent = loadEventData(originalEvent.getId());
@@ -318,6 +319,7 @@ public class DeletePerformer extends AbstractUpdatePerformer {
             if (changeExceptionDates.remove(recurrenceId)) {
                 eventUpdate.setChangeExceptionDates(changeExceptionDates);
             }
+            eventUpdate.setSequence(originalMasterEvent.getSequence() + 1);
             Consistency.setModified(session, timestamp, eventUpdate, calendarUserId);
             storage.getEventStorage().updateEvent(eventUpdate);
             Event updatedMasterEvent = loadEventData(originalMasterEvent.getId());

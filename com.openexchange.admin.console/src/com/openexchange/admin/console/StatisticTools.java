@@ -124,6 +124,9 @@ public class StatisticTools extends AbstractJMXTools {
     private static final char OPT_DOCUMENTCONVERTER_STATS_SHORT = 'y';
     private static final String OPT_DOCUMENTCONVERTER_STATS_LONG = "documentconverterstats";
 
+    private static final char OPT_IMAGECONVERTER_STATS_SHORT = 'I';
+    private static final String OPT_IMAGECONVERTER_STATS_LONG = "imageconverterstats";
+
     private static final char OPT_OFFICE_STATS_SHORT = 'f';
     private static final String OPT_OFFICE_STATS_LONG = "officestats";
 
@@ -168,6 +171,7 @@ public class StatisticTools extends AbstractJMXTools {
     private CLIOption pnsStats = null;
     private CLIOption webSocketStats = null;
     private CLIOption documentconverterstats = null;
+    private CLIOption imageconverterstats = null;
     private CLIOption officestats = null;
     private CLIOption eventadminstats = null;
     private CLIOption generalstats = null;
@@ -296,6 +300,10 @@ public class StatisticTools extends AbstractJMXTools {
         }
         if (null != parser.getOptionValue(this.documentconverterstats) && 0 == count) {
             System.out.print(showDocumentConverterData(mbc));
+            count++;
+        }
+        if (null != parser.getOptionValue(this.imageconverterstats) && 0 == count) {
+            System.out.print(showImageConverterData(mbc));
             count++;
         }
         if (null != parser.getOptionValue(this.officestats) && 0 == count) {
@@ -563,6 +571,13 @@ public class StatisticTools extends AbstractJMXTools {
             "shows the documentconverter stats",
             false,
             NeededQuadState.notneeded);
+        this.imageconverterstats = setShortLongOpt(
+            parser,
+            OPT_IMAGECONVERTER_STATS_SHORT,
+            OPT_IMAGECONVERTER_STATS_LONG,
+            "shows the imageconverter stats",
+            false,
+            NeededQuadState.notneeded);
         this.officestats = setShortLongOpt(
             parser,
             OPT_OFFICE_STATS_SHORT,
@@ -815,6 +830,10 @@ public class StatisticTools extends AbstractJMXTools {
 
     static String showDocumentConverterData(final MBeanServerConnection mbeanServerConnection) throws InstanceNotFoundException, AttributeNotFoundException, IntrospectionException, MBeanException, ReflectionException, IOException, MalformedObjectNameException, NullPointerException {
         return getStats(mbeanServerConnection, "com.openexchange.documentconverter:name=DocumentConverterInformation").toString();
+    }
+
+    static String showImageConverterData(final MBeanServerConnection mbeanServerConnection) throws InstanceNotFoundException, AttributeNotFoundException, IntrospectionException, MBeanException, ReflectionException, IOException, MalformedObjectNameException, NullPointerException {
+        return getStats(mbeanServerConnection, "com.openexchange.imageconverter:name=ImageConverterMonitoring").toString();
     }
 
     static String showOfficeData(final MBeanServerConnection mbeanServerConnection) throws InstanceNotFoundException, AttributeNotFoundException, IntrospectionException, MBeanException, ReflectionException, IOException, MalformedObjectNameException, NullPointerException {

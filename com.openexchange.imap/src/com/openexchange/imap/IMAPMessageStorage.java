@@ -177,6 +177,7 @@ import com.openexchange.mail.utils.MessageUtility;
 import com.openexchange.mail.uuencode.UUEncodedMultiPart;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountStorageService;
+import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.session.Session;
 import com.openexchange.spamhandler.SpamHandler;
 import com.openexchange.spamhandler.SpamHandlerRegistry;
@@ -439,10 +440,15 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
      * @throws OXException If mail account cannot be returned
      */
     protected MailAccount getMailAccount() throws OXException {
+        MailAccount mailAccount = this.mailAccount;
         if (mailAccount == null) {
             try {
                 final MailAccountStorageService storageService = Services.getService(MailAccountStorageService.class);
+                if (null == storageService) {
+                    throw ServiceExceptionCode.absentService(MailAccountStorageService.class);
+                }
                 mailAccount = storageService.getMailAccount(accountId, session.getUserId(), session.getContextId());
+                this.mailAccount = mailAccount;
             } catch (final RuntimeException e) {
                 throw handleRuntimeException(e);
             }
@@ -1991,10 +1997,13 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                         if (length > 0) {
                             System.arraycopy(unflaggedSeqNums, 0, sortedSeqNums, 0, length);
                         }
-
                         numToCopy -= length;
                         if (numToCopy > 0) {
-                            System.arraycopy(flaggedSeqNums, 0, sortedSeqNums, length, numToCopy);
+                            int start = fromIndex - unflaggedSeqNums.length;
+                            if (start < 0) {
+                                start = 0;
+                            }
+                            System.arraycopy(flaggedSeqNums, start, sortedSeqNums, length, numToCopy);
                         }
                     } else {
                         int length = Math.min(flaggedSeqNums.length - fromIndex, numToCopy);
@@ -2004,10 +2013,13 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                         if (length > 0) {
                             System.arraycopy(flaggedSeqNums, 0, sortedSeqNums, 0, length);
                         }
-
                         numToCopy -= length;
                         if (numToCopy > 0) {
-                            System.arraycopy(unflaggedSeqNums, 0, sortedSeqNums, length, numToCopy);
+                            int start = fromIndex - flaggedSeqNums.length;
+                            if (start < 0) {
+                                start = 0;
+                            }
+                            System.arraycopy(unflaggedSeqNums, start, sortedSeqNums, length, numToCopy);
                         }
                     }
                 }

@@ -99,11 +99,6 @@ public class Bug18482Test_ByteOrderMarkOnUtf8 extends AbstractManagedContactTest
     }
 
     @Test
-    public void testUTF32LE() throws Exception {
-        testWithBOM("UTF-32LE", 0xFF, 0xFE, 0x00, 0x00);
-    }
-
-    @Test
     public void testUTF32BE() throws Exception {
         testWithBOM("UTF-32BE", 0x00, 0x00, 0xFE, 0xFF);
     }

@@ -218,7 +218,7 @@ public final class DeleteAction extends AbstractFolderAction {
                     if(response == null){
                         response = folderService.deleteFolder(treeId, folderId, timestamp, session, decorator);
                         if(extendedResponse){
-                            trashResults.add(new TrashResult(folderId, false));
+                            trashResults.add(TrashResult.createUnsupportedTrashResult());
                         }
                     } else {
                         trashResults.add((TrashResult)response.getResponse());

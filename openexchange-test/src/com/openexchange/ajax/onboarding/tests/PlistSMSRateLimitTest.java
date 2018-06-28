@@ -49,19 +49,13 @@
 
 package com.openexchange.ajax.onboarding.tests;
 
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
-import org.json.JSONException;
-import org.json.JSONObject;
 import org.junit.Test;
-import com.openexchange.ajax.onboarding.actions.ExecuteRequest;
-import com.openexchange.ajax.onboarding.actions.OnboardingTestResponse;
 import com.openexchange.client.onboarding.OnboardingExceptionCodes;
-import com.openexchange.exception.OXException;
 import com.openexchange.sms.SMSExceptionCode;
+import com.openexchange.testing.httpclient.invoker.ApiException;
+import com.openexchange.testing.httpclient.models.CommonResponse;
 
 /**
  * {@link PlistSMSRateLimitTest}
@@ -72,32 +66,23 @@ import com.openexchange.sms.SMSExceptionCode;
 public class PlistSMSRateLimitTest extends AbstractPlistSMSTest {
 
     @Test
-    public void testRateLimit() throws OXException, IOException, JSONException, InterruptedException {
+    public void testRateLimit() throws InterruptedException, ApiException {
         String jsonString = "{\"sms\":\"+49276183850\"}";
-        JSONObject body = new JSONObject(jsonString);
 
-        ExecuteRequest req = new ExecuteRequest("apple.iphone/mailsync", "sms", body, false);
-        OnboardingTestResponse response = getAjaxClient().execute(req);
-        assertNotNull("Response is empty!", response);
-        assertNotNull("Unexpected response from the server! Response does not contain an exception.", response.getException());
+        CommonResponse response = onboardingApi.executeClientOnboarding(getSessionId(), "apple.iphone/mailsync", "sms", jsonString);
         // Expecting an sipgate authorization exception
-        assertTrue("Unexpected response from the server! Response does contain a wrong exception: " + response.getException().getMessage(), response.getException().similarTo(SMSExceptionCode.NOT_SENT));
+        checkException(response.getCode(), SMSExceptionCode.NOT_SENT);
 
+        response = onboardingApi.executeClientOnboarding(getSessionId(), "apple.iphone/mailsync", "sms", jsonString);
         // Expecting an SENT_QUOTA_EXCEEDED exeption
-        response = getAjaxClient().execute(req);
-        assertNotNull("Response is empty!", response);
-        assertNotNull("Unexpected response from the server! Response does not contain an exception.", response.getException());
-        // Expecting an sipgate authorization exception
-        assertTrue("Unexpected response from the server! Response does contain a wrong exception: " + response.getException().getMessage(), response.getException().similarTo(OnboardingExceptionCodes.SENT_QUOTA_EXCEEDED));
+        checkException(response.getCode(), OnboardingExceptionCodes.SENT_QUOTA_EXCEEDED);
 
-        // Wait until user should be able to send sms again 
+        // Wait until user should be able to send sms again
         Thread.sleep(11000);
 
-        response = getAjaxClient().execute(req);
-        assertNotNull("Response is empty!", response);
-        assertNotNull("Unexpected response from the server! Response does not contain an exception.", response.getException());
+        response = onboardingApi.executeClientOnboarding(getSessionId(), "apple.iphone/mailsync", "sms", jsonString);
         // Expecting an sipgate authorization exception
-        assertTrue("Unexpected response from the server! Response does contain a wrong exception: " + response.getException().getMessage(), response.getException().similarTo(SMSExceptionCode.NOT_SENT));
+        checkException(response.getCode(), SMSExceptionCode.NOT_SENT);
     }
 
     @Override
@@ -106,6 +91,11 @@ public class PlistSMSRateLimitTest extends AbstractPlistSMSTest {
         map.put("com.openexchange.sms.userlimit.enabled", String.valueOf(false));
         map.put("com.openexchange.client.onboarding.sms.ratelimit", String.valueOf(10000));
         return map;
+    }
+
+    @Override
+    protected String getScope() {
+        return "user";
     }
 
 }

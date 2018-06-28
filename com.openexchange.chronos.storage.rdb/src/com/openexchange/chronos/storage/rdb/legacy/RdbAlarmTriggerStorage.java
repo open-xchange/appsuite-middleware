@@ -417,8 +417,8 @@ public class RdbAlarmTriggerStorage extends RdbStorage implements AlarmTriggerSt
     }
 
     @Override
-    public void deleteAllTriggers() throws OXException {
-        // TODO Auto-generated method stub
+    public boolean deleteAllTriggers() throws OXException {
+        throw new UnsupportedOperationException();
     }
 
     @Override

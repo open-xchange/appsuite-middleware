@@ -49,7 +49,6 @@
 
 package com.openexchange.metrics.jmx.beans;
 
-import com.codahale.metrics.Counter;
 import com.openexchange.management.MBeanMethodAnnotation;
 
 /**

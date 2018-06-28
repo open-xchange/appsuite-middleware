@@ -100,6 +100,7 @@ import com.openexchange.importexport.formats.Format;
 import com.openexchange.importexport.formats.csv.CSVLibrary;
 import com.openexchange.importexport.formats.csv.ContactFieldMapper;
 import com.openexchange.importexport.osgi.ImportExportServices;
+import com.openexchange.java.CharsetDetector;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
@@ -185,10 +186,10 @@ public class CSVContactImporter extends AbstractImporter {
         if (!canImport(sessObj, format, folders, optionalParams)) {
             throw ImportExportExceptionCodes.CANNOT_IMPORT.create(folder, format);
         }
-        
+
         int limit = getLimit(sessObj);
         List<List<String>> csv = loadCSVFromStream(is, optionalParams, limit);
-        
+
         List<String> fields = csv.get(0);
         if (!passesSanityTestForDisplayName(fields)) {
             throw ImportExportExceptionCodes.NO_FIELD_FOR_NAMING.create();
@@ -199,7 +200,7 @@ public class CSVContactImporter extends AbstractImporter {
         final List<Contact> contacts = getContactsFromIntentions(limit, intentions);
 
         final List<OXException> errors = new LinkedList<>();
-        
+
         insertOrUpdateContacts(sessObj, folder, contacts, errors);
 
         // Build result list
@@ -236,7 +237,7 @@ public class CSVContactImporter extends AbstractImporter {
         }
         return csv;
     }
-    
+
     private List<ImportIntention> loadIntentions(final ServerSession sessObj, final String folder, List<List<String>> csv, List<String> fields) {
         final List<ImportIntention> intentions;
         final int size = csv.size();
@@ -250,7 +251,7 @@ public class CSVContactImporter extends AbstractImporter {
         }
         return intentions;
     }
-    
+
     private List<Contact> getContactsFromIntentions(int limit, final List<ImportIntention> intentions) {
         int count = 0;
         // Build a list of contacts to insert
@@ -267,13 +268,21 @@ public class CSVContactImporter extends AbstractImporter {
         }
         return contacts;
     }
-    
+
     private void insertOrUpdateContacts(final ServerSession sessObj, final String folder, final List<Contact> contacts, final List<OXException> errors) throws OXException {
         final FolderUpdaterRegistry updaterRegistry = ImportExportServices.getUpdaterRegistry();
         final TargetFolderDefinition target = new TargetFolderDefinition(folder, sessObj.getUserId(), sessObj.getContext());
         final FolderUpdaterService<Contact> folderUpdater = updaterRegistry.getFolderUpdater(target);
-        if (folderUpdater == null) {
-            throw ImportExportExceptionCodes.CANNOT_IMPORT.create();
+        {
+            if (folderUpdater == null) {
+                throw ImportExportExceptionCodes.CANNOT_IMPORT.create();
+            }
+            SearchIteratorDelegator<Contact> searchIterator = new SearchIteratorDelegator<>(contacts);
+            if (folderUpdater instanceof FolderUpdaterServiceV2) {
+                ((FolderUpdaterServiceV2<Contact>) folderUpdater).save(searchIterator, target, errors);
+            } else {
+                folderUpdater.save(searchIterator, target);
+            }
         }
         SearchIteratorDelegator<Contact> searchIterator = new SearchIteratorDelegator<>(contacts);
         if (folderUpdater instanceof FolderUpdaterServiceV2) {
@@ -282,8 +291,9 @@ public class CSVContactImporter extends AbstractImporter {
             folderUpdater.save(searchIterator, target);
         }
     }
-    
+
     private boolean prepareResults(final String folder, final List<ImportIntention> intentions, final List<OXException> errors, final List<ImportResult> results) {
+        // Build result list
         boolean exceeds = false;
         for (final ImportIntention intention : intentions) {
             final boolean notNull = intention.contact != null;
@@ -444,23 +454,23 @@ public class CSVContactImporter extends AbstractImporter {
     public ContactSwitcher getContactSwitcher(Locale locale) {
         final ContactSwitcherForSimpleDateFormat dateSwitch = new ContactSwitcherForSimpleDateFormat();
         dateSwitch.addDateFormat(DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.MEDIUM));
-        
+
         final TimeZone utc = TimeZoneUtils.getTimeZone("UTC");
         final SimpleDateFormat df1 = new SimpleDateFormat("dd.MM.yyyy");
         df1.setTimeZone(utc);
 
         final SimpleDateFormat df2 = new SimpleDateFormat("yyyy-MM-dd");
-        df2.setTimeZone(utc);        
-        
+        df2.setTimeZone(utc);
+
         dateSwitch.addDateFormat(df1);
         dateSwitch.addDateFormat(df2);
-        
+
         if (null != locale) {
             final DateFormat df3 = DateFormat.getDateInstance(DateFormat.SHORT, locale);
             df3.setTimeZone(utc);
             dateSwitch.addDateFormat(df3);
-        }             
-        
+        }
+
         final ContactSwitcherForTimestamp timestampSwitch = new ContactSwitcherForTimestamp();
         final ContactSwitcherForBooleans boolSwitch = new ContactSwitcherForBooleans();
         ContactSwitcherForEmailAddresses emailSwitch = new ContactSwitcherForEmailAddresses();
@@ -500,7 +510,7 @@ public class CSVContactImporter extends AbstractImporter {
      */
     private List<List<String>> parse(InputStream input, Charset charset, int maxLines) throws OXException, IOException {
         try (ThresholdFileHolder fileHolder = new ThresholdFileHolder(new FileHolder(input, -1, null, null));){
-            
+
             /*
              * parse the first line using a fixed (client-defined) charset
              */
@@ -529,16 +539,14 @@ public class CSVContactImporter extends AbstractImporter {
      * @return The line-wise parsed input, or <code>null</code> if no appropriate mapper was detected
      */
     protected List<List<String>> parse(InputStream input, int maxLines) throws OXException, IOException {
-        try ( BOMInputStream cleanStream = new BOMInputStream(input, ByteOrderMark.UTF_8, ByteOrderMark.UTF_16BE, ByteOrderMark.UTF_16LE, ByteOrderMark.UTF_32BE, ByteOrderMark.UTF_32LE);){
+        BOMInputStream cleanStream = null;
+        try {
+            cleanStream = new BOMInputStream(input, ByteOrderMark.UTF_8, ByteOrderMark.UTF_16BE, ByteOrderMark.UTF_16LE, ByteOrderMark.UTF_32BE, ByteOrderMark.UTF_32LE);
             cleanStream.mark(Integer.MAX_VALUE);
             /*
              * try to parse using the mapper's native charset as well as the auto-detected one
              */
-            Charset detectedCharset = null;
-            String detectedCharsetName = cleanStream.getBOMCharsetName();
-            if (null != detectedCharsetName) {
-                detectedCharset = Charsets.forName(detectedCharsetName);
-            }
+            Charset detectedCharset = detectCharset(cleanStream);
             /*
              * determine the overall best matching mapper
              */
@@ -589,7 +597,26 @@ public class CSVContactImporter extends AbstractImporter {
                 return java.util.Collections.emptyList();
             }
             return bestParser.parse(readLines(cleanStream, detectedCharset != null ? detectedCharset : bestCharset, false, maxLines));
+        } finally {
+            if (cleanStream != null) {
+                Streams.close(cleanStream);
+            }
+            
         }
+    }
+
+    private Charset detectCharset(BOMInputStream cleanStream) throws IOException {
+        Charset detectedCharset = null;
+        String detectedCharsetName = cleanStream.getBOMCharsetName();
+        if (null != detectedCharsetName) {
+            detectedCharset = Charsets.forName(detectedCharsetName);
+        } else {
+            detectedCharsetName = CharsetDetector.detectCharset(cleanStream, null, true);
+            if (detectedCharsetName != null) {
+                detectedCharset = Charsets.forName(detectedCharsetName);
+            }
+        }
+        return detectedCharset;
     }
 
     public List<List<String>> checkFields(final InputStream input) throws OXException, IOException {
@@ -714,7 +741,11 @@ public class CSVContactImporter extends AbstractImporter {
         for (ContactFieldMapper mapper : mappers) {
             Charset key = Charsets.forName(mapper.getEncoding());
             if (null != key) {
-                List<ContactFieldMapper> value = mappersByCharset.computeIfAbsent(key,  k -> new ArrayList<>());
+                List<ContactFieldMapper> value = mappersByCharset.get(key);
+                if (null == value) {
+                    value = new ArrayList<>();
+                    mappersByCharset.put(key, value);
+                }
                 value.add(mapper);
             }
         }

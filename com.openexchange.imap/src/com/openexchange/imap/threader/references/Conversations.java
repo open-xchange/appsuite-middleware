@@ -55,14 +55,15 @@ import static com.openexchange.imap.util.ImapUtility.prepareImapCommandForLoggin
 import static com.openexchange.mail.MailServletInterface.mailInterfaceMonitor;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import javax.mail.FetchProfile;
 import javax.mail.FetchProfile.Item;
 import javax.mail.MessagingException;
 import javax.mail.UIDFolder;
 import com.openexchange.exception.OXException;
-import com.openexchange.imap.IMAPException;
 import com.openexchange.imap.IMAPServerInfo;
 import com.openexchange.imap.command.MailMessageFetchIMAPCommand;
 import com.openexchange.imap.threadsort.MessageInfo;
@@ -304,10 +305,12 @@ public final class Conversations {
                         return Collections.<Conversation> emptyList();
                     }
                     LogProperties.putProperty(LogProperties.Name.MAIL_COMMAND, prepareImapCommandForLogging(command));
-                    throw new BadCommandException(IMAPException.getFormattedMessage(IMAPException.Code.PROTOCOL_ERROR, command, ImapUtility.appendCommandInfo(response.toString(), imapFolder)));
+                    LogProperties.putProperty(LogProperties.Name.MAIL_FULL_NAME, imapFolder.getFullName());
+                    throw new BadCommandException(response);
                 } else if (response.isNO()) {
                     LogProperties.putProperty(LogProperties.Name.MAIL_COMMAND, prepareImapCommandForLogging(command));
-                    throw new CommandFailedException(IMAPException.getFormattedMessage(IMAPException.Code.PROTOCOL_ERROR, command, ImapUtility.appendCommandInfo(response.toString(), imapFolder)));
+                    LogProperties.putProperty(LogProperties.Name.MAIL_FULL_NAME, imapFolder.getFullName());
+                    throw new CommandFailedException(response);
                 } else {
                     LogProperties.putProperty(LogProperties.Name.MAIL_COMMAND, prepareImapCommandForLogging(command));
                     protocol.handleResult(response);
@@ -356,23 +359,70 @@ public final class Conversations {
      * @return The folded conversations
      */
     public static List<Conversation> fold(final List<Conversation> toFold) {
-        Iterator<Conversation> iter = toFold.iterator();
-        int i = 0;
-        while (iter.hasNext()) {
-            foldInto(iter.next(), iter);
-            iter = toFold.listIterator(++i);
-        }
+        fold(toFold, new HashMap<String, Conversation>(toFold.size()));
         return toFold;
     }
 
-    private static void foldInto(final Conversation conversation, final Iterator<Conversation> iter) {
-        while (iter.hasNext()) {
-            final Conversation other = iter.next();
-            if (conversation.referencesOrIsReferencedBy(other)) {
-                iter.remove();
-                conversation.join(other);
+    private static void fold(final List<Conversation> toFold, Map<String, Conversation> lookupTable) {
+        for (Iterator<Conversation> iter = toFold.iterator(); iter.hasNext();) {
+            Conversation conversation = iter.next();
+
+            boolean removed = false;
+            for (String messageId : conversation.getMessageIds()) {
+                Conversation existing = lookupTable.putIfAbsent(messageId, conversation);
+                if (null != existing && !conversation.equals(existing)) {
+                    if (!removed) {
+                        iter.remove();
+                        removed = true;
+                    }
+                    existing.join(conversation);
+                }
+            }
+
+            for (String reference : conversation.getReferences()) {
+                Conversation existing = lookupTable.putIfAbsent(reference, conversation);
+                if (null != existing && !conversation.equals(existing)) {
+                    if (!removed) {
+                        iter.remove();
+                        removed = true;
+                    }
+                    existing.join(conversation);
+                }
             }
         }
+    }
+
+    /**
+     * Folds specified conversations and adds MaillMessages to the list.
+     *
+     * @param toFold The conversations to fold
+     * @param toMergeWith The List of MaillMessages to be added
+     * @return The folded conversations
+     */
+    public static List<Conversation> foldAndMergeWithList(final List<Conversation> toFold, List<MailMessage> toMergeWith) {
+        HashMap<String, Conversation> lookupTable = new HashMap<String, Conversation>(toFold.size());
+        fold(toFold, lookupTable);
+        for (MailMessage mailMessage : toMergeWith) {
+            String messageId = mailMessage.getMessageId();
+            if (null != messageId) {
+                Conversation conversation = lookupTable.get(messageId);
+                if (null != conversation) {
+                    conversation.addMessage(mailMessage);
+                }
+            }
+
+            String[] references = mailMessage.getReferences();
+            if (null != references) {
+                for (String reference : references) {
+                    Conversation conversation = lookupTable.get(reference);
+                    if (null != conversation) {
+                        conversation.addMessage(mailMessage);
+                    }
+                }
+            }
+
+        }
+        return toFold;
     }
 
 }

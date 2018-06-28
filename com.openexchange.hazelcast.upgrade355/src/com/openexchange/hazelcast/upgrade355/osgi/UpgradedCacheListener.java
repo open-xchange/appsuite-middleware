@@ -51,7 +51,11 @@ package com.openexchange.hazelcast.upgrade355.osgi;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.LockSupport;
@@ -60,6 +64,7 @@ import com.hazelcast.client.config.ClientConfig;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.ITopic;
 import com.openexchange.legacy.CacheEvent;
+import com.openexchange.legacy.CacheKeyImpl;
 import com.openexchange.legacy.PortableCacheEvent;
 import com.openexchange.legacy.PortableMessage;
 
@@ -71,7 +76,10 @@ import com.openexchange.legacy.PortableMessage;
  */
 public class UpgradedCacheListener implements com.openexchange.caching.events.CacheListener {
 
-    static final String CACHE_REGION = "Context";
+    static final String CACHE_REGION_CONTEXT = "Context";
+    static final String CACHE_REGION_SCHEMA_STORE = "OXDBPoolCache";
+
+    private static final Set<String> REGIONS = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList(CACHE_REGION_CONTEXT, CACHE_REGION_SCHEMA_STORE)));
 
     private static final String CACHE_EVENT_TOPIC = "cacheEvents-3";
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(UpgradedCacheListener.class);
@@ -96,7 +104,7 @@ public class UpgradedCacheListener implements com.openexchange.caching.events.Ca
         /*
          * check received event
          */
-        if (fromRemote || null == cacheEvent || false == CACHE_REGION.equals(cacheEvent.getRegion()) ||
+        if (fromRemote || null == cacheEvent || false == REGIONS.contains(cacheEvent.getRegion()) ||
             com.openexchange.caching.events.CacheOperation.INVALIDATE != cacheEvent.getOperation() || null == cacheEvent.getKeys()) {
             LOG.trace("Skipping unrelated event: {}", cacheEvent);
             return;
@@ -107,7 +115,14 @@ public class UpgradedCacheListener implements com.openexchange.caching.events.Ca
          */
         HazelcastInstance client = HazelcastClient.newHazelcastClient(clientConfig);
         LOG.info("Successfully initialzed Hazelcast client: {}", client);
-        CacheEvent legacyEvent = reconstructEvent(cacheEvent);
+
+        CacheEvent legacyEvent;
+        if (CACHE_REGION_CONTEXT.equals(cacheEvent.getRegion())) {
+            legacyEvent = reconstructContextEvent(cacheEvent);
+        } else {
+            legacyEvent = reconstructSchemaEvent(cacheEvent);
+        }
+
         PortableMessage<PortableCacheEvent> legacyMessage = new PortableMessage<PortableCacheEvent>(senderID, PortableCacheEvent.wrap(legacyEvent));
         ITopic<Object> topic = client.getTopic(CACHE_EVENT_TOPIC);
         LOG.info("Successfully got reference to cache event topic: {}", topic);
@@ -125,7 +140,7 @@ public class UpgradedCacheListener implements com.openexchange.caching.events.Ca
      * @param cacheEvent The "new" cache event
      * @return The corresponding legacy cache event
      */
-    private static CacheEvent reconstructEvent(com.openexchange.caching.events.CacheEvent cacheEvent) {
+    private static CacheEvent reconstructContextEvent(com.openexchange.caching.events.CacheEvent cacheEvent) {
         List<Serializable> keys = cacheEvent.getKeys();
         List<Serializable> legacyKeys = new ArrayList<Serializable>(keys.size());
         for (Serializable key : keys) {
@@ -139,7 +154,28 @@ public class UpgradedCacheListener implements com.openexchange.caching.events.Ca
                 LOG.warn("Skipping unexpected cache key: {}", key);
             }
         }
-        return CacheEvent.INVALIDATE(CACHE_REGION, null, legacyKeys);
+        return CacheEvent.INVALIDATE(CACHE_REGION_CONTEXT, null, legacyKeys);
+    }
+
+    /**
+     * Reconstructs a legacy cache event from the supplied "new" cache event, ready for re-distribution in the legacy cluster.
+     *
+     * @param cacheEvent The "new" cache event
+     * @return The corresponding legacy cache event
+     */
+    private static CacheEvent reconstructSchemaEvent(com.openexchange.caching.events.CacheEvent cacheEvent) {
+        List<Serializable> keys = cacheEvent.getKeys();
+        List<Serializable> legacyKeys = new ArrayList<Serializable>(keys.size());
+        for (Serializable key : keys) {
+            if (com.openexchange.caching.CacheKey.class.isInstance(key)) {
+                // Cache key
+                com.openexchange.caching.CacheKey ck = (com.openexchange.caching.CacheKey) key;
+                legacyKeys.add(new CacheKeyImpl(ck.getContextId(), ck.getKeys()));
+            } else {
+                LOG.warn("Skipping unexpected cache key: {}", key);
+            }
+        }
+        return CacheEvent.INVALIDATE(CACHE_REGION_SCHEMA_STORE, null, legacyKeys);
     }
 
 }

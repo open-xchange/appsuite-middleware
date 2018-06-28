@@ -234,9 +234,12 @@ public class EventPostProcessor {
                 return events.addAll(resolveOccurrences(event));
             }
             /*
-             * add series master event with 'userized' exception dates
+             * apply 'userized' exception dates as requested
              */
-            return events.add(applyExceptionDates(storage, event, calendarUserId));
+            if (null == requestedFields || Arrays.contains(requestedFields, EventField.CHANGE_EXCEPTION_DATES) || 
+                Arrays.contains(requestedFields, EventField.DELETE_EXCEPTION_DATES)) {
+                event = applyExceptionDates(storage, event, calendarUserId);
+            }
         }
         return events.add(event);
     }

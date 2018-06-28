@@ -71,6 +71,11 @@ public abstract class ChunkedUpload<I extends InputStream, C extends UploadChunk
      */
     public static final long DEFAULT_MIN_CHUNK_SIZE = 5 * 1024 * 1024;
 
+    /**
+     * The buffer size of 1MB.
+     */
+    private static final int BUFFER_SIZE = 1 * 1024 * 1024;
+
     private final long minChunkSize;
     private final I inputStream;
     private boolean hasNext;
@@ -127,12 +132,14 @@ public abstract class ChunkedUpload<I extends InputStream, C extends UploadChunk
 
         ThresholdFileHolder fileHolder = new ThresholdFileHolder();
         try {
-            byte[] buffer = new byte[0xFFFF]; // 64k
+            byte[] buffer = new byte[BUFFER_SIZE]; // 1MB
             for (int read; (read = inputStream.read(buffer, 0, buffer.length)) > 0;) {
                 fileHolder.write(buffer, 0, read);
                 if (fileHolder.getCount() >= minChunkSize) {
                     // Chunk size reached
-                    return createChunkWith(fileHolder, false);
+                    C chunk = createChunkWith(fileHolder, false);
+                    fileHolder = null;
+                    return chunk;
                 }
             }
             /*

@@ -145,11 +145,9 @@ public class PortableCacheEvent extends AbstractCustomPortable {
         hasKeys = reader.readBoolean("hk");
         if (hasKeys) {
             Portable[] portableKeys = reader.readPortableArray("k");
-            if (null != portableKeys) {
-                keys = new PortableCacheKey[portableKeys.length];
-                for (int i = portableKeys.length; i-- > 0;) {
-                    keys[i] = (PortableCacheKey)portableKeys[i];
-                }
+            keys = new PortableCacheKey[portableKeys.length];
+            for (int i = 0; i < portableKeys.length; i++) {
+                keys[i] = (PortableCacheKey)portableKeys[i];
             }
         }
     }

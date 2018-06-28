@@ -98,6 +98,16 @@ public class CalendarProviders {
     }
 
     /**
+     * Gets the name of the property that is used to enable or disable a calendar provider for synchronization.
+     *
+     * @param provider The identifier of the calendar provider to generate the <i>usedForSync</i> property name for
+     * @return The <i>usedForSync</i> property name
+     */
+    public static String getUsedForSyncPropertyName(String providerId) {
+        return "com.openexchange.calendar." + providerId + ".usedForSync";
+    }
+
+    /**
      * Initializes a new {@link CalendarProviders}.
      */
     private CalendarProviders() {

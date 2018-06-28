@@ -7,6 +7,7 @@ Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Import-Package: com.openexchange.chronos,
  com.openexchange.chronos.common,
+ com.openexchange.chronos.exception,
  com.openexchange.chronos.provider,
  com.openexchange.chronos.provider.account,
  com.openexchange.chronos.provider.basic,

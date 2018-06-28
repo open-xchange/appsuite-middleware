@@ -49,6 +49,7 @@
 
 package com.openexchange.subscribe.internal;
 
+import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.subscribe.SubscriptionErrorMessage.INACTIVE_SOURCE;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -71,7 +72,6 @@ import com.openexchange.subscribe.SubscriptionErrorMessage;
 import com.openexchange.subscribe.SubscriptionExecutionService;
 import com.openexchange.subscribe.SubscriptionSource;
 import com.openexchange.subscribe.SubscriptionSourceDiscoveryService;
-import com.openexchange.subscribe.TargetFolderSession;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorDelegator;
 import com.openexchange.tools.iterator.SearchIterators;
@@ -143,7 +143,7 @@ public class SubscriptionExecutionServiceImpl implements SubscriptionExecutionSe
             final SubscribeService subscribeService = discoverer.getSource(sourceId).getSubscribeService();
             final Subscription subscription = subscribeService.loadSubscription(session.getContext(), subscriptionId, null);
             if (subscription == null) {
-                throw SubscriptionErrorMessage.SubscriptionNotFound.create(session.getContextId(), subscriptionId);
+                throw SubscriptionErrorMessage.SubscriptionNotFound.create(I(session.getContextId()), I(subscriptionId));
             }
             subscription.setSession(session);
             final boolean knowsSource = discoverer.filter(subscription.getUserId(), session.getContextId()).knowsSource(subscribeService.getSubscriptionSource().getId());
@@ -160,32 +160,32 @@ public class SubscriptionExecutionServiceImpl implements SubscriptionExecutionSe
     }
 
     /**
-     * @param data
-     * @param subscription
-     * @throws OXException
+     * Stores the data
+     * 
+     * @param data contents of this subscription
+     * @param subscription The {@link Subscription}
+     * @param session The {@link ServerSession}
+     * @throws OXException In case data can't be saved
      */
     protected void storeData(final SearchIterator<?> data, final Subscription subscription, Collection<OXException> optErrors) throws OXException {
         FolderUpdaterService folderUpdater = getFolderUpdater(subscription);
         if (folderUpdater instanceof FolderUpdaterServiceV2) {
             ((FolderUpdaterServiceV2) folderUpdater).save(data, subscription, optErrors);
         } else {
-            if(folderUpdater == null) {
+            if (folderUpdater == null) {
                 throw SubscriptionErrorMessage.UNEXPECTED_ERROR.create("Missing FolderUpdateService.");
             }
             folderUpdater.save(data, subscription);
         }
     }
 
-    /**
-     * @param subscription
-     */
     @Override
     public FolderUpdaterService getFolderUpdater(final TargetFolderDefinition target) throws OXException {
-        final FolderObject folder = getFolder(new TargetFolderSession(target), target.getContext().getContextId(), target.getFolderIdAsInt());
+        final FolderObject folder = getFolder(target.getContext().getContextId(), target.getFolderIdAsInt());
 
         //
         final boolean moreThanOneSubscriptionOnThisFolder = isThereMoreThanOneSubscriptionOnThisFolder(target.getContext(), target.getFolderId(), null);
-        for (final FolderUpdaterService updater : folderUpdaters) {
+        for (final FolderUpdaterService<?> updater : folderUpdaters) {
             if (updater.handles(folder)) {
                 // if there are 2 or more subscriptions on the folder: use the multiple-variant of the strategy if it exists
                 if (moreThanOneSubscriptionOnThisFolder && updater.usesMultipleStrategy()) {
@@ -199,7 +199,7 @@ public class SubscriptionExecutionServiceImpl implements SubscriptionExecutionSe
         }
 
         // if there are 2 or more subscriptions on a folder but no multiple-variant Strategy is available use a single one
-        for (final FolderUpdaterService updater : folderUpdaters) {
+        for (final FolderUpdaterService<?> updater : folderUpdaters) {
             if (updater.handles(folder)) {
                 return updater;
             }
@@ -207,7 +207,7 @@ public class SubscriptionExecutionServiceImpl implements SubscriptionExecutionSe
         return null;
     }
 
-    protected FolderObject getFolder(final TargetFolderSession subscriptionSession, final int contextId, final int folderId) throws OXException {
+    protected FolderObject getFolder(final int contextId, final int folderId) throws OXException {
         final OXFolderAccess ofa = new OXFolderAccess(contextService.getContext(contextId));
         return ofa.getFolderObject(folderId);
     }

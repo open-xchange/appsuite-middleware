@@ -55,7 +55,6 @@ import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
@@ -69,8 +68,11 @@ import com.openexchange.config.DefaultInterests;
 import com.openexchange.config.Interests;
 import com.openexchange.config.Reloadable;
 import com.openexchange.osgi.ExceptionUtils;
+import com.openexchange.threadpool.AbstractTask;
+import com.openexchange.threadpool.Task;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.threadpool.ThreadPools;
+import com.openexchange.threadpool.ThreadRenamer;
 
 /**
  * {@link CacheEventServiceImpl}
@@ -83,70 +85,66 @@ public final class CacheEventServiceImpl implements CacheEventService, CacheEven
     /** The logger */
     static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CacheEventServiceImpl.class);
 
+    /**
+     * Notifies given listeners about specified cache event.
+     *
+     * @param listeners The listeners to notify
+     * @param sender The sender
+     * @param event The event
+     * @param fromRemote Whether remotely or locally generated
+     * @param numDeliveredEvents The counter for delivered events
+     * @param threadPool The thread pool to use or <code>null</code>
+     * @throws Exception If notification fails
+     */
+    static void notify(List<CacheListener> listeners, Object sender, CacheEvent event, boolean fromRemote, AtomicLong numDeliveredEvents, ThreadPoolService threadPool) throws Exception {
+        // Notify asynchronously via executor service, falling back to sequential delivery
+        Task<Void> notificationTask = new ListenerNotificationTask(fromRemote, event, listeners, sender, numDeliveredEvents);
+        if (null == threadPool) {
+            ThreadPools.execute(notificationTask);
+        } else {
+            threadPool.submit(notificationTask);
+        }
+    }
+
+    // -----------------------------------------------------------------------------------------------------------------------------------------------
+
     private final ConcurrentMap<String, List<CacheListener>> cacheRegionListeners;
     private final List<CacheListener> cacheListeners;
     private final CacheEventQueue delayedEvents;
     private final AtomicReference<CacheEventConfiguration> configurationRef;
     private final AtomicBoolean keepgoing;
-    private final AtomicLong offeredEvents;
-    final AtomicLong deliveredEvents;
+    private final AtomicLong numOfferedEvents;
+    private final AtomicLong numDeliveredEvents;
+    private final AtomicReference<ThreadPoolService> threadPoolRef;
 
     /**
      * Initializes a new {@link CacheEventServiceImpl}.
      */
-    public CacheEventServiceImpl(CacheEventConfiguration initialConfiguration) {
+    public CacheEventServiceImpl(CacheEventConfiguration initialConfiguration, ThreadPoolService threadPool) {
         super();
         cacheRegionListeners = new ConcurrentHashMap<String, List<CacheListener>>();
         cacheListeners = new CopyOnWriteArrayList<CacheListener>();
-        offeredEvents = new AtomicLong();
-        deliveredEvents = new AtomicLong();
+        numOfferedEvents = new AtomicLong();
+        numDeliveredEvents = new AtomicLong();
         configurationRef = new AtomicReference<CacheEventConfiguration>(initialConfiguration);
+        threadPoolRef = new AtomicReference<ThreadPoolService>(threadPool);
 
         final CacheEventQueue delayedEvents = new CacheEventQueue();
         this.delayedEvents = delayedEvents;
         final AtomicBoolean keepgoing = new AtomicBoolean(true);
         this.keepgoing = keepgoing;
 
-        Runnable queueConsumer = new Runnable() {
+        Task<Void> queueConsumer = new CacheEventQueueConsumer(keepgoing, delayedEvents, numDeliveredEvents, threadPoolRef);
+        threadPool.submit(queueConsumer);
+    }
 
-            @Override
-            public void run() {
-                List<StampedCacheEvent> drained = new LinkedList<StampedCacheEvent>();
-                while (keepgoing.get()) {
-                    try {
-                        drained.clear();
-
-                        // Blocking wait for at least 1 DelayedPushMsObject to expire.
-                        StampedCacheEvent object = delayedEvents.take();
-                        if (POISON == object) {
-                            return;
-                        }
-                        drained.add(object);
-
-                        // Drain more if available
-                        boolean leave = false;
-                        if (delayedEvents.drainTo(drained) > 0) {
-                            leave = drained.remove(POISON);
-                        }
-
-                        // Deliver events
-                        for (StampedCacheEvent sce : drained) {
-                            CacheEventServiceImpl.this.notify(sce.listeners, sce.sender, sce.event, sce.fromRemote);
-                        }
-
-                        // Terminate?
-                        if (leave) {
-                            return;
-                        }
-                    } catch (InterruptedException e) {
-                        LOG.debug("Interrupted while checking for delayed cache events", e);
-                    } catch (Exception e) {
-                        LOG.error("Checking for delayed cache events failed", e);
-                    }
-                }
-            }
-        };
-        ThreadPools.getThreadPool().submit(ThreadPools.task(queueConsumer, "CacheEventQueueConsumer"));
+    /**
+     * Sets the thread pool reference to given value
+     *
+     * @param threadPool The thread pool or <code>null</code>
+     */
+    public void setThreadPoolService(ThreadPoolService threadPool) {
+        threadPoolRef.set(threadPool);
     }
 
     @Override
@@ -156,12 +154,12 @@ public final class CacheEventServiceImpl implements CacheEventService, CacheEven
 
     @Override
     public long getOfferedEvents() {
-        return offeredEvents.get();
+        return numOfferedEvents.get();
     }
 
     @Override
     public long getDeliveredEvents() {
-        return deliveredEvents.get();
+        return numDeliveredEvents.get();
     }
 
     /**
@@ -219,8 +217,8 @@ public final class CacheEventServiceImpl implements CacheEventService, CacheEven
                 /*
                  * increment offered events
                  */
-                if (offeredEvents.incrementAndGet() < 0L) {
-                    offeredEvents.set(0L);
+                if (numOfferedEvents.incrementAndGet() < 0L) {
+                    numOfferedEvents.set(0L);
                 }
             }
         }
@@ -244,55 +242,6 @@ public final class CacheEventServiceImpl implements CacheEventService, CacheEven
         return listeners;
     }
 
-    /**
-     * Notifies given listeners about cache event.
-     *
-     * @param listeners The listeners to notify
-     * @param sender The sender
-     * @param event The event
-     * @param fromRemote Whether remotely or locally generated
-     */
-    protected void notify(final List<CacheListener> listeners, final Object sender, final CacheEvent event, final boolean fromRemote) {
-        Runnable notificationRunnable = new Runnable() {
-
-            @Override
-            public void run() {
-                /*
-                 * notify listeners
-                 */
-                LOG.debug("Notifying {} listener(s) about {} event: {}", Integer.valueOf(listeners.size()), fromRemote ? "remote" : "local", event);
-                for (CacheListener listener : listeners) {
-                    try {
-                        listener.onEvent(sender, event, fromRemote);
-                    } catch (Throwable t) {
-                        ExceptionUtils.handleThrowable(t);
-                        LOG.error("Error while executing event listener {} for event: {}", listener.getClass().getName(), event, t);
-                    }
-                }
-                /*
-                 * track delivery
-                 */
-                if (deliveredEvents.incrementAndGet() < 0L) {
-                    deliveredEvents.set(0L);
-                }
-            }
-        };
-        /*
-         * Notify asynchronously via executor service, falling back to sequential delivery
-         */
-        ExecutorService executorService = getExecutorService();
-        if (null != executorService) {
-            executorService.execute(notificationRunnable);
-        } else {
-            notificationRunnable.run();
-        }
-    }
-
-    private static ExecutorService getExecutorService() {
-        ThreadPoolService threadPoolService = CacheEventServiceLookup.getService(ThreadPoolService.class);
-        return null != threadPoolService ? threadPoolService.getExecutor() : null;
-    }
-
     @Override
     public void reloadConfiguration(ConfigurationService configService) {
         configurationRef.set(new CacheEventConfigurationImpl(configService));
@@ -301,6 +250,120 @@ public final class CacheEventServiceImpl implements CacheEventService, CacheEven
     @Override
     public Interests getInterests() {
         return DefaultInterests.builder().propertiesOfInterest("com.openexchange.caching.jcs.remoteInvalidationForPersonalFolders").build();
+    }
+
+    // -----------------------------------------------------------------------------------------------------------------------------------------------
+
+    private static final class CacheEventQueueConsumer extends AbstractTask<Void> {
+
+        private final AtomicBoolean keepgoing;
+        private final CacheEventQueue delayedEvents;
+        private final AtomicLong numDeliveredEvents;
+        private final AtomicReference<ThreadPoolService> threadPoolRef;
+
+        /**
+         * Initializes a new {@link CacheEventQueueConsumer}.
+         */
+        CacheEventQueueConsumer(AtomicBoolean keepgoing, CacheEventQueue delayedEvents, AtomicLong numDeliveredEvents, AtomicReference<ThreadPoolService> threadPoolRef) {
+            super();
+            this.keepgoing = keepgoing;
+            this.delayedEvents = delayedEvents;
+            this.numDeliveredEvents = numDeliveredEvents;
+            this.threadPoolRef = threadPoolRef;
+        }
+
+        @Override
+        public void setThreadName(ThreadRenamer threadRenamer) {
+            threadRenamer.renamePrefix("CacheEventQueueConsumer");
+        }
+
+        @Override
+        public Void call() throws Exception {
+            List<StampedCacheEvent> drained = new LinkedList<StampedCacheEvent>();
+            while (keepgoing.get()) {
+                try {
+                    drained.clear();
+
+                    // Blocking wait for at least 1 StampedCacheEvent to expire.
+                    StampedCacheEvent object = delayedEvents.take();
+                    if (POISON == object) {
+                        return null;
+                    }
+                    drained.add(object);
+
+                    // Drain more if available
+                    boolean leave = false;
+                    if (delayedEvents.drainTo(drained) > 0) {
+                        leave = drained.remove(POISON);
+                    }
+
+                    // Deliver events
+                    ThreadPoolService threadPool = threadPoolRef.get();
+                    for (StampedCacheEvent sce : drained) {
+                        CacheEventServiceImpl.notify(sce.listeners, sce.sender, sce.event, sce.fromRemote, numDeliveredEvents, threadPool);
+                    }
+
+                    // Terminate?
+                    if (leave) {
+                        return null;
+                    }
+                } catch (InterruptedException e) {
+                    LOG.debug("Interrupted while checking for delayed cache events", e);
+                } catch (Exception e) {
+                    LOG.error("Checking for delayed cache events failed", e);
+                }
+            }
+
+            return null;
+        }
+    }
+
+    private static final class ListenerNotificationTask extends AbstractTask<Void> {
+
+        private final boolean fromRemote;
+        private final CacheEvent event;
+        private final List<CacheListener> listeners;
+        private final Object sender;
+        private final AtomicLong numDeliveredEvents;
+
+        /**
+         * Initializes a new {@link ListenerNotificationTask}.
+         */
+        ListenerNotificationTask(boolean fromRemote, CacheEvent event, List<CacheListener> listeners, Object sender, AtomicLong numDeliveredEvents) {
+            super();
+            this.fromRemote = fromRemote;
+            this.event = event;
+            this.listeners = listeners;
+            this.sender = sender;
+            this.numDeliveredEvents = numDeliveredEvents;
+        }
+
+        @Override
+        public Void call() throws Exception {
+            /*
+             * notify listeners
+             */
+            if (fromRemote) {
+                LOG.debug("Notifying cache listeners about remote event: {}", event);
+            } else {
+                LOG.debug("Notifying cache listeners about local event: {}", event);
+            }
+            for (CacheListener listener : listeners) {
+                try {
+                    listener.onEvent(sender, event, fromRemote);
+                } catch (Throwable t) {
+                    ExceptionUtils.handleThrowable(t);
+                    LOG.error("Error while calling event listener {} for event: {}", listener.getClass().getName(), event, t);
+                }
+            }
+            /*
+             * track delivery
+             */
+            if (numDeliveredEvents.incrementAndGet() < 0L) {
+                numDeliveredEvents.set(0L);
+            }
+            return null;
+        }
     }
 
 }

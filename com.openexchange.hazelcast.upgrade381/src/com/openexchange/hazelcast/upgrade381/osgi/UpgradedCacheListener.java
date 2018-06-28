@@ -51,17 +51,26 @@ package com.openexchange.hazelcast.upgrade381.osgi;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.UUID;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.CancellationException;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.LockSupport;
 import com.hazelcast.client.HazelcastClient;
 import com.hazelcast.client.config.ClientConfig;
+import com.hazelcast.core.Cluster;
 import com.hazelcast.core.HazelcastInstance;
-import com.hazelcast.core.ITopic;
-import com.openexchange.legacy.CacheEvent;
-import com.openexchange.legacy.PortableCacheEvent;
-import com.openexchange.legacy.PortableMessage;
+import com.hazelcast.core.IExecutorService;
+import com.hazelcast.core.Member;
+import com.openexchange.caching.CacheKey;
+import com.openexchange.java.Strings;
+import com.openexchange.legacy.PoolAndSchema;
+import com.openexchange.legacy.PortableContextInvalidationCallable;
 
 
 /**
@@ -71,13 +80,12 @@ import com.openexchange.legacy.PortableMessage;
  */
 public class UpgradedCacheListener implements com.openexchange.caching.events.CacheListener {
 
-    static final String CACHE_REGION = "Context";
+    /** The cache region name for the schema cache */
+    static final String CACHE_REGION = "OXDBPoolCache";
 
-    private static final String CACHE_EVENT_TOPIC = "cacheEvents-3";
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(UpgradedCacheListener.class);
     private static final int SHUTDOWN_DELAY = 3000;
 
-    private final String senderID;
     private final ClientConfig clientConfig;
 
     /**
@@ -87,7 +95,6 @@ public class UpgradedCacheListener implements com.openexchange.caching.events.Ca
      */
     public UpgradedCacheListener(ClientConfig clientConfig) {
         super();
-        this.senderID = UUID.randomUUID().toString();
         this.clientConfig = clientConfig;
     }
 
@@ -103,43 +110,131 @@ public class UpgradedCacheListener implements com.openexchange.caching.events.Ca
         }
         LOG.info("Processing: {}", cacheEvent);
         /*
-         * reconstruct & redistribute legacy cache event
+         * Propagate cache event through calling 'c.o.ms.internal.portable.PortableContextInvalidationCallable' on each remote member using a Hazelcast client
          */
         HazelcastInstance client = HazelcastClient.newHazelcastClient(clientConfig);
         LOG.info("Successfully initialzed Hazelcast client: {}", client);
-        CacheEvent legacyEvent = reconstructEvent(cacheEvent);
-        PortableMessage<PortableCacheEvent> legacyMessage = new PortableMessage<PortableCacheEvent>(senderID, PortableCacheEvent.wrap(legacyEvent));
-        ITopic<Object> topic = client.getTopic(CACHE_EVENT_TOPIC);
-        LOG.info("Successfully got reference to cache event topic: {}", topic);
-        LOG.info("Publishing legacy cache event: {}", legacyEvent);
-        topic.publish(legacyMessage);
-        LOG.info("Successfully published legacy cache event, shutting down client after {}ms...", Integer.valueOf(SHUTDOWN_DELAY));
+        /*
+         * Determine remote members
+         */
+        final Set<Member> remoteMembers = getRemoteMembers(client);
+        if (null != remoteMembers && false == remoteMembers.isEmpty()) {
+            IExecutorService executor = client.getExecutorService("default");
+            Map<Member, Future<Boolean>> futures = executor.submitToMembers(new PortableContextInvalidationCallable(parseSchemas(cacheEvent)), remoteMembers);
+            LOG.info("Successfully submitted invalidation of schemas to remote members:{}{}", Strings.getLineSeparator(), getMembersString(remoteMembers));
+            /*
+             * Check each submitted task
+             */
+            for (Map.Entry<Member, Future<Boolean>> submittedTask : futures.entrySet()) {
+                Member member = submittedTask.getKey();
+                Future<Boolean> future = submittedTask.getValue();
+                try {
+                    Boolean result = null;
+                    int retryCount = 3;
+                    while (retryCount-- > 0) {
+                        try {
+                            result = future.get();
+                            retryCount = 0;
+                        } catch (InterruptedException e) {
+                            // Interrupted - Keep interrupted state
+                            Thread.currentThread().interrupt();
+                            retryCount = 0;
+                        } catch (CancellationException e) {
+                            // Canceled
+                            retryCount = 0;
+                        } catch (ExecutionException e) {
+                            Throwable cause = e.getCause();
+
+                            // Check for Hazelcast timeout
+                            if (!(cause instanceof com.hazelcast.core.OperationTimeoutException)) {
+                                throw e;
+                            }
+
+                            // Timeout while awaiting remote result
+                            if (retryCount <= 0) {
+                                // No further retry
+                                cancelFutureSafe(future);
+                            }
+                        }
+                    }
+
+                    if (null != result && result.booleanValue()) {
+                        LOG.info("Successfully invalidated schemas on member {}", member);
+                    } else {
+                        LOG.warn("Failed invalidation of schemas on member {}", member);
+                    }
+                } catch (Exception e) {
+                    LOG.warn("Failed invalidation of schemas on member {}", member, e);
+                }
+            }
+        } else {
+            LOG.warn("Found no remote members in cluster");
+        }
+
+        LOG.info("Shutting down client after {}ms...", Integer.valueOf(SHUTDOWN_DELAY));
         LockSupport.parkNanos(TimeUnit.MILLISECONDS.toNanos(SHUTDOWN_DELAY));
         client.shutdown();
         LOG.info("Client shutdown completed.");
     }
 
+    private static <R> void cancelFutureSafe(Future<R> future) {
+        if (null != future) {
+            try { future.cancel(true); } catch (Exception e) {/*Ignore*/}
+        }
+    }
+
     /**
-     * Reconstructs a legacy cache event from the supplied "new" cache event, ready for re-distribution in the legacy cluster.
+     * Gets the remote members from specified Hazelcast instance.
      *
-     * @param cacheEvent The "new" cache event
-     * @return The corresponding legacy cache event
+     * @param hazelcastInstance The Hazelcast instance for the cluster
+     * @return The remote members
      */
-    private static CacheEvent reconstructEvent(com.openexchange.caching.events.CacheEvent cacheEvent) {
+    private static Set<Member> getRemoteMembers(HazelcastInstance hazelcastInstance) {
+        if (null == hazelcastInstance) {
+            return Collections.emptySet();
+        }
+
+        // Get cluster representation
+        Cluster cluster = hazelcastInstance.getCluster();
+
+        // Determine cluster members
+        return cluster.getMembers();
+    }
+
+    private static List<PoolAndSchema> parseSchemas(com.openexchange.caching.events.CacheEvent cacheEvent) {
         List<Serializable> keys = cacheEvent.getKeys();
-        List<Serializable> legacyKeys = new ArrayList<Serializable>(keys.size());
+        Set<PoolAndSchema> schemas = new LinkedHashSet<PoolAndSchema>(keys.size());
         for (Serializable key : keys) {
-            if (String.class.isInstance(key)) {
-                // login info
-                legacyKeys.add(key);
-            } else if (Integer.class.isInstance(key)) {
-                // context identifier
-                legacyKeys.add(key);
+            if (CacheKey.class.isInstance(key)) {
+                // Cache key
+                CacheKey ck = (CacheKey) key;
+                int poolId = ck.getContextId();
+                String schema = ck.getKeys()[0];
+                schemas.add(new PoolAndSchema(poolId, schema));
             } else {
                 LOG.warn("Skipping unexpected cache key: {}", key);
             }
         }
-        return CacheEvent.INVALIDATE(CACHE_REGION, null, legacyKeys);
+        return new ArrayList<>(schemas);
+    }
+
+    private static Object getMembersString(final Set<Member> remoteMembers) {
+        return new Object() {
+            @Override
+            public String toString() {
+                StringBuilder sb = new StringBuilder(remoteMembers.size() << 2);
+                boolean first = true;
+                for (Member member : remoteMembers) {
+                    if (first) {
+                        first = false;
+                    } else {
+                        sb.append(", ");
+                    }
+                    sb.append(member.getAddress().getHost());
+                }
+                return sb.toString();
+            }
+        };
     }
 
 }

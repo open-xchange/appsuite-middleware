@@ -142,6 +142,7 @@ public class ChronosCreateTableService extends AbstractCreateTableImpl {
                 "extendedProperties BLOB DEFAULT NULL," +
                 "PRIMARY KEY (cid,account,id)," +
                 "KEY `range` (cid,account,rangeFrom,rangeUntil)," +
+                "KEY series (cid,account,series)," +
                 "KEY timestamp (cid,account,timestamp)," +
                 "KEY user (cid,account,user)," +
                 "KEY folder (cid,account,folder(191))," +
@@ -192,6 +193,7 @@ public class ChronosCreateTableService extends AbstractCreateTableImpl {
                 "extendedProperties BLOB DEFAULT NULL," +
                 "PRIMARY KEY (cid,account,id)," +
                 "KEY `range` (cid,account,rangeFrom,rangeUntil)," +
+                "KEY series (cid,account,series)," +
                 "KEY timestamp (cid,account,timestamp)," +
                 "KEY user (cid,account,user)," +
                 "KEY folder (cid,account,folder(191))," +

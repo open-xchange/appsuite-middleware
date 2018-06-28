@@ -53,10 +53,14 @@ import static com.openexchange.chronos.provider.CalendarFolderProperty.COLOR;
 import static com.openexchange.chronos.provider.CalendarFolderProperty.COLOR_LITERAL;
 import static com.openexchange.chronos.provider.CalendarFolderProperty.DESCRIPTION;
 import static com.openexchange.chronos.provider.CalendarFolderProperty.DESCRIPTION_LITERAL;
+import static com.openexchange.chronos.provider.CalendarFolderProperty.USED_FOR_SYNC;
+import static com.openexchange.chronos.provider.CalendarFolderProperty.USED_FOR_SYNC_LITERAL;
 import static com.openexchange.chronos.provider.CalendarFolderProperty.optPropertyValue;
 import static com.openexchange.chronos.provider.ical.ICalCalendarConstants.NAME;
+import static com.openexchange.chronos.provider.ical.ICalCalendarConstants.PROVIDER_ID;
 import static com.openexchange.chronos.provider.ical.ICalCalendarConstants.REFRESH_INTERVAL;
 import static com.openexchange.chronos.provider.ical.ICalCalendarConstants.URI;
+import static com.openexchange.java.Autoboxing.B;
 import static com.openexchange.java.Autoboxing.L;
 import java.util.EnumSet;
 import java.util.Locale;
@@ -66,11 +70,13 @@ import org.dmfs.rfc5545.Duration;
 import org.json.JSONObject;
 import com.openexchange.auth.info.AuthType;
 import com.openexchange.chronos.ExtendedProperties;
+import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.provider.CalendarAccount;
 import com.openexchange.chronos.provider.CalendarAccountAttribute;
 import com.openexchange.chronos.provider.CalendarCapability;
 import com.openexchange.chronos.provider.basic.BasicCalendarAccess;
 import com.openexchange.chronos.provider.basic.CalendarSettings;
+import com.openexchange.chronos.provider.caching.CachingCalendarUtils;
 import com.openexchange.chronos.provider.caching.basic.BasicCachingCalendarProvider;
 import com.openexchange.chronos.provider.ical.auth.AdvancedAuthInfo;
 import com.openexchange.chronos.provider.ical.auth.ICalAuthParser;
@@ -175,6 +181,10 @@ public class BasicICalCalendarProvider extends BasicCachingCalendarProvider {
         if (Strings.isEmpty(description)) {
             description = feedResponse.getFeedDescription();
         }
+        Boolean usedForSync = optPropertyValue(settings.getExtendedProperties(), USED_FOR_SYNC_LITERAL, Boolean.class);
+        if (null == usedForSync || false == CachingCalendarUtils.canBeUsedForSync(PROVIDER_ID, session)) {
+            usedForSync = Boolean.FALSE;
+        }
         String name = settings.getName();
         if (Strings.isEmpty(name)) {
             name = Strings.isNotEmpty(feedResponse.getFeedName()) ? feedResponse.getFeedName() : "Calendar";
@@ -197,6 +207,9 @@ public class BasicICalCalendarProvider extends BasicCachingCalendarProvider {
         }
         if (null != description) {
             proposedExtendedProperties.add(DESCRIPTION(description, false));
+        }
+        if (null != usedForSync) {
+            proposedExtendedProperties.add(USED_FOR_SYNC(usedForSync, false == CachingCalendarUtils.canBeUsedForSync(PROVIDER_ID, session)));
         }
         proposedSettings.setConfig(proposedConfig);
         proposedSettings.setExtendedProperties(proposedExtendedProperties);
@@ -236,7 +249,7 @@ public class BasicICalCalendarProvider extends BasicCachingCalendarProvider {
         if (config.hasAndNotNull(ICalCalendarConstants.REFRESH_INTERVAL)) {
             Object opt = config.opt(ICalCalendarConstants.REFRESH_INTERVAL);
 
-            if(opt!=null && !(opt instanceof Number)){
+            if (opt != null && !(opt instanceof Number)) {
                 throw ICalProviderExceptionCodes.BAD_PARAMETER.create(ICalCalendarConstants.REFRESH_INTERVAL, opt);
             }
         }
@@ -253,6 +266,16 @@ public class BasicICalCalendarProvider extends BasicCachingCalendarProvider {
         String description = optPropertyValue(settings.getExtendedProperties(), DESCRIPTION_LITERAL, String.class);
         if (Strings.isNotEmpty(description)) {
             internalConfig.putSafe("description", description);
+        }
+        Boolean usedForSyncValue = optPropertyValue(settings.getExtendedProperties(), USED_FOR_SYNC_LITERAL, Boolean.class);
+        if (null != usedForSyncValue) {
+            boolean usedForSync = usedForSyncValue.booleanValue();
+            if (false == internalConfig.has(USED_FOR_SYNC_LITERAL) || usedForSync != internalConfig.optBoolean(USED_FOR_SYNC_LITERAL, false)) {
+                if (usedForSync && false == CachingCalendarUtils.canBeUsedForSync(PROVIDER_ID, session)) {
+                    throw CalendarExceptionCodes.INVALID_CONFIGURATION.create(USED_FOR_SYNC_LITERAL);
+                }
+                internalConfig.putSafe(USED_FOR_SYNC_LITERAL, usedForSync);
+            }
         }
         return internalConfig;
     }
@@ -292,6 +315,16 @@ public class BasicICalCalendarProvider extends BasicCachingCalendarProvider {
             if (false == Objects.equals(description, internalConfig.optString("description", null))) {
                 internalConfig.putSafe("description", description);
                 changed = true;
+            }
+            Boolean usedForSync = optPropertyValue(settings.getExtendedProperties(), USED_FOR_SYNC_LITERAL, Boolean.class);
+            if (usedForSync != null) {
+                if (!internalConfig.has(USED_FOR_SYNC_LITERAL) || !Objects.equals(usedForSync, B(internalConfig.optBoolean(USED_FOR_SYNC_LITERAL)))) {
+                    if (usedForSync.booleanValue() && false == CachingCalendarUtils.canBeUsedForSync(PROVIDER_ID, session)) {
+                        throw CalendarExceptionCodes.INVALID_CONFIGURATION.create(USED_FOR_SYNC_LITERAL);
+                    }
+                    internalConfig.putSafe(USED_FOR_SYNC_LITERAL, usedForSync);
+                    changed = true;
+                }
             }
         }
         if (settings.containsName() && false == Objects.equals(settings.getName(), internalConfig.optString("name", null))) {

@@ -106,7 +106,7 @@ public class GetResponse {
     }
 
     public String getRefreshInterval() {
-        return getProperty("REFRESH-INTERVAL");
+        return getFirstNonEmptyValue(importedCalendar, "REFRESH-INTERVAL", "X-PUBLISHED-TTL");
     }
 
     public String getFeedName() {

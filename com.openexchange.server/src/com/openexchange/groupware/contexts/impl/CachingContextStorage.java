@@ -209,7 +209,7 @@ public class CachingContextStorage extends ContextStorage {
             Integer key = Integer.valueOf(contextID);
             keys.add(key);
             Object cached = cache.get(key);
-            if (null != cached && Context.class.isInstance(cached)) {
+            if (Context.class.isInstance(cached)) {
                 String[] loginInfos = ((Context) cached).getLoginInfo();
                 if (null != loginInfos && 0 < loginInfos.length) {
                     for (String loginInfo : loginInfos) {

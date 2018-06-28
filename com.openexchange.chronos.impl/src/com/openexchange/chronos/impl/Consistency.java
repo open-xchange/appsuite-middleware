@@ -53,8 +53,10 @@ import java.util.Date;
 import java.util.TimeZone;
 import org.dmfs.rfc5545.DateTime;
 import org.dmfs.rfc5545.Duration;
+import org.dmfs.rfc5545.recur.RecurrenceRule;
 import com.openexchange.chronos.CalendarUser;
 import com.openexchange.chronos.Event;
+import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.service.CalendarService;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.exception.OXException;
@@ -112,6 +114,35 @@ public class Consistency {
                 }
             }
         }
+    }
+
+    /**
+     * Adjusts the recurrence rule according to the <a href="https://tools.ietf.org/html/rfc5545#section-3.3.10">RFC-5545, Section 3.3.10</a>
+     * specification, which ensures that the value type of the UNTIL part of the recurrence rule has the same value type as the DTSTART.
+     *
+     * @param event The event to adjust
+     * @throws OXException if the event has an invalid recurrence rule
+     */
+    public static void adjustRecurrenceRule(Event event) throws OXException {
+        if (null == event.getRecurrenceRule()) {
+            return;
+        }
+        RecurrenceRule rule = CalendarUtils.initRecurrenceRule(event.getRecurrenceRule());
+        if (null == rule.getUntil()) {
+            return;
+        }
+        DateTime until = rule.getUntil();
+        TimeZone timeZone = event.getStartDate().getTimeZone();
+        boolean startAllDay = event.getStartDate().isAllDay();
+        boolean untilAllDay = until.isAllDay();
+        if (startAllDay && !untilAllDay) {
+            rule.setUntil(until.toAllDay());
+        } else if (!startAllDay && untilAllDay) {
+            rule.setUntil(new DateTime(until.getCalendarMetrics(), timeZone, until.getTimestamp()));
+        } else {
+            return;
+        }
+        event.setRecurrenceRule(rule.toString());
     }
 
     public static void setModified(CalendarSession session, Date lastModified, Event event, int modifiedBy) throws OXException {

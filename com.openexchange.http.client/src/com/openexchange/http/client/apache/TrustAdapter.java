@@ -94,9 +94,7 @@ public class TrustAdapter implements ProtocolSocketFactory {
         Socket socket = null;
         try {
             int timeout = params.getConnectionTimeout();
-            if (timeout == 0) {
-                socket = createSocket(host, port, localAddress, localPort);
-            } else {
+            if (timeout != 0) {
                 SSLSocketFactoryProvider factoryProvider = Services.optService(SSLSocketFactoryProvider.class);
                 if (null == factoryProvider) {
                     throw new IOException("Missing " + SSLSocketFactoryProvider.class.getSimpleName() + " service. Bundle \"com.openexchange.net.ssl\" not started?");
@@ -107,10 +105,15 @@ public class TrustAdapter implements ProtocolSocketFactory {
                 SocketAddress remoteaddr = new InetSocketAddress(host, port);
                 socket.bind(localaddr);
                 socket.connect(remoteaddr, timeout);
-                return socket;
+
+                Socket retval = socket;
+                socket = null;
+                return retval;
             }
+            
+            socket = createSocket(host, port, localAddress, localPort);
             int linger = params.getLinger();
-            if(linger == 0) {
+            if (linger == 0) {
                 socket.setSoLinger(false, 0);
             } else if (linger > 0) {
                 socket.setSoLinger(true, linger);
@@ -125,7 +128,4 @@ public class TrustAdapter implements ProtocolSocketFactory {
             Streams.close(socket);
         }
     }
-
-
 }
-

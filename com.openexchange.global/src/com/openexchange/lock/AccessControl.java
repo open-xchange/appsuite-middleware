@@ -78,15 +78,36 @@ public interface AccessControl extends AutoCloseable {
     void acquireGrant() throws InterruptedException;
 
     /**
-     * Releases this access control.
+     * Attempts to immediately acquire a grant from this access control; not waiting for an available grant.
+     *
+     * @return <code>true</code> if grant has been acquired; otherwise <code>false</code>
+     */
+    boolean tryAcquireGrant();
+
+    /**
+     * Releases this access control assuming that a grant was successfully acquired before.
      * <p>
-     * This is the same as calling {@link #close()}.
+     * This is the same as calling {@link #close()} or {@link #release(boolean)} with <code>true</code>.
      * <p>
-     * <div style="margin-left: 0.1in; margin-right: 0.5in; background-color:#FFDDDD;">May only be invoked one time per thread!</div>
+     * <div style="margin-left: 0.1in; margin-right: 0.5in; background-color:#FFDDDD;">
+     * May only be invoked one time per thread!<br>
+     * Do not call in case {@link #tryAcquireGrant()} was invoked and returned <code>false</code>
+     * </div>
      * <p>
      *
      * @return <code>true</code> if released; otherwise <code>false</code>
      */
     boolean release();
+
+    /**
+     * Releases this access control.
+     * <p>
+     * <div style="margin-left: 0.1in; margin-right: 0.5in; background-color:#FFDDDD;">May only be invoked one time per thread!</div>
+     * <p>
+     *
+     * @param acquired <code>true</code> if a grant was acquired; otherwise <code>false</code>
+     * @return <code>true</code> if released; otherwise <code>false</code>
+     */
+    boolean release(boolean acquired);
 
 }

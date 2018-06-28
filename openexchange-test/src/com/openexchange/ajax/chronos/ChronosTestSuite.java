@@ -51,8 +51,8 @@ package com.openexchange.ajax.chronos;
 
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
-import com.openexchange.ajax.chronos.schedjoules.BasicSchedJoulesAPITest;
-import com.openexchange.ajax.chronos.schedjoules.BasicSchedJoulesProviderTest;
+import com.openexchange.ajax.chronos.bugs.ChronosBugsTestSuite;
+import com.openexchange.ajax.chronos.schedjoules.SchedJoulesTestSuite;
 import com.openexchange.test.concurrent.ParallelSuite;
 
 /**
@@ -68,8 +68,7 @@ import com.openexchange.test.concurrent.ParallelSuite;
     BasicAlarmTriggerTest.class,
     //BasicAvailabilityTest.class,
     BasicFreeBusyTest.class,
-    BasicSchedJoulesAPITest.class,
-    BasicSchedJoulesProviderTest.class,
+    SchedJoulesTestSuite.class,
     BasicSelfProtectionTest.class,
     BasicSeriesEventTest.class,
     BasicSingleEventTest.class,
@@ -78,7 +77,8 @@ import com.openexchange.test.concurrent.ParallelSuite;
     ICalEventImportExportTest.class,
     RestrictedAttendeePermissionsTest.class,
     BasicICalCalendarProviderTest.class,
-    ICalImportAccessTest.class
+    ICalImportAccessTest.class,
+    ChronosBugsTestSuite.class
     // @formatter:on
 
 })

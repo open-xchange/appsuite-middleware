@@ -8,9 +8,7 @@ When acting as `authorization server`, every application must be registered at t
 
 # Installation and Configuration
 
-The OAuth provider feature is separated into two packages `open-xchange-oauth-provider` and `open-xchange-admin-oauth-provider`. The former one needs to be installed on every groupware node, the latter one provides the client provisioning interfaces and may be installed on your dedicated provisioning nodes. On a Debian setup you would install those packages like so:
-
-    $ apt-get install open-xchange-oauth-provider open-xchange-admin-oauth-provider
+The OAuth provider feature is separated into two packages `open-xchange-oauth-provider` and `open-xchange-admin-oauth-provider` which are both contained in the `backend`software repository.
 
 Configuration takes place in `/opt/open-xchange/etc/oauth-provider.properties`. The feature is disabled by default and must be activated manually.
 

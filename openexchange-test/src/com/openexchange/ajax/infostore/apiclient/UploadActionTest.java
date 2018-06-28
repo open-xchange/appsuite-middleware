@@ -127,7 +127,7 @@ public class UploadActionTest extends InfostoreApiClientTest {
         // upload chunks
         String id = null;
         for (int x = 0; x < numOfChunks; x++) {
-            id = uploadInfoItem(id, file, MIME_IMAGE_JPG, null, chunks[x], Long.valueOf(x * chunkSize), Long.valueOf(all.length));
+            id = uploadInfoItem(id, file, MIME_IMAGE_JPG, null, chunks[x], Long.valueOf(x * chunkSize), Long.valueOf(all.length), null);
         }
 
         InfoItemData item = getItem(id);

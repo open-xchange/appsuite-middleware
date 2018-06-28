@@ -532,6 +532,7 @@ public class CalendarServiceImpl implements CalendarService {
             }
             notifyHandlers(calendarEvent);
         };
+
         ThreadPools.submitElseExecute(ThreadPools.task(notifyRunnable));
         return result;
     }

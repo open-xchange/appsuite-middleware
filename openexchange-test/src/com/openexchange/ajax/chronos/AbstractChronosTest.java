@@ -130,7 +130,7 @@ public class AbstractChronosTest extends AbstractEnhancedApiClientSession {
         Exception exception = null;
         try {
             if (eventIds != null) {
-                defaultUserApi.getChronosApi().deleteEvent(defaultUserApi.getSession(), System.currentTimeMillis(), new ArrayList<EventId>(eventIds), null, null, false, false);
+                defaultUserApi.getChronosApi().deleteEvent(defaultUserApi.getSession(), System.currentTimeMillis(), new ArrayList<>(eventIds), null, null, false, false);
             }
         } catch (Exception e) {
             exception = e;
@@ -265,6 +265,24 @@ public class AbstractChronosTest extends AbstractEnhancedApiClientSession {
             }
         }
         throw new Exception("Unable to find default calendar folder!");
+    }
+
+    public String getBirthdayCalendarFolder() throws Exception {
+        FoldersVisibilityResponse visibleFolders = foldersApi.getVisibleFolders(defaultUserApi.getSession(), "event", "1,300,308", "1");
+
+        if (visibleFolders.getError() != null) {
+            throw new OXException(new Exception(visibleFolders.getErrorDesc()));
+        }
+        Object privateFolders = visibleFolders.getData().getPrivate();
+        @SuppressWarnings("unchecked")
+        ArrayList<ArrayList<?>> privateList = (ArrayList<ArrayList<?>>) privateFolders;
+
+        for (ArrayList<?> folder : privateList) {
+            if (folder.get(1).equals("Birthdays")) {
+                return folder.get(0).toString();
+            }
+        }
+        throw new Exception("Unable to find birthday calendar folder!");
     }
 
     /**

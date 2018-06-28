@@ -1798,7 +1798,7 @@ public final class MimeMessageUtility {
      */
     public static void setFoldedHeader(String headerName, String headerValue, MimeMessage mimeMessage) throws MessagingException {
         if (null != headerName && null != headerValue && null != mimeMessage) {
-            mimeMessage.setHeader(headerName, fold(headerName.length() + 1, headerValue));
+            mimeMessage.setHeader(headerName, fold(headerName.length() + 2, headerValue));
         }
     }
 
@@ -1814,65 +1814,7 @@ public final class MimeMessageUtility {
      * @return The folded string
      */
     public static String fold(final int used, final String foldMe) {
-        int end;
-        char c;
-        /*
-         * Strip trailing spaces and newlines
-         */
-        for (end = foldMe.length() - 1; end >= 0; end--) {
-            c = foldMe.charAt(end);
-            if (c != ' ' && c != '\t' && c != '\r' && c != '\n') {
-                break;
-            }
-        }
-        String s;
-        if (end != foldMe.length() - 1) {
-            s = foldMe.substring(0, end + 1);
-        } else {
-            s = foldMe;
-        }
-        /*
-         * Check if the string fits now
-         */
-        if (used + s.length() <= 76) {
-            return s;
-        }
-        /*
-         * Fold the string
-         */
-        final StringBuilder sb = new StringBuilder(s.length() + 4);
-        char lastc = 0;
-        int usedChars = used;
-        while (usedChars + s.length() > 76) {
-            int lastspace = -1;
-            for (int i = 0; i < s.length(); i++) {
-                if (lastspace != -1 && usedChars + i > 76) {
-                    break;
-                }
-                c = s.charAt(i);
-                if ((c == ' ' || c == '\t') && !(lastc == ' ' || lastc == '\t')) {
-                    lastspace = i;
-                }
-                lastc = c;
-            }
-            if (lastspace == -1) {
-                /*
-                 * No space, use the whole thing
-                 */
-                sb.append(s);
-                s = "";
-                usedChars = 0;
-                break;
-            }
-            sb.append(s.substring(0, lastspace));
-            sb.append("\r\n");
-            lastc = s.charAt(lastspace);
-            sb.append(lastc);
-            s = s.substring(lastspace + 1);
-            usedChars = 1;
-        }
-        sb.append(s);
-        return sb.toString();
+        return MimeUtility.fold(used, foldMe);
     }
 
     private static final Pattern PATTERN_UNFOLD = Pattern.compile("(\\?=)(\\s*)(=\\?)");

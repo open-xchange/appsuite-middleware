@@ -66,7 +66,6 @@ import com.openexchange.subscribe.SimSubscribeService;
 import com.openexchange.subscribe.SimSubscriptionSourceDiscoveryService;
 import com.openexchange.subscribe.Subscription;
 import com.openexchange.subscribe.SubscriptionSource;
-import com.openexchange.subscribe.TargetFolderSession;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.SimServerSession;
 
@@ -113,7 +112,7 @@ public class SubscriptionExecutionServiceImplTest {
         list.add(simFolderUpdaterService);
         executionService = new SubscriptionExecutionServiceImpl(discovery, list, new SimContextService()) {
             @Override
-            protected FolderObject getFolder(final TargetFolderSession subscriptionSession, final int contextId, final int folderId) throws OXException {
+            protected FolderObject getFolder(final int contextId, final int folderId) throws OXException {
                 return null;
             }
         };
@@ -180,7 +179,7 @@ public class SubscriptionExecutionServiceImplTest {
         list.add(simFolderUpdaterService2);
         executionService = new SubscriptionExecutionServiceImpl(discovery, list, new SimContextService()) {
             @Override
-            protected FolderObject getFolder(final TargetFolderSession subscriptionSession, final int contextId, final int folderId) throws OXException {
+            protected FolderObject getFolder(final int contextId, final int folderId) throws OXException {
                 return null;
             }
         };
@@ -205,7 +204,7 @@ public class SubscriptionExecutionServiceImplTest {
         list.add(simFolderUpdaterService2);
         executionService = new SubscriptionExecutionServiceImpl(discovery, list, new SimContextService()) {
             @Override
-            protected FolderObject getFolder(final TargetFolderSession subscriptionSession, final int contextId, final int folderId) throws OXException {
+            protected FolderObject getFolder(final int contextId, final int folderId) throws OXException {
                 return null;
             }
         };
@@ -226,7 +225,7 @@ public class SubscriptionExecutionServiceImplTest {
         list.add(simFolderUpdaterService);
         executionService = new SubscriptionExecutionServiceImpl(discovery, list, new SimContextService()) {
             @Override
-            protected FolderObject getFolder(final TargetFolderSession subscriptionSession, final int contextId, final int folderId) throws OXException {
+            protected FolderObject getFolder(final int contextId, final int folderId) throws OXException {
                 return null;
             }
         };

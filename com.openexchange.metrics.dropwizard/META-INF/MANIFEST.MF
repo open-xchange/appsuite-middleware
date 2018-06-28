@@ -5,8 +5,7 @@ Bundle-SymbolicName: com.openexchange.metrics.dropwizard
 Bundle-Version: 7.10.0
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
-Import-Package: com.codahale.metrics,
- com.openexchange.exception,
+Import-Package: com.openexchange.exception,
  com.openexchange.management,
  com.openexchange.metrics,
  com.openexchange.metrics.exceptions,
@@ -17,3 +16,6 @@ Import-Package: com.codahale.metrics,
  javax.management,
  org.osgi.framework
 Bundle-Activator: com.openexchange.metrics.dropwizard.osgi.MetricActivator
+Bundle-ClassPath: lib/metrics-core-4.0.3-SNAPSHOT.jar,
+ lib/metrics-jmx-4.0.3-SNAPSHOT.jar,
+ .

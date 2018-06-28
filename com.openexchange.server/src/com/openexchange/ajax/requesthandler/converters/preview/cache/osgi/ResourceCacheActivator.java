@@ -76,6 +76,7 @@ import com.openexchange.ajax.requesthandler.converters.preview.cache.groupware.P
 import com.openexchange.ajax.requesthandler.converters.preview.cache.groupware.PreviewCacheCreateTableService;
 import com.openexchange.ajax.requesthandler.converters.preview.cache.groupware.PreviewCacheCreateTableTask;
 import com.openexchange.ajax.requesthandler.converters.preview.cache.groupware.PreviewCacheDeleteListener;
+import com.openexchange.ajax.requesthandler.converters.preview.cache.groupware.PreviewTableUtf8Mb4UpdateTask;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Reloadable;
 import com.openexchange.database.CreateTableService;
@@ -88,6 +89,7 @@ import com.openexchange.groupware.update.UpdateTaskProviderService;
 import com.openexchange.management.ManagementService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.osgi.SimpleRegistryListener;
+import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.timer.TimerService;
 
 
@@ -176,6 +178,7 @@ public final class ResourceCacheActivator extends HousekeepingActivator {
         // Register stuff
         registerService(ResourceCache.class, cache);
         registerService(Reloadable.class, cache);
+        ServerServiceRegistry.getInstance().addService(ResourceCache.class, cache);
         {
             final Dictionary<String, Object> d = new Hashtable<String, Object>(1);
             d.put(EventConstants.EVENT_TOPIC, new String[] { FileStorageEventConstants.UPDATE_TOPIC, FileStorageEventConstants.DELETE_TOPIC });
@@ -193,7 +196,8 @@ public final class ResourceCacheActivator extends HousekeepingActivator {
             new PreviewCacheCreateDataTableTask(),
             new DropDataFromPreviewCacheTable(),
             new ChangeFileNameAndTypeLength(),
-            new ChangeDataToLongblob()));
+            new ChangeDataToLongblob(),
+            new PreviewTableUtf8Mb4UpdateTask()));
         registerService(DeleteListener.class, new PreviewCacheDeleteListener());
     }
 

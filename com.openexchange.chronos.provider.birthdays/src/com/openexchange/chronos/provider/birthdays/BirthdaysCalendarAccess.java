@@ -59,6 +59,7 @@ import static com.openexchange.tools.arrays.Arrays.contains;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
@@ -128,6 +129,12 @@ public class BirthdaysCalendarAccess implements BasicCalendarAccess, SubscribeAw
     /** Search term to query for contacts having a birthday */
     private static final SearchTerm<?> HAS_BIRTHDAY_TERM = new CompositeSearchTerm(CompositeOperation.NOT)
         .addSearchTerm(new SingleSearchTerm(SingleOperation.ISNULL).addOperand(new ContactFieldOperand(ContactField.BIRTHDAY)));
+
+    /** The fields queried from the contact storage */
+    private static final ContactField[] CONTACT_FIELDS = new ContactField[] {
+        ContactField.OBJECT_ID, ContactField.FOLDER_ID, ContactField.INTERNAL_USERID, ContactField.UID, ContactField.BIRTHDAY,
+        ContactField.LAST_MODIFIED, ContactField.DEPARTMENT, ContactField.SUR_NAME, ContactField.GIVEN_NAME, ContactField.EMAIL1
+    };
 
     private final ServerSession session;
     private final ServiceLookup services;
@@ -291,7 +298,7 @@ public class BirthdaysCalendarAccess implements BasicCalendarAccess, SubscribeAw
     private Contact getBirthdayContact(String eventId) throws OXException {
         try {
             int[] decodedId = eventConverter.decodeEventId(eventId);
-            Contact contact = services.getService(ContactService.class).getContact(session, String.valueOf(decodedId[0]), String.valueOf(decodedId[1]));
+            Contact contact = services.getService(ContactService.class).getContact(session, String.valueOf(decodedId[0]), String.valueOf(decodedId[1]), CONTACT_FIELDS);
             if (null == contact.getBirthday()) {
                 throw OXException.notFound(eventId);
             }
@@ -325,14 +332,14 @@ public class BirthdaysCalendarAccess implements BasicCalendarAccess, SubscribeAw
                 searchTerm = new CompositeSearchTerm(CompositeOperation.AND)
                     .addSearchTerm(new SingleSearchTerm(SingleOperation.EQUALS)
                         .addOperand(new ContactFieldOperand(ContactField.FOLDER_ID))
-                        .addOperand(new ConstantOperand<String>(folderIds.get(0))))
+                        .addOperand(new ConstantOperand<>(folderIds.get(0))))
                     .addSearchTerm(searchTerm);
             } else {
                 CompositeSearchTerm orTerm = new CompositeSearchTerm(CompositeOperation.OR);
                 for (String folderId : folderIds) {
                     orTerm.addSearchTerm(new SingleSearchTerm(SingleOperation.EQUALS)
                         .addOperand(new ContactFieldOperand(ContactField.FOLDER_ID))
-                        .addOperand(new ConstantOperand<String>(folderId)));
+                        .addOperand(new ConstantOperand<>(folderId)));
                 }
                 searchTerm = new CompositeSearchTerm(CompositeOperation.AND).addSearchTerm(orTerm).addSearchTerm(searchTerm);
             }
@@ -350,10 +357,10 @@ public class BirthdaysCalendarAccess implements BasicCalendarAccess, SubscribeAw
         /*
          * perform search & collect contacts with birthday
          */
-        List<Contact> contacts = new ArrayList<Contact>();
+        List<Contact> contacts = new ArrayList<>();
         SearchIterator<Contact> searchIterator = null;
         try {
-            searchIterator = services.getService(ContactService.class).searchContacts(session, searchTerm, sortOptions);
+            searchIterator = services.getService(ContactService.class).searchContacts(session, searchTerm, CONTACT_FIELDS, sortOptions);
             while (searchIterator.hasNext()) {
                 Contact contact = searchIterator.next();
                 if (null == contact.getBirthday()) {
@@ -374,7 +381,7 @@ public class BirthdaysCalendarAccess implements BasicCalendarAccess, SubscribeAw
     }
 
     private boolean isExpandOccurrences() {
-        return parameters.get(CalendarParameters.PARAMETER_EXPAND_OCCURRENCES, Boolean.class, Boolean.TRUE).booleanValue();
+        return parameters.get(CalendarParameters.PARAMETER_EXPAND_OCCURRENCES, Boolean.class, Boolean.FALSE).booleanValue();
     }
 
     private EventField[] getFields() {
@@ -387,13 +394,20 @@ public class BirthdaysCalendarAccess implements BasicCalendarAccess, SubscribeAw
     }
 
     private List<String> getContactFolderIds() throws OXException {
-        List<String> folderIds = new ArrayList<String>();
+        List<String> folderIds = new ArrayList<>();
         JSONArray typesJSONArray = account.getUserConfiguration().optJSONArray("folderTypes");
         if (null == typesJSONArray) {
             return null;
         }
+        Set<String> types = new HashSet<>(typesJSONArray.length());
         for (int i = 0; i < typesJSONArray.length(); i++) {
-            folderIds.addAll(getContactFolderIds(typesJSONArray.optString(i)));
+            types.add(typesJSONArray.optString(i));
+        }
+        if (types.contains("public") && types.contains("shared") && types.contains("private")) {
+            return null;
+        }
+        for (String type : types) {
+            folderIds.addAll(getContactFolderIds(type));
         }
         return folderIds;
     }
@@ -412,7 +426,7 @@ public class BirthdaysCalendarAccess implements BasicCalendarAccess, SubscribeAw
     }
 
     private List<String> getContactFolderIds(Type type) throws OXException {
-        List<String> folderIds = new ArrayList<String>();
+        List<String> folderIds = new ArrayList<>();
         FolderResponse<UserizedFolder[]> visibleFolders = services.getService(FolderService.class).getVisibleFolders(FolderStorage.REAL_TREE_ID, ContactContentType.getInstance(), type, false, session, null);
         UserizedFolder[] folders = visibleFolders.getResponse();
         if (null != folders && 0 < folders.length) {

@@ -181,6 +181,7 @@ public final class ICalChronosDataHandler extends ICalDataHandler {
         try {
             IDBasedCalendarAccess access = services.getServiceSafe(IDBasedCalendarAccessFactory.class).createAccess(session);
             access.set(CalendarParameters.UID_CONFLICT_STRATEGY, UIDConflictStrategy.UPDATE_OR_REASSIGN);
+            access.set(CalendarParameters.PARAMETER_SUPPRESS_ITIP, Boolean.TRUE);
             List<ImportResult> importEvents = access.importEvents(calendarFolder, events);
             for (ImportResult importEvent : importEvents) {
                 if (null == importEvent.getError()) {

@@ -5,17 +5,13 @@ Bundle-SymbolicName: com.openexchange.metrics
 Bundle-Version: 7.10.0
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
-Bundle-ClassPath: .,
- lib/metrics-core-4.0.3-SNAPSHOT.jar,
- lib/metrics-jmx-4.0.3-SNAPSHOT.jar
-Export-Package: com.codahale.metrics,
- com.openexchange.metrics,
+Bundle-ClassPath: .
+Export-Package: com.openexchange.metrics,
  com.openexchange.metrics.exceptions,
  com.openexchange.metrics.jmx,
  com.openexchange.metrics.jmx.beans,
  com.openexchange.metrics.types
-Import-Package: com.codahale.metrics,
- com.openexchange.exception,
+Import-Package: com.openexchange.exception,
  com.openexchange.java,
  com.openexchange.management,
  com.openexchange.osgi,
@@ -23,5 +19,5 @@ Import-Package: com.codahale.metrics,
  com.openexchange.server,
  javax.management,
  org.osgi.framework,
- org.osgi.util.tracker;version="1.5.1",
+ org.osgi.util.tracker,
  org.slf4j

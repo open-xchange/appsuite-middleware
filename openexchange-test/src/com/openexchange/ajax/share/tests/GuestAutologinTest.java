@@ -123,7 +123,7 @@ public class GuestAutologinTest extends ShareTest {
             AutologinResponse response = guestClient.execute(autologin);
             assertFalse(response.getErrorMessage(), response.hasError());
             assertEquals(guestClient.getSession().getId(), response.getSessionId());
-            assertEquals(getUsername(recipient), response.getUser());
+            assertEquals(guestClient.getValues().getUserId() + "@" + guestClient.getValues().getContextId(), response.getUser());
         } finally {
             sharedSession.setId(oldSessionID);
         }

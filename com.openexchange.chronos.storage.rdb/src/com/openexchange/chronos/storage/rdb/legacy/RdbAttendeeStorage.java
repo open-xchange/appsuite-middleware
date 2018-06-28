@@ -277,7 +277,7 @@ public class RdbAttendeeStorage extends RdbStorage implements AttendeeStorage {
     }
 
     @Override
-    public void deleteAllAttendees() throws OXException {
+    public boolean deleteAllAttendees() throws OXException {
         throw new UnsupportedOperationException();
     }
 
@@ -506,7 +506,7 @@ public class RdbAttendeeStorage extends RdbStorage implements AttendeeStorage {
                 try (PreparedStatement stmt = connection.prepareStatement("DELETE FROM dateExternal WHERE cid=? AND objectId=? AND mailAddress=?;")) {
                     stmt.setInt(1, contextID);
                     stmt.setInt(2, objectID);
-                    stmt.setString(3, Event2Appointment.getEMailAddress(attendee.getUri()));
+                    stmt.setString(3, Strings.replaceSurrogatePairs(Event2Appointment.getEMailAddress(attendee.getUri()), '@'));
                     updated += logExecuteUpdate(stmt);
                 }
                 try (PreparedStatement stmt = connection.prepareStatement("DELETE FROM prg_date_rights WHERE cid=? AND object_id=? AND ma=?;")) {
@@ -561,7 +561,7 @@ public class RdbAttendeeStorage extends RdbStorage implements AttendeeStorage {
                     parameterIndex = mapper.setParameters(stmt, parameterIndex, attendee, fields);
                     stmt.setInt(parameterIndex++, contextID);
                     stmt.setInt(parameterIndex++, objectID);
-                    stmt.setString(parameterIndex++, Event2Appointment.getEMailAddress(attendee.getUri()));
+                    stmt.setString(parameterIndex++, Strings.replaceSurrogatePairs(Event2Appointment.getEMailAddress(attendee.getUri()), '@'));
                     updated += logExecuteUpdate(stmt);
                 } catch (SQLException e) {
                     throw asOXException(e, ExternalAttendeeMapper.getInstance(), attendee, connection, "dateExternal");

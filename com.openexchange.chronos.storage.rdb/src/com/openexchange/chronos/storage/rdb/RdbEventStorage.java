@@ -305,7 +305,7 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
     }
 
     @Override
-    public void deleteAllEvents() throws OXException {
+    public boolean deleteAllEvents() throws OXException {
         int updated = 0;
         Connection connection = null;
         try {
@@ -319,6 +319,7 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
         } finally {
             release(connection, updated);
         }
+        return 0 < updated;
     }
 
     private int deleteEvents(Connection connection) throws SQLException {

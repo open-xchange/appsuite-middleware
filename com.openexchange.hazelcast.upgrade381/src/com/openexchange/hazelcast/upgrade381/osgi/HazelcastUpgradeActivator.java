@@ -61,8 +61,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.legacy.DynamicPortableFactory;
 import com.openexchange.legacy.DynamicPortableFactoryImpl;
-import com.openexchange.legacy.PortableCacheKeyFactory;
-import com.openexchange.legacy.PortableMessageFactory;
+import com.openexchange.legacy.PortableContextInvalidationCallableFactory;
 import com.openexchange.osgi.HousekeepingActivator;
 
 /**
@@ -180,8 +179,7 @@ public class HazelcastUpgradeActivator extends HousekeepingActivator {
          * Serialization config
          */
         DynamicPortableFactoryImpl dynamicPortableFactory = new DynamicPortableFactoryImpl();
-        dynamicPortableFactory.register(new PortableMessageFactory());
-        dynamicPortableFactory.register(new PortableCacheKeyFactory());
+        dynamicPortableFactory.register(new PortableContextInvalidationCallableFactory());
         config.getSerializationConfig().addPortableFactory(DynamicPortableFactory.FACTORY_ID, dynamicPortableFactory);
         for (ClassDefinition classDefinition : dynamicPortableFactory.getClassDefinitions()) {
             config.getSerializationConfig().addClassDefinition(classDefinition);

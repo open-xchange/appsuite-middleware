@@ -108,6 +108,18 @@ class ConnectionLifecycle implements PoolableLifecycle<Connection> {
         return openStatementsField;
     }
 
+    static final class FastThrowable extends Throwable {
+
+        FastThrowable() {
+            super("tracked closed connection");
+        }
+
+        @Override
+        public synchronized Throwable fillInStackTrace() {
+            return this;
+        }
+    }
+
     // ----------------------------------------------------------------------------------------------
 
     private final String url;
@@ -130,8 +142,8 @@ class ConnectionLifecycle implements PoolableLifecycle<Connection> {
         Statement stmt = null;
         ResultSet result = null;
         try {
-            retval = !con.isClosed();
-            if (data.getTimeDiff() > checkTime) {
+            retval = MysqlUtils.ClosedState.OPEN == MysqlUtils.isClosed(con, true);
+            if (retval && data.getLastPacketDiffFallbackToTimeDiff() > checkTime) {
                 stmt = con.createStatement();
                 result = stmt.executeQuery(TEST_SELECT);
                 if (result.next()) {
@@ -170,7 +182,7 @@ class ConnectionLifecycle implements PoolableLifecycle<Connection> {
     public boolean deactivate(final PooledData<Connection> data) {
         boolean retval = true;
         try {
-            retval = !data.getPooled().isClosed();
+            retval = MysqlUtils.ClosedState.OPEN == MysqlUtils.isClosed(data.getPooled(), true);;
         } catch (final SQLException e) {
             retval = false;
         }
@@ -230,8 +242,13 @@ class ConnectionLifecycle implements PoolableLifecycle<Connection> {
         final Connection con = data.getPooled();
         boolean retval = true;
         try {
-            if (con.isClosed()) {
-                ConnectionPool.LOG.error("Found closed connection.");
+            MysqlUtils.ClosedState closedState = MysqlUtils.isClosed(con, true);
+            if (MysqlUtils.ClosedState.OPEN != closedState) {
+                if (MysqlUtils.ClosedState.EXPLICITLY_CLOSED == closedState) {
+                    ConnectionPool.LOG.error("Found closed connection.", new FastThrowable());
+                } else {
+                    ConnectionPool.LOG.error("Found internally closed connection.", new FastThrowable());
+                }
                 retval = false;
             } else if (!con.getAutoCommit()) {
                 final OXException dbe = DBPoolingExceptionCodes.NO_AUTOCOMMIT.create();

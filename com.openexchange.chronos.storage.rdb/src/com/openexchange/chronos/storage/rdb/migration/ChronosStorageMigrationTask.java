@@ -90,7 +90,9 @@ public class ChronosStorageMigrationTask extends UpdateTaskAdapter {
     public String[] getDependencies() {
         return new String[] {
             com.openexchange.chronos.storage.rdb.groupware.ChronosCreateTableTask.class.getName(),
-            "com.openexchange.groupware.update.tasks.CalendarAddIndex2DatesMembersV2"
+            "com.openexchange.groupware.update.tasks.CalendarAddIndex2DatesMembersV2",
+            com.openexchange.chronos.storage.rdb.groupware.CalendarEventAddRDateColumnTask.class.getName(),
+            com.openexchange.chronos.storage.rdb.groupware.CalendarEventAddSeriesIndexTask.class.getName()
         };
     }
 
@@ -106,9 +108,10 @@ public class ChronosStorageMigrationTask extends UpdateTaskAdapter {
         int[] contextIds = params.getContextsInSameSchema();
         MigrationProgress progress = new MigrationProgress(params.getProgressState(), contextIds.length);
         Connection connection = params.getConnection();
-        boolean committed = false;
+        int rollback = 0;
         try {
             connection.setAutoCommit(false);
+            rollback = 1;
             /*
              * migrate calendar data for all contexts & increment progress
              */
@@ -121,14 +124,16 @@ public class ChronosStorageMigrationTask extends UpdateTaskAdapter {
                 return;
             }
             connection.commit();
-            committed = true;
+            rollback = 2;
         } catch (SQLException e) {
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } finally {
-            if (false == committed) {
-                rollback(connection);
+            if (rollback > 0) {
+                if (rollback == 1) {
+                    rollback(connection);
+                }
+                autocommit(connection);
             }
-            autocommit(connection);
         }
     }
 

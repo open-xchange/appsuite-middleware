@@ -51,12 +51,10 @@ package com.openexchange.tools.oxfolder.property.osgi;
 
 import java.io.ByteArrayInputStream;
 import java.util.Arrays;
-import java.util.Collection;
 import com.openexchange.caching.CacheService;
 import com.openexchange.database.CreateTableService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.groupware.update.UpdateTaskProviderService;
-import com.openexchange.groupware.update.UpdateTaskV2;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.tools.oxfolder.property.FolderUserPropertyStorage;
@@ -64,6 +62,7 @@ import com.openexchange.tools.oxfolder.property.impl.CachingFolderUserPropertySt
 import com.openexchange.tools.oxfolder.property.impl.RdbFolderUserPropertyStorage;
 import com.openexchange.tools.oxfolder.property.sql.CreateFolderUserPropertyTable;
 import com.openexchange.tools.oxfolder.property.sql.CreateFolderUserPropertyTask;
+import com.openexchange.tools.oxfolder.property.sql.OXFolderUserPropertyConvertUtf8ToUtf8mb4Task;
 
 /**
  * {@link FolderUserPropertyActivator}
@@ -93,16 +92,7 @@ public class FolderUserPropertyActivator extends HousekeepingActivator {
         if (null == dbService) {
             throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(DatabaseService.class.getName());
         }
-        final CreateFolderUserPropertyTask task = new CreateFolderUserPropertyTask(dbService);
-
-        registerService(UpdateTaskProviderService.class, new UpdateTaskProviderService() {
-
-            @Override
-            public Collection<? extends UpdateTaskV2> getUpdateTasks() {
-                return Arrays.asList(task);
-            }
-
-        });
+        registerService(UpdateTaskProviderService.class, () -> Arrays.asList(new CreateFolderUserPropertyTask(dbService), new OXFolderUserPropertyConvertUtf8ToUtf8mb4Task()));
         registerService(CreateTableService.class, new CreateFolderUserPropertyTable());
 
         // Initialize cache region
@@ -128,5 +118,4 @@ public class FolderUserPropertyActivator extends HousekeepingActivator {
         // Register FolderUserPropertyStorage
         registerService(FolderUserPropertyStorage.class, new CachingFolderUserPropertyStorage(new RdbFolderUserPropertyStorage(this)));
     }
-
 }

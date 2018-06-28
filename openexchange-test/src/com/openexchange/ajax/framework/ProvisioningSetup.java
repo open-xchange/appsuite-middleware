@@ -145,7 +145,7 @@ public class ProvisioningSetup {
         String password = contextsAndUsers.getProperty(PASSWORD_IDENTIFIER);
         String oxadmin = contextsAndUsers.getProperty(ADMIN_IDENTIFIER);
 
-        Map<String, Object> map = new HashMap<String, Object>();
+        Map<String, Object> map = new HashMap<>();
         for (final String name : contextsAndUsers.stringPropertyNames()) {
             map.put(name, contextsAndUsers.getProperty(name));
         }
@@ -207,16 +207,11 @@ public class ProvisioningSetup {
     private static Properties getProperties() throws OXException {
         File propFile = getPropFile();
 
-        Properties contextsAndUserProps = readPropFile(propFile);
-
-        return contextsAndUserProps;
+        return readPropFile(propFile);
     }
 
     private static File getPropFile() throws OXException {
         String propertyFileName = getPropertyFileName();
-        if (null == propertyFileName) {
-            throw ConfigurationExceptionCodes.NO_FILENAME.create();
-        }
         final File propFile = new File(propertyFileName);
         if (!propFile.exists()) {
             throw ConfigurationExceptionCodes.FILE_NOT_FOUND.create(propFile.getAbsoluteFile());
@@ -237,17 +232,13 @@ public class ProvisioningSetup {
 
     private static Properties readPropFile(File propFile) throws OXException {
         Properties props = new Properties();
-        FileInputStream fis = null;
-        try {
-            fis = new FileInputStream(propFile);
+        try (FileInputStream fis = new FileInputStream(propFile)){
             props.load(fis);
         } catch (final FileNotFoundException e) {
             throw ConfigurationExceptionCodes.FILE_NOT_FOUND.create(propFile.getAbsolutePath(), e);
         } catch (final IOException e) {
             throw ConfigurationExceptionCodes.READ_ERROR.create(propFile.getAbsolutePath(), e);
-        } finally {
-            Streams.close(fis);
-        }
+        } 
         return props;
     }
 }

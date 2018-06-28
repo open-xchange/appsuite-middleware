@@ -70,6 +70,7 @@ import com.openexchange.passwordchange.history.impl.RdbPasswordChangeRecorder;
 import com.openexchange.passwordchange.history.impl.events.PasswordChangeEventListener;
 import com.openexchange.passwordchange.history.impl.events.PasswordChangeInterceptor;
 import com.openexchange.passwordchange.history.impl.groupware.PasswordChangeHistoryCreateTableTask;
+import com.openexchange.passwordchange.history.impl.groupware.PasswordChangeHistoryConvertToUtf8mb4;
 import com.openexchange.passwordchange.history.impl.groupware.PasswordHistoryDeleteListener;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.user.UserService;
@@ -129,14 +130,16 @@ public final class PasswordChangeHistoryImplActivator extends HousekeepingActiva
         // Register DeleteListener to handle user/context deletions
         registerService(DeleteListener.class, new PasswordHistoryDeleteListener(registry, getService(UserService.class)));
 
-        // Register UpdateTask
-        registerService(CreateTableService.class, new PasswordChangeHistoryCreateTableTask());
+        // Register UpdateTask and CreateTableService
+        final PasswordChangeHistoryCreateTableTask createTableTask = new PasswordChangeHistoryCreateTableTask();
+        registerService(CreateTableService.class, createTableTask);
         registerService(UpdateTaskProviderService.class, new UpdateTaskProviderService() {
 
             @Override
             public Collection<? extends UpdateTaskV2> getUpdateTasks() {
                 final List<UpdateTaskV2> tasks = new ArrayList<UpdateTaskV2>(1);
-                tasks.add(new PasswordChangeHistoryCreateTableTask());
+                tasks.add(createTableTask);
+                tasks.add(new PasswordChangeHistoryConvertToUtf8mb4());
                 return tasks;
             }
         });

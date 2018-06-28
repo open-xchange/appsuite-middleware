@@ -53,6 +53,7 @@ import static com.openexchange.chronos.common.CalendarUtils.getObjectIDs;
 import static com.openexchange.chronos.common.CalendarUtils.getSearchTerm;
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.L;
+import static com.openexchange.osgi.Tools.requireService;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -81,6 +82,7 @@ import com.openexchange.chronos.service.SortOrder;
 import com.openexchange.chronos.service.SortOrder.Order;
 import com.openexchange.chronos.storage.AlarmStorage;
 import com.openexchange.chronos.storage.CalendarStorage;
+import com.openexchange.database.DatabaseService;
 import com.openexchange.database.provider.DBProvider;
 import com.openexchange.database.provider.DBTransactionPolicy;
 import com.openexchange.database.provider.SimpleDBProvider;
@@ -100,12 +102,14 @@ public class CalendarDataMigration {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CalendarDataMigration.class);
 
-    private final CalendarStorage sourceStorage;
-    private final CalendarStorage destinationStorage;
     private final MigrationConfig config;
+    private final Context context;
     private final int contextId;
     private final MigrationProgress progress;
-    private final Connection connection;
+    private final DBProvider dbProvider;
+    private final DBTransactionPolicy txPolicy;
+    private final EntityResolver entityResolver;
+    private final SortedMap<String, List<OXException>> warnings;
 
     private long totalEventsToCopy;
     private long lastLogTime;
@@ -129,13 +133,16 @@ public class CalendarDataMigration {
         this.progress = progress;
         this.config = config;
         this.contextId = context.getContextId();
-        this.connection = connection;
-        DBProvider dbProvider = new SimpleDBProvider(connection, connection);
-        EntityResolver entityResolver = config.optEntityResolver(contextId);
-        sourceStorage = new com.openexchange.chronos.storage.rdb.legacy.RdbCalendarStorage(
-            context, entityResolver, dbProvider, DBTransactionPolicy.NO_TRANSACTIONS);
-        destinationStorage = new com.openexchange.chronos.storage.rdb.RdbCalendarStorage(
-            context, 0, entityResolver, dbProvider, DBTransactionPolicy.NO_TRANSACTIONS);
+        this.context = context;
+        this.entityResolver = config.optEntityResolver(contextId);
+        if (config.isIntermediateCommits()) {
+            this.dbProvider = new UpdateTaskDBProvider(requireService(DatabaseService.class, config.getServiceLookup()));
+            this.txPolicy = DBTransactionPolicy.NORMAL_TRANSACTIONS;
+        } else {
+            this.dbProvider = new SimpleDBProvider(connection, connection);
+            this.txPolicy = DBTransactionPolicy.NO_TRANSACTIONS;
+        }
+        this.warnings = new TreeMap<String, List<OXException>>(CalendarUtils.ID_COMPARATOR);
     }
 
     /**
@@ -149,18 +156,17 @@ public class CalendarDataMigration {
              * empty destination storage as preparation
              */
             LOG.trace("Emptying destination storage...");
-            destinationStorage.getUtilities().deleteAllData();
+            emptyDestinationStorage();
             LOG.info("Destination storage emptied successfully.");
             /*
              * probe total number of events to migrate
              */
-            long eventCount = sourceStorage.getEventStorage().countEvents();
+            long eventCount = countEvents();
             /*
              * determine maximum age of copied event tombstones & probe total number of event tombstones to migrate
              */
             Date minTombstoneLastModified = getMinTombstoneLastModified();
-            long tombstoneCount = null == minTombstoneLastModified ? null : sourceStorage.getEventStorage().countEventTombstones(
-                getSearchTerm(EventField.TIMESTAMP, SingleOperation.GREATER_THAN, minTombstoneLastModified));
+            long tombstoneCount = countEventTombstones(minTombstoneLastModified);
             /*
              * init progress
              */
@@ -201,7 +207,10 @@ public class CalendarDataMigration {
              */
             int sequence = copyCalendarSequence();
             LOG.info("Successfully initialized event identifier sequence with {} in context {}.", I(sequence), I(contextId));
-        } catch (Exception e) {
+        } catch (SQLException e) {
+            LOG.error("Error running calendar migration task in context {}: {}", I(contextId), e.getMessage(), e);
+            throw CalendarExceptionCodes.DB_ERROR.create(e, e.getMessage());
+        } catch (OXException e) {
             LOG.error("Error running calendar migration task in context {}: {}", I(contextId), e.getMessage(), e);
             throw e;
         } finally {
@@ -217,7 +226,6 @@ public class CalendarDataMigration {
             } else {
                 LOG.info("Finished calendar migration task in context {}, {}.{} seconds elapsed.", I(contextId), L(seconds), L(millis));
             }
-            Map<String, List<OXException>> warnings = collectWarnings(sourceStorage, destinationStorage);
             if (null == warnings || 0 == warnings.size()) {
                 LOG.info("No warnings occurred during execution of calendar migration task in context {}.", I(contextId));
             } else {
@@ -227,7 +235,133 @@ public class CalendarDataMigration {
         }
     }
 
-    private int copyCalendarSequence() throws OXException {
+    private CalendarStorage initDestinationStorage(Connection connection) throws OXException {
+        DBProvider dbProvider = new SimpleDBProvider(connection, connection);
+        return new com.openexchange.chronos.storage.rdb.RdbCalendarStorage(context, 0, entityResolver, dbProvider, DBTransactionPolicy.NO_TRANSACTIONS);
+    }
+
+    private CalendarStorage initSourceStorage(Connection connection) throws OXException {
+        DBProvider dbProvider = new SimpleDBProvider(connection, connection);
+        return new com.openexchange.chronos.storage.rdb.legacy.RdbCalendarStorage(context, entityResolver, dbProvider, DBTransactionPolicy.NO_TRANSACTIONS);
+    }
+
+    private void emptyDestinationStorage() throws OXException, SQLException {
+        boolean updated = false;
+        Connection connection = null;
+        try {
+            connection = dbProvider.getWriteConnection(context);
+            txPolicy.setAutoCommit(connection, false);
+            CalendarStorage destinationStorage = initDestinationStorage(connection);
+            updated |= destinationStorage.getEventStorage().deleteAllEvents();
+            updated |= destinationStorage.getAttendeeStorage().deleteAllAttendees();
+            updated |= destinationStorage.getAlarmStorage().deleteAllAlarms();
+            updated |= destinationStorage.getAlarmTriggerStorage().deleteAllTriggers();
+            txPolicy.commit(connection);
+            warnings.putAll(destinationStorage.getAndFlushWarnings());
+        } finally {
+            release(connection, updated);
+        }
+    }
+
+    private long countEvents() throws OXException {
+        Connection connection = null;
+        try {
+            connection = dbProvider.getReadConnection(context);
+            return initSourceStorage(connection).getEventStorage().countEvents();
+        } finally {
+            dbProvider.releaseReadConnection(context, connection);
+        }
+    }
+
+    private long countEventTombstones(Date minTombstoneLastModified) throws OXException {
+        if (null == minTombstoneLastModified) {
+            return 0L;
+        }
+        Connection connection = null;
+        try {
+            connection = dbProvider.getReadConnection(context);
+            return initSourceStorage(connection).getEventStorage().countEventTombstones(
+                getSearchTerm(EventField.TIMESTAMP, SingleOperation.GREATER_THAN, minTombstoneLastModified));
+        } finally {
+            dbProvider.releaseReadConnection(context, connection);
+        }
+    }
+
+
+    private int copyCalendarData(int lastObjectId, int length) throws OXException, SQLException {
+        int nextLastObjectId = 0;
+        Connection connection = null;
+        try {
+            connection = dbProvider.getWriteConnection(context);
+            txPolicy.setAutoCommit(connection, false);
+            CalendarStorage sourceStorage = initSourceStorage(connection);
+            CalendarStorage destinationStorage = initDestinationStorage(connection);
+            nextLastObjectId = copyCalendarData(sourceStorage, destinationStorage, lastObjectId, length);
+            txPolicy.commit(connection);
+            warnings.putAll(sourceStorage.getAndFlushWarnings());
+            warnings.putAll(destinationStorage.getAndFlushWarnings());
+        } finally {
+            release(connection, 0 < nextLastObjectId);
+        }
+        return nextLastObjectId;
+    }
+
+    private long copyTombstoneData(long lastTimestamp, int length) throws OXException, SQLException {
+        long nextTimestamp = 0;
+        Connection connection = null;
+        try {
+            connection = dbProvider.getWriteConnection(context);
+            txPolicy.setAutoCommit(connection, false);
+            CalendarStorage sourceStorage = initSourceStorage(connection);
+            CalendarStorage destinationStorage = initDestinationStorage(connection);
+            nextTimestamp = copyTombstoneData(sourceStorage, destinationStorage, lastTimestamp, length);
+            txPolicy.commit(connection);
+            warnings.putAll(sourceStorage.getAndFlushWarnings());
+            warnings.putAll(destinationStorage.getAndFlushWarnings());
+        } finally {
+            release(connection, 0L < nextTimestamp);
+        }
+        return nextTimestamp;
+    }
+
+    private int copyCalendarSequence() throws OXException, SQLException {
+        int sequence = -1;
+        Connection connection = null;
+        try {
+            connection = dbProvider.getWriteConnection(context);
+            txPolicy.setAutoCommit(connection, false);
+            sequence = copyCalendarSequence(connection);
+            txPolicy.commit(connection);
+        } finally {
+            release(connection, -1 != sequence);
+        }
+        return sequence;
+    }
+
+    /**
+     * Safely releases a write connection obeying the configured transaction policy, rolling back automatically if not committed before.
+     *
+     * @param connection The write connection to release
+     * @param updated <code>true</code> if there were changes, <code>false</code>, otherwise
+     */
+    private void release(Connection connection, boolean updated) throws OXException, SQLException {
+        if (null != connection) {
+            try {
+                if (false == connection.getAutoCommit()) {
+                    txPolicy.rollback(connection);
+                }
+                txPolicy.setAutoCommit(connection, true);
+            } finally {
+                if (updated) {
+                    dbProvider.releaseWriteConnection(context, connection);
+                } else {
+                    dbProvider.releaseWriteConnectionAfterReading(context, connection);
+                }
+            }
+        }
+    }
+
+    private int copyCalendarSequence(Connection connection) throws OXException {
         int sequence;
         try (PreparedStatement stmt = connection.prepareStatement("SELECT id FROM sequence_calendar WHERE cid=?;")) {
             stmt.setInt(1, contextId);
@@ -248,7 +382,7 @@ public class CalendarDataMigration {
         return sequence;
     }
 
-    private int copyCalendarData(int lastObjectId, int length) throws OXException {
+    private int copyCalendarData(CalendarStorage sourceStorage, CalendarStorage destinationStorage, int lastObjectId, int length) throws OXException {
         /*
          * read from source storage: events, corresponding attendees and alarms
          */
@@ -286,7 +420,7 @@ public class CalendarDataMigration {
         return nextLastObjectId;
     }
 
-    private long copyTombstoneData(long lastTimestamp, int length) throws OXException {
+    private long copyTombstoneData(CalendarStorage sourceStorage, CalendarStorage destinationStorage, long lastTimestamp, int length) throws OXException {
         /*
          * read from source storage: event tombstones, corresponding attendees
          */
@@ -396,24 +530,6 @@ public class CalendarDataMigration {
             }
         }
         return count;
-    }
-
-    /**
-     * Collects the storage warnings that occurred during migration.
-     *
-     * @param sourceStorage The source calendar storage
-     * @param destinationStorage The destination calendar storage
-     * @return The warnings, or an empty map if there are none
-     */
-    private static Map<String, List<OXException>> collectWarnings(CalendarStorage sourceStorage, CalendarStorage destinationStorage) {
-        SortedMap<String, List<OXException>> warnings = new TreeMap<String, List<OXException>>(CalendarUtils.ID_COMPARATOR);
-        if (null != sourceStorage) {
-            warnings.putAll(sourceStorage.getAndFlushWarnings());
-        }
-        if (null != destinationStorage) {
-            warnings.putAll(destinationStorage.getAndFlushWarnings());
-        }
-        return warnings;
     }
 
 }

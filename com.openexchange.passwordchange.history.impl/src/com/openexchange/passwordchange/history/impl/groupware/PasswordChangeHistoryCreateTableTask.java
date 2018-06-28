@@ -70,12 +70,11 @@ import com.openexchange.tools.update.Tools;
  */
 public class PasswordChangeHistoryCreateTableTask extends AbstractCreateTableImpl implements UpdateTaskV2 {
 
-    private static final org.slf4j.Logger LOG          = org.slf4j.LoggerFactory.getLogger(PasswordChangeHistoryCreateTableTask.class);
-    private static final String           HISTORY_NAME = "user_password_history";
+    private static final String TABLE_NAME = "user_password_history";
 
     private static String getHistoryTable() {
         StringBuilder sb = new StringBuilder();
-        sb.append("CREATE TABLE ").append(HISTORY_NAME).append(" (");
+        sb.append("CREATE TABLE ").append(TABLE_NAME).append(" (");
         sb.append("id INT UNSIGNED NOT NULL AUTO_INCREMENT,");
         sb.append("cid INT UNSIGNED NOT NULL,");
         sb.append("uid INT UNSIGNED NOT NULL,");
@@ -84,7 +83,7 @@ public class PasswordChangeHistoryCreateTableTask extends AbstractCreateTableImp
         sb.append("ip VARCHAR(45) NULL DEFAULT NULL,");
         sb.append("PRIMARY KEY (id),");
         sb.append("INDEX context_and_user (cid, uid)");
-        sb.append(") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci");
+        sb.append(") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
         return sb.toString();
     }
 
@@ -125,13 +124,12 @@ public class PasswordChangeHistoryCreateTableTask extends AbstractCreateTableImp
 
     @Override
     public String[] tablesToCreate() {
-        return new String[] { HISTORY_NAME };
+        return new String[] { TABLE_NAME };
     }
 
     @Override
     public void perform(PerformParameters params) throws OXException {
-        createTable(HISTORY_NAME, getHistoryTable(), params.getConnection());
-        LOG.info("UpdateTask '" + PasswordChangeHistoryCreateTableTask.class.getSimpleName() + "' successfully performed!");
+        createTable(TABLE_NAME, getHistoryTable(), params.getConnection());
     }
 
     @Override

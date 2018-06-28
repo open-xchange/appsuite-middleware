@@ -50,7 +50,6 @@
 package com.openexchange.calendar.json.actions.chronos;
 
 import static org.slf4j.LoggerFactory.getLogger;
-import org.dmfs.rfc5545.DateTime;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.common.DefaultRecurrenceData;
@@ -115,25 +114,28 @@ public class OriginalEventHolder {
      */
     RecurrenceData getRecurrenceData() {
         if (null == originalRecurrenceData) {
+            String seriesId = originalEventId.getObjectID();
             Event event = get();
-            if (null == event) {
-                return null;
+            if (null != event) {
+                if (event.getId().equals(event.getSeriesId())) {
+                    // series master
+                    seriesId = event.getSeriesId();
+                    originalRecurrenceData = new DefaultRecurrenceData(event.getRecurrenceRule(), event.getStartDate(), null);
+                } else if (null == event.getSeriesId()) {
+                    // no recurrence (yet)
+                    seriesId = null;
+                    originalRecurrenceData = new DefaultRecurrenceData(null, event.getStartDate(), null);
+                } else {
+                    seriesId = event.getSeriesId();
+                }
             }
-            if (event.getId().equals(event.getSeriesId())) {
-                // series master
-                originalRecurrenceData = new DefaultRecurrenceData(event.getRecurrenceRule(), event.getStartDate(), null);
-            } else if (null == event.getSeriesId()) {
-                // no recurrence (yet)
-                DateTime startDate = event.getStartDate();
-                originalRecurrenceData = new DefaultRecurrenceData(null, startDate, null);
-            } else {
+            if (null == originalRecurrenceData) {
                 // recurrence data from fetched series master
-                EventID masterEventId = new EventID(event.getFolderId(), event.getSeriesId());
                 try {
-                    Event seriesMaster = eventConverter.getEvent(masterEventId, FIELDS);
-                    originalRecurrenceData = new DefaultRecurrenceData(seriesMaster.getRecurrenceRule(), seriesMaster.getStartDate(), null);
+                    RecurrenceData recurrenceData = eventConverter.loadRecurrenceData(seriesId);
+                    originalRecurrenceData = new DefaultRecurrenceData(recurrenceData.getRecurrenceRule(), recurrenceData.getSeriesStart(), null);
                 } catch (OXException e) {
-                    getLogger(OriginalEventHolder.class).debug("Error retrieving original data for event {}.", masterEventId, e);
+                    getLogger(OriginalEventHolder.class).debug("Error retrieving original data for event {}.", event.getSeriesId(), e);
                 }
             }
         }

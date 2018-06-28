@@ -51,12 +51,13 @@ package com.openexchange.importexport.exporters.ical;
 
 import java.io.OutputStream;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import com.openexchange.ajax.container.ThresholdFileHolder;
 import com.openexchange.chronos.Event;
+import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.common.CalendarUtils;
+import com.openexchange.chronos.common.mapping.EventMapper;
 import com.openexchange.chronos.ical.CalendarExport;
 import com.openexchange.chronos.ical.ICalParameters;
 import com.openexchange.chronos.ical.ICalService;
@@ -111,7 +112,7 @@ public abstract class AbstractICalEventExporter extends AbstractICalExporter {
                 // Skip not existing events
                 continue;
             }
-            calendarExport.add(stripAttendeesAndOrganizer(event, session));
+            calendarExport.add(exportPseudoGrupScheduled(event, session));
         }
         if (null != optOut) {
             calendarExport.writeVCalendar(optOut);
@@ -131,24 +132,19 @@ public abstract class AbstractICalEventExporter extends AbstractICalExporter {
     }
 
     /**
-     * Strips all other attendees from the event <b>if</b> the current user is an attendee.
-     * In case the user don't participate in the event neither attendees nor organizer will be set.
-     * 
+     * Removes organizer and attendees from pseudo group scheduled (see {@link CalendarUtils#isPseudoGroupScheduled(Event)} events
+     *
      * @param event The event
      * @param session The session
      * @return The stripped {@link Event}
+     * @throws OXException In case event can't be copied
      */
-    private Event stripAttendeesAndOrganizer(Event event, Session session) {
-        // Change for bug 57282
-        if (CalendarUtils.isAttendee(event, session.getUserId())) {
-            if (event.getAttendees().size() > 1) {
-                event.setAttendees(Collections.singletonList(CalendarUtils.find(event.getAttendees(), session.getUserId())));
-            }
-        } else if (CalendarUtils.isOrganizer(event, session.getUserId())) {
-            event.removeAttendees();
-        } else {
-            event.removeAttendees();
-            event.removeOrganizer();
+    private Event exportPseudoGrupScheduled(Event event, Session session) throws OXException {
+        if (CalendarUtils.isPseudoGroupScheduled(event)) {
+            Event copy = EventMapper.getInstance().copy(event, null, (EventField[]) null);
+            copy.removeAttendees();
+            copy.removeOrganizer();
+            return copy;
         }
         return event;
     }

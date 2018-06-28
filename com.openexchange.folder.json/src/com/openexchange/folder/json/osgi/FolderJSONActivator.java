@@ -89,7 +89,9 @@ public class FolderJSONActivator extends AJAXModuleActivator {
 
     @Override
     protected void handleAvailability(final Class<?> clazz) {
-        apply((ConfigurationService) getService(clazz));
+        if (ConfigurationService.class.equals(clazz)) {
+            apply((ConfigurationService) getService(clazz));
+        }
     }
 
     @Override

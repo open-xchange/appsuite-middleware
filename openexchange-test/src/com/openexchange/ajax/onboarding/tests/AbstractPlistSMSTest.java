@@ -49,11 +49,17 @@
 
 package com.openexchange.ajax.onboarding.tests;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import java.rmi.server.UID;
-import com.openexchange.ajax.framework.AbstractConfigAwareAjaxSession;
-import com.openexchange.ajax.user.actions.SetAttributeRequest;
-import com.openexchange.ajax.user.actions.SetAttributeResponse;
+import com.openexchange.ajax.framework.AbstractConfigAwareAPIClientSession;
+import com.openexchange.exception.DisplayableOXExceptionCode;
+import com.openexchange.testing.httpclient.models.UserAttribute;
+import com.openexchange.testing.httpclient.models.UserAttributionResponse;
+import com.openexchange.testing.httpclient.modules.ClientonboardingApi;
+import com.openexchange.testing.httpclient.modules.UserApi;
 
 /**
  * {@link AbstractPlistSMSTest}
@@ -61,19 +67,38 @@ import com.openexchange.ajax.user.actions.SetAttributeResponse;
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.8.1
  */
-public class AbstractPlistSMSTest extends AbstractConfigAwareAjaxSession {
+public class AbstractPlistSMSTest extends AbstractConfigAwareAPIClientSession {
 
     protected static final String UID = new UID((short) 1).toString();
 
     protected static final String[] SCENARIOS = new String[] { "apple.iphone/mailsync", "apple.iphone/eassync", "apple.iphone/davsync" };
 
+    protected ClientonboardingApi onboardingApi;
+
     @Override
     public void setUp() throws Exception {
         super.setUp();
         setUpConfiguration();
-        SetAttributeRequest req = new SetAttributeRequest(getAjaxClient().getValues().getUserId(), "user_sms_link_secret", UID, false);
-        SetAttributeResponse response = getAjaxClient().execute(req);
-        assertNotNull(response);
+        UserApi userApi = new UserApi(getApiClient());
+        UserAttribute attribute = new UserAttribute();
+        attribute.setName("user_sms_link_secret");
+        attribute.setValue(UID);
+
+        UserAttributionResponse response = userApi.setUserAttribute(getApiClient().getSession(), String.valueOf(getApiClient().getUserId()), attribute, false);
+        assertNull(response.getErrorDesc(), response.getError());
+
+        onboardingApi = new ClientonboardingApi(getApiClient());
+    }
+
+    private void checkException(String code, String prefix, int number) {
+        assertNotNull("Unexpected response from the server! Response does not contain an exception.", code);
+        assertTrue("The error code should start with "+prefix+ " but it is "+code+" instead",code.startsWith(prefix));
+        int actualCodeNumber = Integer.parseInt(code.substring(code.indexOf("-")+1));
+        assertEquals("Wrong exception number!", number, actualCodeNumber);
+    }
+
+    protected void checkException(String code, DisplayableOXExceptionCode exception) {
+        checkException(code, exception.getPrefix(), exception.getNumber());
     }
 
 }
