@@ -228,8 +228,18 @@ public abstract class AbstractITipTest extends AbstractChronosTest {
      * @throws Exception In case of error
      */
     protected MailDestinationData createMailInInbox(List<EventData> data) throws Exception {
+        return createMailInInbox(new ITipMailFactory(userResponseC2.getData().getEmail1(), userResponseC1.getData().getEmail1(), new ICalFacotry(data).build()).build());
+    }
+
+    /**
+     * Uploads a mail to the INBOX
+     *
+     * @param eml The mail to upload
+     * @return {@link MailDestinationData} with set mail ID and folder ID
+     * @throws Exception In case of error
+     */
+    protected MailDestinationData createMailInInbox(String eml) throws Exception {
         File tmpFile = File.createTempFile("test", ".eml");
-        String eml = new ITipMailFactory(userResponseC2.getData().getEmail1(), userResponseC1.getData().getEmail1(), new ICalFacotry(data).build()).build();
         FileWriterWithEncoding writer = new FileWriterWithEncoding(tmpFile, "ASCII");
         writer.write(eml);
         writer.close();
@@ -257,6 +267,7 @@ public abstract class AbstractITipTest extends AbstractChronosTest {
         attendee.cn(convertee.getUser());
         attendee.comment("Comment for user " + convertee.getUser());
         attendee.email(convertee.getLogin());
+        attendee.setUri("mailto:" + convertee.getLogin());
         return attendee;
     }
 
@@ -266,6 +277,10 @@ public abstract class AbstractITipTest extends AbstractChronosTest {
         elm.setId(data.getId());
         elm.setFolder(data.getFolderId());
         mailApi.deleteMails(getApiClient().getSession(), Collections.singletonList(elm), now());
+    }
+
+    protected EventData createEvent(EventData event) throws ApiException {
+        return chronosApi.createEvent(session, defaultFolderId, event, Boolean.FALSE, Boolean.FALSE, Boolean.TRUE, null, null, Boolean.FALSE).getData().getCreated().get(0);
     }
 
     protected void deleteEvent(EventData data) throws Exception {

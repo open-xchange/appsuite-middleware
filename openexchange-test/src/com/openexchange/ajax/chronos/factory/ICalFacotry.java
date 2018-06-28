@@ -49,8 +49,10 @@
 
 package com.openexchange.ajax.chronos.factory;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.TimeZone;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
@@ -132,6 +134,9 @@ public class ICalFacotry {
     /** The ID of the manufacture */
     private ProdID prodId;
 
+    /** Map containing additional values. This values will be used prior defaults */
+    private Map<String, Object> values = Collections.emptyMap();
+
     /**
      * Initializes a new {@link ICalFacotry}.
      * 
@@ -177,6 +182,11 @@ public class ICalFacotry {
 
     public ICalFacotry addEventData(List<EventData> data) {
         this.data = data;
+        return this;
+    }
+
+    public ICalFacotry addValueMap(Map<String, Object> values) {
+        this.values = values;
         return this;
     }
 
@@ -329,8 +339,12 @@ public class ICalFacotry {
         setValue(field, value, defaultValue, null);
     }
 
+    @SuppressWarnings("unchecked")
     private <T extends Object> void setValue(String field, T value, T defaultValue, Consumer<T> f) {
         sb.append(field);
+        if (!values.isEmpty() && values.containsKey(field)) {
+            value = (T) values.get(field);
+        }
         if (null == value) {
             if (null != defaultValue) {
                 sb.append(defaultValue);
