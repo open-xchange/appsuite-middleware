@@ -100,6 +100,8 @@ public interface StreamedUpload {
 
     /**
      * Whether this stream upload provides any upload file
+     * <p>
+     * In contrast to {@link #getUploadFiles()} this method is allowed to be called multiple times.
      *
      * @return <code>true</code> if any upload file is provided; otherwise <code>false</code>
      */
@@ -112,7 +114,8 @@ public interface StreamedUpload {
      * <b>Note</b>:
      * <ul>
      * <li>
-     * This method can only be called once. Calling this method multiple times will yield <code>IllegalStateException</code>
+     * This method can only be called once. Calling this method multiple times will yield <code>IllegalStateException</code>. For a quick
+     * check whether this streamed upload provides any upload files, please use {@link #hasAny()}.
      * </li>
      * <li>
      * Each retrieved <code>StreamedUploadFile</code> is supposed to be handled directly.<br>
