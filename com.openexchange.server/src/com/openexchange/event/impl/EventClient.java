@@ -62,6 +62,7 @@ import java.util.Set;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
 import com.openexchange.ajax.requesthandler.cache.ResourceCache;
+import com.openexchange.ajax.requesthandler.cache.ResourceCaches;
 import com.openexchange.context.ContextService;
 import com.openexchange.event.CommonEvent;
 import com.openexchange.exception.OXException;
@@ -577,7 +578,7 @@ public class EventClient {
 
     /**
      * Invalidates any contact picture that might have been cached in the {@link ResourceCache}
-     * 
+     *
      * @param oldContact The old {@link Contact} information
      * @throws OXException if an error is occurred
      */
@@ -593,7 +594,11 @@ public class EventClient {
         if (!oldContact.containsImageLastModified() || oldContact.getImageLastModified() == null) {
             return;
         }
-        ResourceCache resourceCache = ServerServiceRegistry.getInstance().getService(ResourceCache.class);
+        ResourceCache resourceCache = ResourceCaches.getResourceCache();
+        if (null == resourceCache) {
+            LOG.debug("Unable to access resource cache, unable to invalidate contact picture.");
+            return;
+        }
         ImageLocation imageLocation = new ImageLocation.Builder().folder(oldContact.getParentFolderID()).timestamp(Long.toString(oldContact.getImageLastModified().getTime())).build();
         resourceCache.removeAlikes(first.getETag(imageLocation, session), 0, contextId);
     }
@@ -614,7 +619,7 @@ public class EventClient {
 
         final Dictionary<String, CommonEvent> ht = new Hashtable<String, CommonEvent>(1);
         ht.put(CommonEvent.EVENT_KEY, genericEvent);
-        
+
 
         final Event event = new Event("com/openexchange/groupware/contact/delete", ht);
         triggerEvent(event);
