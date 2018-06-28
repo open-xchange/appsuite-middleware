@@ -14,7 +14,7 @@ BuildRequires: java-1_8_0-openjdk-devel
 BuildRequires: java-1.8.0-openjdk-devel
 %endif
 Version:	@OXVERSION@
-%define        ox_release 8
+%define        ox_release 9
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GPL-2.0
@@ -67,6 +67,8 @@ fi
 %doc com.openexchange.spamhandler.cloudmark/ChangeLog
 
 %changelog
+* Wed Jun 27 2018 Wolfgang Rosenauer <wolfgang.rosenauer@open-xchange.com>
+Third candidate for 7.10.0 release
 * Mon Jun 25 2018 Wolfgang Rosenauer <wolfgang.rosenauer@open-xchange.com>
 Second candidate for 7.10.0 release
 * Mon Jun 11 2018 Wolfgang Rosenauer <wolfgang.rosenauer@open-xchange.com>

@@ -50,7 +50,6 @@
 package com.openexchange.ajax.chronos.schedjoules;
 
 import org.junit.runner.RunWith;
-import org.junit.runners.BlockJUnit4ClassRunner;
 import org.junit.runners.Suite;
 
 /**
@@ -58,7 +57,7 @@ import org.junit.runners.Suite;
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-@RunWith(BlockJUnit4ClassRunner.class)
+@RunWith(Suite.class)
 @Suite.SuiteClasses({
     // @formatter:off
     BasicSchedJoulesAPITest.class,
