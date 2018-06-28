@@ -58,8 +58,10 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.chronos.Attendee;
+import com.openexchange.chronos.AttendeeField;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
+import com.openexchange.chronos.common.mapping.AttendeeMapper;
 import com.openexchange.chronos.common.mapping.EventMapper;
 import com.openexchange.chronos.itip.ITipAction;
 import com.openexchange.chronos.itip.ITipAnalysis;
@@ -182,6 +184,9 @@ public class ReplyITipAnalyzer extends AbstractITipAnalyzer {
         return analysis;
     }
 
+    /** Fields to copy when a attendee is replying */
+    private final static AttendeeField[] TO_COPY = new AttendeeField[] { AttendeeField.COMMENT, AttendeeField.EXTENDED_PARAMETERS, AttendeeField.PARTSTAT, AttendeeField.SENT_BY };
+
     /**
      * Updates the attendee provided by the REPLY in the original event.
      * Ignores all other changed fields.
@@ -197,11 +202,19 @@ public class ReplyITipAnalyzer extends AbstractITipAnalyzer {
 
         List<Attendee> attendees = new LinkedList<>();
         // XXX [MW-852] Resolve possible aliases to avoid false party-crashers
-        attendees.add(reply);
+        boolean partyCrasher = true;
         for (Attendee attendee : original.getAttendees()) {
-            if (false == extractEMailAddress(reply.getUri()).equals(extractEMailAddress(attendee.getUri()))) {
+            if (extractEMailAddress(reply.getUri()).equals(extractEMailAddress(attendee.getUri()))) {
+                AttendeeMapper.getInstance().copy(reply, attendee, TO_COPY);
                 attendees.add(attendee);
+                partyCrasher = false;
             }
+            attendees.add(attendee);
+        }
+
+        if (partyCrasher) {
+            // Add 'as-is'
+            attendees.add(reply);
         }
 
         event.setAttendees(attendees);
