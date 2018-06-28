@@ -205,8 +205,8 @@ public class ReplyITipAnalyzer extends AbstractITipAnalyzer {
         boolean partyCrasher = true;
         for (Attendee attendee : original.getAttendees()) {
             if (extractEMailAddress(reply.getUri()).equals(extractEMailAddress(attendee.getUri()))) {
+                attendee = AttendeeMapper.getInstance().copy(attendee, null, (AttendeeField[]) null);
                 AttendeeMapper.getInstance().copy(reply, attendee, TO_COPY);
-                attendees.add(attendee);
                 partyCrasher = false;
             }
             attendees.add(attendee);
