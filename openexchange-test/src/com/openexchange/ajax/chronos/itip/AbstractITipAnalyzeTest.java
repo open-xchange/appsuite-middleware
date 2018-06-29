@@ -67,14 +67,14 @@ import com.openexchange.testing.httpclient.models.EventData;
 import com.openexchange.testing.httpclient.models.MailDestinationData;
 
 /**
- * {@link ITipAnalyzeTest}
+ * {@link AbstractITipAnalyzeTest}
  *
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  * @since v7.10.0
  */
-abstract class ITipAnalyzeTest extends AbstractITipTest {
+public abstract class AbstractITipAnalyzeTest extends AbstractITipTest {
 
-    private MailDestinationData mailData;
+    protected MailDestinationData mailData;
 
     @Override
     public void setUp() throws Exception {
@@ -120,7 +120,8 @@ abstract class ITipAnalyzeTest extends AbstractITipTest {
         analysisValidator.accept(data.get(0));
     }
 
-    enum CustomConsumers {
+    public enum CustomConsumers {
+        /** Validates that the response does contain actions to set the users status */
         ACTIONS((Analysis t) -> {
             Assert.assertTrue("Missing action!", t.getActions().contains(ActionsEnum.ACCEPT));
             Assert.assertTrue("Missing action!", t.getActions().contains(ActionsEnum.TENTATIVE));
@@ -128,13 +129,20 @@ abstract class ITipAnalyzeTest extends AbstractITipTest {
 
             Assert.assertFalse("Unwanted action!", t.getActions().contains(ActionsEnum.UPDATE));
         }),
+        /** Validates that the response does contain the UPDATE action */
         UPDATE((Analysis t) -> {
             Assert.assertFalse("Unwanted action!", t.getActions().contains(ActionsEnum.ACCEPT));
             Assert.assertFalse("Unwanted action!", t.getActions().contains(ActionsEnum.TENTATIVE));
             Assert.assertFalse("Unwanted action!", t.getActions().contains(ActionsEnum.DECLINE));
 
             Assert.assertTrue("Missing action!", t.getActions().contains(ActionsEnum.UPDATE));
-        });
+        }),
+        /** Validates that the response doesn't contain any action */
+        EMPTY((Analysis t) -> {
+            Assert.assertTrue("There should be no action!", t.getActions().isEmpty());
+        }),
+
+        ;
 
         private Consumer<Analysis> consumer;
 

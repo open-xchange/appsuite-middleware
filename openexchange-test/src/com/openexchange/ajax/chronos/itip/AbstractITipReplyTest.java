@@ -52,8 +52,6 @@ package com.openexchange.ajax.chronos.itip;
 import java.util.Collections;
 import java.util.Map;
 import java.util.function.Consumer;
-import org.junit.Test;
-import com.openexchange.ajax.chronos.factory.EventFactory;
 import com.openexchange.ajax.chronos.factory.ICalFacotry.Method;
 import com.openexchange.ajax.chronos.factory.ICalFacotry.PartStat;
 import com.openexchange.ajax.chronos.factory.ICalFacotry.ProdID;
@@ -63,14 +61,14 @@ import com.openexchange.testing.httpclient.models.CalendarUser;
 import com.openexchange.testing.httpclient.models.EventData;
 
 /**
- * {@link ITipReplyTest}
+ * {@link AbstractITipReplyTest}
  *
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  * @since v7.10.0
  */
-public class ITipReplyTest extends ITipAnalyzeTest {
+public abstract class AbstractITipReplyTest extends AbstractITipAnalyzeTest {
 
-    private EventData createdEvent;
+    protected EventData createdEvent;
 
     @Override
     public void tearDown() throws Exception {
@@ -83,33 +81,25 @@ public class ITipReplyTest extends ITipAnalyzeTest {
         }
     }
 
-    @Test
-    public void testSimple() throws Exception {
-        EventData eventToCreate = EventFactory.createSingleTwoHourEvent(0, "Simple test");
-        Attendee replayingAttendee = prepareCommonAttendees(eventToCreate);
-        createdEvent = createEvent(eventToCreate);
-        updateAttendeeStatus(replayingAttendee, PartStat.ACCEPTED);
-        analyze(createdEvent);
-    }
 
-    private void analyze(EventData event) throws Exception {
+    protected void analyze(EventData event) throws Exception {
         analyze(event, CustomConsumers.UPDATE.getConsumer(), null);
     }
 
-    private void analyze(EventData event, Consumer<Analysis> validator, Map<String, Object> values) throws Exception {
+    protected void analyze(EventData event, Consumer<Analysis> validator, Map<String, Object> values) throws Exception {
         analyze(ProdID.OX, Method.REPLY, Collections.singletonList(event), validator, values);
     }
 
-    private void updateAttendeeStatus(Attendee replayingAttendee, PartStat partStat) {
-        replayingAttendee.setPartStat(partStat.name().toUpperCase());
-        createdEvent.setAttendees(Collections.singletonList(replayingAttendee));
+    protected void updateAttendeeStatus(Attendee replyingAttendee, PartStat partStat) {
+        replyingAttendee.setPartStat(partStat.name().toUpperCase());
+        createdEvent.setAttendees(Collections.singletonList(replyingAttendee));
     }
 
-    private Attendee prepareCommonAttendees(EventData event) {
-        Attendee replayingAttendee = createAttendee(testUserC2, apiClientC2);
-        replayingAttendee.setEntity(Integer.valueOf(0));
+    protected Attendee prepareCommonAttendees(EventData event) {
+        Attendee replyingAttendee = createAttendee(testUserC2, apiClientC2);
+        replyingAttendee.setEntity(Integer.valueOf(0));
         // organizer gets added automatically
-        event.setAttendees(Collections.singletonList(replayingAttendee));
+        event.setAttendees(Collections.singletonList(replyingAttendee));
         CalendarUser c = new CalendarUser();
         c.cn(userResponseC1.getData().getDisplayName());
         c.email(userResponseC1.getData().getEmail1());
@@ -117,7 +107,7 @@ public class ITipReplyTest extends ITipAnalyzeTest {
         event.setOrganizer(c);
         event.setCalendarUser(c);
 
-        return replayingAttendee;
+        return replyingAttendee;
     }
 
 }
