@@ -113,6 +113,8 @@ public class IncludeStackTraceCLT extends AbstractRmiCLI<Void> {
     protected void addOptions(Options options) {
         Option enable = createOption("e", "enable", false, "Flag to enable to include stack traces in HTTP-API JSON responses", true);
         Option disbale = createOption("d", "disable", false, "Flag to disable to include stack traces in HTTP-API JSON responses", true);
+        options.addOption(createOption("u", "user", true, "The user identifier", true));
+        options.addOption(createOption("c", "context", true, "The context identifier", true));
 
         OptionGroup og = new OptionGroup();
         og.addOption(enable).addOption(disbale);
