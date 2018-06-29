@@ -77,7 +77,6 @@ import ch.qos.logback.classic.Level;
  * {@link LogbackConfigurationCLT}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
- * @since v7.10.1
  */
 public class LogbackConfigurationCLT extends AbstractRmiCLI<Void> {
 
