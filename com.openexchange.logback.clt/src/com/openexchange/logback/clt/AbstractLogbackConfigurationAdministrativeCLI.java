@@ -52,8 +52,6 @@ package com.openexchange.logback.clt;
 import java.rmi.RemoteException;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.HelpFormatter;
-import org.apache.commons.cli.Option;
-import org.apache.commons.cli.OptionBuilder;
 import org.apache.commons.cli.Options;
 import com.openexchange.auth.rmi.RemoteAuthenticator;
 import com.openexchange.cli.AbstractRmiCLI;
@@ -143,16 +141,5 @@ abstract class AbstractLogbackConfigurationAdministrativeCLI<R> extends Abstract
     protected void printHelp(Options options) {
         HelpFormatter helpFormatter = new HelpFormatter();
         helpFormatter.printHelp(120, getName(), getHeader(), options, getFooter(), false);
-    }
-
-    /**
-     * Create an {@link Option} with the {@link OptionBuilder}
-     */
-    final Option createOption(String shortName, String longName, boolean hasArgs, String description, boolean mandatory) {
-        OptionBuilder.withLongOpt(longName);
-        OptionBuilder.hasArg(hasArgs);
-        OptionBuilder.withDescription(description);
-        OptionBuilder.isRequired(mandatory);
-        return OptionBuilder.create(shortName);
     }
 }

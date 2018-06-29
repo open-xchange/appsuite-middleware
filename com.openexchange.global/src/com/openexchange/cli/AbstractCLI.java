@@ -52,6 +52,8 @@ package com.openexchange.cli;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.HelpFormatter;
+import org.apache.commons.cli.Option;
+import org.apache.commons.cli.OptionBuilder;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.PosixParser;
@@ -338,4 +340,20 @@ public abstract class AbstractCLI<R, C> {
         return i;
     }
 
+    /**
+     * Create an {@link Option} with the {@link OptionBuilder}
+     * 
+     * @param shortName The short name of the {@link Option}
+     * @param longName The long name of the {@link Option}
+     * @param hasArgs boolean flag to indicate whether or not the option has arguments
+     * @param description The description of the {@link Option}
+     * @param mandatory boolean flag to indicate whether the {@link Option} is mandatory
+     */
+    protected Option createOption(String shortName, String longName, boolean hasArgs, String description, boolean mandatory) {
+        OptionBuilder.withLongOpt(longName);
+        OptionBuilder.hasArg(hasArgs);
+        OptionBuilder.withDescription(description);
+        OptionBuilder.isRequired(mandatory);
+        return OptionBuilder.create(shortName);
+    }
 }
