@@ -177,11 +177,11 @@ public class LogbackConfigurationCLT extends AbstractRmiCLI<Void> {
             } else if (cmd.hasOption("la")) {
                 CommandLineExecutor.ROOT_APPENDER_STATS.executeWith(cmd, logbackConfigService);
             } else {
-                printHelp();
+                printHelp(options);
             }
         } catch (IllegalArgumentException e) {
             System.err.println(e.getMessage());
-            printHelp();
+            printHelp(options);
         }
 
         return null;
