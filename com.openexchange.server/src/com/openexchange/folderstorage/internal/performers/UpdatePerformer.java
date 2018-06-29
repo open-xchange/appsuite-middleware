@@ -176,7 +176,7 @@ public final class UpdatePerformer extends AbstractUserizedFolderPerformer {
              */
             final Folder storageFolder = storage.getFolder(treeId, folderId, storageParameters);
             final String oldParentId = storageFolder.getParentID();
-            final String newParentId = folder.getParentID();
+            String newParentId = folder.getParentID();
             final boolean move = (null != newParentId && !newParentId.equals(oldParentId));
             final Folder destinationFolder;
             if(move){
@@ -266,7 +266,7 @@ public final class UpdatePerformer extends AbstractUserizedFolderPerformer {
                     /*
                      * Move folder dependent on folder is virtual or not
                      */
-                    final String newParentId = folder.getParentID();
+                    newParentId = folder.getParentID();
                     FolderStorage newRealParentStorage = folderStorageDiscoverer.getFolderStorage(FolderStorage.REAL_TREE_ID, newParentId);
                     if (null == newRealParentStorage) {
                         throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(FolderStorage.REAL_TREE_ID, newParentId);
