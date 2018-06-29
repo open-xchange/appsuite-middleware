@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.chronos.itip;
 
+import java.util.Collections;
 import org.junit.Test;
 import com.openexchange.ajax.chronos.factory.EventFactory;
 import com.openexchange.ajax.chronos.factory.ICalFacotry.PartStat;
@@ -70,6 +71,17 @@ public class ITipReplyTest extends AbstractITipReplyTest {
         createdEvent = createEvent(eventToCreate);
         updateAttendeeStatus(replyingAttendee, PartStat.ACCEPTED);
         analyze(createdEvent);
+    }
+
+    @Test
+    public void testPartyCrasher() throws Exception {
+        EventData eventToCreate = EventFactory.createSingleTwoHourEvent(0, "Simple test");
+        Attendee replyingAttendee = prepareCommonAttendees(eventToCreate);
+        eventToCreate.setAttendees(Collections.emptyList());
+        createdEvent = createEvent(eventToCreate);
+        updateAttendeeStatus(replyingAttendee, PartStat.ACCEPTED);
+        createdEvent.setAttendees(Collections.singletonList(replyingAttendee));
+        analyze(createdEvent, CustomConsumers.PARTY_CRASHER.getConsumer(), null);
     }
 
 }

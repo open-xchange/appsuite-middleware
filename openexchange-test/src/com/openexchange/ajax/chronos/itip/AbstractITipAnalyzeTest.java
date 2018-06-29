@@ -141,7 +141,11 @@ public abstract class AbstractITipAnalyzeTest extends AbstractITipTest {
         EMPTY((Analysis t) -> {
             Assert.assertTrue("There should be no action!", t.getActions().isEmpty());
         }),
-
+        /** Validates that the response does contain the party crasher action */
+        PARTY_CRASHER((Analysis t) -> {
+            Assert.assertTrue("There should be no action!", t.getActions().size() == 1);
+            Assert.assertTrue("There should be no action!", t.getActions().contains(ActionsEnum.ACCEPT_PARTY_CRASHER));
+        }),
         ;
 
         private Consumer<Analysis> consumer;
