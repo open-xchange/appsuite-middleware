@@ -106,6 +106,7 @@ public class Activator implements BundleActivator, Reloadable {
     private volatile ServiceRegistration<IncludeStackTraceService> includeStackTraceServiceRegistration;
     private ServiceRegistration<Reloadable> reloadable;
     private ServiceRegistration<LogLevelService> logLevelService;
+    private LogbackConfigurationRMIServiceImpl logbackConfigurationRMIService;
 
     /*
      * Do not implement HousekeepingActivator, track services if you need them!
@@ -155,7 +156,8 @@ public class Activator implements BundleActivator, Reloadable {
         reloadable = context.registerService(Reloadable.class, this, null);
 
         // Register RMI logback config service
-        context.registerService(Remote.class, new LogbackConfigurationRMIServiceImpl(loggerContext, rankingAwareTurboFilterList, serviceImpl), null);
+        logbackConfigurationRMIService = new LogbackConfigurationRMIServiceImpl(loggerContext, rankingAwareTurboFilterList, serviceImpl);
+        context.registerService(Remote.class, logbackConfigurationRMIService, null);
 
         logLevelService = context.registerService(LogLevelService.class, new LogLevelServiceImpl(), null);
     }
@@ -199,6 +201,9 @@ public class Activator implements BundleActivator, Reloadable {
         if (logLevelService != null) {
             logLevelService.unregister();
             logLevelService = null;
+        }
+        if (logbackConfigurationRMIService != null) {
+            logbackConfigurationRMIService.dispose();
         }
     }
 
