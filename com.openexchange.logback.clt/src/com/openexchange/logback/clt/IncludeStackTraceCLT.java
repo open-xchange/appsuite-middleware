@@ -49,15 +49,11 @@
 
 package com.openexchange.logback.clt;
 
-import java.rmi.RemoteException;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Option;
-import org.apache.commons.cli.OptionBuilder;
 import org.apache.commons.cli.OptionGroup;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
-import com.openexchange.auth.rmi.RemoteAuthenticator;
-import com.openexchange.cli.AbstractRmiCLI;
 import com.openexchange.logging.rmi.LogbackConfigurationRMIService;
 
 /**
@@ -65,21 +61,7 @@ import com.openexchange.logging.rmi.LogbackConfigurationRMIService;
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class IncludeStackTraceCLT extends AbstractRmiCLI<Void> {
-
-    private static final String SYNTAX = "includestacktrace [-e | -d] [-u <userid>] [-c <contextid>] [-h]";
-    private static final String FOOTER = "\n\nThe flags -e and -d are mutually exclusive.";
-
-    /**
-     * Create an {@link Option} with the {@link OptionBuilder}
-     */
-    private static final Option createOption(String shortName, String longName, boolean hasArgs, String description, boolean mandatory) {
-        OptionBuilder.withLongOpt(longName);
-        OptionBuilder.hasArg(hasArgs);
-        OptionBuilder.withDescription(description);
-        OptionBuilder.isRequired(mandatory);
-        return OptionBuilder.create(shortName);
-    }
+public class IncludeStackTraceCLT extends AbstractLogbackConfigurationAdministrativeCLI<Void> {
 
     /**
      * @param args
@@ -89,19 +71,14 @@ public class IncludeStackTraceCLT extends AbstractRmiCLI<Void> {
         new IncludeStackTraceCLT().execute(args);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.cli.AbstractRmiCLI#administrativeAuth(java.lang.String, java.lang.String, org.apache.commons.cli.CommandLine, com.openexchange.auth.rmi.RemoteAuthenticator)
+    private static final String SYNTAX = "includestacktrace [-e | -d] [-u <userid>] [-c <contextid>] [-h]";
+    private static final String FOOTER = "\n\nThe flags -e and -d are mutually exclusive.";
+
+    /**
+     * Initialises a new {@link IncludeStackTraceCLT}.
      */
-    @Override
-    protected void administrativeAuth(String login, String password, CommandLine cmd, RemoteAuthenticator authenticator) throws RemoteException {
-        try {
-            authenticator.doAuthentication(login, password);
-        } catch (RemoteException e) {
-            System.err.print(e.getMessage());
-            System.exit(-1);
-        }
+    public IncludeStackTraceCLT() {
+        super(SYNTAX, FOOTER);
     }
 
     /*
@@ -146,16 +123,6 @@ public class IncludeStackTraceCLT extends AbstractRmiCLI<Void> {
     /*
      * (non-Javadoc)
      * 
-     * @see com.openexchange.cli.AbstractAdministrativeCLI#requiresAdministrativePermission()
-     */
-    @Override
-    protected boolean requiresAdministrativePermission() {
-        return true;
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
      * @see com.openexchange.cli.AbstractCLI#checkOptions(org.apache.commons.cli.CommandLine)
      */
     @Override
@@ -176,25 +143,4 @@ public class IncludeStackTraceCLT extends AbstractRmiCLI<Void> {
             System.exit(-1);
         }
     }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.cli.AbstractCLI#getFooter()
-     */
-    @Override
-    protected String getFooter() {
-        return FOOTER;
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.cli.AbstractCLI#getName()
-     */
-    @Override
-    protected String getName() {
-        return SYNTAX;
-    }
-
 }

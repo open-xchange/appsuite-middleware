@@ -58,14 +58,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Option;
-import org.apache.commons.cli.OptionBuilder;
 import org.apache.commons.cli.OptionGroup;
 import org.apache.commons.cli.Options;
 import org.apache.commons.lang.ArrayUtils;
-import com.openexchange.auth.rmi.RemoteAuthenticator;
-import com.openexchange.cli.AbstractRmiCLI;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
 import com.openexchange.logging.rmi.LogbackConfigurationRMIService;
@@ -78,7 +74,7 @@ import ch.qos.logback.classic.Level;
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class LogbackConfigurationCLT extends AbstractRmiCLI<Void> {
+public class LogbackConfigurationCLT extends AbstractLogbackConfigurationAdministrativeCLI<Void> {
 
     /**
      * Entry point
@@ -97,22 +93,7 @@ public class LogbackConfigurationCLT extends AbstractRmiCLI<Void> {
      * Initialises a new {@link LogbackConfigurationCLT}.
      */
     public LogbackConfigurationCLT() {
-        super();
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.cli.AbstractRmiCLI#administrativeAuth(java.lang.String, java.lang.String, org.apache.commons.cli.CommandLine, com.openexchange.auth.rmi.RemoteAuthenticator)
-     */
-    @Override
-    protected void administrativeAuth(String login, String password, CommandLine cmd, RemoteAuthenticator authenticator) throws RemoteException {
-        try {
-            authenticator.doAuthentication(login, password);
-        } catch (RemoteException e) {
-            System.err.print(e.getMessage());
-            System.exit(-1);
-        }
+        super(SYNTAX, FOOTER);
     }
 
     /*
@@ -189,16 +170,6 @@ public class LogbackConfigurationCLT extends AbstractRmiCLI<Void> {
     /*
      * (non-Javadoc)
      * 
-     * @see com.openexchange.cli.AbstractAdministrativeCLI#requiresAdministrativePermission()
-     */
-    @Override
-    protected boolean requiresAdministrativePermission() {
-        return true;
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
      * @see com.openexchange.cli.AbstractCLI#checkOptions(org.apache.commons.cli.CommandLine)
      */
     @Override
@@ -214,66 +185,7 @@ public class LogbackConfigurationCLT extends AbstractRmiCLI<Void> {
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.cli.AbstractCLI#getFooter()
-     */
-    @Override
-    protected String getFooter() {
-        return FOOTER;
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.cli.AbstractCLI#getName()
-     */
-    @Override
-    protected String getName() {
-        return SYNTAX;
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.cli.AbstractCLI#printHelp()
-     */
-    @Override
-    protected void printHelp() {
-        printHelp(options);
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.cli.AbstractCLI#printHelp(org.apache.commons.cli.Options)
-     */
-    @Override
-    protected void printHelp(Options options) {
-        HelpFormatter helpFormatter = new HelpFormatter();
-        helpFormatter.printHelp(120, getName(), getHeader(), options, getFooter(), false);
-    }
-
     /////////////////////////////////// HELPERS ///////////////////////////////////////
-
-    /**
-     * Create an {@link Option} with the {@link OptionBuilder}
-     *
-     * @param shortName short name of the option
-     * @param longName long name of the option
-     * @param hasArgs whether it has arguments
-     * @param description short description
-     * @param mandatory whether it is mandatory
-     * @return The {@link Option}
-     */
-    private final Option createOption(String shortName, String longName, boolean hasArgs, String description, boolean mandatory) {
-        OptionBuilder.withLongOpt(longName);
-        OptionBuilder.hasArg(hasArgs);
-        OptionBuilder.withDescription(description);
-        OptionBuilder.isRequired(mandatory);
-        return OptionBuilder.create(shortName);
-    }
 
     /**
      * Return all valid OX Categories
