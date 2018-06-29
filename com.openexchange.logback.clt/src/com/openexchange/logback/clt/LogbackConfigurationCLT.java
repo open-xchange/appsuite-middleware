@@ -67,6 +67,7 @@ import org.apache.commons.lang.ArrayUtils;
 import com.openexchange.auth.rmi.RemoteAuthenticator;
 import com.openexchange.cli.AbstractRmiCLI;
 import com.openexchange.exception.Category;
+import com.openexchange.exception.OXException;
 import com.openexchange.logging.rmi.LogbackConfigurationRMIService;
 import com.openexchange.logging.rmi.LogbackRemoteResponse;
 import com.openexchange.logging.rmi.LogbackRemoteResponse.MessageType;
@@ -238,8 +239,10 @@ public class LogbackConfigurationCLT extends AbstractRmiCLI<Void> {
     protected void printHelp() {
         printHelp(options);
     }
-    
-    /* (non-Javadoc)
+
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.openexchange.cli.AbstractCLI#printHelp(org.apache.commons.cli.Options)
      */
     @Override
@@ -271,7 +274,7 @@ public class LogbackConfigurationCLT extends AbstractRmiCLI<Void> {
     /**
      * Return all valid OX Categories
      *
-     * @return
+     * @return A string with a coma-separated-list of all valid {@link OXException} categories
      */
     private static String getValidCategories() {
         StringBuilder builder = new StringBuilder();
@@ -287,7 +290,7 @@ public class LogbackConfigurationCLT extends AbstractRmiCLI<Void> {
      * Convert array to map
      *
      * @param loggersLevels
-     * @return
+     * @return a {@link Map} with logger names and their respective logging {@link Level}
      */
     private static Map<String, Level> getLoggerMap(String[] loggersLevels) {
         if (loggersLevels == null) {
@@ -312,7 +315,7 @@ public class LogbackConfigurationCLT extends AbstractRmiCLI<Void> {
      * Convert array to list
      *
      * @param loggersArray
-     * @return
+     * @return A list with the logger names
      */
     private static List<String> getLoggerList(String[] loggersArray) {
         if (loggersArray == null) {
@@ -342,8 +345,8 @@ public class LogbackConfigurationCLT extends AbstractRmiCLI<Void> {
     /**
      * Verify whether the specified category is a valid OX Category
      *
-     * @param category
-     * @return
+     * @param category The name of the {@link OXException} category
+     * @return <code>true</code> if the specified category is valid; <code>false</code> otherwise
      */
     private static boolean isValidCategory(String category) {
         if (category == null || category.equals("null")) {
@@ -376,8 +379,8 @@ public class LogbackConfigurationCLT extends AbstractRmiCLI<Void> {
     /**
      * Get the int value
      *
-     * @param value
-     * @return
+     * @param value The integer value as string
+     * @return The integer value, or -1 if an error is occurred. Note that -1 could also be the extracted value
      */
     private static final int getIntValue(String value) {
         try {
@@ -389,6 +392,11 @@ public class LogbackConfigurationCLT extends AbstractRmiCLI<Void> {
         return -1;
     }
 
+    /**
+     * Prints the specified {@link Set}
+     * 
+     * @param set The {@link Set} to print
+     */
     private static void printSet(Set<String> set) {
         Iterator<String> i = set.iterator();
         while (i.hasNext()) {
@@ -410,6 +418,9 @@ public class LogbackConfigurationCLT extends AbstractRmiCLI<Void> {
 
     //////////////////////////////// NESTED /////////////////////////////////
 
+    /**
+     * {@link CommandLineExecutor} - Specifies all command line executors
+     */
     private enum CommandLineExecutor {
         CONTEXT {
 
@@ -421,6 +432,9 @@ public class LogbackConfigurationCLT extends AbstractRmiCLI<Void> {
                     response = logbackConfigService.filterContext(contextId, getLoggerMap(commandLine.getOptionValues('l')));
                 } else if (commandLine.hasOption('d')) {
                     response = logbackConfigService.removeContextFilter(contextId, getLoggerList(commandLine.getOptionValues('l')));
+                } else {
+                    System.err.println("You must specify a life cycle switch, either -a to add a filter or -d to remove a filter");
+                    //printUsage(-1);
                 }
                 printResponse(response);
             }
@@ -436,6 +450,9 @@ public class LogbackConfigurationCLT extends AbstractRmiCLI<Void> {
                     response = logbackConfigService.filterUser(contextId, userId, getLoggerMap(commandLine.getOptionValues('l')));
                 } else if (commandLine.hasOption('d')) {
                     response = logbackConfigService.removeUserFilter(contextId, userId, getLoggerList(commandLine.getOptionValues('l')));
+                } else {
+                    System.err.println("You must specify a life cycle switch, either -a to add a filter or -d to remove a filter");
+                    //printUsage(-1);
                 }
                 printResponse(response);
             }
@@ -450,6 +467,9 @@ public class LogbackConfigurationCLT extends AbstractRmiCLI<Void> {
                     response = logbackConfigService.filterSession(sessionId, getLoggerMap(commandLine.getOptionValues('l')));
                 } else if (commandLine.hasOption('d')) {
                     response = logbackConfigService.removeSessionFilter(sessionId, getLoggerList(commandLine.getOptionValues('l')));
+                } else {
+                    System.err.println("You must specify a life cycle switch, either -a to add a filter or -d to remove a filter");
+                    //printUsage(-1);
                 }
                 printResponse(response);
             }
