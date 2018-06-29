@@ -80,6 +80,15 @@ import ch.qos.logback.classic.Level;
  */
 public class LogbackConfigurationCLT extends AbstractRmiCLI<Void> {
 
+    /**
+     * Entry point
+     * 
+     * @param args The arguments of the command line tool
+     */
+    public static void main(String[] args) {
+        new LogbackConfigurationCLT().execute(args);
+    }
+
     private static final String validLogLevels = "{OFF, ERROR, WARN, INFO, DEBUG, TRACE, ALL}";
     private static final String SYNTAX = "logconf [[-a | -d] [-c <contextid> [-u <userid>] | -s <sessionid>] [-l <logger_name>=<logger_level> ...] [-U <JMX-User> -P <JMX-Password> [-p <JMX-Port>]]] | [-oec <category_1>,...] | [-cf] | [-lf] | [-ll [<logger_1> ...] | [dynamic]] | [-le] | [-h]";
     private static final String FOOTER = "\n\nThe flags -a and -d are mutually exclusive.\n\n\nValid log levels: " + validLogLevels + "\nValid categories: " + getValidCategories();
@@ -113,27 +122,27 @@ public class LogbackConfigurationCLT extends AbstractRmiCLI<Void> {
      */
     @Override
     protected void addOptions(Options options) {
-        Option add = createOption("a", "add", false, false, "Flag to add the filter", true);
-        Option del = createOption("d", "delete", false, false, "Flag to delete the filter", true);
+        Option add = createOption("a", "add", false, "Flag to add the filter", true);
+        Option del = createOption("d", "delete", false, "Flag to delete the filter", true);
 
         OptionGroup og = new OptionGroup();
         og.addOption(add).addOption(del);
         options.addOptionGroup(og);
 
-        options.addOption(createOption("u", "user", true, false, "The user id for which to enable logging", false));
-        options.addOption(createOption("c", "context", true, false, "The context id for which to enable logging", false));
-        options.addOption(createOption("oec", "override-exception-categories", true, false, "Override the exception categories to be suppressed", false));
-        options.addOption(createOption("s", "session", true, false, "The session id for which to enable logging", false));
+        options.addOption(createOption("u", "user", true, "The user id for which to enable logging", false));
+        options.addOption(createOption("c", "context", true, "The context id for which to enable logging", false));
+        options.addOption(createOption("oec", "override-exception-categories", true, "Override the exception categories to be suppressed", false));
+        options.addOption(createOption("s", "session", true, "The session id for which to enable logging", false));
 
-        Option o = createOption("l", "level", false, true, "Define the log level (e.g. -l com.openexchange.appsuite=DEBUG). When the -d flag is present the arguments of this switch should be supplied without the level (e.g. -d -l com.openexchange.appsuite)", false);
+        Option o = createOption("l", "level", false, "Define the log level (e.g. -l com.openexchange.appsuite=DEBUG). When the -d flag is present the arguments of this switch should be supplied without the level (e.g. -d -l com.openexchange.appsuite)", false);
         o.setArgs(Short.MAX_VALUE);
         options.addOption(o);
 
-        options.addOption(createOption("ll", "list-loggers", false, true, "Get a list with all loggers of the system\nCan optionally have a list with loggers as arguments, i.e. -ll <logger1> <logger2> OR the keyword 'dynamic' that instructs the command line tool to fetch all dynamically modified loggers. Any other keyword is then ignored, and a full list will be retrieved.", false));
-        options.addOption(createOption("lf", "list-filters", false, false, "Get a list with all logging filters of the system", false));
-        options.addOption(createOption("cf", "clear-filters", false, false, "Clear all logging filters", false));
-        options.addOption(createOption("le", "list-exception-category", false, false, "Get a list with all supressed exception categories", false));
-        options.addOption(createOption("la", "list-appenders", false, false, "Lists all root appenders and any available statistics", false));
+        options.addOption(createOption("ll", "list-loggers", false, "Get a list with all loggers of the system\nCan optionally have a list with loggers as arguments, i.e. -ll <logger1> <logger2> OR the keyword 'dynamic' that instructs the command line tool to fetch all dynamically modified loggers. Any other keyword is then ignored, and a full list will be retrieved.", false));
+        options.addOption(createOption("lf", "list-filters", false, "Get a list with all logging filters of the system", false));
+        options.addOption(createOption("cf", "clear-filters", false, "Clear all logging filters", false));
+        options.addOption(createOption("le", "list-exception-category", false, "Get a list with all supressed exception categories", false));
+        options.addOption(createOption("la", "list-appenders", false, "Lists all root appenders and any available statistics", false));
 
     }
 
@@ -227,6 +236,14 @@ public class LogbackConfigurationCLT extends AbstractRmiCLI<Void> {
      */
     @Override
     protected void printHelp() {
+        printHelp(options);
+    }
+    
+    /* (non-Javadoc)
+     * @see com.openexchange.cli.AbstractCLI#printHelp(org.apache.commons.cli.Options)
+     */
+    @Override
+    protected void printHelp(Options options) {
         HelpFormatter helpFormatter = new HelpFormatter();
         helpFormatter.printHelp(120, getName(), getHeader(), options, getFooter(), false);
     }
@@ -239,12 +256,11 @@ public class LogbackConfigurationCLT extends AbstractRmiCLI<Void> {
      * @param shortName short name of the option
      * @param longName long name of the option
      * @param hasArgs whether it has arguments
-     * @param hasOptArgs whether it has optional arguments
      * @param description short description
      * @param mandatory whether it is mandatory
      * @return The {@link Option}
      */
-    private final Option createOption(String shortName, String longName, boolean hasArgs, boolean hasOptArgs, String description, boolean mandatory) {
+    private final Option createOption(String shortName, String longName, boolean hasArgs, String description, boolean mandatory) {
         OptionBuilder.withLongOpt(longName);
         OptionBuilder.hasArg(hasArgs);
         OptionBuilder.withDescription(description);
