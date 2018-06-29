@@ -131,7 +131,7 @@ public class IncludeStackTraceCLT extends AbstractRmiCLI<Void> {
         int contextId = parseInt('c', -1, cmd, options);
         int userId = parseInt('u', -1, cmd, options);
         if (contextId <= 0 || userId <= 0) {
-            System.err.println("Invalid context or user identifier specified.");
+            System.err.println("Invalid context and/or user identifier specified.");
             printHelp();
         }
 
