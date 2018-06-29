@@ -87,9 +87,10 @@ import com.openexchange.threadpool.ThreadPools;
  */
 public final class UpdateTaskToolkit {
 
-    static final Logger LOG = org.slf4j.LoggerFactory.getLogger(UpdateTaskToolkit.class);
-
-    static final Object LOCK = new Object();
+    /** Simple class to delay initialization until needed */
+    private static class LoggerHolder {
+        static final Logger LOG = org.slf4j.LoggerFactory.getLogger(UpdateTaskToolkit.class);
+    }
 
     /**
      * Initializes a new {@link UpdateTaskToolkit}.
@@ -106,9 +107,7 @@ public final class UpdateTaskToolkit {
      * @throws OXException If update task cannot be performed
      */
     public static void forceUpdateTask(final String className, final String schemaName) throws OXException {
-        synchronized (LOCK) {
-            forceUpdateTask0(getUpdateTask(className), getInfoBySchemaName(schemaName));
-        }
+        forceUpdateTask0(getUpdateTask(className), getInfoBySchemaName(schemaName));
     }
 
     /**
@@ -119,9 +118,7 @@ public final class UpdateTaskToolkit {
      * @throws OXException If update task cannot be performed
      */
     public static void forceUpdateTask(final String className, final int contextId) throws OXException {
-        synchronized (LOCK) {
-            forceUpdateTask0(getUpdateTask(className), contextId);
-        }
+        forceUpdateTask0(getUpdateTask(className), contextId);
     }
 
     /**
@@ -157,17 +154,15 @@ public final class UpdateTaskToolkit {
      * @throws OXException If update task cannot be performed
      */
     public static void forceUpdateTaskOnAllSchemas(final String className) throws OXException {
-        synchronized (LOCK) {
-            // Get update task by class name
-            UpdateTaskV2 updateTask = getUpdateTask(className);
+        // Get update task by class name
+        UpdateTaskV2 updateTask = getUpdateTask(className);
 
-            // Get all available schemas
-            List<SchemaInfo> schemas = getAllSchemas(null);
+        // Get all available schemas
+        List<SchemaInfo> schemas = getAllSchemas(null);
 
-            // ... and iterate them
-            for (SchemaInfo schemaInfo : schemas) {
-                forceUpdateTask0(updateTask, schemaInfo);
-            }
+        // ... and iterate them
+        for (SchemaInfo schemaInfo : schemas) {
+            forceUpdateTask0(updateTask, schemaInfo);
         }
     }
 
@@ -191,80 +186,78 @@ public final class UpdateTaskToolkit {
 
             @Override
             public Void call() throws Exception {
-                synchronized (LOCK) {
-                    // Iterate schemas
-                    int count = 0;
-                    StringBuilder sb = new StringBuilder(32);
-                    Map<String, Queue<TaskInfo>> totalFailures = new HashMap<String, Queue<TaskInfo>>(32);
-                    for (SchemaInfo schema : schemas) {
-                        UpdateProcess updateProcess = new UpdateProcess(schema.getPoolId(), schema.getSchema(), true, throwExceptionOnFailure);
-                        if (throwExceptionOnFailure) {
-                            try {
-                                updateProcess.runUpdate();
-                            } catch (OXException e) {
-                                LOG.error("", e);
-                                statusText.set(e.getPlainLogMessage());
-                                throw e;
-                            } catch (Exception e) {
-                                LOG.error("", e);
-                                statusText.set(e.getMessage());
-                                throw e;
-                            }
-                        } else {
-                            updateProcess.run();
-
-                            // Check possible failures
-                            Queue<TaskInfo> failures = updateProcess.getFailures();
-                            if (null != failures && !failures.isEmpty()) {
-                                for (TaskInfo taskInfo : failures) {
-                                    Queue<TaskInfo> schemaFailures = totalFailures.get(taskInfo.getSchema());
-                                    if (null == schemaFailures) {
-                                        schemaFailures = new LinkedList<TaskInfo>();
-                                        totalFailures.put(taskInfo.getSchema(), schemaFailures);
-                                    }
-                                    schemaFailures.offer(taskInfo);
-                                }
-                            }
+                // Iterate schemas
+                int count = 0;
+                StringBuilder sb = new StringBuilder(32);
+                Map<String, Queue<TaskInfo>> totalFailures = new HashMap<String, Queue<TaskInfo>>(32);
+                for (SchemaInfo schema : schemas) {
+                    UpdateProcess updateProcess = new UpdateProcess(schema.getPoolId(), schema.getSchema(), true, throwExceptionOnFailure);
+                    if (throwExceptionOnFailure) {
+                        try {
+                            updateProcess.runUpdate();
+                        } catch (OXException e) {
+                            LoggerHolder.LOG.error("", e);
+                            statusText.set(e.getPlainLogMessage());
+                            throw e;
+                        } catch (Exception e) {
+                            LoggerHolder.LOG.error("", e);
+                            statusText.set(e.getMessage());
+                            throw e;
                         }
+                    } else {
+                        updateProcess.run();
 
-                        count++;
-                        if (count < total) {
-                            sb.setLength(0);
-                            sb.append("Processed ").append(count).append(" of ").append(total).append(" schemas.");
-                            statusText.set(sb.toString());
-                        }
-                    }
-
-                    // Completed...
-                    sb.setLength(0);
-                    sb.append("Processed ").append(total).append(" of ").append(total).append(" schemas.");
-
-                    // Append failure information (if any)
-                    if (!totalFailures.isEmpty()) {
-                        sb.append("\\R\\R");
-                        boolean first = true;
-                        for (Map.Entry<String, Queue<TaskInfo>> failureEntry : totalFailures.entrySet()) {
-                            if (first) {
-                                first = false;
-                            } else {
-                                sb.append("\\R\\R");
-                            }
-                            sb.append("The following update task(s) failed on schema \"").append(failureEntry.getKey()).append("\": \\R");
-                            boolean firstTaskInfo = true;
-                            for (TaskInfo taskInfo : failureEntry.getValue()) {
-                                if (firstTaskInfo) {
-                                    firstTaskInfo = false;
-                                } else {
-                                    sb.append("\\R");
+                        // Check possible failures
+                        Queue<TaskInfo> failures = updateProcess.getFailures();
+                        if (null != failures && !failures.isEmpty()) {
+                            for (TaskInfo taskInfo : failures) {
+                                Queue<TaskInfo> schemaFailures = totalFailures.get(taskInfo.getSchema());
+                                if (null == schemaFailures) {
+                                    schemaFailures = new LinkedList<TaskInfo>();
+                                    totalFailures.put(taskInfo.getSchema(), schemaFailures);
                                 }
-                                sb.append(' ').append(taskInfo.getTaskName()).append(" (schema=").append(taskInfo.getSchema()).append(')');
+                                schemaFailures.offer(taskInfo);
                             }
                         }
                     }
 
-                    // Set new status text
-                    statusText.set(sb.toString());
+                    count++;
+                    if (count < total) {
+                        sb.setLength(0);
+                        sb.append("Processed ").append(count).append(" of ").append(total).append(" schemas.");
+                        statusText.set(sb.toString());
+                    }
                 }
+
+                // Completed...
+                sb.setLength(0);
+                sb.append("Processed ").append(total).append(" of ").append(total).append(" schemas.");
+
+                // Append failure information (if any)
+                if (!totalFailures.isEmpty()) {
+                    sb.append("\\R\\R");
+                    boolean first = true;
+                    for (Map.Entry<String, Queue<TaskInfo>> failureEntry : totalFailures.entrySet()) {
+                        if (first) {
+                            first = false;
+                        } else {
+                            sb.append("\\R\\R");
+                        }
+                        sb.append("The following update task(s) failed on schema \"").append(failureEntry.getKey()).append("\": \\R");
+                        boolean firstTaskInfo = true;
+                        for (TaskInfo taskInfo : failureEntry.getValue()) {
+                            if (firstTaskInfo) {
+                                firstTaskInfo = false;
+                            } else {
+                                sb.append("\\R");
+                            }
+                            sb.append(' ').append(taskInfo.getTaskName()).append(" (schema=").append(taskInfo.getSchema()).append(')');
+                        }
+                    }
+                }
+
+                // Set new status text
+                statusText.set(sb.toString());
                 return null;
             }
         };
@@ -277,7 +270,7 @@ public final class UpdateTaskToolkit {
 
     /**
      * Returns an unmodifiable {@link Map} with all {@link NamespaceAwareUpdateTask}s
-     * 
+     *
      * @return an unmodifiable {@link Map} with all {@link NamespaceAwareUpdateTask}s
      */
     public static Map<String, Set<String>> getNamespaceAwareUpdateTasks() {
@@ -363,7 +356,7 @@ public final class UpdateTaskToolkit {
 
     /**
      * Load update task by class name.
-     * 
+     *
      * @param className name of the update task class.
      * @return the update task class.
      * @throws OXException if the update task class can not be determined.
