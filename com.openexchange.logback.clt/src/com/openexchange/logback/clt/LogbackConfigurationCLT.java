@@ -306,12 +306,15 @@ public class LogbackConfigurationCLT extends AbstractRmiCLI<Void> {
         for (String s : loggersLevels) {
             String[] split = s.split("=");
             if (split.length != 2) {
-                System.err.println("Warning: Ignoring unrecognized parameter for -l option");
+                System.err.println("Warning: Ignoring unrecognized parameter for -l option '" + s + "'");
                 continue;
             }
             if (isValidLogLevel(split[1])) {
                 levels.put(split[0], Level.valueOf(split[1]));
             }
+        }
+        if (levels.isEmpty()) {
+            throw new IllegalArgumentException("You must specify a key value pair for each logger along with its level, e.g. com.openexchange.appsuite=DEBUG");
         }
         return levels;
     }
