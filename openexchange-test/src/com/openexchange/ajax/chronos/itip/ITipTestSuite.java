@@ -51,6 +51,7 @@ package com.openexchange.ajax.chronos.itip;
 
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
+import com.openexchange.ajax.chronos.itip.bugs.ReplyBugsTest;
 import com.openexchange.test.concurrent.ParallelSuite;
 
 /**
@@ -62,7 +63,8 @@ import com.openexchange.test.concurrent.ParallelSuite;
 @RunWith(ParallelSuite.class)
 @Suite.SuiteClasses({
     ITipRequestTests.class,
-    ITipReplyTest.class
+    ITipReplyTest.class,
+    ReplyBugsTest.class
 })
 public class ITipTestSuite {
 
