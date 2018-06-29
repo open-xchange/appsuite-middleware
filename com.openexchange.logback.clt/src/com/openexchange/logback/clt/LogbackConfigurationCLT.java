@@ -155,27 +155,32 @@ public class LogbackConfigurationCLT extends AbstractRmiCLI<Void> {
     @Override
     protected Void invoke(Options options, CommandLine cmd, String optRmiHostName) throws Exception {
         LogbackConfigurationRMIService logbackConfigService = getRmiStub(optRmiHostName, LogbackConfigurationRMIService.RMI_NAME);
-        if (cmd.hasOption('s')) {
-            CommandLineExecutor.SESSION.executeWith(cmd, logbackConfigService);
-        } else if (cmd.hasOption('c') && !cmd.hasOption('u')) {
-            CommandLineExecutor.CONTEXT.executeWith(cmd, logbackConfigService);
-        } else if (cmd.hasOption('u')) {
-            CommandLineExecutor.USER.executeWith(cmd, logbackConfigService);
-        } else if (cmd.hasOption('l')) {
-            CommandLineExecutor.MODIFY.executeWith(cmd, logbackConfigService);
-        } else if (cmd.hasOption("le")) {
-            CommandLineExecutor.LIST_CATEGORIES.executeWith(cmd, logbackConfigService);
-        } else if (cmd.hasOption("lf")) {
-            CommandLineExecutor.LIST_FILTERS.executeWith(cmd, logbackConfigService);
-        } else if (cmd.hasOption("ll")) {
-            CommandLineExecutor.LIST_LOGGERS.executeWith(cmd, logbackConfigService);
-        } else if (cmd.hasOption("oec")) {
-            CommandLineExecutor.OVERRIDE_EXCEPTION_CATEGORIES.executeWith(cmd, logbackConfigService);
-        } else if (cmd.hasOption("cf")) {
-            CommandLineExecutor.CLEAR_FILTERS.executeWith(cmd, logbackConfigService);
-        } else if (cmd.hasOption("la")) {
-            CommandLineExecutor.ROOT_APPENDER_STATS.executeWith(cmd, logbackConfigService);
-        } else {
+        try {
+            if (cmd.hasOption('s')) {
+                CommandLineExecutor.SESSION.executeWith(cmd, logbackConfigService);
+            } else if (cmd.hasOption('c') && !cmd.hasOption('u')) {
+                CommandLineExecutor.CONTEXT.executeWith(cmd, logbackConfigService);
+            } else if (cmd.hasOption('u')) {
+                CommandLineExecutor.USER.executeWith(cmd, logbackConfigService);
+            } else if (cmd.hasOption('l')) {
+                CommandLineExecutor.MODIFY.executeWith(cmd, logbackConfigService);
+            } else if (cmd.hasOption("le")) {
+                CommandLineExecutor.LIST_CATEGORIES.executeWith(cmd, logbackConfigService);
+            } else if (cmd.hasOption("lf")) {
+                CommandLineExecutor.LIST_FILTERS.executeWith(cmd, logbackConfigService);
+            } else if (cmd.hasOption("ll")) {
+                CommandLineExecutor.LIST_LOGGERS.executeWith(cmd, logbackConfigService);
+            } else if (cmd.hasOption("oec")) {
+                CommandLineExecutor.OVERRIDE_EXCEPTION_CATEGORIES.executeWith(cmd, logbackConfigService);
+            } else if (cmd.hasOption("cf")) {
+                CommandLineExecutor.CLEAR_FILTERS.executeWith(cmd, logbackConfigService);
+            } else if (cmd.hasOption("la")) {
+                CommandLineExecutor.ROOT_APPENDER_STATS.executeWith(cmd, logbackConfigService);
+            } else {
+                printHelp();
+            }
+        } catch (IllegalArgumentException e) {
+            System.err.println(e.getMessage());
             printHelp();
         }
 
@@ -337,9 +342,7 @@ public class LogbackConfigurationCLT extends AbstractRmiCLI<Void> {
         }
         StringBuilder builder = new StringBuilder();
         builder.append("Error: Unknown log level: \"").append(value).append("\".").append("Requires a valid log level: ").append(validLogLevels).append("\n");
-
-        //printUsage(-1);
-        return false;
+        throw new IllegalArgumentException(builder.toString());
     }
 
     /**
@@ -358,9 +361,7 @@ public class LogbackConfigurationCLT extends AbstractRmiCLI<Void> {
         } catch (IllegalArgumentException e) {
             StringBuilder builder = new StringBuilder();
             builder.append("Error: Unknown category: \"").append(category).append("\".\"\n").append("Requires a valid category: ").append(getValidCategories()).append("\n");
-            System.out.println(builder.toString());
-            //printHelp();
-            return false;
+            throw new IllegalArgumentException(builder.toString());
         }
     }
 
@@ -380,16 +381,14 @@ public class LogbackConfigurationCLT extends AbstractRmiCLI<Void> {
      * Get the int value
      *
      * @param value The integer value as string
-     * @return The integer value, or -1 if an error is occurred. Note that -1 could also be the extracted value
+     * @return The integer value
      */
     private static final int getIntValue(String value) {
         try {
             return Integer.parseInt(value);
         } catch (NumberFormatException e) {
-            System.out.println("Error: Requires an integer value.\n");
-            //printUsage(-1);
+            throw new IllegalArgumentException("You must specify an integer value.");
         }
-        return -1;
     }
 
     /**
@@ -403,18 +402,6 @@ public class LogbackConfigurationCLT extends AbstractRmiCLI<Void> {
             System.out.println(i.next());
         }
     }
-
-    /**
-     * Print usage
-     *
-     * @param exitCode
-     */
-    //    private static final void printUsage(int exitCode) {
-    //        HelpFormatter hf = new HelpFormatter();
-    //        hf.setWidth(120);
-    //        hf.printHelp("logconf [[-a | -d] [-c <contextid> [-u <userid>] | -s <sessionid>] [-l <logger_name>=<logger_level> ...] [-U <JMX-User> -P <JMX-Password> [-p <JMX-Port>]]] | [-oec <category_1>,...] | [-cf] | [-lf] | [-ll [<logger_1> ...] | [dynamic]] | [-le] | [-h]", null, options, "\n\nThe flags -a and -d are mutually exclusive.\n\n\nValid log levels: " + validLogLevels + "\nValid categories: " + getValidCategories());
-    //        System.exit(exitCode);
-    //    }
 
     //////////////////////////////// NESTED /////////////////////////////////
 
@@ -433,8 +420,7 @@ public class LogbackConfigurationCLT extends AbstractRmiCLI<Void> {
                 } else if (commandLine.hasOption('d')) {
                     response = logbackConfigService.removeContextFilter(contextId, getLoggerList(commandLine.getOptionValues('l')));
                 } else {
-                    System.err.println("You must specify a life cycle switch, either -a to add a filter or -d to remove a filter");
-                    //printUsage(-1);
+                    throw new IllegalArgumentException("You must specify a life cycle switch, either -a to add a filter or -d to remove a filter.");
                 }
                 printResponse(response);
             }
@@ -451,8 +437,7 @@ public class LogbackConfigurationCLT extends AbstractRmiCLI<Void> {
                 } else if (commandLine.hasOption('d')) {
                     response = logbackConfigService.removeUserFilter(contextId, userId, getLoggerList(commandLine.getOptionValues('l')));
                 } else {
-                    System.err.println("You must specify a life cycle switch, either -a to add a filter or -d to remove a filter");
-                    //printUsage(-1);
+                    throw new IllegalArgumentException("You must specify a life cycle switch, either -a to add a filter or -d to remove a filter.");
                 }
                 printResponse(response);
             }
@@ -468,8 +453,7 @@ public class LogbackConfigurationCLT extends AbstractRmiCLI<Void> {
                 } else if (commandLine.hasOption('d')) {
                     response = logbackConfigService.removeSessionFilter(sessionId, getLoggerList(commandLine.getOptionValues('l')));
                 } else {
-                    System.err.println("You must specify a life cycle switch, either -a to add a filter or -d to remove a filter");
-                    //printUsage(-1);
+                    throw new IllegalArgumentException("You must specify a life cycle switch, either -a to add a filter or -d to remove a filter.");
                 }
                 printResponse(response);
             }
@@ -532,14 +516,12 @@ public class LogbackConfigurationCLT extends AbstractRmiCLI<Void> {
                 String[] oeca = commandLine.getArgs();
                 Object[] oneArrayToRuleThemAll = ArrayUtils.addAll(v, oeca);
                 if (oneArrayToRuleThemAll.length <= 0) {
-                    //printUsage(-1);
-                    return;
+                    throw new IllegalArgumentException("You must specify at least one exception category.");
                 }
                 StringBuilder builder = new StringBuilder();
                 for (Object o : oneArrayToRuleThemAll) {
                     if (!(o instanceof String)) {
-                        //printUsage(-1);
-                        return;
+                        throw new IllegalArgumentException("The specified category is not of type string '" + o + "'");
                     }
                     String s = ((String) o).toUpperCase();
                     if (isValidCategory(s)) {
