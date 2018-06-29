@@ -244,9 +244,7 @@ public class ReplyITipAnalyzer extends AbstractITipAnalyzer {
 
     private boolean containsPartyCrasher(ITipAnalysis analysis) throws OXException {
         for (ITipChange change : analysis.getChanges()) {
-            // Replying attendee is first one in list through #ensureAttendees
-            Attendee reply = change.getNewEvent().getAttendees().get(0);
-            if (change.getCurrentEvent().getAttendees().stream().noneMatch(a -> extractEMailAddress(reply.getUri()).equals(extractEMailAddress(a.getUri())))) {
+            if (false == change.getDiff().getAttendeeUpdates().getAddedItems().isEmpty()) {
                 return true;
             }
         }
