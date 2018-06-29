@@ -51,6 +51,7 @@ package com.openexchange.share.json.fields;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.slf4j.Logger;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
@@ -67,6 +68,11 @@ import com.openexchange.share.recipient.RecipientType;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public class ExtendedObjectPermission extends ExtendedPermission {
+
+    /** Simple class to delay initialization until needed */
+    private static class LoggerHolder {
+        private static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(ExtendedObjectPermission.class);
+    }
 
     private final File file;
     private final FileStorageObjectPermission permission;
@@ -100,8 +106,7 @@ public class ExtendedObjectPermission extends ExtendedPermission {
         } else {
             User user = resolver.getUser(permission.getEntity());
             if (null == user) {
-                org.slf4j.LoggerFactory.getLogger(ExtendedObjectPermissionsField.class).warn(
-                    "Can't resolve user permission entity {} for file {}", permission.getEntity(), file);
+                LoggerHolder.LOGGER.debug("Can't resolve user permission entity {} for file {}", permission.getEntity(), file);
             } else if (user.isGuest()) {
                 GuestInfo guest = resolver.getGuest(user.getId());
                 if (guest == null) {

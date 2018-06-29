@@ -58,6 +58,7 @@ import java.util.Set;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.slf4j.Logger;
 import com.openexchange.drive.impl.DriveUtils;
 import com.openexchange.drive.impl.internal.SyncSession;
 import com.openexchange.exception.OXException;
@@ -80,6 +81,11 @@ import com.openexchange.tools.iterator.SearchIterators;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public class JsonFileMetadata extends AbstractJsonMetadata {
+
+    /** Simple class to delay initialization until needed */
+    private static class LoggerHolder {
+        private static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(JsonFileMetadata.class);
+    }
 
     private final File file;
 
@@ -272,7 +278,7 @@ public class JsonFileMetadata extends AbstractJsonMetadata {
     }
 
     private JSONObject getJSONObjectPermission(FileStorageObjectPermission permission) throws JSONException, OXException {
-        JSONObject jsonObject = new JSONObject();
+        JSONObject jsonObject = new JSONObject(4);
         jsonObject.put("entity", permission.getEntity());
         jsonObject.put("group", permission.isGroup());
         jsonObject.put("bits", permission.getPermissions());
@@ -289,8 +295,7 @@ public class JsonFileMetadata extends AbstractJsonMetadata {
         } else {
             User user = session.getPermissionResolver().getUser(permission.getEntity());
             if (null == user) {
-                org.slf4j.LoggerFactory.getLogger(JsonDirectoryMetadata.class).warn(
-                    "Can't resolve uon entity {} for file {}", permission.getEntity(), file);
+                LoggerHolder.LOGGER.debug("Can't resolve user entity {} for file {}", permission.getEntity(), file);
             } else if (user.isGuest()) {
                 GuestInfo guest = session.getPermissionResolver().getGuest(user.getId());
                 if (guest == null) {
