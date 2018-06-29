@@ -252,7 +252,7 @@ public class JsonDirectoryMetadata extends AbstractJsonMetadata {
             jsonObject.put("type", "group");
             addGroupInfo(jsonObject, session.getPermissionResolver().getGroup(permission.getEntity()));
         } else {
-            User user = session.getPermissionResolver().getUser(permission.getEntity());s
+            User user = session.getPermissionResolver().getUser(permission.getEntity());
             if (null == user) {
                 LoggerHolder.LOGGER.debug("Can't resolve user entity {} for folder {}", permission.getEntity(), folder);
             } else if (user.isGuest()) {
