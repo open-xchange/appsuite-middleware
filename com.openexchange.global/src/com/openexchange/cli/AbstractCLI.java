@@ -56,7 +56,6 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.PosixParser;
 
-
 /**
  * {@link AbstractCLI} - The basic super class for command-line tools.
  *
@@ -106,7 +105,7 @@ public abstract class AbstractCLI<R, C> {
 
             R retval = null;
             try {
-                retval = invoke(options, cmd, null);
+                retval = invoke(options, cmd, getContext());
             } catch (Exception e) {
                 Throwable t = e.getCause();
                 throw new ExecutionFault(null == t ? e : t);
@@ -191,8 +190,6 @@ public abstract class AbstractCLI<R, C> {
 
     /**
      * Prints the <code>--help</code> text.
-     *
-     * @param options The help output
      */
     protected void printHelp() {
         Options options = this.options;
@@ -207,8 +204,18 @@ public abstract class AbstractCLI<R, C> {
      * @param options The help output
      */
     protected void printHelp(final Options options) {
+        printHelp(options, HelpFormatter.DEFAULT_WIDTH);
+    }
+
+    /**
+     * Prints the <code>--help</code> text.
+     *
+     * @param options The help output
+     * @param width The width of the help screen
+     */
+    protected void printHelp(Options options, int width) {
         final HelpFormatter helpFormatter = new HelpFormatter();
-        helpFormatter.printHelp(HelpFormatter.DEFAULT_WIDTH, getName(), getHeader(), options, getFooter(), false);
+        helpFormatter.printHelp(width, getName(), getHeader(), options, getFooter(), false);
     }
 
     /**
@@ -225,6 +232,20 @@ public abstract class AbstractCLI<R, C> {
      */
     protected abstract String getName();
 
+    /**
+     * Returns the execution context {@link C}
+     * 
+     * @return the execution context {@link C}
+     */
+    protected C getContext() {
+        return null;
+    }
+
+    /**
+     * Returns the command line tool's header
+     * 
+     * @return the command line tool's header
+     */
     protected String getHeader() {
         return null;
     }
