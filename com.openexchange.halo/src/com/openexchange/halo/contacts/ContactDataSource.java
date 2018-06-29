@@ -183,7 +183,7 @@ public class ContactDataSource implements HaloContactDataSource, HaloContactImag
         cso.setEmail3(email);
         cso.setOrSearch(true);
 
-        SearchIterator<Contact> result = services.getService(ContactService.class).searchContacts(session, cso, new ContactField[]{ContactField.FOLDER_ID, ContactField.IMAGE1, ContactField.IMAGE1_CONTENT_TYPE, ContactField.LAST_MODIFIED});
+        SearchIterator<Contact> result = services.getService(ContactService.class).searchContacts(session, cso, new ContactField[] { ContactField.FOLDER_ID, ContactField.IMAGE1, ContactField.IMAGE1_CONTENT_TYPE, ContactField.LAST_MODIFIED, ContactField.EMAIL1, ContactField.EMAIL2, ContactField.EMAIL3 });
         if (result == null) {
             return null;
         }
