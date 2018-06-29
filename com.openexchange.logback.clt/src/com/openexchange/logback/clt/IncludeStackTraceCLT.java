@@ -161,17 +161,17 @@ public class IncludeStackTraceCLT extends AbstractRmiCLI<Void> {
         if (!cmd.hasOption("c")) {
             System.out.println("Missing option -c/--context");
             printHelp();
-            return;
+            System.exit(-1);
         }
         if (!cmd.hasOption("u")) {
             System.out.println("Missing option -u/--user");
             printHelp();
-            return;
+            System.exit(-1);
         }
         if (!cmd.hasOption("e") && !cmd.hasOption("d")) {
             System.out.println("Missing option -e/--enable or -d/--disable");
             printHelp();
-            return;
+            System.exit(-1);
         }
     }
 
