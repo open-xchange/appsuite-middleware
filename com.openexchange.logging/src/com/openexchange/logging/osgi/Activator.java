@@ -50,6 +50,7 @@
 package com.openexchange.logging.osgi;
 
 import java.net.URL;
+import java.rmi.Remote;
 import java.util.Collection;
 import java.util.List;
 import org.osgi.framework.BundleActivator;
@@ -69,6 +70,7 @@ import com.openexchange.logging.filter.MDCEnablerTurboFilter;
 import com.openexchange.logging.filter.ParamsCheckingTurboFilter;
 import com.openexchange.logging.filter.RankingAwareTurboFilterList;
 import com.openexchange.logging.internal.LogLevelServiceImpl;
+import com.openexchange.logging.internal.LogbackConfigurationRMIServiceImpl;
 import com.openexchange.logging.mbean.IncludeStackTraceServiceImpl;
 import com.openexchange.management.ManagementService;
 import ch.qos.logback.classic.Level;
@@ -151,6 +153,9 @@ public class Activator implements BundleActivator, Reloadable {
         registerExceptionCategoryFilter(context, rankingAwareTurboFilterList, serviceImpl);
         registerIncludeStackTraceService(serviceImpl, context);
         reloadable = context.registerService(Reloadable.class, this, null);
+
+        // Register RMI logback config service
+        context.registerService(Remote.class, new LogbackConfigurationRMIServiceImpl(loggerContext, rankingAwareTurboFilterList, serviceImpl), null);
 
         logLevelService = context.registerService(LogLevelService.class, new LogLevelServiceImpl(), null);
     }
