@@ -65,7 +65,6 @@ import org.junit.runners.Suite;
     com.openexchange.groupware.importexport.Bug8681forCSV.class,
     com.openexchange.groupware.importexport.Bug8681forVCard.class,
     com.openexchange.groupware.importexport.CSVContactExportTest.class,
-    com.openexchange.groupware.importexport.CSVContactImportTest.class,
     com.openexchange.groupware.importexport.CSVParserTest.class,
     com.openexchange.groupware.importexport.OutlookCSVContactImportTest.class,
     com.openexchange.groupware.importexport.SizedInputStreamTest.class,
