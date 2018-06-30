@@ -119,12 +119,6 @@ public class ResourceCacheTest extends AbstractAJAXSession {
         lifecycle();
     }
 
-    @Test
-    public void testLifecycleDB() throws Exception {
-        current = DB;
-        lifecycle();
-    }
-
     private void lifecycle() throws Exception {
 
         //Preperations if the cache holds old elements

@@ -51,25 +51,16 @@ package com.openexchange.groupware.importexport;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.Types;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.groupware.importexport.csv.CSVParser;
-import com.openexchange.groupware.importexport.importers.TestCSVContactImporter;
 import com.openexchange.importexport.exporters.CSVContactExporter;
 import com.openexchange.importexport.exporters.Exporter;
 import com.openexchange.importexport.formats.Format;
-import com.openexchange.importexport.importers.CSVContactImporter;
 import com.openexchange.test.OXTestToolkit;
 
 public class CSVContactExportTest extends AbstractContactTest {
@@ -97,28 +88,5 @@ public class CSVContactExportTest extends AbstractContactTest {
     public void exportHead() throws OXException, IOException {
         final InputStream is = exp.exportFolderData(sessObj, Format.CSV, String.valueOf(folderId), TEST1_BASE, null);
         assertEquals("Head only", TEST1_RESULT, OXTestToolkit.readStreamAsString(is));
-    }
-
-    @Test
-    public void exportData() throws NumberFormatException, Exception {
-        final CSVContactImporter imp = new TestCSVContactImporter();
-        InputStream is;
-
-        //importing prior to export test
-        is = new ByteArrayInputStream(TEST2_RESULT.getBytes());
-        final Map<String, Integer> folderMappings = new HashMap<String, Integer>();
-        folderMappings.put(Integer.toString(folderId), new Integer(Types.CONTACT));
-        final List<ImportResult> results = imp.importData(sessObj, Format.CSV, is, new LinkedList<String>(folderMappings.keySet()), null).getImportResults();
-
-        //exporting and asserting
-        is = exp.exportFolderData(sessObj, Format.CSV, String.valueOf(folderId), TEST2_BASE, null);
-        final CSVParser parser = new CSVParser();
-        final String resStr = OXTestToolkit.readStreamAsString(is);
-        assertEquals("Two imports", parser.parse(TEST2_RESULT), parser.parse(resStr));
-
-        //cleaning up
-        for (final ImportResult res : results) {
-            contactStorage.delete(sessObj, res.getFolder(), res.getObjectId(), res.getDate());
-        }
     }
 }
