@@ -59,7 +59,6 @@ import com.openexchange.ajax.share.bugs.Bug40596Test;
 import com.openexchange.ajax.share.bugs.Bug40627Test;
 import com.openexchange.ajax.share.bugs.Bug40722Test;
 import com.openexchange.ajax.share.bugs.Bug40826Test;
-import com.openexchange.ajax.share.bugs.Bug40993Test;
 import com.openexchange.ajax.share.bugs.Bug41184Test;
 import com.openexchange.ajax.share.bugs.Bug41287Test;
 import com.openexchange.ajax.share.bugs.Bug41537Test;
@@ -100,7 +99,6 @@ import com.openexchange.ajax.share.tests.NotifyFolderSharesTest;
 import com.openexchange.ajax.share.tests.ParallelGuestSessionsTest;
 import com.openexchange.ajax.share.tests.PasswordResetServletTest;
 import com.openexchange.ajax.share.tests.QuotaTest;
-import com.openexchange.ajax.share.tests.RemoveGuestPermissionTest;
 import com.openexchange.ajax.share.tests.ResolveLegacyLinkTest;
 import com.openexchange.ajax.share.tests.SharedFilesFolderTest;
 import com.openexchange.test.concurrent.ParallelSuite;
@@ -114,7 +112,6 @@ import com.openexchange.test.concurrent.ParallelSuite;
 @Suite.SuiteClasses({
     CreateWithGuestPermissionTest.class,
     AddGuestPermissionTest.class,
-    RemoveGuestPermissionTest.class,
     ExpiredSharesTest.class,
     CreateSubfolderTest.class,
     FolderTransactionTest.class,
@@ -154,7 +151,6 @@ import com.openexchange.test.concurrent.ParallelSuite;
     Bug40826Test.class,
     AddGuestUserToGroupTest.class,
     PasswordResetServletTest.class,
-    Bug40993Test.class,
     Bug41184Test.class,
     Bug41287Test.class,
     Bug41537Test.class,

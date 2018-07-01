@@ -1177,6 +1177,8 @@ public abstract class ShareTest extends AbstractSmtpAJAXSession {
             assertEquals("Expiry date wrong", anonymousRecipient.getExpiryDate(), actual.getExpiry());
         } else if (RecipientType.GUEST.equals(expected.getType())) {
             GuestRecipient guestRecipient = (GuestRecipient) expected;
+//            guestClient.getValues().getUserId() + "@" + guestClient.getValues().getContextId()
+//            guestRecipient.get
             assertEquals("Wrong display name", guestRecipient.getDisplayName(), actual.getDisplayName());
             assertNotNull("No contact", actual.getContact());
             assertEquals("Wrong e-mail address", guestRecipient.getEmailAddress(), actual.getContact().getEmail1());
