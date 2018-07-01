@@ -51,14 +51,10 @@ package com.openexchange.ajax.oauth.provider;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import java.rmi.Naming;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -79,7 +75,6 @@ import com.openexchange.contacts.json.ContactActionFactory;
 import com.openexchange.java.Strings;
 import com.openexchange.oauth.provider.authorizationserver.client.ClientManagement;
 import com.openexchange.oauth.provider.authorizationserver.client.ClientManagementException.Reason;
-import com.openexchange.oauth.provider.impl.tools.ClientId;
 import com.openexchange.oauth.provider.resourceserver.scope.Scope;
 import com.openexchange.oauth.provider.rmi.client.ClientDataDto;
 import com.openexchange.oauth.provider.rmi.client.ClientDto;
@@ -113,98 +108,6 @@ public class ClientManagementTest {
     public void before() throws Exception {
         clientManagement = (RemoteClientManagement) Naming.lookup("rmi://" + AJAXConfig.getProperty(Property.RMI_HOST) + ":1099/" + RemoteClientManagement.RMI_NAME);
         credentials = AbstractOAuthTest.getMasterAdminCredentials();
-    }
-
-    @Test
-    public void testClientLifecycle() throws Exception {
-        /*
-         * Create client and check data transmission
-         */
-        ClientDataDto clientData = prepareClient(ClientManagementTest.class.getSimpleName() + "_" + System.currentTimeMillis());
-        ClientDto client = clientManagement.registerClient(ClientManagement.DEFAULT_GID, clientData, credentials);
-        String groupId = ClientId.parse(client.getId()).getGroupId();
-        try {
-            compare(clientData, client);
-
-            /*
-             * Assure client is listed and can be got
-             */
-            List<ClientDto> clients = clientManagement.getClients(groupId, credentials);
-            boolean found = false;
-            for (ClientDto c : clients) {
-                if (client.getId().equals(c.getId())) {
-                    found = true;
-                    break;
-                }
-            }
-            assertTrue(found);
-
-            ClientDto reloaded = clientManagement.getClientById(client.getId(), credentials);
-            compare(client, reloaded);
-
-            /*
-             * Check disabling and enabling
-             */
-            assertTrue(clientManagement.disableClient(client.getId(), credentials));
-            reloaded = clientManagement.getClientById(client.getId(), credentials);
-            assertFalse(reloaded.isEnabled());
-            assertFalse(clientManagement.disableClient(client.getId(), credentials)); // cannot disable a disabled client
-
-            assertTrue(clientManagement.enableClient(client.getId(), credentials));
-            reloaded = clientManagement.getClientById(client.getId(), credentials);
-            assertTrue(reloaded.isEnabled());
-            assertFalse(clientManagement.enableClient(client.getId(), credentials)); // cannot enable an enabled client
-
-            /*
-             * Revoke secret
-             */
-            String oldSecret = client.getSecret();
-            client = clientManagement.revokeClientSecret(client.getId(), credentials);
-            assertNotNull(client.getSecret());
-            assertNotEquals(oldSecret, client.getSecret());
-
-            /*
-             * Update
-             */
-            ClientDataDto updatedClientData = new ClientDataDto();
-            updatedClientData.setName(Strings.reverse(client.getName()));
-            updatedClientData.setContactAddress(Strings.reverse(client.getContactAddress()));
-            updatedClientData.setDescription(Strings.reverse(client.getDescription()));
-            updatedClientData.setWebsite(Strings.reverse(client.getWebsite()));
-            IconDto updatedIcon = new IconDto();
-            updatedIcon.setMimeType("image/png");
-            byte[] originalIconBytes = client.getIcon().getData();
-            byte[] updatedIconBytes = new byte[originalIconBytes.length];
-            System.arraycopy(originalIconBytes, 0, updatedIconBytes, 0, originalIconBytes.length);
-            Arrays.sort(updatedIconBytes);
-            updatedIcon.setData(updatedIconBytes);
-            updatedClientData.setIcon(updatedIcon);
-            updatedClientData.setRedirectURIs(Collections.singletonList("https://example.com/oauth/client/endpoint"));
-            updatedClientData.setDefaultScope(Scope.newInstance(ContactActionFactory.OAUTH_READ_SCOPE, ContactActionFactory.OAUTH_WRITE_SCOPE).toString());
-            client = clientManagement.updateClient(client.getId(), updatedClientData, credentials);
-            compare(updatedClientData, client);
-        } finally {
-            assertTrue(clientManagement.unregisterClient(client.getId(), credentials));
-
-            /*
-             * Assure client is not listed anymore
-             */
-            List<ClientDto> clients = clientManagement.getClients(groupId, credentials);
-            boolean found = false;
-            for (ClientDto c : clients) {
-                if (client.getId().equals(c.getId())) {
-                    found = true;
-                    break;
-                }
-            }
-            assertFalse(found);
-
-            /*
-             * Assure client cannot be got anymore
-             */
-            ClientDto reloaded = clientManagement.getClientById(client.getId(), credentials);
-            assertNull(reloaded);
-        }
     }
 
     @Test

@@ -85,7 +85,6 @@ import com.openexchange.test.concurrent.ParallelSuite;
     com.openexchange.ajax.importexport.Bug17392Test.class,
     com.openexchange.ajax.importexport.Bug20360Test_UmlautBreaksImport.class,
     com.openexchange.ajax.importexport.Bug20738Test.class,
-    com.openexchange.ajax.importexport.ICalExportTest.class,
     com.openexchange.ajax.importexport.ICalImportExportServletTest.class,
     com.openexchange.ajax.importexport.VCardImportExportServletTest.class,
     com.openexchange.ajax.infostore.test.CreateAndDeleteInfostoreTest.class,

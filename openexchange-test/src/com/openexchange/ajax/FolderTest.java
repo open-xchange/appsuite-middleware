@@ -126,9 +126,7 @@ public class FolderTest extends AbstractAJAXSession {
         FolderObject newFolder = FolderTestManager.createNewFolderObject("CheckMyPermissions", Module.CALENDAR.getFolderConstant(), FolderObject.PUBLIC, userId, FolderObject.SYSTEM_PUBLIC_FOLDER_ID);
 
         final int fuid = ftm.insertFolderOnServer(newFolder).getObjectID();
-        final Calendar cal = GregorianCalendar.getInstance();
         FolderObject folder = ftm.getFolderFromServer(fuid);
-        folder.setLastModified(cal.getTime());
         FolderObject updated = ftm.updateFolderOnServer(folder);
         ftm.deleteFolderOnServer(updated);
     }
@@ -145,17 +143,16 @@ public class FolderTest extends AbstractAJAXSession {
 
             FolderObject folder = ftm.getFolderFromServer(fuid);
             folder.setFolderName("ChangedPrivateFolderName" + System.currentTimeMillis());
-            folder.setLastModified(new Date(System.currentTimeMillis()));
             ftm.updateFolderOnServer(folder);
-            ftm.getFolderFromServer(fuid);
-            ftm.deleteFolderOnServer(fuid, new Date(System.currentTimeMillis()));
+            FolderObject folderFromServer = ftm.getFolderFromServer(fuid);
+            ftm.deleteFolderOnServer(fuid, folderFromServer.getLastModified());
             assertFalse(ftm.getLastResponse().hasError());
 
             FolderObject newPublicFolder = FolderTestManager.createNewFolderObject("NewPublicFolder" + UUID.randomUUID().toString(), Module.CALENDAR.getFolderConstant(), FolderObject.PRIVATE, userId, FolderObject.SYSTEM_PUBLIC_FOLDER_ID);
             fuid = ftm.insertFolderOnServer(newPublicFolder).getObjectID();
             assertFalse(fuid == -1);
-            ftm.getFolderFromServer(fuid);
-            ftm.deleteFolderOnServer(fuid, new Date(System.currentTimeMillis()));
+            folderFromServer = ftm.getFolderFromServer(fuid);
+            ftm.deleteFolderOnServer(fuid, folderFromServer.getLastModified());
             assertFalse(ftm.getLastResponse().hasError());
             fuid = -1;
 
@@ -164,12 +161,11 @@ public class FolderTest extends AbstractAJAXSession {
             assertFalse(fuid == -1);
             FolderObject retrievedNewInfoStoreFolder = ftm.getFolderFromServer(fuid);
             retrievedNewInfoStoreFolder.setFolderName("ChangedInfostoreFolderName" + System.currentTimeMillis());
-            retrievedNewInfoStoreFolder.setLastModified(new Date(Long.MAX_VALUE));
             ftm.updateFolderOnServer(retrievedNewInfoStoreFolder);
 
-            ftm.getFolderFromServer(fuid);
+            folderFromServer = ftm.getFolderFromServer(fuid);
             assertFalse(ftm.getLastResponse().hasError());
-            ftm.deleteFolderOnServer(fuid, new Date(System.currentTimeMillis()));
+            ftm.deleteFolderOnServer(fuid, folderFromServer.getLastModified());
             assertFalse(ftm.getLastResponse().hasError());
             fuid = -1;
         } finally {

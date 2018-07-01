@@ -61,7 +61,6 @@ import com.openexchange.test.concurrent.ParallelSuite;
  */
 @RunWith(ParallelSuite.class)
 @SuiteClasses({ 
-    AuthorizationEndpointSmtpTest.class, 
     ReadFoldersTest.class, 
     JSONApiTest.class, 
 })

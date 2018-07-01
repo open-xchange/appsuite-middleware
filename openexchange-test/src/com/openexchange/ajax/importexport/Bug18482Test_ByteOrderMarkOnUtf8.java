@@ -79,11 +79,6 @@ public class Bug18482Test_ByteOrderMarkOnUtf8 extends AbstractManagedContactTest
     String csv = ContactTestData.IMPORT_MULTIPLE;
 
     @Test
-    public void testNone() throws Exception {
-        testWithBOM(Charsets.UTF_8_NAME);
-    }
-
-    @Test
     public void testUTF8() throws Exception {
         testWithBOM(Charsets.UTF_8_NAME, 0xEF, 0xBB, 0xBF);
     }

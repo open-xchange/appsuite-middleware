@@ -103,7 +103,6 @@ import com.openexchange.ajax.share.tests.QuotaTest;
 import com.openexchange.ajax.share.tests.RemoveGuestPermissionTest;
 import com.openexchange.ajax.share.tests.ResolveLegacyLinkTest;
 import com.openexchange.ajax.share.tests.SharedFilesFolderTest;
-import com.openexchange.ajax.share.tests.ShowSharedFilesFolderTest;
 import com.openexchange.test.concurrent.ParallelSuite;
 
 /**
@@ -136,7 +135,6 @@ import com.openexchange.test.concurrent.ParallelSuite;
     EmptyGuestPasswordTest.class,
     LoginScreenTest.class,
     FolderItemCountTest.class,
-    ShowSharedFilesFolderTest.class,
     AnonymousGuestTest.class,
     LinkUpdateTest.class,
     ListFileSharesTest.class,

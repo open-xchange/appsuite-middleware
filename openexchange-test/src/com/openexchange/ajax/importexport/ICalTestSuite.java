@@ -74,7 +74,6 @@ import com.openexchange.test.concurrent.ParallelSuite;
     Bug17963Test_DateWithoutTime.class,
     Bug19046Test_SeriesWithExtraneousStartDate.class,
     Bug19089Test.class,
-    Bug19463Test_TimezoneOffsetsWith4Digits.class,
     Bug19681_TimezoneForUtcProperties.class,
     Bug19915Test.class,
     Bug20132Test_WrongRecurrenceDatePosition.class,
