@@ -79,7 +79,6 @@ import com.openexchange.ajax.share.tests.CreateSubfolderTest;
 import com.openexchange.ajax.share.tests.CreateWithGuestPermissionTest;
 import com.openexchange.ajax.share.tests.DownloadHandlerTest;
 import com.openexchange.ajax.share.tests.EmptyGuestPasswordTest;
-import com.openexchange.ajax.share.tests.ExpiredSharesTest;
 import com.openexchange.ajax.share.tests.FileStorageTransactionTest;
 import com.openexchange.ajax.share.tests.FolderItemCountTest;
 import com.openexchange.ajax.share.tests.FolderTransactionTest;
@@ -88,7 +87,6 @@ import com.openexchange.ajax.share.tests.GetLinkInheritanceTest;
 import com.openexchange.ajax.share.tests.GetLinkInheritanceWrongModuleTest;
 import com.openexchange.ajax.share.tests.GuestAutologinTest;
 import com.openexchange.ajax.share.tests.GuestContactTest;
-import com.openexchange.ajax.share.tests.GuestPasswordTest;
 import com.openexchange.ajax.share.tests.LinkUpdateTest;
 import com.openexchange.ajax.share.tests.ListFileSharesTest;
 import com.openexchange.ajax.share.tests.ListFolderSharesTest;
@@ -112,14 +110,12 @@ import com.openexchange.test.concurrent.ParallelSuite;
 @Suite.SuiteClasses({
     CreateWithGuestPermissionTest.class,
     AddGuestPermissionTest.class,
-    ExpiredSharesTest.class,
     CreateSubfolderTest.class,
     FolderTransactionTest.class,
     AggregateSharesTest.class,
     FileStorageTransactionTest.class,
     GuestContactTest.class,
     AnonymousGuestPasswordTest.class,
-    GuestPasswordTest.class,
     GetALinkTest.class,
     GetLinkInheritanceTest.class,
     GetLinkInheritanceWrongModuleTest.class,

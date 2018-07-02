@@ -50,7 +50,6 @@
 package com.openexchange.ajax.share.tests;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import java.util.Collections;
@@ -58,12 +57,8 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.folder.actions.EnumAPI;
-import com.openexchange.ajax.folder.actions.OCLGuestPermission;
-import com.openexchange.ajax.passwordchange.actions.PasswordChangeUpdateRequest;
-import com.openexchange.ajax.passwordchange.actions.PasswordChangeUpdateResponse;
 import com.openexchange.ajax.share.GuestClient;
 import com.openexchange.ajax.share.ShareTest;
-import com.openexchange.ajax.share.actions.ExtendedPermissionEntity;
 import com.openexchange.ajax.share.actions.GetLinkRequest;
 import com.openexchange.ajax.share.actions.GetLinkResponse;
 import com.openexchange.ajax.share.actions.RedeemRequest;
@@ -74,9 +69,7 @@ import com.openexchange.ajax.share.actions.UpdateLinkRequest;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.modules.Module;
 import com.openexchange.java.util.UUIDs;
-import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.share.ShareTarget;
-import com.openexchange.share.notification.ShareNotificationService.Transport;
 
 /**
  * {@link LoginScreenTest}
@@ -102,54 +95,6 @@ public class LoginScreenTest extends ShareTest {
         } finally {
             super.tearDown();
         }
-    }
-
-    @Test
-    public void testGuestWithPassword() throws Exception {
-        /*
-         * Create guest and permission
-         */
-        long now = System.currentTimeMillis();
-        OCLGuestPermission perm = createNamedGuestPermission("testGuestPasswordInit" + now + "@example.org", "Test " + now);
-        folder.getPermissions().add(perm);
-        folder = updateFolder(EnumAPI.OX_NEW, folder, Transport.MAIL);
-        OCLPermission matchingPermission = null;
-        for (OCLPermission permission : folder.getPermissions()) {
-            if (permission.getEntity() != getClient().getValues().getUserId()) {
-                matchingPermission = permission;
-                break;
-            }
-        }
-        assertNotNull("No matching permission in created folder found", matchingPermission);
-        checkPermissions(perm, matchingPermission);
-        /*
-         * Discover & check share
-         */
-        ExtendedPermissionEntity guest = discoverGuestEntity(EnumAPI.OX_NEW, Module.INFOSTORE.getFolderConstant(), folder.getObjectID(), matchingPermission.getEntity());
-        checkGuestPermission(perm, guest);
-        String shareURL = discoverShareURL(guest);
-        GuestClient guestClient = resolveShare(shareURL);
-        /*
-         * Set password for guest user
-         */
-        String newPW = UUIDs.getUnformattedStringFromRandom();
-        PasswordChangeUpdateRequest pwChangeReq = new PasswordChangeUpdateRequest(newPW, "", true);
-        PasswordChangeUpdateResponse pwChangeResp = guestClient.execute(pwChangeReq);
-        assertFalse(pwChangeResp.hasWarnings());
-        assertFalse(pwChangeResp.hasError());
-        guestClient.logout();
-        /*
-         * Re-login with PW and check params
-         */
-        guestClient = resolveShare(shareURL, ShareTest.getUsername(perm.getRecipient()), newPW);
-        ResolveShareResponse resolveResponse = guestClient.getShareResolveResponse();
-        String token = resolveResponse.getToken();
-        assertNotNull(token);
-        RedeemRequest req = new RedeemRequest(token);
-        RedeemResponse resp = guestClient.execute(req);
-        assertEquals("guest_password", resp.getLoginType());
-        assertEquals("INFO", resp.getMessageType());
-        assertNotNull(resp.getMessage());
     }
 
     @Test
