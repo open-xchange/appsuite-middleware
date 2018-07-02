@@ -53,8 +53,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-import java.util.Date;
-import java.util.concurrent.TimeUnit;
 import org.junit.Test;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.share.ShareTest;
@@ -73,110 +71,9 @@ import com.openexchange.share.ShareTarget;
  */
 public class LinkUpdateTest extends ShareTest {
 
-    /**
-     * Initializes a new {@link LinkUpdateTest}.
-     *
-     * @param name The test name
-     */
-    public LinkUpdateTest() {
-        super();
-    }
-
-    @Test
-    public void testLinkExpiryDateRandomly() throws Exception {
-        testLinkExpiryDate(randomFolderAPI(), randomModule());
-    }
-
-    public void noTestLinkExpiryDateExtensively() throws Exception {
-        for (EnumAPI api : TESTED_FOLDER_APIS) {
-            for (int module : TESTED_MODULES) {
-                testLinkExpiryDate(api, module);
-            }
-        }
-    }
-
-    private void testLinkExpiryDate(EnumAPI api, int module) throws Exception {
-        testLinkExpiryDate(api, module, getDefaultFolder(module));
-    }
-
-    private void testLinkExpiryDate(EnumAPI api, int module, int parent) throws Exception {
-        /*
-         * create link for a new folder
-         */
-        FolderObject folder = insertPrivateFolder(api, module, parent);
-        ShareTarget target = new ShareTarget(module, String.valueOf(folder.getObjectID()));
-        GetLinkResponse getResponse = getClient().execute(new GetLinkRequest(target, getTimeZone()));
-        assertFalse(getResponse.getErrorMessage(), getResponse.hasError());
-        ShareLink link = getResponse.getShareLink();
-        assertNotNull("got no link", link);
-        assertTrue(link.isNew());
-        /*
-         * update link & apply expiry date
-         */
-        Date expiryDate = new Date(System.currentTimeMillis() + TimeUnit.DAYS.toMillis(1));
-        UpdateLinkRequest updateRequest = new UpdateLinkRequest(target, getTimeZone(), getResponse.getTimestamp().getTime());
-        updateRequest.setExpiryDate(expiryDate);
-        UpdateLinkResponse updateResponse = getClient().execute(updateRequest);
-        assertFalse(updateResponse.getErrorMessage(), updateResponse.hasError());
-        /*
-         * verify updated link
-         */
-        getResponse = getClient().execute(new GetLinkRequest(target, getTimeZone()));
-        assertFalse(getResponse.getErrorMessage(), getResponse.hasError());
-
-        ShareLink updatedLink = getResponse.getShareLink();
-        assertNotNull("got no updated link", updatedLink);
-        assertFalse(updatedLink.isNew());
-        assertEquals(link.getShareURL(), updatedLink.getShareURL());
-        assertEquals("expiry date wrong", expiryDate, updatedLink.getExpiry());
-        /*
-         * update link & change expiry date
-         */
-        expiryDate = new Date(System.currentTimeMillis() + TimeUnit.DAYS.toMillis(3));
-        updateRequest = new UpdateLinkRequest(target, getTimeZone(), updateResponse.getTimestamp().getTime());
-        updateRequest.setExpiryDate(expiryDate);
-        updateResponse = getClient().execute(updateRequest);
-        assertFalse(updateResponse.getErrorMessage(), updateResponse.hasError());
-        /*
-         * verify updated link
-         */
-        getResponse = getClient().execute(new GetLinkRequest(target, getTimeZone()));
-        assertFalse(getResponse.getErrorMessage(), getResponse.hasError());
-        updatedLink = getResponse.getShareLink();
-        assertNotNull("got no updated link", updatedLink);
-        assertEquals(link.getShareURL(), updatedLink.getShareURL());
-        assertFalse(updatedLink.isNew());
-        assertEquals("expiry date wrong", expiryDate, updatedLink.getExpiry());
-        /*
-         * update link & remove expiry date
-         */
-        updateRequest = new UpdateLinkRequest(target, getTimeZone(), updateResponse.getTimestamp().getTime());
-        updateRequest.setExpiryDate(null);
-        updateResponse = getClient().execute(updateRequest);
-        assertFalse(updateResponse.getErrorMessage(), updateResponse.hasError());
-        /*
-         * verify updated link
-         */
-        getResponse = getClient().execute(new GetLinkRequest(target, getTimeZone()));
-        assertFalse(getResponse.getErrorMessage(), getResponse.hasError());
-        updatedLink = getResponse.getShareLink();
-        assertNotNull("got no updated link", updatedLink);
-        assertEquals(link.getShareURL(), updatedLink.getShareURL());
-        assertFalse(updatedLink.isNew());
-        assertEquals("expiry date wrong", null, updatedLink.getExpiry());
-    }
-
     @Test
     public void testLinkPasswordRandomly() throws Exception {
         testLinkPassword(randomFolderAPI(), randomModule());
-    }
-
-    public void noTestPasswordExtensively() throws Exception {
-        for (EnumAPI api : TESTED_FOLDER_APIS) {
-            for (int module : TESTED_MODULES) {
-                testLinkPassword(api, module);
-            }
-        }
     }
 
     private void testLinkPassword(EnumAPI api, int module) throws Exception {

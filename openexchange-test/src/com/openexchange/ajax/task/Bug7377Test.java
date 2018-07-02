@@ -51,7 +51,6 @@ package com.openexchange.ajax.task;
 
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNotSame;
-import static org.junit.Assert.assertTrue;
 import java.util.Date;
 import java.util.TimeZone;
 import org.junit.After;
@@ -70,7 +69,6 @@ import com.openexchange.ajax.task.actions.InsertRequest;
 import com.openexchange.ajax.task.actions.InsertResponse;
 import com.openexchange.ajax.task.actions.UpdateRequest;
 import com.openexchange.ajax.task.actions.UpdateResponse;
-import com.openexchange.ajax.writer.ResponseWriter;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.UserParticipant;
@@ -114,55 +112,6 @@ public class Bug7377Test extends AbstractTaskTest {
             }
         } finally {
             super.tearDown();
-        }
-    }
-
-    /**
-     * Tests if on updating tasks the folder for the reminder gets lost.
-     * 
-     * @throws Throwable if this test fails.
-     */
-    @Test
-    public void testLostFolderInfo() throws Throwable {
-        // Create a task.
-        final Task task = new Task();
-        task.setTitle("Test bug #7377");
-        task.setParentFolderID(folder1);
-        final InsertResponse iResponse = client1.execute(new InsertRequest(task, tz1));
-        iResponse.fillTask(task);
-        try {
-            // Update timestamp
-            final GetResponse gResponse = client1.execute(new GetRequest(getPrivateFolder(), task.getObjectID()));
-            task.setLastModified(gResponse.getTimestamp());
-            // Update task and insert reminder and don't send folder in task.
-            task.setNote("Updated with reminder");
-            final Date remindDate = new Date();
-            task.setAlarm(remindDate);
-            final UpdateResponse uResponse = client1.execute(new UpdateRequest(task, tz1));
-            task.setLastModified(uResponse.getTimestamp());
-            // Check reminder
-            final RangeResponse rResponse = client1.execute(new RangeRequest(remindDate));
-
-            if (rResponse.hasConflicts()) {
-                System.out.println("Response has got " + rResponse.getConflicts().size() + " conflicts");
-            }
-            if (rResponse.getResponse() != null) {
-                System.out.println("There is a response!");
-                System.out.println("Response is " + ResponseWriter.getJSON(rResponse.getResponse()));
-                if (rResponse.hasError()) {
-                    System.out.println("Response has got " + rResponse.getProblematics().length + " problematics");
-                }
-                System.out.println("Response has got " + rResponse.getException() + " exceptions");
-            }
-
-            ReminderObject[] reminder2 = rResponse.getReminder(tz1);
-            assertTrue("Found no reminders for given timezone", 0 < reminder2.length);
-
-            final ReminderObject reminder = rResponse.getReminderByTarget(tz1, task.getObjectID());
-            assertNotNull("Can't find reminder for task.", reminder);
-            assertNotSame("Found folder 0 for task reminder.", Integer.valueOf(0), Integer.valueOf(reminder.getFolder()));
-        } finally {
-            client1.execute(new DeleteRequest(task));
         }
     }
 

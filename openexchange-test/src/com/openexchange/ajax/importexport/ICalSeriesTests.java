@@ -65,10 +65,6 @@ import com.openexchange.groupware.importexport.ImportResult;
  */
 public class ICalSeriesTests extends ManagedAppointmentTest {
 
-    public ICalSeriesTests() {
-        super();
-    }
-
     @Test
     public void testDeleteException() throws Exception {
         String ical =
@@ -84,33 +80,6 @@ public class ICalSeriesTests extends ManagedAppointmentTest {
             "END:VEVENT\n"
         ;
         testChangeException(ical, "Exceptional Meeting #1", 1);
-    }
-
-    @Test
-    public void testChangeExceptionWithExceptionFirst() throws Exception {
-        String uid = "change-exception-" + new Date().getTime();
-        String title = "Change to exceptional meeting #3: One hour later";
-        String ical =
-            "BEGIN:VCALENDAR\n" +
-            "VERSION:2.0\n" +
-            "BEGIN:VEVENT\n" +
-            "DTSTART;TZID=Europe/Rome:20171010T080000\n" +
-            "DTEND;TZID=Europe/Rome:20171010T100000\n" +
-            "DTSTAMP:20171012T140049Z\n" +
-            "SUMMARY:" + title + "\n" +
-            "RECURRENCE-ID:20171010T060000Z" + "\n" +
-            "UID:" + uid + "\n" +
-            "END:VEVENT\n" +
-            "BEGIN:VEVENT\n" +
-            "DTSTART;TZID=Europe/Rome:20171009T080000\n" +
-            "DTEND;TZID=Europe/Rome:20171009T090000\n" +
-            "RRULE:FREQ=DAILY;UNTIL=20171013T215959Z\n" +
-            "DTSTAMP:20171012T140049Z\n" +
-            "SUMMARY:Exceptional meeting #3\n" +
-            "UID:" + uid + "\n" +
-            "END:VEVENT\n"
-        ;
-        testChangeException(ical, title, 2);
     }
 
     @Test

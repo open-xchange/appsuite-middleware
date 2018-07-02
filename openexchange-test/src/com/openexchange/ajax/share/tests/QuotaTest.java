@@ -60,8 +60,6 @@ import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.dataobjects.UserProperty;
 import com.openexchange.ajax.folder.actions.EnumAPI;
-import com.openexchange.ajax.folder.actions.InsertResponse;
-import com.openexchange.ajax.folder.actions.UpdateRequest;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.share.ShareTest;
 import com.openexchange.ajax.share.actions.GetLinkRequest;
@@ -162,48 +160,4 @@ public class QuotaTest extends ShareTest {
             assertTrue("Unexpected exception: " + e, QuotaExceptionCodes.QUOTA_EXCEEDED_SHARES.equals(e));
         }
     }
-
-    @Test
-    public void testInviteGuestButQuotaLimitReached() throws Exception {
-        /*
-         * try and invite more guests than allowed
-         */
-        FolderObject folder = insertPrivateFolder(client2, EnumAPI.OX_NEW, FolderObject.INFOSTORE, getDefaultFolder(client2, FolderObject.INFOSTORE));
-        foldersToDelete.put(Integer.valueOf(folder.getObjectID()), folder);
-        folder.getPermissions().add(createNamedAuthorPermission(randomUID() + "@example.com", randomUID()));
-        UpdateRequest request = new UpdateRequest(EnumAPI.OX_NEW, folder);
-        request.setFailOnError(false);
-
-        //output the current configuration
-        com.openexchange.admin.rmi.dataobjects.User user = new com.openexchange.admin.rmi.dataobjects.User(client2.getValues().getUserId());
-        Credentials credentials = new Credentials(admin.getUser(), admin.getPassword());
-        OXUserInterface iface = (OXUserInterface) Naming.lookup("rmi://" + AJAXConfig.getProperty(Property.RMI_HOST) + ":1099/" + OXUserInterface.RMI_NAME);
-        List<UserProperty> userConfigurationSource = iface.getUserConfigurationSource(new Context(client2.getValues().getContextId()), user, "quota", credentials);
-        System.out.println("User configuration related to 'quota' for the test user at SETUP.");
-        for (UserProperty prop : userConfigurationSource) {
-            System.out.println("Property " + prop.getName() + "(" + prop.getScope() + "): " + prop.getValue());
-        }
-
-        InsertResponse updateResponse = client2.execute(request);
-        if (updateResponse.hasError()) {
-            /*
-             * one or more guest invitations existed before, expect appropriate exception
-             */
-            OXException e = updateResponse.getException();
-            assertTrue("Unexpected exception: " + e, QuotaExceptionCodes.QUOTA_EXCEEDED_SHARES.equals(e));
-        } else {
-            /*
-             * no errors during first invitation - a second guest will exceed the quota for sure
-             */
-            folder = getFolder(EnumAPI.OX_NEW, folder.getObjectID(), client2);
-            folder.getPermissions().add(createNamedAuthorPermission(randomUID() + "@example.com", randomUID()));
-            request = new UpdateRequest(EnumAPI.OX_NEW, folder);
-            request.setFailOnError(false);
-            updateResponse = client2.execute(request);
-            assertTrue("No errors in response", updateResponse.hasError());
-            OXException e = updateResponse.getException();
-            assertTrue("Unexpected exception: " + e, QuotaExceptionCodes.QUOTA_EXCEEDED_SHARES.equals(e));
-        }
-    }
-
 }

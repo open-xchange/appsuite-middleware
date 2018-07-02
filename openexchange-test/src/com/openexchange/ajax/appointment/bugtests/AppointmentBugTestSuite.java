@@ -93,7 +93,6 @@ import com.openexchange.test.concurrent.ParallelSuite;
     Bug18336Test.class,
     Bug13090Test.class,
     Bug17327Test.class,
-    Bug18455Test.class,
     Bug18558Test.class,
     Bug19489Test.class,
     Bug19109Test.class,
