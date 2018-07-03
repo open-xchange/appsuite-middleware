@@ -106,4 +106,49 @@ public class ImapIdleControl {
         return expirees;
     }
 
+    /**
+     * Awaits expired push listeners from this control.
+     *
+     * @return The expired push listeners
+     * @throws InterruptedException If waiting thread is interrupted
+     */
+    List<ImapIdleRegistration> awaitExpired() throws InterruptedException {
+        ImapIdleRegistration taken = queue.take();
+
+        List<ImapIdleRegistration> expirees = new LinkedList<ImapIdleRegistration>();
+        expirees.add(taken);
+
+        queue.drainTo(expirees);
+        return expirees;
+    }
+
+    /**
+     * Awaits expired push listeners from this control uninterruptibly.
+     *
+     * @return The expired push listeners
+     */
+    List<ImapIdleRegistration> awaitExpiredUninterruptible() {
+        boolean interrupted = false;
+        try {
+            ImapIdleRegistration taken = null;
+            while (null == taken) {
+                try {
+                    taken = queue.take();
+                } catch (InterruptedException e) {
+                    interrupted = true;
+                }
+            }
+
+            List<ImapIdleRegistration> expirees = new LinkedList<ImapIdleRegistration>();
+            expirees.add(taken);
+
+            queue.drainTo(expirees);
+            return expirees;
+        } finally {
+            if (interrupted) {
+                Thread.currentThread().interrupt();
+            }
+        }
+    }
+
 }

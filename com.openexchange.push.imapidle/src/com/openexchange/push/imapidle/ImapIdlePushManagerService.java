@@ -59,6 +59,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
 import com.hazelcast.core.HazelcastInstance;
@@ -79,7 +80,9 @@ import com.openexchange.push.PushUtility;
 import com.openexchange.push.imapidle.ImapIdlePushListener.PushMode;
 import com.openexchange.push.imapidle.control.ImapIdleControl;
 import com.openexchange.push.imapidle.control.ImapIdleControlTask;
+import com.openexchange.push.imapidle.control.ImapIdlePeriodicControlTask;
 import com.openexchange.push.imapidle.locking.ImapIdleClusterLock;
+import com.openexchange.push.imapidle.locking.ImapIdleClusterLock.AcquisitionResult;
 import com.openexchange.push.imapidle.locking.SessionInfo;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
@@ -90,6 +93,7 @@ import com.openexchange.sessiond.SessiondServiceExtended;
 import com.openexchange.sessionstorage.hazelcast.serialization.PortableMultipleSessionRemoteLookUp;
 import com.openexchange.sessionstorage.hazelcast.serialization.PortableSession;
 import com.openexchange.sessionstorage.hazelcast.serialization.PortableSessionCollection;
+import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.timer.ScheduledTimerTask;
 import com.openexchange.timer.TimerService;
 
@@ -120,7 +124,7 @@ public final class ImapIdlePushManagerService implements PushManagerExtendedServ
     }
 
     public static ImapIdlePushManagerService newInstance(ImapIdleConfiguration configuration, ServiceLookup services) throws OXException {
-        ImapIdlePushManagerService tmp = new ImapIdlePushManagerService(configuration.getFullName(), configuration.getAccountId(), configuration.getPushMode(), configuration.getDelay(), configuration.getClusterLock(), services);
+        ImapIdlePushManagerService tmp = new ImapIdlePushManagerService(configuration.getFullName(), configuration.getAccountId(), configuration.getPushMode(), configuration.getDelay(), configuration.getClusterLock(), configuration.isCheckPeriodic(), services);
         instance = tmp;
         return tmp;
     }
@@ -130,7 +134,12 @@ public final class ImapIdlePushManagerService implements PushManagerExtendedServ
         return (service instanceof SessiondServiceExtended) ? false == ((SessiondServiceExtended) service).isApplicableForSessionStorage(session) : false;
     }
 
-    // ---------------------------------------------------------------------------------------------------- //
+    private static interface Cancelable {
+
+        void cancel();
+    }
+
+    // -------------------------------------------------------------------------------------------------------------------------------------
 
     private final String name;
     private final ServiceLookup services;
@@ -141,13 +150,13 @@ public final class ImapIdlePushManagerService implements PushManagerExtendedServ
     private final PushMode pushMode;
     private final ImapIdleClusterLock clusterLock;
     private final long delay;
-    private final ScheduledTimerTask timerTask;
+    private final Cancelable cancelable;
     private final AccessControl globalLock;
 
     /**
      * Initializes a new {@link ImapIdlePushManagerService}.
      */
-    private ImapIdlePushManagerService(String fullName, int accountId, PushMode pushMode, long delay, ImapIdleClusterLock clusterLock, ServiceLookup services) throws OXException {
+    private ImapIdlePushManagerService(String fullName, int accountId, PushMode pushMode, long delay, ImapIdleClusterLock clusterLock, boolean checkPeriodic, ServiceLookup services) throws OXException {
         super();
         name = "IMAP-IDLE Push Manager";
         this.pushMode = pushMode;
@@ -159,12 +168,37 @@ public final class ImapIdlePushManagerService implements PushManagerExtendedServ
         this.control = new ImapIdleControl();
         listeners = new ConcurrentHashMap<SimpleKey, ImapIdlePushListener>(512, 0.9f, 1);
 
-        // Initialize timer task to check for expired IMAP-IDLE push listeners for every 30 seconds
-        TimerService timerService = services.getOptionalService(TimerService.class);
-        if (null == timerService) {
-            throw ServiceExceptionCode.absentService(TimerService.class);
+        if (checkPeriodic) {
+            // Initialize timer task to check for expired IMAP-IDLE push listeners for every 30 seconds
+            TimerService timerService = services.getOptionalService(TimerService.class);
+            if (null == timerService) {
+                throw ServiceExceptionCode.absentService(TimerService.class);
+            }
+            ScheduledTimerTask timerTask = timerService.scheduleWithFixedDelay(new ImapIdlePeriodicControlTask(control), 30, 30, TimeUnit.SECONDS);
+            cancelable = new Cancelable() {
+
+                @Override
+                public void cancel() {
+                    timerTask.cancel();
+                }
+            };
+        } else {
+            // Initialize task to check for expired IMAP-IDLE push listeners
+            ThreadPoolService threadPool = services.getOptionalService(ThreadPoolService.class);
+            if (null == threadPool) {
+                throw ServiceExceptionCode.absentService(ThreadPoolService.class);
+            }
+            ImapIdleControlTask controlTask = new ImapIdleControlTask(control);
+            Future<Void> submitted = threadPool.submit(controlTask);
+            cancelable = new Cancelable() {
+
+                @Override
+                public void cancel() {
+                    controlTask.cancel();
+                    submitted.cancel(true);
+                }
+            };
         }
-        timerTask = timerService.scheduleWithFixedDelay(new ImapIdleControlTask(control), 30, 30, TimeUnit.SECONDS);
 
         // The fall-back lock
         globalLock = new ReentrantLockAccessControl();
@@ -188,7 +222,7 @@ public final class ImapIdlePushManagerService implements PushManagerExtendedServ
      * Shuts-down this IMAP-IDLE push manager.
      */
     public void shutDown() {
-        timerTask.cancel();
+        cancelable.cancel();
     }
 
     @Override
@@ -225,7 +259,7 @@ public final class ImapIdlePushManagerService implements PushManagerExtendedServ
         return pushListenerService.generateSessionFor(pushUser);
     }
 
-    // ----------------------------------------------------------------------------------------------------------------------------------
+    // -------------------------------------------------------------------------------------------------------------------------------------
 
     @Override
     public List<PushUserInfo> getAvailablePushUsers() throws OXException {
@@ -255,8 +289,25 @@ public final class ImapIdlePushManagerService implements PushManagerExtendedServ
         int userId = session.getUserId();
 
         SessionInfo sessionInfo = new SessionInfo(session, true, false);
-        if (clusterLock.acquireLock(sessionInfo)) {
+        AcquisitionResult acquisitionResult = clusterLock.acquireLock(sessionInfo);
+        if (AcquisitionResult.NOT_ACQUIRED == acquisitionResult) {
+            LOGGER.info("Could not acquire lock to start permanent IMAP-IDLE listener for user {} in context {} with session {} as there is already an associated listener", I(userId), I(contextId), session.getSessionID());
+        } else {
             // Locked...
+            switch (acquisitionResult) {
+                case ACQUIRED_NEW:
+                    LOGGER.info("Acquired lock to start permanent IMAP-IDLE listener for user {} in context {} with session {}", I(userId), I(contextId), session.getSessionID());
+                    break;
+                case ACQUIRED_NO_SUCH_SESSION:
+                    LOGGER.info("Acquired lock to start permanent IMAP-IDLE listener for user {} in context {} with session {} since the session is gone, which is associated with existent IMAP-IDLE listener", I(userId), I(contextId), session.getSessionID());
+                    break;
+                case ACQUIRED_TIMED_OUT:
+                    LOGGER.info("Acquired lock to start permanent IMAP-IDLE listener for user {} in context {} with session {} since lock for existent IMAP-IDLE listener timed out", I(userId), I(contextId), session.getSessionID());
+                    break;
+                default:
+                    break;
+            }
+
             boolean unlock = true;
             try {
                 AccessControl lock = getlockFor(userId, contextId);
@@ -292,8 +343,6 @@ public final class ImapIdlePushManagerService implements PushManagerExtendedServ
                     releaseLock(sessionInfo);
                 }
             }
-        } else {
-            LOGGER.info("Could not acquire lock to start IMAP-IDLE listener for user {} in context {} with session {} as there is already an associated listener", I(userId), I(contextId), session.getSessionID());
         }
 
         // No listener registered for given session
@@ -321,7 +370,7 @@ public final class ImapIdlePushManagerService implements PushManagerExtendedServ
         return false;
     }
 
-    // ----------------------------------------------------------------------------------------------------------------------------------
+    // -------------------------------------------------------------------------------------------------------------------------------------
 
     @Override
     public PushListener startListener(Session session) throws OXException {
@@ -332,8 +381,25 @@ public final class ImapIdlePushManagerService implements PushManagerExtendedServ
         int userId = session.getUserId();
 
         SessionInfo sessionInfo = new SessionInfo(session, false, isTransient(session, services));
-        if (clusterLock.acquireLock(sessionInfo)) {
+        AcquisitionResult acquisitionResult = clusterLock.acquireLock(sessionInfo);
+        if (AcquisitionResult.NOT_ACQUIRED == acquisitionResult) {
+            LOGGER.info("Could not acquire lock to start IMAP-IDLE listener for user {} in context {} with session {} as there is already an associated listener", I(userId), I(contextId), session.getSessionID());
+        } else {
             // Locked...
+            switch (acquisitionResult) {
+                case ACQUIRED_NEW:
+                    LOGGER.info("Acquired lock to start IMAP-IDLE listener for user {} in context {} with session {}", I(userId), I(contextId), session.getSessionID());
+                    break;
+                case ACQUIRED_NO_SUCH_SESSION:
+                    LOGGER.info("Acquired lock to start IMAP-IDLE listener for user {} in context {} with session {} since the session is gone, which is associated with existent IMAP-IDLE listener", I(userId), I(contextId), session.getSessionID());
+                    break;
+                case ACQUIRED_TIMED_OUT:
+                    LOGGER.info("Acquired lock to start IMAP-IDLE listener for user {} in context {} with session {} since lock for existent IMAP-IDLE listener timed out", I(userId), I(contextId), session.getSessionID());
+                    break;
+                default:
+                    break;
+            }
+
             boolean unlock = true;
             try {
                 AccessControl lock = getlockFor(userId, contextId);
@@ -360,8 +426,6 @@ public final class ImapIdlePushManagerService implements PushManagerExtendedServ
                     releaseLock(sessionInfo);
                 }
             }
-        } else {
-            LOGGER.info("Could not acquire lock to start IMAP-IDLE listener for user {} in context {} with session {} ({}) as there is already an associated listener", I(userId), I(contextId), session.getSessionID(), session.getClient());
         }
 
         // No listener registered for given session
@@ -580,7 +644,7 @@ public final class ImapIdlePushManagerService implements PushManagerExtendedServ
         }
     }
 
-    // -------------------------------------------------------------------------------------------------------------------------------
+    // -------------------------------------------------------------------------------------------------------------------------------------
 
     private static class InjectedImapIdlePushListener {
 
