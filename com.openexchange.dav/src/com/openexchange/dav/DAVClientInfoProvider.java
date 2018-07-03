@@ -144,7 +144,7 @@ public class DAVClientInfoProvider implements ClientInfoProvider {
                         clientVersion = clientVersionMajor;
                     }
                 }
-                if (userAgent.equals(DAVUserAgent.OX_SYNC) || userAgent.equals(DAVUserAgent.SMOOTH_SYNC)) {
+                if (DAVUserAgent.OX_SYNC == userAgent || DAVUserAgent.SMOOTH_SYNC == userAgent) {
                     return new DAVClientInfo(userAgent.getReadableName(), osFamily, osVersion, client, clientVersion, clientFamily, ClientInfoType.OXAPP);
                 }
                 return new DAVClientInfo(userAgent.getReadableName(), osFamily, osVersion, client, clientVersion, clientFamily);
@@ -188,7 +188,15 @@ public class DAVClientInfoProvider implements ClientInfoProvider {
         return null;
     }
 
-    private String getClientFamily(DAVUserAgent userAgent) {
+    // -------------------------------------------------------------------------------------------------------------------------------------
+
+    /**
+     * Determines the client family from specified DAV user agent
+     *
+     * @param userAgent The DAV user agent
+     * @return The client family; e.g. <code>"macos_calendar"</code> or <code>"thunderbird_lightning"</code>
+     */
+    static String getClientFamily(DAVUserAgent userAgent) {
         switch (userAgent) {
             case MAC_CALENDAR:
                 return MAC_CALENDAR;
@@ -224,7 +232,13 @@ public class DAVClientInfoProvider implements ClientInfoProvider {
         }
     }
 
-    private String getOSFamily(DAVUserAgent userAgent) {
+    /**
+     * Determines the OS family from specified DAV user agent
+     *
+     * @param userAgent The DAV user agent
+     * @return The OS family; e.g. <code>"macos"</code> or <code>"windows"</code>
+     */
+    static String getOSFamily(DAVUserAgent userAgent) {
         switch (userAgent) {
             case MAC_CALENDAR:
             case MAC_CONTACTS:
