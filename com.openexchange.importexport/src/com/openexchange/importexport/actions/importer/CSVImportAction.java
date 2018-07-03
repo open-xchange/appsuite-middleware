@@ -75,7 +75,7 @@ public class CSVImportAction extends AbstractImportAction implements AJAXActionS
         super(services);
     }
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CSVImportAction.class);
+    public static org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CSVImportAction.class);
 
 	private Importer importer;
 
@@ -95,7 +95,7 @@ public class CSVImportAction extends AbstractImportAction implements AJAXActionS
             }
 
             final File dir = new File(path);
-            if (!dir.isDirectory()) {
+            if (dir == null || !dir.isDirectory()) {
                 LOG.error("Directory {} supposedly containing import mappers information wasn't actually a directory, defaulting to deprecated mappers as fallback.", path);
                 return imp;
             }

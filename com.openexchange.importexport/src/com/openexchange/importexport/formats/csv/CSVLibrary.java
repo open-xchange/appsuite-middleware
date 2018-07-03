@@ -316,9 +316,8 @@ public final class CSVLibrary {
              * read line by line
              */
             int lines = 0;
-            String line;
             BufferedReader reader = new BufferedReader(inputStreamReader);
-            while ((line = reader.readLine()) != null) {
+            for (String line = reader.readLine(); null != line; line = reader.readLine()) {
                 stringBuilder.append(line).append('\n');
                 if (0 < maxLines && ++lines >= maxLines) {
                     break;
@@ -336,13 +335,11 @@ public final class CSVLibrary {
             throw ImportExportExceptionCodes.IOEXCEPTION.create(e);
         } finally {
             if (close) {
-                if (inputStreamReader != null) {
-                    Streams.close(inputStreamReader);
-                }
+                Streams.close(inputStreamReader);
             }
         }
     }
-    
+
 	private static int lengthOfBOM(char[] buf) {
 		int length = buf.length;
 
