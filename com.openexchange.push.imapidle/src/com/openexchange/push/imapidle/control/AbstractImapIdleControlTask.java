@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,85 +47,50 @@
  *
  */
 
-package com.openexchange.push.imapidle.locking;
+package com.openexchange.push.imapidle.control;
 
-import javax.annotation.concurrent.Immutable;
-import com.openexchange.session.Session;
+import org.slf4j.Logger;
+import com.openexchange.push.imapidle.ImapIdlePushListener;
 
 /**
- * {@link SessionInfo} - The session info for the IMAP-IDLE listener.
+ * {@link AbstractImapIdleControlTask}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since v7.6.2
+ * @since v7.10.1
  */
-@Immutable
-public class SessionInfo {
+public abstract class AbstractImapIdleControlTask {
 
-    private final int contextId;
-    private final int userId;
-    private final String sessionId;
-    private final boolean permanent;
-    private final boolean tranzient;
+    /** Simple class to delay initialization until needed */
+    private static class LoggerHolder {
+        static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(AbstractImapIdleControlTask.class);
+    }
+
+    /** The IMAP IDLE control */
+    protected final ImapIdleControl control;
 
     /**
-     * Initializes a new {@link SessionInfo}.
-     *
-     * @param session The associated session
-     * @param permanent Whether permanent or not
-     * @param tranzient <code>true</code> if session is not supposed to be held in session storage; otherwise <code>false</code>
+     * Initializes a new {@link AbstractImapIdleControlTask}.
      */
-    public SessionInfo(Session session, boolean permanent, boolean tranzient) {
+    protected AbstractImapIdleControlTask(ImapIdleControl control) {
         super();
-        this.contextId = session.getContextId();
-        this.userId = session.getUserId();
-        this.sessionId = session.getSessionID();
-        this.permanent = permanent;
-        this.tranzient = tranzient;
+        this.control = control;
     }
 
     /**
-     * Gets the context identifier.
+     * Handles specified expired IMAP IDLE registration.
      *
-     * @return The context identifier
+     * @param registration The expired registration
      */
-    public int getContextId() {
-        return contextId;
-    }
-
-    /**
-     * Gets the user identifier.
-     *
-     * @return The user identifier
-     */
-    public int getUserId() {
-        return userId;
-    }
-
-    /**
-     * Gets the session identifier.
-     *
-     * @return The session identifier
-     */
-    public String getSessionId() {
-        return sessionId;
-    }
-
-    /**
-     * Gets the permanent flag.
-     *
-     * @return The permanent flag
-     */
-    public boolean isPermanent() {
-        return permanent;
-    }
-
-    /**
-     * Signals if associated session is not supposed to be held in session storage.
-     *
-     * @return <code>true</code> if not held in session storage; otherwise <code>false</code>
-     */
-    public boolean isTransient() {
-        return tranzient;
+    protected void handleExpired(ImapIdleRegistration registration) {
+        ImapIdlePushListener pushListener = registration.getPushListener();
+        if (pushListener.isIdling()) {
+            try {
+                pushListener.markInterrupted();
+                registration.getImapFolder().close(false);
+            } catch (Exception e) {
+                LoggerHolder.LOGGER.warn("Failed to interrupt elapsed {}IMAP-IDLE listener for user {} in context {}.", pushListener.isPermanent() ? "permanent " : "", pushListener.getUserId(), pushListener.getContextId(), e);
+            }
+        }
     }
 
 }

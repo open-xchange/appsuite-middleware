@@ -196,7 +196,6 @@ public final class ImapIdlePushListener implements PushListener, Runnable {
     private final boolean supportsPermanentListeners;
     private volatile IMAPFolder imapFolderInUse;
     private volatile Map<String, Object> additionalProps;
-    private volatile long lastLockRefreshMillis;
     private volatile boolean interrupted;
     private volatile boolean idling;
 
@@ -216,7 +215,6 @@ public final class ImapIdlePushListener implements PushListener, Runnable {
         this.control = control;
         this.pushMode = pushMode;
         additionalProps = null;
-        lastLockRefreshMillis = System.currentTimeMillis();
     }
 
     private boolean isUserValid() {
@@ -434,9 +432,7 @@ public final class ImapIdlePushListener implements PushListener, Runnable {
                     }
 
                     // Refresh lock prior to entering IMAP-IDLE
-                    if (doRefreshLock()) {
-                        ImapIdlePushManagerService.getInstance().refreshLock(new SessionInfo(session, permanent, permanent ? false : isTransient(session, services)));
-                    }
+                    ImapIdlePushManagerService.getInstance().refreshLock(new SessionInfo(session, permanent, permanent ? false : isTransient(session, services)));
 
                     // Are there already new messages?
                     {
@@ -577,21 +573,6 @@ public final class ImapIdlePushListener implements PushListener, Runnable {
     }
 
     /**
-     * Checks whether held cluster lock needs to be refreshed.
-     *
-     * @return <code>true</code> if refresh is needed; otherwise <code>false</code>
-     */
-    private boolean doRefreshLock() {
-        long last = lastLockRefreshMillis;
-        long now = System.currentTimeMillis();
-        if (now - last > TIMEOUT_THRESHOLD_MILLIS) {
-            lastLockRefreshMillis = now;
-            return true;
-        }
-        return false;
-    }
-
-    /**
      * Actually enters the IMAP-IDLE to IMAP server with respect to frequent cluster lock <i><tt>touch</tt></i>ing.
      * <p>
      * IMAP-IDLE is performed until either
@@ -729,7 +710,6 @@ public final class ImapIdlePushListener implements PushListener, Runnable {
                 } else {
                     try {
                         anotherListener.start();
-                        cleanUpTask = null;
                     } catch (Exception e) {
                         LOGGER.warn("Failed to start new listener for user {} in context {}.", Integer.valueOf(session.getUserId()), Integer.valueOf(session.getContextId()), e);
                         // Give up lock and return

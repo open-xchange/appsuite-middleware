@@ -47,85 +47,36 @@
  *
  */
 
-package com.openexchange.push.imapidle.locking;
+package com.openexchange.push.imapidle.control;
 
-import javax.annotation.concurrent.Immutable;
-import com.openexchange.session.Session;
+import java.util.List;
 
 /**
- * {@link SessionInfo} - The session info for the IMAP-IDLE listener.
+ * {@link ImapIdlePeriodicControlTask} - Responsible for interrupting expired threads currently performing IMAP IDLE.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since v7.6.2
+ * @since v7.8.1
  */
-@Immutable
-public class SessionInfo {
-
-    private final int contextId;
-    private final int userId;
-    private final String sessionId;
-    private final boolean permanent;
-    private final boolean tranzient;
+public class ImapIdlePeriodicControlTask extends AbstractImapIdleControlTask implements Runnable {
 
     /**
-     * Initializes a new {@link SessionInfo}.
-     *
-     * @param session The associated session
-     * @param permanent Whether permanent or not
-     * @param tranzient <code>true</code> if session is not supposed to be held in session storage; otherwise <code>false</code>
+     * Initializes a new {@link ImapIdlePeriodicControlTask}.
      */
-    public SessionInfo(Session session, boolean permanent, boolean tranzient) {
-        super();
-        this.contextId = session.getContextId();
-        this.userId = session.getUserId();
-        this.sessionId = session.getSessionID();
-        this.permanent = permanent;
-        this.tranzient = tranzient;
+    public ImapIdlePeriodicControlTask(ImapIdleControl control) {
+        super(control);
     }
 
-    /**
-     * Gets the context identifier.
-     *
-     * @return The context identifier
-     */
-    public int getContextId() {
-        return contextId;
-    }
-
-    /**
-     * Gets the user identifier.
-     *
-     * @return The user identifier
-     */
-    public int getUserId() {
-        return userId;
-    }
-
-    /**
-     * Gets the session identifier.
-     *
-     * @return The session identifier
-     */
-    public String getSessionId() {
-        return sessionId;
-    }
-
-    /**
-     * Gets the permanent flag.
-     *
-     * @return The permanent flag
-     */
-    public boolean isPermanent() {
-        return permanent;
-    }
-
-    /**
-     * Signals if associated session is not supposed to be held in session storage.
-     *
-     * @return <code>true</code> if not held in session storage; otherwise <code>false</code>
-     */
-    public boolean isTransient() {
-        return tranzient;
+    @Override
+    public void run() {
+        try {
+            List<ImapIdleRegistration> expired = control.removeExpired();
+            for (ImapIdleRegistration registration : expired) {
+                // Idl'ing for too long
+                handleExpired(registration);
+            }
+        } catch (Exception e) {
+            // Ignore
+        }
     }
 
 }
