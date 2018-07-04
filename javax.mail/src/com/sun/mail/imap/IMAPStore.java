@@ -939,13 +939,12 @@ public class IMAPStore extends Store
                 case PRIVACYREQUIRED:
                     throw new javax.mail.PrivacyRequiredException(cex.getResponse().getRest(), cex);
                 default:
-                    throw new javax.mail.LoginFailedException(cex.getMessage(), cex);
+                    /*fall-through*/
             }
         }
 
 	    // No response code given... Assume an authentication/authorization issue
-	    throw new AuthenticationFailedException(
-					cex.getResponse().getRest(), cex);
+	    throw new AuthenticationFailedException(cex.getResponse().getRest(), cex);
 	} catch (ProtocolException pex) { // any other exception
 	    // failure in login command, close connection to server
 	    if (protocol != null) {

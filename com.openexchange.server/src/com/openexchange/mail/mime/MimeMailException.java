@@ -248,14 +248,6 @@ public class MimeMailException extends OXException {
             if ((e instanceof javax.mail.AuthenticationFailedException) || ((toLowerCase(e.getMessage(), "").indexOf(ERR_AUTH_FAILED) != -1))) {
                 // Authentication failed
                 return handleAuthenticationFailedException(e, mailConfig, session);
-            } else if (e instanceof javax.mail.AuthorizationFailedException) {
-                return MimeMailExceptionCode.AUTHORIZATION_FAILED.create(e, mailConfig == null ? STR_EMPTY : mailConfig.getServer(), mailConfig == null ? STR_EMPTY : mailConfig.getLogin());
-            } else if (e instanceof javax.mail.TemporaryAuthenticationFailureException) {
-                return MimeMailExceptionCode.TEMPORARY_AUTH_FAILURE.create(e, mailConfig == null ? STR_EMPTY : mailConfig.getServer(), mailConfig == null ? STR_EMPTY : mailConfig.getLogin());
-            } else if (e instanceof javax.mail.PasswordExpiredException) {
-                return MimeMailExceptionCode.PASSWORD_EXPIRED.create(e, mailConfig == null ? STR_EMPTY : mailConfig.getServer(), mailConfig == null ? STR_EMPTY : mailConfig.getLogin());
-            } else if (e instanceof javax.mail.PrivacyRequiredException) {
-                return MimeMailExceptionCode.PRIVACY_REQUIRED.create(e, mailConfig == null ? STR_EMPTY : mailConfig.getServer(), mailConfig == null ? STR_EMPTY : mailConfig.getLogin());
             } else if (e instanceof javax.mail.FolderClosedException) {
                 if (isTimeoutException(e)) {
                     // javax.mail.FolderClosedException through a read timeout
@@ -721,11 +713,21 @@ public class MimeMailException extends OXException {
                         }
                         if (null != oAuthAccount) {
                             API api = oAuthAccount.getAPI();
-                            return OAuthExceptionCodes.OAUTH_ACCESS_TOKEN_INVALID.create(api.getName(), I(oAuthAccount.getId()), I(session.getUserId()), I(session.getContextId()));
+                            return OAuthExceptionCodes.OAUTH_ACCESS_TOKEN_INVALID.create(authenticationFailedException, api.getName(), I(oAuthAccount.getId()), I(session.getUserId()), I(session.getContextId()));
                         }
                     }
                 }
             }
+        }
+        
+        if (authenticationFailedException instanceof javax.mail.AuthorizationFailedException) {
+            return MimeMailExceptionCode.AUTHORIZATION_FAILED.create(authenticationFailedException, mailConfig == null ? STR_EMPTY : mailConfig.getServer(), mailConfig == null ? STR_EMPTY : mailConfig.getLogin());
+        } else if (authenticationFailedException instanceof javax.mail.TemporaryAuthenticationFailureException) {
+            return MimeMailExceptionCode.TEMPORARY_AUTH_FAILURE.create(authenticationFailedException, mailConfig == null ? STR_EMPTY : mailConfig.getServer(), mailConfig == null ? STR_EMPTY : mailConfig.getLogin());
+        } else if (authenticationFailedException instanceof javax.mail.PasswordExpiredException) {
+            return MimeMailExceptionCode.PASSWORD_EXPIRED.create(authenticationFailedException, mailConfig == null ? STR_EMPTY : mailConfig.getServer(), mailConfig == null ? STR_EMPTY : mailConfig.getLogin());
+        } else if (authenticationFailedException instanceof javax.mail.PrivacyRequiredException) {
+            return MimeMailExceptionCode.PRIVACY_REQUIRED.create(authenticationFailedException, mailConfig == null ? STR_EMPTY : mailConfig.getServer(), mailConfig == null ? STR_EMPTY : mailConfig.getLogin());
         }
 
         // Primary account?

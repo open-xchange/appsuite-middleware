@@ -49,7 +49,7 @@ package javax.mail;
  *
  * @author Thorben Betten
  */
-public class TemporaryAuthenticationFailureException extends LoginFailedException {
+public class TemporaryAuthenticationFailureException extends AuthenticationFailedException {
 
     private static final long serialVersionUID = 472080755954436511L;
 
