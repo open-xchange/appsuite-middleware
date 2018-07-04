@@ -482,6 +482,7 @@ public class IMAPMessage extends MimeMessage implements ReadableMime {
 	throw new IllegalWriteException("IMAPMessage is read-only");
     }
 
+    @Override
     public void addRecipients(Message.RecipientType type, Address[] addresses)
 			throws MessagingException {
 	throw new IllegalWriteException("IMAPMessage is read-only");
@@ -841,6 +842,7 @@ public class IMAPMessage extends MimeMessage implements ReadableMime {
      *
      * @see javax.mail.internet.MimeMessage#getContentStream
      */
+    @Override
     protected InputStream getContentStream() throws MessagingException {
 	if (bodyLoaded)
 	    return super.getContentStream();
@@ -856,10 +858,45 @@ public class IMAPMessage extends MimeMessage implements ReadableMime {
 		// to acquire the lock ...
 		checkExpunged();
 
-		if (p.isREV1() && (getFetchBlockSize() != -1)) // IMAP4rev1
-		    return new IMAPInputStream(this, toSection("TEXT"),
-				    bs != null && !ignoreBodyStructureSize() ?
-					bs.size : -1, pk);
+		if (p.isREV1() && (getFetchBlockSize() != -1)) { // IMAP4rev1
+		    String section = toSection("TEXT");
+		    if (!section.endsWith("TEXT")) {
+                // Specific section identifier has already been used. Return IMAPInputStream as-is
+		        return new IMAPInputStream(this, section,
+                    bs != null && !ignoreBodyStructureSize() ?
+                    bs.size : -1, pk);
+		    }
+
+		    // Relative section identifier used. Need to test IMAPInputStream
+		    IMAPInputStream iis = null;
+		    try {
+                iis = new IMAPInputStream(this, section,
+                    bs != null && !ignoreBodyStructureSize() ?
+                    bs.size : -1, pk);
+
+                // Read first byte and push it back immediately
+                java.io.PushbackInputStream in = new java.io.PushbackInputStream(iis);
+                int read = in.read();
+                if (read < 0) {
+                    // IMAPInputStream provides no content. Close it & re-establish a new instance using specific section identifier
+                    try { in.close(); } catch (IOException e) {/*ignore*/}
+                    iis = null; // Already closed here through closing wrapping PushbackInputStream
+                    // Retry while using specific section identifier
+                    return new IMAPInputStream(this, sectionId == null ? "1" : sectionId + ".1",
+                        bs != null && !ignoreBodyStructureSize() ?
+                            bs.size : -1, pk);
+                }
+                in.unread(read);
+                iis = null; // Null'ify reference to avoid premature deletion
+                return in;
+            } catch (IOException e) {
+                throw new MessagingException("I/O error", e);
+            } finally {
+                if (null != iis) {
+                    try { iis.close(); } catch (IOException e) {/*ignore*/}
+                }
+            }
+		}
 
 		if (p.isREV1()) {
 		    BODY b;

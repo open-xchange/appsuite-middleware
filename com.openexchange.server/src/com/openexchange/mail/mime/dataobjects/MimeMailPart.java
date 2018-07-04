@@ -401,15 +401,19 @@ public final class MimeMailPart extends MailPart implements MimeRawSource, MimeC
             return null;
         }
         try {
+            InputStream partStream = null;
             try {
                 // Try to read first byte and push back immediately
-                final PushbackInputStream in = new PushbackInputStream(part.getInputStream());
+                partStream = part.getInputStream();
+                final PushbackInputStream in = partStream instanceof PushbackInputStream ? (PushbackInputStream) partStream : new PushbackInputStream(partStream);
                 final int read = in.read();
                 if (read < 0) {
                     Streams.close(in);
+                    partStream = null;
                     return Streams.EMPTY_INPUT_STREAM;
                 }
                 in.unread(read);
+                partStream = null;
                 return in;
             } catch (final com.sun.mail.util.MessageRemovedIOException e) {
                 throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);
@@ -429,6 +433,8 @@ public final class MimeMailPart extends MailPart implements MimeRawSource, MimeC
                     throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
                 }
                 return in;
+            } finally {
+                Streams.close(partStream);
             }
         } catch (final MessagingException e) {
             throw MimeMailException.handleMessagingException(e);
