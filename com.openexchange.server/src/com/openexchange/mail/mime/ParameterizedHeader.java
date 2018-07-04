@@ -224,6 +224,10 @@ public abstract class ParameterizedHeader implements Serializable, Comparable<Pa
             return paramHdrArg;
         }
         String paramHdr = unfold(paramHdrArg.trim());
+        if (paramHdr.indexOf('%') >= 0) {
+            // Possibly encoded
+            paramHdr = decodeUrl(paramHdr);
+        }
         if (paramHdr.indexOf("=?") >= 0) {
             // Possibly mail-safe encoded
             paramHdr = decodeEnvelopeHeader(paramHdr).trim();
