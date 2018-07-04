@@ -856,10 +856,43 @@ public class IMAPMessage extends MimeMessage implements ReadableMime {
 		// to acquire the lock ...
 		checkExpunged();
 
-		if (p.isREV1() && (getFetchBlockSize() != -1)) // IMAP4rev1
-		    return new IMAPInputStream(this, toSection("TEXT"),
-				    bs != null && !ignoreBodyStructureSize() ?
-					bs.size : -1, pk);
+		if (p.isREV1() && (getFetchBlockSize() != -1)) { // IMAP4rev1
+		    IMAPInputStream iis = null;
+		    try {
+		        String section = toSection("TEXT");
+                iis = new IMAPInputStream(this, section,
+                    bs != null && !ignoreBodyStructureSize() ?
+                    bs.size : -1, pk);
+
+                if (!"TEXT".equals(section)) {
+                    // Specific section identifier has already been used. Return IMAPInputStream as-is
+                    IMAPInputStream in = iis;
+                    iis = null; // Null'ify reference to avoid premature deletion
+                    return in;
+                }
+
+                // Test IMAPInputStream through reading first byte and pushing it back immediately
+                java.io.PushbackInputStream in = new java.io.PushbackInputStream(iis);
+                int read = in.read();
+                if (read < 0) {
+                    try { in.close(); } catch (IOException e) {/*ignore*/}
+                    iis = null; // Already closed here through closing wrapping PushbackInputStream
+                    // Retry while using specific section identifier
+                    return new IMAPInputStream(this, sectionId == null ? "1" : sectionId + ".1",
+                        bs != null && !ignoreBodyStructureSize() ?
+                            bs.size : -1, pk);
+                }
+                in.unread(read);
+                iis = null; // Null'ify reference to avoid premature deletion
+                return in;
+            } catch (IOException e) {
+                throw new MessagingException("I/O error", e);
+            } finally {
+                if (null != iis) {
+                    try { iis.close(); } catch (IOException e) {/*ignore*/}
+                }
+            }
+		}
 
 		if (p.isREV1()) {
 		    BODY b;
