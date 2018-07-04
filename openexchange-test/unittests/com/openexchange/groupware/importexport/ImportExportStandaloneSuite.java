@@ -68,7 +68,6 @@ import com.openexchange.groupware.importexport.mappers.PropertyDrivenMapperTest;
     SizedInputStreamTest.class,
 
     //CSV
-    CSVContactImportTest.class,
     CSVContactExportTest.class,
     OutlookCSVContactImportTest.class,
     CsvDoesDifferentLanguages.class,

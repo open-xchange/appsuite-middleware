@@ -1,3 +1,9 @@
+open-xchange-mobile-config (7.10.0-10) stable; urgency=medium
+
+  * Fourth candidate for 7.10.0 release
+
+ -- Marcus Klein <jenkins@hudson-slave-1.netline.de>  Fri, 29 Jun 2018 12:38:14 +0200
+
 open-xchange-mobile-config (7.10.0-9) stable; urgency=medium
 
   * Third candidate for 7.10.0 release

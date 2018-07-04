@@ -47,55 +47,67 @@
  *
  */
 
-package com.openexchange.ajax.chronos.schedjoules;
+package com.openexchange.ajax.chronos.itip;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import java.sql.Date;
-import java.util.List;
-import org.junit.Test;
-import com.openexchange.chronos.EventField;
-import com.openexchange.chronos.service.SortOrder;
+import java.util.Collections;
+import java.util.Map;
+import java.util.function.Consumer;
+import com.openexchange.ajax.chronos.factory.ICalFacotry.Method;
+import com.openexchange.ajax.chronos.factory.ICalFacotry.PartStat;
+import com.openexchange.ajax.chronos.factory.ICalFacotry.ProdID;
+import com.openexchange.testing.httpclient.models.Analysis;
+import com.openexchange.testing.httpclient.models.Attendee;
+import com.openexchange.testing.httpclient.models.CalendarUser;
 import com.openexchange.testing.httpclient.models.EventData;
-import com.openexchange.testing.httpclient.models.FolderData;
-import com.openexchange.testing.httpclient.models.UpdatesResult;
 
 /**
- * {@link BasicSchedJoulesSyncAwareTest}
+ * {@link AbstractITipReplyTest}
  *
- * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
+ * @since v7.10.0
  */
-public class BasicSchedJoulesSyncAwareTest extends AbstractSchedJoulesProviderTest {
+public abstract class AbstractITipReplyTest extends AbstractITipAnalyzeTest {
 
-    /**
-     * Initialises a new {@link BasicSchedJoulesSyncAwareTest}.
-     * 
-     * @param providerId
-     */
-    public BasicSchedJoulesSyncAwareTest() {
-        super();
+    protected EventData createdEvent;
+
+    @Override
+    public void tearDown() throws Exception {
+        try {
+            if (null != createdEvent) {
+                deleteEvent(createdEvent);
+            }
+        } finally {
+            super.tearDown();
+        }
     }
 
-    private static final long FIVE_YEARS_OFFSET = 5 * 365 * 24 * 60 * 60 * 1000 * 1000;
 
-    /**
-     * Tests getting updated events since a defined point in time
-     */
-    @Test
-    public void testGetUpdatedEventsSince() throws Exception {
-        FolderData folderData = createFolder(CALENDAR_ONE, "testSimpleSearch");
-        Date beginOfTime = new Date(0);
-        Date future = new Date(TIMESTAMP + FIVE_YEARS_OFFSET);
-        List<EventData> allEvents = eventManager.getAllEvents(beginOfTime, future, false, folderData.getId(), SortOrder.getSortOrder(EventField.TIMESTAMP, SortOrder.Order.ASC));
+    protected void analyze(EventData event) throws Exception {
+        analyze(event, CustomConsumers.UPDATE.getConsumer(), null);
+    }
 
-        assertNotNull(allEvents);
-        assertTrue("No events returned", allEvents.size() > 0);
+    protected void analyze(EventData event, Consumer<Analysis> validator, Map<String, Object> values) throws Exception {
+        analyze(ProdID.OX, Method.REPLY, Collections.singletonList(event), validator, values);
+    }
 
-        EventData eventData = allEvents.get(allEvents.size() - 1);
-        Long since = eventData.getTimestamp();
-        UpdatesResult updates = eventManager.getUpdates(new Date(since), beginOfTime, future, false, folderData.getId());
-        assertEquals(1, updates.getNewAndModified().size());
+    protected void updateAttendeeStatus(Attendee replyingAttendee, PartStat partStat) {
+        replyingAttendee.setPartStat(partStat.name().toUpperCase());
+        createdEvent.setAttendees(Collections.singletonList(replyingAttendee));
+    }
+
+    protected Attendee prepareCommonAttendees(EventData event) {
+        Attendee replyingAttendee = createAttendee(testUserC2, apiClientC2);
+        replyingAttendee.setEntity(Integer.valueOf(0));
+        // organizer gets added automatically
+        event.setAttendees(Collections.singletonList(replyingAttendee));
+        CalendarUser c = new CalendarUser();
+        c.cn(userResponseC1.getData().getDisplayName());
+        c.email(userResponseC1.getData().getEmail1());
+        c.entity(Integer.valueOf(userResponseC1.getData().getId()));
+        event.setOrganizer(c);
+        event.setCalendarUser(c);
+
+        return replyingAttendee;
     }
 
 }

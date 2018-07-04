@@ -117,40 +117,6 @@ public final class Bug27722Test extends AbstractInfostoreTest {
     }
 
     @Test
-    public void testDeleteManyFiles() throws Exception {
-        /*
-         * pick DELETED_ITEMS randomly
-         */
-        List<String> objectIDs = new ArrayList<String>(DELETED_ITEMS);
-        List<String> folderIDs = new ArrayList<String>(DELETED_ITEMS);
-        Random random = new Random();
-        while (objectIDs.size() < DELETED_ITEMS) {
-            File randomDocument = items.get(random.nextInt(TOTAL_ITEMS));
-            String objectID = randomDocument.getId();
-            if (false == objectIDs.contains(objectID)) {
-                objectIDs.add(objectID);
-                folderIDs.add(randomDocument.getFolderId());
-            }
-        }
-        /*
-         * execute delete request
-         */
-        itm.deleteAction(objectIDs, folderIDs, itm.getLastResponse().getTimestamp());
-        long duration = itm.getLastResponse().getRequestDuration();
-        assertTrue("deletion took " + duration + "ms, which is too long", 10 * DELETED_ITEMS > duration); // allow 10ms per item
-        /*
-         * verify deletion
-         */
-        int[] columns = { CommonObject.OBJECT_ID };
-        List<File> all = itm.getAll(testFolder.getObjectID(), columns);
-        assertEquals("Unexpected object count", TOTAL_ITEMS - DELETED_ITEMS, all.size());
-        for (File file : all) {
-            String objectID = file.getId();
-            assertFalse("Object not deleted", objectIDs.contains(objectID));
-        }
-    }
-
-    @Test
     public void testHardDeleteManyFiles() throws Exception {
         /*
          * pick DELETED_ITEMS randomly

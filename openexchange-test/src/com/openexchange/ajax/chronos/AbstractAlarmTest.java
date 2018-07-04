@@ -51,6 +51,8 @@ package com.openexchange.ajax.chronos;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import org.junit.runner.RunWith;
+import org.junit.runners.BlockJUnit4ClassRunner;
 import com.openexchange.ajax.chronos.manager.ChronosApiException;
 import com.openexchange.ajax.chronos.util.AssertUtil;
 import com.openexchange.testing.httpclient.invoker.ApiException;
@@ -61,6 +63,7 @@ import com.openexchange.testing.httpclient.models.EventData;
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
+@RunWith(BlockJUnit4ClassRunner.class)
 abstract class AbstractAlarmTest extends AbstractChronosTest {
 
     /**

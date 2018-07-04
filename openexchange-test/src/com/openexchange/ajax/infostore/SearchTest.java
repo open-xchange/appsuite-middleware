@@ -83,52 +83,6 @@ public class SearchTest extends AbstractAJAXSession {
     }
 
     @Test
-    public void testCaseInsensitive() throws Exception {
-        List<com.openexchange.file.storage.File> files = itm.search("test", folderId);
-        assertFalse(itm.getLastResponse().hasError());
-        assertTitles(files, all);
-    }
-
-    @Test
-    public void testStartAndStop() throws Exception {
-        List<com.openexchange.file.storage.File> files = itm.search("5", folderId, Metadata.DESCRIPTION, Order.ASCENDING, -1, 0, 1);
-        assertFalse(itm.getLastResponse().hasError());
-
-        JSONArray arrayOfarrays = (JSONArray) itm.getLastResponse().getData();
-        assertEquals(2, arrayOfarrays.length());
-        assertTitle(0, arrayOfarrays, "Test 5");
-        assertTitle(1, arrayOfarrays, "Test 15");
-
-        files = itm.search("5", folderId, Metadata.DESCRIPTION, Order.DESCENDING, -1, 0, 1);
-        assertFalse(itm.getLastResponse().hasError());
-
-        arrayOfarrays = (JSONArray) itm.getLastResponse().getData();
-
-        assertEquals(2, arrayOfarrays.length());
-        assertTitle(0, arrayOfarrays, "Test 25");
-        assertTitle(1, arrayOfarrays, "Test 15");
-
-        files = itm.search("5", folderId, Metadata.DESCRIPTION, Order.DESCENDING, -1, 1, 2);
-        assertFalse(itm.getLastResponse().hasError());
-
-        arrayOfarrays = (JSONArray) itm.getLastResponse().getData();
-
-        assertEquals(2, arrayOfarrays.length());
-        assertTitle(0, arrayOfarrays, "Test 15");
-        assertTitle(1, arrayOfarrays, "Test 5");
-
-        files = itm.search("5", folderId, Metadata.DESCRIPTION, Order.DESCENDING, -1, 1, 5);
-        assertFalse(itm.getLastResponse().hasError());
-
-        arrayOfarrays = (JSONArray) itm.getLastResponse().getData();
-
-        assertEquals(2, arrayOfarrays.length());
-        assertTitle(0, arrayOfarrays, "Test 15");
-        assertTitle(1, arrayOfarrays, "Test 5");
-
-    }
-
-    @Test
     public void testLimit() throws Exception {
         List<com.openexchange.file.storage.File> files = itm.search("5", folderId, Metadata.DESCRIPTION, Order.ASCENDING, 1);
         assertFalse(itm.getLastResponse().hasError());

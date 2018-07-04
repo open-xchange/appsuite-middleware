@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,35 +47,50 @@
  *
  */
 
-package com.openexchange.ajax.importexport;
+package com.openexchange.push.imapidle.control;
 
-import static org.junit.Assert.assertTrue;
-import org.junit.Test;
-import com.openexchange.ajax.task.TaskTools;
-import com.openexchange.groupware.tasks.Task;
+import org.slf4j.Logger;
+import com.openexchange.push.imapidle.ImapIdlePushListener;
 
-public class ICalExportTest extends AbstractICalTest {
+/**
+ * {@link AbstractImapIdleControlTask}
+ *
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.10.1
+ */
+public abstract class AbstractImapIdleControlTask {
 
-    @Test
-    public void testExportICalTask() throws Exception {
-        final String title = "testExportICalTask" + System.currentTimeMillis();
-        final Task taskObj = new Task();
-        taskObj.setTitle(title);
-        taskObj.setStartDate(startTime);
-        taskObj.setEndDate(endTime);
-        taskObj.setParentFolderID(taskFolderId);
+    /** Simple class to delay initialization until needed */
+    private static class LoggerHolder {
+        static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(AbstractImapIdleControlTask.class);
+    }
 
-        final int objectId = ttm.insertTaskOnServer(taskObj).getObjectID();
-        final Task[] taskArray = exportTask(timeZone, null);
-        boolean found = false;
-        for (int a = 0; a < taskArray.length; a++) {
-            if (title.equals(taskArray[a].getTitle())) {
-                found = true;
-                taskObj.setStartDate(taskArray[a].getStartDate());
-                taskArray[a].setParentFolderID(taskFolderId);
-                TaskTools.compareObject(taskObj, taskArray[a]);
+    /** The IMAP IDLE control */
+    protected final ImapIdleControl control;
+
+    /**
+     * Initializes a new {@link AbstractImapIdleControlTask}.
+     */
+    protected AbstractImapIdleControlTask(ImapIdleControl control) {
+        super();
+        this.control = control;
+    }
+
+    /**
+     * Handles specified expired IMAP IDLE registration.
+     *
+     * @param registration The expired registration
+     */
+    protected void handleExpired(ImapIdleRegistration registration) {
+        ImapIdlePushListener pushListener = registration.getPushListener();
+        if (pushListener.isIdling()) {
+            try {
+                pushListener.markInterrupted();
+                registration.getImapFolder().close(false);
+            } catch (Exception e) {
+                LoggerHolder.LOGGER.warn("Failed to interrupt elapsed {}IMAP-IDLE listener for user {} in context {}.", pushListener.isPermanent() ? "permanent " : "", pushListener.getUserId(), pushListener.getContextId(), e);
             }
         }
-        assertTrue("task with id: " + objectId + " not found", found);
     }
+
 }

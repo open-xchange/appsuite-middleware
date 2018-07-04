@@ -63,7 +63,6 @@ import org.junit.runners.Suite;
     BasicSchedJoulesAPITest.class,
     BasicSchedJoulesProviderTest.class,
     BasicSchedJoulesSearchAwareTest.class,
-    BasicSchedJoulesSyncAwareTest.class
     // @formatter:on
 
 })

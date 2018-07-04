@@ -57,6 +57,7 @@ import java.util.Set;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.slf4j.Logger;
 import com.openexchange.drive.DriveExceptionCodes;
 import com.openexchange.drive.impl.DriveUtils;
 import com.openexchange.drive.impl.internal.SyncSession;
@@ -87,6 +88,11 @@ import com.openexchange.share.recipient.RecipientType;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public class JsonDirectoryMetadata extends AbstractJsonMetadata {
+
+    /** Simple class to delay initialization until needed */
+    private static class LoggerHolder {
+        private static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(JsonDirectoryMetadata.class);
+    }
 
     private final FileStorageFolder folder;
     private final String folderID;
@@ -230,7 +236,7 @@ public class JsonDirectoryMetadata extends AbstractJsonMetadata {
     }
 
     private JSONObject getJSONPermission(FileStoragePermission permission) throws JSONException, OXException {
-        JSONObject jsonObject = new JSONObject();
+        JSONObject jsonObject = new JSONObject(4);
         jsonObject.put("bits", createPermissionBits(permission));
         jsonObject.put("entity", permission.getEntity());
         jsonObject.put("group", permission.isGroup());
@@ -248,8 +254,7 @@ public class JsonDirectoryMetadata extends AbstractJsonMetadata {
         } else {
             User user = session.getPermissionResolver().getUser(permission.getEntity());
             if (null == user) {
-                org.slf4j.LoggerFactory.getLogger(JsonDirectoryMetadata.class).warn(
-                    "Can't resolve user entity {} for folder {}", permission.getEntity(), folder);
+                LoggerHolder.LOGGER.debug("Can't resolve user entity {} for folder {}", permission.getEntity(), folder);
             } else if (user.isGuest()) {
                 GuestInfo guest = session.getPermissionResolver().getGuest(user.getId());
                 if (guest == null) {

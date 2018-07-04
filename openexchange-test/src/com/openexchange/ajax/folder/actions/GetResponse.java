@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.folder.actions;
 
+import java.util.Date;
 import java.util.TimeZone;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -102,6 +103,9 @@ public final class GetResponse extends AbstractAJAXResponse {
                     if (tmp.startsWith(FolderObject.SHARED_PREFIX)) {
                         data.put(FolderFields.FOLDER_ID, Integer.toString(FolderObject.SYSTEM_SHARED_FOLDER_ID));
                     }
+                }
+                if (data.has(FolderFields.LAST_MODIFIED)) {
+                    parsed.setLastModified(new Date(data.getLong(FolderFields.LAST_MODIFIED)));
                 }
             } catch (final JSONException e) {
                 throw OXJSONExceptionCodes.JSON_READ_ERROR.create();

@@ -52,6 +52,7 @@ package com.openexchange.ajax.chronos;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 import com.openexchange.ajax.chronos.bugs.ChronosBugsTestSuite;
+import com.openexchange.ajax.chronos.itip.ITipTestSuite;
 import com.openexchange.ajax.chronos.schedjoules.SchedJoulesTestSuite;
 import com.openexchange.test.concurrent.ParallelSuite;
 
@@ -78,7 +79,8 @@ import com.openexchange.test.concurrent.ParallelSuite;
     RestrictedAttendeePermissionsTest.class,
     BasicICalCalendarProviderTest.class,
     ICalImportAccessTest.class,
-    ChronosBugsTestSuite.class
+    ChronosBugsTestSuite.class,
+    ITipTestSuite.class
     // @formatter:on
 
 })

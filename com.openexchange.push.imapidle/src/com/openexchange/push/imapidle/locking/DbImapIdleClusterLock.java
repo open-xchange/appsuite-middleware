@@ -76,8 +76,8 @@ public class DbImapIdleClusterLock extends AbstractImapIdleClusterLock {
     /**
      * Initializes a new {@link DbImapIdleClusterLock}.
      */
-    public DbImapIdleClusterLock(ServiceLookup services) {
-        super(services);
+    public DbImapIdleClusterLock(boolean validateSessionExistence, ServiceLookup services) {
+        super(validateSessionExistence, services);
     }
 
     @Override
@@ -86,7 +86,7 @@ public class DbImapIdleClusterLock extends AbstractImapIdleClusterLock {
     }
 
     @Override
-    public boolean acquireLock(SessionInfo sessionInfo) throws OXException {
+    public AcquisitionResult acquireLock(SessionInfo sessionInfo) throws OXException {
         DatabaseService databaseService = services.getOptionalService(DatabaseService.class);
         if (null == databaseService) {
             throw ServiceExceptionCode.absentService(DatabaseService.class);
@@ -101,7 +101,7 @@ public class DbImapIdleClusterLock extends AbstractImapIdleClusterLock {
         }
     }
 
-    private boolean acquireDbLock(SessionInfo sessionInfo, Connection con) throws OXException {
+    private AcquisitionResult acquireDbLock(SessionInfo sessionInfo, Connection con) throws OXException {
         int contextId = sessionInfo.getContextId();
         int userId = sessionInfo.getUserId();
 
@@ -120,7 +120,7 @@ public class DbImapIdleClusterLock extends AbstractImapIdleClusterLock {
             stmt.setInt(pos++, userId);
             stmt.setString(pos++, ATTR_IMAPIDLE_LOCK);
             if (stmt.executeUpdate() > 0) {
-                return true;
+                return AcquisitionResult.ACQUIRED_NEW;
             }
 
             // Check if elapsed
@@ -135,9 +135,10 @@ public class DbImapIdleClusterLock extends AbstractImapIdleClusterLock {
             Databases.closeSQLStuff(rs, stmt);
 
             // Check if valid
-            if (validValue(previous, now, sessionInfo.isTransient(), services.getOptionalService(HazelcastInstance.class))) {
+            Validity validity = validateValue(previous, now, getValidationArgs(sessionInfo, services.getOptionalService(HazelcastInstance.class)));
+            if (Validity.VALID == validity) {
                 // Locked
-                return false;
+                return AcquisitionResult.NOT_ACQUIRED;
             }
 
             // Invalid entry - try to replace it mutually exclusive
@@ -148,7 +149,19 @@ public class DbImapIdleClusterLock extends AbstractImapIdleClusterLock {
             stmt.setInt(pos++, userId);
             stmt.setString(pos++, ATTR_IMAPIDLE_LOCK);
             stmt.setString(pos++, previous);
-            return stmt.executeUpdate() > 0;
+            boolean replaced = stmt.executeUpdate() > 0;
+            if (false == replaced) {
+                return AcquisitionResult.NOT_ACQUIRED;
+            }
+
+            switch (validity) {
+                case NO_SUCH_SESSION:
+                    return AcquisitionResult.ACQUIRED_NO_SUCH_SESSION;
+                case TIMED_OUT:
+                    return AcquisitionResult.ACQUIRED_TIMED_OUT;
+                default:
+                    return AcquisitionResult.ACQUIRED_NEW;
+            }
         } catch (SQLException e) {
             throw PushExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {

@@ -150,28 +150,6 @@ public class QueryTest extends CalendarFindTest {
     }
 
     @Test
-    public void testFilterRange() throws Exception {
-        Appointment soonAppointment = randomPrivateAppointment();
-        soonAppointment.setStartDate(TimeTools.D("tomorrow at noon"));
-        soonAppointment.setEndDate(TimeTools.D("tomorrow at noon"));
-        soonAppointment = manager.insert(soonAppointment);
-        Appointment lateAppointment = randomPrivateAppointment();
-        lateAppointment.setStartDate(TimeTools.D("in 8 months"));
-        lateAppointment.setEndDate(TimeTools.D("in 8 months"));
-        lateAppointment = manager.insert(lateAppointment);
-
-        List<PropDocument> oneMonthDocuments = query(Collections.singletonList(createActiveFacet(RANGE, "one_month", "range", "one_month")));
-        assertTrue("no appointments found", 0 < oneMonthDocuments.size());
-        assertNotNull("expected appointment not found", findByProperty(oneMonthDocuments, "summary", soonAppointment.getTitle()));
-        assertNull("unexpected appointment found", findByProperty(oneMonthDocuments, "summary", lateAppointment.getTitle()));
-
-        List<PropDocument> oneYearDocuments = query(Collections.singletonList(createActiveFacet(RANGE, "one_year", "range", "one_year")));
-        assertTrue("no appointments found", 0 < oneYearDocuments.size());
-        assertNotNull("expected appointment not found", findByProperty(oneYearDocuments, "summary", lateAppointment.getTitle()));
-        assertNotNull("expected appointment not found", findByProperty(oneYearDocuments, "summary", soonAppointment.getTitle()));
-    }
-
-    @Test
     public void testFilterStatus() throws Exception {
         Appointment acceptedAppointment = randomPrivateAppointment();
         acceptedAppointment = manager.insert(acceptedAppointment);

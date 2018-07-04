@@ -73,6 +73,7 @@ public class ImapIdleConfiguration {
     private int accountId;
     private PushMode pushMode;
     private long delay;
+    private boolean checkPeriodic;
 
     /**
      * Initializes a new {@link ImapIdleConfiguration}.
@@ -103,14 +104,16 @@ public class ImapIdleConfiguration {
         }
 
         {
+            String tmp = configService.getProperty("com.openexchange.push.imapidle.clusterLock.validateSessionExistence", "false").trim();
+            boolean validateSessionExistence = Boolean.parseBoolean(tmp);
 
-            String tmp = configService.getProperty("com.openexchange.push.imapidle.clusterLock", "hz").trim();
+            tmp = configService.getProperty("com.openexchange.push.imapidle.clusterLock", "hz").trim();
             if ("hz".equalsIgnoreCase(tmp)) {
-                clusterLock = new HzImapIdleClusterLock("imapidle-2", services);
+                clusterLock = new HzImapIdleClusterLock("imapidle-2", validateSessionExistence, services);
             } else if ("db".equalsIgnoreCase(tmp)) {
-                clusterLock = new DbImapIdleClusterLock(services);
+                clusterLock = new DbImapIdleClusterLock(validateSessionExistence, services);
             } else if ("local".equalsIgnoreCase(tmp)) {
-                clusterLock = new LocalImapIdleClusterLock(services);
+                clusterLock = new LocalImapIdleClusterLock(validateSessionExistence, services);
             } else {
                 clusterLock = new NoOpImapIdleClusterLock();
             }
@@ -124,6 +127,11 @@ public class ImapIdleConfiguration {
         {
             PushMode tmp = PushMode.fromIdentifier(configService.getProperty("com.openexchange.push.imapidle.pushMode", "always").trim());
             pushMode = null == tmp ? PushMode.ALWAYS : tmp;
+        }
+
+        {
+            String tmp = configService.getProperty("com.openexchange.push.imapidle.checkPeriodic", "false").trim();
+            checkPeriodic = Boolean.parseBoolean(tmp);
         }
     }
 
@@ -170,6 +178,15 @@ public class ImapIdleConfiguration {
      */
     public long getDelay() {
         return delay;
+    }
+
+    /**
+     * Signals whether existence of expired IMAP IDLE listeners should happen periodically or through waiting take.
+     *
+     * @return <code>true</code> for periodic; otherwise <code>false</code>
+     */
+    public boolean isCheckPeriodic() {
+        return checkPeriodic;
     }
 
 }

@@ -135,7 +135,7 @@ public class OriginalEventHolder {
                     RecurrenceData recurrenceData = eventConverter.loadRecurrenceData(seriesId);
                     originalRecurrenceData = new DefaultRecurrenceData(recurrenceData.getRecurrenceRule(), recurrenceData.getSeriesStart(), null);
                 } catch (OXException e) {
-                    getLogger(OriginalEventHolder.class).debug("Error retrieving original data for event {}.", event.getSeriesId(), e);
+                    getLogger(OriginalEventHolder.class).debug("Error retrieving original data for event {}.", seriesId, e);
                 }
             }
         }
