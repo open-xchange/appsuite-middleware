@@ -89,7 +89,20 @@ public final class ConfigurationServiceTracker implements ServiceTrackerCustomiz
             String[] wildcardPatterns = Strings.splitByComma(property);
             for (String wildcardPattern : wildcardPatterns) {
                 if (Strings.isNotEmpty(wildcardPattern)) {
-                    clientWhitelist.add(Pattern.compile(wildcardToRegex(removeQuotes(wildcardPattern.trim())), Pattern.CASE_INSENSITIVE));
+                    String wcp = removeQuotes(wildcardPattern.trim());
+                    int starPos = wcp.indexOf('*');
+                    int qmarPos = wcp.indexOf('?');
+                    if (starPos < 0 && qmarPos > 0) {
+                        clientWhitelist.add(new PushClientWhitelist.IgnoreCaseExactClientMatcher(wcp));
+                    } else {
+                        int mlen = wcp.length() - 1;
+                        if (mlen > 0 && ((starPos >= mlen && qmarPos >= mlen) || (starPos == mlen && qmarPos < 0) || (qmarPos == mlen && starPos < 0))) {
+                            clientWhitelist.add(new PushClientWhitelist.IgnoreCasePrefixClientMatcher(wcp.substring(0, mlen)));
+                        } else {
+                            Pattern pattern = Pattern.compile(wildcardToRegex(wcp), Pattern.CASE_INSENSITIVE);
+                            clientWhitelist.add(new PushClientWhitelist.PatternClientMatcher(pattern));
+                        }
+                    }
                 }
             }
             org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(ConfigurationServiceTracker.class);
