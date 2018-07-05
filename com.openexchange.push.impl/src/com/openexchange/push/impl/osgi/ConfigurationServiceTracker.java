@@ -79,7 +79,7 @@ public final class ConfigurationServiceTracker implements ServiceTrackerCustomiz
     @Override
     public ConfigurationService addingService(final ServiceReference<ConfigurationService> reference) {
         final ConfigurationService service = context.getService(reference);
-        final String property = service.getProperty("com.openexchange.push.allowedClients");
+        final String property = service.getProperty("com.openexchange.push.allowedClients", "\"USM-EAS*\", \"open-xchange-mobile-api-facade*\"");
         final PushClientWhitelist clientWhitelist = PushClientWhitelist.getInstance();
         clientWhitelist.clear();
         if (Strings.isEmpty(property)) {
